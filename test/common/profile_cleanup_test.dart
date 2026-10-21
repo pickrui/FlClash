@@ -30,13 +30,15 @@ void main() {
     return file;
   }
 
-  List<String> scan() => collectUnusedProfilePaths(
-    profilesPath: profiles,
-    scriptsPath: scripts,
-    providersPath: providers,
-    profileIds: [1],
-    scriptIds: [3],
-  );
+  List<String> scan({Set<String>? libraryCacheKeys}) =>
+      collectUnusedProfilePaths(
+        profilesPath: profiles,
+        scriptsPath: scripts,
+        providersPath: providers,
+        profileIds: [1],
+        scriptIds: [3],
+        libraryCacheKeys: libraryCacheKeys,
+      );
 
   test('retains both the source and runtime copy of active profiles', () {
     write(profiles, '1.yaml');
@@ -80,6 +82,61 @@ void main() {
       Link(p.join(profiles, '2.yaml')).createSync(outside.path);
       Link(p.join(providers, '2')).createSync(root.path);
       expect(scan(), isEmpty);
+      expect(outside.readAsStringSync(), 'fixture');
+    },
+    skip: Platform.isWindows ? 'creating symlinks requires privileges' : false,
+  );
+
+  test(
+    'prunes only known library caches without database or config references',
+    () {
+      final current = 'a' * 32;
+      final active = 'b' * 32;
+      final unused = 'c' * 32;
+      final removed = <String>[];
+      for (final kind in ['proxy', 'rule']) {
+        final directory = p.join(providers, 'app', kind);
+        write(directory, current);
+        write(directory, active);
+        removed.add(write(directory, unused).path);
+        write(directory, '$unused.write-backup-fixture');
+        write(directory, 'notes.txt');
+        write(p.join(directory, 'nested'), unused);
+      }
+      expect(scan(), isEmpty);
+      final referenced = providerCacheKeysFromConfig({
+        'proxy-providers': {
+          'live': {'path': p.join('providers', 'app', 'proxy', active)},
+        },
+        'rule-providers': {
+          'preview': {'path': p.join('providers', 'app', 'rule', active)},
+        },
+      });
+      expect(
+        scan(libraryCacheKeys: {current, ...referenced}),
+        unorderedEquals(removed),
+      );
+    },
+  );
+
+  test(
+    'library cache cleanup does not follow symlinks at any level',
+    () {
+      final cache = 'd' * 32;
+      final outside = write(p.join(root.path, 'outside'), cache);
+      final library = p.join(providers, 'app');
+      final rule = p.join(library, 'rule');
+      Directory(rule).createSync(recursive: true);
+      Link(p.join(rule, cache)).createSync(outside.path);
+      Link(p.join(library, 'proxy')).createSync(outside.parent.path);
+      expect(scan(libraryCacheKeys: {}), isEmpty);
+      Directory(library).deleteSync(recursive: true);
+      Link(library).createSync(outside.parent.path);
+      expect(scan(libraryCacheKeys: {}), isEmpty);
+      Link(library).deleteSync();
+      Directory(providers).deleteSync();
+      Link(providers).createSync(outside.parent.path);
+      expect(scan(libraryCacheKeys: {}), isEmpty);
       expect(outside.readAsStringSync(), 'fixture');
     },
     skip: Platform.isWindows ? 'creating symlinks requires privileges' : false,

@@ -307,17 +307,15 @@ abstract class CoreHandlerInterface with CoreInterface {
 
   @override
   Future<List<ExternalProvider>> getExternalProviders() async {
-    final data = await _invokeMethod<List<dynamic>>(
+    final data = await _invokeRequiredMethod<List<dynamic>>(
       method: CoreMethod.getExternalProviders,
     );
-    return data
-            ?.whereType<Map>()
-            .map(
-              (item) =>
-                  ExternalProvider.fromJson(Map<String, Object?>.from(item)),
-            )
-            .toList() ??
-        [];
+    return data.map((item) {
+      if (item is! Map) {
+        throw const FormatException('Invalid external provider inventory');
+      }
+      return ExternalProvider.fromJson(Map<String, Object?>.from(item));
+    }).toList();
   }
 
   @override

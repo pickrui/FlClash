@@ -42,23 +42,39 @@ class BackupAction extends _$BackupAction {
 }
 
 extension BackupControllerExt on AppController {
-  Future<void> shakingStore() {
-    return storageLock.synchronized(
-      () => runExclusiveDatabaseOperation(() async {
-        final profileIds = await database.profilesDao.ids().get();
-        final scriptIds = await database.scriptsDao.ids().get();
-        final pathsToDelete = await shakingProfileTask(
-          VM2(profileIds, scriptIds),
-        );
-        await Future.wait(
-          pathsToDelete.map((path) async {
+  Future<void> shakingStore() => _serializeCoreLifecycle(
+    () => storageLock.synchronized(
+      () => runExclusiveDatabaseOperation(
+        () => _providerCacheLock.synchronized(() async {
+          final profileIds = await database.profilesDao.ids().get();
+          final scriptIds = await database.scriptsDao.ids().get();
+          final activeProviders = coreController.isCompleted
+              ? await coreController.getExternalProviders()
+              : null;
+          final libraryCacheKeys =
+              activeProviders == null ||
+                  activeProviders.any((provider) => provider.path == null)
+              ? null
+              : <String>{
+                  ...await database.clashProvidersDao.cacheKeys(),
+                  ..._providerCacheKeysInUse,
+                  for (final provider in activeProviders)
+                    p.basename(provider.path!),
+                };
+          final pathsToDelete = await shakingProfileTask((
+            profileIds: profileIds,
+            scriptIds: scriptIds,
+            libraryCacheKeys: libraryCacheKeys,
+          ));
+          for (final path in pathsToDelete) {
+            if (_providerCacheKeysInUse.contains(p.basename(path))) continue;
             final message = await coreController.deleteFile(path);
             if (message.isNotEmpty) throw message;
-          }),
-        );
-      }),
-    );
-  }
+          }
+        }),
+      ),
+    ),
+  );
 
   Future<String> backup() async {
     final backupData = await storageLock.synchronized(() async {

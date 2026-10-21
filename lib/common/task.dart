@@ -881,25 +881,40 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
   }
 }
 
-Future<List<String>> shakingProfileTask(
-  VM2<Iterable<int>, Iterable<int>> data,
-) async {
-  return compute<
-    VM3<Iterable<int>, Iterable<int>, RootIsolateToken>,
-    List<String>
-  >(_shakingProfileTask, VM3(data.a, data.b, RootIsolateToken.instance!));
+typedef ProfileCleanupArgs = ({
+  Iterable<int> profileIds,
+  Iterable<int> scriptIds,
+  Set<String>? libraryCacheKeys,
+});
+
+final _providerCacheName = RegExp(r'^[a-f0-9]{32}$');
+
+Set<String> providerCacheKeysFromConfig(Map<String, dynamic> config) => {
+  for (final section in ['proxy-providers', 'rule-providers'])
+    if (config[section] case final Map providers)
+      for (final definition in providers.values)
+        if (definition case {'path': final String path})
+          if (_providerCacheName.hasMatch(basename(path))) basename(path),
+};
+
+Future<List<String>> shakingProfileTask(ProfileCleanupArgs data) async {
+  return compute<(ProfileCleanupArgs, RootIsolateToken), List<String>>(
+    _shakingProfileTask,
+    (data, RootIsolateToken.instance!),
+  );
 }
 
 Future<List<String>> _shakingProfileTask(
-  VM3<Iterable<int>, Iterable<int>, RootIsolateToken> data,
+  (ProfileCleanupArgs, RootIsolateToken) data,
 ) async {
-  BackgroundIsolateBinaryMessenger.ensureInitialized(data.c);
+  BackgroundIsolateBinaryMessenger.ensureInitialized(data.$2);
   return collectUnusedProfilePaths(
     profilesPath: await appPath.profilesPath,
     scriptsPath: await appPath.scriptsDirPath,
     providersPath: await appPath.getProvidersRootPath(),
-    profileIds: data.a,
-    scriptIds: data.b,
+    profileIds: data.$1.profileIds,
+    scriptIds: data.$1.scriptIds,
+    libraryCacheKeys: data.$1.libraryCacheKeys,
   );
 }
 
@@ -909,6 +924,7 @@ List<String> collectUnusedProfilePaths({
   required String providersPath,
   required Iterable<int> profileIds,
   required Iterable<int> scriptIds,
+  Set<String>? libraryCacheKeys,
 }) {
   final profiles = profileIds.toSet();
   final scripts = scriptIds.toSet();
@@ -933,6 +949,27 @@ List<String> collectUnusedProfilePaths({
   scan(profilesPath, profiles, RegExp(r'^\.?([0-9]+)\.yaml$'));
   scan(scriptsPath, scripts, RegExp(r'^([0-9]+)\.js$'));
   scan(providersPath, profiles, RegExp(r'^([0-9]+)$'), directories: true);
+  final libraryPath = join(providersPath, 'app');
+  bool realDirectory(String path) =>
+      FileSystemEntity.typeSync(path, followLinks: false) ==
+      FileSystemEntityType.directory;
+  if (libraryCacheKeys != null &&
+      realDirectory(profilesPath) &&
+      realDirectory(providersPath) &&
+      realDirectory(libraryPath)) {
+    for (final kind in ProviderKind.values) {
+      final directory = Directory(join(libraryPath, kind.name));
+      if (!realDirectory(directory.path)) continue;
+      for (final file in directory.listSync(followLinks: false)) {
+        if (file is! File) continue;
+        final name = basename(file.path);
+        if (_providerCacheName.hasMatch(name) &&
+            !libraryCacheKeys.contains(name)) {
+          targets.add(file.path);
+        }
+      }
+    }
+  }
   return targets;
 }
 

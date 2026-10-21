@@ -12,6 +12,18 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('cache inventory rejects missing and malformed Core replies', () async {
+    final handler = _FakeCoreHandler()..response = <dynamic>[];
+    expect(await handler.getExternalProviders(), isEmpty);
+    handler.response = null;
+    await expectLater(
+      handler.getExternalProviders(),
+      throwsA(_missingResponse(CoreMethod.getExternalProviders)),
+    );
+    handler.response = <dynamic>[null];
+    await expectLater(handler.getExternalProviders(), throwsFormatException);
+  });
+
   test('DNS reset requires a real Core response', () async {
     final handler = _FakeCoreHandler()..response = true;
     expect(await handler.clearDnsState(), isTrue);

@@ -547,6 +547,9 @@ typedef RuleSetInfo = ({
   List<int>? content,
 });
 
+String clashProviderCacheKey(int id, String url, List<int> content) =>
+    '$id@$url@${base64Encode(content)}'.toMd5();
+
 extension ClashProviderExt on ClashProvider {
   ClashProvider withFileFormat(String source) {
     if (kind != ProviderKind.rule) return this;
@@ -568,7 +571,7 @@ extension ClashProviderExt on ClashProvider {
       kind == ProviderKind.proxy || format != RuleProviderFormat.mrs;
   String get section =>
       kind == ProviderKind.proxy ? 'proxy-providers' : 'rule-providers';
-  String get cacheKey => '$id@$url@${base64Encode(content)}'.toMd5();
+  String get cacheKey => clashProviderCacheKey(id, url, content);
 
   Map<String, dynamic> definition(String path) => {
     'type': isRemote ? 'http' : 'file',

@@ -74,6 +74,26 @@ void main() {
   });
   tearDown(() => db.close());
 
+  test(
+    'cache inventory retains unreadable rows and follows content revisions',
+    () async {
+      final before = resource();
+      await db.clashProvidersDao.put(before);
+      final revised = before.copyWith(
+        content: utf8.encode('payload: [DOMAIN,new.test]'),
+      );
+      await db.clashProvidersDao.put(revised);
+      await db.customStatement(
+        "UPDATE clash_providers SET kind = 'future', behavior = 'future', format = 'future' WHERE id = 1",
+      );
+      expect(await db.clashProvidersDao.all().get(), isEmpty);
+      expect(await db.clashProvidersDao.cacheKeys(), {revised.cacheKey});
+      expect(revised.cacheKey, isNot(before.cacheKey));
+      await db.clashProvidersDao.remove(1);
+      expect(await db.clashProvidersDao.cacheKeys(), isEmpty);
+    },
+  );
+
   for (final key in ['include-all', 'include-all-providers']) {
     test(
       'implicit $key provider use protects deletion and permits safe rename',

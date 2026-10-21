@@ -9,6 +9,9 @@ class AppController {
   Future<String?> Function()? requestAgeSecretKey;
   DesktopUpdateInstaller? desktopUpdateInstaller;
   final _exitCoordinator = ExitCoordinator();
+  final _providerCacheLock = AsyncStorageLock();
+  // Returned previews can outlive their database revision and be validated later.
+  final _providerCacheKeysInUse = <String>{};
   late final BuildContext _context;
   late final WidgetRef _ref;
   Future<void> _logFileWrite = Future.value();

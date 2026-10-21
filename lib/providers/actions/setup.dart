@@ -746,43 +746,49 @@ extension SetupControllerExt on AppController {
         },
       );
     }
+    _providerCacheKeysInUse.addAll([
+      ...setupState.clashProviders.map((provider) => provider.cacheKey),
+      ...providerCacheKeysFromConfig(rawConfig),
+    ]);
     final directory = await appPath.profilesPath;
-    final res = makeRealProfileTask(
-      MakeRealProfileState(
-        profilesPath: directory,
-        profileId: profileId,
-        rawConfig: rawConfig,
-        overwriteType: setupState.overwriteType,
-        customProfile: setupState.profileType == ProfileType.custom,
-        profileProviders: {
-          for (final MapEntry(key: label, value: source)
-              in setupState.usedProfileProviders.entries)
-            label: profileProviderDefinition(
-              p.join(directory, '${source.profileId}.yaml'),
-              setupState.overrides.proxyProviders[label],
-            ),
-        },
-        overrides: setupState.overrides,
-        realPatchConfig: realPatchConfig,
-        appendSystemDns: appendSystemDns,
-        addedRules: addedRules,
-        proxyChains: proxyChains,
-        profileProxies: setupState.profileProxies,
-        clashProviders: setupState.clashProviders,
-        customProxyGroups: customProxyGroups,
-        customRules: customRules,
-        matchTarget: setupState.matchTarget,
-        defaultUA: defaultUA,
-        dockerMode: system.isDocker,
-        blockQuic: setupState.blockQuic,
-        blockWebRtc: setupState.blockWebRtc,
-        tailscaleNetworks: setupState.tailscaleNetworks,
-        tailscaleHostname: defaultTailscaleHostname(Platform.operatingSystem),
-        bypassPrivateRoute: bypassPrivateRoute,
-        authentication: _ref
-            .read(networkSettingProvider)
-            .authentication
-            .credentials,
+    final res = _providerCacheLock.synchronized(
+      () => makeRealProfileTask(
+        MakeRealProfileState(
+          profilesPath: directory,
+          profileId: profileId,
+          rawConfig: rawConfig,
+          overwriteType: setupState.overwriteType,
+          customProfile: setupState.profileType == ProfileType.custom,
+          profileProviders: {
+            for (final MapEntry(key: label, value: source)
+                in setupState.usedProfileProviders.entries)
+              label: profileProviderDefinition(
+                p.join(directory, '${source.profileId}.yaml'),
+                setupState.overrides.proxyProviders[label],
+              ),
+          },
+          overrides: setupState.overrides,
+          realPatchConfig: realPatchConfig,
+          appendSystemDns: appendSystemDns,
+          addedRules: addedRules,
+          proxyChains: proxyChains,
+          profileProxies: setupState.profileProxies,
+          clashProviders: setupState.clashProviders,
+          customProxyGroups: customProxyGroups,
+          customRules: customRules,
+          matchTarget: setupState.matchTarget,
+          defaultUA: defaultUA,
+          dockerMode: system.isDocker,
+          blockQuic: setupState.blockQuic,
+          blockWebRtc: setupState.blockWebRtc,
+          tailscaleNetworks: setupState.tailscaleNetworks,
+          tailscaleHostname: defaultTailscaleHostname(Platform.operatingSystem),
+          bypassPrivateRoute: bypassPrivateRoute,
+          authentication: _ref
+              .read(networkSettingProvider)
+              .authentication
+              .credentials,
+        ),
       ),
     );
     try {

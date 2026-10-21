@@ -39,6 +39,24 @@ class ClashProvidersDao extends DatabaseAccessor<Database>
     );
   }
 
+  Future<Set<String>> cacheKeys() async {
+    final query = selectOnly(clashProviders)
+      ..addColumns([
+        clashProviders.id,
+        clashProviders.url,
+        clashProviders.content,
+      ]);
+    return (await query.get())
+        .map(
+          (row) => clashProviderCacheKey(
+            row.read(clashProviders.id)!,
+            row.read(clashProviders.url)!,
+            row.read(clashProviders.content)!,
+          ),
+        )
+        .toSet();
+  }
+
   Future<void> put(ClashProvider provider) async {
     await into(clashProviders).insertOnConflictUpdate(provider.toCompanion());
   }
