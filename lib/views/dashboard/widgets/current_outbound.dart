@@ -308,6 +308,17 @@ class _ExitRow extends ConsumerWidget {
       color: active ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
     ).copyWith(letterSpacing: 0);
     final info = this.info;
+    final details = info == null || hideIp
+        ? ''
+        : [
+            if (info.country case final country?)
+              shownCountryCode(info.countryCode) ==
+                      info.countryCode.toUpperCase()
+                  ? country
+                  : shownCountryCode(info.countryCode),
+            ?info.organization,
+            if (info.asn case final asn?) 'AS$asn',
+          ].join(' · ');
     final appLocalizations = context.appLocalizations;
     final Widget ip = info != null
         ? _IpText(ip: info.ip, hidden: hideIp, style: style)
@@ -341,6 +352,18 @@ class _ExitRow extends ConsumerWidget {
                   child: ip,
                 ),
               ),
+              if (details.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Tooltip(
+                  message: details,
+                  child: Text(
+                    details,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: DashboardText.label(context),
+                  ),
+                ),
+              ],
               if (failed) ...[
                 const SizedBox(height: 4),
                 Text(

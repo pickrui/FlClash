@@ -155,6 +155,38 @@ void main() {
   }
 
   group('the exit address', () {
+    for (final density in DashboardDensity.values) {
+      testWidgets('exit metadata fits and follows IP privacy at $density', (
+        tester,
+      ) async {
+        container.dispose();
+        container = containerWith(
+          state: const NetworkDetectionState(
+            isLoading: false,
+            ipInfo: IpInfo(
+              ip: _ip,
+              countryCode: 'GB',
+              country: 'United Kingdom',
+              organization: 'Example Network With A Long Organization Name',
+              asn: 64500,
+            ),
+          ),
+        );
+        await pumpCard(tester, density: density);
+        const details =
+            'United Kingdom · Example Network With A Long Organization Name · AS64500';
+        expect(find.text(details), findsOneWidget);
+        expect(find.byTooltip(details), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.text(_ip));
+        await tester.pump();
+        expect(find.text(details), findsNothing);
+        expect(find.byTooltip(details), findsNothing);
+        await tester.tap(find.text('*****'));
+        await tester.pump();
+        expect(find.text(details), findsOneWidget);
+      });
+    }
     testWidgets('shows with its country under the running state', (
       tester,
     ) async {

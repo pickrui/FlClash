@@ -361,42 +361,108 @@ extension GroupExt on Group {
 
 @freezed
 abstract class IpInfo with _$IpInfo {
-  const factory IpInfo({required String ip, required String countryCode}) =
-      _IpInfo;
+  const factory IpInfo({
+    required String ip,
+    required String countryCode,
+    String? country,
+    String? organization,
+    int? asn,
+  }) = _IpInfo;
+
+  static String? _text(Object? value) {
+    if (value is! String) return null;
+    final text = value.trim();
+    return text.isEmpty ? null : text;
+  }
+
+  static int? _asn(Object? value) {
+    final text = value is int ? '$value' : _text(value);
+    if (text == null) return null;
+    final match = RegExp(
+      r'^(?:AS)?([0-9]+)$',
+      caseSensitive: false,
+    ).firstMatch(text);
+    final number = int.tryParse(match?.group(1) ?? '');
+    return number != null && number > 0 && number <= 0xffffffff ? number : null;
+  }
 
   static IpInfo _fromFields(
     Map<String, dynamic> json, {
     String ipKey = 'ip',
     required String countryKey,
+    Object? country,
+    Object? organization,
+    Object? asn,
   }) {
     final ip = json[ipKey];
     final countryCode = json[countryKey];
     if (ip is! String || countryCode is! String) {
       throw const FormatException('invalid json');
     }
-    return IpInfo(ip: ip, countryCode: countryCode);
+    return IpInfo(
+      ip: ip,
+      countryCode: countryCode,
+      country: _text(country),
+      organization: _text(organization),
+      asn: _asn(asn),
+    );
   }
 
-  static IpInfo fromIpInfoIoJson(Map<String, dynamic> json) =>
-      _fromFields(json, countryKey: 'country');
+  static IpInfo fromIpInfoIoJson(Map<String, dynamic> json) => _fromFields(
+    json,
+    countryKey: 'country',
+    organization: _text(json['org'])
+        ?.replaceFirst(RegExp(r'^AS[0-9]+(?:\s+|$)', caseSensitive: false), ''),
+    asn: _text(json['org'])?.split(RegExp(r'\s+')).first,
+  );
 
-  static IpInfo fromIpApiCoJson(Map<String, dynamic> json) =>
-      _fromFields(json, countryKey: 'country_code');
+  static IpInfo fromIpApiCoJson(Map<String, dynamic> json) => _fromFields(
+    json,
+    countryKey: 'country_code',
+    country: json['country_name'],
+    organization: json['org'],
+    asn: json['asn'],
+  );
 
-  static IpInfo fromIpSbJson(Map<String, dynamic> json) =>
-      _fromFields(json, countryKey: 'country_code');
+  static IpInfo fromIpSbJson(Map<String, dynamic> json) => _fromFields(
+    json,
+    countryKey: 'country_code',
+    country: json['country'],
+    organization:
+        _text(json['asn_organization']) ??
+        _text(json['organization']) ??
+        _text(json['isp']),
+    asn: json['asn'],
+  );
 
-  static IpInfo fromIpWhoIsJson(Map<String, dynamic> json) =>
-      _fromFields(json, countryKey: 'country_code');
+  static IpInfo fromIpWhoIsJson(Map<String, dynamic> json) {
+    final connection = json['connection'];
+    return _fromFields(
+      json,
+      countryKey: 'country_code',
+      country: json['country'],
+      organization: connection is Map
+          ? _text(connection['org']) ?? _text(connection['isp'])
+          : null,
+      asn: connection is Map ? connection['asn'] : null,
+    );
+  }
 
   static IpInfo fromMyIpJson(Map<String, dynamic> json) =>
-      _fromFields(json, countryKey: 'cc');
+      _fromFields(json, countryKey: 'cc', country: json['country']);
 
-  static IpInfo fromIpAPIJson(Map<String, dynamic> json) =>
-      _fromFields(json, ipKey: 'query', countryKey: 'countryCode');
+  static IpInfo fromIpAPIJson(Map<String, dynamic> json) => _fromFields(
+    json,
+    ipKey: 'query',
+    countryKey: 'countryCode',
+    country: json['country'],
+    organization:
+        _text(json['asname']) ?? _text(json['org']) ?? _text(json['isp']),
+    asn: _text(json['as'])?.split(RegExp(r'\s+')).first,
+  );
 
   static IpInfo fromIdentMeJson(Map<String, dynamic> json) =>
-      _fromFields(json, countryKey: 'cc');
+      _fromFields(json, countryKey: 'cc', country: json['country']);
 }
 
 @freezed

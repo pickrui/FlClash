@@ -8,6 +8,121 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('exit IP information', () {
+    test('keeps organization and ASN from each detailed response shape', () {
+      final responses = [
+        IpInfo.fromIpSbJson({
+          'ip': '203.0.113.9',
+          'country_code': 'GB',
+          'country': ' United Kingdom ',
+          'asn_organization': ' Example Network ',
+          'organization': 'fallback',
+          'asn': 64500,
+        }),
+        IpInfo.fromIpWhoIsJson({
+          'ip': '203.0.113.9',
+          'country_code': 'GB',
+          'country': 'United Kingdom',
+          'connection': {
+            'asn': 64500,
+            'org': 'Example Network',
+            'isp': 'fallback',
+          },
+        }),
+        IpInfo.fromIpApiCoJson({
+          'ip': '203.0.113.9',
+          'country_code': 'GB',
+          'country_name': 'United Kingdom',
+          'org': 'Example Network',
+          'asn': 'AS64500',
+        }),
+        IpInfo.fromIpAPIJson({
+          'query': '203.0.113.9',
+          'countryCode': 'GB',
+          'country': 'United Kingdom',
+          'org': 'Example Network',
+          'as': 'AS64500 Example Network',
+        }),
+      ];
+      for (final info in responses) {
+        expect(
+          info,
+          const IpInfo(
+            ip: '203.0.113.9',
+            countryCode: 'GB',
+            country: 'United Kingdom',
+            organization: 'Example Network',
+            asn: 64500,
+          ),
+        );
+      }
+      final combined = IpInfo.fromIpInfoIoJson({
+        'ip': '203.0.113.9',
+        'country': 'GB',
+        'org': 'AS64500 Example Network',
+      });
+      expect(combined.organization, 'Example Network');
+      expect(combined.asn, 64500);
+      expect(combined.country, isNull);
+    });
+
+    test('optional metadata does not discard a valid exit address', () {
+      for (final invalid in [
+        null,
+        0,
+        -1,
+        4294967296,
+        1.5,
+        'AS?',
+        'AS64500 text',
+        {},
+      ]) {
+        final info = IpInfo.fromIpSbJson({
+          'ip': '203.0.113.9',
+          'country_code': 'GB',
+          'country': [],
+          'asn': invalid,
+          'asn_organization': ' ',
+          'organization': 1,
+          'isp': ' Carrier ',
+        });
+        expect(info.ip, '203.0.113.9');
+        expect(info.asn, isNull);
+        expect(info.country, isNull);
+        expect(info.organization, 'Carrier');
+      }
+      expect(
+        IpInfo.fromIpWhoIsJson({
+          'ip': '203.0.113.9',
+          'country_code': 'GB',
+          'connection': [],
+        }).organization,
+        isNull,
+      );
+      expect(
+        IpInfo.fromIpSbJson({
+          'ip': '203.0.113.9',
+          'country_code': 'GB',
+          'asn': ' as4294967295 ',
+        }).asn,
+        4294967295,
+      );
+      for (final parser in [IpInfo.fromMyIpJson, IpInfo.fromIdentMeJson]) {
+        expect(
+          parser({
+            'ip': '203.0.113.9',
+            'cc': 'GB',
+            'country': 'United Kingdom',
+          }),
+          const IpInfo(
+            ip: '203.0.113.9',
+            countryCode: 'GB',
+            country: 'United Kingdom',
+          ),
+        );
+      }
+    });
+  });
   test(
     'connection search combines detail fields and exact keyword filters',
     () {
