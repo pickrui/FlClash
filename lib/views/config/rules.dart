@@ -27,10 +27,13 @@ class AddedRulesView extends ConsumerStatefulWidget {
 class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
   final _key = uniqueId;
   String _query = '';
+  final _searchTexts = Expando<String>();
 
   List<Rule> _filter(List<Rule> rules) {
     final query = SearchQuery(_query);
-    return rules.where((rule) => query.matches([rule.value])).toList();
+    return rules
+        .whereMatches(query, (rule) => [rule.value], texts: _searchTexts)
+        .toList();
   }
 
   Future<void> _addPresets() async {

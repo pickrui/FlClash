@@ -148,6 +148,25 @@ extension TrackerInfoExt on TrackerInfo {
     }
     return process.trim();
   }
+
+  List<String> get searchFields => [
+    metadata.network,
+    metadata.host,
+    metadata.destinationIP,
+    metadata.destinationPort,
+    metadata.sourceIP,
+    metadata.sourcePort,
+    metadata.process,
+    metadata.processPath,
+    metadata.remoteDestination,
+    metadata.destinationIPASN,
+    ...metadata.destinationGeoIP,
+    metadata.specialProxy,
+    metadata.specialRules,
+    rule,
+    rulePayload,
+    ...chains,
+  ];
 }
 
 String _logDateTime(dynamic _) {
@@ -179,14 +198,24 @@ abstract class LogsState with _$LogsState {
   }) = _LogsState;
 }
 
+final _logSearchTexts = Expando<String>();
+
 extension LogsStateExt on LogsState {
+  bool get isSearching => keywords.isNotEmpty || SearchQuery(query).isNotEmpty;
+
   List<Log> get list {
     final search = SearchQuery(query);
-    return logs.where((log) {
-      final logLevelName = log.logLevel.name;
-      return (keywords.isEmpty || {logLevelName}.containsAll(keywords)) &&
-          search.matches([log.payload, logLevelName]);
-    }).toList();
+    if (keywords.isEmpty && search.isEmpty) return logs;
+    return logs
+        .where(
+          (log) => keywords.every((keyword) => keyword == log.logLevel.name),
+        )
+        .whereMatches(
+          search,
+          (log) => [log.payload, log.logLevel.name],
+          texts: _logSearchTexts,
+        )
+        .toList();
   }
 }
 
@@ -200,21 +229,28 @@ abstract class TrackerInfosState with _$TrackerInfosState {
   }) = _TrackerInfosState;
 }
 
+final _trackerInfoSearchTexts = Expando<String>();
+
 extension TrackerInfosStateExt on TrackerInfosState {
+  bool get isSearching => keywords.isNotEmpty || SearchQuery(query).isNotEmpty;
+
   List<TrackerInfo> get list {
     final search = SearchQuery(query);
-    return trackerInfos.where((trackerInfo) {
-      final chains = trackerInfo.chains;
-      final process = trackerInfo.metadata.process;
-      return (keywords.isEmpty || {...chains, process}.containsAll(keywords)) &&
-          search.matches([
-            trackerInfo.metadata.network,
-            trackerInfo.metadata.host,
-            trackerInfo.metadata.destinationIP,
-            trackerInfo.metadata.process,
-            ...chains,
-          ]);
-    }).toList();
+    if (keywords.isEmpty && search.isEmpty) return trackerInfos;
+    return trackerInfos
+        .where(
+          (info) => keywords.every(
+            (keyword) =>
+                info.metadata.process == keyword ||
+                info.chains.contains(keyword),
+          ),
+        )
+        .whereMatches(
+          search,
+          (info) => info.searchFields,
+          texts: _trackerInfoSearchTexts,
+        )
+        .toList();
   }
 }
 

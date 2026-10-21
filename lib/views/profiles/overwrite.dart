@@ -805,6 +805,7 @@ class _EditGlobalAddedRules extends ConsumerStatefulWidget {
 
 class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
   var _query = SearchQuery('');
+  final _searchTexts = Expando<String>();
 
   int get profileId => widget.profileId;
 
@@ -865,7 +866,7 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
     final rulesState = ref.watch(globalRulesProvider);
     final disabledRuleIds = disabledRulesState.value?.toSet() ?? <int>{};
     final rules = (rulesState.value ?? [])
-        .where((rule) => _query.matches([rule.value]))
+        .whereMatches(_query, (rule) => [rule.value], texts: _searchTexts)
         .toList();
     final error = rulesState.error ?? disabledRulesState.error;
     final loading = rulesState.isLoading || disabledRulesState.isLoading;

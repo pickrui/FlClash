@@ -121,7 +121,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
           final requests = state.list;
           return NullStatusSwitcher(
             isEmpty: requests.isEmpty,
-            isSearching: state.query.isNotEmpty || state.keywords.isNotEmpty,
+            isSearching: state.isSearching,
             nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.requests),
               illustration: NullStatusIllustration.requests,

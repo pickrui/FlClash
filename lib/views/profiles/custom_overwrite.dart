@@ -330,6 +330,7 @@ class CustomRulesView extends ConsumerStatefulWidget {
 class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
   int get profileId => widget.profileId;
   String _query = '';
+  final _searchTexts = Expando<String>();
   var _selected = <Rule>{};
   bool _deleting = false;
 
@@ -567,7 +568,9 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
     final selected = _selected.intersection(rules.toSet());
     final issues = ref.watch(routingIssuesProvider(profileId)).rules;
     final query = SearchQuery(_query);
-    final visible = rules.where((rule) => query.matches([rule.value])).toList();
+    final visible = rules
+        .whereMatches(query, (rule) => [rule.value], texts: _searchTexts)
+        .toList();
     final selecting = selected.isNotEmpty;
     Widget rowAt(int index, {required bool reorderable}) {
       final rule = visible[index];

@@ -144,7 +144,7 @@ class _LogsViewState extends ConsumerState<LogsView>
           final logs = state.list;
           return NullStatusSwitcher(
             isEmpty: logs.isEmpty,
-            isSearching: state.query.isNotEmpty || state.keywords.isNotEmpty,
+            isSearching: state.isSearching,
             nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.logs),
               illustration: NullStatusIllustration.logs,

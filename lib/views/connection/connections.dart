@@ -223,7 +223,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
           return NullStatusSwitcher(
             isLoading: !_loaded,
             isEmpty: connections.isEmpty,
-            isSearching: state.query.isNotEmpty || state.keywords.isNotEmpty,
+            isSearching: state.isSearching,
             nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.connections),
               illustration: NullStatusIllustration.connections,
