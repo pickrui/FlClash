@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:collection/collection.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/measure.dart';
 import 'package:fl_clash/ui/builder.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/table_layout.dart';
@@ -352,7 +352,7 @@ class _RecordTableHeader<T> extends StatelessWidget {
 
 /// The width a fixed column takes to show [label] whole in its header.
 double recordHeaderWidth(BuildContext context, String label) =>
-    globalState.measure
+    MeasureScope.of(context)
         .computeTextSize(Text(label, style: _headerLabelStyle(context)))
         .width
         .ceilToDouble() +
@@ -360,7 +360,7 @@ double recordHeaderWidth(BuildContext context, String label) =>
 
 /// The width a fixed column takes to show a RecordLabel of [label] whole.
 double recordLabelWidth(BuildContext context, String label) =>
-    globalState.measure
+    MeasureScope.of(context)
         .computeTextSize(
           Text(
             label,
