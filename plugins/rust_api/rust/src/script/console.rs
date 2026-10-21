@@ -6,7 +6,7 @@
 use crate::api::script::ScriptLog;
 use rquickjs::convert::Coerced;
 use rquickjs::function::Rest;
-use rquickjs::{CatchResultExt, Ctx, Function, Object, Result, Value};
+use rquickjs::{CatchResultExt, Ctx, Exception, Function, Object, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Instant;
@@ -36,23 +36,25 @@ fn write<'js>(
     logs: &RefCell<Vec<ScriptLog>>,
     bytes: &RefCell<usize>,
     deadline: Instant,
-) {
+) -> Result<()> {
+    if Instant::now() >= deadline {
+        return Err(Exception::throw_message(&ctx, "script execution timed out"));
+    }
     // Never stream unbounded native logs or enqueue one Dart event per call.
     if logs.borrow().len() >= MAX_LINES || *bytes.borrow() >= MAX_BYTES {
-        return;
+        return Ok(());
     }
     let limit = MAX_LINE_BYTES.min(MAX_BYTES - *bytes.borrow());
     let mut line = String::new();
     for value in args.iter() {
-        // format() clears the interrupt raised inside a user toJSON or toString;
-        // stop here so the next interrupt check ends the script.
-        if Instant::now() >= deadline {
-            return;
-        }
         if !line.is_empty() {
             line.push(' ');
         }
         let text = format(&ctx, value);
+        // Formatting clears JS exceptions, including the runtime interrupt.
+        if Instant::now() >= deadline {
+            return Err(Exception::throw_message(&ctx, "script execution timed out"));
+        }
         let mut end = text.len().min(limit.saturating_sub(line.len()));
         while !text.is_char_boundary(end) {
             end -= 1;
@@ -64,7 +66,7 @@ fn write<'js>(
     }
     // toJSON can itself call console. Recheck the shared budget after formatting.
     if logs.borrow().len() >= MAX_LINES || *bytes.borrow() >= MAX_BYTES {
-        return;
+        return Ok(());
     }
     let mut end = line.len().min(MAX_BYTES - *bytes.borrow());
     while !line.is_char_boundary(end) {
@@ -76,6 +78,7 @@ fn write<'js>(
         level: level.into(),
         output: line,
     });
+    Ok(())
 }
 
 fn format<'js>(ctx: &Ctx<'js>, value: &Value<'js>) -> String {

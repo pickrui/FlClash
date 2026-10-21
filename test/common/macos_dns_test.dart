@@ -69,6 +69,32 @@ void main() {
     },
   );
 
+  test('shutdown during snapshot persistence never installs new DNS', () async {
+    final system = _FakeDnsSystem();
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    String? snapshot;
+    final controller = MacosDnsController(
+      runProcess: system.run,
+      writeSnapshot: (value) async {
+        if (value.contains('"Wi-Fi"') && !entered.isCompleted) {
+          entered.complete();
+          await release.future;
+        }
+        snapshot = value;
+      },
+    );
+
+    final apply = controller.updateDns(false);
+    await entered.future;
+    final closed = controller.shutdownDns();
+    release.complete();
+    await Future.wait([apply, closed]);
+    expect(system.writes, isEmpty);
+    expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+    expect(snapshot, contains('"services":{}'));
+  });
+
   test(
     'failed shutdown preserves the recovery journal and stays closed',
     () async {

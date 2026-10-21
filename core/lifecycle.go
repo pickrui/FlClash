@@ -23,6 +23,7 @@ var (
 	version       = 0
 	isRunning     = false
 	runLock       sync.Mutex
+	lifecycleLock sync.Mutex
 	// Set once the process exits, so an apply still holding runLock cannot
 	// bring back the TUN that exit cleanup closed first.
 	exiting atomic.Bool
@@ -31,6 +32,8 @@ var (
 var isInit atomic.Bool
 
 func handleInitClash(params *InitParams) bool {
+	lifecycleLock.Lock()
+	defer lifecycleLock.Unlock()
 	runLock.Lock()
 	defer runLock.Unlock()
 	if exiting.Load() {
@@ -74,6 +77,8 @@ func handleGetIsInit() bool {
 }
 
 func handleShutdown() bool {
+	lifecycleLock.Lock()
+	defer lifecycleLock.Unlock()
 	liveConnections.stop("")
 	stopGeoLifecycle()
 	runLock.Lock()

@@ -83,6 +83,7 @@ class SystemProxyController {
         return SystemProxyStartResult.mixedProxyUnavailable;
       }
       for (var attempt = 0; attempt < _setupAttempts; attempt++) {
+        if (_closed) return SystemProxyStartResult.closed;
         final success = await startProxy(port, bypassDomain);
         if (success == true) {
           _startedByFlClash = true;

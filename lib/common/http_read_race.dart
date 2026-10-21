@@ -72,7 +72,7 @@ Future<T> raceHttpReads<T>(
     for (final token in tokens) {
       token.cancel('HTTP read finished');
     }
-    await cancellation?.cancel();
+    unawaited(cancellation?.cancel());
   }
 }
 

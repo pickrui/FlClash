@@ -527,7 +527,7 @@ void main() {
       await sendDeltas(tester, [
         caretDelta(window, window.length),
         textDelta(window, '', 0, window.length),
-      ]);
+      ], pump: false);
       expect(controller.text, isEmpty);
 
       await sendDeltas(tester, [composingDelta('', 'k', 0)]);

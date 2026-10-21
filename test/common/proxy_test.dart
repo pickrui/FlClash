@@ -282,6 +282,46 @@ void main() {
     expect(controller.startedByFlClash, false);
   });
 
+  for (final waitingFor in ['readiness', 'retry']) {
+    test('exit retires a start waiting for $waitingFor', () async {
+      final entered = Completer<void>();
+      final release = Completer<bool>();
+      final events = <String>[];
+      final controller = SystemProxyController(
+        startProxy: (_, _) async {
+          events.add('start');
+          if (waitingFor == 'retry' && !entered.isCompleted) {
+            entered.complete();
+            return release.future;
+          }
+          return true;
+        },
+        stopProxy: () async {
+          events.add('stop');
+          return true;
+        },
+        readinessChecker: (_) async {
+          if (waitingFor == 'readiness') {
+            entered.complete();
+            return release.future;
+          }
+          return true;
+        },
+        setupAttempts: 2,
+      );
+
+      final start = controller.start(7890, const []);
+      await entered.future;
+      final closed = controller.close();
+      release.complete(waitingFor == 'readiness');
+      final outcome = await start;
+      expect(await closed, isTrue);
+      expect(outcome, SystemProxyStartResult.closed);
+      expect(events, [if (waitingFor == 'retry') 'start', 'stop']);
+      expect(controller.startedByFlClash, isFalse);
+    });
+  }
+
   test('no start queued around exit turns the proxy back on', () async {
     final startEntered = Completer<void>();
     final releaseStart = Completer<void>();

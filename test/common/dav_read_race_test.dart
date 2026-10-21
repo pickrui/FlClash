@@ -66,6 +66,63 @@ void main() {
     await waitForReads();
   });
 
+  for (final dispose in [false, true]) {
+    test(
+      'retiring DAV checks cancels every stalled route (dispose=$dispose)',
+      () async {
+        final streams = <StreamController<Uint8List>>[];
+        final started = Completer<void>();
+        final allCanceled = Completer<void>();
+        var canceled = 0;
+        final connection = DAVConnectionController(
+          createClient: (props) => DAVClient(
+            props,
+            resolveRoutes: (_) => ['direct', 'proxy'],
+            createAdapter: (_) => readAdapter((options) async {
+              final body = StreamController<Uint8List>(
+                onListen: () {
+                  if (streams.length == 2 && !started.isCompleted) {
+                    started.complete();
+                  }
+                },
+                onCancel: () {
+                  if (++canceled == 2) allCanceled.complete();
+                },
+              );
+              streams.add(body);
+              return ResponseBody(body.stream, 200);
+            }),
+          ),
+        );
+        final check = connection.update(_props);
+        await started.future.timeout(const Duration(seconds: 2));
+        await pumpEventQueue();
+        if (dispose) {
+          connection.dispose();
+        } else {
+          await connection.update(null);
+        }
+        final retired = await Future.any([
+          check.then((_) => true),
+          Future<bool>.delayed(const Duration(milliseconds: 100), () => false),
+        ]);
+        await Future.any([
+          allCanceled.future,
+          Future<void>.delayed(const Duration(milliseconds: 100)),
+        ]);
+        final canceledOnRetirement = canceled;
+        for (final stream in streams) {
+          unawaited(stream.close());
+        }
+        await check;
+        if (!dispose) connection.dispose();
+        expect(retired, isTrue);
+        expect(canceledOnRetirement, 2);
+        await waitForReads();
+      },
+    );
+  }
+
   test(
     'authenticated reads race and only a validated ZIP is retained',
     () async {

@@ -39,7 +39,8 @@ class HostResolver {
 
   final _cache = <String, ({List<InternetAddress> addresses, DateTime at})>{};
   Future<void>? _loaded;
-  Future<void> _writes = Future.value();
+  bool _persisting = false;
+  bool _dirty = false;
 
   static Future<List<InternetAddress>> _systemLookup(
     String host, {
@@ -130,10 +131,19 @@ class HostResolver {
     if (store == null) return;
     // A confirmation can land before anything was read back, so merge what is
     // already stored first; a write must not drop another host's address.
-    _writes = _writes
-        .then((_) => _restore())
-        .then(
-          (_) => store.write(
+    _dirty = true;
+    if (_persisting) return;
+    _persisting = true;
+    unawaited(_writeLatest(store));
+  }
+
+  Future<void> _writeLatest(HostAddressStore store) async {
+    try {
+      await _restore();
+      while (_dirty) {
+        _dirty = false;
+        try {
+          await store.write(
             jsonEncode({
               for (final entry in _cache.entries)
                 entry.key: {
@@ -144,9 +154,14 @@ class HostResolver {
                   ],
                 },
             }),
-          ),
-        )
-        .onError((_, _) {});
+          );
+        } catch (_) {
+          // A failed cache write must not block newer confirmed addresses.
+        }
+      }
+    } finally {
+      _persisting = false;
+    }
   }
 
   static String _key(String host) => host.toLowerCase();

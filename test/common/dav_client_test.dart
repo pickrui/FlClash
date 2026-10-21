@@ -245,5 +245,8 @@ const _otherDeviceId = '22222222222222222222222222222222';
 
 class _PendingClient extends Fake implements DAVClient {
   @override
+  void cancelConnectionCheck() {}
+
+  @override
   final pingCompleter = Completer<bool>();
 }

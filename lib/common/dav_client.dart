@@ -134,6 +134,7 @@ class DAVClient {
   final Iterable<String> Function(Uri) _resolveRoutes;
   final HttpClientAdapter Function(String)? _createAdapter;
   final Duration readTimeout;
+  final _pingCancellation = CancelToken();
 
   DAVClient(
     DAVProps dav, {
@@ -224,6 +225,7 @@ class DAVClient {
   Future<T> _raceRead<T>(
     Future<T> Function(Client client, CancelToken token) read, {
     Duration? timeout,
+    CancelToken? cancelToken,
   }) => raceHttpReads<T>(
     _resolveRoutes(Uri.parse(_dav.uri)).toSet().map(
       (route) => (token) async {
@@ -236,6 +238,7 @@ class DAVClient {
       },
     ),
     timeout: timeout ?? readTimeout,
+    cancelToken: cancelToken,
   );
 
   Future<bool> _ping() async {
@@ -254,11 +257,14 @@ class DAVClient {
           );
         }
         return true;
-      });
+      }, cancelToken: _pingCancellation);
     } catch (_) {
       return false;
     }
   }
+
+  void cancelConnectionCheck() =>
+      _pingCancellation.cancel('WebDAV connection check retired');
 
   String get root => '/$appName';
 
@@ -429,6 +435,7 @@ class DAVConnectionController extends ValueNotifier<bool?> {
     _credentials = credentials;
     _hasUpdated = true;
     final requestId = ++_requestId;
+    client?.cancelConnectionCheck();
     client = null;
     if (props == null || !isValidDavUri(props.uri)) {
       value = false;
@@ -448,6 +455,7 @@ class DAVConnectionController extends ValueNotifier<bool?> {
   void dispose() {
     _disposed = true;
     _requestId++;
+    client?.cancelConnectionCheck();
     client = null;
     super.dispose();
   }

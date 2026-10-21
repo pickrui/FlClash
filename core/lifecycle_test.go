@@ -11,6 +11,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
@@ -90,6 +91,40 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	if currentConfig != nil || *listener.GetPorts() != (listener.Ports{}) {
 		t.Error("reinitialization reused the retired configuration before setup")
 	}
+	t.Run("reinitialization waits for retiring geo work", func(t *testing.T) {
+		canceled, release := make(chan struct{}), make(chan struct{})
+		if !runLifecycleGeoTask(func(ctx context.Context) {
+			<-ctx.Done()
+			close(canceled)
+			<-release
+		}) {
+			t.Fatal("geo task was not admitted")
+		}
+		stopped := make(chan bool, 1)
+		go func() { stopped <- handleShutdown() }()
+		<-canceled
+		initialized := make(chan bool, 1)
+		go func() {
+			initialized <- handleInitClash(&InitParams{HomeDir: GlobalValidationSourceHome})
+		}()
+		early := false
+		select {
+		case <-initialized:
+			early = true
+			t.Error("initialization overtook shutdown while GEO work was still draining")
+		case <-time.After(50 * time.Millisecond):
+		}
+		close(release)
+		if !<-stopped {
+			t.Fatal("shutdown failed")
+		}
+		if !early && !<-initialized {
+			t.Fatal("queued initialization failed")
+		}
+		if !isInit.Load() {
+			t.Error("shutdown discarded the new initialization")
+		}
+	})
 	exiting.Store(true)
 	if handleStartListener() || isRunning {
 		t.Error("a start revived the core while exiting")

@@ -150,7 +150,7 @@ class MacosDnsController {
     final applied = [...current, addedDns];
     _overrides[service] = (before: current, applied: applied);
     await _save();
-    await _writeDns(service, applied);
+    if (!_closing) await _writeDns(service, applied);
   }
 
   Future<void> _save() async {

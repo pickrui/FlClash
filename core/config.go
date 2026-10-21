@@ -148,7 +148,7 @@ func updateConfig(params *UpdateParams) error {
 	}
 	if params.IPv6 != nil {
 		general.IPv6 = *params.IPv6
-		resolver.DisableIPv6 = !general.IPv6
+		resolver.DisableIPv6.Store(!general.IPv6)
 	}
 	controller := currentConfig.Controller
 	if params.ExternalController != nil && *params.ExternalController != controller.ExternalController ||
