@@ -30,7 +30,7 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
   final Set<Completer<CoreMethodResponse?>> _pendingCalls = {};
 
   final Service? _service;
-  final SharedState Function() _readSharedState;
+  final FutureOr<SharedState> Function() _readSharedState;
 
   CoreLib._internal()
     : _service = service,
@@ -151,7 +151,11 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
     }
     _connectedCompleter.complete(true);
     try {
-      final syncError = await _service?.syncState(_readSharedState()) ?? '';
+      final shared = await _readSharedState();
+      if (revision != _lifecycleRevision) {
+        throw StateError('Android Core service disconnected during startup');
+      }
+      final syncError = await _service?.syncState(shared) ?? '';
       if (syncError.isNotEmpty) throw StateError(syncError);
       if (revision != _lifecycleRevision) {
         throw StateError('Android Core service disconnected during startup');

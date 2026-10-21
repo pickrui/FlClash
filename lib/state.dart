@@ -304,6 +304,16 @@ class GlobalState {
     final resumesRunningService = startTime != null;
     startTime ??= DateTime.now();
     try {
+      if (system.isAndroid) {
+        await container.read(vpnRouteAddressProvider.future);
+        final shared = container.read(sharedStateProvider);
+        if (request != _runRequest) return;
+        await preferences.saveShareState(shared);
+        if (request != _runRequest) return;
+        final error = await service?.syncState(shared) ?? '';
+        if (error.isNotEmpty) throw StateError(error);
+        if (request != _runRequest) return;
+      }
       await _listeners.apply(
         running: true,
         suspended: !system.isAndroid && container.read(suspendProvider),

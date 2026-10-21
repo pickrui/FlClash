@@ -51,6 +51,27 @@ void main() {
     }
   }
 
+  test(
+    'Android startup waits for routes and drops them after disconnection',
+    () async {
+      final service = _Service();
+      final ready = Completer<SharedState>();
+      final core = CoreLib.forTesting(
+        service: service,
+        readSharedState: () => ready.future,
+      );
+      addTearDown(core.destroy);
+      final start = core.preload();
+      await Future<void>.delayed(Duration.zero);
+      expect(service.syncs, 0);
+      core.onServiceCrash('service process died');
+      ready.complete(_sharedState);
+      expect(await start, contains('disconnected during startup'));
+      expect(service.syncs, 0);
+      expect(core.isConnected, isFalse);
+    },
+  );
+
   for (final close in [false, true]) {
     test(
       'a ${close ? 'closed' : 'lost'} service fails in-flight calls',
@@ -311,10 +332,16 @@ void main() {
   }
 
   test('concurrent connects share one start', () async {
-    final core = CoreLib();
+    final service = _Service();
+    final core = CoreLib.forTesting(
+      service: service,
+      readSharedState: () => _sharedState,
+    );
+    addTearDown(core.destroy);
     expect(await Future.wait([core.preload(), core.preload()]), ['', '']);
     expect(core.isConnected, isTrue);
     expect(await core.preload(), isEmpty);
+    expect(service.starts, 1);
   });
 }
 

@@ -39,12 +39,14 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
       }
     });
     ref.listenManual(sharedStateProvider, (prev, next) {
-      if (prev != next) {
-        debouncer.call(
-          FunctionTag.saveSharedFile,
-          () => preferences.saveShareState(next),
-          duration: const Duration(seconds: 1),
-        );
+      if (prev != next && next.vpnOptions != null) {
+        debouncer.call(FunctionTag.saveSharedFile, () async {
+          if (!mounted) return;
+          final current = ref.read(sharedStateProvider);
+          if (current.vpnOptions != null) {
+            await preferences.saveShareState(current);
+          }
+        }, duration: const Duration(seconds: 1));
         if (prev?.needSyncSharedState != next.needSyncSharedState) {
           service?.syncState(next.needSyncSharedState);
         }

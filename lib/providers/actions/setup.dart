@@ -389,7 +389,7 @@ extension SetupControllerExt on AppController {
           rethrow;
         }
         if (system.isAndroid) {
-          await preferences.saveShareState(this.sharedState);
+          await preferences.saveShareState(await this.sharedState);
         }
         // A later user Stop must win over this settings-triggered restart.
         if (restart && generation == _startIntentGeneration) {
@@ -959,7 +959,9 @@ extension SetupControllerExt on AppController {
     globalState.lastSetupState = setupState;
     _ref.read(appliedConfigCountsProvider.notifier).applied(profileId, config);
     if (system.isAndroid) {
-      preferences.saveShareState(this.sharedState);
+      final shared = await this.sharedState;
+      if (!isCurrentApply()) return false;
+      await preferences.saveShareState(shared);
     }
     addCheckIp();
     return true;

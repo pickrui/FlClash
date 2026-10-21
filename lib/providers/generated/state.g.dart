@@ -508,7 +508,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'c1aa2dd7f9fe133df942c4b49070cb34298bf756';
+String _$sharedStateHash() => r'859b7c50a927ac198518ec809c709d41143532ca';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -562,6 +562,86 @@ abstract class _$AccessControlState extends $Notifier<AccessControlProps> {
     return element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(vpnRouteAddress)
+final vpnRouteAddressProvider = VpnRouteAddressProvider._();
+
+final class VpnRouteAddressProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<String>>,
+          List<String>,
+          FutureOr<List<String>>
+        >
+    with $FutureModifier<List<String>>, $FutureProvider<List<String>> {
+  VpnRouteAddressProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'vpnRouteAddressProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$vpnRouteAddressHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<String>> create(Ref ref) {
+    return vpnRouteAddress(ref);
+  }
+}
+
+String _$vpnRouteAddressHash() => r'35465c216c42064354907e1f1d61565673356251';
+
+@ProviderFor(vpnOptions)
+final vpnOptionsProvider = VpnOptionsProvider._();
+
+final class VpnOptionsProvider
+    extends $FunctionalProvider<VpnOptions?, VpnOptions?, VpnOptions?>
+    with $Provider<VpnOptions?> {
+  VpnOptionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'vpnOptionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$vpnOptionsHash();
+
+  @$internal
+  @override
+  $ProviderElement<VpnOptions?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  VpnOptions? create(Ref ref) {
+    return vpnOptions(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VpnOptions? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VpnOptions?>(value),
+    );
+  }
+}
+
+String _$vpnOptionsHash() => r'4a9b4e35d0511862576e2fec89b195c738bc8f4f';
 
 @ProviderFor(navigationItemsState)
 final navigationItemsStateProvider = NavigationItemsStateProvider._();

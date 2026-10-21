@@ -230,32 +230,6 @@ SharedState sharedState(Ref ref) {
       (state) => VM2(state.onlyStatisticsProxy, state.testUrl),
     ),
   );
-  final bypassDomain = ref.watch(
-    networkSettingProvider.select((state) => state.bypassDomain),
-  );
-  final bypassPrivateRoute = ref.watch(
-    networkSettingProvider.select((state) => state.bypassPrivateRoute),
-  );
-  final clashConfigVM2 = ref.watch(
-    patchClashConfigProvider.select(
-      (state) => VM2(state.tun.stack.name, state.mixedPort),
-    ),
-  );
-  final congestionController = ref.watch(
-    patchClashConfigProvider.select((state) => state.tun.congestionController),
-  );
-  final keepTailnet = ref.watch(
-    tailscaleNetworksProvider.select(
-      (networks) => networks.any((network) => network.autoRoute),
-    ),
-  );
-  final routeAddress = ref
-      .watch(patchClashConfigProvider.select((state) => state.tun))
-      .vpnRouteAddress(
-        bypassPrivateRoute: bypassPrivateRoute,
-        keepTailnet: keepTailnet,
-      );
-  final vpnSetting = ref.watch(vpnStateProvider).vpnProps;
   final suspendOnIdle = ref.watch(
     networkSettingProvider.select((state) => state.suspendOnIdle),
   );
@@ -263,8 +237,6 @@ SharedState sharedState(Ref ref) {
   final selectedMap = currentProfileVM2.b;
   final onlyStatisticsProxy = appSettingVM3.a;
   final testUrl = appSettingVM3.b;
-  final stack = clashConfigVM2.a;
-  final port = clashConfigVM2.b;
   return SharedState(
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,
@@ -280,24 +252,7 @@ SharedState sharedState(Ref ref) {
       testUrl: testUrl,
       suspendOnIdle: suspendOnIdle,
     ),
-    vpnOptions: VpnOptions(
-      excludeSSIDs: ref.watch(networkSettingProvider).excludeSSIDs,
-      excludeNetworks: ref.watch(networkSettingProvider).excludeNetworks,
-      mtu: normalizeTunMtu(
-        ref.watch(patchClashConfigProvider.select((state) => state.tun.mtu)),
-      ),
-      congestionController: congestionController,
-      enable: vpnSetting.enable,
-      stack: stack,
-      systemProxy: vpnSetting.systemProxy,
-      port: port,
-      ipv6: vpnSetting.ipv6,
-      dnsHijacking: vpnSetting.dnsHijacking,
-      accessControlProps: vpnSetting.accessControlProps,
-      allowBypass: vpnSetting.allowBypass,
-      bypassDomain: bypassDomain,
-      routeAddress: routeAddress,
-    ),
+    vpnOptions: ref.watch(vpnOptionsProvider),
   );
 }
 
@@ -306,4 +261,67 @@ class AccessControlState extends _$AccessControlState
     with AutoDisposeNotifierMixin {
   @override
   AccessControlProps build() => const AccessControlProps();
+}
+
+@Riverpod(keepAlive: true)
+FutureOr<List<String>> vpnRouteAddress(Ref ref) {
+  final bypassPrivateRoute = ref.watch(
+    networkSettingProvider.select((state) => state.bypassPrivateRoute),
+  );
+  final keepTailnet = ref.watch(
+    tailscaleNetworksProvider.select(
+      (networks) => networks.any((network) => network.autoRoute),
+    ),
+  );
+  final tun = ref.watch(
+    patchClashConfigProvider.select(
+      (state) => Tun(
+        routeAddress: state.tun.routeAddress,
+        routeExcludeAddress: state.tun.routeExcludeAddress,
+      ),
+    ),
+  );
+  return tun.vpnRouteAddress(
+    bypassPrivateRoute: bypassPrivateRoute,
+    keepTailnet: keepTailnet,
+  );
+}
+
+@riverpod
+VpnOptions? vpnOptions(Ref ref) {
+  final routes = ref.watch(vpnRouteAddressProvider);
+  if (routes.isLoading || routes.hasError) return null;
+  final routeAddress = routes.requireValue;
+  final bypassDomain = ref.watch(
+    networkSettingProvider.select((state) => state.bypassDomain),
+  );
+  final clashConfigVM2 = ref.watch(
+    patchClashConfigProvider.select(
+      (state) => VM2(state.tun.stack.name, state.mixedPort),
+    ),
+  );
+  final congestionController = ref.watch(
+    patchClashConfigProvider.select((state) => state.tun.congestionController),
+  );
+  final vpnSetting = ref.watch(vpnStateProvider).vpnProps;
+  final stack = clashConfigVM2.a;
+  final port = clashConfigVM2.b;
+  return VpnOptions(
+    excludeSSIDs: ref.watch(networkSettingProvider).excludeSSIDs,
+    excludeNetworks: ref.watch(networkSettingProvider).excludeNetworks,
+    mtu: normalizeTunMtu(
+      ref.watch(patchClashConfigProvider.select((state) => state.tun.mtu)),
+    ),
+    congestionController: congestionController,
+    enable: vpnSetting.enable,
+    stack: stack,
+    systemProxy: vpnSetting.systemProxy,
+    port: port,
+    ipv6: vpnSetting.ipv6,
+    dnsHijacking: vpnSetting.dnsHijacking,
+    accessControlProps: vpnSetting.accessControlProps,
+    allowBypass: vpnSetting.allowBypass,
+    bypassDomain: bypassDomain,
+    routeAddress: routeAddress,
+  );
 }
