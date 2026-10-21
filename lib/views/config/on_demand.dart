@@ -24,11 +24,13 @@ class SsidPermissionItem extends ConsumerStatefulWidget {
     required this.isMacOS,
     this.checkPermission,
     this.requestPermission,
+    this.readSsid,
   });
 
   final bool isMacOS;
   final Future<WifiSsidPermission> Function()? checkPermission;
   final Future<WifiSsidPermission> Function()? requestPermission;
+  final Future<String?> Function()? readSsid;
 
   @override
   ConsumerState<SsidPermissionItem> createState() => _SsidPermissionItemState();
@@ -38,12 +40,16 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem>
     with WidgetsBindingObserver {
   WifiSsidPermission? _permission;
   bool _requesting = false;
+  bool _checking = true;
+  bool _failed = false;
+  String? _ssid;
   int _generation = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    ref.listenManual(ssidRefreshProvider, (_, _) => _check());
     _check();
   }
 
@@ -61,15 +67,42 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem>
 
   Future<void> _check() async {
     final generation = ++_generation;
+    setState(() {
+      _checking = true;
+      _failed = false;
+    });
     try {
       final permission =
           await (widget.checkPermission ?? wifiSsidManager.checkPermission)();
       if (mounted && generation == _generation) {
         setState(() => _permission = permission);
+        String? ssid;
+        if (permission == WifiSsidPermission.granted ||
+            permission == WifiSsidPermission.foregroundOnly) {
+          try {
+            ssid = await (widget.readSsid ?? wifiSsidManager.getSsid)();
+          } catch (_) {
+            // A Wi-Fi lookup failure does not revoke a granted permission.
+          }
+        }
+        if (!mounted || generation != _generation) return;
+        setState(
+          () => _ssid = ssid == null || ssid.isEmpty || ssid == '<unknown ssid>'
+              ? null
+              : ssid,
+        );
       }
     } catch (_) {
       if (mounted && generation == _generation) {
-        setState(() => _permission = null);
+        setState(() {
+          _permission = null;
+          _ssid = null;
+          _failed = true;
+        });
+      }
+    } finally {
+      if (mounted && generation == _generation) {
+        setState(() => _checking = false);
       }
     }
   }
@@ -86,8 +119,9 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem>
                 wifiSsidManager.requestPermission)();
       }
       if (!mounted) return;
-      _generation++;
-      setState(() => _permission = permission);
+      await _check();
+      if (!mounted) return;
+      permission = _permission ?? permission;
       ref.read(ssidRefreshProvider.notifier).update((v) => v + 1);
       if (permission != WifiSsidPermission.granted) {
         final l10n = context.appLocalizations;
@@ -113,11 +147,21 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem>
     final granted = _permission == WifiSsidPermission.granted;
     return DecorationListItem(
       title: TooltipLabel(context.appLocalizations.locationPermission),
-      trailing: _requesting
+      subtitle: _ssid == null ? null : Text('SSID: $_ssid'),
+      trailing: _requesting || _checking
           ? const CommonCircleLoading(size: 24)
           : AuthorizeButton(
               authorized: granted,
-              onPressed: granted ? null : _request,
+              label: _failed
+                  ? context.appLocalizations.retry
+                  : _permission == WifiSsidPermission.foregroundOnly
+                  ? context.appLocalizations.allowBackgroundLocation
+                  : null,
+              onPressed: granted
+                  ? null
+                  : _failed
+                  ? _check
+                  : _request,
             ),
     );
   }

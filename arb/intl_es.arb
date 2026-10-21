@@ -812,6 +812,7 @@
   "configRecoveryUseLocalStorageConfirm": "¿Guardar las claves y credenciales en un archivo de la carpeta de la aplicación accesible solo por su cuenta, en lugar del llavero del sistema? Cualquier programa ejecutado con su cuenta podrá leerlas y descifrar la configuración local. Esta elección seguirá vigente.",
   "excludeSsids": "Redes Wi-Fi que pausan el proxy",
   "excludeSsidsDesc": "Pausar el proxy en las redes Wi-Fi indicadas; reanudar al salir solo si la aplicación sigue iniciada",
+  "allowBackgroundLocation": "Permitir siempre",
   "locationPermission": "Permiso de ubicación",
   "locationPermissionRequired": "Se requiere permiso de ubicación",
   "locationPermissionGuide": "1. Abre Ajustes del sistema > Privacidad y seguridad\n2. Elige Servicios de localización\n3. Busca {appName} en la lista y márcalo\n\nCuando termines, vuelve a la app para continuar. Gracias por tu colaboración.",

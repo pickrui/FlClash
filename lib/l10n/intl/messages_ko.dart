@@ -349,6 +349,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ageSecretKeyRequiredTip": MessageLookupByLibrary.simpleMessage(
       "이 프로필은 age로 암호화되어 있어 복호화하려면 age 비밀 키가 필요합니다",
     ),
+    "allowBackgroundLocation": MessageLookupByLibrary.simpleMessage("항상 위치 허용"),
     "allowBypass": MessageLookupByLibrary.simpleMessage("앱의 VPN 우회 허용"),
     "allowBypassDesc": MessageLookupByLibrary.simpleMessage(
       "일부 앱이 VPN을 우회하도록 허용",

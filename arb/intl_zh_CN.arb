@@ -812,6 +812,7 @@
   "configRecoveryUseLocalStorageConfirm": "将加密密钥和账号凭据改存到应用数据目录中仅当前用户可访问的文件，不再使用系统密钥环？以当前用户身份运行的程序都能读取它们并解密本地配置，此选择之后会一直生效",
   "excludeSsids": "暂停代理的 Wi-Fi",
   "excludeSsidsDesc": "连接所列 Wi-Fi 时暂停代理；离开后仅在应用仍为启动状态时恢复",
+  "allowBackgroundLocation": "允许始终使用位置",
   "locationPermission": "位置权限",
   "locationPermissionRequired": "需要位置权限",
   "locationPermissionGuide": "1. 打开 系统设置 > 隐私与安全性\n2. 选择 定位服务\n3. 在右侧列表中找到并勾选 {appName}\n\n完成设置后，返回应用即可正常使用。感谢您的配合",

@@ -53,6 +53,8 @@ void main() {
       await manager.checkPermission(),
       WifiSsidPermission.permanentlyDenied,
     );
+    nativeState = 3;
+    expect(await manager.checkPermission(), WifiSsidPermission.foregroundOnly);
   });
 
   test('requestPermission treats a null native value as denied', () async {

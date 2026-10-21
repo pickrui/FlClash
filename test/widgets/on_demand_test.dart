@@ -142,6 +142,7 @@ void main() {
   for (final (permission, label) in [
     (WifiSsidPermission.granted, 'Authorized'),
     (WifiSsidPermission.denied, 'Tap to authorize'),
+    (WifiSsidPermission.foregroundOnly, 'Allow all the time'),
   ]) {
     testWidgets('the location row reads a $permission permission', (
       tester,
@@ -153,17 +154,68 @@ void main() {
           child: SsidPermissionItem(
             isMacOS: false,
             checkPermission: () async => permission,
+            readSsid: () async => 'Office',
           ),
         ),
       );
       await tester.pumpAndSettle();
       expect(find.text(label), findsOneWidget);
       expect(
+        find.text('SSID: Office'),
+        permission == WifiSsidPermission.denied ? findsNothing : findsOneWidget,
+      );
+      expect(
         tester.widget<FilledButton>(_authorize).onPressed,
         permission == WifiSsidPermission.granted ? isNull : isNotNull,
       );
     });
   }
+
+  testWidgets(
+    'permission failures retry and authorization updates refresh SSID',
+    (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      var failed = true;
+      var permission = WifiSsidPermission.foregroundOnly;
+      var ssid = 'Office';
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            homeBuilder: (child) => Scaffold(body: child),
+            child: SsidPermissionItem(
+              isMacOS: false,
+              checkPermission: () async {
+                if (failed) throw StateError('fixture');
+                return permission;
+              },
+              readSsid: () async => ssid,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Tap to authorize'), findsNothing);
+      failed = false;
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(find.text('Allow all the time'), findsOneWidget);
+      expect(find.text('SSID: Office'), findsOneWidget);
+      permission = WifiSsidPermission.granted;
+      ssid = 'Home';
+      container.read(ssidRefreshProvider.notifier).update((v) => v + 1);
+      await tester.pumpAndSettle();
+      expect(find.text('Authorized'), findsOneWidget);
+      expect(find.text('SSID: Home'), findsOneWidget);
+      permission = WifiSsidPermission.denied;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(find.text('SSID: Home'), findsNothing);
+      expect(find.text('Tap to authorize'), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'inline SSIDs keep their order and select from the section header',

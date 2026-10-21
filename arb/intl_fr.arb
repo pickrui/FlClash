@@ -812,6 +812,7 @@
   "configRecoveryUseLocalStorageConfirm": "Enregistrer les clés de chiffrement et les identifiants dans un fichier du dossier de l’application, accessible uniquement à votre compte, plutôt que dans le trousseau système ? Tout programme exécuté avec votre compte pourra les lire et déchiffrer la configuration locale. Ce choix restera actif.",
   "excludeSsids": "Réseaux Wi-Fi qui suspendent le proxy",
   "excludeSsidsDesc": "Suspendre le proxy sur les réseaux Wi-Fi indiqués ; reprendre après les avoir quittés, uniquement si l’application reste démarrée",
+  "allowBackgroundLocation": "Toujours autoriser",
   "locationPermission": "Autorisation de localisation",
   "locationPermissionRequired": "Autorisation de localisation requise",
   "locationPermissionGuide": "1. Ouvrez Réglages système > Confidentialité et sécurité\n2. Choisissez Service de localisation\n3. Trouvez {appName} dans la liste et cochez-le\n\nUne fois terminé, revenez dans l’app pour continuer. Merci de votre coopération.",

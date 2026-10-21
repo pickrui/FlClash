@@ -6817,6 +6817,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Allow all the time`
+  String get allowBackgroundLocation {
+    return Intl.message(
+      'Allow all the time',
+      name: 'allowBackgroundLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Location permission`
   String get locationPermission {
     return Intl.message(

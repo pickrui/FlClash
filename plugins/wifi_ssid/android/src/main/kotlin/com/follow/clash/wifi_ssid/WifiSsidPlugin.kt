@@ -92,6 +92,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         private const val PERMISSION_GRANTED = 0
         private const val PERMISSION_DENIED = 1
         private const val PERMISSION_PERMANENTLY_DENIED = 2
+        private const val PERMISSION_FOREGROUND_ONLY = 3
     }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -155,7 +156,11 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         refreshWifiNetworkCallback()
         forgetGrantedDenials(ctx)
         result.success(
-            if (missingPermission(ctx) == null) PERMISSION_GRANTED else PERMISSION_DENIED,
+            when {
+                !hasForegroundLocation(ctx) -> PERMISSION_DENIED
+                !hasBackgroundLocation(ctx) -> PERMISSION_FOREGROUND_ONLY
+                else -> PERMISSION_GRANTED
+            },
         )
     }
 
@@ -229,6 +234,9 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         refreshWifiNetworkCallback()
         forgetGrantedDenials(activity)
         val missing = missingPermission(activity) ?: return PERMISSION_GRANTED
+        if (missing == Manifest.permission.ACCESS_BACKGROUND_LOCATION) {
+            return PERMISSION_FOREGROUND_ONLY
+        }
         return resolveDenial(activity, missing, rationaleBefore[missing] == true)
     }
 

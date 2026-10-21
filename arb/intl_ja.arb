@@ -812,6 +812,7 @@
   "configRecoveryUseLocalStorageConfirm": "暗号化キーとアカウントの認証情報を、システムのキーリングではなくアプリのデータフォルダー内の現在のユーザーだけがアクセスできるファイルに保存しますか？現在のユーザーとして動作するプログラムはそれらを読み取ってローカル設定を復号でき、この選択は今後も維持されます",
   "excludeSsids": "プロキシを停止する Wi-Fi",
   "excludeSsidsDesc": "指定した Wi-Fi ではプロキシを一時停止し、アプリが開始状態の場合のみ離れると再開します",
+  "allowBackgroundLocation": "常に位置情報を許可",
   "locationPermission": "位置情報の権限",
   "locationPermissionRequired": "位置情報の権限が必要です",
   "locationPermissionGuide": "1. システム設定 > プライバシーとセキュリティ を開く\n2. 位置情報サービス を選択\n3. リストで {appName} を見つけてチェックを入れる\n\n設定が完了したらアプリに戻ると、通常どおり使用できます。ご協力ありがとうございます",

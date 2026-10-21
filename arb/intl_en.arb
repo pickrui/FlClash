@@ -812,6 +812,7 @@
   "configRecoveryUseLocalStorageConfirm": "Store encryption keys and account credentials in a file in the application data folder that only your user account can open, instead of the system keyring? Any program running as your user can read them and decrypt the local configuration. This choice stays in effect from now on.",
   "excludeSsids": "Wi-Fi networks that pause the proxy",
   "excludeSsidsDesc": "Pause proxying on the listed Wi-Fi networks; resume after leaving only while the app remains started.",
+  "allowBackgroundLocation": "Allow all the time",
   "locationPermission": "Location permission",
   "locationPermissionRequired": "Location permission required",
   "locationPermissionGuide": "1. Open System Settings > Privacy & Security\n2. Choose Location Services\n3. Find and check {appName} in the list\n\nWhen you are done, return to the app to continue. Thank you for your cooperation.",

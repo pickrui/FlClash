@@ -421,6 +421,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "ageSecretKeyRequiredTip": MessageLookupByLibrary.simpleMessage(
       "Ce profil est chiffré avec age et nécessite une clé secrète age pour être déchiffré",
     ),
+    "allowBackgroundLocation": MessageLookupByLibrary.simpleMessage(
+      "Toujours autoriser",
+    ),
     "allowBypass": MessageLookupByLibrary.simpleMessage(
       "Autoriser les apps à contourner le VPN",
     ),
