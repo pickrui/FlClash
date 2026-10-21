@@ -9,6 +9,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/widgets/sheet_scaffold.dart';
 
 import 'overwrite_sheet.dart';
 
@@ -111,41 +112,43 @@ class _RoutingTargetPickerState extends State<RoutingTargetPicker> {
           ),
       ],
     ];
-    return OverwriteEditorForm(
-      maxWidth: 480,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      title: widget.title,
-      overrideScroll: true,
-      actions: [
-        TextButton(
-          onPressed: () => context.safeNestedPop(),
-          child: Text(l10n.cancel),
-        ),
-      ],
-      child: SizedBox(
-        height: 360,
-        child: Column(
-          children: [
-            TextField(
-              key: const Key('custom-rule-option-search'),
-              autofocus: true,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: l10n.search,
-                prefixIcon: const GlyphIcon(AppGlyphs.search),
+    return OverwriteExitGuard(
+      child: PagedSheetForm(
+        maxWidth: 480,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        title: widget.title,
+        overrideScroll: true,
+        actions: [
+          TextButton(
+            onPressed: () => context.safeNestedPop(),
+            child: Text(l10n.cancel),
+          ),
+        ],
+        child: SizedBox(
+          height: 360,
+          child: Column(
+            children: [
+              TextField(
+                key: const Key('custom-rule-option-search'),
+                autofocus: true,
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  labelText: l10n.search,
+                  prefixIcon: const GlyphIcon(AppGlyphs.search),
+                ),
+                onChanged: (value) => setState(() => _query = value),
               ),
-              onChanged: (value) => setState(() => _query = value),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: entries.isEmpty
-                  ? Center(child: Text(l10n.noData))
-                  : ListView.builder(
-                      itemCount: entries.length,
-                      itemBuilder: (_, index) => entries[index],
-                    ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Expanded(
+                child: entries.isEmpty
+                    ? Center(child: Text(l10n.noData))
+                    : ListView.builder(
+                        itemCount: entries.length,
+                        itemBuilder: (_, index) => entries[index],
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

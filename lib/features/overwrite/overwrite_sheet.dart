@@ -15,7 +15,6 @@ import 'package:fl_clash/ui/pop_scope.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/snap_sheet.dart';
-import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -179,45 +178,6 @@ class _OverwriteExitGuardState extends State<OverwriteExitGuard> {
         return false;
       },
       child: widget.child,
-    ),
-  );
-}
-
-class OverwriteEditorForm extends StatelessWidget {
-  const OverwriteEditorForm({
-    super.key,
-    required this.title,
-    required this.child,
-    this.actions = const [],
-    this.overrideScroll = false,
-    this.maxWidth = 480,
-    this.insetPadding,
-    this.isDirty,
-    this.save,
-    this.isBusy,
-  });
-  final String title;
-  final Widget child;
-  final List<Widget> actions;
-  final bool overrideScroll;
-  final double maxWidth;
-  final EdgeInsets? insetPadding;
-  final bool Function()? isDirty;
-  final FutureOr<void> Function()? save;
-  final bool Function()? isBusy;
-
-  @override
-  Widget build(BuildContext context) => OverwriteExitGuard(
-    isDirty: isDirty,
-    save: save,
-    isBusy: isBusy,
-    child: PagedSheetForm(
-      title: title,
-      actions: actions,
-      overrideScroll: overrideScroll,
-      maxWidth: maxWidth,
-      insetPadding: insetPadding,
-      child: child,
     ),
   );
 }
