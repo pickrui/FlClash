@@ -10,6 +10,10 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
   List<T> _entries = [];
   late final List<T> _initialEntries;
   final _selectionKey = utils.id;
+  DragBackRouteMixin<dynamic>? _resultRoute;
+  late final ValueGetter<Object?> _readResult = _currentResult;
+  Object _currentResult() => popResult(_entries);
+  bool _deleting = false;
 
   String get title;
 
@@ -36,6 +40,30 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
     super.initState();
     _entries = List<T>.from(initialEntries);
     _initialEntries = List<T>.from(_entries);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _releaseResult();
+    final route = ModalRoute.of(context);
+    if (route is DragBackRouteMixin<dynamic>) {
+      _resultRoute = route;
+      route.pageResult = _readResult;
+    }
+  }
+
+  void _releaseResult() {
+    if (identical(_resultRoute?.pageResult, _readResult)) {
+      _resultRoute?.pageResult = null;
+    }
+    _resultRoute = null;
+  }
+
+  @override
+  void dispose() {
+    _releaseResult();
+    super.dispose();
   }
 
   void _handleReorder(int oldIndex, int newIndex) {
@@ -78,13 +106,36 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
     setState(() {});
   }
 
-  void _handleDelete() {
-    final selected = ref.read(itemsProvider(_selectionKey));
-    _entries = _entries
-        .where((entry) => !selected.contains(idOf(entry)))
-        .toList();
-    ref.read(itemsProvider(_selectionKey).notifier).value = {};
-    setState(() {});
+  Future<void> _handleDelete() async {
+    if (_deleting) return;
+    final selected = ref
+        .read(itemsProvider(_selectionKey))
+        .whereType<String>()
+        .toSet();
+    if (selected.isEmpty) return;
+    final route = ModalRoute.of(context);
+    setState(() => _deleting = true);
+    try {
+      final confirmed = await globalState.showMessage(
+        message: TextSpan(
+          text: context.appLocalizations.deleteMultipTip(title),
+        ),
+        destructive: true,
+        confirmText: context.appLocalizations.delete,
+      );
+      if (confirmed != true || !mounted || route?.isCurrent == false) return;
+      final currentSelection = ref.read(itemsProvider(_selectionKey));
+      final deleting = selected.intersection(currentSelection);
+      setState(() {
+        _entries = _entries
+            .where((entry) => !deleting.contains(idOf(entry)))
+            .toList();
+      });
+      ref.read(itemsProvider(_selectionKey).notifier).value = currentSelection
+          .difference(deleting);
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
   }
 
   Future<void> _handleReset() async {
@@ -134,21 +185,24 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
     final selected = ref.watch(itemsProvider(_selectionKey));
     final isEditing = selected.isNotEmpty;
     return CommonPopScope(
-      onPop: (_) {
-        if (isEditing) {
-          ref.read(itemsProvider(_selectionKey).notifier).value = {};
-          return false;
-        }
-        Navigator.of(context).pop(popResult(_entries));
-        return false;
-      },
+      onPop: !isEditing && !_deleting && _resultRoute != null
+          ? null
+          : (_) {
+              if (_deleting) return false;
+              if (isEditing) {
+                ref.read(itemsProvider(_selectionKey).notifier).value = {};
+                return false;
+              }
+              Navigator.of(context).pop(popResult(_entries));
+              return false;
+            },
       child: CommonScaffold(
         title: title,
         actions: [
           if (isEditing)
             IconButton(
               tooltip: appLocalizations.delete,
-              onPressed: _handleDelete,
+              onPressed: _deleting ? null : _handleDelete,
               icon: const GlyphIcon(AppGlyphs.delete),
             )
           else if (!sameEntries(_entries, _initialEntries))

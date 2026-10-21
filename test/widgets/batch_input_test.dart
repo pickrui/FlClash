@@ -7,6 +7,8 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:fl_clash/widgets/input.dart';
+import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -92,6 +94,94 @@ void main() {
     expect(find.text('value[https://doh.pub/dns-query]'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  for (final map in [false, true]) {
+    testWidgets(
+      '${map ? 'map' : 'list'} editor confirms deletion and returns its draft by gesture',
+      (tester) async {
+        Object? result;
+        late BuildContext editorContext;
+        await tester.pumpWidget(
+          TestApp(
+            locale: const Locale('en'),
+            wrapInProviderScope: true,
+            child: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  child: const Text('open editor'),
+                  onPressed: () async {
+                    Widget buildEditor(BuildContext context) {
+                      editorContext = context;
+                      return map
+                          ? MapInputPage(
+                              title: 'Fixture editor',
+                              entries: const {'first': 'one', 'second': 'two'},
+                              titleBuilder: (entry) => Text(entry.key),
+                            )
+                          : const ListInputPage(
+                              title: 'Fixture editor',
+                              items: ['first', 'second'],
+                              titleBuilder: Text.new,
+                            );
+                    }
+
+                    result = await Navigator.of(context).push(
+                      map
+                          ? CommonRoute<Map<String, String>>(
+                              builder: buildEditor,
+                            )
+                          : CommonRoute<List<String>>(builder: buildEditor),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('open editor'));
+        await tester.pumpAndSettle();
+        void selectFirst() => tester
+            .widget<SelectedDecorationListItem>(
+              find.byType(SelectedDecorationListItem).first,
+            )
+            .onSelected();
+        selectFirst();
+        await tester.pumpAndSettle();
+        await Navigator.of(editorContext).maybePop();
+        await tester.pumpAndSettle();
+        expect(find.text('Fixture editor'), findsOneWidget);
+        expect(
+          tester
+              .widget<SelectedDecorationListItem>(
+                find.byType(SelectedDecorationListItem).first,
+              )
+              .isSelected,
+          isFalse,
+        );
+        selectFirst();
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Delete'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        expect(find.text('first'), findsOneWidget);
+        await tester.tap(find.byTooltip('Delete'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+        await tester.pumpAndSettle();
+        expect(find.text('first'), findsNothing);
+        await tester.timedDrag(
+          find.text('Fixture editor'),
+          const Offset(700, 0),
+          const Duration(seconds: 1),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('open editor'), findsOneWidget);
+        expect(result, map ? {'second': 'two'} : ['second']);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('route addresses take only CIDRs the core can parse', (
     tester,

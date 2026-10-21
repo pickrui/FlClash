@@ -22,6 +22,10 @@ const Animation<Offset> _noSlide = AlwaysStoppedAnimation(Offset.zero);
 /// in the hit test, so it wins the arena and keeps the drag.
 mixin DragBackRouteMixin<T> on ModalRoute<T> {
   bool _dragBackActive = false;
+  ValueGetter<Object?>? pageResult;
+
+  @override
+  T? get currentResult => pageResult?.call() as T? ?? super.currentResult;
 
   /// While true the route's own transition should follow the finger linearly,
   /// through the release until the route settles.
