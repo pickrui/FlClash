@@ -272,19 +272,3 @@ class SkipTraversalFocusNode extends FocusNode {
   @override
   bool get skipTraversal => true;
 }
-
-class SelectIcon extends StatelessWidget {
-  const SelectIcon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.inversePrimary,
-      shape: AppShape.circle,
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        child: const GlyphIcon(AppGlyphs.check, size: 16),
-      ),
-    );
-  }
-}

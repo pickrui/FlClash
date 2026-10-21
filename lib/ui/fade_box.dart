@@ -230,34 +230,3 @@ class FadeScaleEnterTransition extends StatelessWidget {
     );
   }
 }
-
-class FadeRotationScaleBox extends StatelessWidget {
-  final Widget child;
-  final AlignmentGeometry? alignment;
-
-  const FadeRotationScaleBox({super.key, required this.child, this.alignment});
-
-  @override
-  Widget build(BuildContext context) {
-    final realAlignment = alignment ?? Alignment.center;
-    return AnimatedSwitcher(
-      duration: commonDuration,
-      switchInCurve: Curves.easeOutBack,
-      switchOutCurve: Curves.easeInBack,
-      transitionBuilder: (child, animation) {
-        return RotationTransition(
-          turns: animation.drive(Tween(begin: 0.8, end: 1.0)),
-          child: FadeTransition(
-            opacity: animation.drive(Tween(begin: 0.6, end: 1.0)),
-            child: ScaleTransition(scale: animation, child: child),
-          ),
-        );
-      },
-      layoutBuilder: (currentChild, previousChildren) => Stack(
-        alignment: realAlignment,
-        children: <Widget>[...previousChildren, ?currentChild],
-      ),
-      child: child,
-    );
-  }
-}

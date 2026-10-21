@@ -235,30 +235,3 @@ class MetaChip extends StatelessWidget {
     );
   }
 }
-
-/// A pressed chip with a leading glyph, for the file and resource actions
-/// that rows still offer inline.
-class CommonActionChip extends StatelessWidget {
-  final String label;
-  final Widget? avatar;
-  final VoidCallback? onPressed;
-
-  const CommonActionChip({
-    super.key,
-    required this.label,
-    this.avatar,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ActionChip(
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      avatar: avatar,
-      clipBehavior: Clip.antiAlias,
-      labelPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
-      onPressed: onPressed ?? () {},
-      label: Text(label),
-    );
-  }
-}
