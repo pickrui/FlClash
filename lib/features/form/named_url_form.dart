@@ -97,10 +97,13 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
   late final _label = TextEditingController(text: widget.label);
   late final _url = TextEditingController(text: widget.url);
   final _ageSecretKey = TextEditingController();
+  late final _scrollController = sheetScrollController(context);
   String? _error;
   bool _batch = false;
+  bool _batchAttempted = false;
+  ParsedInput<String>? _cachedBatch;
   final _batchText = TextEditingController();
-  ParsedInput<String> get _parsed => parseLinkInput(
+  ParsedInput<String> get _parsed => _cachedBatch ??= parseLinkInput(
     _batchText.text,
     existing: widget.existingUrls,
     isValid: (value) => _urlError(value) == null,
@@ -117,7 +120,40 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _cachedBatch = null;
+  }
+
+  @override
+  void didUpdateWidget(covariant _NamedUrlForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _cachedBatch = null;
+  }
+
+  String? get _batchError {
+    if (!_batchAttempted) return null;
+    final l = context.appLocalizations;
+    final parsed = _parsed;
+    if (parsed.issues.isEmpty) {
+      return parsed.entries.isEmpty ? l.emptyTip(l.link) : null;
+    }
+    return parsed.issues
+        .take(5)
+        .map(
+          (issue) => l.lineIssueTip(
+            issue.line,
+            issue.kind == InputIssueKind.valueTooLong
+                ? l.maxLengthTip(l.link, TextInputLimits.profileLink)
+                : l.invalidLinkTip,
+          ),
+        )
+        .join('\n');
+  }
+
+  @override
   void dispose() {
+    _scrollController.dispose();
     _label.dispose();
     _url.dispose();
     _batchText.dispose();
@@ -126,16 +162,12 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
   }
 
   void _save() {
-    final l = context.appLocalizations;
     final url = _url.text.trim();
     if (_batch) {
       final parsed = _parsed;
       if (!parsed.isValid || parsed.entries.isEmpty) {
-        setState(
-          () => _error = parsed.issues.isEmpty
-              ? l.emptyTip(l.link)
-              : l.invalidLinkTip,
-        );
+        setState(() => _batchAttempted = true);
+        if (_scrollController.hasClients) _scrollController.jumpTo(0);
         return;
       }
       _finish([for (final url in parsed.entries) (label: '', url: url)]);
@@ -171,8 +203,9 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
     final l = context.appLocalizations;
     return FormPage(
       title: widget.title,
+      scrollController: _scrollController,
       onSave: _save,
-      error: _error,
+      error: _batch ? _batchError : _error,
       actions: [
         if (widget.enableBatch)
           IconButtonData(
@@ -180,6 +213,8 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
             tooltip: l.batchAdd,
             onPressed: () => setState(() {
               _batch = !_batch;
+              _batchAttempted = false;
+              _cachedBatch = null;
               _error = null;
               if (_batch && _batchText.text.isEmpty) {
                 _batchText.text = _url.text;
@@ -201,7 +236,7 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
                   controller: _batchText,
                   autofocus: true,
                   minLines: 4,
-                  maxLines: null,
+                  maxLines: 8,
                   autocorrect: false,
                   inputFormatters: TextInputLimits.limit(
                     TextInputLimits.batchLinks,
@@ -209,7 +244,10 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
                   decoration: InputDecoration.collapsed(
                     hintText: l.batchLinkInputTip,
                   ),
-                  onChanged: (_) => setState(() => _error = null),
+                  onChanged: (_) => setState(() {
+                    _cachedBatch = null;
+                    _batchAttempted = false;
+                  }),
                 ),
               ),
             ],

@@ -22,6 +22,7 @@ class FormPage extends StatelessWidget {
   final String? error;
   final bool saving;
   final List<Widget> children;
+  final ScrollController? scrollController;
 
   const FormPage({
     super.key,
@@ -32,6 +33,7 @@ class FormPage extends StatelessWidget {
     this.error,
     this.saving = false,
     required this.children,
+    this.scrollController,
   });
 
   @override
@@ -46,6 +48,7 @@ class FormPage extends StatelessWidget {
         onPressed: saving ? null : onSave,
       ),
       body: ListView(
+        controller: scrollController,
         shrinkWrap: true,
         padding: const EdgeInsets.symmetric(horizontal: 16)
             .copyWith(top: context.contentTopPadding, bottom: 20),
