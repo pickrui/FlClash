@@ -675,6 +675,20 @@ mod native {
             if !fixture_mode(DESCENDANT) {
                 return;
             }
+            let detached_stderr = std::env::args_os().any(|value| value == "detached-stderr");
+            if detached_stderr {
+                // Stdio::null does not prevent inheriting the original pipe handle on Windows.
+                assert_ne!(
+                    unsafe {
+                        SetHandleInformation(
+                            GetStdHandle(windows_sys::Win32::System::Console::STD_ERROR_HANDLE),
+                            HANDLE_FLAG_INHERIT,
+                            0,
+                        )
+                    },
+                    0
+                );
+            }
             let completed = std::env::args_os().any(|value| value == "completed-descendant");
             let mut arguments = fixture_arguments(if completed { EXITING } else { RUNNING });
             arguments.extend(["--skip".into(), "quiet".into()]);
@@ -689,13 +703,11 @@ mod native {
                         .args(&arguments)
                         .stdin(std::process::Stdio::null())
                         .stdout(std::process::Stdio::null())
-                        .stderr(
-                            if std::env::args_os().any(|value| value == "detached-stderr") {
-                                std::process::Stdio::null()
-                            } else {
-                                std::process::Stdio::inherit()
-                            },
-                        )
+                        .stderr(if detached_stderr {
+                            std::process::Stdio::null()
+                        } else {
+                            std::process::Stdio::inherit()
+                        })
                         .spawn()
                         .unwrap()
                 })
