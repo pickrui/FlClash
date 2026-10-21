@@ -225,8 +225,7 @@ class System {
     if (system.isAndroid) {
       await SystemNavigator.pop();
     }
-    await window?.close();
-    window?.forceExit();
+    windowPort?.forceExit();
   }
 }
 

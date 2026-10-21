@@ -11,12 +11,17 @@ import 'dart:typed_data';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/common/preferences.dart';
+import 'package:fl_clash/common/system.dart';
+import 'package:fl_clash/common/window_port.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
+
+class _ExitWindow extends Mock implements WindowPort {}
 
 void main() {
   test(
@@ -32,13 +37,21 @@ void main() {
       }
 
       Future<void> terminate() async => calls.add('exit');
-      final first = exit.run(cleanup: cleanup, terminate: terminate);
-      final second = exit.run(cleanup: cleanup, terminate: terminate);
+      final first = exit.run(
+        cleanup: cleanup,
+        closeWindow: () async => calls.add('close'),
+        terminate: terminate,
+      );
+      final second = exit.run(
+        cleanup: cleanup,
+        closeWindow: () async => calls.add('duplicate close'),
+        terminate: terminate,
+      );
       expect(identical(first, second), isTrue);
       expect(calls, ['save']);
       saved.complete();
       await first;
-      expect(calls, ['save', 'stop', 'exit']);
+      expect(calls, ['save', 'stop', 'close', 'exit']);
     },
   );
 
@@ -48,6 +61,7 @@ void main() {
     var exits = 0;
     await exit.run(
       cleanup: () => blocked.future,
+      closeWindow: () async => fail('late cleanup must not close a window'),
       terminate: () async {
         exits++;
       },
@@ -57,6 +71,42 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(exits, 1);
   });
+
+  for (final hangs in [false, true]) {
+    test(
+      'window close ${hangs ? 'stall' : 'failure'} still forces exit once',
+      () async {
+        final previousWindow = windowPort;
+        final window = _ExitWindow();
+        windowPort = window;
+        addTearDown(() => windowPort = previousWindow);
+        final closing = Completer<void>();
+        final failure = StateError('window channel closed');
+        var exits = 0;
+        when(() => window.close()).thenAnswer(
+          (_) => hangs ? closing.future : Future<void>.error(failure),
+        );
+        when(() => window.forceExit()).thenAnswer((_) {
+          exits++;
+        });
+        final operation = ExitCoordinator().run(
+          cleanup: () async {},
+          closeWindow: window.close,
+          terminate: system.exit,
+          timeout: const Duration(milliseconds: 10),
+        );
+        if (hangs) {
+          await operation.timeout(const Duration(seconds: 1));
+          closing.completeError(failure);
+          await Future<void>.delayed(Duration.zero);
+        } else {
+          await expectLater(operation, throwsA(same(failure)));
+        }
+        expect(exits, 1);
+        verify(() => window.close()).called(1);
+      },
+    );
+  }
 
   group('failed core restart', () {
     Future<List<String>> restart({

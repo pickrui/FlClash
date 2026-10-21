@@ -31,17 +31,38 @@ class ExitCoordinator {
 
   Future<void> run({
     required Future<void> Function() cleanup,
+    required Future<void> Function() closeWindow,
     required Future<void> Function() terminate,
     Duration timeout = const Duration(seconds: 10),
-  }) => _pending ??= _run(cleanup, terminate, timeout);
+  }) {
+    if (_pending case final pending?) return pending;
+    final completion = Completer<void>();
+    _pending = completion.future;
+    unawaited(
+      _run(
+        cleanup,
+        closeWindow,
+        terminate,
+        timeout,
+      ).then(completion.complete, onError: completion.completeError),
+    );
+    return completion.future;
+  }
 
   Future<void> _run(
     Future<void> Function() cleanup,
+    Future<void> Function() closeWindow,
     Future<void> Function() terminate,
     Duration timeout,
   ) async {
+    var expired = false;
     try {
-      await cleanup().timeout(timeout, onTimeout: () {});
+      await runCleanupActions([
+        cleanup,
+        () async {
+          if (!expired) await closeWindow();
+        },
+      ]).timeout(timeout, onTimeout: () => expired = true);
     } finally {
       await terminate();
     }
@@ -87,6 +108,7 @@ extension SystemControllerExt on AppController {
         coreController.destroy,
       ]);
     },
+    closeWindow: () async => windowPort?.close(),
     terminate: system.exit,
   );
 
