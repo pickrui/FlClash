@@ -16,7 +16,8 @@ import 'package:flutter/services.dart';
 import 'package:material_color_utilities/hct/hct.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'slider_theme.dart';
+import 'package:fl_clash/ui/input.dart';
+import 'package:fl_clash/ui/theme.dart';
 
 const _trackHeight = 20.0;
 const _thumbRadius = 14.0;
@@ -710,25 +711,8 @@ class _HexColorFieldState extends State<HexColorField> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final shape = AppShape.input.copyWith(borderRadius: AppRadius.full);
-    final none = shape.copyWith(borderSide: BorderSide.none);
-    return InputDecorationTheme(
-      data: InputDecorationTheme.of(context).copyWith(
-        filled: true,
-        fillColor: context.raisedSurfaceLevel.colorOf(colorScheme),
-        hoverColor: Colors.transparent,
-        floatingLabelBehavior: FloatingLabelBehavior.never,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        border: none,
-        enabledBorder: none,
-        focusedBorder: shape.copyWith(
-          borderSide: BorderSide(color: colorScheme.primary, width: 2),
-        ),
-      ),
+    return FilledInputTheme(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: TextField(
         controller: _controller,
         autocorrect: false,
