@@ -10,6 +10,7 @@ import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/profiles/edit.dart';
 import 'package:fl_clash/widgets/error_status.dart';
 import 'package:fl_clash/features/form/form_row.dart';
@@ -258,6 +259,7 @@ Future<void> _openProfile(
     ProviderScope(
       overrides: [
         cloudAccountProvider.overrideWith(_IdleAccount.new),
+        profilesProvider.overrideWithBuild((_, _) => [profile]),
         viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1200)),
         ...overrides,
       ],
