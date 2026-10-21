@@ -387,7 +387,7 @@ class _ListInputPageState extends _EditViewState<ListInputPage, String> {
     }
 
     return globalState.showCommonDialog<List<String>>(
-      child: EntryDialog<String>(
+      child: _EntryDialog<String>(
         title: entry == null ? appLocalizations.add : appLocalizations.edit,
         valueField: Field(
           label: label,
@@ -398,7 +398,7 @@ class _ListInputPageState extends _EditViewState<ListInputPage, String> {
         toEntry: _toEntry,
         batch: entry != null
             ? null
-            : BatchInput(
+            : _BatchInput(
                 label: widget.title,
                 formatTip: appLocalizations.batchListInputTip,
                 parse: _parseBatch,

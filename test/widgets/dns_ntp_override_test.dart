@@ -415,7 +415,7 @@ void main() {
     expect(find.text('10.0.0.0/33'), findsOneWidget);
     expect(find.text(_cidrTip), findsOneWidget);
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField), '10.1.0.0/33');
     await tester.tap(find.text('Confirm'));

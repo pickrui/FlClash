@@ -225,7 +225,9 @@ void main() {
           find.byType(ListView).first,
           const Offset(0, 250),
         );
-        await tester.tap(find.text('YAML'));
+        await tester.ensureVisible(find.text('YAML'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('YAML').hitTestable());
         await tester.pumpAndSettle();
         await tester.tap(find.text(AppLocalizations.current.nodeQuickFields));
         await tester.pumpAndSettle();

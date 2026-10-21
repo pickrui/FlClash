@@ -297,7 +297,12 @@ void main() {
     ]);
     await pumpEditor(tester);
 
-    await tester.tap(find.byType(MemoryInfo));
+    await tester.tap(
+      find.ancestor(
+        of: find.byType(MemoryInfo),
+        matching: find.byType(ReorderableDelayedDragStartListener),
+      ),
+    );
     await settle(tester);
 
     expect(find.byType(MemoryDetailSheet), findsNothing);
