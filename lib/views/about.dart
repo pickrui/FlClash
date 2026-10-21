@@ -156,7 +156,10 @@ class _AboutViewState extends State<AboutView> {
       body: AppBarClearance(
         child: Padding(
           padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
-          child: generateListView(items),
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 16),
+            children: items,
+          ),
         ),
       ),
     );
