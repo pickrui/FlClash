@@ -228,6 +228,73 @@ void main() {
     },
   );
 
+  for (final locale in [const Locale('en'), const Locale('fr')]) {
+    testWidgets('$locale access settings edit only the draft until saved', (
+      tester,
+    ) async {
+      const original = AccessControlProps(
+        enable: true,
+        mode: AccessControlMode.acceptSelected,
+        acceptList: ['system.app', 'temporarily.missing'],
+        rejectList: ['visible.app'],
+        isFilterSystemApp: true,
+        isFilterNonInternetApp: true,
+      );
+      final api = InstalledAppsFake()
+        ..packages = [
+          installedPackage('visible.app'),
+          installedPackage('system.app', system: true),
+          installedPackage('offline.app').copyWith(internet: false),
+        ];
+      final container = await openAccess(
+        tester,
+        api,
+        locale: locale,
+        textScaler: const TextScaler.linear(1.3),
+        props: original,
+      );
+      final l10n = AppLocalizations.current;
+      await tester.tap(find.byTooltip(l10n.more));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l10n.settings));
+      await tester.pumpAndSettle();
+      final panel = find.byType(AccessControlPanel);
+      Finder row(String label) =>
+          find.descendant(of: panel, matching: find.text(label));
+      await tester.tap(row(l10n.mode));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l10n.blacklistMode));
+      await tester.pumpAndSettle();
+      await tester.tap(row(l10n.sort));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l10n.name));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(row(l10n.systemApp));
+      await tester.tap(row(l10n.systemApp));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(row(l10n.noNetworkApp));
+      await tester.tap(row(l10n.noNetworkApp));
+      await tester.pumpAndSettle();
+      final draft = container.read(accessControlStateProvider);
+      expect(draft.mode, AccessControlMode.rejectSelected);
+      expect(draft.sort, AccessSortType.name);
+      expect(draft.isFilterSystemApp, isFalse);
+      expect(draft.isFilterNonInternetApp, isFalse);
+      expect(draft.acceptList, original.acceptList);
+      expect(draft.rejectList, original.rejectList);
+      expect(container.read(vpnSettingProvider).accessControlProps, original);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(panel, findsNothing);
+      expect(find.text('system.app'), findsWidgets);
+      expect(find.text('offline.app'), findsWidgets);
+      await tester.tap(find.byTooltip(l10n.save));
+      await tester.pumpAndSettle();
+      expect(container.read(vpnSettingProvider).accessControlProps, draft);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('large text keeps neighboring app rows separate', (tester) async {
     final api = InstalledAppsFake()
       ..packages = [

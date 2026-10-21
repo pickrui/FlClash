@@ -18,6 +18,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/installed_apps.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/config_item.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -306,7 +307,7 @@ class _AccessViewState extends ConsumerState<AccessView>
 
   Widget _buildContent({
     required List<Package> packages,
-    required List<String> valueList,
+    required Set<String> selected,
   }) {
     final status = ref.watch(installedAppsProvider);
     if (status.isLoading) {
@@ -339,7 +340,7 @@ class _AccessViewState extends ConsumerState<AccessView>
               return PackageListItem(
                 key: ValueKey((package.packageName, package.lastUpdateTime)),
                 package: package,
-                value: valueList.contains(package.packageName),
+                value: selected.contains(package.packageName),
                 onChanged: (_) => _handleSelected(package.packageName),
               );
             },
@@ -546,7 +547,7 @@ class _AccessViewState extends ConsumerState<AccessView>
                       installed.value?.permissionGranted == true,
                   child: _buildContent(
                     packages: viewPackages,
-                    valueList: valueList,
+                    selected: valueList.toSet(),
                   ),
                 ),
               ),
@@ -590,185 +591,86 @@ class PackageListItem extends StatelessWidget {
   }
 }
 
-class AccessControlPanel extends ConsumerStatefulWidget {
+class AccessControlPanel extends StatelessWidget {
   const AccessControlPanel({super.key});
 
-  @override
-  ConsumerState createState() => _AccessControlPanelState();
-}
-
-class _AccessControlPanelState extends ConsumerState<AccessControlPanel> {
-  Glyph _getIconWithAccessControlMode(AccessControlMode mode) {
-    return switch (mode) {
-      AccessControlMode.acceptSelected => AppGlyphs.target,
-      AccessControlMode.rejectSelected => AppGlyphs.block,
-    };
-  }
-
-  String _getTextWithAccessControlMode(AccessControlMode mode) {
-    return switch (mode) {
-      AccessControlMode.acceptSelected => appLocalizations.whitelistMode,
-      AccessControlMode.rejectSelected => appLocalizations.blacklistMode,
-    };
-  }
-
-  String _getTextWithAccessSortType(AccessSortType type) {
-    return switch (type) {
-      AccessSortType.none => appLocalizations.defaultText,
-      AccessSortType.name => appLocalizations.name,
-      AccessSortType.time => appLocalizations.time,
-    };
-  }
-
-  Glyph _getIconWithProxiesSortType(AccessSortType type) {
-    return switch (type) {
-      AccessSortType.none => AppGlyphs.sort,
-      AccessSortType.name => AppGlyphs.sortAlpha,
-      AccessSortType.time => AppGlyphs.history,
-    };
-  }
-
-  Widget _buildModeSetting() {
-    return generateSection(
-      title: appLocalizations.mode,
-      items: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          child: Consumer(
-            builder: (_, ref, _) {
-              final accessControlMode = ref.watch(
-                accessControlStateProvider.select((state) => state.mode),
-              );
-              return Wrap(
-                spacing: 16,
-                children: [
-                  for (final item in AccessControlMode.values)
-                    SettingInfoCard(
-                      Info(
-                        label: _getTextWithAccessControlMode(item),
-                        glyph: _getIconWithAccessControlMode(item),
-                      ),
-                      isSelected: accessControlMode == item,
-                      onPressed: () {
-                        ref
-                            .read(accessControlStateProvider.notifier)
-                            .update((state) => state.copyWith(mode: item));
-                      },
-                    ),
-                ],
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSortSetting() {
-    return generateSection(
-      title: appLocalizations.sort,
-      items: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          child: Consumer(
-            builder: (_, ref, _) {
-              final accessSortType = ref.watch(
-                accessControlStateProvider.select((state) => state.sort),
-              );
-              return Wrap(
-                spacing: 16,
-                children: [
-                  for (final item in AccessSortType.values)
-                    SettingInfoCard(
-                      Info(
-                        label: _getTextWithAccessSortType(item),
-                        glyph: _getIconWithProxiesSortType(item),
-                      ),
-                      isSelected: accessSortType == item,
-                      onPressed: () {
-                        ref
-                            .read(accessControlStateProvider.notifier)
-                            .update((state) => state.copyWith(sort: item));
-                      },
-                    ),
-                ],
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSourceSetting() {
-    return generateSection(
-      title: appLocalizations.source,
-      items: [
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
-          child: Consumer(
-            builder: (_, ref, _) {
-              final vm2 = ref.watch(
-                accessControlStateProvider.select(
-                  (state) => VM2(
-                    state.isFilterSystemApp,
-                    state.isFilterNonInternetApp,
-                  ),
-                ),
-              );
-              return Wrap(
-                spacing: 16,
-                children: [
-                  SettingTextCard(
-                    appLocalizations.systemApp,
-                    isSelected: vm2.a == false,
-                    onPressed: () {
-                      ref
-                          .read(accessControlStateProvider.notifier)
-                          .update(
-                            (state) =>
-                                state.copyWith(isFilterSystemApp: !vm2.a),
-                          );
-                    },
-                  ),
-                  SettingTextCard(
-                    appLocalizations.noNetworkApp,
-                    isSelected: vm2.b == false,
-                    onPressed: () {
-                      ref
-                          .read(accessControlStateProvider.notifier)
-                          .update(
-                            (state) =>
-                                state.copyWith(isFilterNonInternetApp: !vm2.b),
-                          );
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ],
-    );
+  static ConfigWriter<T> _writer<T>(
+    AccessControlProps Function(AccessControlProps state, T value) update,
+  ) {
+    return (ref, value) => ref
+        .read(accessControlStateProvider.notifier)
+        .update((state) => update(state, value));
   }
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildModeSetting(),
-            _buildSortSetting(),
-            _buildSourceSetting(),
-          ],
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 16)
+          .copyWith(top: context.contentTopPadding, bottom: 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          generateSection(
+            items: [
+              ConfigOptionsItem<AccessControlMode>(
+                title: (l) => l.mode,
+                options: AccessControlMode.values,
+                textBuilder: (mode) => switch (mode) {
+                  AccessControlMode.acceptSelected =>
+                    appLocalizations.whitelistMode,
+                  AccessControlMode.rejectSelected =>
+                    appLocalizations.blacklistMode,
+                },
+                selector: accessControlStateProvider.select(
+                  (state) => state.mode,
+                ),
+                onChanged: _writer(
+                  (state, value) => state.copyWith(mode: value),
+                ),
+              ),
+              ConfigOptionsItem<AccessSortType>(
+                title: (l) => l.sort,
+                options: AccessSortType.values,
+                textBuilder: (type) => switch (type) {
+                  AccessSortType.none => appLocalizations.defaultText,
+                  AccessSortType.name => appLocalizations.name,
+                  AccessSortType.time => appLocalizations.time,
+                },
+                selector: accessControlStateProvider.select(
+                  (state) => state.sort,
+                ),
+                onChanged: _writer(
+                  (state, value) => state.copyWith(sort: value),
+                ),
+              ),
+            ],
+          ),
+          generateSection(
+            title: appLocalizations.source,
+            items: [
+              ConfigToggleItem(
+                title: (l) => l.systemApp,
+                selector: accessControlStateProvider.select(
+                  (state) => !state.isFilterSystemApp,
+                ),
+                onChanged: _writer(
+                  (state, value) => state.copyWith(isFilterSystemApp: !value),
+                ),
+              ),
+              ConfigToggleItem(
+                title: (l) => l.noNetworkApp,
+                selector: accessControlStateProvider.select(
+                  (state) => !state.isFilterNonInternetApp,
+                ),
+                onChanged: _writer(
+                  (state, value) =>
+                      state.copyWith(isFilterNonInternetApp: !value),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

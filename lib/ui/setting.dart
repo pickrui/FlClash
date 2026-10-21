@@ -5,56 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
-
-class SettingInfoCard extends StatelessWidget {
-  final Info info;
-  final bool? isSelected;
-  final VoidCallback onPressed;
-
-  const SettingInfoCard(
-    this.info, {
-    super.key,
-    this.isSelected,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CommonCard(
-      isSelected: isSelected,
-      fillsSelection: true,
-      onPressed: onPressed,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            if (info.glyph case final glyph?) ...[
-              Flexible(child: GlyphIcon(glyph)),
-              const SizedBox(width: 8),
-            ],
-            Flexible(
-              child: Text(
-                info.label,
-                style: AppTextStyle.subheadline
-                    .of(context)
-                    .copyWith(
-                      color: isSelected == true
-                          ? context.colorScheme.onPrimary
-                          : null,
-                    ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class SettingTextCard extends StatelessWidget {
   final String text;
