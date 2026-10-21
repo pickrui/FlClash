@@ -1,0 +1,983 @@
+{
+  "schemaVersion": 2,
+  "versions": [
+    {
+      "version": "0.9.1",
+      "tag": "v0.9.1",
+      "date": "2026-10-22",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "ca73068",
+              "scope": "providers",
+              "text": "Preview effective node configuration with ownership guards"
+            },
+            {
+              "id": "3382e1e",
+              "scope": "resources",
+              "text": "Import provider links in bounded batches"
+            },
+            {
+              "id": "1b08b10",
+              "scope": "rules",
+              "text": "Align added rule forms with grouped sheets"
+            },
+            {
+              "id": "8018eea",
+              "scope": "rules",
+              "text": "Add loopback presets and refresh quick actions"
+            },
+            {
+              "id": "480bb18",
+              "scope": "access",
+              "text": "Align application filter settings with upstream"
+            },
+            {
+              "id": "283d415",
+              "scope": "backup",
+              "text": "Align WebDAV forms and connection checks with upstream"
+            },
+            {
+              "id": "bd05d7e",
+              "scope": "ui",
+              "text": "Align map entry forms and editor actions with upstream"
+            },
+            {
+              "id": "8cac398",
+              "scope": "import",
+              "text": "Accept quoted and same-line batch links"
+            },
+            {
+              "id": "967a51b",
+              "scope": "ui",
+              "text": "Align status notifications with upstream"
+            },
+            {
+              "id": "6dae577",
+              "scope": "resources",
+              "text": "Detect rule sets and convert compatible rules to mrs"
+            },
+            {
+              "id": "ef604e1",
+              "scope": "core",
+              "text": "Expose full dns state reset"
+            },
+            {
+              "id": "bf2ee1d",
+              "scope": "l10n",
+              "text": "Add french, spanish and korean translations"
+            },
+            {
+              "id": "b22c33a",
+              "scope": "ui",
+              "text": "Finish resource, import and scanner migration"
+            },
+            {
+              "id": "590dafa",
+              "scope": "profiles",
+              "text": "Add structured protocol fields to the node editor"
+            },
+            {
+              "id": "7403a97",
+              "scope": "ui",
+              "text": "Port editor, resource libraries and utility pages"
+            },
+            {
+              "id": "5151281",
+              "scope": "profiles",
+              "text": "Lay out the overwrite modes as upstream's extend pages"
+            },
+            {
+              "id": "f06ab00",
+              "scope": "profiles",
+              "text": "Set provider options in upstream's grouped form"
+            },
+            {
+              "id": "fe06b5c",
+              "scope": "profiles",
+              "text": "Edit rules in upstream's list and grouped form"
+            },
+            {
+              "id": "e240ab9",
+              "scope": "profiles",
+              "text": "List the running profile's providers on its details page"
+            },
+            {
+              "id": "0085f98",
+              "scope": "profiles",
+              "text": "Edit proxy groups in upstream's grouped form"
+            },
+            {
+              "id": "2a0a00c",
+              "scope": "profiles",
+              "text": "Give the custom profile upstream's overview and providers"
+            },
+            {
+              "id": "36debb4",
+              "scope": "profiles",
+              "text": "Show profiles as upstream's cards with context menus"
+            },
+            {
+              "id": "d658d5e",
+              "scope": "profiles",
+              "text": "Lay out the profile details as a grouped form"
+            },
+            {
+              "id": "9919e7c",
+              "scope": "network",
+              "text": "Set tcp keep-alive idle, disabling and the routing mark"
+            },
+            {
+              "id": "2b5b62a",
+              "scope": "l10n",
+              "text": "Take upstream's names for the settings rows"
+            },
+            {
+              "id": "2c7c8c5",
+              "scope": "providers",
+              "text": "Lay out the provider library as upstream does"
+            },
+            {
+              "id": "4f5a11c",
+              "scope": "rules",
+              "text": "Lay out the added rules page as upstream does"
+            },
+            {
+              "id": "e72aef7",
+              "scope": "scripts",
+              "text": "Lay out the script library as upstream does"
+            },
+            {
+              "id": "1bd7725",
+              "scope": "on-demand",
+              "text": "Lay out the on-demand page as upstream does"
+            },
+            {
+              "id": "41523f1",
+              "scope": "config",
+              "text": "Lay out the general settings as upstream does"
+            },
+            {
+              "id": "18ac1a4",
+              "scope": "l10n",
+              "text": "Word the DNS and NTP notes as section footers"
+            },
+            {
+              "id": "ec5e34d",
+              "scope": "network",
+              "text": "Lay out the network settings as upstream does"
+            },
+            {
+              "id": "e4afda4",
+              "scope": "config",
+              "text": "Lay out the override pages as upstream does"
+            },
+            {
+              "id": "f5f2b24",
+              "scope": "recovery",
+              "text": "Restyle the configuration recovery screen"
+            },
+            {
+              "id": "c85e773",
+              "scope": "diagnostics",
+              "text": "Restyle the network self-check and its proxy guide"
+            },
+            {
+              "id": "7a92997",
+              "scope": "tailscale",
+              "text": "Restyle the network list, network page and guide"
+            },
+            {
+              "id": "72e5176",
+              "scope": "cloud",
+              "text": "Restyle the node filter editor"
+            },
+            {
+              "id": "234b0c5",
+              "scope": "cloud",
+              "text": "Restyle the store, its sheets and its alerts"
+            },
+            {
+              "id": "f244a77",
+              "scope": "cloud",
+              "text": "Sign in, register and reset passwords in form sheets"
+            },
+            {
+              "id": "3a4b5d3",
+              "scope": "cloud",
+              "text": "Lay out the oixcloud account page as upstream's grouped page"
+            },
+            {
+              "id": "86fd4e2",
+              "scope": "window",
+              "text": "Open a first window at four dashboard columns"
+            },
+            {
+              "id": "b2d5731",
+              "scope": "dashboard",
+              "text": "Redesign the dashboard around the current exit"
+            },
+            {
+              "id": "a72e0b7",
+              "scope": "proxies",
+              "text": "Open provider actions from a context menu"
+            },
+            {
+              "id": "c8307e2",
+              "scope": "proxies",
+              "text": "Let the proxies page open as a picker"
+            },
+            {
+              "id": "45b4de3",
+              "scope": "proxies",
+              "text": "Lay the tab style out like upstream's"
+            },
+            {
+              "id": "9526dfc",
+              "scope": "proxies",
+              "text": "Show groups as cards"
+            },
+            {
+              "id": "7399fd7",
+              "scope": "proxies",
+              "text": "Set proxy cards in the iOS type scale"
+            },
+            {
+              "id": "5a6ec46",
+              "scope": "proxies",
+              "text": "Name card sizes and icon styles after upstream"
+            },
+            {
+              "id": "1ce45a2",
+              "scope": "core",
+              "text": "Bind the android core with gomobile"
+            },
+            {
+              "id": "91c0af0",
+              "scope": "ui",
+              "text": "Hide a row's separators when a key moves focus to it"
+            },
+            {
+              "id": "4bead53",
+              "scope": "profiles",
+              "text": "Sort profiles by their handles"
+            },
+            {
+              "id": "b690ab2",
+              "scope": "ui",
+              "text": "Give sortable rows upstream's handles in sort mode"
+            },
+            {
+              "id": "de32610",
+              "scope": "ui",
+              "text": "Move floating actions into the toolbar"
+            },
+            {
+              "id": "f7098d0",
+              "scope": "ui",
+              "text": "Move the scaffold into lib/ui with upstream's toolbar"
+            },
+            {
+              "id": "36b95bf",
+              "scope": "network",
+              "text": "Select excluded SSIDs from the section header"
+            },
+            {
+              "id": "71260a3",
+              "scope": "ui",
+              "text": "Ring a card only on remote or key-moved focus"
+            },
+            {
+              "id": "4f07bfe",
+              "scope": "android",
+              "text": "Report a floating tv keyboard to the remote focus layer"
+            },
+            {
+              "id": "b168d0c",
+              "scope": "ui",
+              "text": "Port upstream's remote focus library with keyboard and traversal parts"
+            },
+            {
+              "id": "ebf4273",
+              "scope": "ui",
+              "text": "Show the app's dialogs as iOS alerts"
+            },
+            {
+              "id": "e547c94",
+              "scope": "theme",
+              "text": "Pick the app font from the installed families"
+            },
+            {
+              "id": "94a9e8b",
+              "scope": "form",
+              "text": "Port the selection sheet with removable picks"
+            },
+            {
+              "id": "9b977ab",
+              "scope": "ui",
+              "text": "Open forms as form sheets"
+            },
+            {
+              "id": "442f17c",
+              "scope": "ui",
+              "text": "Present bottom sheets on ios detents and stack them"
+            },
+            {
+              "id": "c4b6266",
+              "scope": "ui",
+              "text": "Add a view scope for the window size and layout"
+            },
+            {
+              "id": "47014e6",
+              "scope": "widgets",
+              "text": "Open option rows as an iOS pop-up menu"
+            },
+            {
+              "id": "6bd3d36",
+              "scope": "profiles",
+              "text": "Add share links to a custom profile as nodes"
+            },
+            {
+              "id": "5dc82bb",
+              "scope": "profiles",
+              "text": "Import a config into a custom profile"
+            },
+            {
+              "id": "d8096b4",
+              "scope": "profiles",
+              "text": "Set options for library proxy providers in custom profiles"
+            },
+            {
+              "id": "fb916cd",
+              "scope": "profiles",
+              "text": "Edit a custom profile's dns, ntp, sniffer and tun keys"
+            },
+            {
+              "id": "58c0c70",
+              "scope": "profiles",
+              "text": "Keep dns, ntp, sniffer and tun keys per custom profile"
+            },
+            {
+              "id": "ea3ef68",
+              "scope": "theme",
+              "text": "Fall back to Han fonts that match the UI language"
+            },
+            {
+              "id": "b7a0555",
+              "scope": "theme",
+              "text": "Redesign the theme page with an iOS-style color picker"
+            },
+            {
+              "id": "f8c0831",
+              "scope": "ui",
+              "text": "Add the Liquid Glass engine behind a theme setting"
+            },
+            {
+              "id": "7fd76a2",
+              "scope": "theme",
+              "text": "Start new installs in iOS blue following the system theme"
+            },
+            {
+              "id": "8b1bea1",
+              "scope": "theme",
+              "text": "Replace scheme variants with four color styles"
+            },
+            {
+              "id": "d001f3c",
+              "scope": "profiles",
+              "text": "Offer profiles as providers in the custom profile editor"
+            },
+            {
+              "id": "bc7e0e7",
+              "scope": "profiles",
+              "text": "Keep provider references to profiles intact"
+            },
+            {
+              "id": "36ea766",
+              "scope": "profiles",
+              "text": "Use other profiles as proxy providers in custom profiles"
+            },
+            {
+              "id": "3c575f6",
+              "scope": "profiles",
+              "text": "Add a custom profile editor"
+            },
+            {
+              "id": "6635669",
+              "scope": "profiles",
+              "text": "Assemble custom profiles from an empty config"
+            },
+            {
+              "id": "0cfc37d",
+              "scope": "database",
+              "text": "Store the profile type and per-profile overrides"
+            },
+            {
+              "id": "f8d9e65",
+              "scope": "ui",
+              "text": "Put pages, sheets and floats on surface levels"
+            },
+            {
+              "id": "08f7b91",
+              "scope": "ui",
+              "text": "Draw cards, tonal buttons and window chrome with surface levels"
+            },
+            {
+              "id": "6723850",
+              "scope": "ui",
+              "text": "Theme every page with the iOS type scale and surface levels"
+            },
+            {
+              "id": "ef03fb5",
+              "scope": "config",
+              "text": "Build the dns and ntp pages on the shared override rows"
+            },
+            {
+              "id": "36ee9d6",
+              "scope": "android",
+              "text": "Set the vpn congestion controller and excluded routes"
+            },
+            {
+              "id": "f76b5d9",
+              "scope": "network",
+              "text": "Pick desktop tun keys in the network settings"
+            },
+            {
+              "id": "da1b8a4",
+              "scope": "android",
+              "text": "Pass the tun congestion controller to the mips stack"
+            },
+            {
+              "id": "8632a47",
+              "scope": "tun",
+              "text": "Let desktop tun keys follow the profile unless picked"
+            },
+            {
+              "id": "d8f5bae",
+              "scope": "config",
+              "text": "Keep picked desktop tun keys apart from the app tun"
+            },
+            {
+              "id": "7808ee9",
+              "scope": "core",
+              "text": "Take the tun congestion-controller option"
+            },
+            {
+              "id": "a5c9b47",
+              "scope": "network",
+              "text": "Replace the route mode with a bypass private route switch"
+            },
+            {
+              "id": "2ea6fc1",
+              "scope": "config",
+              "text": "Let optional dns and ntp text fields be cleared"
+            },
+            {
+              "id": "77cc268",
+              "scope": "config",
+              "text": "Apply picked dns and ntp keys without override switches"
+            },
+            {
+              "id": "89dbc67",
+              "scope": "proxies",
+              "text": "Show the group tabs as chips"
+            },
+            {
+              "id": "5c4b197",
+              "scope": "views",
+              "text": "Show connections, requests and DNS as sortable tables"
+            },
+            {
+              "id": "6691cec",
+              "scope": "widgets",
+              "text": "Add a sortable record table frame"
+            },
+            {
+              "id": "65aacaa",
+              "scope": "ui",
+              "text": "Add a table layout engine with resizable columns"
+            },
+            {
+              "id": "741d78c",
+              "scope": "requests",
+              "text": "Report the live traffic of open requests"
+            },
+            {
+              "id": "98e64c3",
+              "scope": "ui",
+              "text": "Bring shapes to upstream parity with superellipse corners"
+            },
+            {
+              "id": "b5a1f54",
+              "scope": "sheet",
+              "text": "Size side sheets to the window"
+            },
+            {
+              "id": "1f3ff03",
+              "scope": "profiles",
+              "text": "Import share-link lists as subscriptions"
+            },
+            {
+              "id": "e44fe81",
+              "scope": "overwrite",
+              "text": "Check proxy-group filters as they are typed"
+            },
+            {
+              "id": "11733ca",
+              "scope": "core",
+              "text": "Report dialer-proxy loops to the user"
+            },
+            {
+              "id": "ebaacf8",
+              "scope": "android",
+              "text": "Reset core connections when the default network changes"
+            },
+            {
+              "id": "bbe1fbe",
+              "scope": "android",
+              "text": "Follow xiaomi's battery saver for the exemption status"
+            },
+            {
+              "id": "dcc2b14",
+              "scope": "android",
+              "text": "Ask for background location right after the foreground grant"
+            },
+            {
+              "id": "2ecc1b8",
+              "scope": "android",
+              "text": "Add start and stop launcher shortcuts"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "5a47937",
+              "scope": "lifecycle",
+              "text": "Fix shutdown races, stale WebDAV checks and script time limits, and coalesce address-cache writes"
+            },
+            {
+              "id": "8d853d3",
+              "scope": "profiles",
+              "text": "Preserve long node names in structured edits"
+            },
+            {
+              "id": "a22e5e8",
+              "scope": "core",
+              "text": "Preserve ipc framing across desktop write stalls"
+            },
+            {
+              "id": "cacf934",
+              "scope": "profiles",
+              "text": "Localize batch update network errors"
+            },
+            {
+              "id": "b63dc80",
+              "scope": "profiles",
+              "text": "Reject blank names and trim saved labels"
+            },
+            {
+              "id": "641545e",
+              "scope": "import",
+              "text": "Bound unique labels and preserve unicode filenames"
+            },
+            {
+              "id": "f9c68d9",
+              "scope": "editor",
+              "text": "Complete proxy provider insertion positions"
+            },
+            {
+              "id": "73b24a8",
+              "scope": "ui",
+              "text": "Measure record columns with the local text scale"
+            },
+            {
+              "id": "dfe9b5a",
+              "scope": "ui",
+              "text": "Keep time labels on their current refresh interval"
+            },
+            {
+              "id": "4a3f0e3",
+              "scope": "storage",
+              "text": "Prune orphan provider caches with live reference guards"
+            },
+            {
+              "id": "a6f91ad",
+              "scope": "import",
+              "text": "Show bounded line errors for batch links"
+            },
+            {
+              "id": "5977879",
+              "scope": "editor",
+              "text": "Preserve back results and confirm bulk deletion"
+            },
+            {
+              "id": "c8b576f",
+              "scope": "desktop",
+              "text": "Bound window close with the exit watchdog"
+            },
+            {
+              "id": "ccd2a71",
+              "scope": "network",
+              "text": "Bound and validate outbound ip queries"
+            },
+            {
+              "id": "2f39b1f",
+              "scope": "android",
+              "text": "Track acknowledged vpn options across service reconnects"
+            },
+            {
+              "id": "dfa5e87",
+              "scope": "macos",
+              "text": "Prevent dns updates after shutdown begins"
+            },
+            {
+              "id": "5aa0b63",
+              "scope": "common",
+              "text": "Align search and collection helpers with upstream"
+            },
+            {
+              "id": "92cb6bc",
+              "scope": "ui",
+              "text": "Retain bounded history while browsing logs and requests"
+            },
+            {
+              "id": "2991d7d",
+              "scope": "ui",
+              "text": "Display record timestamps in local time"
+            },
+            {
+              "id": "389da30",
+              "scope": "linux",
+              "text": "Refresh verified appimage runtime digests"
+            },
+            {
+              "id": "8577653",
+              "scope": "core",
+              "text": "Synchronize desktop ipc connection access"
+            },
+            {
+              "id": "0e6de8d",
+              "scope": "windows",
+              "text": "Omit arm64ec runtime from native arm64 packages"
+            },
+            {
+              "id": "43bc594",
+              "scope": "windows",
+              "text": "Refresh installer messages and architecture identifiers"
+            },
+            {
+              "id": "a17db93",
+              "scope": "linux",
+              "text": "Contain connectivity listener startup failures"
+            },
+            {
+              "id": "27c7b9a",
+              "scope": "linux",
+              "text": "Adopt upstream appimage launch handling"
+            },
+            {
+              "id": "825fb79",
+              "scope": "backup",
+              "text": "Clean failed archive attempts"
+            },
+            {
+              "id": "4e0e74d",
+              "scope": "android",
+              "text": "Invalidate runtime state without a flutter engine"
+            },
+            {
+              "id": "79c972f",
+              "scope": "resources",
+              "text": "Preserve size limits through bounded reads"
+            },
+            {
+              "id": "a9af0b9",
+              "scope": "android",
+              "text": "Discard runtime queries after service loss"
+            },
+            {
+              "id": "31dc000",
+              "scope": "resources",
+              "text": "Localize update failures and size limits"
+            },
+            {
+              "id": "1a586ba",
+              "scope": "linux",
+              "text": "Validate bundles and complete packaged url entrypoints"
+            },
+            {
+              "id": "3522a93",
+              "scope": "android",
+              "text": "Package only the requested native abi"
+            },
+            {
+              "id": "501963c",
+              "scope": "ui",
+              "text": "Complete upstream import and resource behavior"
+            },
+            {
+              "id": "9291fec",
+              "scope": "l10n",
+              "text": "List the required string once"
+            },
+            {
+              "id": "8ede73d",
+              "scope": "profiles",
+              "text": "Keep the members a custom profile's selectors list"
+            },
+            {
+              "id": "869d520",
+              "scope": "profiles",
+              "text": "Add library rule sets that only dns or the sniffer match"
+            },
+            {
+              "id": "e9726ba",
+              "scope": "profiles",
+              "text": "Check the provider options being edited"
+            },
+            {
+              "id": "86654fb",
+              "scope": "tun",
+              "text": "Keep tailnet peers and subnets routed while bypassing private ranges"
+            },
+            {
+              "id": "21c81f6",
+              "scope": "ui",
+              "text": "Keep hand-drawn cards and page bands on the surface levels"
+            },
+            {
+              "id": "7c16770",
+              "scope": "tun",
+              "text": "Keep live updates off the profile's tun keys"
+            },
+            {
+              "id": "93d7d99",
+              "scope": "ui",
+              "text": "Round the column resizer and group chips with superellipses"
+            },
+            {
+              "id": "b47ab73",
+              "scope": "dns",
+              "text": "Keep the profile nameservers when a picked list is emptied"
+            },
+            {
+              "id": "de0d237",
+              "scope": "database",
+              "text": "Skip rows this version cannot read instead of failing"
+            },
+            {
+              "id": "72bc0b0",
+              "scope": "settings",
+              "text": "Keep readable settings when some values cannot be read"
+            },
+            {
+              "id": "7492be2",
+              "scope": "proxies",
+              "text": "Keep groups and search matches when hiding timeouts"
+            },
+            {
+              "id": "10dcf49",
+              "scope": "proxies",
+              "text": "Hide only the built-in GLOBAL group in rule mode"
+            },
+            {
+              "id": "af95225",
+              "scope": "android",
+              "text": "Apply system dns updates in the order they arrive"
+            },
+            {
+              "id": "83f172c",
+              "scope": "core",
+              "text": "Spill large core replies into sealed files"
+            },
+            {
+              "id": "ab8be56",
+              "scope": "android",
+              "text": "Post the service notification again after unlock"
+            },
+            {
+              "id": "333792e",
+              "scope": "android",
+              "text": "Move the vpn tun address to 198.18.0.1/30"
+            },
+            {
+              "id": "b1146ef",
+              "scope": "tray",
+              "text": "Ignore tray updates once exit has removed the icon"
+            },
+            {
+              "id": "57ccb38",
+              "scope": "helper",
+              "text": "Close the connection after rejecting a request"
+            },
+            {
+              "id": "c0b5a95",
+              "scope": "ui",
+              "text": "Lift every reorderable row with commonProxyDecorator"
+            },
+            {
+              "id": "16351b8",
+              "scope": "ui",
+              "text": "Read the bottom inset below the scaffold that adds to it"
+            },
+            {
+              "id": "d979ac6",
+              "scope": "ui",
+              "text": "Stop non-secret fields from opening a password keyboard"
+            },
+            {
+              "id": "4081757",
+              "scope": "profiles",
+              "text": "Name an exported profile as a yaml file"
+            },
+            {
+              "id": "acdd77f",
+              "scope": "proxy",
+              "text": "Keep the system proxy off once exit has stopped it"
+            },
+            {
+              "id": "cc8dadd",
+              "scope": "tray",
+              "text": "Keep the macos status item at exit and show suspension"
+            },
+            {
+              "id": "5d167bc",
+              "scope": "proxy",
+              "text": "Drop trailing slashes and bypass intranet hosts on windows"
+            },
+            {
+              "id": "c884406",
+              "scope": "core",
+              "text": "Backport upstream mihomo fixes from october"
+            },
+            {
+              "id": "086efb0",
+              "scope": "linux",
+              "text": "Match the window to its launcher with StartupWMClass"
+            },
+            {
+              "id": "106aec7",
+              "scope": "window",
+              "text": "Restore positions across mixed-dpi monitors on windows"
+            },
+            {
+              "id": "29faca8",
+              "scope": "cloud",
+              "text": "Align node filter editing and subscription parameters"
+            },
+            {
+              "id": "e04fa57",
+              "scope": "subscription",
+              "text": "Bound protected direct updates and label fallback"
+            }
+          ]
+        },
+        {
+          "type": "perf",
+          "entries": [
+            {
+              "id": "1f4dd5a",
+              "scope": "dns",
+              "text": "Reuse query filters across unchanged view builds"
+            },
+            {
+              "id": "2dfb623",
+              "scope": "connections",
+              "text": "Decode large snapshots outside the ui isolate"
+            },
+            {
+              "id": "7a03a5e",
+              "scope": "android",
+              "text": "Compute vpn routes asynchronously with startup guards"
+            },
+            {
+              "id": "da5c180",
+              "scope": "search",
+              "text": "Cache record filters and include connection details"
+            },
+            {
+              "id": "d105827",
+              "scope": "platform",
+              "text": "Reduce socket lookup and idle wifi callback overhead"
+            },
+            {
+              "id": "472d6f3",
+              "scope": "ui",
+              "text": "Hand the nested sheet's provider a stable close callback"
+            },
+            {
+              "id": "11a8c38",
+              "scope": "editor",
+              "text": "Build large documents off the UI isolate"
+            },
+            {
+              "id": "cdb6046",
+              "scope": "ipc",
+              "text": "Serve the desktop core from an event-driven tokio server"
+            },
+            {
+              "id": "4deaefd",
+              "scope": "views",
+              "text": "Estimate long lists exactly and narrow proxy rebuilds"
+            },
+            {
+              "id": "4068b3f",
+              "scope": "ui",
+              "text": "Grow the open container by painting alone"
+            },
+            {
+              "id": "1b58d42",
+              "scope": "ui",
+              "text": "Fade pages by painting the surface and defer push starts"
+            },
+            {
+              "id": "4a13e4f",
+              "scope": "scaffold",
+              "text": "Keep body relayouts and repaints inside the body"
+            },
+            {
+              "id": "18e65af",
+              "scope": "theme",
+              "text": "Keep keyboard frames from rebuilding the theme manager"
+            },
+            {
+              "id": "3a9f07b",
+              "scope": "theme",
+              "text": "Switch themes in one frame and cross-fade the last one"
+            },
+            {
+              "id": "566b05d",
+              "scope": "android",
+              "text": "Keep core calls and events off the main thread"
+            },
+            {
+              "id": "487b4e9",
+              "scope": "core",
+              "text": "Release load memory once provider loads go quiet"
+            },
+            {
+              "id": "67695cb",
+              "scope": "core",
+              "text": "Skip the short-id rewrite for configs without one"
+            },
+            {
+              "id": "355bd48",
+              "scope": "android",
+              "text": "Load at most eight package icons at a time"
+            },
+            {
+              "id": "a42fdcc",
+              "scope": "core",
+              "text": "Encode desktop requests straight to utf-8 bytes"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
