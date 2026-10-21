@@ -9,6 +9,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/webdav_form.dart';
 import 'package:fl_clash/ui/sheet.dart';
+import 'package:fl_clash/ui/popup.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -73,18 +74,89 @@ void main() {
     for (final count in davMaxBackupsOptions) {
       expect(
         find.descendant(
-          of: find.byType(AlertDialog),
+          of: find.byType(CommonPopupMenu),
           matching: find.text('$count'),
         ),
         findsOneWidget,
       );
     }
-    await tester.tap(find.text('5'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(CommonPopupMenu),
+        matching: find.text('5'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(container.read(davSettingProvider)?.maxBackups, 5);
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(CommonPopupMenu), findsNothing);
   });
+
+  for (final retention in [true, false]) {
+    testWidgets(
+      '${retention ? 'retention' : 'restore strategy'} menus preserve busy and delayed-selection guards',
+      (tester) async {
+        final container = await _pumpPage(
+          tester,
+          const DAVProps(
+            uri: 'ftp://dav.example.com',
+            user: 'me',
+            password: 'p',
+          ),
+        );
+        final original = container.read(appSettingProvider).restoreStrategy;
+        final strategy = RestoreStrategy.values.firstWhere(
+          (value) => value != original,
+        );
+        final title = retention
+            ? appLocalizations.backupRetention
+            : appLocalizations.restoreStrategy;
+        final choice = retention ? '5' : strategy.label;
+        final loading = container.read(
+          loadingProvider(LoadingTag.backup_restore).notifier,
+        );
+        Object? value() => retention
+            ? container.read(davSettingProvider)?.maxBackups
+            : container.read(appSettingProvider).restoreStrategy;
+        final before = value();
+        await tester.ensureVisible(find.text(title));
+        await tester.pumpAndSettle();
+        loading.start();
+        await tester.pump();
+        await tester.tap(find.text(title));
+        await tester.pump(const Duration(milliseconds: 800));
+        expect(find.byType(CommonPopupMenu), findsNothing);
+        loading.stop();
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(title));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.descendant(
+            of: find.byType(CommonPopupMenu),
+            matching: find.text(choice),
+          ),
+        );
+        loading.start();
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(value(), before);
+        loading.stop();
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(title));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.descendant(
+            of: find.byType(CommonPopupMenu),
+            matching: find.text(choice),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(value(), retention ? 5 : strategy);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('a pasted address loses its surrounding whitespace', (
     tester,

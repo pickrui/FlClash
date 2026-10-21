@@ -87,7 +87,7 @@ final class _OptionsAction<T> extends _ListItemAction {
   final List<T> options;
   final T value;
   final String Function(T value) textBuilder;
-  final ValueChanged<T> onChanged;
+  final ValueChanged<T>? onChanged;
 
   const _OptionsAction({
     required this.options,
@@ -195,7 +195,7 @@ class ListItem<T> extends StatelessWidget {
     required List<T> options,
     required T value,
     required String Function(T value) textBuilder,
-    required ValueChanged<T> onChanged,
+    required ValueChanged<T>? onChanged,
     this.horizontalTitleGap,
     this.color,
     this.minTileHeight,
@@ -392,13 +392,15 @@ class ListItem<T> extends StatelessWidget {
           position: position,
           // As an iOS pop-up row does, a tap anywhere on the row opens the
           // menu out of its value.
-          onTap: () => openMenu?.call(),
+          onTap: optionsDelegate.onChanged == null
+              ? null
+              : () => openMenu?.call(),
           trailing: CommonPopupBox(
             targetBuilder: (open) {
               openMenu = open;
               return _OptionsValueButton(
                 label: optionsDelegate.textBuilder(optionsDelegate.value),
-                onPressed: open,
+                onPressed: optionsDelegate.onChanged == null ? null : open,
               );
             },
             popupBuilder: (_) => CommonPopupMenu(
@@ -407,7 +409,7 @@ class ListItem<T> extends StatelessWidget {
                   CommonPopupMenuItem(
                     label: optionsDelegate.textBuilder(option),
                     checked: option == optionsDelegate.value,
-                    onPressed: () => optionsDelegate.onChanged(option),
+                    onPressed: () => optionsDelegate.onChanged?.call(option),
                   ),
               ],
             ),
@@ -492,7 +494,7 @@ class _OptionsValueButton extends StatelessWidget {
   const _OptionsValueButton({required this.label, required this.onPressed});
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {

@@ -22,7 +22,6 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/fade_box.dart';
-import 'package:fl_clash/widgets/input.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/text.dart';
@@ -223,40 +222,8 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
     },
   );
 
-  Future<void> _handleUpdateMaxBackups(int value) async {
-    final res = await globalState.showCommonDialog<int>(
-      child: OptionsDialog<int>(
-        title: appLocalizations.backupRetention,
-        options: davMaxBackupsOptions,
-        textBuilder: (count) => '$count',
-        value: value,
-      ),
-    );
-    if (res == null || !_isCurrentPage) return;
-    ref
-        .read(davSettingProvider.notifier)
-        .update((state) => state?.copyWith(maxBackups: res));
-  }
-
-  Future<void> _handleUpdateRestoreStrategy() async {
-    final restoreStrategy = ref.read(
-      appSettingProvider.select((state) => state.restoreStrategy),
-    );
-    final res = await globalState.showCommonDialog(
-      child: OptionsDialog<RestoreStrategy>(
-        title: appLocalizations.restoreStrategy,
-        options: RestoreStrategy.values,
-        textBuilder: (mode) => mode.label,
-        value: restoreStrategy,
-      ),
-    );
-    if (res == null || !_isCurrentPage) {
-      return;
-    }
-    ref
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(restoreStrategy: res));
-  }
+  bool get _canUpdateOptions =>
+      _isCurrentPage && !ref.read(loadingProvider(LoadingTag.backup_restore));
 
   @override
   Widget build(BuildContext context) {
@@ -334,18 +301,22 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  ListItem(
-                    onTap: isLoading
-                        ? null
-                        : () => _handleUpdateMaxBackups(dav.maxBackups),
+                  ListItem<int>.options(
                     title: Text(appLocalizations.backupRetention),
                     subtitle: Text(appLocalizations.backupRetentionDesc),
-                    trailing: FilledButton(
-                      onPressed: isLoading
-                          ? null
-                          : () => _handleUpdateMaxBackups(dav.maxBackups),
-                      child: Text('${dav.maxBackups}'),
-                    ),
+                    options: davMaxBackupsOptions,
+                    value: dav.maxBackups,
+                    textBuilder: (count) => '$count',
+                    onChanged: isLoading
+                        ? null
+                        : (value) {
+                            if (!_canUpdateOptions) return;
+                            ref
+                                .read(davSettingProvider.notifier)
+                                .update(
+                                  (state) => state?.copyWith(maxBackups: value),
+                                );
+                          },
                   ),
                   ListItem(
                     onTap: isLoading
@@ -407,15 +378,22 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
                         (state) => state.restoreStrategy,
                       ),
                     );
-                    return ListItem(
-                      onTap: isLoading ? null : _handleUpdateRestoreStrategy,
+                    return ListItem<RestoreStrategy>.options(
                       title: Text(appLocalizations.restoreStrategy),
-                      trailing: FilledButton(
-                        onPressed: isLoading
-                            ? null
-                            : _handleUpdateRestoreStrategy,
-                        child: Text(restoreStrategy.label),
-                      ),
+                      options: RestoreStrategy.values,
+                      value: restoreStrategy,
+                      textBuilder: (strategy) => strategy.label,
+                      onChanged: isLoading
+                          ? null
+                          : (value) {
+                              if (!_canUpdateOptions) return;
+                              ref
+                                  .read(appSettingProvider.notifier)
+                                  .update(
+                                    (state) =>
+                                        state.copyWith(restoreStrategy: value),
+                                  );
+                            },
                     );
                   },
                 ),
