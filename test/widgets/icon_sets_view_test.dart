@@ -41,8 +41,8 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Icon sets'));
       await tester.pumpAndSettle();
-      expect(find.text('Gallery (1)'), findsOneWidget);
-      await tester.tap(find.text('Gallery (1)'));
+      expect(find.text('Gallery'), findsOneWidget);
+      await tester.tap(find.text('Gallery'));
       await tester.pumpAndSettle();
       expect(find.text('Fixture icon'), findsOneWidget);
       expect(tester.takeException(), isNull);

@@ -121,13 +121,10 @@ abstract final class DashboardCorner {
 
 final _groupedFormat = NumberFormat.decimalPattern('en');
 
-final _compactFormat = NumberFormat.compact(locale: 'en');
-
 /// Grouped digits, as the design shows them, until they outgrow a third of a
 /// phone's width; past that K and M in every locale, never 万 or тыс.
-String dashboardCount(int count) => count < 100000
-    ? _groupedFormat.format(count)
-    : _compactFormat.format(count);
+String dashboardCount(int count) =>
+    count < 100000 ? _groupedFormat.format(count) : count.compact;
 
 String dashboardTraffic(num bytes) {
   final show = bytes.traffic;

@@ -16,6 +16,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/features/overwrite/icon_picker.dart';
 import 'package:fl_clash/features/form/named_url_form.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/chip_title.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/ui/navigator.dart';
@@ -184,7 +185,10 @@ class _IconSetsViewState extends ConsumerState<IconSetsView> {
                 child: CommonTargetIcon(src: iconSet.cover, size: 32),
               ),
             ),
-            title: Text('${iconSet.name} (${iconSet.icons.length})'),
+            title: ChipTitle(
+              title: iconSet.name,
+              chip: iconSet.icons.length.compact,
+            ),
             subtitle: Text(
               iconSet.isRemote
                   ? appLocalizations.remote

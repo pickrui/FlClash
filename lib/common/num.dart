@@ -6,8 +6,13 @@
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:intl/intl.dart' show NumberFormat;
+
+final _compactFormat = NumberFormat.compact(locale: 'en');
 
 extension NumExt on num {
+  String get compact => _compactFormat.format(this);
+
   String fixed({int decimals = 2}) {
     String formatted = toStringAsFixed(decimals);
     if (formatted.contains('.')) {
