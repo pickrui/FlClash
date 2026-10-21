@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:code_forge/code_forge.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/form/named_url_form.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -16,7 +17,6 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/config/providers.dart';
 import 'package:fl_clash/views/config/rules.dart';
 import 'package:fl_clash/views/config/scripts.dart';
-import 'package:fl_clash/widgets/input_dialog.dart';
 import 'package:fl_clash/widgets/error_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -129,13 +129,11 @@ void main() {
         child: Builder(
           builder: (context) => TextButton(
             onPressed: () async {
-              result = await showDialog<({String label, String url})>(
-                context: context,
-                builder: (_) => NamedUrlDialog(
-                  title: 'Import',
-                  labelValidator: (value) =>
-                      value == 'Reserved' ? 'Duplicate name' : null,
-                ),
+              result = await showNamedUrlForm(
+                context,
+                title: 'Import',
+                labelValidator: (value) =>
+                    value == 'Reserved' ? 'Duplicate name' : null,
               );
             },
             child: const Text('Open'),
@@ -145,17 +143,17 @@ void main() {
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextFormField).first, 'Reserved');
+    await tester.enterText(find.byType(TextField).first, 'Reserved');
     await tester.enterText(
-      find.byType(TextFormField).last,
+      find.byType(TextField).last,
       'https://example.invalid/config.yaml',
     );
-    await tester.tap(find.text(AppLocalizations.current.submit));
+    await tester.tap(find.text(AppLocalizations.current.save));
     await tester.pumpAndSettle();
     expect(find.text('Duplicate name'), findsOneWidget);
     expect(result, isNull);
-    await tester.enterText(find.byType(TextFormField).first, '');
-    await tester.tap(find.text(AppLocalizations.current.submit));
+    await tester.enterText(find.byType(TextField).first, '');
+    await tester.tap(find.text(AppLocalizations.current.save));
     await tester.pumpAndSettle();
     expect(result, (label: '', url: 'https://example.invalid/config.yaml'));
   });

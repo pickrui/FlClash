@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart' show PlatformFile;
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/network_error.dart';
+import 'package:fl_clash/features/form/named_url_form.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -111,30 +112,27 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
     try {
       await _run(() async {
         if (fromUrl) {
-          final result = await globalState
-              .showCommonDialog<({String label, String url})>(
-                child: NamedUrlDialog(
-                  title: context.appLocalizations.importUrl,
-                  labelValidator: (value) =>
-                      (ref.read(clashProvidersProvider).value ?? []).any(
-                        (item) =>
-                            item.kind == _kind && item.label == value?.trim(),
-                      )
-                      ? context.appLocalizations.existsTip(
-                          context.appLocalizations.name,
-                        )
-                      : null,
-                  urlValidator: (value) {
-                    final uri = Uri.tryParse(value?.trim() ?? '');
-                    return uri != null &&
-                            ['http', 'https'].contains(uri.scheme) &&
-                            uri.host.isNotEmpty &&
-                            uri.userInfo.isEmpty
-                        ? null
-                        : context.appLocalizations.providerUrlTip;
-                  },
-                ),
-              );
+          final result = await showNamedUrlForm(
+            context,
+            title: context.appLocalizations.importUrl,
+            labelValidator: (value) =>
+                (ref.read(clashProvidersProvider).value ?? []).any(
+                  (item) => item.kind == _kind && item.label == value?.trim(),
+                )
+                ? context.appLocalizations.existsTip(
+                    context.appLocalizations.name,
+                  )
+                : null,
+            urlValidator: (value) {
+              final uri = Uri.tryParse(value?.trim() ?? '');
+              return uri != null &&
+                      ['http', 'https'].contains(uri.scheme) &&
+                      uri.host.isNotEmpty &&
+                      uri.userInfo.isEmpty
+                  ? null
+                  : context.appLocalizations.providerUrlTip;
+            },
+          );
           if (result == null || !_isCurrentPage) return;
           final provider = _newProvider(
             label: result.label.isEmpty
