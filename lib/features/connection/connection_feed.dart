@@ -5,10 +5,27 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:math';
+import 'dart:isolate';
 
 import 'package:fl_clash/core/event.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/models/models.dart';
+
+FutureOr<Map<String, TrackerInfo>> decodeConnectionSnapshot(
+  List<dynamic> rows,
+) {
+  if (rows.length < 512) return _decodeConnectionSnapshot(rows);
+  return Isolate.run(() => _decodeConnectionSnapshot(rows));
+}
+
+Map<String, TrackerInfo> _decodeConnectionSnapshot(List<dynamic> rows) {
+  final result = <String, TrackerInfo>{};
+  for (final raw in rows) {
+    final tracker = TrackerInfo.fromJson(Map<String, dynamic>.from(raw as Map));
+    result[tracker.id] = tracker;
+  }
+  return result;
+}
 
 class ConnectionFeed with CoreEventListener {
   ConnectionFeed({
@@ -17,15 +34,19 @@ class ConnectionFeed with CoreEventListener {
     required this.newId,
     DateTime Function()? now,
     CoreEventManager? events,
+    FutureOr<Map<String, TrackerInfo>> Function(List<dynamic>)? decodeSnapshot,
   }) : _now = now ?? DateTime.now,
-       _events = events ?? coreEventManager;
+       _events = events ?? coreEventManager,
+       _decodeSnapshot = decodeSnapshot ?? decodeConnectionSnapshot;
 
   final Future<Object?> Function(CoreMethod, String) invoke;
   final void Function(List<TrackerInfo>) onSnapshot;
   final String Function() newId;
   final DateTime Function() _now;
   final CoreEventManager _events;
-  final _connections = <String, TrackerInfo>{};
+  final FutureOr<Map<String, TrackerInfo>> Function(List<dynamic>)
+  _decodeSnapshot;
+  var _connections = <String, TrackerInfo>{};
   final _pending = <Map<String, dynamic>>[];
   String? _subscription;
   int _sequence = 0;
@@ -95,9 +116,18 @@ class ConnectionFeed with CoreEventListener {
       if (snapshot['subscription'] != id || snapshot['reset'] != true) {
         throw const FormatException('invalid connection snapshot');
       }
-      _connections.clear();
-      _sequence = snapshot['sequence'] as int;
-      _apply(snapshot);
+      final sequence = snapshot['sequence'] as int;
+      final connections = await _decodeSnapshot(
+        snapshot['added'] as List? ?? const [],
+      );
+      if (!_active || id != _subscription) {
+        _cancel(id);
+        return;
+      }
+      if (_needsReset) return;
+      _connections = connections;
+      _sequence = sequence;
+      _apply(snapshot, includeAdded: false);
       _receivedAt = _renewedAt = _now();
       _opening = false;
       for (final delta in _pending) {
@@ -117,8 +147,9 @@ class ConnectionFeed with CoreEventListener {
     }
   }
 
-  void _apply(Map<String, dynamic> delta) {
-    for (final raw in (delta['added'] as List? ?? const [])) {
+  void _apply(Map<String, dynamic> delta, {bool includeAdded = true}) {
+    for (final raw
+        in (includeAdded ? delta['added'] as List? ?? const [] : const [])) {
       final tracker = TrackerInfo.fromJson(
         Map<String, dynamic>.from(raw as Map),
       );

@@ -32,6 +32,83 @@ Map<String, dynamic> snapshot(String id, String trackerId) => {
 };
 
 void main() {
+  for (final outcome in ['apply', 'stop', 'overflow', 'failure']) {
+    test(
+      'snapshot decoding preserves ownership and queued deltas: $outcome',
+      () async {
+        final entered = Completer<void>();
+        final decoded = Completer<Map<String, TrackerInfo>>();
+        final published = <List<TrackerInfo>>[];
+        var serial = 0;
+        final feed = ConnectionFeed(
+          newId: () => '${++serial}',
+          onSnapshot: published.add,
+          invoke: (method, id) async => method == CoreMethod.startConnections
+              ? snapshot(id, 'first')
+              : true,
+          decodeSnapshot: (rows) {
+            if (serial != 1) return decodeConnectionSnapshot(rows);
+            entered.complete();
+            return decoded.future;
+          },
+        );
+        addTearDown(feed.stop);
+        final opening = feed.maintain();
+        await entered.future;
+        final expected = outcome == 'failure'
+            ? expectLater(opening, throwsFormatException)
+            : opening;
+        feed.onConnections({
+          'subscription': '1',
+          'sequence': 1,
+          'updated': [
+            {'id': 'first', 'upload': 42, 'download': 7},
+          ],
+        });
+        if (outcome == 'stop') feed.stop();
+        if (outcome == 'overflow') {
+          for (var sequence = 2; sequence <= 9; sequence++) {
+            feed.onConnections({'subscription': '1', 'sequence': sequence});
+          }
+        }
+        if (outcome == 'failure') {
+          decoded.completeError(const FormatException('fixture decode failed'));
+        } else {
+          decoded.complete(await decodeConnectionSnapshot([tracker('first')]));
+        }
+        await expected;
+        if (outcome == 'apply') {
+          expect(published.single.single.upload, 42);
+          expect(published.single.single.metadata.host, 'fixture.test');
+        } else {
+          expect(published, isEmpty);
+        }
+        if (outcome == 'overflow' || outcome == 'stop') {
+          await feed.maintain();
+          expect(serial, 2);
+          expect(published.single.single.id, 'first');
+        }
+      },
+    );
+  }
+
+  test(
+    'large snapshots decode off the caller isolate and preserve model fields',
+    () async {
+      final rows = [for (var i = 0; i < 512; i++) tracker('$i')];
+      final operation = decodeConnectionSnapshot(rows);
+      expect(operation, isA<Future<Map<String, TrackerInfo>>>());
+      final result = await operation;
+      expect(result.length, 512);
+      expect(result['511']!.chains, ['group', 'node']);
+      rows[511]['metadata'] = 42;
+      await expectLater(
+        decodeConnectionSnapshot(rows),
+        throwsA(isA<TypeError>()),
+      );
+    },
+  );
+
   test('deltas retain metadata and sequence gaps resnapshot with a new subscription', () async {
     var serial = 0;
     final starts = <String>[];
