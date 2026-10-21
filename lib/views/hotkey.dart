@@ -17,15 +17,9 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-
-extension IntlExt on Intl {
-  static String actionMessage(String messageText) =>
-      Intl.message('action_$messageText');
-}
 
 Glyph _glyphOf(HotAction action) {
   return switch (action) {
@@ -194,11 +188,7 @@ class _HotKeyItem extends ConsumerWidget {
     return DecorationListItem(
       contentPadding: EdgeInsets.only(left: 16, right: key == null ? 16 : 6),
       leading: GlyphIcon(_glyphOf(action)),
-      title: Text(
-        IntlExt.actionMessage(action.name),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Text(action.label, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -474,9 +464,7 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
         colorScheme.error,
       ),
       (false, final HotKeyAction conflict) => (
-        appLocalizations.hotkeyConflictWith(
-          IntlExt.actionMessage(conflict.action.name),
-        ),
+        appLocalizations.hotkeyConflictWith(conflict.action.label),
         colorScheme.tertiary,
       ),
       _ => (null, null),
@@ -514,7 +502,7 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
       },
       autofocus: true,
       child: CommonDialog(
-        title: IntlExt.actionMessage(widget.hotKeyAction.action.name),
+        title: widget.hotKeyAction.action.label,
         actions: [
           if (widget.hotKeyAction.key != null)
             TextButton(

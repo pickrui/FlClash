@@ -20,7 +20,6 @@ import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {
   final Widget child;
@@ -295,7 +294,7 @@ class AppSidebarContainer extends ConsumerWidget {
                 for (final item in navigationItems)
                   SidebarDestination(
                     glyph: navigationGlyphOf(item.label),
-                    label: Intl.message(item.label.name),
+                    label: item.label.label,
                   ),
               ],
               selectedIndex: currentIndex,

@@ -85,31 +85,26 @@ class Navigation {
       NavigationItem(
         label: PageLabel.requests,
         builder: (context) => _buildPage(context, PageLabel.requests),
-        description: 'requestsDesc',
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
         label: PageLabel.dnsQueries,
         builder: (context) => _buildPage(context, PageLabel.dnsQueries),
-        description: 'dnsQueriesDesc',
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
         label: PageLabel.connections,
         builder: (context) => _buildPage(context, PageLabel.connections),
-        description: 'connectionsDesc',
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
         label: PageLabel.resources,
-        description: 'resourcesDesc',
         builder: (context) => _buildPage(context, PageLabel.resources),
         modes: [NavigationItemMode.more],
       ),
       NavigationItem(
         label: PageLabel.logs,
         builder: (context) => _buildPage(context, PageLabel.logs),
-        description: 'logsDesc',
         modes: openLogs
             ? [NavigationItemMode.desktop, NavigationItemMode.more]
             : [],

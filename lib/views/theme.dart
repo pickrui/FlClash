@@ -284,7 +284,7 @@ class _PrimaryColorItem extends ConsumerWidget {
                     title: Text(appLocalizations.colorStyle),
                     options: ColorStyle.values,
                     value: themeColors.colorStyle,
-                    textBuilder: _colorStyleLabel,
+                    textBuilder: (style) => style.label,
                     onChanged: (style) => _update(
                       ref,
                       (state) => state.copyWith(colorStyle: style),
@@ -299,13 +299,6 @@ class _PrimaryColorItem extends ConsumerWidget {
     );
   }
 }
-
-String _colorStyleLabel(ColorStyle style) => switch (style) {
-  ColorStyle.vivid => appLocalizations.vividStyle,
-  ColorStyle.tinted => appLocalizations.tintedStyle,
-  ColorStyle.soft => appLocalizations.softStyle,
-  ColorStyle.monochrome => appLocalizations.monochromeScheme,
-};
 
 class _ColorSwatches extends StatelessWidget {
   const _ColorSwatches({

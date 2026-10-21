@@ -16,7 +16,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../helpers/glyph_finders.dart';
@@ -76,10 +76,7 @@ void main() {
   }
 
   Finder buttonOf(Mode mode) => find
-      .ancestor(
-        of: find.text(Intl.message(mode.name)),
-        matching: find.byType(InkWell),
-      )
+      .ancestor(of: find.text(mode.label), matching: find.byType(InkWell))
       .first;
 
   ShapeDecoration decorationOf(WidgetTester tester, Mode mode) {

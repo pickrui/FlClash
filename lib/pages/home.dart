@@ -15,7 +15,6 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'package:fl_clash/ui/focus.dart';
 import 'package:fl_clash/ui/animated_visibility.dart';
@@ -112,7 +111,7 @@ class _HomeShell extends ConsumerWidget {
                                     item.label ==
                                     navigationItems[state.currentIndex].label,
                               ),
-                              label: Intl.message(item.label.name),
+                              label: item.label.label,
                             ),
                         ],
                         selectedIndex: state.currentIndex,
@@ -137,7 +136,7 @@ class _HomeShell extends ConsumerWidget {
                         item.label,
                         selected: index == state.currentIndex,
                       ),
-                      label: Intl.message(item.label.name),
+                      label: item.label.label,
                     ),
                 ],
                 selectedIndex: state.currentIndex,

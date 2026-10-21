@@ -17,7 +17,6 @@ import 'package:fl_clash/views/hotkey.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import 'config/advanced.dart';
 import 'config/custom_resources.dart';
@@ -40,9 +39,9 @@ class _ToolViewState extends ConsumerState<ToolsView> {
   Widget _buildNavigationMenuItem(NavigationItem navigationItem) {
     return ListItem.open(
       leading: GlyphIcon(navigationGlyphOf(navigationItem.label)),
-      title: Text(Intl.message(navigationItem.label.name)),
-      subtitle: navigationItem.description != null
-          ? Text(Intl.message(navigationItem.description!))
+      title: Text(navigationItem.label.label),
+      subtitle: navigationItem.label.description != null
+          ? Text(navigationItem.label.description!)
           : null,
       widget: navigationItem.builder(context),
       forceFull: false,
@@ -152,7 +151,7 @@ class _LocaleItem extends ConsumerWidget {
 
   String _getLocaleString(Locale? locale) {
     if (locale == null) return appLocalizations.defaultText;
-    return Intl.message(locale.toString());
+    return locale.label;
   }
 
   @override

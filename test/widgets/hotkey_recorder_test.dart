@@ -25,39 +25,41 @@ final _modeBinding = HotKeyAction(
 );
 
 void main() {
-  testWidgets('grouped hotkeys fit a narrow window with large text', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(390, 850);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      TestApp(
-        locale: const Locale('ru'),
-        textScaler: const TextScaler.linear(2),
-        overrides: [
-          viewSizeProvider.overrideWithBuild((_, _) => const Size(390, 850)),
-          hotKeyActionsProvider.overrideWithBuild(
-            (_, _) => [
-              _modeBinding.copyWith(
-                action: HotAction.view,
-                modifiers: primaryHotKeyModifiers,
+  for (final locale in AppLocalizations.delegate.supportedLocales) {
+    testWidgets(
+      'grouped hotkeys fit a narrow window with large text ($locale)',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 850);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          TestApp(
+            locale: locale,
+            textScaler: const TextScaler.linear(2),
+            overrides: [
+              viewSizeProvider.overrideWithBuild(
+                (_, _) => const Size(390, 850),
+              ),
+              hotKeyActionsProvider.overrideWithBuild(
+                (_, _) => [
+                  _modeBinding.copyWith(
+                    action: HotAction.view,
+                    modifiers: primaryHotKeyModifiers,
+                  ),
+                ],
               ),
             ],
+            child: const HotKeyView(
+              labels: ShortcutLabels(isMacOS: false, isWindows: false),
+            ),
           ),
-        ],
-        child: const HotKeyView(
-          labels: ShortcutLabels(isMacOS: false, isWindows: false),
-        ),
-      ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text(AppLocalizations.current.action_view), findsOneWidget);
+      },
     );
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-    expect(
-      find.text(IntlExt.actionMessage(HotAction.view.name)),
-      findsOneWidget,
-    );
-  });
+  }
 
   testWidgets('recording an existing binding leaves it unchanged until save', (
     tester,
@@ -85,7 +87,7 @@ void main() {
     expect(
       find.text(
         AppLocalizations.current.hotkeyConflictWith(
-          IntlExt.actionMessage(HotAction.mode.name),
+          AppLocalizations.current.action_mode,
         ),
       ),
       findsOneWidget,

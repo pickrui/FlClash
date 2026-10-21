@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$NavigationItem {
 
- PageLabel get label; String? get description; WidgetBuilder get builder; String? get path; List<NavigationItemMode> get modes;
+ PageLabel get label; WidgetBuilder get builder; String? get path; List<NavigationItemMode> get modes;
 /// Create a copy of NavigationItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $NavigationItemCopyWith<NavigationItem> get copyWith => _$NavigationItemCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as NavigationItem;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NavigationItem&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.builder, _this.builder) || other.builder == _this.builder)&&(identical(other.path, _this.path) || other.path == _this.path)&&const DeepCollectionEquality().equals(other.modes, _this.modes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NavigationItem&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.builder, _this.builder) || other.builder == _this.builder)&&(identical(other.path, _this.path) || other.path == _this.path)&&const DeepCollectionEquality().equals(other.modes, _this.modes));
 }
 
 
 @override
 int get hashCode {
   final _this = this as NavigationItem;
-  return Object.hash(runtimeType,_this.label,_this.description,_this.builder,_this.path,const DeepCollectionEquality().hash(_this.modes));
+  return Object.hash(runtimeType,_this.label,_this.builder,_this.path,const DeepCollectionEquality().hash(_this.modes));
 }
 
 @override
 String toString() {
   final _this = this as NavigationItem;
-  return 'NavigationItem(label: ${_this.label}, description: ${_this.description}, builder: ${_this.builder}, path: ${_this.path}, modes: ${_this.modes})';
+  return 'NavigationItem(label: ${_this.label}, builder: ${_this.builder}, path: ${_this.path}, modes: ${_this.modes})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $NavigationItemCopyWith<$Res>  {
   factory $NavigationItemCopyWith(NavigationItem value, $Res Function(NavigationItem) _then) = _$NavigationItemCopyWithImpl;
 @useResult
 $Res call({
- PageLabel label, String? description, WidgetBuilder builder, String? path, List<NavigationItemMode> modes
+ PageLabel label, WidgetBuilder builder, String? path, List<NavigationItemMode> modes
 });
 
 
@@ -68,11 +68,10 @@ class _$NavigationItemCopyWithImpl<$Res>
 
 /// Create a copy of NavigationItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? label = null,Object? description = freezed,Object? builder = null,Object? path = freezed,Object? modes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? label = null,Object? builder = null,Object? path = freezed,Object? modes = null,}) {
   return _then(NavigationItem(
 label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
-as PageLabel,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,builder: null == builder ? _self.builder : builder // ignore: cast_nullable_to_non_nullable
+as PageLabel,builder: null == builder ? _self.builder : builder // ignore: cast_nullable_to_non_nullable
 as WidgetBuilder,path: freezed == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
 as String?,modes: null == modes ? _self.modes : modes // ignore: cast_nullable_to_non_nullable
 as List<NavigationItemMode>,
@@ -160,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PageLabel label,  String? description,  WidgetBuilder builder,  String? path,  List<NavigationItemMode> modes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PageLabel label,  WidgetBuilder builder,  String? path,  List<NavigationItemMode> modes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NavigationItem() when $default != null:
-return $default(_that.label,_that.description,_that.builder,_that.path,_that.modes);case _:
+return $default(_that.label,_that.builder,_that.path,_that.modes);case _:
   return orElse();
 
 }
@@ -181,10 +180,10 @@ return $default(_that.label,_that.description,_that.builder,_that.path,_that.mod
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PageLabel label,  String? description,  WidgetBuilder builder,  String? path,  List<NavigationItemMode> modes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PageLabel label,  WidgetBuilder builder,  String? path,  List<NavigationItemMode> modes)  $default,) {final _that = this;
 switch (_that) {
 case _NavigationItem():
-return $default(_that.label,_that.description,_that.builder,_that.path,_that.modes);case _:
+return $default(_that.label,_that.builder,_that.path,_that.modes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +200,10 @@ return $default(_that.label,_that.description,_that.builder,_that.path,_that.mod
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PageLabel label,  String? description,  WidgetBuilder builder,  String? path,  List<NavigationItemMode> modes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PageLabel label,  WidgetBuilder builder,  String? path,  List<NavigationItemMode> modes)?  $default,) {final _that = this;
 switch (_that) {
 case _NavigationItem() when $default != null:
-return $default(_that.label,_that.description,_that.builder,_that.path,_that.modes);case _:
+return $default(_that.label,_that.builder,_that.path,_that.modes);case _:
   return null;
 
 }
@@ -216,11 +215,10 @@ return $default(_that.label,_that.description,_that.builder,_that.path,_that.mod
 
 
 class _NavigationItem implements NavigationItem {
-  const _NavigationItem({required this.label, this.description, required this.builder, this.path,  List<NavigationItemMode> modes = const [NavigationItemMode.mobile, NavigationItemMode.desktop]}): _modes = modes;
+  const _NavigationItem({required this.label, required this.builder, this.path,  List<NavigationItemMode> modes = const [NavigationItemMode.mobile, NavigationItemMode.desktop]}): _modes = modes;
   
 
 @override final  PageLabel label;
-@override final  String? description;
 @override final  WidgetBuilder builder;
 @override final  String? path;
  final  List<NavigationItemMode> _modes;
@@ -241,18 +239,18 @@ _$NavigationItemCopyWith<_NavigationItem> get copyWith => __$NavigationItemCopyW
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _NavigationItem&&(identical(other.label, label) || other.label == label)&&(identical(other.description, description) || other.description == description)&&(identical(other.builder, builder) || other.builder == builder)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other.modes, _modes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _NavigationItem&&(identical(other.label, label) || other.label == label)&&(identical(other.builder, builder) || other.builder == builder)&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other.modes, _modes));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,label,description,builder,path,const DeepCollectionEquality().hash(_modes));
+    return Object.hash(runtimeType,label,builder,path,const DeepCollectionEquality().hash(_modes));
 }
 
 @override
 String toString() {
-    return 'NavigationItem(label: $label, description: $description, builder: $builder, path: $path, modes: $modes)';
+    return 'NavigationItem(label: $label, builder: $builder, path: $path, modes: $modes)';
 }
 
 
@@ -263,7 +261,7 @@ abstract mixin class _$NavigationItemCopyWith<$Res> implements $NavigationItemCo
   factory _$NavigationItemCopyWith(_NavigationItem value, $Res Function(_NavigationItem) _then) = __$NavigationItemCopyWithImpl;
 @override @useResult
 $Res call({
- PageLabel label, String? description, WidgetBuilder builder, String? path, List<NavigationItemMode> modes
+ PageLabel label, WidgetBuilder builder, String? path, List<NavigationItemMode> modes
 });
 
 
@@ -280,11 +278,10 @@ class __$NavigationItemCopyWithImpl<$Res>
 
 /// Create a copy of NavigationItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? label = null,Object? description = freezed,Object? builder = null,Object? path = freezed,Object? modes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? label = null,Object? builder = null,Object? path = freezed,Object? modes = null,}) {
   return _then(_NavigationItem(
 label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
-as PageLabel,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,builder: null == builder ? _self.builder : builder // ignore: cast_nullable_to_non_nullable
+as PageLabel,builder: null == builder ? _self.builder : builder // ignore: cast_nullable_to_non_nullable
 as WidgetBuilder,path: freezed == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
 as String?,modes: null == modes ? _self._modes : modes // ignore: cast_nullable_to_non_nullable
 as List<NavigationItemMode>,

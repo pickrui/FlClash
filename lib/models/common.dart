@@ -19,7 +19,6 @@ part 'generated/common.g.dart';
 abstract class NavigationItem with _$NavigationItem {
   const factory NavigationItem({
     required PageLabel label,
-    String? description,
     required WidgetBuilder builder,
     String? path,
     @Default([NavigationItemMode.mobile, NavigationItemMode.desktop])

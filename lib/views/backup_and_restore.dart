@@ -28,7 +28,6 @@ import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 Future<bool?> _runBackupTask(
   BuildContext context, {
@@ -247,7 +246,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
       child: OptionsDialog<RestoreStrategy>(
         title: appLocalizations.restoreStrategy,
         options: RestoreStrategy.values,
-        textBuilder: (mode) => Intl.message('restoreStrategy_${mode.name}'),
+        textBuilder: (mode) => mode.label,
         value: restoreStrategy,
       ),
     );
@@ -415,11 +414,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
                         onPressed: isLoading
                             ? null
                             : _handleUpdateRestoreStrategy,
-                        child: Text(
-                          Intl.message(
-                            'restoreStrategy_${restoreStrategy.name}',
-                          ),
-                        ),
+                        child: Text(restoreStrategy.label),
                       ),
                     );
                   },

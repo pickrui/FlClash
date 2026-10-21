@@ -11,7 +11,6 @@ import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 class ProxiesSetting extends ConsumerWidget {
   const ProxiesSetting({super.key});
@@ -43,7 +42,7 @@ class ProxiesSetting extends ConsumerWidget {
               ConfigOptionsItem<ProxiesType>(
                 title: (l) => l.style,
                 options: ProxiesType.values,
-                textBuilder: (type) => Intl.message(type.name),
+                textBuilder: (type) => type.label,
                 selector: proxiesStyleSettingProvider.select(
                   (state) => state.type,
                 ),
@@ -84,7 +83,7 @@ class ProxiesSetting extends ConsumerWidget {
               ConfigOptionsItem<ProxyCardType>(
                 title: (l) => l.size,
                 options: ProxyCardType.values,
-                textBuilder: (type) => Intl.message(type.name),
+                textBuilder: (type) => type.label,
                 selector: proxiesStyleSettingProvider.select(
                   (state) => state.cardType,
                 ),

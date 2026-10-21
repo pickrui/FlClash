@@ -8,7 +8,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:tray/tray.dart' as native;
 
 import 'app_localizations.dart';
@@ -136,7 +135,7 @@ class Tray {
     for (final mode in Mode.values) {
       menuItems.add(
         native.TrayMenuCheckbox(
-          label: Intl.message(mode.name),
+          label: mode.label,
           detail: shortcut(switch (mode) {
             Mode.rule => HotAction.ruleMode,
             Mode.global => HotAction.globalMode,

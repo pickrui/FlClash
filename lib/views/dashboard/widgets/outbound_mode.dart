@@ -12,7 +12,6 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/style.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'card.dart';
@@ -60,7 +59,7 @@ class OutboundModeCard extends ConsumerWidget {
                     outer: _outer,
                     inner: 12,
                     background: tone,
-                    semanticLabel: Intl.message(item.name),
+                    semanticLabel: item.label,
                     onTap: () => _changeMode(ref, item),
                     builder: (foreground) => SizedBox(
                       height: 52,
@@ -74,7 +73,7 @@ class OutboundModeCard extends ConsumerWidget {
                             color: foreground,
                           ),
                           Text(
-                            Intl.message(item.name),
+                            item.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: style.copyWith(color: foreground),
@@ -147,7 +146,7 @@ class OutboundModeBar extends ConsumerWidget {
                         outer: outer,
                         inner: 10,
                         background: DashboardColors.of(context).tone,
-                        semanticLabel: Intl.message(item.name),
+                        semanticLabel: item.label,
                         onTap: () => _changeMode(ref, item),
                         builder: (foreground) => Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -160,7 +159,7 @@ class OutboundModeBar extends ConsumerWidget {
                             ),
                             Flexible(
                               child: Text(
-                                Intl.message(item.name),
+                                item.label,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: style.copyWith(color: foreground),
