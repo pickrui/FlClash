@@ -104,16 +104,6 @@ rules: ['RULE-SET,shared,select', 'MATCH,DIRECT']
 	if _, err := handleGetProviderProxy("shared", "node"); err == nil {
 		t.Fatal("managed configuration was exposed")
 	}
-	var written recordingConn
-	useTestConnection(t, &written)
-	handleMethodCall(&MethodCall{Method: getProviderProxyMethod, Arguments: json.RawMessage(`{"providerName":"shared","proxyName":"node"}`)}, MethodResponse{ID: "mapping"})
-	var response MethodResponse
-	if err := json.Unmarshal(written.responseFrame(t, "mapping"), &response); err != nil {
-		t.Fatal(err)
-	}
-	if response.Result != nil || response.Error == nil || response.Error.Code != "provider_lookup_failed" || response.Error.Details != nil {
-		t.Fatal("managed lookup did not return a redacted typed error")
-	}
 	setDNSAuth(nil)
 	providers := handleGetExternalProviders()
 	if len(providers) != 2 || providers[0].Name != "shared" || providers[0].Type != "Proxy" || providers[1].Type != "Rule" {

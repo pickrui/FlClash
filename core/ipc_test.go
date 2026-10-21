@@ -10,6 +10,7 @@ package core
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -57,6 +58,22 @@ func (c *scriptedIPC) SetWriteDeadline(time.Time) error {
 	return nil
 }
 func (c *scriptedIPC) Close() error { c.closed = true; return nil }
+
+func TestProviderProxyRPCRefusesManagedConfiguration(t *testing.T) {
+	previousAuth := currentDNSAuth()
+	t.Cleanup(func() { setDNSAuth(previousAuth) })
+	setDNSAuth(&dnsAuthSettings{})
+	var written recordingConn
+	useTestConnection(t, &written)
+	handleMethodCall(&MethodCall{Method: getProviderProxyMethod, Arguments: json.RawMessage(`{"providerName":"shared","proxyName":"node"}`)}, MethodResponse{ID: "mapping"})
+	var response MethodResponse
+	if err := json.Unmarshal(written.responseFrame(t, "mapping"), &response); err != nil {
+		t.Fatal(err)
+	}
+	if response.Result != nil || response.Error == nil || response.Error.Code != "provider_lookup_failed" || response.Error.Details != nil {
+		t.Fatal("managed lookup did not return a redacted typed error")
+	}
+}
 
 func TestIPCSendKeepsFrameBoundaries(t *testing.T) {
 	timeout := fmt.Errorf("wrapped: %w", pipeTimeout{})

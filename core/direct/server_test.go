@@ -14,6 +14,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"runtime"
 	"strconv"
 	"sync/atomic"
 	"syscall"
@@ -128,7 +129,24 @@ func TestProtectedDirectUsesSocketProtectionAndBypassesGlobalRouting(t *testing.
 }
 
 func TestProtectedDirectHonorsDesktopInterfaceBinding(t *testing.T) {
-	echo, err := net.Listen("tcp4", "127.0.0.1:0")
+	address := "127.0.0.1:0"
+	if runtime.GOOS == "linux" {
+		addresses, err := net.InterfaceAddrs()
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, candidate := range addresses {
+			ip, _, err := net.ParseCIDR(candidate.String())
+			if err == nil && ip.To4() != nil && ip.IsGlobalUnicast() {
+				address = net.JoinHostPort(ip.String(), "0")
+				break
+			}
+		}
+		if address == "127.0.0.1:0" {
+			t.Fatal("interface binding test requires a local non-loopback IPv4 address")
+		}
+	}
+	echo, err := net.Listen("tcp4", address)
 	if err != nil {
 		t.Fatal(err)
 	}
