@@ -6,6 +6,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/common/layout.dart';
+import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/proxy_chain.dart';
 import 'package:fl_clash/models/models.dart';
@@ -60,6 +61,7 @@ class _ProfilesViewState extends State<ProfilesView> {
         .toList();
     if (remoteProfiles.isEmpty) return;
     final profileAction = context.profileAction;
+    final localizations = context.appLocalizations;
     final route = ModalRoute.of(context);
     bool isCurrent() =>
         mounted &&
@@ -82,7 +84,7 @@ class _ProfilesViewState extends State<ProfilesView> {
                 label: profile.realLabel,
                 message: profile.isoixCloudProfile
                     ? error.runtimeType.toString()
-                    : error.toString(),
+                    : userFacingErrorMessage(error, localizations),
               ),
             );
           }

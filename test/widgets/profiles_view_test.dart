@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:dio/dio.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/status_manager.dart';
@@ -263,29 +265,51 @@ void main() {
     tester,
   ) async {
     final action = _UpdatingProfileAction();
-    await openUpdatingProfiles(tester, action, [_first, _second]);
+    final managed = _first.copyWith(
+      id: 3,
+      label: 'Managed',
+      url: 'oixcloud://managed',
+    );
+    await openUpdatingProfiles(tester, action, [_first, _second, managed]);
     await tester.tap(find.byTooltip('Update'));
     await tester.pump();
     action.pending[1]!.completeError(
-      StateError('fixture subscription failure'),
+      DioException(
+        requestOptions: RequestOptions(
+          path: 'https://example.invalid/sub?token=fixture-private',
+        ),
+        type: DioExceptionType.receiveTimeout,
+      ),
     );
     await tester.pump();
-    expect(find.textContaining('fixture subscription failure'), findsNothing);
+    expect(
+      find.text(AppLocalizations.current.networkTimeoutError),
+      findsNothing,
+    );
     action.pending[2]!.complete(_second);
+    action.pending[3]!.completeError(StateError('fixture-managed-private'));
     await tester.pumpAndSettle();
     expect(
-      find.text('Bad state: fixture subscription failure'),
+      find.text(AppLocalizations.current.networkTimeoutError),
       findsOneWidget,
     );
+    expect(find.textContaining('fixture-private'), findsNothing);
+    expect(find.textContaining('DioException'), findsNothing);
+    expect(find.text('StateError'), findsOneWidget);
+    expect(find.textContaining('fixture-managed-private'), findsNothing);
     await tester.tap(find.text('Confirm'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Update'));
     await tester.pump();
-    expect(action.calls, [1, 2, 1, 2]);
+    expect(action.calls, [1, 2, 3, 1, 2, 3]);
     action.pending[1]!.complete(_first);
     action.pending[2]!.complete(_second);
+    action.pending[3]!.complete(managed);
     await tester.pumpAndSettle();
-    expect(find.textContaining('fixture subscription failure'), findsNothing);
+    expect(
+      find.text(AppLocalizations.current.networkTimeoutError),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
   });
 
