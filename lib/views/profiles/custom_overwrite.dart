@@ -344,7 +344,7 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
     List<Rule>? candidateRules;
     final selected = await showOverwriteSheet<List<Rule>>(
       context: context,
-      builder: (_) => RulePresetDialog(
+      builder: (_) => RulePresetSheet(
         validate: (rules) async {
           if (!context.mounted) return appLocalizations.routingChanged;
           final current = ref.read(profileProvider(profileId));

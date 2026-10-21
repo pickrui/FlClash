@@ -1124,6 +1124,7 @@
   "rulePresetBlockQuic": "Bloquer QUIC",
   "rulePresetBlockStun": "Bloquer STUN",
   "rulePresetBlockDot": "Bloquer DNS over TLS",
+  "rulePresetBlockLoopback": "Bloquer le bouclage du proxy",
   "rulePresetLanDirect": "LAN en direct",
   "rulePresetSystemServicesDirect": "Apple et Microsoft en direct",
   "rulePresetBittorrentDirect": "BitTorrent en direct",

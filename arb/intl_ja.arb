@@ -1124,6 +1124,7 @@
   "rulePresetBlockQuic": "QUIC をブロック",
   "rulePresetBlockStun": "STUN をブロック",
   "rulePresetBlockDot": "DNS over TLS をブロック",
+  "rulePresetBlockLoopback": "プロキシのループバックを防止",
   "rulePresetLanDirect": "LAN 直接接続",
   "rulePresetSystemServicesDirect": "Apple と Microsoft に直接接続",
   "rulePresetBittorrentDirect": "BitTorrent を直接接続",

@@ -1124,6 +1124,7 @@
   "rulePresetBlockQuic": "QUIC 차단",
   "rulePresetBlockStun": "STUN 차단",
   "rulePresetBlockDot": "DNS over TLS 차단",
+  "rulePresetBlockLoopback": "프록시 루프백 차단",
   "rulePresetLanDirect": "LAN 직접 연결",
   "rulePresetSystemServicesDirect": "Apple 및 Microsoft 직접 연결",
   "rulePresetBittorrentDirect": "BitTorrent 직접 연결",

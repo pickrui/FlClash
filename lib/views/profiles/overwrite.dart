@@ -464,7 +464,7 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
     );
     await showOverwriteSheet<List<Rule>>(
       context: context,
-      builder: (_) => RulePresetDialog(
+      builder: (_) => RulePresetSheet(
         validate: (rules) async {
           await notifier.addPresets(rules);
           return '';

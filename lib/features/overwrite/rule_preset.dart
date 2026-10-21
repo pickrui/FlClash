@@ -8,30 +8,58 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/features/form/error_banner.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/inherited.dart';
+import 'package:fl_clash/ui/models.dart';
+import 'package:fl_clash/ui/scaffold.dart';
+import 'package:fl_clash/common/network_error.dart';
+import 'package:fl_clash/ui/selection_mark.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'overwrite_sheet.dart';
 
 enum RulePreset {
-  blockQuic(['AND,((NETWORK,UDP),(DST-PORT,443)),REJECT-DROP']),
-  blockStun(['AND,((NETWORK,UDP),(DST-PORT,3478/19302)),REJECT-DROP']),
-  blockDot(['DST-PORT,853,REJECT']),
-  lanDirect(['GEOSITE,private,DIRECT', 'GEOIP,LAN,DIRECT,no-resolve']),
-  systemServicesDirect(['GEOSITE,apple,DIRECT', 'GEOSITE,microsoft,DIRECT']),
-  bittorrentDirect([
+  blockQuic(AppGlyphs.block, [
+    'AND,((NETWORK,UDP),(DST-PORT,443)),REJECT-DROP',
+  ]),
+  blockStun(AppGlyphs.eyeOff, [
+    'AND,((NETWORK,UDP),(DST-PORT,3478/19302)),REJECT-DROP',
+  ]),
+  blockDot(AppGlyphs.dns, ['DST-PORT,853,REJECT']),
+  // Connecting to 0.0.0.0 or :: also reaches a local listener.
+  blockLoopback(AppGlyphs.sync, [
+    'IP-CIDR,127.0.0.0/8,REJECT,no-resolve',
+    'IP-CIDR,0.0.0.0/32,REJECT,no-resolve',
+    'IP-CIDR6,::1/128,REJECT,no-resolve',
+    'IP-CIDR6,::/128,REJECT,no-resolve',
+    'AND,((IN-TYPE,TUN),(DST-PORT,853)),REJECT',
+  ]),
+  lanDirect(AppGlyphs.wifi, [
+    'GEOSITE,private,DIRECT',
+    'GEOIP,LAN,DIRECT,no-resolve',
+  ]),
+  systemServicesDirect(AppGlyphs.devices, [
+    'GEOSITE,apple,DIRECT',
+    'GEOSITE,microsoft,DIRECT',
+  ]),
+  bittorrentDirect(AppGlyphs.cloudDownload, [
     'GEOSITE,category-public-tracker,DIRECT',
     'GEOSITE,category-pt,DIRECT',
     r'PROCESS-NAME-REGEX,(?i)^(qbittorrent|transmission.*|deluge.*|aria2c|motrix|utorrent|bitcomet)(\.exe)?$,DIRECT',
   ]);
 
+  final Glyph glyph;
   final List<String> rawRules;
 
-  const RulePreset(this.rawRules);
+  const RulePreset(this.glyph, this.rawRules);
 
   String label(AppLocalizations appLocalizations) => switch (this) {
     RulePreset.blockQuic => appLocalizations.rulePresetBlockQuic,
     RulePreset.blockStun => appLocalizations.rulePresetBlockStun,
     RulePreset.blockDot => appLocalizations.rulePresetBlockDot,
+    RulePreset.blockLoopback => appLocalizations.rulePresetBlockLoopback,
     RulePreset.lanDirect => appLocalizations.rulePresetLanDirect,
     RulePreset.systemServicesDirect =>
       appLocalizations.rulePresetSystemServicesDirect,
@@ -50,22 +78,41 @@ List<Rule> insertRulePresets(List<Rule> existing, Iterable<Rule> selected) {
   ];
 }
 
-class RulePresetDialog extends StatefulWidget {
+class RulePresetSheet extends StatefulWidget {
   final Future<String> Function(List<Rule>) validate;
 
-  const RulePresetDialog({super.key, required this.validate});
+  const RulePresetSheet({super.key, required this.validate});
 
   @override
-  State<RulePresetDialog> createState() => _RulePresetDialogState();
+  State<RulePresetSheet> createState() => _RulePresetSheetState();
 }
 
-class _RulePresetDialogState extends State<RulePresetDialog> {
+class _RulePresetSheetState extends State<RulePresetSheet> {
   final _selected = <RulePreset>{};
   bool _saving = false;
+  bool _submitted = false;
   String? _error;
+  late final _scroll = sheetScrollController(context);
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _showError(String error) {
+    if (!mounted || ModalRoute.of(context)?.isCurrent == false) return;
+    setState(() => _error = error);
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+  }
 
   Future<void> _submit() async {
-    if (_saving || _selected.isEmpty) return;
+    if (_saving ||
+        _submitted ||
+        _selected.isEmpty ||
+        ModalRoute.of(context)?.isCurrent == false) {
+      return;
+    }
     setState(() {
       _saving = true;
       _error = null;
@@ -78,12 +125,15 @@ class _RulePresetDialogState extends State<RulePresetDialog> {
       final error = await widget.validate(rules);
       if (!mounted || ModalRoute.of(context)?.isCurrent == false) return;
       if (error.isEmpty) {
+        _submitted = true;
         context.safeNestedPop(rules);
       } else {
-        setState(() => _error = error);
+        _showError(error);
       }
     } catch (error) {
-      if (mounted) setState(() => _error = error.toString());
+      if (mounted) {
+        _showError(userFacingErrorMessage(error, context.appLocalizations));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -92,60 +142,63 @@ class _RulePresetDialogState extends State<RulePresetDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
-    return OverwriteEditorForm(
+    return OverwriteExitGuard(
       isDirty: () => _selected.isNotEmpty,
       save: _submit,
-      isBusy: () => _saving,
-      title: l10n.quickAdd,
-      maxWidth: 600,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      actions: [
-        TextButton(
-          onPressed: _saving ? null : () => context.safeNestedPop(),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          key: const Key('rule-preset-confirm'),
-          onPressed: _saving || _selected.isEmpty ? null : _submit,
-          child: Text(l10n.add),
-        ),
-      ],
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l10n.rulePresetInsertHint),
-          if (_saving) const LinearProgressIndicator(),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                _error!,
-                style: TextStyle(color: context.colorScheme.error),
+      isBusy: () => _saving || _submitted,
+      child: CommonScaffold(
+        title: l10n.quickActions,
+        confirmationAction: _selected.isEmpty
+            ? null
+            : IconButtonData(
+                glyph: AppGlyphs.check,
+                tooltip: l10n.add,
+                isLoading: _saving,
+                onPressed: _saving || _submitted ? null : _submit,
               ),
+        body: ListView(
+          controller: _scroll,
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(horizontal: 16)
+              .copyWith(top: context.contentTopPadding, bottom: 20),
+          children: [
+            ErrorBanner(message: _error),
+            generateSection(
+              footer: l10n.rulePresetInsertHint,
+              items: [
+                for (final preset in RulePreset.values)
+                  DecorationListItem(
+                    key: ValueKey(preset),
+                    leading: GlyphIcon(preset.glyph),
+                    title: Text(preset.label(l10n)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final raw in preset.rawRules)
+                          Text(
+                            raw,
+                            style: AppTextStyle.footnote
+                                .of(context)
+                                .toJetBrainsMono
+                                .copyWith(color: context.colorScheme.tertiary),
+                          ),
+                      ],
+                    ),
+                    isSelected: _selected.contains(preset),
+                    trailing: _selected.contains(preset)
+                        ? const SelectionCheck()
+                        : null,
+                    onPressed: _saving || _submitted
+                        ? null
+                        : () => setState(() {
+                            _selected.addOrRemove(preset);
+                            _error = null;
+                          }),
+                  ),
+              ],
             ),
-          for (final preset in RulePreset.values)
-            CheckboxListTile(
-              key: ValueKey(preset),
-              contentPadding: EdgeInsets.zero,
-              title: Text(preset.label(l10n)),
-              subtitle: Text(
-                preset.rawRules.join('\n'),
-                style: AppTextStyle.footnote.of(context).toJetBrainsMono,
-              ),
-              value: _selected.contains(preset),
-              onChanged: _saving
-                  ? null
-                  : (selected) => setState(() {
-                      if (selected == true) {
-                        _selected.add(preset);
-                      } else {
-                        _selected.remove(preset);
-                      }
-                      _error = null;
-                    }),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

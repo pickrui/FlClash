@@ -2922,6 +2922,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
       "Блокировать DNS over TLS",
     ),
+    "rulePresetBlockLoopback": MessageLookupByLibrary.simpleMessage(
+      "Защита от петли прокси",
+    ),
     "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage(
       "Блокировать QUIC",
     ),

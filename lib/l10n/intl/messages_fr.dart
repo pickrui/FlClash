@@ -2982,6 +2982,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
       "Bloquer DNS over TLS",
     ),
+    "rulePresetBlockLoopback": MessageLookupByLibrary.simpleMessage(
+      "Bloquer le bouclage du proxy",
+    ),
     "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage("Bloquer QUIC"),
     "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage("Bloquer STUN"),
     "rulePresetInsertHint": MessageLookupByLibrary.simpleMessage(

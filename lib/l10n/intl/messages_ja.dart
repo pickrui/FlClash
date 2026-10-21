@@ -2367,6 +2367,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
       "DNS over TLS をブロック",
     ),
+    "rulePresetBlockLoopback": MessageLookupByLibrary.simpleMessage(
+      "プロキシのループバックを防止",
+    ),
     "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage("QUIC をブロック"),
     "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage("STUN をブロック"),
     "rulePresetInsertHint": MessageLookupByLibrary.simpleMessage(

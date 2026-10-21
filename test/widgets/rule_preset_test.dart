@@ -7,6 +7,9 @@ import 'dart:async';
 
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
+import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
+import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -60,14 +63,14 @@ void main() {
                 body: TextButton(
                   child: const Text('Open'),
                   onPressed: () async {
-                    result = await showDialog<List<Rule>>(
+                    result = await showOverwriteSheet<List<Rule>>(
                       context: context,
-                      builder: (_) => RulePresetDialog(
+                      builder: (_) => RulePresetSheet(
                         validate: (rules) {
                           attempts++;
                           expect(
                             rules.map((rule) => rule.value),
-                            RulePreset.blockQuic.rawRules,
+                            RulePreset.blockLoopback.rawRules,
                           );
                           return switch (attempts) {
                             1 => pending.future,
@@ -86,30 +89,39 @@ void main() {
       );
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
-      final confirm = find.byKey(const Key('rule-preset-confirm'));
-      expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
-      expect(find.text(RulePreset.blockQuic.rawRules.single), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey(RulePreset.blockQuic)));
+      final confirm = find.byTooltip(appLocalizations.add);
+      expect(confirm, findsNothing);
+      for (final raw in RulePreset.blockLoopback.rawRules) {
+        expect(find.text(raw), findsOneWidget);
+      }
+      await tester.ensureVisible(
+        find.byKey(const ValueKey(RulePreset.blockLoopback)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey(RulePreset.blockLoopback)));
       await tester.pump();
       await tester.tap(confirm);
       await tester.pump();
-      expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+      expect(attempts, 1);
+      await tester.tap(confirm);
+      await tester.pump();
+      expect(attempts, 1);
       pending.complete('Core rejected this configuration');
       await tester.pumpAndSettle();
       expect(find.text('Core rejected this configuration'), findsOneWidget);
       expect(
         tester
-            .widget<CheckboxListTile>(
-              find.byKey(const ValueKey(RulePreset.blockQuic)),
+            .widget<DecorationListItem>(
+              find.byKey(const ValueKey(RulePreset.blockLoopback)),
             )
-            .value,
+            .isSelected,
         true,
       );
       expect(result, isNull);
       await tester.tap(confirm);
       await tester.pump();
-      final navigator = tester.state<NavigatorState>(
-        find.byType(Navigator).first,
+      final navigator = Navigator.of(
+        tester.element(find.byType(RulePresetSheet)),
       );
       unawaited(
         navigator.push(
@@ -125,9 +137,23 @@ void main() {
       expect(result, isNull);
       navigator.pop();
       await tester.pumpAndSettle();
-      await tester.tap(confirm);
+      final submit = tester
+          .widget<CommonScaffold>(
+            find.descendant(
+              of: find.byType(RulePresetSheet),
+              matching: find.byType(CommonScaffold),
+            ),
+          )
+          .confirmationAction!
+          .onPressed!;
+      submit();
+      await tester.pump();
+      submit();
       await tester.pumpAndSettle();
-      expect(result?.map((rule) => rule.value), RulePreset.blockQuic.rawRules);
+      expect(
+        result?.map((rule) => rule.value),
+        RulePreset.blockLoopback.rawRules,
+      );
       expect(attempts, 3);
       expect(tester.takeException(), isNull);
     },

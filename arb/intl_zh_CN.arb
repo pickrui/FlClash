@@ -1124,6 +1124,7 @@
   "rulePresetBlockQuic": "屏蔽 QUIC",
   "rulePresetBlockStun": "屏蔽 STUN",
   "rulePresetBlockDot": "屏蔽 DNS over TLS",
+  "rulePresetBlockLoopback": "防止代理回环",
   "rulePresetLanDirect": "局域网直连",
   "rulePresetSystemServicesDirect": "Apple 与 Microsoft 直连",
   "rulePresetBittorrentDirect": "BT 下载直连",

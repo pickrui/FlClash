@@ -1124,6 +1124,7 @@
   "rulePresetBlockQuic": "Блокировать QUIC",
   "rulePresetBlockStun": "Блокировать STUN",
   "rulePresetBlockDot": "Блокировать DNS over TLS",
+  "rulePresetBlockLoopback": "Защита от петли прокси",
   "rulePresetLanDirect": "Локальная сеть напрямую",
   "rulePresetSystemServicesDirect": "Apple и Microsoft напрямую",
   "rulePresetBittorrentDirect": "BitTorrent напрямую",

@@ -37,7 +37,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
     final notifier = ref.read(globalRulesProvider.notifier);
     await showOverwriteSheet<List<Rule>>(
       context: context,
-      builder: (_) => RulePresetDialog(
+      builder: (_) => RulePresetSheet(
         validate: (rules) async {
           await notifier.addPresets(rules);
           return '';

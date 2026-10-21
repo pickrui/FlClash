@@ -9492,6 +9492,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Block proxy loopback`
+  String get rulePresetBlockLoopback {
+    return Intl.message(
+      'Block proxy loopback',
+      name: 'rulePresetBlockLoopback',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `LAN direct`
   String get rulePresetLanDirect {
     return Intl.message(
