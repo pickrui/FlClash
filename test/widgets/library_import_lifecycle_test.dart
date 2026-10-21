@@ -10,6 +10,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/common/path.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
@@ -51,11 +52,11 @@ class _Files extends FilePickerPlatform {
 }
 
 final class _File extends PlatformFile {
-  _File(this.bytes);
+  _File(this.bytes, {this.name = 'fixture.yaml'});
   final Future<Uint8List> bytes;
   int reads = 0;
   @override
-  String get name => 'fixture.yaml';
+  final String name;
   @override
   Uri get uri => Uri.parse('content://fixture/import');
   @override
@@ -76,6 +77,12 @@ final class _File extends PlatformFile {
 
 class _Scripts implements ScriptLibrary {
   final saved = <String>[];
+  final labels = <String>[];
+  Future<String> _fetch(String _) async =>
+      'function main(config) { return config; }';
+  @override
+  Future<String> Function(String) get fetch => _fetch;
+
   @override
   Future<void> save(
     Script script,
@@ -84,6 +91,7 @@ class _Scripts implements ScriptLibrary {
     List<int>? previousBytes,
   }) async {
     saved.add(content);
+    labels.add(script.label);
   }
 
   @override
@@ -92,6 +100,7 @@ class _Scripts implements ScriptLibrary {
 
 void main() {
   late Directory directory;
+  late Future<void> Function() restorePaths;
   late _Files files;
   late _Scripts scripts;
   late ValueNotifier<bool> active;
@@ -99,6 +108,15 @@ void main() {
   final data = Uint8List.fromList(utf8.encode('proxies: []\n'));
 
   setUpAll(() async {
+    final support = AppPath.supportDirectory;
+    final temporary = AppPath.temporaryDirectory;
+    final download = AppPath.downloadDirectory;
+    restorePaths = () async {
+      AppPath.supportDirectory = support;
+      AppPath.temporaryDirectory = temporary;
+      AppPath.downloadDirectory = download;
+      await appPath.rebind();
+    };
     directory = await Directory.systemTemp.createTemp('library-import-');
     await useAppPaths(directory);
     await Future.wait([
@@ -109,6 +127,7 @@ void main() {
   });
   tearDownAll(() async {
     FilePickerPlatform.instance = originalFiles;
+    await restorePaths();
     await directory.delete(recursive: true);
   });
   setUp(() {
@@ -119,14 +138,36 @@ void main() {
   });
   tearDown(() => active.dispose());
 
-  Future<BuildContext> open(WidgetTester tester, bool isScript) async {
+  Future<BuildContext> open(
+    WidgetTester tester,
+    bool isScript, {
+    String? reservedLabel,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(800, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       TestApp(
         overrides: [
-          clashProvidersProvider.overrideWith((_) => Stream.value([])),
-          scriptsProvider.overrideWithBuild((_, _) => Stream.value([])),
+          clashProvidersProvider.overrideWith(
+            (_) => Stream.value([
+              if (reservedLabel != null)
+                ClashProvider(
+                  id: 1,
+                  kind: ProviderKind.proxy,
+                  label: reservedLabel,
+                ),
+            ]),
+          ),
+          scriptsProvider.overrideWithBuild(
+            (_, _) => Stream.value([
+              if (reservedLabel != null)
+                Script(
+                  id: 1,
+                  label: reservedLabel,
+                  lastUpdateTime: DateTime(2026),
+                ),
+            ]),
+          ),
           scriptLibraryProvider.overrideWithValue(scripts),
           viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
         ],
@@ -181,6 +222,63 @@ void main() {
 
   for (final isScript in [true, false]) {
     final kind = isScript ? 'script' : 'provider';
+    testWidgets(
+      '$kind file import deduplicates a long filename within the editable limit',
+      (tester) async {
+        final name = '订阅' * 40;
+        final reserved = '订阅' * 32;
+        files.select = () async =>
+            _File(Future.value(data), name: '$name.yaml');
+        await open(tester, isScript, reservedLabel: reserved);
+        await importFile(tester);
+        await tester.pumpAndSettle();
+        final label = isScript
+            ? scripts.labels.single
+            : tester
+                  .widget<EditClashProviderView>(
+                    find.byType(EditClashProviderView),
+                  )
+                  .provider
+                  .label;
+        expect(label, '${reserved.substring(0, 61)}(1)');
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('$kind URL import decodes its filename before deduplicating', (
+      tester,
+    ) async {
+      await open(tester, isScript, reservedLabel: '订阅');
+      await tester.tap(find.byTooltip('Add'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppLocalizations.current.importUrl));
+      final fields = find.byType(TextFormField);
+      for (var frame = 0; frame < 20 && fields.evaluate().isEmpty; frame++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      expect(fields, isScript ? findsOneWidget : findsNWidgets(2));
+      await tester.enterText(
+        isScript ? fields : fields.last,
+        'https://example.invalid/%E8%AE%A2%E9%98%85.yaml?token=fixture-private',
+      );
+      await tester.tap(
+        isScript
+            ? find.text(AppLocalizations.current.submit)
+            : find.text(AppLocalizations.current.save),
+      );
+      await tester.pumpAndSettle();
+      final label = isScript
+          ? scripts.labels.single
+          : tester
+                .widget<EditClashProviderView>(
+                  find.byType(EditClashProviderView),
+                )
+                .provider
+                .label;
+      expect(label, '订阅(1)');
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('$kind picker result during exit never starts a read', (
       tester,
     ) async {

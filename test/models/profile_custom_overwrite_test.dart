@@ -115,6 +115,35 @@ void main() {
     expect(const ProxyProviderOptions().definition, isEmpty);
   });
 
+  test(
+    'new labels are bounded while stored names survive metadata updates',
+    () {
+      final legacy = Profile(
+        id: 1,
+        label: 'Legacy' * 20,
+        autoUpdateDuration: Duration.zero,
+      );
+      final profiles = [legacy];
+      final edited = legacy.copyWith(autoUpdate: false);
+      expect(profiles.copyAndAddProfile(edited).b, edited);
+      final name = 'x' * 64;
+      final duplicates = [
+        for (var i = 0; i < 2000; i++)
+          Profile(
+            id: i + 2,
+            label: i == 0 ? name : '${'x' * (64 - '($i)'.length)}($i)',
+            autoUpdateDuration: Duration.zero,
+          ),
+      ];
+      final result = duplicates.copyAndAddProfile(
+        Profile(id: 3000, label: 'x' * 100, autoUpdateDuration: Duration.zero),
+      );
+      expect(result.b.label, '${'x' * 58}(2000)');
+      expect(result.a.last, result.b);
+      expect(duplicates, hasLength(2000));
+    },
+  );
+
   group('profiles as proxy providers', () {
     const subscription = Profile(
       id: 1,
@@ -159,13 +188,19 @@ void main() {
     });
 
     test('a renamed provider takes its users and their options along', () {
-      final next = subscription.copyWith(label: 'Renamed');
+      final next = profiles
+          .copyAndAddProfile(subscription.copyWith(label: ' Built '))
+          .b;
+      expect(next.label, 'Built(1)');
 
       final renamed = renameProfileProviderUsers(profiles, subscription, next);
 
-      expect(renamed.single.customProxyGroups.single.use, ['Renamed', 'Cloud']);
+      expect(renamed.single.customProxyGroups.single.use, [
+        'Built(1)',
+        'Cloud',
+      ]);
       expect(renamed.single.overrides.proxyProviders, {
-        'Renamed': const ProxyProviderOptions(filter: 'JP'),
+        'Built(1)': const ProxyProviderOptions(filter: 'JP'),
       });
       expect(
         renameProfileProviderUsers(

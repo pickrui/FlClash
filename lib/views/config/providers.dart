@@ -75,22 +75,18 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
   );
 
   String _uniqueLabel(String source) {
-    final path = Uri.tryParse(source)?.path ?? source;
-    final name = p.basenameWithoutExtension(path);
-    final base = name.isEmpty
-        ? (_kind == ProviderKind.proxy
-              ? context.appLocalizations.proxyProviders
-              : context.appLocalizations.ruleProviders)
-        : name;
+    final name = p.basenameWithoutExtension(source);
     final labels = (ref.read(clashProvidersProvider).value ?? [])
         .where((item) => item.kind == _kind)
         .map((item) => item.label)
         .toSet();
-    var label = base;
-    for (var suffix = 2; labels.contains(label); suffix++) {
-      label = '$base ($suffix)';
-    }
-    return label;
+    return uniqueLabelFor(
+      name,
+      fallback: _kind == ProviderKind.proxy
+          ? context.appLocalizations.proxyProviders
+          : context.appLocalizations.ruleProviders,
+      taken: labels.contains,
+    );
   }
 
   void _options(
@@ -136,7 +132,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
           if (result == null || !_isCurrentPage) return;
           final provider = _newProvider(
             label: result.label.isEmpty
-                ? _uniqueLabel(result.url)
+                ? _uniqueLabel(result.url.urlFileName)
                 : result.label,
             url: result.url,
           ).withFileFormat(result.url);

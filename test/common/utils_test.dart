@@ -79,36 +79,6 @@ void main() {
     });
   });
 
-  group('getOverwriteLabel', () {
-    test('appends (1) to label without number', () {
-      expect(utils.getOverwriteLabel('foo'), 'foo(1)');
-    });
-
-    test('increments existing number', () {
-      expect(utils.getOverwriteLabel('foo(1)'), 'foo(2)');
-    });
-
-    test('increments higher numbers', () {
-      expect(utils.getOverwriteLabel('foo(9)'), 'foo(10)');
-    });
-
-    test('increments numbers with three or more digits', () {
-      expect(utils.getOverwriteLabel('foo(100)'), 'foo(101)');
-      expect(utils.getOverwriteLabel('Plan(2025)'), 'Plan(2026)');
-    });
-
-    test('increments a label that is only a counter', () {
-      expect(utils.getOverwriteLabel('(1)'), '(2)');
-    });
-
-    test('appends a counter when the number overflows', () {
-      expect(
-        utils.getOverwriteLabel('foo(99999999999999999999)'),
-        'foo(99999999999999999999)(1)',
-      );
-    });
-  });
-
   group('getFileNameForDisposition', () {
     test('prefers the encoded file name', () {
       expect(

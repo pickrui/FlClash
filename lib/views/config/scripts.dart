@@ -115,7 +115,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
         if (fromUrl) {
           url = (await _url())?.trim();
           if (url == null || !_isCurrentPage) return;
-          name = p.basenameWithoutExtension(Uri.parse(url).path);
+          name = p.basenameWithoutExtension(url.urlFileName);
           content = await library.fetch(url);
         } else {
           final file = await picker.pickerFile();
@@ -126,14 +126,14 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
           );
         }
         if (!mounted || !context.isCurrentPage) return;
-        final base = name.isEmpty ? context.appLocalizations.script : name;
         final labels = (ref.read(scriptsProvider).value ?? [])
             .map((item) => item.label)
             .toSet();
-        var label = base;
-        for (var suffix = 2; labels.contains(label); suffix++) {
-          label = '$base ($suffix)';
-        }
+        final label = uniqueLabelFor(
+          name,
+          fallback: context.appLocalizations.script,
+          taken: labels.contains,
+        );
         await library.save(Script.create(label: label, url: url), content);
       });
     } finally {

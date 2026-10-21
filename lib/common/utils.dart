@@ -106,13 +106,6 @@ class Utils {
     return null;
   }
 
-  String getOverwriteLabel(String label) {
-    final match = RegExp(r'\((\d+)\)$').firstMatch(label);
-    final number = int.tryParse(match?[1] ?? '');
-    if (match == null || number == null) return '$label(1)';
-    return '${label.substring(0, match.start)}(${number + 1})';
-  }
-
   String? getFileNameForDisposition(String? disposition) {
     if (disposition == null) return null;
     final Map<String, String?> parameters;

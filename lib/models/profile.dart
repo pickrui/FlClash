@@ -1390,28 +1390,25 @@ extension ProfilesExt on List<Profile> {
     return index == -1 ? null : this[index];
   }
 
-  String _getLabel(String label, int id) {
-    final realLabel = label.takeFirstValid([id.toString()]);
-    final hasDup =
-        indexWhere(
-          (element) => element.label == realLabel && element.id != id,
-        ) !=
-        -1;
-    if (hasDup) {
-      return _getLabel(utils.getOverwriteLabel(realLabel), id);
-    } else {
-      return label;
-    }
-  }
-
   VM2<List<Profile>, Profile> copyAndAddProfile(Profile profile) {
     final List<Profile> profilesTemp = List.from(this);
     final index = profilesTemp.indexWhere(
       (element) => element.id == profile.id,
     );
-    final updateProfile = profile.copyWith(
-      label: _getLabel(profile.label, profile.id),
-    );
+    final existing = index == -1 ? null : profilesTemp[index];
+    final labels = {
+      for (final item in this)
+        if (item.id != profile.id) item.realLabel,
+    };
+    final updateProfile = existing?.label == profile.label
+        ? profile
+        : profile.copyWith(
+            label: uniqueLabelFor(
+              profile.label,
+              fallback: profile.id.toString(),
+              taken: labels.contains,
+            ),
+          );
     if (index == -1) {
       profilesTemp.add(updateProfile);
     } else {

@@ -11,6 +11,36 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/app_paths.dart';
 
 void main() {
+  test('import labels stay unique without splitting emoji or growing past the input limit', () {
+    const emoji = '👩🏽‍💻';
+    final labels = {emoji * 64, '${emoji * 61}(1)'};
+    expect(
+      uniqueLabelFor(
+        '  ${emoji * 80}  ',
+        fallback: 'File',
+        taken: labels.contains,
+      ),
+      '${emoji * 61}(2)',
+    );
+    expect(
+      uniqueLabelFor(
+        '  ',
+        fallback: 'File',
+        taken: {'File', 'File(1)'}.contains,
+      ),
+      'File(2)',
+    );
+    expect(
+      uniqueLabelFor('File(9)', fallback: 'File', taken: {'File(9)'}.contains),
+      'File(10)',
+    );
+    const overflow = 'File(99999999999999999999)';
+    expect(
+      uniqueLabelFor(overflow, fallback: 'File', taken: {overflow}.contains),
+      '$overflow(1)',
+    );
+  });
+
   test(
     'cached search accepts records and reuses object text across queries',
     () {

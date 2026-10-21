@@ -6,6 +6,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:fl_clash/common/common.dart';
 
 extension StringExtension on String {
@@ -74,6 +75,27 @@ extension StringExtension on String {
       (segment) => segment.isNotEmpty,
       orElse: () => '',
     );
+  }
+}
+
+final _labelCounter = RegExp(r'\((\d{1,9})\)$');
+
+String uniqueLabelFor(
+  String name, {
+  required String fallback,
+  required bool Function(String label) taken,
+}) {
+  const maxLength = TextInputLimits.name;
+  String take(String value, int length) =>
+      value.characters.take(length).toString().trimRight();
+  final label = take(name.takeFirstValid([fallback]), maxLength);
+  if (!taken(label)) return label;
+  final counter = _labelCounter.firstMatch(label);
+  final stem = counter == null ? label : label.substring(0, counter.start);
+  for (var index = int.parse(counter?[1] ?? '0') + 1; ; index++) {
+    final suffix = '($index)';
+    final candidate = take(stem, maxLength - suffix.length) + suffix;
+    if (!taken(candidate)) return candidate;
   }
 }
 
