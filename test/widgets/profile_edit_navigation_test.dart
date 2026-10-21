@@ -9,7 +9,11 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:code_forge/code_forge.dart';
+import 'package:fl_clash/common/lock.dart';
+import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -41,6 +45,14 @@ class _ReadyCoreAction extends CoreAction {
 
 class _ProfileAction extends ProfileAction {
   final saved = <String>[];
+  final metadata = <Profile>[];
+
+  @override
+  Future<Profile> saveProfileMetadata(Profile profile) async {
+    metadata.add(profile);
+    return profile;
+  }
+
   Future<void> Function()? completeSave;
   @override
   void build() {}
@@ -54,19 +66,31 @@ class _ProfileAction extends ProfileAction {
 
 void main() {
   late Directory directory;
+  late Future<void> Function() restorePaths;
   setUpAll(() async {
+    final support = AppPath.supportDirectory;
+    final temporary = AppPath.temporaryDirectory;
+    final download = AppPath.downloadDirectory;
+    restorePaths = () async {
+      AppPath.supportDirectory = support;
+      AppPath.temporaryDirectory = temporary;
+      AppPath.downloadDirectory = download;
+      await appPath.rebind();
+    };
     directory = await Directory.systemTemp.createTemp('profile-navigation-');
     await useAppPaths(directory);
     await initEditorNative();
     await (await _profile.file).writeAsString('mode: rule');
   });
   tearDownAll(() async {
+    await restorePaths();
     await directory.delete(recursive: true);
   });
 
   Future<_ProfileAction> openEditor(
     WidgetTester tester, {
     Future<String> Function()? validate,
+    bool editFile = true,
   }) async {
     await mockPreferences();
     await tester.binding.setSurfaceSize(const Size(800, 1200));
@@ -98,6 +122,11 @@ void main() {
     );
     await tester.runAsync(() => tester.tap(find.text('Open profile')));
     await settle(tester, 12);
+    if (!editFile) {
+      // The next test must not inherit a lock future bound to this fake zone.
+      await tester.runAsync(() => storageLock.synchronized(() async {}));
+      return profiles;
+    }
     await tester.runAsync(() => tester.tap(find.text('Profile')));
     await settle(tester, 12);
     final controller = tester
@@ -107,6 +136,30 @@ void main() {
     await settle(tester, 2);
     return profiles;
   }
+
+  testWidgets('profile names reject blanks and trim a successful edit', (
+    tester,
+  ) async {
+    final profiles = await openEditor(tester, editFile: false);
+    final name = find.descendant(
+      of: find.widgetWithText(FormRow, AppLocalizations.current.name),
+      matching: find.byType(TextFormField),
+    );
+    await tester.enterText(name, '  ');
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pumpAndSettle();
+    expect(profiles.metadata, isEmpty);
+    expect(
+      find.text(AppLocalizations.current.profileNameNullValidationDesc),
+      findsOneWidget,
+    );
+    await tester.enterText(name, '  Renamed  ');
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pumpAndSettle();
+    expect(profiles.metadata.single.label, 'Renamed');
+    expect(find.byType(EditProfileView), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'covered validation returns its draft and saving closes only the profile',

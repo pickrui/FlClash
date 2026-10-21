@@ -138,7 +138,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     AppLocalizations appLocalizations,
   ) {
     final isoixCloud = widget.profile.isoixCloudProfile;
-    if (!isoixCloud && _labelController.text.isEmpty) {
+    if (!isoixCloud && _labelController.text.trim().isEmpty) {
       return (
         field: _ProfileField.label,
         message: appLocalizations.profileNameNullValidationDesc,
@@ -200,7 +200,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
           : _urlController.text.trim(),
       label: widget.profile.isoixCloudProfile
           ? widget.profile.label
-          : _labelController.text,
+          : _labelController.text.trim(),
       autoUpdate: _autoUpdate,
       autoUpdateDuration: _autoUpdate && interval != null && interval > 0
           ? Duration(minutes: interval)
