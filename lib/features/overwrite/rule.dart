@@ -6,14 +6,16 @@
 library;
 
 import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
-import 'package:fl_clash/ui/card.dart';
-import 'package:fl_clash/widgets/input.dart';
+import 'package:fl_clash/features/form/form_page.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/features/form/selection_sheet.dart';
+import 'package:fl_clash/ui/text.dart';
+import 'package:fl_clash/ui/inherited.dart' show sheetScrollController;
 import 'package:fl_clash/ui/list.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -161,18 +163,20 @@ class RuleStatusItem extends StatelessWidget {
   }
 }
 
-class AddOrEditRuleDialog extends StatefulWidget {
+enum _RuleField { content, target }
+
+class AddedRuleForm extends StatefulWidget {
   final Rule? rule;
 
   final List<String> targets;
 
-  const AddOrEditRuleDialog({super.key, this.rule, this.targets = const []});
+  const AddedRuleForm({super.key, this.rule, this.targets = const []});
 
   @override
-  State<AddOrEditRuleDialog> createState() => _AddOrEditRuleDialogState();
+  State<AddedRuleForm> createState() => _AddedRuleFormState();
 }
 
-class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
+class _AddedRuleFormState extends State<AddedRuleForm> {
   late List<Object?> _origin;
   List<Object?> get _snapshot => [
     _ruleAction,
@@ -186,8 +190,14 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
   final _contentController = TextEditingController();
   bool _noResolve = false;
   bool _src = false;
-  List<String> _targetItems = [];
-  final _formKey = GlobalKey<FormState>();
+  List<String> get _targetItems => {
+    ...RuleTarget.values.map((item) => item.value),
+    ...widget.targets,
+    if (_ruleTarget.isNotEmpty) _ruleTarget,
+  }.toList();
+  late final _scroll = sheetScrollController(context);
+  bool _attempted = false;
+  bool _submitted = false;
 
   @override
   void initState() {
@@ -197,10 +207,6 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
   }
 
   void _initState() {
-    _targetItems = {
-      ...RuleTarget.values.map((item) => item.value),
-      ...widget.targets,
-    }.toList();
     if (widget.rule != null) {
       final parsedRule = ParsedRule.parseString(widget.rule!.value);
       _ruleAction = parsedRule.ruleAction;
@@ -211,23 +217,27 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
       return;
     }
     _ruleAction = RuleAction.addedRuleActions.first;
-    if (_targetItems.isNotEmpty) {
-      _ruleTarget = _targetItems.first;
-    }
+    _contentController.clear();
+    _ruleTarget = RuleTarget.values.first.value;
+    _noResolve = false;
+    _src = false;
   }
 
   @override
   void dispose() {
     _contentController.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(AddOrEditRuleDialog oldWidget) {
+  void didUpdateWidget(AddedRuleForm oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.rule != widget.rule) {
       _initState();
       _origin = _snapshot;
+      _attempted = false;
+      _submitted = false;
     }
   }
 
@@ -240,9 +250,34 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
     _ => _contentController.text.trim(),
   };
 
+  ({_RuleField field, String message})? get _issue {
+    final l = context.appLocalizations;
+    String? contentError;
+    if (_savedContent.isEmpty) {
+      contentError = l.emptyTip(l.content);
+    } else if (!_ruleAction.hasCommaPayload && _savedContent.contains(',')) {
+      // Saved as "TYPE,content,target": a comma would move the target.
+      contentError = l.customRuleInvalidSyntax;
+    } else {
+      contentError = ParsedRule(
+        ruleAction: _ruleAction,
+        content: _savedContent,
+      ).payloadError?.getMessage(context);
+    }
+    if (contentError != null) {
+      return (field: _RuleField.content, message: contentError);
+    }
+    if (_ruleTarget.trim().isEmpty) {
+      return (field: _RuleField.target, message: l.emptyTip(l.ruleTarget));
+    }
+    return null;
+  }
+
   void _handleSubmit() {
-    final res = _formKey.currentState?.validate();
-    if (res == false) {
+    if (_submitted || ModalRoute.of(context)?.isCurrent == false) return;
+    if (_issue != null) {
+      setState(() => _attempted = true);
+      if (_scroll.hasClients) _scroll.jumpTo(0);
       return;
     }
     final parsedRule = ParsedRule(
@@ -255,187 +290,164 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
     final rule = widget.rule != null
         ? widget.rule!.copyWith(value: parsedRule.value)
         : Rule.value(parsedRule.value);
+    _submitted = true;
     context.safeNestedPop(rule);
   }
 
+  Future<void> _choose<T>({
+    required String title,
+    required List<T> options,
+    required T value,
+    required String Function(T) label,
+    String? Function(BuildContext, T)? description,
+    required ValueChanged<T> onChanged,
+  }) async {
+    FocusScope.of(context).unfocus();
+    var picked = false;
+    final selected = await showOverwriteSheet<T>(
+      context: context,
+      builder: (context) => SelectionSheet<T>(
+        title: title,
+        sections: [
+          SelectionSection(items: options, subtitleBuilder: description),
+        ],
+        labelBuilder: label,
+        selectedOf: (_) => value,
+        onSelected: (item) {
+          if (picked ||
+              !context.mounted ||
+              ModalRoute.of(context)?.isCurrent == false) {
+            return;
+          }
+          picked = true;
+          context.safeNestedPop(item);
+        },
+      ),
+    );
+    if (selected == null ||
+        !mounted ||
+        ModalRoute.of(context)?.isCurrent == false) {
+      return;
+    }
+    setState(() => onChanged(selected));
+  }
+
+  Widget _choice({
+    required Key key,
+    required String title,
+    required String value,
+    required VoidCallback onPressed,
+    bool invalid = false,
+  }) => FormRow(
+    key: key,
+    title: title,
+    invalid: invalid,
+    onPressed: onPressed,
+    trailing: Row(
+      spacing: 2,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: TooltipText(
+            text: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+        ),
+        const GlyphIcon(AppGlyphs.chevronForward),
+      ],
+    ),
+  );
+
+  Widget _switch({
+    required String title,
+    required bool value,
+    required ValueChanged<bool>? onChanged,
+  }) => FormRow(
+    title: title,
+    onPressed: onChanged == null ? null : () => onChanged(!value),
+    trailing: Switch(value: value, onChanged: onChanged),
+  );
+
   @override
   Widget build(BuildContext context) {
-    return OverwriteEditorForm(
+    final l = context.appLocalizations;
+    final issue = _attempted ? _issue : null;
+    return OverwriteExitGuard(
       isDirty: () => !const ListEquality().equals(_origin, _snapshot),
+      isBusy: () => _submitted,
       save: _handleSubmit,
-      title: widget.rule != null
-          ? appLocalizations.editRule
-          : appLocalizations.addRule,
-      actions: [
-        TextButton(
-          onPressed: _handleSubmit,
-          child: Text(appLocalizations.confirm),
-        ),
-      ],
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FilledButton.tonal(
-              onPressed: () async {
-                _ruleAction =
-                    await showOverwriteSheet<RuleAction>(
-                      context: context,
-                      builder: (_) => OptionsDialog<RuleAction>(
-                        title: appLocalizations.ruleName,
-                        options: RuleAction.addedRuleActions,
-                        textBuilder: (item) => item.value,
-                        subtitleBuilder: (item) => item.getDesc(context),
-                        value: _ruleAction,
-                      ),
-                    ) ??
-                    _ruleAction;
-                if (mounted) setState(() {});
-              },
-              child: Text(_ruleAction.value),
-            ),
-            const SizedBox(height: 24),
-            TextFormField(
-              keyboardType: TextInputType.text,
-              inputFormatters: TextInputLimits.limit(TextInputLimits.rule),
-              onFieldSubmitted: (_) {
-                _handleSubmit();
-              },
-              controller: _contentController,
-              decoration: InputDecoration(
-                border: AppShape.input,
-                labelText: appLocalizations.content,
-                helperText: _ruleAction.getDesc(context),
-                helperMaxLines: 4,
-              ),
-              validator: (_) {
-                if (_contentController.text.trim().isEmpty) {
-                  return appLocalizations.emptyTip(appLocalizations.content);
-                }
-                // Saved as "TYPE,content,target": a comma would move the target.
-                if (!_ruleAction.hasCommaPayload &&
-                    _savedContent.contains(',')) {
-                  return appLocalizations.customRuleInvalidSyntax;
-                }
-                return ParsedRule(
-                  ruleAction: _ruleAction,
-                  content: _contentController.text,
-                ).payloadError?.getMessage(context);
-              },
-            ),
-            const SizedBox(height: 24),
-            FormField<String>(
-              validator: (_) {
-                if (_ruleTarget.isEmpty) {
-                  return appLocalizations.emptyTip(appLocalizations.ruleTarget);
-                }
-                return null;
-              },
-              builder: (field) => SizedBox(
-                width: 200,
-                child: Semantics(
-                  button: true,
-                  child: InkWell(
-                    key: const Key('added-rule-target'),
-                    customBorder: AppShape.of(AppShape.input.borderRadius),
-                    onTap: () async {
-                      FocusScope.of(context).unfocus();
-                      final selected = await showOverwriteSheet<String>(
-                        context: context,
-                        builder: (_) => OptionsDialog<String>(
-                          title: appLocalizations.ruleTarget,
-                          options: _targetItems,
-                          textBuilder: (target) => target,
-                          value: _ruleTarget,
-                        ),
-                      );
-                      if (selected == null || !mounted) return;
-                      setState(() {
-                        _ruleTarget = selected;
-                      });
-                      field.didChange(selected);
-                    },
-                    child: InputDecorator(
-                      decoration: InputDecoration(
-                        border: AppShape.input,
-                        labelText: appLocalizations.ruleTarget,
-                        errorText: field.errorText,
-                        suffixIcon: const GlyphIcon(AppGlyphs.chevronDown),
-                      ),
-                      child: Text(
-                        _ruleTarget,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
+      child: FormPage(
+        title: widget.rule != null ? l.editRule : l.addRule,
+        saveLabel: l.confirm,
+        onSave: _handleSubmit,
+        scrollController: _scroll,
+        error: issue?.message,
+        children: [
+          generateSection(
+            title: l.basicInfo,
+            footer: _ruleAction.getDesc(context),
+            items: [
+              _choice(
+                key: const Key('added-rule-type'),
+                title: l.customRuleType,
+                value: _ruleAction.value,
+                onPressed: () => _choose<RuleAction>(
+                  title: l.ruleName,
+                  options: RuleAction.addedRuleActions,
+                  value: _ruleAction,
+                  label: (action) => action.value,
+                  description: (context, action) => action.getDesc(context),
+                  onChanged: (action) => _ruleAction = action,
                 ),
               ),
-            ),
-            if (_ruleAction.hasParams) ...[
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 8,
-                children: [
-                  CommonCard(
-                    radius: 8,
-                    isSelected: _src,
-                    fillsSelection: true,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                      child: Text(
-                        appLocalizations.sourceIp,
-                        style: AppTextStyle.subheadline
-                            .of(context)
-                            .copyWith(
-                              color: _src
-                                  ? context.colorScheme.onPrimary
-                                  : null,
-                            ),
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _src = !_src;
-                      });
-                    },
-                  ),
-                  CommonCard(
-                    radius: 8,
-                    isSelected: _noResolve || _src,
-                    fillsSelection: true,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                      child: Text(
-                        appLocalizations.noResolve,
-                        style: AppTextStyle.subheadline
-                            .of(context)
-                            .copyWith(
-                              color: _noResolve || _src
-                                  ? context.colorScheme.onPrimary
-                                  : null,
-                            ),
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (!_src) _noResolve = !_noResolve;
-                      });
-                    },
-                  ),
-                ],
+              FormRow(
+                title: l.content,
+                invalid: issue?.field == _RuleField.content,
+                trailing: FormRowTextField(
+                  controller: _contentController,
+                  hintText: l.required,
+                  autocorrect: false,
+                  inputFormatters: TextInputLimits.limit(TextInputLimits.rule),
+                  onChanged: (_) {
+                    if (_attempted) setState(() {});
+                  },
+                  onFieldSubmitted: (_) => _handleSubmit(),
+                ),
+              ),
+              _choice(
+                key: const Key('added-rule-target'),
+                title: l.ruleTarget,
+                value: _ruleTarget,
+                invalid: issue?.field == _RuleField.target,
+                onPressed: () => _choose<String>(
+                  title: l.ruleTarget,
+                  options: _targetItems,
+                  value: _ruleTarget,
+                  label: (target) => target,
+                  onChanged: (target) => _ruleTarget = target,
+                ),
               ),
             ],
-            const SizedBox(height: 20),
-          ],
-        ),
+          ),
+          if (_ruleAction.hasParams)
+            generateSection(
+              title: l.additionalParameters,
+              footer: l.customRuleNoResolveHint,
+              items: [
+                _switch(
+                  title: l.noResolve,
+                  value: _noResolve || _src,
+                  onChanged: _src
+                      ? null
+                      : (value) => setState(() => _noResolve = value),
+                ),
+                _switch(
+                  title: l.sourceIp,
+                  value: _src,
+                  onChanged: (value) => setState(() => _src = value),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

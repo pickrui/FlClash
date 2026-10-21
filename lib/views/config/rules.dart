@@ -49,7 +49,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
   Future<void> _handleAddOrUpdate([Rule? rule]) async {
     final res = await showOverwriteSheet<Rule>(
       context: context,
-      builder: (_) => AddOrEditRuleDialog(
+      builder: (_) => AddedRuleForm(
         rule: rule,
         targets: tailscaleRoutingTargets(ref.read(tailscaleNetworksProvider)),
       ),
