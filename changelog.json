@@ -11,6 +11,11 @@
           "type": "feat",
           "entries": [
             {
+              "id": "dc147ca",
+              "scope": "dashboard",
+              "text": "Show exit network organization and asn"
+            },
+            {
               "id": "ca73068",
               "scope": "providers",
               "text": "Preview effective node configuration with ownership guards"
@@ -555,6 +560,16 @@
         {
           "type": "fix",
           "entries": [
+            {
+              "id": "ce1ce8a",
+              "scope": "android",
+              "text": "Distinguish background location access and show current ssid"
+            },
+            {
+              "id": "acffae7",
+              "scope": "lifecycle",
+              "text": "Complete service and resource cleanup safeguards"
+            },
             {
               "id": "5a47937",
               "scope": "lifecycle",

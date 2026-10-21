@@ -4,6 +4,7 @@
 
 **Features**
 
+- **dashboard** Show exit network organization and asn (dc147ca)
 - **providers** Preview effective node configuration with ownership guards (ca73068)
 - **resources** Import provider links in bounded batches (3382e1e)
 - **rules** Align added rule forms with grouped sheets (1b08b10)
@@ -115,6 +116,8 @@
 
 **Bug Fixes**
 
+- **android** Distinguish background location access and show current ssid (ce1ce8a)
+- **lifecycle** Complete service and resource cleanup safeguards (acffae7)
 - **lifecycle** Fix shutdown races, stale WebDAV checks and script time limits, and coalesce address-cache writes (5a47937)
 - **profiles** Preserve long node names in structured edits (8d853d3)
 - **core** Preserve ipc framing across desktop write stalls (a22e5e8)
