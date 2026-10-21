@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 import 'package:fl_clash/common/backup.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:webdav_client/webdav_client.dart';
 
@@ -240,7 +241,18 @@ class DAVClient {
   Future<bool> _ping() async {
     try {
       return await _raceRead((client, token) async {
-        await client.ping(token);
+        final response = await client.c.wdOptions(
+          client,
+          '/',
+          cancelToken: token,
+        );
+        if (response.statusCode != 200 && response.statusCode != 204) {
+          throw DioException(
+            requestOptions: response.requestOptions,
+            response: response,
+            type: DioExceptionType.badResponse,
+          );
+        }
         return true;
       });
     } catch (_) {
@@ -391,5 +403,52 @@ class DAVClient {
         if (candidate != winner) await io.File(candidate).safeDelete();
       }
     }
+  }
+}
+
+typedef DAVClientFactory = DAVClient Function(DAVProps props);
+
+class DAVConnectionController extends ValueNotifier<bool?> {
+  DAVConnectionController({DAVClientFactory? createClient})
+    : _createClient = createClient ?? DAVClient.new,
+      super(null);
+
+  final DAVClientFactory _createClient;
+  (String, String, String)? _credentials;
+  bool _hasUpdated = false;
+  bool _disposed = false;
+  int _requestId = 0;
+  DAVClient? client;
+
+  Future<void> update(DAVProps? props) async {
+    if (_disposed) return;
+    final credentials = props == null
+        ? null
+        : (props.uri, props.user, props.password);
+    if (_hasUpdated && _credentials == credentials) return;
+    _credentials = credentials;
+    _hasUpdated = true;
+    final requestId = ++_requestId;
+    client = null;
+    if (props == null || !isValidDavUri(props.uri)) {
+      value = false;
+      return;
+    }
+    value = null;
+    var connected = false;
+    try {
+      final nextClient = _createClient(props);
+      client = nextClient;
+      connected = await nextClient.pingCompleter.future;
+    } catch (_) {}
+    if (!_disposed && requestId == _requestId) value = connected;
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _requestId++;
+    client = null;
+    super.dispose();
   }
 }

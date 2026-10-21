@@ -6,6 +6,9 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/dav_client.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/features/form/form_row.dart';
+import 'package:fl_clash/features/form/webdav_form.dart';
+import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -94,7 +97,10 @@ void main() {
     await tester.tap(find.text(appLocalizations.edit));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.widgetWithText(TextFormField, appLocalizations.address),
+      find.descendant(
+        of: find.widgetWithText(FormRow, appLocalizations.address),
+        matching: find.byType(TextField),
+      ),
       ' https://dav.example.com/dav \n',
     );
     await tester.tap(find.text(appLocalizations.save));
@@ -114,17 +120,17 @@ void main() {
       tester,
       const DAVProps(
         uri: 'ftp://dav.example.com',
-        user: 'me',
-        password: 'old',
+        user: ' me ',
+        password: ' old ',
         maxBackups: 5,
       ),
     );
 
     await tester.tap(find.text(appLocalizations.edit));
     await tester.pumpAndSettle();
-    final address = find.widgetWithText(
-      TextFormField,
-      appLocalizations.address,
+    final address = find.descendant(
+      of: find.widgetWithText(FormRow, appLocalizations.address),
+      matching: find.byType(TextField),
     );
     await tester.tap(find.text(appLocalizations.save));
     await tester.pumpAndSettle();
@@ -139,13 +145,76 @@ void main() {
       container.read(davSettingProvider),
       const DAVProps(
         uri: 'https://dav.example.com',
-        user: 'me',
-        password: 'old',
+        user: ' me ',
+        password: ' old ',
         maxBackups: 5,
       ),
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'a narrow WebDAV form validates credentials and cancels its draft',
+    (tester) async {
+      const size = Size(320, 700);
+      await tester.binding.setSurfaceSize(size);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      const original = DAVProps(
+        uri: 'https://dav.invalid',
+        user: 'me',
+        password: 'secret',
+        maxBackups: 5,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          davSettingProvider.overrideWithBuild((_, _) => original),
+          viewSizeProvider.overrideWithBuild((_, _) => size),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            textScaler: const TextScaler.linear(1.3),
+            child: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => showFormSheet<void>(
+                  context: context,
+                  builder: (_, _) => const WebDAVForm(dav: original),
+                ),
+                child: const Text('edit dav'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('edit dav'));
+      await tester.pumpAndSettle();
+      final fields = find.byType(TextField);
+      await tester.enterText(fields.at(1), '');
+      await tester.tap(find.byTooltip(appLocalizations.save));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(appLocalizations.emptyTip(appLocalizations.account)),
+        findsOneWidget,
+      );
+      await tester.enterText(fields.at(1), 'new user');
+      await tester.enterText(fields.at(2), '');
+      await tester.tap(find.byTooltip(appLocalizations.save));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(appLocalizations.emptyTip(appLocalizations.password)),
+        findsOneWidget,
+      );
+      expect(container.read(davSettingProvider), original);
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(container.read(davSettingProvider), original);
+      expect(find.text('edit dav'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'duplicate delete taps share one confirmation and cancel cleanly',
@@ -203,11 +272,15 @@ void main() {
       tester,
       const DAVProps(uri: 'http://127.0.0.1:1', user: 'me', password: 'p'),
     );
-    Future<bool>? pingFuture() => tester
-        .widget<FutureBuilder<bool>>(find.byType(FutureBuilder<bool>))
-        .future;
-    final ping = pingFuture();
-    expect(ping, isNotNull);
+    DAVConnectionController connection() =>
+        tester
+                .widget<ValueListenableBuilder<bool?>>(
+                  find.byType(ValueListenableBuilder<bool?>),
+                )
+                .valueListenable
+            as DAVConnectionController;
+    final client = connection().client;
+    expect(client, isNotNull);
 
     final loading = container.read(
       loadingProvider(LoadingTag.backup_restore).notifier,
@@ -218,12 +291,12 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(container.read(loadingProvider(LoadingTag.backup_restore)), false);
-    expect(pingFuture(), same(ping));
+    expect(connection().client, same(client));
     container
         .read(davSettingProvider.notifier)
         .update((state) => state?.copyWith(maxBackups: 5));
     await tester.pump();
-    expect(pingFuture(), same(ping));
+    expect(connection().client, same(client));
   });
 }
 

@@ -52,6 +52,20 @@ void main() {
     root.deleteSync(recursive: true);
   });
 
+  test('an empty successful OPTIONS response reports connected', () async {
+    final dav = DAVClient(
+      _props,
+      resolveRoutes: (_) => ['direct'],
+      createAdapter: (_) => readAdapter((options) async {
+        expect(options.method, 'OPTIONS');
+        if (options.headers['authorization'] == null) return _challenge();
+        return ResponseBody.fromBytes([], 204);
+      }),
+    );
+    expect(await dav.pingCompleter.future, isTrue);
+    await waitForReads();
+  });
+
   test(
     'authenticated reads race and only a validated ZIP is retained',
     () async {
