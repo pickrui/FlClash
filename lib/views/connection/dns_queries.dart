@@ -8,6 +8,7 @@ import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/features/connection/dns_query_filter.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -21,8 +22,6 @@ import 'package:fl_clash/widgets/record_table.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-
-enum _QueryFilter { all, cached, failed }
 
 extension on DnsQuery {
   bool get hasFailureRcode => rcode.isNotEmpty && rcode != 'NOERROR';
@@ -132,8 +131,9 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
   bool _paused = false;
   bool _resettingDns = false;
   String _search = '';
+  final _querySearch = DnsQuerySearch();
   List<String> _keywords = [];
-  _QueryFilter _filter = _QueryFilter.all;
+  DnsQueryFilter _filter = DnsQueryFilter.all;
 
   @override
   void initState() {
@@ -355,17 +355,14 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
 
   @override
   Widget build(BuildContext context) {
-    final search = SearchQuery(_search);
-    final queries = _queries.reversed.where((query) {
-      final tags = _tagsOf(appLocalizations, query);
-      return _keywords.every(tags.contains) &&
-          search.matches([...query.searchFields, ...tags]) &&
-          switch (_filter) {
-            _QueryFilter.all => true,
-            _QueryFilter.cached => query.cached,
-            _QueryFilter.failed => query.isFailed,
-          };
-    }).toList();
+    final queries = _querySearch.filter(
+      queries: _queries,
+      search: _search,
+      keywords: _keywords,
+      filter: _filter,
+      locale: Localizations.localeOf(context).toLanguageTag(),
+      tagsOf: (query) => _tagsOf(context.appLocalizations, query),
+    );
     return CommonScaffold(
       title: appLocalizations.dnsQueries,
       searchState: AppBarSearchState(
@@ -383,11 +380,11 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
                 16,
                 0,
               ),
-              child: SegmentedControl<_QueryFilter>(
+              child: SegmentedControl<DnsQueryFilter>(
                 segments: [
-                  (_QueryFilter.all, appLocalizations.dnsQueryAll),
-                  (_QueryFilter.cached, appLocalizations.dnsQueryCached),
-                  (_QueryFilter.failed, appLocalizations.dnsQueryFailures),
+                  (DnsQueryFilter.all, appLocalizations.dnsQueryAll),
+                  (DnsQueryFilter.cached, appLocalizations.dnsQueryCached),
+                  (DnsQueryFilter.failed, appLocalizations.dnsQueryFailures),
                 ],
                 value: _filter,
                 onChanged: (filter) => setState(() => _filter = filter),

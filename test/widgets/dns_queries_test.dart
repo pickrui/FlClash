@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/features/connection/dns_query_filter.dart';
 import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
@@ -26,14 +27,15 @@ class _DnsCoreHandler extends Mock implements CoreHandlerInterface {}
 
 Future<void> _pumpDnsQueries(
   WidgetTester tester,
-  ProviderContainer container,
-) async {
+  ProviderContainer container, {
+  Locale locale = const Locale('en'),
+}) async {
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
       child: MaterialApp(
         navigatorKey: globalState.navigatorKey,
-        locale: const Locale('en'),
+        locale: locale,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           AppUiLocalizations.delegate,
@@ -51,6 +53,97 @@ Future<void> _pumpDnsQueries(
 }
 
 void main() {
+  test(
+    'DNS search cache invalidates for data, filters, keywords and locale',
+    () {
+      final cache = DnsQuerySearch();
+      final cached = DnsQuery(
+        domain: 'one.invalid',
+        type: 'A',
+        time: DateTime.utc(2026),
+        cached: true,
+      );
+      final failed = cached.copyWith(
+        domain: 'two.invalid',
+        cached: false,
+        rcode: 'NXDOMAIN',
+      );
+      var rows = [cached, failed];
+      var labelsRead = 0;
+      List<DnsQuery> query({
+        String search = '',
+        String locale = 'en',
+        List<String> keywords = const [],
+        DnsQueryFilter filter = DnsQueryFilter.all,
+      }) => cache.filter(
+        queries: rows,
+        search: search,
+        locale: locale,
+        keywords: keywords,
+        filter: filter,
+        tagsOf: (q) {
+          labelsRead++;
+          return [q.type, if (q.cached) locale == 'en' ? 'Cached' : '已缓存'];
+        },
+      );
+      final all = query();
+      expect(all, [failed, cached]);
+      expect(labelsRead, 0);
+      expect(identical(query(), all), isTrue);
+      expect(query(filter: DnsQueryFilter.failed), [failed]);
+      expect(query(search: 'cached'), [cached]);
+      expect(labelsRead, 2);
+      expect(query(search: 'one'), [cached]);
+      expect(labelsRead, 2);
+      expect(query(search: 'cached', locale: 'zh-CN'), isEmpty);
+      expect(query(search: '已缓存', locale: 'zh-CN'), [cached]);
+      expect(query(keywords: ['A'], filter: DnsQueryFilter.cached), [cached]);
+      rows = [failed];
+      expect(query(filter: DnsQueryFilter.cached), isEmpty);
+      rows = [];
+      expect(query(), isEmpty);
+    },
+  );
+
+  testWidgets('DNS localized search follows language changes while paused', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+      ],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(dnsQueriesProvider.notifier);
+    notifier.addQuery(
+      DnsQuery(
+        domain: 'query.example',
+        type: 'A',
+        time: DateTime.utc(2026),
+        cached: true,
+      ),
+    );
+    await _pumpDnsQueries(tester, container);
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Pause updates'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'cached');
+    await tester.pumpAndSettle();
+    expect(find.text('query.example'), findsOneWidget);
+    await _pumpDnsQueries(tester, container, locale: const Locale('zh', 'CN'));
+    expect(find.text('query.example'), findsNothing);
+    await tester.enterText(
+      find.byType(TextField),
+      AppLocalizations.current.dnsQueryCached,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('query.example'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('DNS reset waits, reports failures and retains query history', (
     tester,
   ) async {
