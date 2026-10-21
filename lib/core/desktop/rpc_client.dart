@@ -41,6 +41,7 @@ final class CoreRpcClient implements CoreRpcChannel {
   final DesktopCoreTransport transport;
   final Duration extensionGrace;
   final Map<String, Completer<Object?>> _pending = {};
+  final Set<String> _resolving = {};
   late final StreamSubscription<Uint8List> _frameSubscription;
   late final StreamSubscription<DesktopTransportEvent> _eventSubscription;
 
@@ -219,18 +220,26 @@ final class CoreRpcClient implements CoreRpcChannel {
       ..reset()
       ..start();
     final id = response.id;
-    final completer = id == null ? null : _pending.remove(id);
+    final completer = id == null ? null : _pending[id];
     if (completer == null || completer.isCompleted) {
       unawaited(discardSpilledResponse(response));
       return;
     }
+    if (_resolving.contains(id)) return;
     if (response.file != null) {
+      _resolving.add(id!);
       unawaited(
-        resolveSpilledResponse(response)
-            .then((resolved) => _complete(completer, resolved)),
+        resolveSpilledResponse(response).then((resolved) {
+          _resolving.remove(id);
+          if (identical(_pending[id], completer)) {
+            _pending.remove(id);
+            _complete(completer, resolved);
+          }
+        }),
       );
       return;
     }
+    _pending.remove(id);
     _complete(completer, response);
   }
 

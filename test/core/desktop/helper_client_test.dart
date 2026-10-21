@@ -226,7 +226,7 @@ void main() {
         });
       }),
     );
-    final launcher = HelperLauncher(client);
+    final launcher = HelperLauncher(client, livenessProbe: (_) async => false);
     final lease = await launcher.start(
       sessionId: _sessionId,
       address: 'test-address',
@@ -243,7 +243,7 @@ void main() {
     expect(result.exitConfirmed, isTrue);
   });
 
-  test('Helper lease retries stop after a transport failure', () async {
+  test('Linux Helper lease retries stop after a transport failure', () async {
     var stopRequests = 0;
     final client = _client(
       _ResponseAdapter((options) {
@@ -263,8 +263,13 @@ void main() {
           'reason': 'notRunning',
         });
       }),
+      isLinux: true,
     );
-    final launcher = HelperLauncher(client, livenessProbe: (_) async => true);
+    var probes = 0;
+    final launcher = HelperLauncher(
+      client,
+      livenessProbe: (_) async => ++probes == 1,
+    );
     final lease = await launcher.start(
       sessionId: _sessionId,
       address: 'test-address',
@@ -283,12 +288,13 @@ void main() {
     final result = await lease.stop(const Duration(seconds: 1));
 
     expect(stopRequests, 2);
+    expect(probes, 2);
     expect(result.stopped, isFalse);
     expect(result.exitConfirmed, isTrue);
   });
 
   test(
-    'Helper lease confirms the exit of a Core whose Helper is gone',
+    'Linux Helper lease confirms the exit of a Core whose Helper is gone',
     () async {
       var stopRequests = 0;
       final probedPids = <int>[];
@@ -303,6 +309,7 @@ void main() {
             type: DioExceptionType.connectionError,
           );
         }),
+        isLinux: true,
       );
       final launcher = HelperLauncher(
         client,
@@ -326,6 +333,171 @@ void main() {
       expect(repeated, result);
     },
   );
+
+  for (final stopped in [false, true]) {
+    test(
+      'Windows root exit remains unconfirmed until Helper recovers with stopped=$stopped',
+      () async {
+        var requests = 0;
+        final probedPids = <int>[];
+        final client = _client(
+          _ResponseAdapter((options) {
+            if (++requests == 1) {
+              throw DioException(
+                requestOptions: options,
+                type: DioExceptionType.connectionError,
+              );
+            }
+            return _jsonResponse({
+              'sessionId': _sessionId,
+              'stopped': stopped,
+              if (!stopped) 'reason': 'notRunning',
+            });
+          }),
+        );
+        final lease = HelperCoreLease(
+          sessionId: _sessionId,
+          pid: 6456,
+          client: client,
+          livenessProbe: (pid) async {
+            probedPids.add(pid);
+            return false;
+          },
+        );
+        await expectLater(
+          lease.stop(const Duration(seconds: 1)),
+          throwsA(
+            isA<HelperException>().having(
+              (error) => error.code,
+              'code',
+              'transportError',
+            ),
+          ),
+        );
+        expect(probedPids, isEmpty);
+        final result = await lease.stop(const Duration(seconds: 1));
+        expect(
+          result,
+          CoreProcessStopResult(stopped: stopped, exitConfirmed: true),
+        );
+        expect(await lease.stop(const Duration(seconds: 1)), result);
+        expect(requests, 2);
+        expect(probedPids, stopped ? isEmpty : [6456]);
+      },
+    );
+  }
+
+  test('a superseded Helper lease recovers only after its PID exits', () async {
+    var alive = true;
+    final probedPids = <int>[];
+    final adapter = _ResponseAdapter(
+      (options) => _jsonResponse({
+        'sessionId': _sessionId,
+        'stopped': false,
+        'reason': 'sessionMismatch',
+      }, statusCode: HttpStatus.conflict),
+    );
+    final lease = HelperCoreLease(
+      sessionId: _sessionId,
+      pid: 6456,
+      client: _client(adapter),
+      livenessProbe: (pid) async {
+        probedPids.add(pid);
+        return alive;
+      },
+    );
+
+    await expectLater(
+      lease.stop(const Duration(seconds: 1)),
+      throwsA(
+        isA<HelperException>().having(
+          (error) => error.code,
+          'code',
+          'sessionMismatch',
+        ),
+      ),
+    );
+    alive = false;
+    final result = await lease.stop(const Duration(seconds: 1));
+    expect(
+      result,
+      const CoreProcessStopResult(stopped: false, exitConfirmed: true),
+    );
+    expect(await lease.stop(const Duration(seconds: 1)), result);
+    expect(adapter.requestCount, 2);
+    expect(probedPids, [6456, 6456]);
+  });
+
+  test(
+    'Helper Core cleanup failure can be retried without losing its session',
+    () async {
+      final requests = <Object?>[];
+      final adapter = _ResponseAdapter((options) {
+        requests.add(options.data);
+        return requests.length == 1
+            ? _jsonResponse({
+                'code': 'coreStopFailed',
+                'message': 'Core did not exit after termination',
+              }, statusCode: HttpStatus.internalServerError)
+            : _jsonResponse({'sessionId': _sessionId, 'stopped': true});
+      });
+      final lease = HelperCoreLease(
+        sessionId: _sessionId,
+        pid: 6456,
+        client: _client(adapter),
+        livenessProbe: (_) async =>
+            throw StateError('semantic failure must be retained'),
+      );
+      await expectLater(
+        lease.stop(const Duration(seconds: 1)),
+        throwsA(
+          isA<HelperException>().having(
+            (error) => error.code,
+            'code',
+            'coreStopFailed',
+          ),
+        ),
+      );
+      final firstRetry = lease.stop(const Duration(seconds: 1));
+      final concurrentRetry = lease.stop(const Duration(seconds: 1));
+      expect(identical(firstRetry, concurrentRetry), isTrue);
+      expect(
+        await firstRetry,
+        const CoreProcessStopResult(stopped: true, exitConfirmed: true),
+      );
+      expect(requests, [
+        {'sessionId': _sessionId},
+        {'sessionId': _sessionId},
+      ]);
+    },
+  );
+
+  test('a failed PID probe after Helper restart stays retryable', () async {
+    var probes = 0;
+    final adapter = _ResponseAdapter(
+      (options) => _jsonResponse({
+        'sessionId': _sessionId,
+        'stopped': false,
+        'reason': 'notRunning',
+      }),
+    );
+    final lease = HelperCoreLease(
+      sessionId: _sessionId,
+      pid: 6456,
+      client: _client(adapter),
+      livenessProbe: (_) async {
+        if (++probes == 1) throw StateError('probe unavailable');
+        return false;
+      },
+    );
+    await expectLater(lease.stop(const Duration(seconds: 1)), throwsStateError);
+    expect(
+      await lease.stop(const Duration(seconds: 1)),
+      const CoreProcessStopResult(stopped: false, exitConfirmed: true),
+    );
+    expect(adapter.requestCount, 2);
+    expect(probes, 2);
+  });
 
   test('Helper lease does not reinterpret a semantic stop failure', () async {
     final client = _client(
@@ -733,6 +905,45 @@ void main() {
       },
     );
 
+    test('does not start a direct Core while the Helper is stopping', () async {
+      final requests = <RequestOptions>[];
+      final client = _client(
+        _ResponseAdapter((options) {
+          requests.add(options);
+          if (options.path.endsWith('/start')) {
+            return _jsonResponse({
+              'code': 'helperStopping',
+              'message': 'Helper is stopping',
+            }, statusCode: HttpStatus.serviceUnavailable);
+          }
+          return _jsonResponse({
+            'sessionId': _sessionId,
+            'stopped': false,
+            'reason': 'notRunning',
+          });
+        }),
+      );
+      final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 3);
+      final launcher = FallbackCoreLauncher(
+        primary: HelperLauncher(client),
+        fallback: direct,
+      );
+
+      await expectLater(
+        launcher.start(sessionId: _sessionId, address: 'test-address'),
+        throwsA(
+          isA<HelperException>().having(
+            (error) => error.code,
+            'code',
+            'helperStopping',
+          ),
+        ),
+      );
+      expect(requests.map((request) => request.uri.path), ['/start', '/stop']);
+      expect(requests.last.data, {'sessionId': _sessionId});
+      expect(direct.startCount, 0);
+    });
+
     test('does not fall back for ambiguous Helper start failures', () async {
       final helper = FakeLauncher(owner: CoreProcessOwner.windowsHelper, pid: 2)
         ..startError = const HelperException(
@@ -757,6 +968,7 @@ HelperClient _client(
   String Function()? expectedHelperPath,
   Future<String> Function()? readCoreSha256,
   int? Function()? readHelperPort,
+  bool isLinux = false,
 }) {
   final dio = Dio()..httpClientAdapter = adapter;
   return HelperClient(
@@ -764,6 +976,7 @@ HelperClient _client(
     expectedHelperPath: expectedHelperPath ?? () => r'C:\Helper.exe',
     readCoreSha256: readCoreSha256 ?? () async => _coreSha256,
     readHelperPort: readHelperPort,
+    isLinux: isLinux,
   );
 }
 

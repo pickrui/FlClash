@@ -55,6 +55,7 @@ object Service {
         }
     }
 
+    @Volatile
     var onServiceDisconnected: ((String) -> Unit)? = null
 
     private fun handleServiceDisconnected(message: String) {

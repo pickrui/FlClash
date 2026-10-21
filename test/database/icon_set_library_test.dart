@@ -46,6 +46,67 @@ void main() {
     },
   );
 
+  test(
+    'a queued refresh preserves a name edited before its download starts',
+    () async {
+      final library = IconSetLibrary(db, download: (_) async => content);
+      final initial = await library.importUrl(
+        'https://example.invalid/icons.json',
+      );
+      await db.iconSetsDao.rename(initial.id, 'User name');
+      await library.sync(initial);
+      expect((await db.iconSetsDao.all().getSingle()).name, 'User name');
+    },
+  );
+
+  for (final editUrl in [false, true]) {
+    test(
+      'a slow ${editUrl ? 'URL edit' : 'refresh'} respects a newer import',
+      () async {
+        const initial = IconSet(
+          id: 1,
+          name: 'Original',
+          url: 'https://example.invalid/icons.json',
+        );
+        await db.iconSetsDao.put(initial);
+        final started = Completer<void>();
+        final response = Completer<String>();
+        final library = IconSetLibrary(
+          db,
+          download: (_) {
+            started.complete();
+            return response.future;
+          },
+        );
+        final syncing = editUrl
+            ? library.sync(
+                initial.copyWith(
+                  name: 'Edited',
+                  url: 'https://example.invalid/new.json',
+                ),
+                previousUrl: initial.url,
+              )
+            : library.sync(initial);
+        await started.future;
+        await IconSetLibrary(
+          db,
+          download: (_) async => content.replaceAll('hk.png', 'newer.png'),
+        ).importUrl(initial.url, name: 'New import');
+        final imported = await db.iconSetsDao.all().getSingle();
+        response.complete(content);
+        await syncing;
+        final stored = await db.iconSetsDao.all().getSingle();
+        if (editUrl) {
+          expect(stored.url, 'https://example.invalid/new.json');
+          expect(stored.name, 'Edited');
+          expect(stored.icons.single.url, 'https://example.invalid/hk.png');
+        } else {
+          expect(stored, imported);
+        }
+      },
+    );
+  }
+
   test('a stale refresh cannot undo an already edited URL', () async {
     var downloads = 0;
     final library = IconSetLibrary(

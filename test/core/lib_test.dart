@@ -117,6 +117,59 @@ void main() {
     );
   }
 
+  for (final close in [false, true]) {
+    testWidgets(
+      'a ${close ? 'closed' : 'lost'} service retires calls waiting for connection',
+      (tester) async {
+        final service = _Service();
+        final core = CoreLib.forTesting(
+          service: service,
+          readSharedState: () => _sharedState,
+        );
+        Object? failure;
+        final call = core
+            .invokeMethod<bool>(method: CoreMethod.getIsInit)
+            .then<void>((_) {}, onError: (Object error) => failure = error);
+        try {
+          await tester.pump();
+          expect(service.calls, isEmpty);
+          if (close) {
+            await core.destroy();
+          } else {
+            core.onServiceCrash('service process died before connection');
+          }
+          await tester.pump();
+          expect(
+            failure,
+            isA<CoreMethodException>().having(
+              (error) => error.code,
+              'code',
+              'transport_disconnected',
+            ),
+          );
+          if (!close) {
+            expect(await core.preload(), isEmpty);
+            await tester.pump();
+            expect(service.calls, isEmpty);
+            service.invocation.complete(const CoreMethodResponse(result: true));
+            expect(
+              await core.invokeMethod<bool>(method: CoreMethod.getIsInit),
+              isTrue,
+            );
+            expect(service.calls, hasLength(1));
+          }
+        } finally {
+          if (!service.invocation.isCompleted) {
+            service.invocation.complete(null);
+          }
+          await core.destroy();
+          await tester.pump(const Duration(seconds: 10));
+          await call;
+        }
+      },
+    );
+  }
+
   test('a lost service invalidates the connection before restarting', () async {
     final service = _Service();
     final core = CoreLib.forTesting(

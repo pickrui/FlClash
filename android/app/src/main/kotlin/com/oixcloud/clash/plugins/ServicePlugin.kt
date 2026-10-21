@@ -14,7 +14,6 @@ import com.oixcloud.clash.service.models.ServiceRunState
 import com.oixcloud.clash.models.SharedState
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.StandardMethodCodec
@@ -25,13 +24,14 @@ import kotlinx.coroutines.launch
 
 class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
-    private lateinit var messenger: BinaryMessenger
     private lateinit var flutterMethodChannel: MethodChannel
     private lateinit var coreChannel: MethodChannel
-    @Volatile private var attached = false
+    @Volatile private lateinit var events: EngineEventDispatcher
+    private var disconnectListener: ((String) -> Unit)? = null
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        messenger = flutterPluginBinding.binaryMessenger
+        val messenger = flutterPluginBinding.binaryMessenger
+        events = EngineEventDispatcher(messenger, SERVICE_CHANNEL)
         flutterMethodChannel = MethodChannel(messenger, SERVICE_CHANNEL)
         flutterMethodChannel.setMethodCallHandler(this)
         // Requests reach 64 MiB; decoding one on the platform thread drops frames.
@@ -42,13 +42,23 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
             messenger.makeBackgroundTaskQueue(),
         )
         coreChannel.setMethodCallHandler(::onCoreMethodCall)
-        attached = true
     }
 
     override fun onDetachedFromEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        attached = false
+        val owner = events
+        owner.close()
+        if (Service.onServiceDisconnected === disconnectListener) {
+            Service.onServiceDisconnected = null
+        }
+        disconnectListener = null
+        clearEventListener()
         flutterMethodChannel.setMethodCallHandler(null)
         coreChannel.setMethodCallHandler(null)
+    }
+
+    internal fun clearEventListener() {
+        val owner = events
+        GlobalState.launch { Service.clearEventListener(owner) }
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) = when (call.method) {
@@ -131,24 +141,11 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     }
 
     fun handleStateChanged() {
-        launch(Dispatchers.Main) {
-            if (attached) flutterMethodChannel.invokeMethod("stateChanged", null)
-        }
+        events.send("stateChanged", null)
     }
 
     fun handleSendEvent(value: ByteArray) {
-        val message = StandardMethodCodec.INSTANCE.encodeMethodCall(MethodCall("event", value))
-        launch(Dispatchers.Main) {
-            messenger.send(SERVICE_CHANNEL, message)
-        }
-    }
-
-    private fun onServiceDisconnected(message: String) {
-        launch(Dispatchers.Main) {
-            if (attached && State.servicePlugin === this@ServicePlugin) {
-                flutterMethodChannel.invokeMethod("crash", message)
-            }
-        }
+        events.send("event", value)
     }
 
     private fun handleSyncState(call: MethodCall, result: MethodChannel.Result) {
@@ -162,11 +159,16 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
 
 
     fun handleInit(result: MethodChannel.Result) {
-        Service.onServiceDisconnected = ::onServiceDisconnected
+        val owner = events
+        val listener: (String) -> Unit = { message ->
+            owner.send("crash", message) { State.servicePlugin === this@ServicePlugin }
+        }
+        disconnectListener = listener
+        Service.onServiceDisconnected = listener
         Service.bind()
         launch {
-            Service.setEventListener(this@ServicePlugin, { attached && State.servicePlugin === this@ServicePlugin }) {
-                handleSendEvent(it)
+            Service.setEventListener(owner, { owner.isActive && State.servicePlugin === this@ServicePlugin }) {
+                owner.send("event", it)
             }.onSuccess {
                 result.success("")
             }.onFailure {

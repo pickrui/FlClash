@@ -32,14 +32,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.resume
 
-private const val EVENT_ACK_TIMEOUT_MILLIS = 5_000L
+private const val CALLBACK_ACK_TIMEOUT_MILLIS = 5_000L
 
 class RemoteService : Service(),
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
@@ -94,7 +92,7 @@ class RemoteService : Service(),
                 )
                 // Stop pacing on a frozen or dead listener until it acknowledges again.
                 if (!stalled.get() &&
-                    withTimeoutOrNull(EVENT_ACK_TIMEOUT_MILLIS) { acknowledged.await() } == null
+                    withTimeoutOrNull(CALLBACK_ACK_TIMEOUT_MILLIS) { acknowledged.await() } == null
                 ) {
                     stalled.set(true)
                 }
@@ -213,25 +211,33 @@ class RemoteService : Service(),
         }
     }
 
+    private suspend fun deliverReply(chunks: List<ByteArray>, callback: ICallbackInterface) {
+        for ((index, chunk) in chunks.withIndex()) {
+            val delivered = withTimeoutOrNull(CALLBACK_ACK_TIMEOUT_MILLIS) {
+                val acknowledged = CompletableDeferred<Unit>()
+                callback.onResult(
+                    chunk,
+                    index == chunks.lastIndex,
+                    object : IAckInterface.Stub() {
+                        override fun onAck() { acknowledged.complete(Unit) }
+                    },
+                )
+                acknowledged.await()
+                true
+            }
+            if (delivered != true) {
+                GlobalState.log("Core reply was not acknowledged")
+                return
+            }
+        }
+    }
+
     private val binder = object : IRemoteInterface.Stub() {
         override fun invokeMethod(data: String, callback: ICallbackInterface) {
             Core.invokeMethod(data) {
                 launch {
                     runCatching {
-                        val chunks = it?.chunkedForAidl() ?: listOf()
-                        for ((index, chunk) in chunks.withIndex()) {
-                            suspendCancellableCoroutine { cont ->
-                                callback.onResult(
-                                    chunk,
-                                    index == chunks.lastIndex,
-                                    object : IAckInterface.Stub() {
-                                        override fun onAck() {
-                                            cont.resume(Unit)
-                                        }
-                                    },
-                                )
-                            }
-                        }
+                        deliverReply(it?.chunkedForAidl().orEmpty(), callback)
                     }
                 }
             }
@@ -255,20 +261,7 @@ class RemoteService : Service(),
             Core.quickSetup(initParamsString, setupParamsString) {
                 launch {
                     runCatching {
-                        val chunks = it?.chunkedForAidl() ?: listOf()
-                        for ((index, chunk) in chunks.withIndex()) {
-                            suspendCancellableCoroutine { cont ->
-                                callback.onResult(
-                                    chunk,
-                                    index == chunks.lastIndex,
-                                    object : IAckInterface.Stub() {
-                                        override fun onAck() {
-                                            cont.resume(Unit)
-                                        }
-                                    },
-                                )
-                            }
-                        }
+                        deliverReply(it?.chunkedForAidl().orEmpty(), callback)
                     }
                 }
             }

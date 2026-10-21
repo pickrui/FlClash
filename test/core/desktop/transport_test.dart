@@ -189,6 +189,7 @@ void main() {
       await connected;
 
       expect(connectionError, isA<TimeoutException>());
+      expect(transport.hasEventListeners, isFalse);
       expect(transport.state, DesktopTransportState.ready);
       final reconnected = transport.waitUntilConnected(
         const Duration(seconds: 1),

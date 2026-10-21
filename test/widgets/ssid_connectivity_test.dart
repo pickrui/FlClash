@@ -11,8 +11,79 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  for (final retiredBy in ['dispose', 'network', 'settings', 'permission']) {
+    testWidgets('retired SSID lookup stops after $retiredBy changes', (
+      tester,
+    ) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container
+          .read(networkSettingProvider.notifier)
+          .update((state) => state.copyWith(excludeSSIDs: ['Home']));
+      final events = StreamController<List<ConnectivityResult>>();
+      addTearDown(events.close);
+      final pending = Completer<int>();
+      final calls = <String>[];
+      const channel = MethodChannel('wifi_ssid');
+      final messenger = tester.binding.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        calls.add(call.method);
+        if (call.method == 'checkPermission') {
+          return retiredBy == 'permission' ? 1 : pending.future;
+        }
+        if (call.method == 'requestPermission') {
+          return retiredBy == 'permission' ? pending.future : 0;
+        }
+        return 'Home';
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      final lifecycle = tester.binding.lifecycleState;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      addTearDown(() {
+        if (lifecycle != null) {
+          tester.binding.handleAppLifecycleStateChanged(lifecycle);
+        }
+      });
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: ConnectivityManager(
+            connectivityStream: events.stream,
+            checkConnectivity: () async => [ConnectivityResult.wifi],
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      await tester.pump();
+      final expectedCalls = [
+        'checkPermission',
+        if (retiredBy == 'permission') 'requestPermission',
+      ];
+      expect(calls, expectedCalls);
+      switch (retiredBy) {
+        case 'dispose':
+        case 'permission':
+          await tester.pumpWidget(const SizedBox());
+        case 'network':
+          events.add([ConnectivityResult.mobile]);
+        case 'settings':
+          container
+              .read(networkSettingProvider.notifier)
+              .update((state) => state.copyWith(excludeSSIDs: []));
+      }
+      await tester.pump();
+      pending.complete(retiredBy == 'permission' ? 0 : 1);
+      await tester.pump();
+      expect(calls, expectedCalls);
+      expect(container.read(currentSSIDProvider), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(Duration.zero);
+    });
+  }
+
   testWidgets(
     'listener startup failure is contained without changing callback zone',
     (tester) async {

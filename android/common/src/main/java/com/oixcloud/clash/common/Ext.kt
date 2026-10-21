@@ -21,11 +21,10 @@ import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
 import android.os.Build
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -145,22 +144,27 @@ fun Context.bindServiceFlow(
         override fun onServiceDisconnected(name: ComponentName?) {
             trySend(Pair(null, "Service disconnected"))
         }
+
+        override fun onBindingDied(name: ComponentName?) {
+            trySend(Pair(null, "Service binding died"))
+        }
+
+        override fun onNullBinding(name: ComponentName?) {
+            trySend(Pair(null, "Service returned a null binding"))
+        }
     }
 
-    val success = withContext(Dispatchers.Main) {
-        bindService(intent, connection, flags)
-    }
-
-    if (!success) {
-        // A refused bind still registers the connection until it is unbound.
-        withContext(Dispatchers.Main) { runCatching { unbindService(connection) } }
-        throw IllegalStateException("bindService() failed, will retry")
-    }
-
-    awaitClose {
-        Handler(Looper.getMainLooper()).post {
+    var registered = false
+    try {
+        val success = withContext(Dispatchers.Main) {
+            bindService(intent, connection, flags).also { registered = true }
+        }
+        check(success) { "bindService() failed, will retry" }
+        awaitClose {}
+    } finally {
+        // A refused bind also registers; cancellation can win the return from Main.
+        if (registered) withContext(NonCancellable + Dispatchers.Main) {
             unbindService(connection)
-            trySend(Pair(null, ""))
         }
     }
 }.retryWhen { cause, attempt ->

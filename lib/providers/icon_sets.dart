@@ -11,6 +11,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 
 import 'database.dart';
 
@@ -171,6 +172,11 @@ class IconSetLibrary {
     return _serialize(() async {
       final current = await database.iconSetsDao.get(item.id).getSingleOrNull();
       if (current == null || current.url != before.url) return current ?? item;
+      if (item.url == before.url &&
+          (current.lastUpdateTime != before.lastUpdateTime ||
+              !listEquals(current.icons, before.icons))) {
+        return current;
+      }
       final duplicates = (await database.iconSetsDao.all().get()).any(
         (row) => row.id != item.id && row.url == item.url,
       );
@@ -178,7 +184,9 @@ class IconSetLibrary {
         throw const IconSetLibraryException('duplicate');
       }
       final updated = current.copyWith(
-        name: item.name == before.name ? current.name : item.name,
+        name: previousUrl == null || item.name == before.name
+            ? current.name
+            : item.name,
         url: item.url,
         icons: parsed.icons,
         lastUpdateTime: DateTime.now(),

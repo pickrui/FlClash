@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:rust_api/rust_api.dart';
 
 typedef IpcServerBinder = Future<IpcServer> Function(String address);
@@ -215,6 +216,9 @@ final class IpcCoreTransport implements DesktopCoreTransport {
   @override
   Stream<Uint8List> get frames => _frameController.stream;
 
+  @visibleForTesting
+  bool get hasEventListeners => _eventController.hasListener;
+
   @override
   Future<void> open() {
     if (_state == DesktopTransportState.closed) {
@@ -329,17 +333,18 @@ final class IpcCoreTransport implements DesktopCoreTransport {
       return Future.error(failure.error, failure.stackTrace);
     }
     return events
-        .firstWhere(
+        .where(
           (event) => event is TransportConnected || event is TransportFailed,
         )
+        .timeout(timeout)
+        .first
         .then<TransportConnected>((event) {
           if (event case TransportConnected()) {
             return event;
           }
           final failure = event as TransportFailed;
           Error.throwWithStackTrace(failure.error, failure.stackTrace);
-        })
-        .timeout(timeout);
+        });
   }
 
   /// Hands [frame] to the server at once when its outbox has room. Otherwise

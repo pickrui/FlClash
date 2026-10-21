@@ -460,6 +460,48 @@ mod tests {
     }
 
     #[test]
+    fn closing_retires_partial_reads_blocked_writes_and_waiting_senders() {
+        let path = socket_path();
+        let (server, events) = serve(&path);
+        let server = Arc::new(server);
+        let mut peer = connect(&path);
+        expect_connected(&events);
+        peer.write_all(&1024_u32.to_le_bytes()).unwrap();
+        peer.write_all(b"partial").unwrap();
+
+        server.send(&vec![1; 20 * 1024 * 1024]).unwrap();
+        let queued = vec![2; 10 * 1024 * 1024];
+        wait_until(|| server.send(&queued).is_ok());
+        let (sent_tx, sent_rx) = channel();
+        let sender = Arc::clone(&server);
+        let waiting = thread::spawn(move || {
+            let result = sender.send_within(&queued, Duration::from_secs(30));
+            let _ = sent_tx.send(result.map_err(|error| error.kind()));
+        });
+        assert!(matches!(
+            sent_rx.recv_timeout(Duration::from_millis(100)),
+            Err(mpsc::RecvTimeoutError::Timeout)
+        ));
+
+        let (closed_tx, closed_rx) = channel();
+        let closing = Arc::clone(&server);
+        let closer = thread::spawn(move || {
+            closing.close();
+            let _ = closed_tx.send(());
+        });
+        let closed = closed_rx.recv_timeout(WAIT);
+        drop(peer);
+        closed.expect("closing waited for the stalled peer");
+        assert_eq!(
+            sent_rx.recv_timeout(WAIT).unwrap(),
+            Err(io::ErrorKind::NotConnected)
+        );
+        waiting.join().unwrap();
+        closer.join().unwrap();
+        assert!(!Path::new(&path).exists());
+    }
+
+    #[test]
     fn dropping_the_server_releases_the_socket() {
         let path = socket_path();
         let (server, _events) = serve(&path);

@@ -51,7 +51,7 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
   @override
   void onServiceCrash(String message) {
     ++_lifecycleRevision;
-    _disconnect(message);
+    _disconnect(details: message, cancelConnecting: true);
     final disconnected = _connectedCompleter;
     coreEventManager.sendEvent(
       CoreEvent(type: CoreEventType.crash, data: message),
@@ -62,9 +62,12 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
     );
   }
 
-  void _disconnect([String? details]) {
-    if (_connectedCompleter.isCompleted) {
+  void _disconnect({String? details, bool cancelConnecting = false}) {
+    // Startup cleanup preserves callers already waiting for the next service.
+    if (_connectedCompleter.isCompleted || cancelConnecting) {
+      final previous = _connectedCompleter;
       _connectedCompleter = Completer<bool>();
+      if (!previous.isCompleted) previous.complete(false);
     }
     final pending = _pendingCalls.toList(growable: false);
     _pendingCalls.clear();
@@ -186,13 +189,14 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
       await _startOperation;
     } catch (_) {}
     final revision = ++_lifecycleRevision;
-    if (!_connectedCompleter.isCompleted) {
+    final wasConnected = _connectedCompleter.isCompleted;
+    _disconnect(cancelConnecting: _closed);
+    if (!wasConnected) {
       return CoreLifecycleResult(
         revision: revision,
         outcome: CoreLifecycleOutcome.coalesced,
       );
     }
-    _disconnect();
     final stopped = await _service?.shutdown() ?? true;
     if (!stopped) {
       throw StateError('Android Core service shutdown failed');
@@ -222,8 +226,9 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
       );
     }
     final connection = _connectedCompleter;
+    final bool connected;
     try {
-      await connection.future.timeout(const Duration(seconds: 10));
+      connected = await connection.future.timeout(const Duration(seconds: 10));
     } catch (error) {
       commonPrint.log(
         'Invoke method ${method.name} before connection timed out: $error',
@@ -231,7 +236,7 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
       );
       return null;
     }
-    if (_closed || !identical(connection, _connectedCompleter)) {
+    if (!connected || _closed || !identical(connection, _connectedCompleter)) {
       throw const CoreMethodException(
         code: 'transport_disconnected',
         message: 'Android Core service disconnected before sending the call',

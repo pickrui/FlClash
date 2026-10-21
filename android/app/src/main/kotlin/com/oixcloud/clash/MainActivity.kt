@@ -5,14 +5,12 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 package com.oixcloud.clash
 
-import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.plugins.BatteryPlugin
 import com.oixcloud.clash.plugins.AppPlugin
 import com.oixcloud.clash.plugins.ServicePlugin
 import com.oixcloud.clash.plugins.TilePlugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import kotlinx.coroutines.launch
 
 class MainActivity : FlutterActivity() {
     private var ownedEngine: FlutterEngine? = null
@@ -32,9 +30,7 @@ class MainActivity : FlutterActivity() {
         val owner = engine?.plugin<ServicePlugin>()
         ownedEngine = null
         if (State.flutterEngine === engine) State.flutterEngine = null
-        if (owner != null) GlobalState.launch {
-            Service.clearEventListener(owner)
-        }
+        owner?.clearEventListener()
         super.onDestroy()
     }
 }

@@ -6,6 +6,7 @@
 use anyhow::{anyhow, bail, Result};
 use std::ffi::{OsStr, OsString};
 use std::net::SocketAddrV4;
+use std::path::PathBuf;
 
 const OWNER_SID_FLAG: &str = "--owner-sid";
 const OWNER_PID_FLAG: &str = "--owner-pid";
@@ -60,6 +61,58 @@ pub fn service_command(args: impl IntoIterator<Item = OsString>) -> Result<Servi
         }
         [value, ..] => bail!("unknown helper command: {}", value.to_string_lossy()),
     }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct InstallLockSource {
+    pub pid: u32,
+    pub handle: usize,
+}
+
+pub struct ServiceInvocation {
+    pub command: ServiceCommand,
+    pub install_lock: Option<InstallLockSource>,
+    pub executable: Option<PathBuf>,
+}
+
+pub fn service_invocation(args: impl IntoIterator<Item = OsString>) -> Result<ServiceInvocation> {
+    let mut args: Vec<OsString> = args.into_iter().collect();
+    let install_lock = if args.len() >= 3 && args[args.len() - 3] == "--install-lock" {
+        let values = args.split_off(args.len() - 3);
+        let pid = values[1]
+            .to_str()
+            .and_then(|v| v.parse::<u32>().ok())
+            .filter(|v| *v != 0)
+            .ok_or_else(|| anyhow!("invalid installer process ID"))?;
+        let handle = values[2]
+            .to_str()
+            .and_then(|v| v.parse::<usize>().ok())
+            .filter(|v| *v != 0 && *v <= isize::MAX as usize)
+            .ok_or_else(|| anyhow!("invalid installer lock handle"))?;
+        Some(InstallLockSource { pid, handle })
+    } else {
+        None
+    };
+    let executable = if args.len() >= 2 && args[args.len() - 2] == "--service-path" {
+        let values = args.split_off(args.len() - 2);
+        if install_lock.is_none() || values[1].is_empty() {
+            bail!("an explicit service path requires an installer lock");
+        }
+        Some(PathBuf::from(&values[1]))
+    } else {
+        None
+    };
+    let command = service_command(args)?;
+    if (install_lock.is_some() && matches!(command, ServiceCommand::Run { .. }))
+        || (executable.is_some() && !matches!(command, ServiceCommand::Install { .. }))
+    {
+        bail!("installer arguments are only valid for service maintenance");
+    }
+    Ok(ServiceInvocation {
+        command,
+        install_lock,
+        executable,
+    })
 }
 
 fn owner_sid(value: &OsStr) -> Result<String> {
@@ -149,6 +202,79 @@ mod tests {
         assert_eq!(
             service_command(os(&["uninstall"])).unwrap(),
             ServiceCommand::Uninstall
+        );
+    }
+
+    #[test]
+    fn installer_capability_does_not_widen_service_start_arguments() {
+        let parsed = service_invocation(os(&[
+            "install",
+            "--owner-sid",
+            SID,
+            "--service-path",
+            r"C:\Program Files\FlClash\FlClashHelperService.exe",
+            "--install-lock",
+            "4242",
+            "256",
+        ]))
+        .unwrap();
+        assert_eq!(
+            parsed.command,
+            ServiceCommand::Install {
+                owner: InstallOwner::Account(SID.into())
+            }
+        );
+        assert_eq!(
+            parsed.install_lock,
+            Some(InstallLockSource {
+                pid: 4242,
+                handle: 256
+            })
+        );
+        assert_eq!(
+            parsed.executable,
+            Some(PathBuf::from(
+                r"C:\Program Files\FlClash\FlClashHelperService.exe"
+            ))
+        );
+        for args in [
+            vec!["--owner-sid", SID, "--install-lock", "4242", "256"],
+            vec![
+                "install",
+                "--owner-sid",
+                SID,
+                "--service-path",
+                "helper.exe",
+            ],
+            vec![
+                "uninstall",
+                "--service-path",
+                "helper.exe",
+                "--install-lock",
+                "4242",
+                "256",
+            ],
+            vec!["uninstall", "--install-lock", "0", "256"],
+            vec!["uninstall", "--install-lock", "4242", "0"],
+            vec!["uninstall", "--install-lock", "4242", "-1"],
+            vec![
+                "uninstall",
+                "--install-lock",
+                "4242",
+                "18446744073709551615",
+            ],
+            vec!["uninstall", "--install-lock", "4242", "256", "extra"],
+        ] {
+            assert!(service_invocation(os(&args)).is_err(), "{args:?}");
+        }
+        let legacy = service_invocation(os(&["install", "--owner-pid", "42"])).unwrap();
+        assert!(legacy.install_lock.is_none());
+        assert!(legacy.executable.is_none());
+        assert_eq!(
+            legacy.command,
+            ServiceCommand::Install {
+                owner: InstallOwner::Process(42)
+            }
         );
     }
 

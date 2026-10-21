@@ -28,10 +28,10 @@ class DesktopUpdateWorkerTest(unittest.TestCase):
         self.target = self.root / 'FlClash.AppImage'
         self.marker = self.root / 'launched'
         self.result = self.root / 'result'
-        self.target.write_text(f'#!/bin/sh\nprintf old >{shlex.quote(str(self.marker))}\n')
+        self.target.write_text(f'#!/bin/sh\nprintf old >{shlex.quote(str(self.marker) + ".tmp")}\nmv {shlex.quote(str(self.marker) + ".tmp")} {shlex.quote(str(self.marker))}\n')
         self.target.chmod(0o755)
         self.next = self.stage / 'next'
-        self.next.write_text(f'#!/bin/sh\nprintf new >{shlex.quote(str(self.marker))}\n')
+        self.next.write_text(f'#!/bin/sh\nprintf new >{shlex.quote(str(self.marker) + ".tmp")}\nmv {shlex.quote(str(self.marker) + ".tmp")} {shlex.quote(str(self.marker))}\n')
         self.next.chmod(0o755)
         self.digest = hashlib.sha256(self.next.read_bytes()).hexdigest()
         checksum = self.root / 'checksum'

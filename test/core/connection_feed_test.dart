@@ -252,6 +252,40 @@ void main() {
   );
 
   test(
+    'a retired failure does not delay the next connection subscription',
+    () async {
+      var serial = 0;
+      final old = Completer<Object?>();
+      final published = <List<TrackerInfo>>[];
+      final feed = ConnectionFeed(
+        newId: () => '${++serial}',
+        onSnapshot: published.add,
+        invoke: (method, id) => method != CoreMethod.startConnections
+            ? Future.value(true)
+            : id == '1'
+            ? old.future
+            : Future.value(snapshot(id, 'fresh')),
+      );
+      addTearDown(feed.stop);
+      final opening = feed.maintain();
+      final retired = expectLater(opening, completes);
+      feed.stop();
+      await feed.maintain();
+      expect(serial, 1);
+      old.completeError(
+        const CoreMethodException(
+          code: 'transport_error',
+          message: 'old transport',
+        ),
+      );
+      await retired;
+      await feed.maintain();
+      expect(serial, 2);
+      expect(published.single.single.id, 'fresh');
+    },
+  );
+
+  test(
     'a silent restart is detected even if its final event was dropped',
     () async {
       var now = DateTime.utc(2026);

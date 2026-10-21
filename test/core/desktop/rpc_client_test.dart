@@ -11,6 +11,7 @@ import 'dart:typed_data';
 import 'package:fl_clash/core/desktop/rpc_client.dart';
 import 'package:fl_clash/core/event.dart';
 import 'package:fl_clash/core/method.dart';
+import 'package:fl_clash/common/path.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/app_paths.dart';
@@ -401,6 +402,59 @@ void main() {
     await waitUntilDeleted(late);
     expect(late.existsSync(), isFalse);
   });
+
+  for (final closeClient in [false, true]) {
+    test(
+      '${closeClient ? 'close' : 'disconnect'} releases a reply still reading its spill file',
+      () async {
+        final transport = FakeDesktopCoreTransport.connected();
+        final client = CoreRpcClient(transport);
+        final directory = Completer<Directory>();
+        final original = AppPath.supportDirectory;
+        AppPath.supportDirectory = () => directory.future;
+        final rebound = appPath.rebind();
+        Object? failure;
+        final invocation = client
+            .invoke<String>(method: CoreMethod.getConfig)
+            .then<void>((_) {}, onError: (Object error) => failure = error);
+        try {
+          final id = (await _sentRequest(transport))['id'];
+          final (file, key) = await sealSpilledReply(home.path, {
+            'id': id,
+            'result': 'obsolete configuration',
+          });
+          transport.addJson({'id': id, 'file': file.path, 'key': key});
+          await pumpEventQueue();
+          if (closeClient) {
+            await client.close();
+          } else {
+            transport.disconnect(1);
+          }
+          await pumpEventQueue();
+          expect(
+            failure,
+            isA<CoreMethodException>().having(
+              (error) => error.code,
+              'code',
+              'transport_disconnected',
+            ),
+          );
+          expect(client.pendingCount, 0);
+          directory.complete(home);
+          await rebound;
+          await waitUntilDeleted(file);
+        } finally {
+          if (!directory.isCompleted) directory.complete(home);
+          await rebound;
+          await invocation;
+          AppPath.supportDirectory = original;
+          await appPath.rebind();
+          await client.close();
+          await transport.close();
+        }
+      },
+    );
+  }
 
   test('forwards Core message events', () async {
     final transport = FakeDesktopCoreTransport.connected();

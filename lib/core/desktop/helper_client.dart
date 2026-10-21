@@ -558,13 +558,17 @@ final class HelperCoreLease implements CoreProcessLease {
     if (stopOperation != null) {
       return stopOperation;
     }
-    final nextOperation = _stop().onError((
-      Object error,
-      StackTrace stackTrace,
-    ) {
-      _stopOperation = null;
-      Error.throwWithStackTrace(error, stackTrace);
-    });
+    final nextOperation = _stop()
+        .then((result) {
+          if (!result.exitConfirmed) {
+            _stopOperation = null;
+          }
+          return result;
+        })
+        .onError((Object error, StackTrace stackTrace) {
+          _stopOperation = null;
+          Error.throwWithStackTrace(error, stackTrace);
+        });
     _stopOperation = nextOperation;
     return nextOperation;
   }
@@ -574,16 +578,22 @@ final class HelperCoreLease implements CoreProcessLease {
     try {
       response = await _client.stop(sessionId);
     } on HelperException catch (error) {
-      if (error.code != 'transportError' || await _livenessProbe(pid)) rethrow;
+      final canConfirmRootExit =
+          error.code == 'sessionMismatch' ||
+          (_client.isLinux && error.code == 'transportError');
+      if (!canConfirmRootExit || await _livenessProbe(pid)) {
+        rethrow;
+      }
       commonPrint.log(
-        'Helper is unreachable and Core $pid has exited; session $sessionId is released',
+        'Helper stop returned ${error.code} and Core $pid has exited; session $sessionId is released',
         logLevel: LogLevel.warning,
       );
       return const CoreProcessStopResult(stopped: false, exitConfirmed: true);
     }
+    // A restarted Helper has no session record for a surviving old Core.
     return CoreProcessStopResult(
       stopped: response.stopped,
-      exitConfirmed: true,
+      exitConfirmed: response.stopped || !await _livenessProbe(pid),
     );
   }
 }

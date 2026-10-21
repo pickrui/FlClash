@@ -61,7 +61,7 @@ void main() {
         scriptsProvider.overrideWithBuild((_, _) => Stream.value([])),
         clashProvidersProvider.overrideWith((_) => Stream.value([item])),
         patchClashConfigProvider.overrideWithBuild(
-          (_, _) => const ClashConfig(),
+          (_, _) => const ClashConfig(geoAutoUpdate: true),
         ),
         setupActionProvider.overrideWith(_NoGeoUpdates.new),
         resourcesProvider.overrideWith(
@@ -87,6 +87,82 @@ void main() {
       await root.delete(recursive: true);
     });
   });
+
+  test('automatic updates load libraries without page subscriptions', () async {
+    final updating = container.read(resourcesProvider).autoUpdate();
+    await requested.future.timeout(const Duration(seconds: 2));
+    response.complete(valid);
+    await updating;
+    expect(downloads, 1);
+    expect(await File(await item.resourcePath).readAsBytes(), valid);
+    await container.pump();
+    expect(container.exists(scriptsProvider), isFalse);
+  });
+
+  test('library errors propagate and release the temporary listener', () async {
+    final failure = StateError('fixture library failure');
+    var cancellations = 0;
+    container.dispose();
+    container = ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        iconSetsProvider.overrideWithBuild((ref, _) {
+          ref.onCancel(() => cancellations++);
+          return Stream.error(failure);
+        }),
+        resourcesProvider.overrideWith(
+          (ref) => ResourceUpdates(ref, store: db),
+        ),
+      ],
+    );
+    await expectLater(
+      container.read(resourcesProvider).updateAll(shouldContinue: () => true),
+      throwsA(same(failure)),
+    );
+    await container.pump();
+    expect(cancellations, 1);
+  });
+
+  for (final automatic in [false, true]) {
+    test(
+      '${automatic ? 'automatic' : 'bulk'} update stops when disposed during library loading',
+      () async {
+        final icons = Completer<List<IconSet>>();
+        final entered = Completer<void>();
+        var scriptReads = 0;
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            iconSetsProvider.overrideWithBuild((_, _) {
+              entered.complete();
+              return icons.future.asStream();
+            }),
+            scriptsProvider.overrideWithBuild((_, _) {
+              scriptReads++;
+              return Stream.value([]);
+            }),
+            clashProvidersProvider.overrideWith((_) => Stream.value([item])),
+            patchClashConfigProvider.overrideWithBuild(
+              (_, _) => const ClashConfig(geoAutoUpdate: true),
+            ),
+            setupActionProvider.overrideWith(_NoGeoUpdates.new),
+            resourcesProvider.overrideWith(
+              (ref) => ResourceUpdates(ref, store: db),
+            ),
+          ],
+        );
+        final service = container.read(resourcesProvider);
+        final updating = automatic
+            ? service.autoUpdate()
+            : service.updateAll(shouldContinue: () => true);
+        await entered.future.timeout(const Duration(seconds: 2));
+        container.dispose();
+        icons.complete([]);
+        await updating.timeout(const Duration(seconds: 2));
+        expect(scriptReads, 0);
+      },
+    );
+  }
 
   test('bulk failures translate network and library errors without replacing cache', () async {
     final previousLocale = Intl.defaultLocale;

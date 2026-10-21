@@ -54,6 +54,7 @@ class ConnectionFeed with CoreEventListener {
   DateTime? _renewedAt;
   DateTime? _retryAt;
   int _failures = 0;
+  int _generation = 0;
   bool _opening = false;
   bool _busy = false;
   bool _active = false;
@@ -67,6 +68,7 @@ class ConnectionFeed with CoreEventListener {
     final now = _now();
     if (_busy || (_retryAt != null && now.isBefore(_retryAt!))) return;
     _busy = true;
+    final generation = _generation;
     try {
       if (_needsReset ||
           _receivedAt == null ||
@@ -81,9 +83,11 @@ class ConnectionFeed with CoreEventListener {
           if (renewed != true) _needsReset = true;
         }
       }
+      if (generation != _generation) return;
       _failures = 0;
       _retryAt = null;
     } catch (_) {
+      if (generation != _generation) return;
       _failures++;
       _retryAt = _now().add(Duration(seconds: 1 << min(_failures - 1, 3)));
       rethrow;
@@ -210,6 +214,7 @@ class ConnectionFeed with CoreEventListener {
   }
 
   void stop() {
+    _generation++;
     _active = false;
     _events.removeListener(this);
     final id = _subscription;
