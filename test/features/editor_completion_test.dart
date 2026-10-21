@@ -207,6 +207,21 @@ void main() {
       expect(_labels(completion).first, 'name');
       const nested = 'proxy-groups:\n  - name: G\n    type: select\n  - pro|';
       expect(_inserted(_complete(nested), 'proxies'), 'proxies:\n  \t- ');
+      final usePosition = _complete(
+        'proxy-groups:\n  - name: G\n    type: select\n    use-p|',
+      );
+      expect(_labels(usePosition), ['use-position']);
+      expect(_inserted(usePosition, 'use-position'), 'use-position:\n\t');
+      expect(
+        _labels(_complete('name: G\nuse-p|', schema: EditorSchema.proxyGroup)),
+        ['use-position'],
+      );
+      expect(
+        _labels(
+          _complete('use-position:\n  |', schema: EditorSchema.proxyGroup),
+        ),
+        isNot(contains('proxies')),
+      );
     });
 
     test('completes rule types, matching segments and abbreviations', () {
