@@ -9,10 +9,9 @@
 package core
 
 import (
-	"io"
 	"net"
 )
 
-func dial(path string) (io.ReadWriteCloser, error) {
+func dial(path string) (ipcConn, error) {
 	return net.Dial("unix", path)
 }

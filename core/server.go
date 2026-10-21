@@ -11,18 +11,37 @@ package core
 import (
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"sync"
+	"sync/atomic"
+	"time"
 )
+
+type ipcConn interface {
+	io.ReadWriteCloser
+	SetWriteDeadline(time.Time) error
+}
 
 var (
-	conn   io.ReadWriteCloser
-	connMu sync.Mutex
+	conn                    ipcConn
+	connMu                  sync.Mutex
+	writeMu                 sync.Mutex
+	deliveryFailureReported atomic.Bool
 )
 
-const maxIPCFrameSize = 64 * 1024 * 1024
+const (
+	maxIPCFrameSize = 64 * 1024 * 1024
+	ipcWriteTimeout = 10 * time.Second
+)
+
+func logDeliveryError(format string, args ...any) {
+	if !deliveryFailureReported.Swap(true) {
+		log.Printf(format, args...)
+	}
+}
 
 func (response MethodResponse) send() {
 	data, err := response.frame()
@@ -58,30 +77,66 @@ func sendMessageBatch(messages []Message) {
 	send(data)
 }
 
-func writeFrame(writer io.Writer, data []byte) error {
+func writeFrame(writer io.Writer, data []byte) (int, error) {
 	if len(data) > maxIPCFrameSize {
-		return fmt.Errorf("IPC frame exceeds %d bytes", maxIPCFrameSize)
+		return 0, fmt.Errorf("IPC frame exceeds %d bytes", maxIPCFrameSize)
 	}
 	header := [4]byte{}
 	binary.LittleEndian.PutUint32(header[:], uint32(len(data)))
-	if err := writeAll(writer, header[:]); err != nil {
-		return err
+	written, err := writeAll(writer, header[:])
+	if err != nil {
+		return written, err
 	}
-	return writeAll(writer, data)
+	n, err := writeAll(writer, data)
+	return written + n, err
 }
 
-func writeAll(writer io.Writer, data []byte) error {
-	for len(data) > 0 {
-		written, err := writer.Write(data)
-		if err != nil {
-			return err
+type resumingWriter struct {
+	conn    ipcConn
+	written int
+}
+
+func (writer *resumingWriter) Write(data []byte) (int, error) {
+	accepted := 0
+	for {
+		n, err := writer.conn.Write(data[accepted:])
+		accepted += n
+		writer.written += n
+		if err == nil {
+			return accepted, nil
 		}
-		if written == 0 {
-			return io.ErrShortWrite
+		if accepted >= len(data) || !writer.resume(err) {
+			return accepted, err
 		}
-		data = data[written:]
 	}
-	return nil
+}
+
+// A suspended desktop app may drain again on wake. Keep a partial frame intact
+// until then; closing the connection on disconnect still interrupts the writer.
+func (writer *resumingWriter) resume(err error) bool {
+	return writer.written > 0 && isWriteTimeout(err) &&
+		writer.conn.SetWriteDeadline(time.Now().Add(ipcWriteTimeout)) == nil
+}
+
+func isWriteTimeout(err error) bool {
+	var timeout interface{ Timeout() bool }
+	return errors.As(err, &timeout) && timeout.Timeout()
+}
+
+func writeAll(writer io.Writer, data []byte) (int, error) {
+	written := 0
+	for len(data) > 0 {
+		n, err := writer.Write(data)
+		written += n
+		if err != nil {
+			return written, err
+		}
+		if n == 0 {
+			return written, io.ErrShortWrite
+		}
+		data = data[n:]
+	}
+	return written, nil
 }
 
 func readFrame(reader io.Reader) ([]byte, error) {
@@ -101,15 +156,43 @@ func readFrame(reader io.Reader) ([]byte, error) {
 }
 
 func send(data []byte) {
+	writeMu.Lock()
+	defer writeMu.Unlock()
 	connMu.Lock()
-	defer connMu.Unlock()
-	if conn == nil {
-		log.Printf("send conn nil")
+	c := conn
+	connMu.Unlock()
+	if c == nil {
+		logDeliveryError("send conn nil")
 		return
 	}
-	if err := writeFrame(conn, data); err != nil {
-		log.Printf("server write error: %v", err)
+	if len(data) > maxIPCFrameSize {
+		logDeliveryError("IPC frame exceeds %d bytes", maxIPCFrameSize)
+		return
 	}
+	if err := c.SetWriteDeadline(time.Now().Add(ipcWriteTimeout)); err != nil {
+		logDeliveryError("server write deadline error: %v", err)
+		closeConnection(c)
+		return
+	}
+	written, err := writeFrame(&resumingWriter{conn: c}, data)
+	if err == nil {
+		deliveryFailureReported.Store(false)
+		return
+	}
+	logDeliveryError("server write error after %d bytes: %v", written, err)
+	if written == 0 && isWriteTimeout(err) {
+		return
+	}
+	closeConnection(c)
+}
+
+func closeConnection(c ipcConn) {
+	connMu.Lock()
+	if conn == c {
+		conn = nil
+	}
+	connMu.Unlock()
+	_ = c.Close()
 }
 
 func StartServer(address string) {
@@ -120,12 +203,13 @@ func StartServer(address string) {
 	serve(dialed)
 }
 
-func serve(dialed io.ReadWriteCloser) {
+func serve(dialed ipcConn) {
 	connMu.Lock()
 	conn = dialed
+	deliveryFailureReported.Store(false)
 	connMu.Unlock()
 	defer releaseOnExit()
-	defer dialed.Close()
+	defer closeConnection(dialed)
 	for {
 		data, err := readFrame(dialed)
 		if err != nil {

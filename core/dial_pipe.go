@@ -9,11 +9,9 @@
 package core
 
 import (
-	"io"
-
 	"github.com/Microsoft/go-winio"
 )
 
-func dial(path string) (io.ReadWriteCloser, error) {
+func dial(path string) (ipcConn, error) {
 	return winio.DialPipe(path, nil)
 }

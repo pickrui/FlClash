@@ -296,30 +296,37 @@ type exitTestConn struct {
 	closed bool
 }
 
+func (c *exitTestConn) SetWriteDeadline(time.Time) error { return nil }
+
 func (c *exitTestConn) Write(p []byte) (int, error) { return len(p), nil }
 func (c *exitTestConn) Close() error                { c.closed = true; return nil }
 
 type recordingConn struct{ bytes.Buffer }
 
+func (c *recordingConn) SetWriteDeadline(time.Time) error { return nil }
+
 func (c *recordingConn) Close() error { return nil }
 
-func useTestConnection(t *testing.T, connection io.ReadWriteCloser) {
+func useTestConnection(t *testing.T, connection ipcConn) {
 	t.Helper()
 	connMu.Lock()
 	previous := conn
+	previousFailure := deliveryFailureReported.Load()
+	deliveryFailureReported.Store(false)
 	conn = connection
 	connMu.Unlock()
 	t.Cleanup(func() {
 		connMu.Lock()
 		conn = previous
+		deliveryFailureReported.Store(previousFailure)
 		connMu.Unlock()
 	})
 }
 
 func (c *recordingConn) responseFrame(t *testing.T, id string) []byte {
 	t.Helper()
-	connMu.Lock()
-	defer connMu.Unlock()
+	writeMu.Lock()
+	defer writeMu.Unlock()
 	for c.Len() > 0 {
 		frame, err := readFrame(&c.Buffer)
 		if err != nil {
@@ -357,6 +364,9 @@ func TestServeCleansUpOnDisconnect(t *testing.T) {
 				}
 			})
 			serve(connection)
+			if conn != nil {
+				t.Fatal("disconnected IPC is still published")
+			}
 			if !*called {
 				t.Fatal("IPC disconnect skipped cleanup")
 			}
