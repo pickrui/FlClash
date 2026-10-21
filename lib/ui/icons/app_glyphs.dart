@@ -2260,37 +2260,4 @@ abstract final class AppGlyphs {
   ]);
 
   static const columnsOne = Glyph([GlyphBox(3, 4.5, 21, 19.5, 3.5)]);
-
-  static const cardLarge = Glyph([
-    GlyphBox(3.5, 3.6, 20.5, 20.4, 3.2),
-    GlyphPolyline([
-      GlyphVertex(7, 9),
-      GlyphVertex(17, 9),
-    ], role: GlyphRole.detail),
-    GlyphPolyline([
-      GlyphVertex(7, 15),
-      GlyphVertex(13.5, 15),
-    ], role: GlyphRole.detail),
-  ], matchTextDirection: true);
-
-  static const cardMedium = Glyph([
-    GlyphBox(3.5, 6.4, 20.5, 17.6, 2.8),
-    GlyphPolyline([
-      GlyphVertex(7, 12),
-      GlyphVertex(17, 12),
-    ], role: GlyphRole.detail),
-  ], matchTextDirection: true);
-
-  static const cardSmall = Glyph([GlyphBox(3.5, 9, 20.5, 15, 2.2)]);
-
-  static const iconPlain = Glyph([
-    GlyphPolyline([
-      GlyphVertex(3, 17.6),
-      GlyphVertex(9.6, 11, 1.2),
-      GlyphVertex(14.2, 15.6, 1.2),
-      GlyphVertex(16.6, 13.2, 1.2),
-      GlyphVertex(21, 17.6),
-    ]),
-    GlyphCircle(16.4, 7.4, 2.2, solid: true),
-  ]);
 }

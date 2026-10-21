@@ -307,23 +307,3 @@ class CommonScaffoldBackActionProvider extends InheritedWidget {
   bool updateShouldNotify(CommonScaffoldBackActionProvider oldWidget) =>
       backAction != oldWidget.backAction;
 }
-
-class SheetSettlingScope extends InheritedWidget {
-  final ValueListenable<bool> settling;
-
-  const SheetSettlingScope({
-    super.key,
-    required this.settling,
-    required super.child,
-  });
-
-  static ValueListenable<bool>? of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<SheetSettlingScope>()
-        ?.settling;
-  }
-
-  @override
-  bool updateShouldNotify(SheetSettlingScope oldWidget) =>
-      settling != oldWidget.settling;
-}

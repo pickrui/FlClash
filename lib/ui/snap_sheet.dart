@@ -921,14 +921,11 @@ class _SnapSheetState extends State<_SnapSheet>
                     child: SheetOverhangScope(
                       overhang: _model.lift,
                       fitsContent: route.fitsContent,
-                      child: SheetSettlingScope(
-                        settling: _model.settling,
-                        child: SheetDismissScope(
-                          handler: route._dismissHandler,
-                          child: SheetScrollScope(
-                            createController: _createScrollController,
-                            child: content,
-                          ),
+                      child: SheetDismissScope(
+                        handler: route._dismissHandler,
+                        child: SheetScrollScope(
+                          createController: _createScrollController,
+                          child: content,
                         ),
                       ),
                     ),
