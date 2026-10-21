@@ -29,6 +29,7 @@ mixin ActivePollingMixin<T extends StatefulWidget>
     on State<T>, WidgetsBindingObserver {
   late final _pollRunner = PeriodicTaskRunner(
     interval: pollInterval,
+    runImmediately: pollOnStart,
     onError: (error, _) => commonPrint.log(
       '$runtimeType poll error: $error',
       logLevel: LogLevel.warning,
@@ -40,6 +41,8 @@ mixin ActivePollingMixin<T extends StatefulWidget>
   int _pollGeneration = 0;
 
   Duration get pollInterval;
+
+  bool get pollOnStart => true;
 
   Future<void> poll(PollGuard isCurrent);
 
@@ -94,6 +97,7 @@ mixin ActivePollingMixin<T extends StatefulWidget>
       return;
     }
     _isPolling = true;
+    _pollRunner.interval = pollInterval;
     final generation = ++_pollGeneration;
     unawaited(
       _pollRunner.start([() => poll(() => _isCurrentPoll(generation))]),
@@ -143,6 +147,22 @@ class _TickBuilderState extends State<TickBuilder>
 
   @override
   Duration get pollInterval => widget.duration;
+
+  @override
+  bool get pollOnStart => false;
+
+  @override
+  void didUpdateWidget(covariant TickBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.duration != widget.duration) restartPolling();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final couldPoll = canPoll;
+    super.didChangeAppLifecycleState(state);
+    if (!couldPoll && canPoll) setState(() => _tick++);
+  }
 
   @override
   Future<void> poll(PollGuard isCurrent) async {

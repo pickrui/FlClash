@@ -8,7 +8,8 @@ import 'dart:async';
 typedef PeriodicTask = FutureOr<void> Function();
 
 class PeriodicTaskRunner {
-  final Duration interval;
+  Duration _interval;
+  final bool runImmediately;
   final void Function(Object error, StackTrace stackTrace) onError;
   List<PeriodicTask> _tasks = [];
   Timer? _timer;
@@ -18,9 +19,31 @@ class PeriodicTaskRunner {
   int _generation = 0;
 
   PeriodicTaskRunner({
-    this.interval = const Duration(seconds: 1),
+    Duration interval = const Duration(seconds: 1),
+    this.runImmediately = true,
     required this.onError,
-  });
+  }) : assert(interval > Duration.zero),
+       _interval = interval;
+
+  set interval(Duration value) {
+    assert(value > Duration.zero);
+    if (_interval == value) return;
+    _interval = value;
+    if (_timer != null) {
+      _timer!.cancel();
+      _schedule(_generation);
+    }
+  }
+
+  Future<void> _begin(int generation) {
+    if (runImmediately) return _run(generation);
+    _schedule(generation);
+    return Future.value();
+  }
+
+  void _schedule(int generation) {
+    _timer = Timer(_interval, () => unawaited(_run(generation)));
+  }
 
   Future<void> start([List<PeriodicTask>? tasks]) {
     if (tasks != null) _tasks = List.of(tasks);
@@ -30,7 +53,7 @@ class PeriodicTaskRunner {
     }
     if (_enabled) return _inFlight ?? Future.value();
     _enabled = true;
-    return _paused ? Future.value() : _run(++_generation);
+    return _paused ? Future.value() : _begin(++_generation);
   }
 
   void stop() {
@@ -46,7 +69,7 @@ class PeriodicTaskRunner {
     _generation++;
     _timer?.cancel();
     _timer = null;
-    return !paused && _enabled ? _run(_generation) : Future.value();
+    return !paused && _enabled ? _begin(_generation) : Future.value();
   }
 
   bool _isCurrent(int generation) =>
@@ -73,7 +96,7 @@ class PeriodicTaskRunner {
       if (identical(_inFlight, completion.future)) _inFlight = null;
       completion.complete();
       if (_isCurrent(generation)) {
-        _timer = Timer(interval, () => unawaited(_run(generation)));
+        _schedule(generation);
       }
     }
   }

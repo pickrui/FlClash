@@ -50,6 +50,64 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('time labels wait for an interval and refresh on resume', (
+    tester,
+  ) async {
+    setLifecycle(tester, AppLifecycleState.resumed);
+    addTearDown(() => setLifecycle(tester, AppLifecycleState.resumed));
+    var current = -1;
+    await tester.pumpWidget(
+      TickBuilder(
+        duration: const Duration(seconds: 2),
+        builder: (_, tick) {
+          current = tick;
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+    await tester.pump();
+    expect(current, 0);
+    await tick(tester);
+    expect(current, 0);
+    await tick(tester);
+    expect(current, 1);
+    setLifecycle(tester, AppLifecycleState.hidden);
+    await tick(tester, 10);
+    expect(current, 1);
+    setLifecycle(tester, AppLifecycleState.resumed);
+    await tester.pump();
+    expect(current, 2);
+    await tick(tester, 2);
+    expect(current, 3);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('time labels adopt a changed interval without remounting', (
+    tester,
+  ) async {
+    setLifecycle(tester, AppLifecycleState.resumed);
+    var current = -1;
+    Widget label(Duration duration) => TickBuilder(
+      duration: duration,
+      builder: (_, tick) {
+        current = tick;
+        return const SizedBox.shrink();
+      },
+    );
+    await tester.pumpWidget(label(const Duration(seconds: 10)));
+    await tester.pump();
+    final before = current;
+    await tester.pumpWidget(label(const Duration(seconds: 2)));
+    await tick(tester, 2);
+    expect(current, before + 1);
+    await tester.pumpWidget(label(const Duration(seconds: 5)));
+    await tick(tester, 2);
+    expect(current, before + 1);
+    await tick(tester, 3);
+    expect(current, before + 2);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   for (final fails in [false, true]) {
     testWidgets('resuming coalesces pending polls after failure: $fails', (
       tester,
