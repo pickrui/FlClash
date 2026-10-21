@@ -391,26 +391,31 @@ class _StructuredReleaseNotes extends StatelessWidget {
   final ChangelogVersion version;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      for (final group in version.visibleGroups) ...[
-        Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 8),
-          child: Text(
-            changelogGroupTitle(context.appLocalizations, group.type),
-            style: AppTextStyle.subheadline.of(context, emphasized: true),
-          ),
-        ),
-        for (final entry in group.entries)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: SelectableText(
-              '• ${entry.scope == null ? '' : '${entry.scope}: '}${entry.text}',
-              style: AppTextStyle.body.of(context),
-            ),
-          ),
-      ],
-    ],
-  );
+  Widget build(BuildContext context) => version.summary.trim().isNotEmpty
+      ? SelectableText(
+          version.summary.trim(),
+          style: AppTextStyle.body.of(context),
+        )
+      : Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final group in version.visibleGroups) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
+                child: Text(
+                  changelogGroupTitle(context.appLocalizations, group.type),
+                  style: AppTextStyle.subheadline.of(context, emphasized: true),
+                ),
+              ),
+              for (final entry in group.entries)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: SelectableText(
+                    '• ${entry.scope == null ? '' : '${entry.scope}: '}${entry.text}',
+                    style: AppTextStyle.body.of(context),
+                  ),
+                ),
+            ],
+          ],
+        );
 }

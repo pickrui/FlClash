@@ -571,7 +571,7 @@ as List<ChangelogEntry>,
 /// @nodoc
 mixin _$ChangelogVersion {
 
- String get version; String get tag; String get date; bool get prerelease; List<ChangelogGroup> get groups;
+ String get version; String get tag; String get date; String get summary; bool get prerelease; List<ChangelogGroup> get groups;
 /// Create a copy of ChangelogVersion
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -585,20 +585,20 @@ $ChangelogVersionCopyWith<ChangelogVersion> get copyWith => _$ChangelogVersionCo
 @override
 bool operator ==(Object other) {
   final _this = this as ChangelogVersion;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangelogVersion&&(identical(other.version, _this.version) || other.version == _this.version)&&(identical(other.tag, _this.tag) || other.tag == _this.tag)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.prerelease, _this.prerelease) || other.prerelease == _this.prerelease)&&const DeepCollectionEquality().equals(other.groups, _this.groups));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChangelogVersion&&(identical(other.version, _this.version) || other.version == _this.version)&&(identical(other.tag, _this.tag) || other.tag == _this.tag)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.summary, _this.summary) || other.summary == _this.summary)&&(identical(other.prerelease, _this.prerelease) || other.prerelease == _this.prerelease)&&const DeepCollectionEquality().equals(other.groups, _this.groups));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ChangelogVersion;
-  return Object.hash(runtimeType,_this.version,_this.tag,_this.date,_this.prerelease,const DeepCollectionEquality().hash(_this.groups));
+  return Object.hash(runtimeType,_this.version,_this.tag,_this.date,_this.summary,_this.prerelease,const DeepCollectionEquality().hash(_this.groups));
 }
 
 @override
 String toString() {
   final _this = this as ChangelogVersion;
-  return 'ChangelogVersion(version: ${_this.version}, tag: ${_this.tag}, date: ${_this.date}, prerelease: ${_this.prerelease}, groups: ${_this.groups})';
+  return 'ChangelogVersion(version: ${_this.version}, tag: ${_this.tag}, date: ${_this.date}, summary: ${_this.summary}, prerelease: ${_this.prerelease}, groups: ${_this.groups})';
 }
 
 
@@ -609,7 +609,7 @@ abstract mixin class $ChangelogVersionCopyWith<$Res>  {
   factory $ChangelogVersionCopyWith(ChangelogVersion value, $Res Function(ChangelogVersion) _then) = _$ChangelogVersionCopyWithImpl;
 @useResult
 $Res call({
- String version, String tag, String date, bool prerelease, List<ChangelogGroup> groups
+ String version, String tag, String date, String summary, bool prerelease, List<ChangelogGroup> groups
 });
 
 
@@ -626,11 +626,12 @@ class _$ChangelogVersionCopyWithImpl<$Res>
 
 /// Create a copy of ChangelogVersion
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? version = null,Object? tag = null,Object? date = null,Object? prerelease = null,Object? groups = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? version = null,Object? tag = null,Object? date = null,Object? summary = null,Object? prerelease = null,Object? groups = null,}) {
   return _then(ChangelogVersion(
 version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as String,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
 as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String,summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
 as String,prerelease: null == prerelease ? _self.prerelease : prerelease // ignore: cast_nullable_to_non_nullable
 as bool,groups: null == groups ? _self.groups : groups // ignore: cast_nullable_to_non_nullable
 as List<ChangelogGroup>,
@@ -718,10 +719,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version,  String tag,  String date,  bool prerelease,  List<ChangelogGroup> groups)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String version,  String tag,  String date,  String summary,  bool prerelease,  List<ChangelogGroup> groups)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChangelogVersion() when $default != null:
-return $default(_that.version,_that.tag,_that.date,_that.prerelease,_that.groups);case _:
+return $default(_that.version,_that.tag,_that.date,_that.summary,_that.prerelease,_that.groups);case _:
   return orElse();
 
 }
@@ -739,10 +740,10 @@ return $default(_that.version,_that.tag,_that.date,_that.prerelease,_that.groups
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version,  String tag,  String date,  bool prerelease,  List<ChangelogGroup> groups)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String version,  String tag,  String date,  String summary,  bool prerelease,  List<ChangelogGroup> groups)  $default,) {final _that = this;
 switch (_that) {
 case _ChangelogVersion():
-return $default(_that.version,_that.tag,_that.date,_that.prerelease,_that.groups);case _:
+return $default(_that.version,_that.tag,_that.date,_that.summary,_that.prerelease,_that.groups);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -759,10 +760,10 @@ return $default(_that.version,_that.tag,_that.date,_that.prerelease,_that.groups
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version,  String tag,  String date,  bool prerelease,  List<ChangelogGroup> groups)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String version,  String tag,  String date,  String summary,  bool prerelease,  List<ChangelogGroup> groups)?  $default,) {final _that = this;
 switch (_that) {
 case _ChangelogVersion() when $default != null:
-return $default(_that.version,_that.tag,_that.date,_that.prerelease,_that.groups);case _:
+return $default(_that.version,_that.tag,_that.date,_that.summary,_that.prerelease,_that.groups);case _:
   return null;
 
 }
@@ -774,12 +775,13 @@ return $default(_that.version,_that.tag,_that.date,_that.prerelease,_that.groups
 @JsonSerializable()
 
 class _ChangelogVersion implements ChangelogVersion {
-  const _ChangelogVersion({required this.version, required this.tag, this.date = '', this.prerelease = false,  List<ChangelogGroup> groups = const []}): _groups = groups;
+  const _ChangelogVersion({required this.version, required this.tag, this.date = '', this.summary = '', this.prerelease = false,  List<ChangelogGroup> groups = const []}): _groups = groups;
   factory _ChangelogVersion.fromJson(Map<String, dynamic> json) => _$ChangelogVersionFromJson(json);
 
 @override final  String version;
 @override final  String tag;
 @override@JsonKey() final  String date;
+@override@JsonKey() final  String summary;
 @override@JsonKey() final  bool prerelease;
  final  List<ChangelogGroup> _groups;
 @override@JsonKey() List<ChangelogGroup> get groups {
@@ -802,18 +804,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChangelogVersion&&(identical(other.version, version) || other.version == version)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.date, date) || other.date == date)&&(identical(other.prerelease, prerelease) || other.prerelease == prerelease)&&const DeepCollectionEquality().equals(other.groups, _groups));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChangelogVersion&&(identical(other.version, version) || other.version == version)&&(identical(other.tag, tag) || other.tag == tag)&&(identical(other.date, date) || other.date == date)&&(identical(other.summary, summary) || other.summary == summary)&&(identical(other.prerelease, prerelease) || other.prerelease == prerelease)&&const DeepCollectionEquality().equals(other.groups, _groups));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,version,tag,date,prerelease,const DeepCollectionEquality().hash(_groups));
+    return Object.hash(runtimeType,version,tag,date,summary,prerelease,const DeepCollectionEquality().hash(_groups));
 }
 
 @override
 String toString() {
-    return 'ChangelogVersion(version: $version, tag: $tag, date: $date, prerelease: $prerelease, groups: $groups)';
+    return 'ChangelogVersion(version: $version, tag: $tag, date: $date, summary: $summary, prerelease: $prerelease, groups: $groups)';
 }
 
 
@@ -824,7 +826,7 @@ abstract mixin class _$ChangelogVersionCopyWith<$Res> implements $ChangelogVersi
   factory _$ChangelogVersionCopyWith(_ChangelogVersion value, $Res Function(_ChangelogVersion) _then) = __$ChangelogVersionCopyWithImpl;
 @override @useResult
 $Res call({
- String version, String tag, String date, bool prerelease, List<ChangelogGroup> groups
+ String version, String tag, String date, String summary, bool prerelease, List<ChangelogGroup> groups
 });
 
 
@@ -841,11 +843,12 @@ class __$ChangelogVersionCopyWithImpl<$Res>
 
 /// Create a copy of ChangelogVersion
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? version = null,Object? tag = null,Object? date = null,Object? prerelease = null,Object? groups = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? version = null,Object? tag = null,Object? date = null,Object? summary = null,Object? prerelease = null,Object? groups = null,}) {
   return _then(_ChangelogVersion(
 version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as String,tag: null == tag ? _self.tag : tag // ignore: cast_nullable_to_non_nullable
 as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String,summary: null == summary ? _self.summary : summary // ignore: cast_nullable_to_non_nullable
 as String,prerelease: null == prerelease ? _self.prerelease : prerelease // ignore: cast_nullable_to_non_nullable
 as bool,groups: null == groups ? _self._groups : groups // ignore: cast_nullable_to_non_nullable
 as List<ChangelogGroup>,

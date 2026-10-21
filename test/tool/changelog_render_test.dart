@@ -13,12 +13,14 @@ ChangelogVersion version({
   String tag = 'v0.8.96',
   String date = '2026-08-16',
   bool prerelease = false,
+  String summary = '',
   List<ChangelogGroup> groups = const [],
 }) => ChangelogVersion(
   version: tag.substring(1),
   tag: tag,
   date: date,
   prerelease: prerelease,
+  summary: summary,
   groups: groups,
 );
 
@@ -34,6 +36,37 @@ ChangelogGroup entryGroup(
 );
 
 void main() {
+  test(
+    'editorial summaries keep the published style and structured history',
+    () {
+      const summary = '网络与按需运行：区分定位权限并展示 SSID\n\n界面与交互：展示 ASN 信息';
+      final release = version(
+        summary: summary,
+        groups: [
+          entryGroup(ChangelogType.fix, [
+            ('abc1234', 'android', 'Technical details'),
+          ]),
+        ],
+      );
+      final decoded = decodeChangelog(
+        encodeChangelog(Changelog(versions: [release])),
+      ).versions.single;
+      final markdown = renderMarkdown(Changelog(versions: [decoded]));
+      expect(markdown, contains('## v0.8.96\n\n$summary'));
+      expect(markdown, isNot(contains('Technical details')));
+      expect(markdown, isNot(contains('**Bug Fixes**')));
+      final published = renderRelease(decoded);
+      expect(published.split(releaseEndMarker).first, contains(summary));
+      expect(
+        published.split(releaseEndMarker).first,
+        isNot(contains('Technical details')),
+      );
+      expect(published, contains('abc1234'));
+      expect(renderTelegram(decoded), summary);
+      expect(decoded.groups.single.entries.single.id, 'abc1234');
+    },
+  );
+
   group('renderMarkdown', () {
     test('renders versions, groups and the frozen marker', () {
       final markdown = renderMarkdown(

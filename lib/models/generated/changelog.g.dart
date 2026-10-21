@@ -56,6 +56,7 @@ _ChangelogVersion _$ChangelogVersionFromJson(Map<String, dynamic> json) =>
       version: json['version'] as String,
       tag: json['tag'] as String,
       date: json['date'] as String? ?? '',
+      summary: json['summary'] as String? ?? '',
       prerelease: json['prerelease'] as bool? ?? false,
       groups:
           (json['groups'] as List<dynamic>?)
@@ -69,6 +70,7 @@ Map<String, dynamic> _$ChangelogVersionToJson(_ChangelogVersion instance) =>
       'version': instance.version,
       'tag': instance.tag,
       'date': instance.date,
+      'summary': instance.summary,
       'prerelease': instance.prerelease,
       'groups': instance.groups,
     };

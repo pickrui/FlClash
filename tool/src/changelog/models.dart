@@ -97,21 +97,25 @@ class ChangelogVersion {
     required this.date,
     required this.groups,
     this.prerelease = false,
+    this.summary = '',
   });
 
   final String version;
   final String tag;
   final String date;
   final bool prerelease;
+  final String summary;
   final List<ChangelogGroup> groups;
 
-  bool get isEmpty => groups.every((group) => group.entries.isEmpty);
+  bool get isEmpty =>
+      summary.trim().isEmpty && groups.every((group) => group.entries.isEmpty);
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'version': version,
     'tag': tag,
     'date': date,
     'prerelease': prerelease,
+    if (summary.isNotEmpty) 'summary': summary,
     'groups': groups.map((group) => group.toJson()).toList(),
   };
 
@@ -121,6 +125,7 @@ class ChangelogVersion {
         tag: json['tag'] as String,
         date: json['date'] as String,
         prerelease: json['prerelease'] as bool? ?? false,
+        summary: json['summary'] as String? ?? '',
         groups: (json['groups'] as List<dynamic>)
             .map(
               (group) => ChangelogGroup.fromJson(group as Map<String, dynamic>),

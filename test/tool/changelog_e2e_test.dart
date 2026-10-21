@@ -63,6 +63,39 @@ void main() {
     boundary: 'v1.0.0',
   ).build(pending: pending);
 
+  test('rebuilding a retagged release preserves its editorial summary and new fixes', () {
+    final original = build().changelog.versions.single;
+    resolve(repo.path, changelogDataPath).writeAsStringSync(
+      encodeChangelog(
+        Changelog(
+          versions: [
+            ChangelogVersion(
+              version: original.version,
+              tag: original.tag,
+              date: original.date,
+              summary: '稳定性与恢复：完善服务退出和恢复',
+              groups: original.groups,
+            ),
+          ],
+        ),
+      ),
+    );
+    commit('fix: close inherited fixture handles');
+    git(['tag', '-f', 'v1.1.0']);
+    final rebuilt = build().changelog.versions.single;
+    expect(rebuilt.summary, '稳定性与恢复：完善服务退出和恢复');
+    expect(
+      rebuilt.groups
+          .expand((group) => group.entries)
+          .map((entry) => entry.text),
+      contains('Close inherited fixture handles'),
+    );
+    expect(
+      renderMarkdown(Changelog(versions: [rebuilt])),
+      contains('稳定性与恢复：完善服务退出和恢复'),
+    );
+  });
+
   test('collects one section per stable tag above the boundary', () {
     final versions = build().changelog.versions;
 

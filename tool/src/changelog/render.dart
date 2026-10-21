@@ -33,6 +33,12 @@ String renderMarkdown(Changelog changelog) {
     buffer
       ..writeln(_heading(version))
       ..writeln();
+    if (version.summary.trim().isNotEmpty) {
+      buffer
+        ..writeln(version.summary.trim())
+        ..writeln();
+      continue;
+    }
     if (version.isEmpty) {
       buffer
         ..writeln(emptyVersionNote)
@@ -57,6 +63,14 @@ String renderMarkdown(Changelog changelog) {
 
 String renderRelease(ChangelogVersion version) {
   final buffer = StringBuffer()..writeln(releaseBeginMarker);
+  if (version.summary.trim().isNotEmpty) {
+    buffer
+      ..writeln(version.summary.trim())
+      ..writeln(releaseEndMarker)
+      ..writeln()
+      ..write(renderReleaseJson(version));
+    return buffer.toString();
+  }
   if (version.isEmpty) {
     buffer.writeln('- $emptyVersionNote');
   }
@@ -98,7 +112,9 @@ String renderTelegram(ChangelogVersion version, {String? moreUrl}) {
     }
     buffer.writeln();
   }
-  final text = buffer.toString().trimRight();
+  final text = version.summary.trim().isNotEmpty
+      ? escapeTelegramHtml(version.summary.trim())
+      : buffer.toString().trimRight();
   if (_telegramVisibleLength(text) <= telegramLimit) {
     return text;
   }
@@ -120,7 +136,8 @@ int _telegramVisibleLength(String markup) => markup
     .replaceAll(RegExp('&[a-z]+;'), '&')
     .length;
 
-String _heading(ChangelogVersion version) => version.date.isEmpty
+String _heading(ChangelogVersion version) =>
+    version.date.isEmpty || version.summary.trim().isNotEmpty
     ? '## ${version.tag}'
     : '## ${version.tag} (${version.date})';
 

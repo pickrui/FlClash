@@ -43,6 +43,7 @@ abstract class ChangelogVersion with _$ChangelogVersion {
     required String version,
     required String tag,
     @Default('') String date,
+    @Default('') String summary,
     @Default(false) bool prerelease,
     @Default([]) List<ChangelogGroup> groups,
   }) = _ChangelogVersion;
@@ -68,7 +69,7 @@ extension ChangelogVersionExt on ChangelogVersion {
       .where((group) => group.entries.isNotEmpty)
       .toList();
 
-  bool get isEmpty => visibleGroups.isEmpty;
+  bool get isEmpty => summary.trim().isEmpty && visibleGroups.isEmpty;
 }
 
 extension ChangelogExt on Changelog {

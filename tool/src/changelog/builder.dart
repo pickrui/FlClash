@@ -51,6 +51,17 @@ class ChangelogBuilder {
   final String boundary;
 
   ChangelogBuildResult build({PendingVersion? pending}) {
+    final recorded = resolve(
+      git.workingDirectory ?? Directory.current.path,
+      changelogDataPath,
+    );
+    final summaries = <String, String>{
+      if (recorded.existsSync())
+        for (final version in decodeChangelog(
+          recorded.readAsStringSync(),
+        ).versions)
+          version.tag: version.summary,
+    };
     final boundaryTag = VersionTag.tryParse(boundary);
     final stable = git
         .stableTags()
@@ -72,6 +83,7 @@ class ChangelogBuilder {
           tag: pending.tag,
           date: pending.date,
           prerelease: pending.prerelease,
+          summary: summaries[pending.tag] ?? '',
           groups: groupItems(parser.parseAll(commits)),
         ),
       );
@@ -89,6 +101,7 @@ class ChangelogBuilder {
           version: tag.version,
           tag: tag.name,
           date: git.tagDate(tag.name),
+          summary: summaries[tag.name] ?? '',
           groups: groupItems(parser.parseAll(commits)),
         ),
       );
