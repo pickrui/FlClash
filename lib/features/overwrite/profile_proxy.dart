@@ -1085,7 +1085,7 @@ class OverwriteEntryTile extends StatelessWidget {
                     children: [
                       Switch(value: enable, onChanged: onToggle),
                       CommonPopupBox(
-                        popup: CommonPopupMenu(
+                        popupBuilder: (_) => CommonPopupMenu(
                           items: [
                             CommonPopupMenuItem(
                               glyph: AppGlyphs.edit,

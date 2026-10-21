@@ -306,7 +306,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
             onPressed: unavailable ? null : () => open(),
             icon: const GlyphIcon(AppGlyphs.addCircle),
           ),
-          popup: CommonPopupMenu(
+          popupBuilder: (_) => CommonPopupMenu(
             items: [
               CommonPopupMenuItem(
                 label: l.startFromScratch,

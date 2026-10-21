@@ -417,7 +417,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
             onPressed: unavailable ? null : () => open(),
             icon: const GlyphIcon(AppGlyphs.addCircle),
           ),
-          popup: CommonPopupMenu(
+          popupBuilder: (_) => CommonPopupMenu(
             items: [
               CommonPopupMenuItem(
                 label: l.startFromScratch,

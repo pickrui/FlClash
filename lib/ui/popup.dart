@@ -1112,15 +1112,13 @@ class CommonPopupBox extends StatefulWidget {
   const CommonPopupBox({
     super.key,
     required this.targetBuilder,
-    this.popup,
-    this.popupBuilder,
+    required this.popupBuilder,
     this.placement = PopupPlacement.overAnchorEnd,
-  }) : assert((popup == null) != (popupBuilder == null));
+  });
 
   final Widget Function(PopupOpen open) targetBuilder;
 
-  final Widget? popup;
-  final WidgetBuilder? popupBuilder;
+  final WidgetBuilder popupBuilder;
 
   final PopupPlacement placement;
 
@@ -1285,7 +1283,7 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     final snapshot = ValueNotifier<ui.Image?>(null);
     final route = _route = CommonPopupRoute<void>(
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      builder: (context) => widget.popupBuilder?.call(context) ?? widget.popup!,
+      builder: (context) => widget.popupBuilder(context),
       anchorOf: _sourceRect,
       placement: widget.placement,
       elevated: ElevatedSurfaceTheme.isIn(context),

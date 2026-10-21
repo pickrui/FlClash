@@ -421,7 +421,7 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
               onPressed: profile == null || _importing ? null : () => open(),
               child: Text(appLocalizations.import),
             ),
-            popup: CommonPopupMenu(
+            popupBuilder: (_) => CommonPopupMenu(
               items: customImportMenuItems(appLocalizations, _import),
             ),
           ),

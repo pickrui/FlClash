@@ -2088,7 +2088,7 @@ void main() {
                 onPressed: () => open(),
                 icon: const Icon(Icons.more_vert),
               ),
-              popup: CommonPopupMenu(
+              popupBuilder: (_) => CommonPopupMenu(
                 items: [
                   CommonPopupMenuItem(
                     label: 'Edit',
@@ -2204,7 +2204,7 @@ void main() {
                   icon: const Icon(Icons.more_vert),
                   onPressed: () => open(),
                 ),
-                popup: CommonPopupMenu(
+                popupBuilder: (_) => CommonPopupMenu(
                   items: [
                     for (var index = 0; index < 12; index++)
                       CommonPopupMenuItem(

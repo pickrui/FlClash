@@ -633,7 +633,7 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
                 onPressed: open,
               ),
             ),
-            popup: CommonPopupMenu(
+            popupBuilder: (_) => CommonPopupMenu(
               items: [
                 CommonPopupMenuItem(
                   glyph: AppGlyphs.add,

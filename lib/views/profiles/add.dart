@@ -173,7 +173,7 @@ class _AddProfileViewState extends ConsumerState<AddProfileView> {
             subtitle: Text(appLocalizations.importConfigDesc),
             onTap: () => open(),
           ),
-          popup: CommonPopupMenu(
+          popupBuilder: (_) => CommonPopupMenu(
             items: customImportMenuItems(
               appLocalizations,
               (source) => _toAddCustom(context, source),
