@@ -9,6 +9,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/l10n/generated/territory_names.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/state.dart';
@@ -311,11 +312,10 @@ class _ExitRow extends ConsumerWidget {
     final details = info == null || hideIp
         ? ''
         : [
-            if (info.country case final country?)
-              shownCountryCode(info.countryCode) ==
-                      info.countryCode.toUpperCase()
-                  ? country
-                  : shownCountryCode(info.countryCode),
+            territoryNames[Localizations.localeOf(context)
+                    .languageCode]?[shownCountryCode(info.countryCode)] ??
+                info.country ??
+                shownCountryCode(info.countryCode),
             ?info.organization,
             if (info.asn case final asn?) 'AS$asn',
           ].join(' · ');

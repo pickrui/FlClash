@@ -132,12 +132,13 @@ void main() {
     Future<void> Function(bool isStart)? statusUpdater,
     bool glass = false,
     bool disableAnimations = false,
+    Locale? locale = const Locale('en'),
   }) async {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
-          locale: const Locale('en'),
+          locale: locale,
           child: Builder(
             builder: (context) => MediaQuery(
               data: MediaQuery.of(context)
@@ -155,6 +156,46 @@ void main() {
   }
 
   group('the exit address', () {
+    testWidgets('cached IP location follows language changes without a query', (
+      tester,
+    ) async {
+      container.dispose();
+      container = containerWith(
+        state: const NetworkDetectionState(
+          isLoading: false,
+          ipInfo: IpInfo(
+            ip: _ip,
+            countryCode: 'gb',
+            country: 'United Kingdom',
+            organization: 'Example Network',
+            asn: 64500,
+          ),
+        ),
+      );
+      for (final (locale, country) in [
+        (const Locale('en'), 'United Kingdom'),
+        (const Locale('zh', 'CN'), '英国'),
+        (const Locale('ja'), 'イギリス'),
+        (const Locale('ru'), 'Великобритания'),
+        (const Locale('fr'), 'Royaume-Uni'),
+        (const Locale('es'), 'Reino Unido'),
+        (const Locale('ko'), '영국'),
+      ]) {
+        await pumpCard(tester, locale: locale);
+        await tester.pumpAndSettle();
+        expect(
+          find.text('$country · Example Network · AS64500'),
+          findsOneWidget,
+        );
+        expect(detection.checks, 0);
+      }
+      tester.platformDispatcher.localesTestValue = const [Locale('zh', 'CN')];
+      addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+      await pumpCard(tester, locale: null);
+      await tester.pumpAndSettle();
+      expect(find.text('英国 · Example Network · AS64500'), findsOneWidget);
+      expect(detection.checks, 0);
+    });
     for (final density in DashboardDensity.values) {
       testWidgets('exit metadata fits and follows IP privacy at $density', (
         tester,
@@ -212,14 +253,39 @@ void main() {
       expect(find.text('TW'), findsNothing);
     });
 
-    testWidgets('a little wider than its card shrinks to fit', (tester) async {
+    testWidgets('short and full-length IPs stay complete on one line', (
+      tester,
+    ) async {
       await pumpCard(tester);
-
-      expect(tester.widget<Text>(find.text(_ip)).overflow, isNull);
-      expect(
-        find.ancestor(of: find.text(_ip), matching: find.byType(FittedBox)),
-        findsOneWidget,
-      );
+      for (final density in DashboardDensity.values) {
+        for (final ip in [
+          '1.1.1.1',
+          '255.255.255.255',
+          '2001:0db8:1234:5678:9abc:def0:1234:5678',
+        ]) {
+          detection.value = NetworkDetectionState(
+            isLoading: false,
+            ipInfo: IpInfo(ip: ip, countryCode: 'GB'),
+          );
+          await pumpCard(tester, density: density);
+          final text = find.text(ip);
+          final fitted = find.ancestor(
+            of: text,
+            matching: find.byType(FittedBox),
+          );
+          expect(fitted, findsOneWidget);
+          final paragraph = tester.renderObject<RenderParagraph>(text);
+          expect(paragraph.didExceedMaxLines, isFalse);
+          final painted = MatrixUtils.transformRect(
+            paragraph.getTransformTo(null),
+            Offset.zero & paragraph.size,
+          );
+          final available = tester.getRect(fitted);
+          expect(painted.left, greaterThanOrEqualTo(available.left - 0.01));
+          expect(painted.right, lessThanOrEqualTo(available.right + 0.01));
+          expect(tester.takeException(), isNull);
+        }
+      }
     });
 
     testWidgets('holds its place while it is checked, the clover turning', (

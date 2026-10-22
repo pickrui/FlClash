@@ -204,6 +204,9 @@ class NetworkSpeedCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final showChart = ref.watch(
+      appSettingProvider.select((state) => state.showNetworkSpeedChart),
+    );
     final traffics = ref.watch(trafficsProvider);
     final total = ref.watch(totalTrafficProvider);
     final latest = traffics.list.lastOrNull ?? const Traffic();
@@ -214,6 +217,26 @@ class NetworkSpeedCard extends ConsumerWidget {
           DashboardCardHeader(
             glyph: AppGlyphs.speed,
             title: context.appLocalizations.networkSpeed,
+            trailing: [
+              Semantics(
+                expanded: showChart,
+                child: DashboardIconButton(
+                  glyph: showChart
+                      ? AppGlyphs.chevronUp
+                      : AppGlyphs.chevronDown,
+                  tooltip: showChart
+                      ? context.appLocalizations.collapseList
+                      : context.appLocalizations.expandList,
+                  onPressed: () => ref
+                      .read(appSettingProvider.notifier)
+                      .update(
+                        (state) => state.copyWith(
+                          showNetworkSpeedChart: !state.showNetworkSpeedChart,
+                        ),
+                      ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Row(
@@ -226,6 +249,7 @@ class NetworkSpeedCard extends ConsumerWidget {
                     speed: direction.of(latest),
                     total: direction.of(total),
                     traffics: traffics,
+                    showChart: showChart,
                   ),
                 ),
             ],
@@ -244,12 +268,14 @@ class _SpeedTile extends StatelessWidget {
     required this.speed,
     required this.total,
     required this.traffics,
+    required this.showChart,
   });
 
   final TrafficDirection direction;
   final num speed;
   final num total;
   final FixedList<Traffic> traffics;
+  final bool showChart;
 
   static const _aspectRatio = 1.06;
   static const _padding = EdgeInsets.fromLTRB(16, 14, 16, 0);
@@ -284,18 +310,24 @@ class _SpeedTile extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              Positioned(
-                left: -_bleed,
-                right: -_bleed,
-                bottom: -_bleed,
-                height: chartHeight,
-                child: RepaintBoundary(
-                  child: _SpeedChart(direction: direction, traffics: traffics),
+              if (showChart)
+                Positioned(
+                  left: -_bleed,
+                  right: -_bleed,
+                  bottom: -_bleed,
+                  height: chartHeight,
+                  child: RepaintBoundary(
+                    child: _SpeedChart(
+                      direction: direction,
+                      traffics: traffics,
+                    ),
+                  ),
                 ),
-              ),
               Padding(
                 padding: _padding.copyWith(
-                  bottom: chartHeight - _bleed + _chartGap,
+                  bottom: showChart
+                      ? chartHeight - _bleed + _chartGap
+                      : _padding.top,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
