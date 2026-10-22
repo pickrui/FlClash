@@ -277,10 +277,10 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
 
   /// Share links add nodes to the profile rather than replacing it.
   Future<bool> _addShareLinks(String text) async {
-    final links = readShareLinks(text);
+    final core = ref.read(coreHandlerProvider);
+    final links = await readShareLinks(text, core);
     if (links.nodes.isEmpty) return false;
     var nodes = links.nodes;
-    final core = ref.read(coreHandlerProvider);
     if (core.isCompleted) {
       final errors = await core.validateProxies([
         for (final node in nodes) node.proxy,

@@ -209,8 +209,16 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
     return proxy;
   }
 
-  Map<String, Object?> _readEditor() {
-    if (_mode == 0) return parseProfileProxyUri(_uriController.text.trim());
+  Future<Map<String, Object?>> _readEditor() async {
+    if (_mode == 0) {
+      final result = await ref.read(coreHandlerProvider).decodeShareLinks([
+        _uriController.text.trim(),
+      ]);
+      if (result.single.length != 1) {
+        throw const FormatException('Expected one share link');
+      }
+      return result.single.single;
+    }
     if (_mode == 2) return parseProfileProxyDefinition(_yamlController.text);
     return parseProfileProxyDefinition(writeYaml(_quickDefinition()));
   }
@@ -263,7 +271,8 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
       final invalidDefinition = context.appLocalizations.nodeInvalidDefinition;
       String? error;
       try {
-        final proxy = _readEditor();
+        final proxy = await _readEditor();
+        if (!mounted || revision != _validationRevision || _saving) return;
         final core = ref.read(coreHandlerProvider);
         if (core.isCompleted) {
           final errors = await core.validateProxies([proxy]);
@@ -277,16 +286,20 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
     });
   }
 
-  void _switchMode(int mode) {
+  Future<void> _switchMode(int mode) async {
+    final revision = ++_validationRevision;
     try {
       if ((_mode == 0 && _uriController.text.trim().isNotEmpty) || _mode != 0) {
-        _proxy = _readEditor();
+        final proxy = await _readEditor();
+        if (!mounted || revision != _validationRevision || _saving) return;
+        _proxy = proxy;
       }
       _writeEditors();
       if (mode == 0 && _mode != 0) _uriController.clear();
       setState(() => _mode = mode);
       _scheduleValidation();
     } catch (_) {
+      if (!mounted) return;
       context.showNotifier(context.appLocalizations.nodeInvalidDefinition);
     }
   }
@@ -311,7 +324,8 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
     _validationTimer?.cancel();
     setState(() => _saving = true);
     try {
-      final proxy = _readEditor();
+      final proxy = await _readEditor();
+      if (!mounted || route?.isCurrent != true) return;
       final core = ref.read(coreHandlerProvider);
       if (!core.isCompleted) {
         context.showNotifier(

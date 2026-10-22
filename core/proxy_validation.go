@@ -14,7 +14,6 @@ import (
 	"sync/atomic"
 
 	"github.com/metacubex/mihomo/adapter"
-	"github.com/metacubex/mihomo/common/convert"
 	"github.com/metacubex/mihomo/common/utils"
 )
 
@@ -56,21 +55,10 @@ func handleValidateFilters(filters []string) []string {
 	return results
 }
 
-// ConvertsV2Ray skips certificate checks for every socks and http link.
 func handleConvertProxies(encoded string) ([]map[string]any, error) {
 	data, err := base64.StdEncoding.DecodeString(encoded)
 	if err != nil {
 		return nil, err
 	}
-	proxies, err := convert.ConvertsV2Ray(data)
-	if err != nil {
-		return nil, err
-	}
-	for _, proxy := range proxies {
-		switch proxy["type"] {
-		case "socks5", "http":
-			delete(proxy, "skip-cert-verify")
-		}
-	}
-	return proxies, nil
+	return decodeShareSubscription(data)
 }

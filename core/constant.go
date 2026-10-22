@@ -119,6 +119,7 @@ const (
 	validateProxiesMethod          CoreMethod = "validateProxies"
 	validateFiltersMethod          CoreMethod = "validateFilters"
 	convertProxiesMethod           CoreMethod = "convertProxies"
+	decodeShareLinksMethod         CoreMethod = "decodeShareLinks"
 	updateConfigMethod             CoreMethod = "updateConfig"
 	getProxyGroupsMethod           CoreMethod = "getProxyGroups"
 	getProxyPageMethod             CoreMethod = "getProxyPage"

@@ -115,6 +115,10 @@ class CoreController {
 
   FutureOr<bool> get isInit => _interface.isInit;
 
+  Future<List<List<Map<String, Object?>>>> decodeShareLinks(
+    List<String> lines,
+  ) => _interface.decodeShareLinks(lines);
+
   Future<List<String>> validateProxies(List<Map<String, Object?>> proxies) =>
       _interface.validateProxies(proxies);
 

@@ -13,6 +13,46 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
+    'share link decode preserves positions and rejects malformed replies',
+    () async {
+      final handler = _FakeCoreHandler()
+        ..response = <dynamic>[
+          [],
+          [
+            {'name': 'A', 'type': 'ss'},
+          ],
+        ];
+      expect(await handler.decodeShareLinks(['invalid', 'ss://fixture']), [
+        [],
+        [
+          {'name': 'A', 'type': 'ss'},
+        ],
+      ]);
+      expect(handler.methods, [CoreMethod.decodeShareLinks]);
+      expect(handler.arguments, ['invalid', 'ss://fixture']);
+      for (final response in <dynamic>[
+        [],
+        [null, []],
+        [
+          [],
+          [3],
+        ],
+      ]) {
+        handler.response = response;
+        await expectLater(
+          handler.decodeShareLinks(['a', 'b']),
+          throwsFormatException,
+        );
+      }
+      handler.response = null;
+      await expectLater(
+        handler.decodeShareLinks(['a']),
+        throwsA(_missingResponse(CoreMethod.decodeShareLinks)),
+      );
+    },
+  );
+
+  test(
     'provider lookup requires an answer and sends only provider and node names',
     () async {
       final handler = _FakeCoreHandler();

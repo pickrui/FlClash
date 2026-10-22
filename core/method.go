@@ -180,6 +180,11 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if decodeMethodArguments(call, response, &filters) {
 			response.success(handleValidateFilters(filters))
 		}
+	case decodeShareLinksMethod:
+		var lines []string
+		if decodeMethodArguments(call, response, &lines) {
+			response.success(handleDecodeShareLinks(lines))
+		}
 	case convertProxiesMethod:
 		encoded := ""
 		if !decodeMethodArguments(call, response, &encoded) {
