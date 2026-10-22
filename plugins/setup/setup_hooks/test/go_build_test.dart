@@ -124,7 +124,7 @@ void main() {
         first.outputs.single,
       ]);
       expect(buildInfo.exitCode, 0, reason: buildInfo.stderr.toString());
-      expect(buildInfo.stdout, contains('go1.26.9'));
+      expect(buildInfo.stdout, contains('go1.26.10'));
       expect(first.inputs, contains(core.path));
       expect(first.inputs, isNot(contains(root.path)));
       expect(first.inputs, isNot(contains(p.join(root.path, '.dart_tool'))));
