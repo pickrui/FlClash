@@ -39,8 +39,7 @@ const _decorationGrowth = 0.12;
 
 const _decorationTurn = 2 * math.pi / 12;
 
-/// The code the exit's country shows as; Taiwan reads as the oixCloud panel
-/// shows it.
+/// The badge code follows the oixCloud panel; location names use the original code.
 String shownCountryCode(String countryCode) {
   final code = countryCode.toUpperCase();
   return code == 'TW' ? 'CN' : code;
@@ -313,9 +312,9 @@ class _ExitRow extends ConsumerWidget {
         ? ''
         : [
             territoryNames[Localizations.localeOf(context)
-                    .languageCode]?[shownCountryCode(info.countryCode)] ??
+                    .languageCode]?[info.countryCode.toUpperCase()] ??
                 info.country ??
-                shownCountryCode(info.countryCode),
+                info.countryCode.toUpperCase(),
             ?info.organization,
             if (info.asn case final asn?) 'AS$asn',
           ].join(' · ');

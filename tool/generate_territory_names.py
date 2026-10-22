@@ -24,7 +24,8 @@ def territories(language):
     data = json.loads(fetch(
         f"cldr-json/cldr-localenames-full/main/{language}/territories.json"
     ))["main"][language]["localeDisplayNames"]["territories"]
-    return {code: name for code, name in sorted(data.items())
+    return {code: data.get(f"{code}-alt-short", name) if code in {"HK", "MO"} else name
+            for code, name in sorted(data.items())
             if re.fullmatch(r"[A-Z]{2}", code)}
 
 

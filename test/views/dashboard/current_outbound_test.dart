@@ -240,17 +240,34 @@ void main() {
       expect(find.text('—'), findsOneWidget);
     });
 
-    testWidgets('shows Taiwan as the oixCloud panel does', (tester) async {
-      container = containerWith(
-        state: const NetworkDetectionState(
-          isLoading: false,
-          ipInfo: IpInfo(ip: _ip, countryCode: 'tw'),
-        ),
-      );
-      await pumpCard(tester);
-
-      expect(find.text('CN'), findsOneWidget);
-      expect(find.text('TW'), findsNothing);
+    testWidgets('shows short region names independently of the badge', (
+      tester,
+    ) async {
+      for (final (code, badge, chinese, english) in [
+        ('hk', 'HK', '香港', 'Hong Kong'),
+        ('mo', 'MO', '澳门', 'Macao'),
+        ('tw', 'CN', '台湾', 'Taiwan'),
+      ]) {
+        await tester.pumpWidget(const SizedBox.shrink());
+        container.dispose();
+        container = containerWith(
+          state: NetworkDetectionState(
+            isLoading: false,
+            ipInfo: IpInfo(ip: _ip, countryCode: code),
+          ),
+        );
+        for (final (locale, name) in [
+          (const Locale('zh', 'CN'), chinese),
+          (const Locale('en'), english),
+        ]) {
+          await pumpCard(tester, locale: locale);
+          await tester.pumpAndSettle();
+          expect(find.text(name), findsOneWidget);
+          expect(find.byTooltip(name), findsOneWidget);
+          expect(find.text(badge), findsOneWidget);
+          expect(detection.checks, 0);
+        }
+      }
     });
 
     testWidgets('short and full-length IPs stay complete on one line', (
