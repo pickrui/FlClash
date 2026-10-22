@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/common.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart' show NumberFormat;
 
 final _compactFormat = NumberFormat.compact(locale: 'en');
@@ -43,15 +42,5 @@ extension NumExt on num {
       unitIndex++;
     }
     return (size, units[unitIndex].name);
-  }
-}
-
-extension OffsetExt on Offset {
-  double getCrossAxisOffset(Axis direction) {
-    return direction == Axis.vertical ? dx : dy;
-  }
-
-  double getMainAxisOffset(Axis direction) {
-    return direction == Axis.vertical ? dy : dx;
   }
 }

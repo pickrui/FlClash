@@ -96,11 +96,14 @@ void main() {
     }
     expect(BootRecord.fromJson(null), isNull);
     expect(AppExitInfo.fromJson({'reason': 4, 'timestamp': 1000}), isNull);
-    expect(
-      AppExitInfo.fromJson({'reason': 4, 'timestamp': 1000, 'pid': 100})
-          ?.isCrash,
-      isTrue,
-    );
+    final exit = AppExitInfo.fromJson({
+      'reason': 4,
+      'timestamp': 1000,
+      'pid': 100,
+    });
+    expect(exit?.reason, 4);
+    expect(exit?.timestamp, 1000);
+    expect(exit?.processId, 100);
   });
 
   test(

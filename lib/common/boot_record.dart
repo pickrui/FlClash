@@ -31,9 +31,6 @@ class AppExitInfo {
     );
   }
 
-  // ApplicationExitInfo: Java/native crash, ANR, or initialization failure.
-  // Unknown, low-memory, user-requested and package-update exits are excluded.
-  bool get isCrash => const {4, 5, 6, 7}.contains(reason);
   bool get isExternalStop =>
       const {1, 2, 3, 8, 9, 10, 11, 12, 14, 15, 16}.contains(reason);
 }
