@@ -6,7 +6,6 @@
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/locale_manager.dart';
-import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,9 +29,6 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           currentProfileProvider.overrideWith((_) => null),
-          currentGroupsStateProvider.overrideWith(
-            (_) => const GroupsState(value: []),
-          ),
           selectedMapProvider.overrideWith((_) => {}),
         ],
       );

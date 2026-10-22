@@ -178,7 +178,7 @@ final class TrayDelaysProvider
   }
 }
 
-String _$trayDelaysHash() => r'e0079dad461011b8baedf84006991bb22f2d8864';
+String _$trayDelaysHash() => r'1fa32fbbbef811a199b94298b195350315d3635c';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -219,7 +219,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'8cc888f0a59c565d656569316fe5c96092420086';
+String _$trayStateHash() => r'6dba3e418f1474cad8611dca4fb865a2f21b9170';
 
 @ProviderFor(vpnState)
 final vpnStateProvider = VpnStateProvider._();
@@ -993,7 +993,7 @@ final class CurrentGroupsStateProvider
 }
 
 String _$currentGroupsStateHash() =>
-    r'a99c7c52cc4a1c026a4a5d06a23b5d94bcd7ac90';
+    r'962420b058ff8bb463eefa6605c77370860ecb31';
 
 @ProviderFor(delaysAtLastTestBatch)
 final delaysAtLastTestBatchProvider = DelaysAtLastTestBatchProvider._();

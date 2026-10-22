@@ -90,7 +90,7 @@ Map<String, Map<String, int>> trayDelays(Ref ref) {
   if (delayMap.isEmpty) {
     return const {};
   }
-  final groups = ref.watch(currentGroupsStateProvider).value;
+  final groups = _visibleGroups(ref);
   final allGroups = ref.watch(groupsProvider);
   final defaultTestUrl = ref.watch(
     appSettingProvider.select((state) => state.testUrl),
@@ -129,7 +129,7 @@ TrayState trayState(Ref ref) {
       (state) => VM3(state.autoLaunch, state.locale, state.showTrayTitle),
     ),
   );
-  final groups = ref.watch(currentGroupsStateProvider).value;
+  final groups = _visibleGroups(ref).toList();
   final brightness = ref.watch(systemBrightnessProvider);
 
   return TrayState(

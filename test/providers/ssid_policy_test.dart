@@ -56,9 +56,6 @@ void main() {
     final c = ProviderContainer(
       overrides: [
         currentProfileProvider.overrideWith((_) => null),
-        currentGroupsStateProvider.overrideWith(
-          (_) => const GroupsState(value: []),
-        ),
         selectedMapProvider.overrideWith((_) => {}),
       ],
     );

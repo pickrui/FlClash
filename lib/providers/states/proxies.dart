@@ -5,29 +5,39 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of '../state.dart';
 
-@riverpod
-GroupsState currentGroupsState(Ref ref) {
+Iterable<Group> _visibleGroups(Ref ref) {
   final mode = ref.watch(
     patchClashConfigProvider.select((state) => state.mode),
   );
-  final groups = ref.watch(
-    groupsProvider.select(
-      (state) => state.map((item) {
-        return item.copyWith(
-          revision: null,
-          all: item.all.map((proxy) => proxy.copyWith(now: '')).toList(),
-        );
-      }),
-    ),
-  );
+  final groups = ref.watch(groupsProvider);
+  return switch (mode) {
+    Mode.direct => const [],
+    Mode.global => groups,
+    Mode.rule => groups.where((item) => item.hidden != true),
+  };
+}
+
+@riverpod
+GroupsState currentGroupsState(Ref ref) {
   return GroupsState(
-    value: switch (mode) {
-      Mode.direct => [],
-      Mode.global => groups.toList(),
-      Mode.rule => groups.where((item) => item.hidden != true).toList(),
-    },
+    value: _visibleGroups(ref).map(_withoutSelection).toList(),
   );
 }
+
+Group _withoutSelection(Group group) {
+  // Paged summaries carry only the selected member, not the group's layout.
+  final all = group.nodeCount != null
+      ? const <Proxy>[]
+      : group.all.any(_hasSelection)
+      ? [
+          for (final proxy in group.all)
+            _hasSelection(proxy) ? proxy.copyWith(now: '') : proxy,
+        ]
+      : group.all;
+  return group.copyWith(now: '', revision: null, all: all);
+}
+
+bool _hasSelection(Proxy proxy) => proxy.now?.isNotEmpty ?? false;
 
 @Riverpod(keepAlive: true)
 DelayMap delaysAtLastTestBatch(Ref ref) {

@@ -13,6 +13,63 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'paged selections update the tray without rebuilding group layouts',
+    () async {
+      Group summary(String selected) => Group(
+        name: 'Group',
+        type: GroupType.Selector,
+        nodeCount: 2,
+        revision: 'members',
+        now: selected,
+        testUrl: 'https://group.test',
+        all: [Proxy(name: selected, type: 'Shadowsocks')],
+      );
+      final container = ProviderContainer(
+        overrides: [
+          groupsProvider.overrideWithBuild((_, _) => [summary('A')]),
+          currentProfileProvider.overrideWith((_) => null),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(delayDataSourceProvider.notifier).setDelays(const [
+        Delay(name: 'A', url: 'https://group.test', value: 10),
+        Delay(name: 'B', url: 'https://group.test', value: 20),
+      ]);
+      var layouts = 0;
+      final subscription = container.listen(
+        proxiesListStateProvider,
+        (_, _) => layouts++,
+      );
+      addTearDown(subscription.close);
+      expect(container.read(getSelectedProxyNameProvider('Group')), 'A');
+      expect(container.read(trayStateProvider).groups.single.now, 'A');
+      expect(container.read(trayDelaysProvider), {
+        'Group': {'A': 10},
+      });
+
+      container.read(groupsProvider.notifier).value = [summary('B')];
+      await container.pump();
+      expect(container.read(getSelectedProxyNameProvider('Group')), 'B');
+      final trayGroup = container.read(trayStateProvider).groups.single;
+      expect(trayGroup.now, 'B');
+      expect(trayGroup.all.single.name, 'B');
+      expect(container.read(trayDelaysProvider), {
+        'Group': {'B': 20},
+      });
+      expect(layouts, 0);
+
+      container.read(groupsProvider.notifier).value = [
+        summary('B').copyWith(nodeCount: 3, fixed: 'B'),
+      ];
+      await container.pump();
+      expect(layouts, 1);
+      final layout = container.read(proxiesListStateProvider).groups.single;
+      expect(layout.nodeCount, 3);
+      expect(layout.fixed, 'B');
+    },
+  );
+
   test('search matches all words across name and protocol without case sensitivity', () {
     expect(
       SearchQuery('  hong \n SHADOW ').matches(['Hong Kong 01', 'Shadowsocks']),

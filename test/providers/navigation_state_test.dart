@@ -93,12 +93,11 @@ void main() {
 
             container.read(groupsProvider.notifier).update((_) => groups);
             _expectProxiesPage(container, 'Personal');
-            final member = container
-                .read(currentGroupsStateProvider)
-                .value
-                .single
-                .all
-                .single;
+            expect(
+              container.read(getSelectedProxyNameProvider('Personal')),
+              selected,
+            );
+            final member = container.read(groupsProvider).single.all.single;
             expect(member.name, selected);
             expect(member.type, groups.single.all.single.type);
           }

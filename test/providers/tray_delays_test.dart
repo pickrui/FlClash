@@ -33,15 +33,13 @@ void main() {
       const nested = Group(
         name: 'Nested',
         type: GroupType.Selector,
+        hidden: true,
         now: 'leaf',
         testUrl: 'https://nested.test',
         all: [Proxy(name: 'leaf', type: 'ss')],
       );
       final container = ProviderContainer(
         overrides: [
-          currentGroupsStateProvider.overrideWith(
-            (_) => const GroupsState(value: [group]),
-          ),
           groupsProvider.overrideWithBuild((_, _) => [group, nested]),
           selectedMapProvider.overrideWith((_) => {}),
         ],
