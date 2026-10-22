@@ -9,7 +9,10 @@ import android.app.Application
 import com.oixcloud.clash.core.Core
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
@@ -39,10 +42,16 @@ class CoreReplyLifecycleTest {
         fun quickSetup(init: String, setup: String, callback: (String?) -> Unit) {
             callback(payload().decodeToString())
         }
+
+        @Implementation
+        fun callSetEventListener(callback: ((ByteArray) -> Unit)?) {
+            eventListener.set(callback)
+        }
     }
 
     companion object {
         private fun payload() = ByteArray(150_000) { (65 + it % 26).toByte() }
+        private val eventListener = AtomicReference<((ByteArray) -> Unit)?>()
     }
 
     private fun request(service: RemoteService, quick: Boolean, callback: ICallbackInterface) {
@@ -122,6 +131,64 @@ class CoreReplyLifecycleTest {
             assertFalse(service.isActive)
         } finally {
             service.onDestroy()
+        }
+    }
+
+    @Test
+    fun slowEventListenerBackpressuresTheProducerAndResumesInOrder() {
+        val service = Robolectric.buildService(RemoteService::class.java).get()
+        val worker = Executors.newSingleThreadExecutor()
+        val firstAck = CompletableFuture<IAckInterface>()
+        val received = mutableListOf<Int>()
+        val finished = CountDownLatch(1)
+        try {
+            (service.onBind(null) as IRemoteInterface).setEventListener(object : IEventInterface.Stub() {
+                override fun onEvent(id: String, data: ByteArray, isLast: Boolean, ack: IAckInterface) {
+                    val index = data.decodeToString().toInt()
+                    received.add(index)
+                    if (index == 0) firstAck.complete(ack) else ack.onAck()
+                    if (index == 1023) finished.countDown()
+                }
+            })
+            val listener = requireNotNull(eventListener.get())
+            val producer = worker.submit { repeat(1024) { listener(it.toString().toByteArray()) } }
+            val ack = firstAck.get(2, TimeUnit.SECONDS)
+            assertThrows(TimeoutException::class.java) { producer.get(200, TimeUnit.MILLISECONDS) }
+            ack.onAck()
+            producer.get(5, TimeUnit.SECONDS)
+            assertTrue(finished.await(2, TimeUnit.SECONDS))
+            assertEquals((0..1023).toList(), received)
+        } finally {
+            service.onDestroy()
+            worker.shutdownNow()
+        }
+    }
+
+    @Test
+    fun replacingOrDestroyingTheListenerReleasesABlockedProducer() {
+        for (destroy in listOf(false, true)) {
+            val service = Robolectric.buildService(RemoteService::class.java).get()
+            val binder = service.onBind(null) as IRemoteInterface
+            val worker = Executors.newSingleThreadExecutor()
+            val firstAck = CompletableFuture<IAckInterface>()
+            try {
+                binder.setEventListener(object : IEventInterface.Stub() {
+                    override fun onEvent(id: String, data: ByteArray, isLast: Boolean, ack: IAckInterface) {
+                        firstAck.complete(ack)
+                    }
+                })
+                val listener = requireNotNull(eventListener.get())
+                val producer = worker.submit { repeat(1024) { listener(byteArrayOf(1)) } }
+                val ack = firstAck.get(2, TimeUnit.SECONDS)
+                assertThrows(TimeoutException::class.java) { producer.get(200, TimeUnit.MILLISECONDS) }
+                if (destroy) service.onDestroy() else binder.setEventListener(null)
+                producer.get(2, TimeUnit.SECONDS)
+                ack.onAck()
+                assertNull(eventListener.get())
+            } finally {
+                service.onDestroy()
+                worker.shutdownNow()
+            }
         }
     }
 }

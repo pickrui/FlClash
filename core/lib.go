@@ -256,8 +256,9 @@ func marshalResult(value any) string {
 
 func sendMessageBatch(messages []Message) {
 	eventListenerLock.RLock()
-	defer eventListenerLock.RUnlock()
-	if eventListener == nil {
+	listener := eventListener
+	eventListenerLock.RUnlock()
+	if listener == nil {
 		return
 	}
 	arguments, err := json.Marshal(messages)
@@ -269,7 +270,7 @@ func sendMessageBatch(messages []Message) {
 	if err != nil {
 		return
 	}
-	eventListener(data)
+	listener(data)
 }
 
 func StopTun() {

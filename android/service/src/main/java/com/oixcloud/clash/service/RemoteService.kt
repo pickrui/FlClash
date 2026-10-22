@@ -30,6 +30,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -57,13 +58,13 @@ class RemoteService : Service(),
             if (listener == null) {
                 Core.callSetEventListener(null)
             } else {
-                // Go's single batcher goroutine calls back here and must never block.
-                val events = Channel<ByteArray>(Channel.UNLIMITED)
+                // Backpressure stays on Go's batcher; replacing this channel releases its sender.
+                val events = Channel<ByteArray>(Channel.RENDEZVOUS)
                 val job = launch {
                     val stalled = AtomicBoolean(false)
                     for (event in events) forwardEvent(listener, event, stalled)
                 }
-                Core.callSetEventListener { events.trySend(it) }
+                Core.callSetEventListener { events.trySendBlocking(it) }
                 eventForwarder = EventForwarder(events, job)
             }
         }
