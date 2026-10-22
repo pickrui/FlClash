@@ -68,3 +68,66 @@ func TestShareLinkPortHopping(t *testing.T) {
 		}
 	}
 }
+
+func TestShareLinksRoundTrip(t *testing.T) {
+	data, err := os.ReadFile("testdata/share_links.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fixtures map[string]map[string]any
+	if err = json.Unmarshal(data, &fixtures); err != nil {
+		t.Fatal(err)
+	}
+	for link, want := range fixtures {
+		t.Run(link, func(t *testing.T) {
+			source := decodeShareLink(link)
+			data, _ := json.Marshal(source)
+			json.Unmarshal(data, &source)
+			encoded := handleEncodeShareLinks([]map[string]any{source})[0]
+			if encoded == "" {
+				t.Fatal("supported node lost its link")
+			}
+			decoded := decodeShareLink(encoded)
+			data, _ = json.Marshal(decoded)
+			var got map[string]any
+			json.Unmarshal(data, &got)
+			for key, value := range want {
+				if !reflect.DeepEqual(got[key], value) {
+					t.Errorf("%s: got %#v want %#v", key, got[key], value)
+				}
+			}
+		})
+	}
+	for _, kind := range []string{"direct", "tailscale", "snell"} {
+		if handleEncodeShareLinks([]map[string]any{{"type": kind, "server": "example.com"}})[0] != "" {
+			t.Fatal("invented an unsupported link")
+		}
+	}
+}
+
+func TestMieruShareLinksExpandAndRoundTripRanges(t *testing.T) {
+	link := "mierus://user:pass@example.com?port=443&protocol=TCP&port=8000-9000&protocol=UDP#nodes"
+	rows := handleDecodeShareLinks([]string{link})
+	if len(rows[0]) != 2 || rows[0][1]["port-range"] != "8000-9000" {
+		t.Fatalf("multi-port link: %#v", rows)
+	}
+	encoded := handleEncodeShareLinks(rows[0])
+	for i, uri := range encoded {
+		p := decodeShareLink(uri)
+		if p == nil || p["name"] != rows[0][i]["name"] {
+			t.Fatalf("name changed: %#v", p)
+		}
+	}
+}
+
+func TestShareLinkPlainUsernameAndExplicitVmessCertificatePolicy(t *testing.T) {
+	p := decodeShareLink("http://user@example.com:8080")
+	if p == nil || p["username"] != "user" {
+		t.Fatalf("plain username decoded as binary: %#v", p)
+	}
+	p = decodeShareLink("vmess://fixture@example.com:443?security=tls&skip-cert-verify=true#node")
+	encoded := handleEncodeShareLinks([]map[string]any{p})[0]
+	if next := decodeShareLink(encoded); next == nil || next["skip-cert-verify"] != true {
+		t.Fatal("explicit vmess certificate setting lost")
+	}
+}

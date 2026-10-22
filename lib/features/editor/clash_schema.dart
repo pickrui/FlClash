@@ -91,6 +91,7 @@ enum EditorSchema {
   proxy(_proxy),
   proxyGroup(_customProxyGroup, 'proxy-groups'),
   rules(_rules),
+  shareLinks(_str),
   provider(_providerFile);
 
   final YamlSchema root;

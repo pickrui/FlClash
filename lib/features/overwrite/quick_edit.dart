@@ -13,6 +13,10 @@ import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:material_ui/material_ui.dart';
 
+class QuickEditCancelled implements Exception {
+  const QuickEditCancelled();
+}
+
 /// Edits a definition as text; a [FormatException] from [apply] reads as
 /// [invalidMessage], and leaving with the text unread asks to discard it.
 Future<void> showCustomQuickEdit(
@@ -35,6 +39,8 @@ Future<void> showCustomQuickEdit(
       try {
         await apply(next);
         return true;
+      } on QuickEditCancelled {
+        return false;
       } catch (error) {
         final message = error is FormatException
             ? invalidMessage

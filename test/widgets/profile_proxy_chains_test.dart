@@ -8,6 +8,7 @@ import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/overwrite.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -139,6 +140,73 @@ Future<void> _deleteFromMenu(WidgetTester tester, String title) async {
 }
 
 void main() {
+  for (final scenario in ['apply', 'cancel', 'referenced', 'stale']) {
+    testWidgets(
+      'batch share links handle $scenario without losing node identity',
+      (tester) async {
+        final core = _Core();
+        const proxy = ProfileProxy(
+          id: 11,
+          proxy: {'name': 'One', 'type': 'ss'},
+        );
+        when(() => core.encodeShareLinks(any()))
+            .thenAnswer((_) async => ['ss://original']);
+        when(() => core.decodeShareLinks(any())).thenAnswer(
+          (call) async => [
+            for (final _ in call.positionalArguments.single as List)
+              [proxy.proxy],
+          ],
+        );
+        when(() => core.validateProxies(any())).thenAnswer(
+          (call) async => [
+            for (final _ in call.positionalArguments.single as List) '',
+          ],
+        );
+        final setup = _SetupAction(
+          rawConfig: scenario == 'referenced'
+              ? {
+                  'rules': ['MATCH,One'],
+                }
+              : {},
+        );
+        final (profiles, _) = await _pump(
+          tester,
+          setup,
+          _baseProfile.copyWith(profileProxies: [proxy]),
+          overrides: [coreHandlerProvider.overrideWithValue(core)],
+        );
+        await tester.tap(find.byTooltip(_l10n.quickEdit));
+        await tester.pumpAndSettle();
+        if (scenario == 'stale') {
+          profiles.updateProfile(
+            1,
+            (profile) => profile.copyWith(label: 'changed'),
+          );
+        }
+        final editor = tester.widget<EditorPage>(find.byType(EditorPage));
+        final leaving = editor.onPop!(
+          tester.element(find.byType(EditorPage)),
+          editor.title,
+          scenario == 'apply' ? 'ss://edited' : '',
+        );
+        await tester.pumpAndSettle();
+        if (scenario == 'apply') {
+          expect(await leaving, isTrue);
+          final node = profiles.state.single.profileProxies.single;
+          expect(node.id, proxy.id);
+          expect(node.uri, 'ss://edited');
+          expect(setup.applies, 1);
+          return;
+        }
+        await tester.tap(find.text(_l10n.cancel).last);
+        await tester.pumpAndSettle();
+        expect(await leaving, isFalse);
+        expect(profiles.state.single.profileProxies, [proxy]);
+        expect(setup.applies, 0);
+      },
+    );
+  }
+
   testWidgets('enabling a chain through an unavailable node keeps it off', (
     tester,
   ) async {

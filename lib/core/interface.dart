@@ -37,6 +37,8 @@ mixin CoreInterface {
 
   Future<List<List<Map<String, Object?>>>> decodeShareLinks(List<String> lines);
 
+  Future<List<String>> encodeShareLinks(List<Map<String, Object?>> proxies);
+
   Future<String> validateConfigWithBytes(String data);
 
   Future<String> decryptConfigBytes(String data, String secretKey);
@@ -231,6 +233,21 @@ abstract class CoreHandlerInterface with CoreInterface {
     if (results.length != filters.length ||
         results.any((value) => value is! String)) {
       throw const FormatException('Invalid filter validation response');
+    }
+    return results.cast<String>();
+  }
+
+  @override
+  Future<List<String>> encodeShareLinks(
+    List<Map<String, Object?>> proxies,
+  ) async {
+    final results = await _invokeRequiredMethod<List<dynamic>>(
+      method: CoreMethod.encodeShareLinks,
+      arguments: proxies,
+    );
+    if (results.length != proxies.length ||
+        results.any((value) => value is! String)) {
+      throw const FormatException('Invalid share link response');
     }
     return results.cast<String>();
   }

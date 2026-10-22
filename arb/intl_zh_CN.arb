@@ -1625,5 +1625,14 @@
   "providerLookupFailed": "无法读取当前生效的节点配置，请刷新资源后重试",
   "lookupProxyConfig": "查找节点配置",
   "tunDnsMode": "系统 DNS 模式",
-  "tunDnsModeDesc": "留空保持原有行为；disabled 不设置系统 DNS；native 使用 TUN 地址；hijack 额外拦截其他网卡的 DNS（Windows 需 strict-route，Linux 需 auto-redirect）。macOS 上显式模式优先于自动设置系统 DNS"
+  "tunDnsModeDesc": "留空保持原有行为；disabled 不设置系统 DNS；native 使用 TUN 地址；hijack 额外拦截其他网卡的 DNS（Windows 需 strict-route，Linux 需 auto-redirect）。macOS 上显式模式优先于自动设置系统 DNS",
+  "nodeShareLinkUnavailable": "此节点无法转换为分享链接，请使用字段或 YAML 编辑",
+  "shareLinkNodesPreserved": "{count} 个节点无法转换为链接，将保留原配置",
+  "@shareLinkNodesPreserved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

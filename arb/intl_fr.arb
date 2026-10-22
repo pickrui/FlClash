@@ -1625,5 +1625,14 @@
   "providerLookupFailed": "Impossible de lire la configuration active du nœud. Actualisez la ressource et réessayez.",
   "lookupProxyConfig": "Rechercher la configuration du nœud",
   "tunDnsMode": "Mode DNS du système",
-  "tunDnsModeDesc": "Une valeur vide conserve le comportement précédent. disabled ne modifie pas le DNS ; native utilise l’adresse TUN ; hijack intercepte aussi le DNS des autres interfaces (strict-route sous Windows, auto-redirect sous Linux). Sur macOS, un mode explicite est prioritaire sur le DNS automatique."
+  "tunDnsModeDesc": "Une valeur vide conserve le comportement précédent. disabled ne modifie pas le DNS ; native utilise l’adresse TUN ; hijack intercepte aussi le DNS des autres interfaces (strict-route sous Windows, auto-redirect sous Linux). Sur macOS, un mode explicite est prioritaire sur le DNS automatique.",
+  "nodeShareLinkUnavailable": "Ce nœud ne peut pas être converti en lien. Utilisez les champs ou YAML",
+  "shareLinkNodesPreserved": "{count} nœuds ne peuvent pas être convertis en liens et seront conservés",
+  "@shareLinkNodesPreserved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

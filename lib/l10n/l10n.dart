@@ -13737,6 +13737,26 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `This node cannot be represented by a share link; use fields or YAML`
+  String get nodeShareLinkUnavailable {
+    return Intl.message(
+      'This node cannot be represented by a share link; use fields or YAML',
+      name: 'nodeShareLinkUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} nodes cannot be represented by links and will be kept unchanged`
+  String shareLinkNodesPreserved(int count) {
+    return Intl.message(
+      '$count nodes cannot be represented by links and will be kept unchanged',
+      name: 'shareLinkNodesPreserved',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

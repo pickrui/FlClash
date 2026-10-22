@@ -1625,5 +1625,14 @@
   "providerLookupFailed": "現在有効なノード設定を読み取れません。リソースを更新して再試行してください",
   "lookupProxyConfig": "ノード設定を検索",
   "tunDnsMode": "システム DNS モード",
-  "tunDnsModeDesc": "空欄は従来の動作を維持します。disabled はシステム DNS を変更せず、native は TUN アドレスを使用します。hijack は他のインターフェースの DNS も捕捉します（Windows は strict-route、Linux は auto-redirect が必要）。macOS では明示したモードが自動 DNS 設定に優先します。"
+  "tunDnsModeDesc": "空欄は従来の動作を維持します。disabled はシステム DNS を変更せず、native は TUN アドレスを使用します。hijack は他のインターフェースの DNS も捕捉します（Windows は strict-route、Linux は auto-redirect が必要）。macOS では明示したモードが自動 DNS 設定に優先します。",
+  "nodeShareLinkUnavailable": "このノードは共有リンクに変換できません。項目または YAML で編集してください",
+  "shareLinkNodesPreserved": "リンクに変換できない {count} 個のノードは変更せず保持されます",
+  "@shareLinkNodesPreserved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -286,36 +286,39 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: 'Из ссылок добавлен ${count} узел', few: 'Из ссылок добавлено ${count} узла', many: 'Из ссылок добавлено ${count} узлов', other: 'Из ссылок добавлено ${count} узла')}";
 
   static String m109(count) =>
+      "Узлы, которые нельзя представить ссылкой (${count}), останутся без изменений";
+
+  static String m110(count) =>
       "${Intl.plural(count, one: 'Не удалось прочитать ${count} ссылку', few: 'Не удалось прочитать ${count} ссылки', many: 'Не удалось прочитать ${count} ссылок', other: 'Не удалось прочитать ${count} ссылки')}";
 
-  static String m110(label) => "«${label}» — только одно значение";
+  static String m111(label) => "«${label}» — только одно значение";
 
-  static String m111(fields) => "Проверьте настройки: ${fields}";
+  static String m112(fields) => "Проверьте настройки: ${fields}";
 
-  static String m112(count) => "Устройства (${count})";
+  static String m113(count) => "Устройства (${count})";
 
-  static String m113(name, profile) =>
+  static String m114(name, profile) =>
       "${name} все еще используется правилом или группой в профиле «${profile}»";
 
-  static String m114(region) => "Ретранслятор ${region}";
+  static String m115(region) => "Ретранслятор ${region}";
 
-  static String m115(name) =>
+  static String m116(name) =>
       "Это устройство выйдет из сети ${name}, а данные входа будут удалены с него. Если сеть сейчас недоступна, удалите устройство в консоли администратора Tailscale.";
 
-  static String m116(value) => "Пик ${value}";
+  static String m117(value) => "Пик ${value}";
 
-  static String m117(value) => "Всего ${value}";
+  static String m118(value) => "Всего ${value}";
 
-  static String m118(build) => "Номер сборки: ${build}";
+  static String m119(build) => "Номер сборки: ${build}";
 
-  static String m119(version) => "Версия: ${version}";
+  static String m120(version) => "Версия: ${version}";
 
-  static String m120(label) => "${label} должен быть URL";
-
-  static String m121(count) =>
-      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+  static String m121(label) => "${label} должен быть URL";
 
   static String m122(count) =>
+      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+
+  static String m123(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2228,6 +2231,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage(
       "Быстрое редактирование",
     ),
+    "nodeShareLinkUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Этот узел нельзя представить ссылкой. Используйте поля или YAML",
+    ),
     "nodes": MessageLookupByLibrary.simpleMessage("Узлы"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "Этот внешний ресурс не является текстовым файлом",
@@ -3058,7 +3064,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "settings": MessageLookupByLibrary.simpleMessage("Настройки"),
     "settingsCount": m107,
     "shareLinkNodesAdded": m108,
-    "shareLinksNotRead": m109,
+    "shareLinkNodesPreserved": m109,
+    "shareLinksNotRead": m110,
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
     "showLess": MessageLookupByLibrary.simpleMessage("Свернуть"),
     "showMore": MessageLookupByLibrary.simpleMessage("Развернуть"),
@@ -3080,7 +3087,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Запуск в фоновом режиме",
     ),
     "singleAdd": MessageLookupByLibrary.simpleMessage("По одному"),
-    "singleValueTip": m110,
+    "singleValueTip": m111,
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Пропускать проверку сертификата",
@@ -3216,7 +3223,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "Доступные выходные узлы",
     ),
-    "tailscaleCheckSettings": m111,
+    "tailscaleCheckSettings": m112,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Подключено"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Подключение"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage(
@@ -3228,7 +3235,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage(
       "Имя устройства",
     ),
-    "tailscaleDevices": m112,
+    "tailscaleDevices": m113,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("Напрямую"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "Добавьте сеть, войдите на этом устройстве и запустите прокси, чтобы получить доступ к своим устройствам.",
@@ -3323,7 +3330,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Требуется вход",
     ),
-    "tailscaleNetworkInUse": m113,
+    "tailscaleNetworkInUse": m114,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Название сети",
     ),
@@ -3340,8 +3347,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Открыть страницу входа",
     ),
-    "tailscaleRelay": m114,
-    "tailscaleRemoveConfirm": m115,
+    "tailscaleRelay": m115,
+    "tailscaleRemoveConfirm": m116,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Удалить сеть",
     ),
@@ -3413,8 +3420,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Загружено"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Трафик"),
-    "trafficPeak": m116,
-    "trafficTotal": m117,
+    "trafficPeak": m117,
+    "trafficTotal": m118,
     "trafficUsage": MessageLookupByLibrary.simpleMessage(
       "Использование трафика",
     ),
@@ -3477,7 +3484,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Автоматическое обновление не завершено. Повторите попытку или обновите приложение со страницы загрузки.",
     ),
-    "updateBuildNumber": m118,
+    "updateBuildNumber": m119,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
     ),
@@ -3528,7 +3535,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "Приложение закроется, обновится и откроется снова. Ваши настройки сохранятся.",
     ),
-    "updateVersionNumber": m119,
+    "updateVersionNumber": m120,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Скорость отдачи"),
@@ -3536,7 +3543,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -3580,8 +3587,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует",
     ),
-    "yearsAgo": m121,
-    "yearsAgoShort": m122,
+    "yearsAgo": m122,
+    "yearsAgoShort": m123,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };

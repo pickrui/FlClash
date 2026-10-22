@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/metacubex/mihomo/common/convert"
 )
@@ -19,12 +20,21 @@ import (
 func handleDecodeShareLinks(lines []string) [][]map[string]any {
 	results := make([][]map[string]any, len(lines))
 	for i, line := range lines {
-		results[i] = []map[string]any{}
-		if proxy := decodeShareLink(strings.TrimSpace(line)); proxy != nil {
-			results[i] = append(results[i], proxy)
-		}
+		results[i] = decodeShareLinkRows(strings.TrimSpace(line))
 	}
 	return results
+}
+
+func decodeShareLinkRows(line string) []map[string]any {
+	if len(line) <= 256*1024 && !strings.ContainsAny(line, "\r\n") && strings.HasPrefix(strings.ToLower(line), "mierus://") {
+		if proxies, err := convert.ConvertsV2Ray([]byte(line)); err == nil && len(proxies) > 1 {
+			return proxies
+		}
+	}
+	if proxy := decodeShareLink(line); proxy != nil {
+		return []map[string]any{proxy}
+	}
+	return []map[string]any{}
 }
 
 func shareBool(value string) bool {
@@ -112,7 +122,7 @@ func decodeShareLink(line string) (proxy map[string]any) {
 		}
 		auth := shareUser(u)
 		if !strings.Contains(auth, ":") {
-			if decoded, err := convert.TryDecodeBase64(auth); err == nil {
+			if decoded, err := convert.TryDecodeBase64(auth); err == nil && utf8.Valid(decoded) {
 				auth = string(decoded)
 			}
 		}
@@ -188,10 +198,25 @@ func decodeShareLink(line string) (proxy map[string]any) {
 		}
 	}
 	port, err := strconv.Atoi(fmt.Sprint(proxy["port"]))
-	if err != nil || port < 1 || port > 65535 {
-		return nil
+	if proxy["type"] == "mieru" && proxy["port-range"] != nil {
+		bounds := strings.Split(fmt.Sprint(proxy["port-range"]), "-")
+		if len(bounds) != 2 {
+			return nil
+		}
+		start, e1 := strconv.ParseUint(bounds[0], 10, 16)
+		end, e2 := strconv.ParseUint(bounds[1], 10, 16)
+		if e1 != nil || e2 != nil || start == 0 || end < start {
+			return nil
+		}
+	} else {
+		if err != nil || port < 1 || port > 65535 {
+			return nil
+		}
+		proxy["port"] = port
 	}
-	proxy["port"] = port
+	if proxy["type"] == "mieru" && u.Fragment != "" {
+		proxy["name"] = u.Fragment
+	}
 	server, _ := proxy["server"].(string)
 	if server == "" {
 		return nil
@@ -322,7 +347,7 @@ func decodeShareSubscription(data []byte) ([]map[string]any, error) {
 	var proxies []map[string]any
 	names := map[string]bool{}
 	for _, line := range strings.Split(string(data), "\n") {
-		if p := decodeShareLink(strings.TrimSpace(line)); p != nil {
+		for _, p := range decodeShareLinkRows(strings.TrimSpace(line)) {
 			base := fmt.Sprint(p["name"])
 			name := base
 			for suffix := 2; names[name]; suffix++ {

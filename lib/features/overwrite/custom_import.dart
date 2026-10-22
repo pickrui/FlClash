@@ -197,11 +197,13 @@ Future<({List<ShareLinkNode> nodes, int invalid})> readShareLinks(
   final nodes = <ShareLinkNode>[];
   var invalid = 0;
   for (final (index, results) in decoded.indexed) {
-    if (results.length != 1) {
+    if (results.isEmpty) {
       invalid++;
       continue;
     }
-    nodes.add((uri: lines[index], proxy: results.single));
+    for (final proxy in results) {
+      nodes.add((uri: lines[index], proxy: proxy));
+    }
   }
   return (nodes: nodes, invalid: invalid);
 }

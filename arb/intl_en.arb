@@ -1625,5 +1625,14 @@
   "providerLookupFailed": "Unable to read the active node configuration. Refresh the resource and try again.",
   "lookupProxyConfig": "Find node configuration",
   "tunDnsMode": "System DNS mode",
-  "tunDnsModeDesc": "Empty keeps the previous behavior. disabled leaves system DNS unchanged; native uses the TUN address; hijack also intercepts DNS on other interfaces (Windows requires strict-route; Linux requires auto-redirect). An explicit mode takes precedence over automatic system DNS on macOS."
+  "tunDnsModeDesc": "Empty keeps the previous behavior. disabled leaves system DNS unchanged; native uses the TUN address; hijack also intercepts DNS on other interfaces (Windows requires strict-route; Linux requires auto-redirect). An explicit mode takes precedence over automatic system DNS on macOS.",
+  "nodeShareLinkUnavailable": "This node cannot be represented by a share link; use fields or YAML",
+  "shareLinkNodesPreserved": "{count} nodes cannot be represented by links and will be kept unchanged",
+  "@shareLinkNodesPreserved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

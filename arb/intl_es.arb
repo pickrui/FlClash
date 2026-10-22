@@ -1625,5 +1625,14 @@
   "providerLookupFailed": "No se puede leer la configuración activa del nodo. Actualiza el recurso e inténtalo de nuevo.",
   "lookupProxyConfig": "Buscar la configuración del nodo",
   "tunDnsMode": "Modo DNS del sistema",
-  "tunDnsModeDesc": "Vacío conserva el comportamiento anterior. disabled no modifica el DNS; native usa la dirección TUN; hijack también intercepta el DNS de otras interfaces (Windows requiere strict-route; Linux, auto-redirect). En macOS, un modo explícito tiene prioridad sobre el DNS automático."
+  "tunDnsModeDesc": "Vacío conserva el comportamiento anterior. disabled no modifica el DNS; native usa la dirección TUN; hijack también intercepta el DNS de otras interfaces (Windows requiere strict-route; Linux, auto-redirect). En macOS, un modo explícito tiene prioridad sobre el DNS automático.",
+  "nodeShareLinkUnavailable": "Este nodo no se puede convertir en un enlace. Use los campos o YAML",
+  "shareLinkNodesPreserved": "Se conservarán sin cambios {count} nodos que no se pueden convertir en enlaces",
+  "@shareLinkNodesPreserved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

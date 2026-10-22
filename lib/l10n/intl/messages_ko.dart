@@ -256,36 +256,38 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m108(count) =>
       "${Intl.plural(count, one: '공유 링크에서 노드 1개를 추가했습니다', other: '공유 링크에서 노드 ${count}개를 추가했습니다')}";
 
-  static String m109(count) =>
+  static String m109(count) => "링크로 변환할 수 없는 노드 ${count}개는 변경 없이 유지됩니다";
+
+  static String m110(count) =>
       "${Intl.plural(count, one: '링크 1개를 읽지 못했습니다', other: '링크 ${count}개를 읽지 못했습니다')}";
 
-  static String m110(label) => "${label}은(는) 하나만 입력해야 합니다";
+  static String m111(label) => "${label}은(는) 하나만 입력해야 합니다";
 
-  static String m111(fields) => "다음 설정을 확인하세요: ${fields}";
+  static String m112(fields) => "다음 설정을 확인하세요: ${fields}";
 
-  static String m112(count) => "기기(${count})";
+  static String m113(count) => "기기(${count})";
 
-  static String m113(name, profile) =>
+  static String m114(name, profile) =>
       "프로필 ${profile}의 규칙 또는 그룹이 아직 ${name}을(를) 사용하고 있습니다";
 
-  static String m114(region) => "중계 ${region}";
+  static String m115(region) => "중계 ${region}";
 
-  static String m115(name) =>
+  static String m116(name) =>
       "이 기기가 ${name}에서 나가고 기기에 저장된 로그인 정보가 삭제됩니다. 현재 네트워크에 연결할 수 없다면 Tailscale 관리 콘솔에서 기기를 제거하세요.";
 
-  static String m116(value) => "최고 ${value}";
+  static String m117(value) => "최고 ${value}";
 
-  static String m117(value) => "합계 ${value}";
+  static String m118(value) => "합계 ${value}";
 
-  static String m118(build) => "빌드: ${build}";
+  static String m119(build) => "빌드: ${build}";
 
-  static String m119(version) => "버전: ${version}";
+  static String m120(version) => "버전: ${version}";
 
-  static String m120(label) => "${label}은(는) URL이어야 합니다";
-
-  static String m121(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m121(label) => "${label}은(는) URL이어야 합니다";
 
   static String m122(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m123(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1782,6 +1784,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "이름과 유형을 포함한 완전한 프록시 정의를 입력하세요",
     ),
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage("빠른 편집"),
+    "nodeShareLinkUnavailable": MessageLookupByLibrary.simpleMessage(
+      "이 노드는 공유 링크로 변환할 수 없습니다. 필드 또는 YAML로 편집하세요",
+    ),
     "nodes": MessageLookupByLibrary.simpleMessage("노드"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "이 외부 리소스는 텍스트 파일이 아닙니다",
@@ -2424,7 +2429,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "settings": MessageLookupByLibrary.simpleMessage("설정"),
     "settingsCount": m107,
     "shareLinkNodesAdded": m108,
-    "shareLinksNotRead": m109,
+    "shareLinkNodesPreserved": m109,
+    "shareLinksNotRead": m110,
     "show": MessageLookupByLibrary.simpleMessage("표시"),
     "showLess": MessageLookupByLibrary.simpleMessage("접기"),
     "showMore": MessageLookupByLibrary.simpleMessage("펼치기"),
@@ -2440,7 +2446,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "silentLaunch": MessageLookupByLibrary.simpleMessage("백그라운드 실행"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("백그라운드에서 시작"),
     "singleAdd": MessageLookupByLibrary.simpleMessage("개별 추가"),
-    "singleValueTip": m110,
+    "singleValueTip": m111,
     "size": MessageLookupByLibrary.simpleMessage("크기"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage("인증서 검증 건너뛰기"),
     "skipDomain": MessageLookupByLibrary.simpleMessage("건너뛸 도메인"),
@@ -2548,7 +2554,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "사용 가능한 출구 노드",
     ),
-    "tailscaleCheckSettings": m111,
+    "tailscaleCheckSettings": m112,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("연결됨"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("연결 중"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage("제어 서버 URL"),
@@ -2556,7 +2562,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "인증 정보와 기기 ID는 이 기기에만 보관됩니다.",
     ),
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage("기기 이름"),
-    "tailscaleDevices": m112,
+    "tailscaleDevices": m113,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("직접 연결"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "네트워크를 추가하고 이 기기에서 로그인한 후 프록시를 시작하면 다른 기기에 접근할 수 있습니다.",
@@ -2637,7 +2643,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "기기 승인 대기 중",
     ),
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage("로그인 필요"),
-    "tailscaleNetworkInUse": m113,
+    "tailscaleNetworkInUse": m114,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage("네트워크 이름"),
     "tailscaleNetworks": MessageLookupByLibrary.simpleMessage("네트워크"),
     "tailscaleNotApplied": MessageLookupByLibrary.simpleMessage("적용되지 않음"),
@@ -2650,8 +2656,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "로그인 페이지 열기",
     ),
-    "tailscaleRelay": m114,
-    "tailscaleRemoveConfirm": m115,
+    "tailscaleRelay": m115,
+    "tailscaleRemoveConfirm": m116,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage("네트워크 제거"),
     "tailscaleSaveAndLogin": MessageLookupByLibrary.simpleMessage("저장 후 로그인"),
     "tailscaleSignedIn": MessageLookupByLibrary.simpleMessage("로그인됨"),
@@ -2697,8 +2703,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("업로드량"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
     "traffic": MessageLookupByLibrary.simpleMessage("트래픽"),
-    "trafficPeak": m116,
-    "trafficTotal": m117,
+    "trafficPeak": m117,
+    "trafficTotal": m118,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "transferConfirmNotice": MessageLookupByLibrary.simpleMessage(
       "이체가 완료되면 시스템에서 자동으로 확인하고 선택한 요금제를 활성화합니다.",
@@ -2755,7 +2761,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "자동 업데이트를 완료하지 못했습니다. 다시 시도하거나 다운로드 페이지에서 업데이트하세요.",
     ),
-    "updateBuildNumber": m118,
+    "updateBuildNumber": m119,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("다운로드 취소"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "백그라운드에서 다운로드",
@@ -2790,13 +2796,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "앱이 닫힌 뒤 현재 위치에서 업데이트되고 다시 열립니다. 설정은 유지됩니다.",
     ),
-    "updateVersionNumber": m119,
+    "updateVersionNumber": m120,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("요금제 업그레이드"),
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL로 프로필 가져오기"),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -2824,8 +2830,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m121,
-    "yearsAgoShort": m122,
+    "yearsAgo": m122,
+    "yearsAgoShort": m123,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

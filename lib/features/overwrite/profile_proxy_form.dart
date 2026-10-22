@@ -153,6 +153,10 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
   int _revision = 0;
   int _mode = 0;
   bool _saving = false;
+  bool _switching = false;
+  Map<String, Object?>? _linkBase;
+  Map<String, Object?>? _linkedDefinition;
+  String? _generatedLink;
   bool? _udp;
   Timer? _validationTimer;
   int _validationRevision = 0;
@@ -217,7 +221,14 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
       if (result.single.length != 1) {
         throw const FormatException('Expected one share link');
       }
-      return result.single.single;
+      if (_uriController.text.trim() == _generatedLink && _linkBase != null) {
+        return _linkBase!;
+      }
+      return withUnlinkedFields(
+        result.single.single,
+        previous: _linkBase ?? const {},
+        linked: _linkedDefinition,
+      );
     }
     if (_mode == 2) return parseProfileProxyDefinition(_yamlController.text);
     return parseProfileProxyDefinition(writeYaml(_quickDefinition()));
@@ -267,7 +278,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
     final revision = ++_validationRevision;
     _validationTimer?.cancel();
     _validationTimer = Timer(const Duration(milliseconds: 400), () async {
-      if (!mounted || _saving) return;
+      if (!mounted || _saving || _switching) return;
       final invalidDefinition = context.appLocalizations.nodeInvalidDefinition;
       String? error;
       try {
@@ -287,20 +298,49 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
   }
 
   Future<void> _switchMode(int mode) async {
+    if (_switching || _saving || mode == _mode) return;
     final revision = ++_validationRevision;
+    _validationTimer?.cancel();
+    setState(() => _switching = true);
     try {
+      var proxy = _proxy;
       if ((_mode == 0 && _uriController.text.trim().isNotEmpty) || _mode != 0) {
-        final proxy = await _readEditor();
-        if (!mounted || revision != _validationRevision || _saving) return;
-        _proxy = proxy;
+        proxy = await _readEditor();
       }
+      String? link;
+      Map<String, Object?>? linked;
+      if (mode == 0) {
+        final core = ref.read(coreHandlerProvider);
+        link = (await core.encodeShareLinks([proxy])).single;
+        if (link.isEmpty) {
+          if (mounted) {
+            context.showNotifier(
+              context.appLocalizations.nodeShareLinkUnavailable,
+            );
+          }
+          return;
+        }
+        linked = (await core.decodeShareLinks([link])).single.single;
+      }
+      if (!mounted || revision != _validationRevision) return;
+      _proxy = proxy;
       _writeEditors();
-      if (mode == 0 && _mode != 0) _uriController.clear();
+      if (link != null) {
+        _linkBase = proxy;
+        _linkedDefinition = linked;
+        _generatedLink = link;
+        _uriController.text = link;
+      }
       setState(() => _mode = mode);
-      _scheduleValidation();
     } catch (_) {
-      if (!mounted) return;
-      context.showNotifier(context.appLocalizations.nodeInvalidDefinition);
+      if (mounted) {
+        context.showNotifier(context.appLocalizations.nodeInvalidDefinition);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _switching = false);
+        _scheduleValidation();
+      }
     }
   }
 
@@ -317,7 +357,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
   }
 
   Future<void> _handleSubmit() async {
-    if (_saving) return;
+    if (_saving || _switching) return;
     final route = ModalRoute.of(context);
     FocusScope.of(context).unfocus();
     _validationRevision++;
@@ -729,18 +769,18 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
     return OverwriteExitGuard(
       isDirty: () => !const ListEquality().equals(_origin, _snapshot),
       save: _handleSubmit,
-      isBusy: () => _saving,
+      isBusy: () => _saving || _switching,
       child: CommonScaffold(
         title: l.proxyChainCustomNode,
         confirmationAction: IconButtonData(
           glyph: AppGlyphs.check,
           tooltip: l.save,
-          onPressed: _saving ? null : _handleSubmit,
+          onPressed: _saving || _switching ? null : _handleSubmit,
           isLoading: _saving,
         ),
         body: Builder(
           builder: (context) => AbsorbPointer(
-            absorbing: _saving,
+            absorbing: _saving || _switching,
             child: ListView(
               padding: EdgeInsets.fromLTRB(
                 16,
@@ -758,6 +798,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                 ErrorBanner(message: _coreError),
                 if (_mode == 0)
                   TextField(
+                    key: const ValueKey('proxy-share-link'),
                     controller: _uriController,
                     minLines: 4,
                     maxLines: 8,

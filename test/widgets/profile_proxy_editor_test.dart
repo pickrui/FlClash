@@ -20,6 +20,74 @@ import '../helpers/test_app.dart';
 final class _Core extends Mock implements CoreController {}
 
 void main() {
+  testWidgets('field to link editing keeps local fields and disabled state', (
+    tester,
+  ) async {
+    final core = _Core();
+    const base = {
+      'name': 'Node',
+      'type': 'vless',
+      'server': 'example.com',
+      'port': 443,
+      'uuid': 'fixture',
+      'udp': false,
+      'future': {'keep': true},
+    };
+    const linked = {
+      'name': 'Node',
+      'type': 'vless',
+      'server': 'example.com',
+      'port': 443,
+      'uuid': 'fixture',
+      'udp': true,
+    };
+    when(() => core.isCompleted).thenReturn(true);
+    when(() => core.encodeShareLinks(any()))
+        .thenAnswer((_) async => ['vless://original']);
+    when(() => core.decodeShareLinks(any())).thenAnswer(
+      (call) async => [
+        [
+          {
+            ...linked,
+            if ((call.positionalArguments.single as List).single ==
+                'vless://edited')
+              'server': 'edited.example',
+          },
+        ],
+      ],
+    );
+    when(() => core.validateProxies(any())).thenAnswer((_) async => ['']);
+    ProfileProxy? saved;
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [coreHandlerProvider.overrideWithValue(core)],
+        child: ProfileProxyEditView(
+          profileProxy: const ProfileProxy(id: 1, enable: false, proxy: base),
+          canSave: (next) async {
+            saved = next;
+            return false;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('URI'));
+    await tester.pumpAndSettle();
+    final input = find.byKey(const ValueKey('proxy-share-link'));
+    expect(
+      tester.widget<TextField>(input).controller!.text,
+      'vless://original',
+    );
+    await tester.enterText(input, 'vless://edited');
+    await tester.tap(find.byTooltip(AppLocalizations.current.save));
+    await tester.pumpAndSettle();
+    expect(saved?.id, 1);
+    expect(saved?.enable, false);
+    expect(saved?.proxy['server'], 'edited.example');
+    expect(saved?.proxy['udp'], false);
+    expect(saved?.proxy['future'], {'keep': true});
+  });
+
   testWidgets('node validation debounces edits and ignores stale responses', (
     tester,
   ) async {

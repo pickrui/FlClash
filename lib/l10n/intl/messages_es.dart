@@ -295,36 +295,39 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: '1 nodo añadido desde los enlaces compartidos', other: '${count} nodos añadidos desde los enlaces compartidos')}";
 
   static String m109(count) =>
+      "Se conservarán sin cambios ${count} nodos que no se pueden convertir en enlaces";
+
+  static String m110(count) =>
       "${Intl.plural(count, one: 'No se pudo leer 1 enlace', other: 'No se pudieron leer ${count} enlaces')}";
 
-  static String m110(label) => "${label} debe ser un solo elemento";
+  static String m111(label) => "${label} debe ser un solo elemento";
 
-  static String m111(fields) => "Revise estos ajustes: ${fields}";
+  static String m112(fields) => "Revise estos ajustes: ${fields}";
 
-  static String m112(count) => "Dispositivos (${count})";
+  static String m113(count) => "Dispositivos (${count})";
 
-  static String m113(name, profile) =>
+  static String m114(name, profile) =>
       "${name} sigue en uso por una regla o grupo del perfil ${profile}";
 
-  static String m114(region) => "Relé ${region}";
+  static String m115(region) => "Relé ${region}";
 
-  static String m115(name) =>
+  static String m116(name) =>
       "Este dispositivo saldrá de ${name} y se borrarán sus datos de inicio de sesión de este dispositivo. Si la red es inaccesible, elimine el dispositivo en la consola de administración de Tailscale.";
 
-  static String m116(value) => "Pico: ${value}";
+  static String m117(value) => "Pico: ${value}";
 
-  static String m117(value) => "Total: ${value}";
+  static String m118(value) => "Total: ${value}";
 
-  static String m118(build) => "Compilación: ${build}";
+  static String m119(build) => "Compilación: ${build}";
 
-  static String m119(version) => "Versión: ${version}";
+  static String m120(version) => "Versión: ${version}";
 
-  static String m120(label) => "${label} debe ser una URL";
-
-  static String m121(count) =>
-      "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
+  static String m121(label) => "${label} debe ser una URL";
 
   static String m122(count) =>
+      "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
+
+  static String m123(count) =>
       "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2273,6 +2276,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Introduzca una definición completa del proxy, con nombre y tipo",
     ),
     "nodeQuickFields": MessageLookupByLibrary.simpleMessage("Edición rápida"),
+    "nodeShareLinkUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Este nodo no se puede convertir en un enlace. Use los campos o YAML",
+    ),
     "nodes": MessageLookupByLibrary.simpleMessage("Nodos"),
     "nonTextProviderFile": MessageLookupByLibrary.simpleMessage(
       "Este recurso externo no es un archivo de texto",
@@ -3107,7 +3113,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "settings": MessageLookupByLibrary.simpleMessage("Ajustes"),
     "settingsCount": m107,
     "shareLinkNodesAdded": m108,
-    "shareLinksNotRead": m109,
+    "shareLinkNodesPreserved": m109,
+    "shareLinksNotRead": m110,
     "show": MessageLookupByLibrary.simpleMessage("Mostrar"),
     "showLess": MessageLookupByLibrary.simpleMessage("Contraer"),
     "showMore": MessageLookupByLibrary.simpleMessage("Expandir"),
@@ -3129,7 +3136,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Iniciar en segundo plano",
     ),
     "singleAdd": MessageLookupByLibrary.simpleMessage("Añadir uno"),
-    "singleValueTip": m110,
+    "singleValueTip": m111,
     "size": MessageLookupByLibrary.simpleMessage("Tamaño"),
     "skipCertVerify": MessageLookupByLibrary.simpleMessage(
       "Omitir verificación de certificado",
@@ -3271,7 +3278,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleAvailableExitNodes": MessageLookupByLibrary.simpleMessage(
       "Nodos de salida disponibles",
     ),
-    "tailscaleCheckSettings": m111,
+    "tailscaleCheckSettings": m112,
     "tailscaleConnected": MessageLookupByLibrary.simpleMessage("Conectado"),
     "tailscaleConnecting": MessageLookupByLibrary.simpleMessage("Conectando"),
     "tailscaleControlUrl": MessageLookupByLibrary.simpleMessage(
@@ -3283,7 +3290,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleDeviceName": MessageLookupByLibrary.simpleMessage(
       "Nombre del dispositivo",
     ),
-    "tailscaleDevices": m112,
+    "tailscaleDevices": m113,
     "tailscaleDirect": MessageLookupByLibrary.simpleMessage("Directa"),
     "tailscaleEmptyDesc": MessageLookupByLibrary.simpleMessage(
       "Añada una red, inicie sesión en este dispositivo e inicie el proxy para acceder a sus dispositivos.",
@@ -3378,7 +3385,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleNeedsLogin": MessageLookupByLibrary.simpleMessage(
       "Inicio de sesión necesario",
     ),
-    "tailscaleNetworkInUse": m113,
+    "tailscaleNetworkInUse": m114,
     "tailscaleNetworkName": MessageLookupByLibrary.simpleMessage(
       "Nombre de la red",
     ),
@@ -3393,8 +3400,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "tailscaleOpenLoginPage": MessageLookupByLibrary.simpleMessage(
       "Abrir página de inicio de sesión",
     ),
-    "tailscaleRelay": m114,
-    "tailscaleRemoveConfirm": m115,
+    "tailscaleRelay": m115,
+    "tailscaleRemoveConfirm": m116,
     "tailscaleRemoveNetwork": MessageLookupByLibrary.simpleMessage(
       "Eliminar red",
     ),
@@ -3464,8 +3471,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "totalUpload": MessageLookupByLibrary.simpleMessage("Subido"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Puerto TProxy"),
     "traffic": MessageLookupByLibrary.simpleMessage("Tráfico"),
-    "trafficPeak": m116,
-    "trafficTotal": m117,
+    "trafficPeak": m117,
+    "trafficTotal": m118,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Uso de tráfico"),
     "transferConfirmNotice": MessageLookupByLibrary.simpleMessage(
       "La transferencia se confirmará automáticamente y se activará el plan seleccionado.",
@@ -3526,7 +3533,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "La actualización automática no se completó. Reintente o actualice desde la página de descarga.",
     ),
-    "updateBuildNumber": m118,
+    "updateBuildNumber": m119,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancelar descarga",
     ),
@@ -3579,7 +3586,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "La aplicación se cerrará, se actualizará en su ubicación actual y se abrirá de nuevo. Sus ajustes se conservarán.",
     ),
-    "updateVersionNumber": m119,
+    "updateVersionNumber": m120,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Mejorar plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Subida"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
@@ -3589,7 +3596,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtener un perfil mediante una URL",
     ),
-    "urlTip": m120,
+    "urlTip": m121,
     "useHosts": MessageLookupByLibrary.simpleMessage("Usar hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Usar hosts del sistema",
@@ -3627,8 +3634,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m121,
-    "yearsAgoShort": m122,
+    "yearsAgo": m122,
+    "yearsAgoShort": m123,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

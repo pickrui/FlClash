@@ -24,6 +24,8 @@ import 'package:material_ui/material_ui.dart';
 
 import 'overwrite_sheet.dart';
 import 'proxy_fields.dart';
+import 'share_links.dart';
+import 'quick_edit.dart';
 
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
@@ -347,6 +349,7 @@ class ProfileProxiesContent extends ConsumerStatefulWidget {
 
 class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
   final _profileProxyKey = uniqueId;
+  bool _quickEditing = false;
 
   Future<Map<String, dynamic>?> _loadRawConfig() async {
     final setupAction = context.setupAction;
@@ -730,6 +733,158 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     }
   }
 
+  Future<void> _quickEdit() async {
+    if (_quickEditing) return;
+    final profile = ref.read(profileProvider(widget.profileId));
+    if (profile == null) return;
+    setState(() => _quickEditing = true);
+    try {
+      final core = ref.read(coreHandlerProvider);
+      final previous = profile.profileProxies;
+      final links = await core.encodeShareLinks([
+        for (final node in previous) node.proxy,
+      ]);
+      final linked = await core.decodeShareLinks(links);
+      if (!mounted) return;
+      final unsupported = links.where((link) => link.isEmpty).length;
+      if (unsupported > 0) {
+        context.showNotifier(
+          appLocalizations.shareLinkNodesPreserved(unsupported),
+        );
+      }
+      await showCustomQuickEdit(
+        context,
+        title: appLocalizations.proxies,
+        content: links.where((link) => link.isNotEmpty).join('\n'),
+        schema: EditorSchema.shareLinks,
+        invalidMessage: appLocalizations.nodeInvalidDefinition,
+        apply: (text) async {
+          if (utf8.encode(text).length > 2 * 1024 * 1024) {
+            throw const FormatException('Share links exceed 2 MiB');
+          }
+          final edited = const LineSplitter()
+              .convert(text)
+              .map((line) => line.trim())
+              .where((line) => line.isNotEmpty)
+              .toList();
+          final decoded = await core.decodeShareLinks(edited);
+          for (final (index, row) in decoded.indexed) {
+            if (row.isEmpty) {
+              throw appLocalizations.lineIssueTip(
+                index + 1,
+                appLocalizations.nodeInvalidDefinition,
+              );
+            }
+          }
+          final next = applyProfileShareLinks(
+            previous: previous,
+            links: links,
+            edited: [
+              for (final (index, row) in decoded.indexed)
+                for (final _ in row) edited[index],
+            ],
+            decoded: [for (final row in decoded) ...row],
+            linked: [for (final row in linked) row.singleOrNull],
+          );
+          final changed = next
+              .where((node) => !previous.contains(node))
+              .toList();
+          final errors = await core.validateProxies([
+            for (final node in changed) node.proxy,
+          ]);
+          if (errors.any((error) => error.isNotEmpty)) {
+            throw appLocalizations.nodeInvalidDefinition;
+          }
+          if (!mounted ||
+              ref.read(profileProvider(widget.profileId)) != profile) {
+            throw appLocalizations.routingChanged;
+          }
+          final raw = await _loadRawConfig();
+          if (!mounted || raw == null) {
+            throw appLocalizations.nodeInvalidDefinition;
+          }
+          final removedIds = previous
+              .map((node) => node.id)
+              .toSet()
+              .difference(next.map((node) => node.id).toSet());
+          final removedNames = previous
+              .where((node) => removedIds.contains(node.id))
+              .map((node) => node.name)
+              .toSet()
+              .difference(_rawProxyNames(raw));
+          for (final name in removedNames) {
+            final reference = findRawOutboundReference(
+              raw,
+              name,
+              includeTopLevelRules:
+                  profile.overwriteType != OverwriteType.custom,
+              includeProxyGroups: profile.overwriteType != OverwriteType.custom,
+            );
+            if (reference != null) {
+              throw appLocalizations.rawOutboundInUse(name, reference);
+            }
+            if (profile.hasCustomOutboundReferences(
+              name,
+              includeProxyChains: false,
+            )) {
+              throw appLocalizations.customOutboundInUse(name);
+            }
+          }
+          for (final node in next) {
+            if (hasProfileProxyCustomNameConflict(profile, node) ||
+                hasProfileProxyGroupNameConflict(raw, node)) {
+              throw appLocalizations.existsTip(appLocalizations.proxies);
+            }
+          }
+          final remaining = _removeProxiesFromChains(
+            profile.proxyChains,
+            removedNames,
+          );
+          final (
+            :proxyChains,
+            :conflictName,
+          ) = _disableChainsConflictingWithRestoredDialers(
+            raw,
+            remaining,
+            previous,
+            removedIds,
+          );
+          if (conflictName != null) {
+            throw appLocalizations.proxyChainConflictTip(conflictName);
+          }
+          if (removedIds.isNotEmpty) {
+            final confirmed = await globalState.showMessage(
+              message: TextSpan(
+                text: appLocalizations.deleteMultipTip(
+                  appLocalizations.proxies,
+                ),
+              ),
+              destructive: true,
+            );
+            if (confirmed != true) throw const QuickEditCancelled();
+          }
+          if (!mounted ||
+              ref.read(profileProvider(widget.profileId)) != profile) {
+            throw appLocalizations.routingChanged;
+          }
+          ref
+              .read(profilesProvider.notifier)
+              .updateProfile(
+                widget.profileId,
+                (current) => current
+                    .copyWith(profileProxies: next, proxyChains: proxyChains)
+                    .copyAndRemoveOutboundCaches(removedNames),
+              );
+          _applyProfileChanges();
+        },
+      );
+    } catch (error) {
+      if (mounted) context.showNotifier(compactError(error));
+    } finally {
+      if (mounted) setState(() => _quickEditing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileProxies =
@@ -744,6 +899,11 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           child: InfoHeader(
             info: Info(label: appLocalizations.proxyChainCustomNodes),
             actions: [
+              IconButton(
+                tooltip: appLocalizations.quickEdit,
+                onPressed: _quickEditing ? null : _quickEdit,
+                icon: const GlyphIcon(AppGlyphs.edit),
+              ),
               if (selectedProfileProxies.isNotEmpty) ...[
                 CommonMinIconButtonTheme(
                   child: IconButton.filledTonal(

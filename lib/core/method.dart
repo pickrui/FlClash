@@ -27,6 +27,7 @@ enum CoreMethod {
   validateFilters,
   convertProxies,
   decodeShareLinks,
+  encodeShareLinks,
   validateConfigWithBytes,
   decryptConfigBytes,
   updateConfig,
