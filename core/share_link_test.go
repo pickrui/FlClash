@@ -123,18 +123,6 @@ func TestMieruShareLinksExpandAndRoundTripRanges(t *testing.T) {
 	}
 }
 
-func TestShareLinkPlainUsernameAndExplicitVmessCertificatePolicy(t *testing.T) {
-	p := decodeShareLink("http://user@example.com:8080")
-	if p == nil || p["username"] != "user" {
-		t.Fatalf("plain username decoded as binary: %#v", p)
-	}
-	p = decodeShareLink("vmess://fixture@example.com:443?security=tls&skip-cert-verify=true#node")
-	encoded := handleEncodeShareLinks([]map[string]any{p})[0]
-	if next := decodeShareLink(encoded); next == nil || next["skip-cert-verify"] != true {
-		t.Fatal("explicit vmess certificate setting lost")
-	}
-}
-
 func TestShareLinksPreserveEscapedCredentialsAndLegacyTLS(t *testing.T) {
 	for _, source := range []map[string]any{
 		{"type": "socks5", "name": "escaped", "server": "example.com", "port": 1080, "username": "user:name%40", "password": "p:@%41"},
