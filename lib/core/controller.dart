@@ -167,7 +167,7 @@ class CoreController {
 
   Future<Uint8List?> shareLinksConfig(List<String> links) async {
     final proxies = <Map<String, Object?>>[];
-    final taken = {...reservedOutboundNames};
+    final taken = {...RuleTarget.ruleTargets};
     for (final link in links) {
       final List<Map<String, Object?>> decoded;
       try {

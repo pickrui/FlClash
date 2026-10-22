@@ -101,7 +101,7 @@ void _mergeCustomProxyGroups(
   final proxies = rawConfig['proxies'];
   final providers = rawConfig['proxy-providers'];
   final occupiedNames = <String>{
-    ...reservedOutboundNames,
+    ...RuleTarget.ruleTargets,
     if (groups is List)
       ...groups
           .whereType<Map>()
@@ -660,7 +660,7 @@ List<String> _applyTailscaleNetworks(
   if (networks.isEmpty) {
     return const [];
   }
-  final takenNames = <String>{...reservedOutboundNames};
+  final takenNames = <String>{...RuleTarget.ruleTargets};
   for (final key in const ['proxies', 'proxy-groups']) {
     final items = rawConfig[key];
     if (items is! List) {

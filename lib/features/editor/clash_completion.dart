@@ -10,6 +10,8 @@ import 'package:code_forge/code_forge.dart'
         CodeForgeSnippet,
         CodeForgeSuggestion;
 
+import 'package:fl_clash/enum/enum.dart';
+
 import 'clash_schema.dart';
 import 'completion_matcher.dart';
 import 'yaml_lines.dart';
@@ -293,7 +295,10 @@ class ClashCompletionSource {
         CodeForgeSuggestion(label: key, detail: value),
       for (final MapEntry(:key, :value) in names.proxies.entries)
         CodeForgeSuggestion(label: key, detail: value),
-      for (final policy in [...builtinPolicies, if (withGlobal) 'GLOBAL'])
+      for (final policy
+          in withGlobal
+              ? RuleTarget.ruleTargetNames
+              : RuleTarget.baseTargetNames)
         if (!names.groups.containsKey(policy))
           CodeForgeSuggestion(label: policy),
     ];

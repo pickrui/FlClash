@@ -19,14 +19,15 @@ import 'package:material_ui/material_ui.dart';
 import '../helpers/test_app.dart';
 
 void main() {
-  for (final (bottomInset, textScale, locale) in [
-    (48.0, 1.0, const Locale('en')),
-    (24.0, 1.5, const Locale('fr')),
-    (24.0, 1.5, const Locale('es')),
-    (24.0, 1.5, const Locale('ko')),
+  for (final (bottomInset, textScale, locale, target) in [
+    (48.0, 1.0, const Locale('en'), 'MATCH'),
+    (24.0, 1.5, const Locale('fr'), 'MATCH'),
+    (24.0, 1.5, const Locale('es'), 'MATCH'),
+    (24.0, 1.5, const Locale('ko'), 'MATCH'),
+    (24.0, 1.0, const Locale('en'), 'PASS-RULE'),
   ]) {
     testWidgets(
-      'MATCH is selectable in a sheet with $bottomInset inset, $textScale text scale and ${locale.languageCode}',
+      '$target is selectable in a sheet with $bottomInset inset, $textScale text scale and ${locale.languageCode}',
       (tester) async {
         const size = Size(360, 640);
         tester.view.devicePixelRatio = 1;
@@ -66,12 +67,21 @@ void main() {
         await tester.pumpAndSettle();
 
         final match = find.ancestor(
-          of: find.text('MATCH'),
+          of: find.text(target),
           matching: find.byWidgetPredicate(
             (widget) => widget is DecorationListItem,
           ),
         );
-        await tester.ensureVisible(match);
+        await tester.scrollUntilVisible(
+          match,
+          120,
+          scrollable: find
+              .descendant(
+                of: find.byType(SelectionSheet<String>),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
         await tester.pumpAndSettle();
         expect(
           tester.getRect(match).bottom,
@@ -81,7 +91,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byTooltip(AppLocalizations.current.confirm));
         await tester.pumpAndSettle();
-        expect(result?.value, 'DOMAIN,example.com,MATCH');
+        expect(result?.value, 'DOMAIN,example.com,$target');
         expect(tester.takeException(), isNull);
       },
     );

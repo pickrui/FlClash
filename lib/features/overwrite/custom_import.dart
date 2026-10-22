@@ -213,7 +213,7 @@ List<ShareLinkNode> withFreeNodeNames(
   Iterable<ShareLinkNode> nodes,
   Set<String> taken,
 ) {
-  final names = {...reservedOutboundNames, ...taken};
+  final names = {...RuleTarget.ruleTargets, ...taken};
   final result = <ShareLinkNode>[];
   for (final (:uri, :proxy) in nodes) {
     final name = _textOf(proxy['name']);
@@ -312,7 +312,7 @@ class _Importer {
       labels: context.ruleLabels,
       sources: context.ruleSources,
     );
-    final taken = {...reservedOutboundNames};
+    final taken = {...RuleTarget.ruleTargets};
     final names = <String, String>{};
     final proxies = <Map<String, Object?>>[];
     final dialers = <String, String>{};

@@ -26,10 +26,7 @@ List<String> customRoutingTargets(
             .where((name) => name.trim().isNotEmpty)
       : const [];
   return <String>{
-    'DIRECT',
-    'REJECT',
-    'REJECT-DROP',
-    'PASS',
+    ...RuleTarget.ruleTargetNames,
     ...profile.customProxyGroups.map((group) => group.name),
     if (profile.overwriteType != OverwriteType.custom) ...names('proxy-groups'),
     ...profile.profileProxies

@@ -69,7 +69,7 @@ bool hasProfileProxyCustomNameConflict(
   ProfileProxy profileProxy,
 ) {
   final name = profileProxy.name;
-  return reservedOutboundNames.contains(name) ||
+  return RuleTarget.ruleTargets.contains(name) ||
       profile.customProxyGroups.any((group) => group.name == name);
 }
 

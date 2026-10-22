@@ -568,10 +568,25 @@ enum RuleTarget {
   DIRECT('DIRECT'),
   REJECT('REJECT'),
   REJECT_DROP('REJECT-DROP'),
+  PASS('PASS'),
+  PASS_RULE('PASS-RULE'),
+  COMPATIBLE('COMPATIBLE'),
   MATCH('MATCH');
 
   final String value;
   const RuleTarget(this.value);
+
+  // MATCH is a local added-rule placeholder, not a Core outbound.
+  static final List<String> baseTargetNames = List.unmodifiable(
+    values.where((target) => target != MATCH).map((target) => target.value),
+  );
+
+  // GLOBAL is created after groups, so only rules and dialers may name it.
+  static final List<String> ruleTargetNames = List.unmodifiable([
+    ...baseTargetNames,
+    GroupName.GLOBAL.name,
+  ]);
+  static final Set<String> ruleTargets = Set.unmodifiable(ruleTargetNames);
 }
 
 enum RestoreStrategy { compatible, override }

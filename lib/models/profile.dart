@@ -63,16 +63,6 @@ Future<Uint8List> _subscriptionConfig(
       (throw ConfigValidationException(message));
 }
 
-const reservedOutboundNames = {
-  'DIRECT',
-  'REJECT',
-  'REJECT-DROP',
-  'PASS',
-  'PASS-RULE',
-  'COMPATIBLE',
-  'GLOBAL',
-};
-
 bool isEncryptedProfileBytes(Uint8List bytes) {
   if (AgeCrypto.isArmored(bytes)) {
     return true;

@@ -53,12 +53,16 @@ void main() {
         'REJECT',
         'REJECT-DROP',
         'PASS',
+        'PASS-RULE',
+        'COMPATIBLE',
+        'GLOBAL',
         'Personal automatic',
         'Subscription group',
         'Personal node',
         'Subscription node',
       ]),
     );
+    expect(targets, isNot(contains('MATCH')));
     expect(targets, isNot(contains('Subscription provider')));
     expect(targets, isNot(contains('Disabled node')));
     expect(targets, isNot(contains('Incomplete node')));

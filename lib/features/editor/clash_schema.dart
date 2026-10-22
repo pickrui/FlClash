@@ -110,15 +110,6 @@ const _policy = YamlSchema.of(YamlScalar.policy);
 const _outbound = YamlSchema.of(YamlScalar.outbound);
 const _headers = YamlSchema.dict(_strList);
 
-const builtinPolicies = [
-  'DIRECT',
-  'REJECT',
-  'REJECT-DROP',
-  'PASS',
-  'PASS-RULE',
-  'COMPATIBLE',
-];
-
 const ruleTypes = {
   'DOMAIN': 'example.com',
   'DOMAIN-SUFFIX': 'example.com',

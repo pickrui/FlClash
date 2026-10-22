@@ -6,6 +6,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_clash/enum/enum.dart';
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -214,7 +216,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
 
   bool get _nameTaken {
     final name = _name.text.trim();
-    if (reservedOutboundNames.contains(name)) return true;
+    if (RuleTarget.ruleTargets.contains(name)) return true;
     return ref
         .read(tailscaleNetworksProvider)
         .any((network) => network.id != _id && network.name == name);

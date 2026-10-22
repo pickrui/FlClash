@@ -169,7 +169,7 @@ void main() {
     expect(result['rules'], raw['rules']);
   });
 
-  for (final name in [...reservedOutboundNames, 'Subscription', 'Japan']) {
+  for (final name in [...RuleTarget.ruleTargets, 'Subscription', 'Japan']) {
     test('merge rejects occupied outbound name $name', () async {
       await expectLater(
         makeRealProfileTask(

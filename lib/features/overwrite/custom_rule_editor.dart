@@ -16,7 +16,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
-import 'package:fl_clash/models/models.dart' show reservedOutboundNames;
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
@@ -548,7 +547,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     final subRule = _action == RuleAction.SUB_RULE;
     final builtIns = {
       for (final name in targets)
-        if (!subRule && reservedOutboundNames.contains(name)) name,
+        if (!subRule && RuleTarget.ruleTargets.contains(name)) name,
     };
     final groups = {
       for (final name in targets)

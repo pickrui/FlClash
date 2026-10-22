@@ -213,7 +213,7 @@ void main() {
     for (final fallback in [
       null,
       '',
-      ...reservedOutboundNames.where((name) => name != 'GLOBAL'),
+      ...RuleTarget.baseTargetNames,
       'Node',
       'Tailnet',
     ]) {

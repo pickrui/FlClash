@@ -117,7 +117,7 @@ class _CustomProxyGroupsSectionState
     Map<String, dynamic> rawConfig;
     Map<String, String> providerSources;
     final reservedNames = <String>{
-      ...reservedOutboundNames,
+      ...RuleTarget.ruleTargets,
       ...profile.profileProxies.map((item) => item.name),
     };
     try {
@@ -367,7 +367,7 @@ class _CustomProxyGroupsSectionState
     final profile = ref.read(profileProvider(profileId));
     if (profile == null || !profile.customProxyGroups.contains(group)) return;
     final taken = {
-      ...reservedOutboundNames,
+      ...RuleTarget.ruleTargets,
       for (final node in profile.profileProxies) node.name,
       for (final item in profile.customProxyGroups) item.name,
     };

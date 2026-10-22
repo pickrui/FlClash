@@ -191,7 +191,8 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
   bool _noResolve = false;
   bool _src = false;
   List<String> get _targetItems => {
-    ...RuleTarget.values.map((item) => item.value),
+    ...RuleTarget.ruleTargetNames,
+    RuleTarget.MATCH.value,
     ...widget.targets,
     if (_ruleTarget.isNotEmpty) _ruleTarget,
   }.toList();
@@ -218,7 +219,7 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
     }
     _ruleAction = RuleAction.addedRuleActions.first;
     _contentController.clear();
-    _ruleTarget = RuleTarget.values.first.value;
+    _ruleTarget = RuleTarget.DIRECT.value;
     _noResolve = false;
     _src = false;
   }

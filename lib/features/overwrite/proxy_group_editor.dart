@@ -698,10 +698,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   }
 
   Future<void> _showEmptyFallbackOptions() async {
-    final builtIns = {
-      _defaultEmptyFallback,
-      ...reservedOutboundNames.where((name) => name != 'GLOBAL'),
-    };
+    final builtIns = {_defaultEmptyFallback, ...RuleTarget.baseTargetNames};
     final groups = {
       ...widget.groupTypes.keys,
       for (final group in widget.existingGroups) group.name,
@@ -1089,7 +1086,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
         _MemberKind.proxy => (
           member.name,
           groupTypes[member.name] ??
-              (reservedOutboundNames.contains(member.name)
+              (RuleTarget.ruleTargets.contains(member.name)
                   ? appLocalizations.basicStrategy
                   : null),
           (colorScheme.secondaryContainer, colorScheme.onSecondaryContainer),
@@ -1450,7 +1447,7 @@ class _MemberPickerState extends State<_MemberPicker> {
   List<_Category> get _categories {
     final builtIns = {
       for (final name in widget.available)
-        if (reservedOutboundNames.contains(name)) name,
+        if (RuleTarget.ruleTargets.contains(name)) name,
     };
     _Entry named(_MemberKind kind, String name, String? subtitle) =>
         (member: (kind: kind, name: name), title: name, subtitle: subtitle);

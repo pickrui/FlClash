@@ -59,14 +59,14 @@ RoutingIssues inspectCustomRouting(
   };
   final providers = keys('proxy-providers');
   final targets = {
-    ...reservedOutboundNames,
+    ...RuleTarget.ruleTargets,
     ...rawGroups,
     ...proxies,
     ...groups.map((group) => group.name),
     ...additionalTargets,
   };
   final fallbackTargets = {
-    ...reservedOutboundNames.where((name) => name != 'GLOBAL'),
+    ...RuleTarget.baseTargetNames,
     ...proxies,
     ...additionalTargets,
   };
@@ -123,7 +123,7 @@ RoutingIssues inspectCustomRouting(
     final issues = <RoutingIssue>[
       if (group.name.trim().isEmpty)
         const RoutingIssue(RoutingIssueKind.emptyName)
-      else if (reservedOutboundNames.contains(group.name))
+      else if (RuleTarget.ruleTargets.contains(group.name))
         RoutingIssue(RoutingIssueKind.reservedName, [group.name])
       else if ((groupNames[group.name] ?? 0) > 1 ||
           proxies.contains(group.name) ||

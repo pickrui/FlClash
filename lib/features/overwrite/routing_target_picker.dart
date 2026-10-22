@@ -44,10 +44,7 @@ class _RoutingTargetPickerState extends State<RoutingTargetPicker> {
         .toSet()
         .where((name) => query.matches([name]))
         .toList();
-    final basic = {
-      for (final target in RuleTarget.values)
-        if (target != RuleTarget.MATCH) target.value,
-    };
+    final basic = RuleTarget.ruleTargets;
     final sections = widget.groupNames == null
         ? [('', options)]
         : [
