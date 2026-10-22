@@ -12,7 +12,7 @@ require (
 	github.com/metacubex/http v0.1.8
 	github.com/metacubex/mihomo v0.0.0-00010101000000-000000000000
 	github.com/metacubex/sing-tun v0.4.27
-	github.com/metacubex/tls v0.1.8
+	github.com/metacubex/tls v0.1.9
 	github.com/miekg/dns v1.1.73
 	github.com/oschwald/maxminddb-golang v1.13.1
 	github.com/sirupsen/logrus v1.10.2
