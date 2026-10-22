@@ -232,6 +232,9 @@ func encodeVmess(f proxyFields) string {
 		values["alpn"] = strings.Join(f.list("alpn"), ",")
 		values["fp"] = f.str("client-fingerprint")
 	}
+	if _, set := f["skip-cert-verify"]; set {
+		values["allowInsecure"] = f.flag("skip-cert-verify")
+	}
 	data, _ := json.Marshal(values)
 	return "vmess://" + base64.StdEncoding.EncodeToString(data)
 }
@@ -356,7 +359,10 @@ func encodeHysteria2(f proxyFields) string {
 		return ""
 	}
 	host := hostPort(f)
-	if ports := f.str("ports"); ports != "" && !strings.Contains(f.str("server"), ":") {
+	if ports := f.str("ports"); ports != "" {
+		if strings.Contains(f.str("server"), ":") {
+			return ""
+		}
 		host = f.str("server") + ":" + ports
 	}
 	var user *url.Userinfo

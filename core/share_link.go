@@ -7,6 +7,7 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/url"
@@ -120,16 +121,16 @@ func decodeShareLink(line string) (proxy map[string]any) {
 		if proxy["type"] == "http" && originalPort == "" {
 			return nil
 		}
-		auth := shareUser(u)
-		if !strings.Contains(auth, ":") {
-			if decoded, err := convert.TryDecodeBase64(auth); err == nil && utf8.Valid(decoded) {
-				auth = string(decoded)
-			}
-		}
 		delete(proxy, "username")
 		delete(proxy, "password")
-		if auth != "" {
-			name, password, found := strings.Cut(auth, ":")
+		if u.User != nil {
+			name := u.User.Username()
+			password, found := u.User.Password()
+			if !found {
+				if decoded, err := convert.TryDecodeBase64(name); err == nil && utf8.Valid(decoded) {
+					name, password, found = strings.Cut(string(decoded), ":")
+				}
+			}
 			proxy["username"] = name
 			if found {
 				proxy["password"] = password
@@ -137,6 +138,23 @@ func decodeShareLink(line string) (proxy map[string]any) {
 		}
 	}
 	switch proxy["type"] {
+	case "vmess":
+		if u.User == nil {
+			_, body, _ := strings.Cut(line, "://")
+			var values map[string]any
+			if decoded, err := convert.TryDecodeBase64(body); err == nil && json.Unmarshal(decoded, &values) == nil {
+				if fingerprint, ok := values["fp"].(string); ok && fingerprint != "" {
+					proxy["client-fingerprint"] = fingerprint
+				}
+				for _, key := range []string{"skip-cert-verify", "allowInsecure"} {
+					if value, ok := values[key]; ok && value != nil {
+						if text := strings.TrimSpace(fmt.Sprint(value)); text != "" {
+							q.Set(key, text)
+						}
+					}
+				}
+			}
+		}
 	case "trojan", "hysteria2":
 		if !strings.HasSuffix(u.Scheme, "+realm") && u.User != nil {
 			proxy["password"] = shareUser(u)

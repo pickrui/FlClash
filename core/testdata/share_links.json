@@ -150,6 +150,9 @@
     "username": "user",
     "password": "pass"
   },
+  "http://dXNlcg==@1.2.3.4:8080": {
+    "username": "user"
+  },
   "socks5://dXNlcjpwJTQxc3M%3D@1.2.3.4:1080": {
     "username": "user",
     "password": "p%41ss"

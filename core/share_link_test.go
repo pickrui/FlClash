@@ -103,6 +103,9 @@ func TestShareLinksRoundTrip(t *testing.T) {
 			t.Fatal("invented an unsupported link")
 		}
 	}
+	if encodeShareLink(proxyFields{"type": "hysteria2", "server": "2001:db8::1", "port": 443, "ports": "443,8000-9000"}) != "" {
+		t.Fatal("IPv6 port hopping must not silently become a single-port link")
+	}
 }
 
 func TestMieruShareLinksExpandAndRoundTripRanges(t *testing.T) {
@@ -129,5 +132,23 @@ func TestShareLinkPlainUsernameAndExplicitVmessCertificatePolicy(t *testing.T) {
 	encoded := handleEncodeShareLinks([]map[string]any{p})[0]
 	if next := decodeShareLink(encoded); next == nil || next["skip-cert-verify"] != true {
 		t.Fatal("explicit vmess certificate setting lost")
+	}
+}
+
+func TestShareLinksPreserveEscapedCredentialsAndLegacyTLS(t *testing.T) {
+	for _, source := range []map[string]any{
+		{"type": "socks5", "name": "escaped", "server": "example.com", "port": 1080, "username": "user:name%40", "password": "p:@%41"},
+		{"type": "vmess", "name": "legacy", "server": "example.com", "port": 443, "uuid": "fixture", "alterId": 64, "tls": true, "skip-cert-verify": true, "client-fingerprint": "chrome"},
+		{"type": "vmess", "name": "verified", "server": "example.com", "port": 443, "uuid": "fixture", "alterId": 64, "tls": true, "skip-cert-verify": false},
+	} {
+		t.Run(source["type"].(string), func(t *testing.T) {
+			link := handleEncodeShareLinks([]map[string]any{source})[0]
+			got := decodeShareLink(link)
+			for _, key := range []string{"username", "password", "skip-cert-verify", "client-fingerprint"} {
+				if want, ok := source[key]; ok && got[key] != want {
+					t.Errorf("%s: got %#v, want %#v", key, got[key], want)
+				}
+			}
+		})
 	}
 }
