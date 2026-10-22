@@ -16,6 +16,9 @@ import 'package:fl_clash/ui/sidebar.dart';
 import 'package:fl_clash/ui/animated_visibility.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/resources.dart';
+import 'package:fl_clash/providers/icon_sets.dart';
+import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/widgets/icon.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
@@ -109,6 +112,20 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         appController.savePreferencesDebounce();
       }
     });
+    if (!safeModeBuild) {
+      ref.listenManual(groupsProvider, (prev, next) {
+        if (prev != next) {
+          unawaited(precacheTargetIcons(next.map((group) => group.icon)));
+        }
+      }, fireImmediately: true);
+      ref.listenManual(iconSetsProvider, (_, next) {
+        if (next.value case final iconSets?) {
+          unawaited(
+            precacheTargetIcons(iconSets.map((iconSet) => iconSet.cover)),
+          );
+        }
+      }, fireImmediately: true);
+    }
     ref.listenManual(needUpdateGroupsProvider, (prev, next) {
       if (prev != next) {
         appController.updateGroupsDebounce();

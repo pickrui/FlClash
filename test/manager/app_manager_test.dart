@@ -10,6 +10,7 @@ import 'package:fl_clash/common/render.dart';
 import 'package:fl_clash/common/render_binding.dart';
 import 'package:fl_clash/manager/app_manager.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/providers/icon_sets.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
@@ -31,7 +32,11 @@ void main() {
     void Function()? onHover,
     required Future<void> Function() check,
   }) async {
-    final container = ProviderContainer();
+    final container = ProviderContainer(
+      overrides: [
+        iconSetsProvider.overrideWithBuild((_, _) => Stream.value([])),
+      ],
+    );
     globalState.container = container;
     render!.resume();
     binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);

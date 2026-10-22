@@ -6,41 +6,40 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-/// Bounds both decoded bytes and the data URI retained as the cache key.
-class EncodedIconCache {
-  EncodedIconCache({this.maxEntries = 64, this.maxBytes = 2 * 1024 * 1024});
+import 'package:flutter/foundation.dart' show listEquals;
+
+class IconBytesCache {
+  IconBytesCache({this.maxEntries = 64, this.maxBytes = 2 * 1024 * 1024});
 
   final int maxEntries;
   final int maxBytes;
   final _entries = <String, Uint8List>{};
   int _retainedBytes = 0;
 
-  Uint8List? decode(String source) {
+  Uint8List? operator [](String source) {
     final existing = _entries.remove(source);
-    if (existing != null) {
-      _entries[source] = existing;
-      return existing;
-    }
-    final marker = source.indexOf('base64,');
-    if (marker < 0) return null;
-    final Uint8List bytes;
-    try {
-      bytes = base64.decode(source.substring(marker + 7));
-    } on FormatException {
-      return null;
-    }
-    if (bytes.isEmpty) return null;
+    if (existing != null) _entries[source] = existing;
+    return existing;
+  }
+
+  Uint8List put(String source, Uint8List bytes) {
+    final existing = this[source];
+    if (existing != null && listEquals(existing, bytes)) return existing;
+    remove(source);
     final cost = _cost(source, bytes);
-    // Oversized images may still render, but must not evict every small icon
-    // or remain resident in this auxiliary cache.
-    if (maxEntries <= 0 || cost > maxBytes) return bytes;
+    // Oversized images may still render without displacing cached small icons.
+    if (bytes.isEmpty || maxEntries <= 0 || cost > maxBytes) return bytes;
     while (_entries.length >= maxEntries || _retainedBytes + cost > maxBytes) {
-      final oldest = _entries.keys.first;
-      _retainedBytes -= _cost(oldest, _entries.remove(oldest)!);
+      remove(_entries.keys.first);
     }
     _entries[source] = bytes;
     _retainedBytes += cost;
     return bytes;
+  }
+
+  void remove(String source) {
+    final bytes = _entries.remove(source);
+    if (bytes != null) _retainedBytes -= _cost(source, bytes);
   }
 
   void clear() {
@@ -49,4 +48,21 @@ class EncodedIconCache {
   }
 
   int _cost(String source, Uint8List bytes) => source.length * 2 + bytes.length;
+}
+
+class EncodedIconCache extends IconBytesCache {
+  EncodedIconCache({super.maxEntries, super.maxBytes});
+
+  Uint8List? decode(String source) {
+    final existing = this[source];
+    if (existing != null) return existing;
+    final marker = source.indexOf('base64,');
+    if (marker < 0) return null;
+    try {
+      final bytes = base64.decode(source.substring(marker + 7));
+      return bytes.isEmpty ? null : put(source, bytes);
+    } on FormatException {
+      return null;
+    }
+  }
 }

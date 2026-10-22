@@ -5,7 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
+
 import 'dart:ui' as ui;
+
+import 'package:fl_clash/common/constant.dart';
 
 import 'package:fl_clash/widgets/icon.dart';
 import 'package:flutter_svg/svg.dart';
@@ -13,6 +17,137 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
+  final png = base64Decode(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9V8AAAAASUVORK5CYII=',
+  );
+  const source = 'https://example.invalid/icon.png';
+  const fallback = ValueKey('icon-fallback');
+  Widget remoteIcon([String src = source]) => MediaQuery(
+    data: const MediaQueryData(devicePixelRatio: 3),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: CommonTargetIcon(
+          src: src,
+          size: 24,
+          recordHistory: false,
+          fallback: const SizedBox(key: fallback),
+        ),
+      ),
+    ),
+  );
+  Uint8List displayedBytes(WidgetTester tester) {
+    final resized =
+        tester.widget<Image>(find.byType(Image)).image as ResizeImage;
+    return (resized.imageProvider as MemoryImage).bytes;
+  }
+
+  tearDown(() {
+    readRemoteIcon = null;
+  });
+
+  testWidgets('preloaded icons display immediately and reuse unchanged bytes', (
+    tester,
+  ) async {
+    final refresh = StreamController<Uint8List>();
+    var reads = 0;
+    readRemoteIcon = (_) => ++reads == 1 ? Stream.value(png) : refresh.stream;
+    await precacheTargetIcons([source]);
+    await tester.pumpWidget(remoteIcon());
+    expect(find.byKey(fallback), findsNothing);
+    expect(displayedBytes(tester), same(png));
+    refresh.add(Uint8List.fromList(png));
+    await tester.pump();
+    expect(displayedBytes(tester), same(png));
+    await tester.pumpWidget(const SizedBox.shrink());
+    await refresh.close();
+  });
+
+  testWidgets(
+    'late icon loads cannot replace a new source or update disposed widgets',
+    (tester) async {
+      final old = Completer<Uint8List>();
+      final next = Completer<Uint8List>();
+      final disposed = Completer<Uint8List>();
+      final updated = Uint8List.fromList(png);
+      readRemoteIcon = (src) => Stream.fromFuture(
+        src == source
+            ? old.future
+            : src.endsWith('new.png')
+            ? next.future
+            : disposed.future,
+      );
+      await tester.pumpWidget(remoteIcon());
+      await tester.pumpWidget(remoteIcon('https://example.invalid/new.png'));
+      next.complete(updated);
+      await tester.pump();
+      await tester.pump();
+      expect(displayedBytes(tester), same(updated));
+      old.complete(png);
+      await tester.pump();
+      await tester.pump();
+      expect(displayedBytes(tester), same(updated));
+      await tester.pumpWidget(
+        remoteIcon('https://example.invalid/disposed.png'),
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      disposed.complete(png);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'memory pressure prevents in-flight preloads from refilling the cache',
+    (tester) async {
+      final pending = StreamController<Uint8List>();
+      var reads = 0;
+      readRemoteIcon = (_) =>
+          ++reads == 1 ? pending.stream : const Stream.empty();
+      final preload = precacheTargetIcons([source]);
+      await tester.pump();
+      tester.binding.handleMemoryPressure();
+      pending.add(png);
+      await pending.close();
+      await preload;
+      await tester.pumpWidget(remoteIcon());
+      expect(find.byKey(fallback), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets('preloading deduplicates sources and bounds active reads', (
+    tester,
+  ) async {
+    final release = Completer<void>();
+    var active = 0;
+    var peak = 0;
+    final reads = <String>[];
+    readRemoteIcon = (src) async* {
+      reads.add(src);
+      active++;
+      if (active > peak) peak = active;
+      await release.future;
+      yield png;
+      active--;
+    };
+    final sources = List.generate(20, (i) => 'https://example.invalid/$i.png');
+    final preload = precacheTargetIcons([
+      '',
+      'data:image/png;base64,AAA',
+      'file:///tmp/icon.png',
+      ...sources,
+      ...sources,
+    ]);
+    await tester.pump();
+    expect(active, maxConcurrentIconLoads);
+    release.complete();
+    await tester.pump();
+    await preload;
+    expect(peak, maxConcurrentIconLoads);
+    expect(reads, unorderedEquals(sources));
+  });
+
   testWidgets('large node icons decode at display resolution', (tester) async {
     final source = await tester.runAsync(() async {
       final recorder = ui.PictureRecorder();
@@ -54,22 +189,21 @@ void main() {
     tester.binding.imageCache.clearLiveImages();
   });
 
-  testWidgets('base64 svg icons render as vectors', (tester) async {
+  testWidgets('inline and remote svg icons render as vectors', (tester) async {
     const svg =
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">'
         '<rect width="1" height="1" fill="#123456"/></svg>';
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: CommonTargetIcon(
-            src: 'data:image/svg+xml;base64,${base64Encode(utf8.encode(svg))}',
-            size: 24,
-          ),
-        ),
-      ),
-    );
-    expect(find.byType(SvgPicture), findsOneWidget);
-    expect(find.byType(Image), findsNothing);
+    final bytes = Uint8List.fromList(utf8.encode(svg));
+    const remote = 'https://example.invalid/icon.svg?revision=2';
+    readRemoteIcon = (_) => Stream.value(bytes);
+    await precacheTargetIcons([remote]);
+    for (final src in [
+      'data:image/svg+xml;base64,${base64Encode(bytes)}',
+      remote,
+    ]) {
+      await tester.pumpWidget(remoteIcon(src));
+      expect(find.byType(SvgPicture), findsOneWidget);
+      expect(find.byType(Image), findsNothing);
+    }
   });
 }
