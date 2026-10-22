@@ -113,7 +113,9 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
   Future<void> _updateSsid() async {
     final revision = ++_revision;
     String? ssid;
-    if (_onWifi && ref.read(networkSettingProvider).excludeSSIDs.isNotEmpty) {
+    if (!safeModeBuild &&
+        _onWifi &&
+        ref.read(networkSettingProvider).excludeSSIDs.isNotEmpty) {
       try {
         ssid =
             await (widget.readSsid ??
@@ -122,7 +124,6 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
                   if (!mounted || revision != _revision) return null;
                   if (permission == WifiSsidPermission.denied &&
                       !_permissionRequested &&
-                      !safeModeBuild &&
                       WidgetsBinding.instance.lifecycleState ==
                           AppLifecycleState.resumed) {
                     _permissionRequested = true;
