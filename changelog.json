@@ -4,13 +4,33 @@
     {
       "version": "0.9.1",
       "tag": "v0.9.1",
-      "date": "2026-10-22",
+      "date": "2026-10-23",
       "prerelease": false,
-      "summary": "界面与交互：更新仪表盘、导航、设置和资源页面，统一分组表单、弹窗、卡片及排序交互；完善不同窗口宽度、文字缩放、键盘和遥控器操作，增加法语、西班牙语和韩语；IP 区域补充地区、机构或运营商及 ASN 信息，隐藏 IP 时同时隐藏详情\n\n配置与资源：新增自定义配置，可组合节点、策略组、规则和资源库，并分别设置 DNS、NTP、嗅探及虚拟网卡参数；支持批量导入分享链接、预览节点实际配置及规则集格式转换，完善名称和选项校验、错误提示与缓存清理，保留已有配置和本地定制行为\n\n网络与按需运行：完善虚拟网卡选项、私有地址绕过和 Tailscale 路由兼容，保留订阅中的显式设置；增加 DNS 状态重置和代理链循环提示，限制出口 IP 查询的并发与等待时间；Android 区分前台定位与始终允许定位，展示当前可读取的 SSID，权限变化后刷新状态，查询失败时支持重试\n\n性能与资源：将大型连接快照解析和编辑器文档构建移出界面线程，复用搜索及 DNS 筛选结果，减少无效重建；桌面内核通信采用事件驱动处理，修复写入阻塞、超时和断连时的任务残留；限制 Android 图标并发加载，合并地址缓存写入，及时回收订阅加载和后台查询资源\n\n稳定性与恢复：修复启动、停止、服务重连及退出过程中的状态竞争，防止旧回调覆盖新状态；完善 Android 服务绑定、消息应答和引擎销毁时的清理，处理脚本超时、WebDAV 检查取消和资源更新冲突；加强桌面 Helper 的实例归属、子进程回收及升级失败恢复\n\n跨平台兼容：修复 Windows 混合缩放显示器窗口位置、代理绕过与安装升级残留，完善 ARM64 打包；修复 Linux 网络监听初始化失败和 SSID 查询挂起，完善 AppImage 启动及打包检查；阻止 macOS 退出后继续更新 DNS、系统代理或托盘状态",
+      "summary": "界面与交互：更新仪表盘、导航、设置和资源页面，统一分组表单、弹窗、卡片及排序交互；完善不同窗口宽度、文字缩放、键盘和遥控器操作，增加法语、西班牙语和韩语；IP 区域补充地区、机构或运营商及 ASN 信息，隐藏 IP 时同时隐藏详情\n\n配置与资源：新增自定义配置，可组合节点、策略组、规则和资源库，并分别设置 DNS、NTP、嗅探及虚拟网卡参数；支持批量导入、导出分享链接及节点批量快编，保留扩展参数、启用状态和引用；支持预览节点实际配置及规则集格式转换，完善名称和选项校验、错误提示与缓存清理，保留已有配置和本地定制行为\n\n网络与按需运行：完善虚拟网卡选项、私有地址绕过和 Tailscale 路由兼容，保留订阅中的显式设置；增加 DNS 状态重置、DNS 接管模式和代理链循环提示，限制出口 IP 查询的并发与等待时间；Android 区分前台定位与始终允许定位，展示当前可读取的 SSID，权限变化后刷新状态，查询失败时支持重试\n\n性能与资源：将大型连接快照解析和编辑器文档构建移出界面线程，复用搜索及 DNS 筛选结果，减少无效重建；桌面内核通信采用事件驱动处理，修复写入阻塞、超时和断连时的任务残留；预加载并限制图标缓存，减少节点切换时的列表重建；限制 Android 图标并发加载，合并地址缓存写入，及时回收订阅加载和后台查询资源\n\n稳定性与恢复：修复启动、停止、服务重连及退出过程中的状态竞争，防止旧回调覆盖新状态；完善 Android 服务绑定、消息应答和引擎销毁时的清理，限制事件转发积压，处理脚本超时、WebDAV 检查取消和资源更新冲突；加强桌面 Helper 的实例归属、子进程回收及升级失败恢复\n\n跨平台兼容：修复 Windows 混合缩放显示器窗口位置、代理绕过与安装升级残留，完善 ARM64 打包；修复 Linux 网络监听初始化失败和 SSID 查询挂起，完善 AppImage 启动及打包检查，改善 deb 压缩兼容并规范 Linux 包权限和动态库搜索路径；阻止 macOS 退出后继续更新 DNS、系统代理或托盘状态\n\n安全与协议：更新 Go 证书验证安全补丁，完善 TLS ECH、TUN UDP 校验和与 MIP 协议栈处理，整理 Sudoku 传输并保留兼容保护；修复分享链接往返中的账号转义、证书与指纹参数丢失，保留无法完整转换的节点配置",
       "groups": [
         {
           "type": "feat",
           "entries": [
+            {
+              "id": "debfc76",
+              "scope": "profiles",
+              "text": "Add share link round trips and guarded batch editing"
+            },
+            {
+              "id": "140c85a",
+              "scope": "tun",
+              "text": "Add dns mode overrides with macos ownership handoff"
+            },
+            {
+              "id": "9b6dc1d",
+              "scope": "settings",
+              "text": "Restore custom user agents while preserving cloud requests"
+            },
+            {
+              "id": "681bc2f",
+              "scope": "dashboard",
+              "text": "Persist chart visibility and improve ip display"
+            },
             {
               "id": "dc147ca",
               "scope": "dashboard",
@@ -562,6 +582,71 @@
           "type": "fix",
           "entries": [
             {
+              "id": "febdfe5",
+              "scope": "build",
+              "text": "Use go 1.26.10 for certificate security updates"
+            },
+            {
+              "id": "59d862f",
+              "scope": "android",
+              "text": "Bound core event forwarding without blocking teardown"
+            },
+            {
+              "id": "8defa51",
+              "scope": "core",
+              "text": "Preserve share link credentials and tls options"
+            },
+            {
+              "id": "c88ffbc",
+              "scope": "connectivity",
+              "text": "Skip ssid reads in safe mode"
+            },
+            {
+              "id": "b7c2608",
+              "scope": "rules",
+              "text": "Share complete built-in routing targets"
+            },
+            {
+              "id": "cca1759",
+              "scope": "linux",
+              "text": "Preserve relative rpm library paths"
+            },
+            {
+              "id": "e4502bc",
+              "scope": "linux",
+              "text": "Normalize package tree permissions"
+            },
+            {
+              "id": "65a1b25",
+              "scope": "profiles",
+              "text": "Unify share link decoding through core"
+            },
+            {
+              "id": "fa1d8ed",
+              "scope": "linux",
+              "text": "Use compatible deb compression"
+            },
+            {
+              "id": "a1f0383",
+              "scope": "core",
+              "text": "Port tun udp checksum and gro fixes"
+            },
+            {
+              "id": "30e08c0",
+              "scope": "core",
+              "text": "Port mipstack recovery fixes with local memory policy"
+            },
+            {
+              "id": "4e2e83b",
+              "scope": "core",
+              "text": "Update tls ech validation"
+            },
+            {
+              "id": "bce8ca1",
+              "scope": "dashboard",
+              "text": "Use short ip location names"
+            },
+            {
               "id": "2430638",
               "scope": "windows",
               "text": "Use supported handle type for registry imports"
@@ -906,6 +991,16 @@
         {
           "type": "perf",
           "entries": [
+            {
+              "id": "4b659ba",
+              "scope": "proxies",
+              "text": "Isolate group layouts from selection updates"
+            },
+            {
+              "id": "b7232a0",
+              "scope": "icons",
+              "text": "Preload bounded remote icon bytes"
+            },
             {
               "id": "1f4dd5a",
               "scope": "dns",
