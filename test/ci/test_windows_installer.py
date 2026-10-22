@@ -154,7 +154,7 @@ DLL_STUBS = {
       Size := (Length(Value) + 1) * 2; Result := 0;
     end;""",
     'HelperCreateMutex': r'''begin
-      Assert(Attributes.Length = 3 * SizeOf(NativeInt));
+      Assert(Attributes.Length = 3 * SizeOf(THandle));
       Assert(Attributes.Descriptor = 512); Assert(Attributes.InheritHandle = 0);
       Assert(InitialOwner = 0); Assert(Name = 'Global\FlClashHelperService.Install.v1');
       ApiError := LockFailure;
@@ -364,6 +364,37 @@ end.
 '''
 
 
+def installer_code():
+    source = Path(os.environ.get('FLCLASH_INSTALLER_SOURCE', 'windows/packaging/exe/inno_setup.iss'))
+    code = source.read_text().split('[Code]', 1)[1].split('[Languages]', 1)[0]
+    code = re.sub(r'^#emit .*PackagedHelperSHA256.*$', "  PackagedHelperSHA256 = '" + 'a' * 64 + "';", code, flags=re.M)
+    code = re.sub(r'^#emit .*PackagedCoreSHA256.*$', "  PackagedCoreSHA256 = '" + 'b' * 64 + "';", code, flags=re.M)
+    return code
+
+
+@unittest.skipUnless(os.name == 'nt', 'requires the Windows Inno Setup compiler')
+class WindowsInstallerCompileTest(unittest.TestCase):
+    def test_production_code_compiles_with_inno_setup(self):
+        compiler = shutil.which('ISCC.exe') or str(
+            Path(os.environ.get('ProgramFiles(x86)', r'C:\Program Files (x86)'))
+            / 'Inno Setup 6' / 'ISCC.exe'
+        )
+        self.assertTrue(Path(compiler).is_file(), 'Inno Setup compiler is required on Windows')
+        with tempfile.TemporaryDirectory(prefix='flclash-inno-test-') as directory:
+            root = Path(directory)
+            script = root / 'installer.iss'
+            script.write_text(
+                '[Setup]\nAppName=Installer fixture\nAppVersion=1.0\n'
+                'DefaultDirName={tmp}\\FlClashFixture\nOutputDir=.\n'
+                'OutputBaseFilename=fixture\n[Code]\n' + installer_code(),
+                encoding='utf-8-sig',
+            )
+            result = subprocess.run([compiler, '/Qp', str(script)], cwd=root,
+                                    capture_output=True, text=True, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertTrue((root / 'fixture.exe').is_file())
+
+
 @unittest.skipUnless(shutil.which('fpc'), 'requires Free Pascal for isolated installer control-flow tests')
 class WindowsInstallerTest(unittest.TestCase):
     @classmethod
@@ -371,10 +402,7 @@ class WindowsInstallerTest(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory(prefix='flclash-installer-test-')
         cls.addClassCleanup(temporary.cleanup)
         root = Path(temporary.name)
-        source = Path(os.environ.get('FLCLASH_INSTALLER_SOURCE', 'windows/packaging/exe/inno_setup.iss'))
-        code = source.read_text().split('[Code]', 1)[1].split('[Languages]', 1)[0]
-        code = re.sub(r'^#emit .*PackagedHelperSHA256.*$', "  PackagedHelperSHA256 = '" + 'a' * 64 + "';", code, flags=re.M)
-        code = re.sub(r'^#emit .*PackagedCoreSHA256.*$', "  PackagedCoreSHA256 = '" + 'b' * 64 + "';", code, flags=re.M)
+        code = installer_code()
         for name, stub in DLL_STUBS.items():
             code = re.sub(r'(function ' + name + r'\b[^\n]*;)\s*external [^;]+;',
                           lambda match: match[1] + '\n' + stub, code)

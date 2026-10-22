@@ -26,6 +26,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
+      - name: Compile Windows installer code
+        run: python -m unittest discover -s test/ci -p test_windows_installer.py -v
+
       - name: Check format
         run: cargo fmt --manifest-path services/helper/Cargo.toml -- --check
 

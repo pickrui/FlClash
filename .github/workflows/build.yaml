@@ -498,6 +498,20 @@ jobs:
               printf '%s\n' 'gradle.startParameter.refreshDependencies = true' > "$refresh_init"
               dart setup.dart $BUILD_ARGS
             fi
+          elif [ "${{ matrix.platform }}" == "macos" ]; then
+            build_log="$RUNNER_TEMP/macos-build.log"
+            set +e
+            dart setup.dart $BUILD_ARGS 2>&1 | tee "$build_log"
+            build_status=${PIPESTATUS[0]}
+            set -e
+            if [ "$build_status" -ne 0 ]; then
+              if ! grep -q 'github.com/simolus3/sqlite3.dart/releases/download/' "$build_log" ||
+                 ! grep -q 'Connection closed before full header was received' "$build_log"; then
+                exit "$build_status"
+              fi
+              echo "Retrying macOS build once after the SQLite dependency download was interrupted"
+              dart setup.dart $BUILD_ARGS
+            fi
           else
             dart setup.dart $BUILD_ARGS
           fi

@@ -27,9 +27,9 @@ const
 type
   { Pointer-sized slots include the SECURITY_ATTRIBUTES padding on 64-bit Setup. }
   THelperSecurityAttributes = record
-    Length: NativeInt;
-    Descriptor: NativeInt;
-    InheritHandle: NativeInt;
+    Length: THandle;
+    Descriptor: THandle;
+    InheritHandle: THandle;
   end;
 
 function HelperCreateMutex(var Attributes: THelperSecurityAttributes; InitialOwner: Integer; Name: String): THandle;
@@ -38,12 +38,12 @@ function HelperCloseHandle(Handle: THandle): Integer;
   external 'CloseHandle@kernel32.dll stdcall';
 function HelperGetCurrentProcessId: LongWord;
   external 'GetCurrentProcessId@kernel32.dll stdcall';
-function HelperConvertSecurity(Sddl: String; Revision: LongWord; var Descriptor: NativeInt; Size: NativeInt): Integer;
+function HelperConvertSecurity(Sddl: String; Revision: LongWord; var Descriptor: THandle; Size: THandle): Integer;
   external 'ConvertStringSecurityDescriptorToSecurityDescriptorW@advapi32.dll stdcall';
-function HelperLocalFree(Memory: NativeInt): NativeInt;
+function HelperLocalFree(Memory: THandle): THandle;
   external 'LocalFree@kernel32.dll stdcall';
 
-function HelperReadRegistryString(Root: HKEY; Key, Name: String; Flags: LongWord; ValueType: NativeInt; Data: String; var Size: LongWord): LongWord;
+function HelperReadRegistryString(Root: HKEY; Key, Name: String; Flags: LongWord; ValueType: THandle; Data: String; var Size: LongWord): LongWord;
   external 'RegGetValueW@advapi32.dll stdcall';
 
 var
