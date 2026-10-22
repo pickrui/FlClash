@@ -159,6 +159,7 @@
   "cut": "切り取り",
   "copy": "コピー",
   "paste": "貼り付け",
+  "userAgent": "User-Agent",
   "testUrl": "テストURL",
   "sync": "同期",
   "exclude": "最近のタスクから隠す",

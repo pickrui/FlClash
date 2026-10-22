@@ -1360,6 +1360,7 @@ abstract class ClashConfigSnippet with _$ClashConfigSnippet {
 @freezed
 abstract class ClashConfig with _$ClashConfig {
   const factory ClashConfig({
+    @JsonKey(name: 'global-ua') String? globalUa,
     @Default(defaultMixedPort) @JsonKey(name: 'mixed-port') int mixedPort,
     @Default(0) @JsonKey(name: 'socks-port') int socksPort,
     @Default(0) @JsonKey(name: 'port') int port,

@@ -16,6 +16,7 @@ import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/views/application_setting.dart';
 import 'package:fl_clash/views/config/network.dart' show SuspendOnIdleItem;
 import 'package:fl_clash/views/config/on_demand.dart';
+import 'package:fl_clash/views/config/user_agents.dart';
 
 import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/widgets/proxy_authentication.dart';
@@ -39,6 +40,23 @@ class LogLevelItem extends ConsumerWidget {
       onChanged: (ref, value) => ref
           .read(patchClashConfigProvider.notifier)
           .update((state) => state.copyWith(logLevel: value)),
+    );
+  }
+}
+
+class UaItem extends ConsumerWidget {
+  const UaItem({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final appLocalizations = context.appLocalizations;
+    final globalUa = ref.watch(
+      patchClashConfigProvider.select((state) => state.globalUa),
+    );
+    return ListItem.open(
+      title: Text(appLocalizations.userAgent),
+      subtitle: Text(globalUa ?? appLocalizations.defaultText),
+      widget: const UserAgentsView(),
     );
   }
 }
@@ -505,6 +523,7 @@ class GeneralView extends ConsumerWidget {
   List<Widget> _connectionItems() {
     return [
       const TestUrlItem(),
+      const UaItem(),
       _clashToggle(
         title: (l) => l.unifiedDelay,
         select: (state) => state.unifiedDelay,

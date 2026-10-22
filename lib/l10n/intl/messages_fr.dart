@@ -3607,6 +3607,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "usedShort": MessageLookupByLibrary.simpleMessage("utilisé"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Trafic utilisé"),
+    "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "userCenter": MessageLookupByLibrary.simpleMessage("Espace utilisateur"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage(
       "Espace utilisateur (secours)",

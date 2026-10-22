@@ -3541,6 +3541,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage(
       "Использованный трафик",
     ),
+    "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "userCenter": MessageLookupByLibrary.simpleMessage("Центр пользователя"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage(
       "Центр пользователя (резервный)",

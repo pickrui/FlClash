@@ -2797,6 +2797,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("사용한 트래픽"),
+    "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "userCenter": MessageLookupByLibrary.simpleMessage("사용자 센터"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage("사용자 센터(보조)"),
     "userGuide": MessageLookupByLibrary.simpleMessage("사용자 가이드"),

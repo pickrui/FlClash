@@ -2516,6 +2516,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("已用流量"),
+    "userAgent": MessageLookupByLibrary.simpleMessage("用户代理"),
     "userCenter": MessageLookupByLibrary.simpleMessage("用户中心"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage("用户中心（备用）"),
     "userGuide": MessageLookupByLibrary.simpleMessage("用户指南"),

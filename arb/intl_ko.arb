@@ -159,6 +159,7 @@
   "cut": "잘라내기",
   "copy": "복사",
   "paste": "붙여넣기",
+  "userAgent": "User-Agent",
   "testUrl": "테스트 URL",
   "sync": "동기화",
   "exclude": "최근 작업에서 숨기기",

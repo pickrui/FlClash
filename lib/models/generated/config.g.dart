@@ -18,6 +18,11 @@ _AppSettingProps _$AppSettingPropsFromJson(
   Map<String, dynamic> json,
 ) => _AppSettingProps(
   locale: json['locale'] as String?,
+  userAgents:
+      (json['userAgents'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      defaultUserAgents,
   dashboardWidgets: json['dashboardWidgets'] == null
       ? defaultDashboardWidgets
       : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
@@ -80,6 +85,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
     <String, dynamic>{
       'locale': instance.locale,
+      'userAgents': instance.userAgents,
       'dashboardWidgets': instance.dashboardWidgets
           .map((e) => _$DashboardWidgetEnumMap[e]!)
           .toList(),

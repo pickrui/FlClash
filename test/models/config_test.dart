@@ -166,7 +166,7 @@ void main() {
       );
     },
   );
-  test('retired UA preferences do not replace unrelated settings', () {
+  test('saved UA list preserves unrelated settings', () {
     final props = AppSettingProps.fromJson({
       'userAgents': ['Saved/1'],
       'customUserAgent': 'Saved/1',
@@ -178,7 +178,7 @@ void main() {
     expect(props.showNotificationStopAction, false);
     expect(props.autoRun, true);
     final saved = jsonDecode(jsonEncode(props)) as Map<String, dynamic>;
-    expect(saved, isNot(contains('userAgents')));
+    expect(saved['userAgents'], ['Saved/1']);
     expect(saved, isNot(contains('customUserAgent')));
     expect(AppSettingProps.fromJson(saved), props);
   });

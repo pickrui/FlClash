@@ -81,12 +81,15 @@ void main() {
     pathProviderDir.deleteSync(recursive: true);
   });
 
-  test('retired UA overrides use the application default', () async {
+  test('custom UA overrides the profile and survives serialization', () async {
     final patch = ClashConfig.fromJson({
       'global-ua': 'Legacy/1',
       'mixed-port': 7895,
     });
-    expect(patch.toJson(), isNot(contains('global-ua')));
+    expect(
+      ClashConfig.fromJson(jsonDecode(jsonEncode(patch))).globalUa,
+      'Legacy/1',
+    );
     final result = await makeRealProfileTask(
       _makeRealProfileState(
         rawConfig: {
@@ -95,7 +98,11 @@ void main() {
         },
       ).copyWith(realPatchConfig: patch),
     );
-    expect(result['global-ua'], 'FlClash');
+    expect(result['global-ua'], 'Legacy/1');
+    final fallback = await makeRealProfileTask(
+      _makeRealProfileState(rawConfig: {'global-ua': 'Profile/1'}),
+    );
+    expect(fallback['global-ua'], 'FlClash');
     expect(result['mixed-port'], 7895);
   });
 

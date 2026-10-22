@@ -265,6 +265,7 @@ class Request {
   final bool Function(String host) _isApiDomain;
   final Duration _readTimeout;
   final HostLookup? _redirectLookup;
+  final String? Function()? _userAgent;
   static const _maxReadBytes = 64 * 1024 * 1024;
   final _apiOptions = BaseOptions(
     headers: {'User-Agent': browserUa},
@@ -282,6 +283,7 @@ class Request {
     HttpClientAdapter? ipAdapter,
     this._readRoutes,
     this._redirectLookup,
+    this._userAgent,
     this._publicGitHubAdapter,
     bool Function(String host)? isApiDomain,
     this._readTimeout = const Duration(seconds: 30),
@@ -396,7 +398,8 @@ class Request {
               proxyTargets: policy.proxyTargets,
               userAgent: isApiRequest
                   ? null
-                  : () => appController.isAttach ? appController.ua : null,
+                  : _userAgent ??
+                        () => appController.isAttach ? appController.ua : null,
             ),
             maxBytes: maxBytes,
           );

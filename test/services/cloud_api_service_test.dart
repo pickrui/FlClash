@@ -1525,8 +1525,10 @@ void main() {
   ]) {
     test('managed direct first: $outcome', () async {
       final adapter = QueuedCloudAdapter();
+      final client = adapter.createClient()
+        ..options.headers['User-Agent'] = 'CustomUA/1.0';
       final service = CloudApiService.forTesting(
-        client: adapter.createClient(),
+        client: client,
         syncRequestTimeout: Duration(seconds: outcome == 'timeout' ? 30 : 2),
         readRoutes: const ['DIRECT', 'PROXY localhost:7890'],
       )..setToken('session');
@@ -1535,6 +1537,7 @@ void main() {
       final fails = ['deadline', '401', '403', 'logout'].contains(outcome);
       final failure = fails ? expectLater(result, throwsException) : null;
       final direct = await adapter.takeRequest();
+      expect(direct.options.headers['User-Agent'], 'FlClash for oixCloud');
       expect(direct.options.extra[cloudReadRouteExtraKey], 'DIRECT');
       expect(direct.options.headers['X-oixCloud-Subscription-Route'], 'direct');
       await pumpEventQueue();
@@ -1570,6 +1573,7 @@ void main() {
             'PROXY localhost:7890',
           );
         }
+        expect(target.options.headers['User-Agent'], 'FlClash for oixCloud');
         if (outcome != 'deadline') {
           final bytes = await AgeCrypto.encrypt(
             utf8.encode('proxies: []'),

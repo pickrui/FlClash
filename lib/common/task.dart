@@ -413,7 +413,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     personalGroups: {for (final group in customProxyGroups) group.name},
   );
   rawConfig['geox-url'] = realPatchConfig.geoXUrl.toJson();
-  rawConfig['global-ua'] = defaultUA;
+  rawConfig['global-ua'] = realPatchConfig.globalUa ?? defaultUA;
   if (realPatchConfig.interfaceName != null) {
     if (realPatchConfig.interfaceName!.isEmpty) {
       rawConfig.remove('interface-name');

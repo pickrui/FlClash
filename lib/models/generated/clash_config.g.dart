@@ -482,6 +482,7 @@ Map<String, dynamic> _$ClashConfigSnippetToJson(_ClashConfigSnippet instance) =>
     };
 
 _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
+  globalUa: json['global-ua'] as String?,
   mixedPort: (json['mixed-port'] as num?)?.toInt() ?? defaultMixedPort,
   socksPort: (json['socks-port'] as num?)?.toInt() ?? 0,
   port: (json['port'] as num?)?.toInt() ?? 0,
@@ -568,6 +569,7 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
 
 Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
     <String, dynamic>{
+      'global-ua': instance.globalUa,
       'mixed-port': instance.mixedPort,
       'socks-port': instance.socksPort,
       'port': instance.port,

@@ -159,6 +159,7 @@
   "cut": "Couper",
   "copy": "Copier",
   "paste": "Coller",
+  "userAgent": "User-Agent",
   "testUrl": "URL de test",
   "sync": "Synchroniser",
   "exclude": "Masquer des tâches récentes",

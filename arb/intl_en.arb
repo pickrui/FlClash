@@ -159,6 +159,7 @@
   "cut": "Cut",
   "copy": "Copy",
   "paste": "Paste",
+  "userAgent": "User-Agent",
   "testUrl": "Test URL",
   "sync": "Sync",
   "exclude": "Hide from recent tasks",

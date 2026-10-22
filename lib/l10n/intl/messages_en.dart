@@ -3370,6 +3370,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("used"),
     "usedTrafficLabel": MessageLookupByLibrary.simpleMessage("Used traffic"),
+    "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "userCenter": MessageLookupByLibrary.simpleMessage("User Center"),
     "userCenterFallback": MessageLookupByLibrary.simpleMessage(
       "User Center (Backup)",

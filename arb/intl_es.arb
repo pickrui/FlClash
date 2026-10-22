@@ -159,6 +159,7 @@
   "cut": "Cortar",
   "copy": "Copiar",
   "paste": "Pegar",
+  "userAgent": "User-Agent",
   "testUrl": "URL de prueba",
   "sync": "Sincronizar",
   "exclude": "Ocultar de aplicaciones recientes",

@@ -17,6 +17,7 @@ abstract final class TextInputLimits {
   static const iconUrl = url;
   static const dnsServer = url;
   static const hostValue = url;
+  static const userAgent = 512;
   static const userName = 128;
   static const password = 512;
   static const ageSecretKey = 8192;

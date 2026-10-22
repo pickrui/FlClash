@@ -1230,6 +1230,11 @@ class AppLocalizations {
     return Intl.message('Paste', name: 'paste', desc: '', args: []);
   }
 
+  /// `User-Agent`
+  String get userAgent {
+    return Intl.message('User-Agent', name: 'userAgent', desc: '', args: []);
+  }
+
   /// `Test URL`
   String get testUrl {
     return Intl.message('Test URL', name: 'testUrl', desc: '', args: []);

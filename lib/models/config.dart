@@ -123,10 +123,13 @@ abstract class Filter with _$Filter {
   factory Filter.fromJson(Map<String, Object?> json) => _$FilterFromJson(json);
 }
 
+const defaultUserAgents = ['clash-verge/v2.4.2', 'ClashforWindows/0.19.23'];
+
 @freezed
 abstract class AppSettingProps with _$AppSettingProps {
   const factory AppSettingProps({
     String? locale,
+    @Default(defaultUserAgents) List<String> userAgents,
     @Default(defaultDashboardWidgets)
     @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
     List<DashboardWidget> dashboardWidgets,

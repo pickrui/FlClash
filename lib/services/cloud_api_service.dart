@@ -1556,6 +1556,7 @@ class CloudApiService implements CloudNodeFilterApi {
       final signature = _flclashHmac('$timestamp.${identity.recipient}');
 
       final headers = <String, String>{
+        'User-Agent': 'FlClash for oixCloud',
         'X-Flclash-Timestamp': timestamp,
         'X-Flclash-Signature': signature,
         'X-Flclash-Age-Pubkey': identity.recipient,
