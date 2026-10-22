@@ -17,7 +17,6 @@ program InstallerFixture;
 {$mode delphiunicode}{$H+}{$ASSERTIONS ON}
 uses SysUtils;
 type
-  HKEY = NativeUInt;
   THandle = NativeUInt;
   TArrayOfString = array of String;
   TSetupStep = (ssInstall, ssPostInstall);

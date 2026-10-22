@@ -43,7 +43,7 @@ function HelperConvertSecurity(Sddl: String; Revision: LongWord; var Descriptor:
 function HelperLocalFree(Memory: THandle): THandle;
   external 'LocalFree@kernel32.dll stdcall';
 
-function HelperReadRegistryString(Root: HKEY; Key, Name: String; Flags: LongWord; ValueType: THandle; Data: String; var Size: LongWord): LongWord;
+function HelperReadRegistryString(Root: THandle; Key, Name: String; Flags: LongWord; ValueType: THandle; Data: String; var Size: LongWord): LongWord;
   external 'RegGetValueW@advapi32.dll stdcall';
 
 var
