@@ -50,6 +50,19 @@ void main() {
   });
 
   group('TUN stack configuration', () {
+    test('DNS mode overrides round-trip without changing legacy defaults', () {
+      const original = ClashConfig(
+        tunOverride: ProfileTun(dnsMode: 'native'),
+        tunOverrideKeys: {TunOverrideKey.dnsMode},
+      );
+      final saved = ClashConfig.fromJson(jsonDecode(jsonEncode(original)));
+      expect(saved.tunOverride.dnsMode, 'native');
+      expect(saved.tunOverrideKeys, {TunOverrideKey.dnsMode});
+      expect(ClashConfig.fromJson({}).tunOverride.dnsMode, '');
+      expect(const ProfileTun().overrideJson({TunOverrideKey.dnsMode}), {
+        'dns-mode': '',
+      });
+    });
     test('keeps mixed as the default for existing configurations', () {
       expect(const Tun().stack, TunStack.mixed);
       expect(ClashConfig.fromJson({}).tun.stack, TunStack.mixed);

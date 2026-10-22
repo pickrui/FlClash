@@ -2712,6 +2712,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "관리자 권한이 거부되어 TUN을 켤 수 없습니다. 시스템 권한 요청을 승인한 후 다시 시도하세요.",
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage("TUN은 관리자 모드에서만 작동합니다."),
+    "tunDnsMode": MessageLookupByLibrary.simpleMessage("시스템 DNS 모드"),
+    "tunDnsModeDesc": MessageLookupByLibrary.simpleMessage(
+      "비워 두면 기존 동작을 유지합니다. disabled는 시스템 DNS를 변경하지 않고, native는 TUN 주소를 사용합니다. hijack은 다른 인터페이스의 DNS도 가로챕니다(Windows는 strict-route, Linux는 auto-redirect 필요). macOS에서는 명시한 모드가 자동 DNS 설정보다 우선합니다.",
+    ),
     "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
       "보조 서비스의 설치 또는 시작에 실패하여 TUN을 켤 수 없습니다. 앱 설치가 완료되었는지, 시스템 서비스가 작동하는지 확인한 후 다시 시도하세요.",
     ),

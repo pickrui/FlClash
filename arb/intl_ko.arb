@@ -1623,5 +1623,7 @@
   "ruleSetNeedsConversionTip": "이 원격 규칙 세트는 정규화가 필요합니다. 로컬 MRS로 다운로드하여 사용하세요",
   "ruleSetSizeTip": "규칙 세트가 처리 한도를 초과했습니다. 더 작은 세트로 나누세요",
   "providerLookupFailed": "현재 적용된 노드 설정을 읽을 수 없습니다. 리소스를 새로 고친 후 다시 시도하세요",
-  "lookupProxyConfig": "노드 설정 찾기"
+  "lookupProxyConfig": "노드 설정 찾기",
+  "tunDnsMode": "시스템 DNS 모드",
+  "tunDnsModeDesc": "비워 두면 기존 동작을 유지합니다. disabled는 시스템 DNS를 변경하지 않고, native는 TUN 주소를 사용합니다. hijack은 다른 인터페이스의 DNS도 가로챕니다(Windows는 strict-route, Linux는 auto-redirect 필요). macOS에서는 명시한 모드가 자동 DNS 설정보다 우선합니다."
 }

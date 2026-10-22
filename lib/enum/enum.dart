@@ -264,6 +264,7 @@ enum SnifferOverrideKey {
 /// so these apply on desktop only, beside the keys the core owns.
 @JsonEnum(valueField: 'path')
 enum TunOverrideKey {
+  dnsMode('dns-mode'),
   mtu('mtu'),
   congestionController('congestion-controller'),
   strictRoute('strict-route'),

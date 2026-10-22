@@ -13717,6 +13717,26 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `System DNS mode`
+  String get tunDnsMode {
+    return Intl.message(
+      'System DNS mode',
+      name: 'tunDnsMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Empty keeps the previous behavior. disabled leaves system DNS unchanged; native uses the TUN address; hijack also intercepts DNS on other interfaces (Windows requires strict-route; Linux requires auto-redirect). An explicit mode takes precedence over automatic system DNS on macOS.`
+  String get tunDnsModeDesc {
+    return Intl.message(
+      'Empty keeps the previous behavior. disabled leaves system DNS unchanged; native uses the TUN address; hijack also intercepts DNS on other interfaces (Windows requires strict-route; Linux requires auto-redirect). An explicit mode takes precedence over automatic system DNS on macOS.',
+      name: 'tunDnsModeDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

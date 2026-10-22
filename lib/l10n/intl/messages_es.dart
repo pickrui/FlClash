@@ -3481,6 +3481,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "TUN solo funciona en modo administrador.",
     ),
+    "tunDnsMode": MessageLookupByLibrary.simpleMessage("Modo DNS del sistema"),
+    "tunDnsModeDesc": MessageLookupByLibrary.simpleMessage(
+      "Vacío conserva el comportamiento anterior. disabled no modifica el DNS; native usa la dirección TUN; hijack también intercepta el DNS de otras interfaces (Windows requiere strict-route; Linux, auto-redirect). En macOS, un modo explícito tiene prioridad sobre el DNS automático.",
+    ),
     "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo activar TUN: falló la instalación o el inicio del servicio auxiliar. Compruebe que la aplicación esté instalada por completo y que el servicio del sistema funcione, y vuelva a intentarlo.",
     ),

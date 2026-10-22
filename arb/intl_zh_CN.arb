@@ -1623,5 +1623,7 @@
   "ruleSetNeedsConversionTip": "此远程规则集需要规范化，请下载为本地 MRS 后使用",
   "ruleSetSizeTip": "规则集超出处理上限，请拆分后重试",
   "providerLookupFailed": "无法读取当前生效的节点配置，请刷新资源后重试",
-  "lookupProxyConfig": "查找节点配置"
+  "lookupProxyConfig": "查找节点配置",
+  "tunDnsMode": "系统 DNS 模式",
+  "tunDnsModeDesc": "留空保持原有行为；disabled 不设置系统 DNS；native 使用 TUN 地址；hijack 额外拦截其他网卡的 DNS（Windows 需 strict-route，Linux 需 auto-redirect）。macOS 上显式模式优先于自动设置系统 DNS"
 }

@@ -121,6 +121,7 @@ const _$TunStackEnumMap = {
 };
 
 _ProfileTun _$ProfileTunFromJson(Map<String, dynamic> json) => _ProfileTun(
+  dnsMode: json['dns-mode'] as String? ?? '',
   mtu: json['mtu'] == null
       ? defaultTunMtu
       : normalizeTunMtu((json['mtu'] as num?)?.toInt()),
@@ -180,6 +181,7 @@ _ProfileTun _$ProfileTunFromJson(Map<String, dynamic> json) => _ProfileTun(
 
 Map<String, dynamic> _$ProfileTunToJson(_ProfileTun instance) =>
     <String, dynamic>{
+      'dns-mode': instance.dnsMode,
       'mtu': instance.mtu,
       'congestion-controller': instance.congestionController,
       'strict-route': instance.strictRoute,
@@ -688,6 +690,7 @@ const _$NtpOverrideKeyEnumMap = {
 };
 
 const _$TunOverrideKeyEnumMap = {
+  TunOverrideKey.dnsMode: 'dns-mode',
   TunOverrideKey.mtu: 'mtu',
   TunOverrideKey.congestionController: 'congestion-controller',
   TunOverrideKey.strictRoute: 'strict-route',

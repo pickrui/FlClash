@@ -3432,6 +3432,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "TUN работает только в режиме администратора",
     ),
+    "tunDnsMode": MessageLookupByLibrary.simpleMessage("Режим системного DNS"),
+    "tunDnsModeDesc": MessageLookupByLibrary.simpleMessage(
+      "Пустое значение сохраняет прежнее поведение. disabled не меняет DNS; native использует адрес TUN; hijack также перехватывает DNS других интерфейсов (Windows: strict-route, Linux: auto-redirect). В macOS явный режим имеет приоритет над автоматической настройкой DNS.",
+    ),
     "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
       "Не удалось включить TUN: ошибка установки или запуска Helper. Проверьте целостность установки приложения и состояние системной службы, затем повторите попытку.",
     ),

@@ -2769,6 +2769,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "管理者権限が拒否されたため、TUN を有効にできませんでした。システムの権限要求を許可して、もう一度お試しください",
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage("TUN は管理者モードでのみ有効です"),
+    "tunDnsMode": MessageLookupByLibrary.simpleMessage("システム DNS モード"),
+    "tunDnsModeDesc": MessageLookupByLibrary.simpleMessage(
+      "空欄は従来の動作を維持します。disabled はシステム DNS を変更せず、native は TUN アドレスを使用します。hijack は他のインターフェースの DNS も捕捉します（Windows は strict-route、Linux は auto-redirect が必要）。macOS では明示したモードが自動 DNS 設定に優先します。",
+    ),
     "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
       "TUN を有効にできませんでした：Helper のインストールまたは起動に失敗しました。アプリが正しくインストールされていることと、システムサービスの状態を確認して再試行してください",
     ),

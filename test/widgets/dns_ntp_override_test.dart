@@ -500,6 +500,23 @@ void main() {
 
         await tester.tap(find.text('Add override entry'));
         await tester.pumpAndSettle();
+        await tester.tap(find.text('System DNS mode'));
+        await tester.pumpAndSettle();
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('System DNS mode'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('native'));
+        await tester.pumpAndSettle();
+        expect(patch().tunOverride.dnsMode, 'native');
+        expect(patch().tunOverrideKeys, {TunOverrideKey.dnsMode});
+        await tester.tap(find.byTooltip('Remove'));
+        await tester.pumpAndSettle();
+        expect(patch().tunOverrideKeys, isEmpty);
+        expect(patch().tunOverride.dnsMode, '');
+
+        await tester.tap(find.text('Add override entry'));
+        await tester.pumpAndSettle();
         final gso = find.text('GSO');
         if (isLinux) {
           await tester.scrollUntilVisible(

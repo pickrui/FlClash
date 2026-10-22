@@ -145,6 +145,7 @@ void main() {
           'mtu': 1400,
           'udp-timeout': 60,
           'strict-route': true,
+          'dns-mode': 'native',
           'dns-hijack': ['192.0.2.53:53'],
           'route-exclude-address': ['203.0.113.0/24'],
         },
@@ -171,6 +172,7 @@ void main() {
         'mtu': 1400,
         'udp-timeout': 60,
         'strict-route': true,
+        'dns-mode': 'native',
         'dns-hijack': defaultDnsHijack,
         'route-exclude-address': ['203.0.113.0/24'],
       },
@@ -180,11 +182,13 @@ void main() {
       const ClashConfig(
         tunOverride: ProfileTun(
           mtu: 1480,
+          dnsMode: 'disabled',
           dnsHijack: ['tcp://any:53'],
           routeExcludeAddress: [],
         ),
         tunOverrideKeys: {
           TunOverrideKey.mtu,
+          TunOverrideKey.dnsMode,
           TunOverrideKey.strictRoute,
           TunOverrideKey.dnsHijack,
           TunOverrideKey.routeExcludeAddress,
@@ -192,7 +196,14 @@ void main() {
       ),
       bypass: true,
     );
+    expect(
+      (await tunOf(
+        const ClashConfig(tunOverrideKeys: {TunOverrideKey.dnsMode}),
+      ))['dns-mode'],
+      '',
+    );
     expect(picked['enable'], false);
+    expect(picked['dns-mode'], 'disabled');
     expect(picked['mtu'], 1480);
     expect(picked['strict-route'], false);
     expect(picked['udp-timeout'], 60);
@@ -214,17 +225,26 @@ void main() {
         overwriteType: OverwriteType.custom,
         customProfile: true,
         realPatchConfig: const ClashConfig(
-          tunOverride: ProfileTun(mtu: 1480, udpTimeout: 60),
-          tunOverrideKeys: {TunOverrideKey.mtu, TunOverrideKey.udpTimeout},
+          tunOverride: ProfileTun(mtu: 1480, udpTimeout: 60, dnsMode: 'native'),
+          tunOverrideKeys: {
+            TunOverrideKey.mtu,
+            TunOverrideKey.udpTimeout,
+            TunOverrideKey.dnsMode,
+          },
         ),
         overrides: const ProfileOverrides(
           tun: ProfileTun(mtu: 1400, dnsHijack: []),
-          tunOverrideKeys: {TunOverrideKey.mtu, TunOverrideKey.dnsHijack},
+          tunOverrideKeys: {
+            TunOverrideKey.mtu,
+            TunOverrideKey.dnsHijack,
+            TunOverrideKey.dnsMode,
+          },
         ),
       ),
     );
     final tun = result['tun'] as Map;
     expect(tun['mtu'], 1400);
+    expect(tun['dns-mode'], 'native');
     expect(tun['udp-timeout'], 60);
     expect(tun['dns-hijack'], defaultDnsHijack);
   });

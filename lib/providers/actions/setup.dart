@@ -941,11 +941,18 @@ extension SetupControllerExt on AppController {
 
     final String message;
     try {
-      onApply();
-      message = await coreController.setupConfig(
-        params: updatedSetupParams,
-        preloadInvoke: preloadInvoke,
-      );
+      Future<String> apply() async {
+        if (!isCurrentApply()) throw const _CoreStartCancelledException();
+        onApply();
+        final result = await coreController.setupConfig(
+          params: updatedSetupParams,
+          preloadInvoke: preloadInvoke,
+        );
+        if (result.isNotEmpty) throw result;
+        return result;
+      }
+
+      message = await (macOS?.applyCoreConfig(config, apply) ?? apply());
     } on _CoreStartCancelledException {
       return false;
     }

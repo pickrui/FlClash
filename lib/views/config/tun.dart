@@ -14,6 +14,7 @@ import 'package:material_ui/material_ui.dart';
 
 extension on TunOverrideKey {
   String label(AppLocalizations l) => switch (this) {
+    TunOverrideKey.dnsMode => l.tunDnsMode,
     TunOverrideKey.mtu => 'MTU',
     TunOverrideKey.congestionController => l.congestionController,
     TunOverrideKey.strictRoute => l.strictRoute,
@@ -32,6 +33,7 @@ extension on TunOverrideKey {
   };
 
   ConfigLabel? get description => switch (this) {
+    TunOverrideKey.dnsMode => (l) => l.tunDnsModeDesc,
     TunOverrideKey.congestionController => (l) => l.congestionControllerDesc,
     TunOverrideKey.strictRoute => (l) => l.strictRouteDesc,
     TunOverrideKey.dnsHijack => (l) => l.dnsHijackDesc,
@@ -159,6 +161,12 @@ class _TunOverrideSpec extends OverrideSpec<TunOverrideKey, ProfileTun> {
 
   @override
   OverrideField<ProfileTun> fieldOf(TunOverrideKey key) => switch (key) {
+    TunOverrideKey.dnsMode => OptionsOverrideField(
+      const ['', 'disabled', 'native', 'hijack'],
+      (tun) => tun.dnsMode,
+      (tun, value) => tun.copyWith(dnsMode: value),
+      labelOf: (value) => value.isEmpty ? appLocalizations.defaultText : value,
+    ),
     TunOverrideKey.mtu => NumberOverrideField(
       (tun) => tun.mtu,
       (tun, value) => tun.copyWith(mtu: value),

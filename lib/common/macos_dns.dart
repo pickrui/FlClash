@@ -19,6 +19,8 @@ class MacosDnsController {
   Future<void> _pending = Future.value();
   bool _loaded = false;
   bool _closing = false;
+  bool _coreDnsMode = false;
+  bool _restoreRequested = true;
   Future<void>? _shutdown;
 
   MacosDnsController({
@@ -30,7 +32,43 @@ class MacosDnsController {
 
   Future<void> updateDns(bool restore) {
     if (_closing) return _shutdown!;
+    _restoreRequested = restore;
     return _enqueue(restore);
+  }
+
+  Future<T> applyCoreConfig<T>(
+    Map<String, dynamic> config,
+    Future<T> Function() apply,
+  ) async {
+    bool explicitMode(Object? tun) =>
+        tun is Map &&
+        tun['dns-mode'] is String &&
+        (tun['dns-mode'] as String).isNotEmpty;
+    final listeners = config['listeners'];
+    final next =
+        explicitMode(config['tun']) ||
+        (listeners is List &&
+            listeners.any(
+              (value) =>
+                  value is Map && value['type'] == 'tun' && explicitMode(value),
+            ));
+    if (_closing) throw StateError('DNS controller is closing');
+    final previous = _coreDnsMode;
+    // Keep both owners inactive until the previous Core listener is replaced.
+    _coreDnsMode = previous || next;
+    final T result;
+    try {
+      if (_coreDnsMode) await _enqueue(true);
+      if (_closing) throw StateError('DNS controller is closing');
+      result = await apply();
+    } catch (_) {
+      _coreDnsMode = previous;
+      await _enqueue(_restoreRequested);
+      rethrow;
+    }
+    _coreDnsMode = next;
+    await _enqueue(_restoreRequested);
+    return result;
   }
 
   Future<void> shutdownDns() {
@@ -77,7 +115,7 @@ class MacosDnsController {
         _loaded = true;
         await _restore();
       }
-      await (restore || _closing ? _restore() : _apply());
+      await (restore || _closing || _coreDnsMode ? _restore() : _apply());
     });
     _pending = operation.then<void>((_) {}, onError: (_, _) {});
     return operation;
@@ -150,7 +188,7 @@ class MacosDnsController {
     final applied = [...current, addedDns];
     _overrides[service] = (before: current, applied: applied);
     await _save();
-    if (!_closing) await _writeDns(service, applied);
+    if (!_closing && !_coreDnsMode) await _writeDns(service, applied);
   }
 
   Future<void> _save() async {

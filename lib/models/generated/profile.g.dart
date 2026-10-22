@@ -238,6 +238,7 @@ const _$SnifferOverrideKeyEnumMap = {
 };
 
 const _$TunOverrideKeyEnumMap = {
+  TunOverrideKey.dnsMode: 'dns-mode',
   TunOverrideKey.mtu: 'mtu',
   TunOverrideKey.congestionController: 'congestion-controller',
   TunOverrideKey.strictRoute: 'strict-route',

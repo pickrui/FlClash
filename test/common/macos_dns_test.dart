@@ -11,6 +11,91 @@ import 'package:test/test.dart';
 
 void main() {
   test(
+    'explicit Core DNS drains legacy writes and blocks late callbacks',
+    () async {
+      final system = _FakeDnsSystem();
+      final controller = MacosDnsController(runProcess: system.run);
+      await controller.updateDns(false);
+      await expectLater(
+        controller.applyCoreConfig(
+          {
+            'tun': {'dns-mode': 'native'},
+          },
+          () async {
+            throw StateError('apply cancelled');
+          },
+        ),
+        throwsStateError,
+      );
+      expect(system.dns['Wi-Fi'], ['1.1.1.1', '223.5.5.5']);
+      for (final mode in ['native', 'hijack', 'disabled']) {
+        await controller.applyCoreConfig(
+          {
+            'tun': {'dns-mode': mode},
+          },
+          () async {
+            expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+            await controller.updateDns(false);
+            expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+          },
+        );
+        await controller.updateDns(false);
+        expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+      }
+      await controller.applyCoreConfig(
+        {
+          'tun': {'dns-mode': ''},
+        },
+        () async {
+          expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+        },
+      );
+      expect(system.dns['Wi-Fi'], ['1.1.1.1', '223.5.5.5']);
+      await controller.shutdownDns();
+      expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+    },
+  );
+
+  test(
+    'failed Core apply keeps the previous owner and shutdown blocks handoff',
+    () async {
+      final system = _FakeDnsSystem();
+      final controller = MacosDnsController(runProcess: system.run);
+      await controller.updateDns(false);
+      await controller.applyCoreConfig({
+        'listeners': [
+          {'type': 'tun', 'dns-mode': 'native'},
+        ],
+      }, () async {});
+      await expectLater(
+        controller.applyCoreConfig({}, () async {
+          throw StateError('setup failed');
+        }),
+        throwsStateError,
+      );
+      await controller.updateDns(false);
+      expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      final apply = controller.applyCoreConfig({}, () async {
+        entered.complete();
+        await release.future;
+      });
+      await entered.future;
+      await controller.shutdownDns();
+      release.complete();
+      await apply;
+      expect(system.dns['Wi-Fi'], ['1.1.1.1']);
+      await expectLater(
+        controller.applyCoreConfig({}, () async {
+          fail('Core must not start after shutdown');
+        }),
+        throwsStateError,
+      );
+    },
+  );
+
+  test(
     'restores the original service after the default network changes',
     () async {
       final system = _FakeDnsSystem();

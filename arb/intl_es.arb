@@ -1623,5 +1623,7 @@
   "ruleSetNeedsConversionTip": "Este conjunto remoto necesita normalización. Descárguelo como MRS local para usarlo",
   "ruleSetSizeTip": "El conjunto de reglas supera el límite de procesamiento. Divídalo en conjuntos más pequeños",
   "providerLookupFailed": "No se puede leer la configuración activa del nodo. Actualiza el recurso e inténtalo de nuevo.",
-  "lookupProxyConfig": "Buscar la configuración del nodo"
+  "lookupProxyConfig": "Buscar la configuración del nodo",
+  "tunDnsMode": "Modo DNS del sistema",
+  "tunDnsModeDesc": "Vacío conserva el comportamiento anterior. disabled no modifica el DNS; native usa la dirección TUN; hijack también intercepta el DNS de otras interfaces (Windows requiere strict-route; Linux, auto-redirect). En macOS, un modo explícito tiene prioridad sobre el DNS automático."
 }

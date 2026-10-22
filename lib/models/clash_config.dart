@@ -402,6 +402,7 @@ extension TunExt on Tun {
 @freezed
 abstract class ProfileTun with _$ProfileTun {
   const factory ProfileTun({
+    @Default('') @JsonKey(name: 'dns-mode') String dnsMode,
     @Default(defaultTunMtu) @JsonKey(fromJson: normalizeTunMtu) int mtu,
     @Default(defaultCongestionController)
     @JsonKey(

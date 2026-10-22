@@ -2443,6 +2443,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "无法启用 TUN：管理员授权被拒绝，请允许系统权限请求后重试",
     ),
     "tunDesc": MessageLookupByLibrary.simpleMessage("虚拟网卡仅在管理员模式生效"),
+    "tunDnsMode": MessageLookupByLibrary.simpleMessage("系统 DNS 模式"),
+    "tunDnsModeDesc": MessageLookupByLibrary.simpleMessage(
+      "留空保持原有行为；disabled 不设置系统 DNS；native 使用 TUN 地址；hijack 额外拦截其他网卡的 DNS（Windows 需 strict-route，Linux 需 auto-redirect）。macOS 上显式模式优先于自动设置系统 DNS",
+    ),
     "tunHelperInstallFailed": MessageLookupByLibrary.simpleMessage(
       "无法启用 TUN：Helper 安装或启动失败，请检查应用安装是否完整及系统服务状态后重试",
     ),

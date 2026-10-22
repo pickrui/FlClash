@@ -1623,5 +1623,7 @@
   "ruleSetNeedsConversionTip": "Ce jeu de règles distant doit être normalisé. Téléchargez-le en MRS local pour l’utiliser",
   "ruleSetSizeTip": "Le jeu de règles dépasse la limite de traitement. Divisez-le en jeux plus petits",
   "providerLookupFailed": "Impossible de lire la configuration active du nœud. Actualisez la ressource et réessayez.",
-  "lookupProxyConfig": "Rechercher la configuration du nœud"
+  "lookupProxyConfig": "Rechercher la configuration du nœud",
+  "tunDnsMode": "Mode DNS du système",
+  "tunDnsModeDesc": "Une valeur vide conserve le comportement précédent. disabled ne modifie pas le DNS ; native utilise l’adresse TUN ; hijack intercepte aussi le DNS des autres interfaces (strict-route sous Windows, auto-redirect sous Linux). Sur macOS, un mode explicite est prioritaire sur le DNS automatique."
 }
