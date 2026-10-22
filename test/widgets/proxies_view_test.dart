@@ -61,6 +61,7 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             groupsProvider.overrideWithBuild((_, _) => [group]),
+            selectedMapProvider.overrideWith((_) => {'Paged': 'Node-500'}),
             proxiesActionProvider.overrideWith(() => action),
             proxiesListStateProvider.overrideWith(
               (_) => const ProxiesListState(
