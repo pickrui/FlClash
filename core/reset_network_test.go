@@ -9,10 +9,13 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"sync/atomic"
 	"testing"
 
+	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/dns"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
@@ -31,16 +34,25 @@ func (tracker resetNetworkTracker) Close() error {
 // Android's NetworkObserveModule sends this method name through Core.invokeMethod.
 func TestResetNetworkClosesEveryTrackedConnection(t *testing.T) {
 	previousManager, previousNotify := statistic.DefaultManager, statistic.DefaultRequestNotify
+	previousResolver := resolver.DefaultResolver
+	client := &clearDNSClient{}
+	r := dns.NewResolverFromClient(client)
+	resolver.DefaultResolver = r
 	var written recordingConn
 	statistic.DefaultManager = &statistic.Manager{}
 	statistic.DefaultRequestNotify = nil
 	useTestConnection(t, &written)
 	t.Cleanup(func() {
+		r.CloseQueries()
+		resolver.DefaultResolver = previousResolver
 		statistic.DefaultManager = previousManager
 		statistic.DefaultRequestNotify = previousNotify
 	})
 	var closed atomic.Int32
 	statistic.DefaultManager.Join(resetNetworkTracker{closed: &closed})
+	if _, err := r.LookupIPv4(context.Background(), "cached.example"); err != nil {
+		t.Fatal(err)
+	}
 
 	handleMethodCall(&MethodCall{ID: "1", Method: "resetNetwork"}, MethodResponse{ID: "1"})
 
@@ -51,5 +63,11 @@ func TestResetNetworkClosesEveryTrackedConnection(t *testing.T) {
 	}
 	if response.Error != nil || response.Result != true || closed.Load() != 1 {
 		t.Fatalf("response %s closed %d connections, want true and 1", frame, closed.Load())
+	}
+	if _, err := r.LookupIPv4(context.Background(), "cached.example"); err != nil {
+		t.Fatal(err)
+	}
+	if client.calls.Load() != 2 {
+		t.Fatal("a network reset left the answer cached on the previous network")
 	}
 }

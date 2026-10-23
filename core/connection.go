@@ -62,7 +62,9 @@ func handleClearDnsState() bool {
 }
 
 // A connection that went out over a network the device has left hangs until
-// TCP gives up on it, and so do the DNS clients' pooled connections.
+// TCP gives up on it, and so do the DNS clients' pooled connections. The cache
+// is cleared rather than waited out: mihomo serves an expired entry once more
+// before it refreshes it.
 func handleResetNetwork() bool {
 	runLock.Lock()
 	defer runLock.Unlock()
@@ -70,7 +72,7 @@ func handleResetNetwork() bool {
 		_ = c.Close()
 		return true
 	})
-	resolver.ResetConnection()
+	dns.ClearAll()
 	return true
 }
 

@@ -90,6 +90,20 @@ class CoreAction extends _$CoreAction {
 
   Future<void> restartCore([bool start = false]) =>
       _controller.restartCore(start);
+
+  Future<void> clearDnsCacheOnNetworkChange() async {
+    if (ref.read(coreStatusProvider) != CoreStatus.connected) {
+      return;
+    }
+    try {
+      await ref.read(coreHandlerProvider).clearDnsState();
+    } catch (error) {
+      commonPrint.log(
+        'clearDnsState error: $error',
+        logLevel: coreFailureLogLevel(error),
+      );
+    }
+  }
 }
 
 extension CoreControllerExt on AppController {

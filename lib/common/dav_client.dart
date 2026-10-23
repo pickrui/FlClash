@@ -128,6 +128,24 @@ Duration _transferTimeout(Duration base, int? bytes) =>
 Future<void> _verifyBackupArchive(String path) =>
     validateBackupArchiveDirectory(path, '$path.restore', verifyPayload: true);
 
+final _contentRange = RegExp(
+  r'^bytes\s+(\d+)-(\d+)/(\d+)$',
+  caseSensitive: false,
+);
+
+/// Some servers answer a plain GET with a 206 that spans the whole object.
+bool _spansWholeObject(Response<dynamic> response) {
+  final data = response.data;
+  final match = _contentRange.firstMatch(
+    response.headers.value('content-range')?.trim() ?? '',
+  );
+  if (data is! List<int> || match == null) return false;
+  final start = int.tryParse(match[1]!);
+  final end = int.tryParse(match[2]!);
+  final total = int.tryParse(match[3]!);
+  return start == 0 && total == data.length && end == data.length - 1;
+}
+
 class DAVClient {
   static const _sendTimeout = Duration(seconds: 60);
   static final _backupLock = AsyncStorageLock();
@@ -200,8 +218,13 @@ class DAVClient {
           handler.next(options);
         },
         onResponse: (response, handler) {
-          final status = response.statusCode ?? 0;
           final method = response.requestOptions.method;
+          if (method == 'GET' &&
+              response.statusCode == 206 &&
+              _spansWholeObject(response)) {
+            response.statusCode = 200;
+          }
+          final status = response.statusCode ?? 0;
           // File MOVE must finish before retention; the library accepts partial 207s.
           if (route == null &&
               ((status >= 300 && status < 400) ||

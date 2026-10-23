@@ -19,6 +19,7 @@ import 'package:fl_clash/ui/input.dart';
 
 import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';
@@ -45,6 +46,7 @@ class Application extends ConsumerStatefulWidget {
 }
 
 class ApplicationState extends ConsumerState<Application> {
+  bool _preHasVpn = false;
   // Windows can only watch SIGINT and SIGHUP.
   final _terminateSignals = system.isDesktop && !system.isWindows
       ? ProcessSignal.sigterm.watch()
@@ -130,6 +132,18 @@ class ApplicationState extends ConsumerState<Application> {
       child: CoreManager(
         child: ConnectivityManager(
           onConnectivityChanged: (results) async {
+            final hasVpn = results.contains(ConnectivityResult.vpn);
+            // Android's NetworkObserveModule reports a new network itself.
+            if (system.isDesktop && _preHasVpn == hasVpn) {
+              debouncer.call(
+                FunctionTag.clearDnsCache,
+                ref
+                    .read(coreActionProvider.notifier)
+                    .clearDnsCacheOnNetworkChange,
+                duration: const Duration(milliseconds: 200),
+              );
+            }
+            _preHasVpn = hasVpn;
             final dnsState = ref.read(autoSetSystemDnsStateProvider);
             try {
               await macOS?.updateDns(!(dnsState.a && dnsState.b));

@@ -217,6 +217,41 @@ void main() {
     expect(directory.listSync().map((file) => file.path), [winner]);
   });
 
+  DAVClient partialClient(String contentRange) => DAVClient(
+    _props,
+    resolveRoutes: (_) => ['direct'],
+    createAdapter: (_) => readAdapter((options) async {
+      if (options.method != 'GET') return ResponseBody.fromBytes([], 200);
+      return ResponseBody.fromBytes(
+        archive,
+        206,
+        headers: {
+          'content-range': [contentRange],
+        },
+      );
+    }),
+  );
+
+  test('a 206 that spans the whole backup is read as the file', () async {
+    final dav = partialClient(
+      'Bytes 0-${archive.length - 1}/${archive.length}',
+    );
+    expect(await dav.pingCompleter.future, true);
+    final path = await dav.restore('backup.zip');
+    await waitForReads();
+    expect(await File(path).readAsBytes(), archive);
+  });
+
+  test('a 206 that covers only part of the backup fails', () async {
+    final dav = partialClient(
+      'bytes 0-${archive.length - 1}/${archive.length + 10}',
+    );
+    expect(await dav.pingCompleter.future, true);
+    await expectLater(dav.restore('backup.zip'), throwsA(isA<DioException>()));
+    await waitForReads();
+    expect(directory.listSync(), isEmpty);
+  });
+
   test(
     'cross-origin WebDAV redirects never send account credentials',
     () async {

@@ -360,6 +360,7 @@ enum FunctionTag {
   saveSharedFile,
   coreErrorNotifier,
   dialerLoopNotifier,
+  clearDnsCache,
 }
 
 enum DashboardWidget {

@@ -270,7 +270,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
   List<IconButtonData> _buildActions() {
     return [
       IconButtonData(
-        glyph: AppGlyphs.refresh,
+        glyph: AppGlyphs.broom,
         tooltip: appLocalizations.resetDns,
         isLoading: _resettingDns,
         onPressed: _resettingDns ? null : _resetDns,
