@@ -8,6 +8,7 @@ import 'package:fl_clash/ui/typography.dart';
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/foot_bar.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/route_motion_hold.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -370,7 +371,10 @@ class _AccessViewState extends ConsumerState<AccessView>
         child: Builder(
           builder: (context) => ListView.builder(
             controller: _controller,
-            padding: EdgeInsets.only(bottom: context.bottomInset),
+            padding: EdgeInsets.only(
+              top: context.contentTopPadding,
+              bottom: context.bottomInset,
+            ),
             scrollCacheExtent: arrivalScrollCacheExtent(routeSettled),
             itemCount: packages.length,
             itemBuilder: (_, index) {
@@ -492,6 +496,9 @@ class _AccessViewState extends ConsumerState<AccessView>
             allValueList: viewPackageNameList,
           )
         : null;
+    final needsAttention =
+        !installed.isLoading &&
+        (installed.hasError || installed.value?.permissionGranted != true);
     final hasChanges =
         _isInit &&
         ref.watch(vpnSettingProvider).accessControlProps != accessControl;
@@ -517,17 +524,92 @@ class _AccessViewState extends ConsumerState<AccessView>
             : null,
         iconActions: [?selectAll],
         menuItems: _buildMenuItems(accessControl),
-        body: AppBarClearance(
-          child: DisabledMask(
-            status:
-                !accessControl.enable &&
-                installed.value?.permissionGranted == true,
-            child: _buildContent(
-              packages: viewPackages,
-              selected: valueList.toSet(),
+        body: needsAttention
+            ? AppBarClearance(
+                child: _buildContent(
+                  packages: viewPackages,
+                  selected: valueList.toSet(),
+                ),
+              )
+            : FloatingFootBar(
+                bar: _AccessStatus(
+                  accessControl: accessControl,
+                  selectedCount: valueList.length,
+                  onEnable: () =>
+                      _update((state) => state.copyWith(enable: true)),
+                ),
+                body: DisabledMask(
+                  status:
+                      !accessControl.enable &&
+                      installed.value?.permissionGranted == true,
+                  child: _buildContent(
+                    packages: viewPackages,
+                    selected: valueList.toSet(),
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class _AccessStatus extends StatelessWidget {
+  const _AccessStatus({
+    required this.accessControl,
+    required this.selectedCount,
+    required this.onEnable,
+  });
+
+  final AccessControlProps accessControl;
+  final int selectedCount;
+  final VoidCallback onEnable;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final enabled = accessControl.enable;
+    final description = enabled
+        ? switch (accessControl.mode) {
+            AccessControlMode.acceptSelected =>
+              appLocalizations.accessControlAllowDesc,
+            AccessControlMode.rejectSelected =>
+              appLocalizations.accessControlNotAllowDesc,
+          }
+        : appLocalizations.accessControlDisabledDesc;
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(16, 6, enabled ? 16 : 8, 6),
+      child: Row(
+        spacing: 12,
+        children: [
+          GlyphIcon(
+            enabled ? AppGlyphs.appsList : AppGlyphs.info,
+            size: 20,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          Expanded(
+            child: Text(
+              description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(color: colorScheme.onSurface),
             ),
           ),
-        ),
+          if (enabled)
+            TonalChip(
+              label: appLocalizations.accessControlSelectedCount(selectedCount),
+              color: colorScheme.primary.opacity15,
+              foregroundColor: colorScheme.primary,
+            )
+          else
+            TonalButton(
+              size: TonalButtonSize.compact,
+              label: appLocalizations.turnOn,
+              onPressed: onEnable,
+            ),
+        ],
       ),
     );
   }

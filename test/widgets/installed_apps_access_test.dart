@@ -11,7 +11,9 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/installed_apps.dart';
 import 'package:fl_clash/views/access.dart';
+import 'package:fl_clash/ui/button.dart';
 import 'package:fl_clash/ui/dialog.dart';
+import 'package:fl_clash/ui/foot_bar.dart';
 import 'package:fl_clash/ui/popup.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -325,7 +327,12 @@ void main() {
       ),
       findsOneWidget,
     );
-    await tester.tap(find.text(AppLocalizations.current.turnOn));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(CommonPopupMenu),
+        matching: find.text(AppLocalizations.current.turnOn),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(container.read(accessControlStateProvider).enable, isTrue);
     await tester.tap(find.byTooltip(AppLocalizations.current.save));
@@ -334,6 +341,73 @@ void main() {
       container.read(vpnSettingProvider).accessControlProps.enable,
       isTrue,
     );
+  });
+
+  testWidgets('the bar at the foot says access control is off and turns '
+      'it on', (tester) async {
+    final api = InstalledAppsFake()
+      ..packages = [installedPackage('fixture.app')];
+    final container = await openAccess(
+      tester,
+      api,
+      props: const AccessControlProps(enable: false),
+    );
+    final l10n = AppLocalizations.current;
+
+    expect(find.text(l10n.accessControlDisabledDesc), findsOneWidget);
+    await tester.tap(find.widgetWithText(TonalButton, l10n.turnOn));
+    await tester.pump();
+
+    expect(container.read(accessControlStateProvider).enable, isTrue);
+    expect(find.text(l10n.accessControlDisabledDesc), findsNothing);
+    expect(find.text(l10n.accessControlNotAllowDesc), findsOneWidget);
+  });
+
+  testWidgets('the bar at the foot follows the mode and counts the '
+      'selected apps', (tester) async {
+    final api = InstalledAppsFake()
+      ..packages = [
+        installedPackage('browser.app'),
+        installedPackage('chat.app'),
+      ];
+    final container = await openAccess(
+      tester,
+      api,
+      props: const AccessControlProps(
+        enable: true,
+        rejectList: ['browser.app'],
+      ),
+    );
+    final l10n = AppLocalizations.current;
+
+    expect(find.text(l10n.accessControlNotAllowDesc), findsOneWidget);
+    expect(find.text(l10n.accessControlSelectedCount(1)), findsOneWidget);
+
+    await tester.tap(find.text('chat.app').first);
+    await tester.pump();
+    expect(find.text(l10n.accessControlSelectedCount(2)), findsOneWidget);
+
+    container
+        .read(accessControlStateProvider.notifier)
+        .update(
+          (state) => state.copyWith(mode: AccessControlMode.acceptSelected),
+        );
+    await tester.pump();
+    expect(find.text(l10n.accessControlAllowDesc), findsOneWidget);
+    expect(find.text(l10n.accessControlSelectedCount(0)), findsOneWidget);
+  });
+
+  testWidgets('a missing installed apps permission shows no foot bar', (
+    tester,
+  ) async {
+    final api = InstalledAppsFake()..granted = false;
+    await openAccess(tester, api);
+
+    expect(
+      find.text(AppLocalizations.current.installedAppsPermissionRequired),
+      findsOneWidget,
+    );
+    expect(find.byType(FloatingFootBar), findsNothing);
   });
 
   for (final locale in const [
