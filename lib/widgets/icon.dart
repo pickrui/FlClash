@@ -33,10 +33,12 @@ class _IconCache extends EncodedIconCache with WidgetsBindingObserver {
   }
 
   int generation = 0;
+  final failedPreloads = <String, DateTime>{};
 
   @override
   void clear() {
     generation++;
+    failedPreloads.clear();
     super.clear();
   }
 
@@ -217,6 +219,9 @@ Stream<Uint8List> _loadRemoteIcon(String src) async* {
 
 final _preloadingIcons = <String>{};
 
+// Groups update on every selection; a failing icon URL waits this long.
+const _preloadRetryDelay = Duration(minutes: 5);
+
 Future<void> precacheTargetIcons(Iterable<String> srcs) async {
   final sources = srcs
       .where((src) {
@@ -230,10 +235,24 @@ Future<void> precacheTargetIcons(Iterable<String> srcs) async {
   Future<void> worker() async {
     while (generation == _remoteIcons.generation && sources.moveNext()) {
       final src = sources.current;
-      if (_remoteIcons[src] != null || !_preloadingIcons.add(src)) continue;
+      final failedAt = _remoteIcons.failedPreloads[src];
+      if (_remoteIcons[src] != null ||
+          failedAt != null &&
+              DateTime.now().difference(failedAt) < _preloadRetryDelay ||
+          !_preloadingIcons.add(src)) {
+        continue;
+      }
       try {
         await _loadRemoteIcon(src).drain<void>();
+        _remoteIcons.failedPreloads.remove(src);
       } catch (error) {
+        final failures = _remoteIcons.failedPreloads;
+        if (generation == _remoteIcons.generation) {
+          if (failures.length >= _remoteIcons.maxEntries) {
+            failures.remove(failures.keys.first);
+          }
+          failures[src] = DateTime.now();
+        }
         commonPrint.log('Icon preload failed (${error.runtimeType})');
       } finally {
         _preloadingIcons.remove(src);

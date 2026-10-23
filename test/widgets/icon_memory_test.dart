@@ -116,6 +116,19 @@ void main() {
     },
   );
 
+  testWidgets('a failed preload waits instead of retrying on every update', (
+    tester,
+  ) async {
+    var reads = 0;
+    readRemoteIcon = (_) {
+      reads++;
+      return Stream.error(const FormatException('unreachable'));
+    };
+    await precacheTargetIcons([source]);
+    await precacheTargetIcons([source]);
+    expect(reads, 1);
+  });
+
   testWidgets('preloading deduplicates sources and bounds active reads', (
     tester,
   ) async {
