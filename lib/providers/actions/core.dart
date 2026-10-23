@@ -164,10 +164,11 @@ extension CoreControllerExt on AppController {
     if (!await _isCoreInitialized()) return false;
     final hadProfile = globalState.lastSetupState != null;
     globalState.lastSetupState = null;
-    // needSetup skips a null state, so reload by force unless an apply is
-    // already running and will set it.
-    if (hadProfile && _runningProfileApplies == 0) {
-      applyProfileDebounce(force: true);
+    // An apply running now may still fail or be superseded, so the reload
+    // stays forced until one of them sets the state again.
+    if (hadProfile) {
+      _profileApplyIntent.merge(force: true);
+      if (_runningProfileApplies == 0) applyProfileDebounce(force: true);
     }
     return true;
   }

@@ -841,6 +841,19 @@ void main() {
     },
   );
 
+  test('an apply that leaves the reinitialized Core without a profile keeps '
+      'the next apply forced', () {
+    final intent = ProfileApplyIntent()
+      ..merge(force: false)
+      ..merge(force: true)
+      ..clear(keepForce: true)
+      ..merge(force: false);
+
+    expect(intent.requiresForce, isTrue);
+    intent.clear();
+    expect(intent.requiresForce, isFalse);
+  });
+
   test('a new start replaces a pending cancelled preload', () async {
     final cancelledStart = Completer<void>();
     final intent = ProfileApplyIntent()

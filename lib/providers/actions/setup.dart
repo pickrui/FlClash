@@ -670,7 +670,8 @@ extension SetupControllerExt on AppController {
     if (!isCurrentApply()) {
       return true;
     }
-    _profileApplyIntent.clear();
+    // needSetup skips a null applied state, so only a forced apply sets it.
+    _profileApplyIntent.clear(keepForce: globalState.lastSetupState == null);
     if (res != true &&
         shouldStopCoreAfterApplyFailure(
           isRunning: _ref.read(isStartProvider),

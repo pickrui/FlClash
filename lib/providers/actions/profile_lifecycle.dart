@@ -94,8 +94,8 @@ class ProfileApplyIntent {
     }
   }
 
-  void clear() {
-    _requiresForce = false;
+  void clear({bool keepForce = false}) {
+    _requiresForce = keepForce && _requiresForce;
     _preloadInvoke = null;
     _preloadFuture = null;
   }
