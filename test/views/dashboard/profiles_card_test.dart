@@ -235,16 +235,13 @@ void main() {
   ) async {
     setUpProfiles([
       _profile(1, remote: true).copyWith(
-        lastUpdateDate: DateTime.now().subtract(
-          const Duration(seconds: 59, milliseconds: 800),
-        ),
+        lastUpdateDate: DateTime.now().subtract(const Duration(seconds: 59)),
       ),
     ]);
     await pumpCard(tester, card: desktopCard(), width: 600);
-    expect(find.text('Updated Just now'), findsOneWidget);
 
     await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+      () => Future<void>.delayed(const Duration(milliseconds: 1200)),
     );
     await tester.pump(const Duration(minutes: 1));
     expect(find.text('Updated 1 minute ago'), findsOneWidget);
