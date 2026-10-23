@@ -75,8 +75,12 @@ class ProfileApplyIntent {
   bool _requiresForce = false;
   FutureOr<void> Function()? _preloadInvoke;
   Future<void>? _preloadFuture;
+  bool? _resume;
 
   bool get requiresForce => _requiresForce || _preloadInvoke != null;
+
+  /// Every merged request only adopts the run a live service already has.
+  bool get resume => _resume ?? false;
 
   FutureOr<void> Function()? get preloadInvoke {
     return _preloadInvoke == null ? null : _invokePreloadOnce;
@@ -86,8 +90,13 @@ class ProfileApplyIntent {
     return _preloadFuture ??= Future.sync(_preloadInvoke!);
   }
 
-  void merge({required bool force, FutureOr<void> Function()? preloadInvoke}) {
+  void merge({
+    required bool force,
+    FutureOr<void> Function()? preloadInvoke,
+    bool resume = false,
+  }) {
     _requiresForce = _requiresForce || force;
+    _resume = (_resume ?? true) && resume;
     if (preloadInvoke != null) {
       _preloadInvoke = preloadInvoke;
       _preloadFuture = null;
@@ -98,8 +107,15 @@ class ProfileApplyIntent {
     _requiresForce = keepForce && _requiresForce;
     _preloadInvoke = null;
     _preloadFuture = null;
+    _resume = null;
   }
 }
+
+/// What the Android Core runs from config.yaml: the YAML and the setup values
+/// it does not hold. Go keeps the live selections itself.
+@visibleForTesting
+String appliedConfigDigest(String yaml, SetupParams params) =>
+    '${params.testUrl}\n${params.suspendOnIdle}\n$yaml'.toMd5();
 
 /// A newer download of a profile supersedes an older one, so the per-minute
 /// auto refresh skips running updates and backs off failing profiles.

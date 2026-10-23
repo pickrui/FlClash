@@ -123,6 +123,20 @@ class Preferences {
     }
   }
 
+  /// The digest of the config.yaml the Android Core last accepted, which is
+  /// also what the service applies when it starts without Flutter.
+  Future<String?> getAppliedConfigMd5() async =>
+      (await _loadSharedPreferences())?.getString('applied_config_md5');
+
+  Future<void> saveAppliedConfigMd5(String? md5) async {
+    final store = await _loadSharedPreferences();
+    if (md5 == null) {
+      await store?.remove('applied_config_md5');
+    } else {
+      await store?.setString('applied_config_md5', md5);
+    }
+  }
+
   Future<void> saveBootRecord(BootRecord record) async {
     final store = await _loadSharedPreferences();
     if (await store?.setString(

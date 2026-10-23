@@ -854,6 +854,39 @@ void main() {
     expect(intent.requiresForce, isFalse);
   });
 
+  test(
+    'an attach adopts the running config only while nothing else merges',
+    () {
+      final intent = ProfileApplyIntent()..merge(force: true, resume: true);
+      expect(intent.resume, isTrue);
+      intent.merge(force: false);
+      expect(intent.resume, isFalse);
+      intent
+        ..clear()
+        ..merge(force: true, resume: true);
+      expect(intent.resume, isTrue);
+    },
+  );
+
+  test('the applied config digest covers what the Core reads beside it', () {
+    const params = SetupParams(
+      selectedMap: {'G': 'a'},
+      testUrl: 'https://a.test',
+    );
+    final digest = appliedConfigDigest('mode: rule', params);
+    expect(
+      appliedConfigDigest('mode: rule', params.copyWith(selectedMap: {})),
+      digest,
+    );
+    for (final changed in [
+      appliedConfigDigest('mode: global', params),
+      appliedConfigDigest('mode: rule', params.copyWith(testUrl: 'https://b')),
+      appliedConfigDigest('mode: rule', params.copyWith(suspendOnIdle: true)),
+    ]) {
+      expect(changed, isNot(digest));
+    }
+  });
+
   test('a new start replaces a pending cancelled preload', () async {
     final cancelledStart = Completer<void>();
     final intent = ProfileApplyIntent()

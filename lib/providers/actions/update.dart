@@ -277,7 +277,11 @@ extension InitControllerExt on AppController {
         ? true
         : _ref.read(appSettingProvider).autoRun && hasProfile;
     if (status == true) {
-      await updateStatus(true, isInit: true);
+      await updateStatus(
+        true,
+        isInit: true,
+        resume: globalState.isStart == true,
+      );
     } else {
       await applyProfile(force: true);
     }

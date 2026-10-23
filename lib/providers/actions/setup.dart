@@ -207,7 +207,11 @@ extension SetupControllerExt on AppController {
     _ref.read(requestsProvider.notifier).value = FixedList(maxLength);
   }
 
-  Future<void> updateStatus(bool isStart, {bool isInit = false}) async {
+  Future<void> updateStatus(
+    bool isStart, {
+    bool isInit = false,
+    bool resume = false,
+  }) async {
     if (isStart) {
       final generation = _startIntentGeneration;
       if (isInit) {
@@ -223,6 +227,7 @@ extension SetupControllerExt on AppController {
       // Listeners, TUN and the system proxy change only after the probe.
       final started = await applyProfile(
         force: true,
+        resume: resume,
         silence: !isInit,
         preloadInvoke: () async {
           await conflictProbe;
@@ -529,10 +534,15 @@ extension SetupControllerExt on AppController {
   Future<bool> applyProfile({
     bool silence = false,
     bool force = false,
+    bool resume = false,
     FutureOr<void> Function()? preloadInvoke,
   }) {
     if (startupRecovery.automaticSetupPaused) return Future.value(false);
-    _profileApplyIntent.merge(force: force, preloadInvoke: preloadInvoke);
+    _profileApplyIntent.merge(
+      force: force,
+      preloadInvoke: preloadInvoke,
+      resume: resume,
+    );
     final generation = ++_profileApplyGeneration;
     _groupsUpdateGeneration++;
     _pendingProfileApplies++;
@@ -593,6 +603,7 @@ extension SetupControllerExt on AppController {
               preloadInvoke: preloadInvoke,
               onApply: () => setupAttempted = true,
               shouldContinue: canRecover,
+              resume: _profileApplyIntent.resume,
             ),
             shouldContinue: canRecover,
             recover: (resource, error) async {
@@ -833,11 +844,10 @@ extension SetupControllerExt on AppController {
     return res;
   }
 
-  Future<({Map<String, dynamic> config, String yaml})?> _validatedConfig(
+  Future<({Map<String, dynamic> config, String yaml})> _composedConfig(
     SetupState setupState,
-    ClashConfig patchConfig, {
-    bool Function()? shouldContinue,
-  }) async {
+    ClashConfig patchConfig,
+  ) async {
     final Map<String, dynamic> config;
     try {
       config = await getProfile(
@@ -850,15 +860,16 @@ extension SetupControllerExt on AppController {
       // Handle them like core validation failures to keep the connection alive.
       throw CandidateConfigValidationException(error.message);
     }
-    final yaml = await encodeYamlTask(config);
-    if (shouldContinue?.call() == false) return null;
+    return (config: config, yaml: await encodeYamlTask(config));
+  }
+
+  Future<void> _validateConfigYaml(String yaml) async {
     final validationMessage = await coreController.validateConfigWithBytes(
       base64Encode(utf8.encode(yaml)),
     );
     if (validationMessage.isNotEmpty) {
       throw CandidateConfigValidationException(validationMessage);
     }
-    return (config: config, yaml: yaml);
   }
 
   Future<SetupState?> _currentSetupState() async {
@@ -868,10 +879,11 @@ extension SetupControllerExt on AppController {
 
   Future<void> _validateSetupConfig(SetupState setupState) async {
     final patchConfig = _ref.read(patchClashConfigProvider);
-    await _validatedConfig(
+    final composed = await _composedConfig(
       setupState,
       patchConfig.copyWith.tun(enable: _ref.read(realTunEnableProvider)),
     );
+    await _validateConfigYaml(composed.yaml);
   }
 
   Future<bool> _setupConfig(
@@ -880,6 +892,7 @@ extension SetupControllerExt on AppController {
     FutureOr<void> Function()? preloadInvoke,
     required VoidCallback onApply,
     required bool Function() shouldContinue,
+    bool resume = false,
   }) async {
     bool isCurrentApply() {
       return shouldContinue() &&
@@ -933,28 +946,12 @@ extension SetupControllerExt on AppController {
     final realTunEnable = _ref.read(realTunEnableProvider);
     final realPatchConfig = patchConfig.copyWith.tun(enable: realTunEnable);
     final setupState = await _ref.readSetupState(profile?.id);
-    final candidate = await _validatedConfig(
+    final (:config, yaml: yamlString) = await _composedConfig(
       setupState,
       realPatchConfig,
-      shouldContinue: isCurrentApply,
     );
-    if (candidate == null || !isCurrentApply()) {
-      return false;
-    }
-    final (:config, yaml: yamlString) = candidate;
-    final configFilePath = await appPath.configFilePath;
+    if (!isCurrentApply()) return false;
     final isoixCloud = profile?.isoixCloudProfile ?? false;
-    if (isoixCloud && system.isAndroid) {
-      final encryptedBytes = await encryptProfileBytes(
-        Uint8List.fromList(utf8.encode(yamlString)),
-      );
-      if (!isCurrentApply()) return false;
-      await writeEncryptedProfileSnapshot(configFilePath, encryptedBytes);
-    } else if (!isoixCloud) {
-      await durableCreateDirectory(File(configFilePath).parent.path);
-      await durableWriteBytes(configFilePath, utf8.encode(yamlString));
-    }
-
     final latestProfile = _ref.read(profilesProvider).getProfile(profileId);
     final updatedSetupParams = SetupParams(
       selectedMap: latestProfile?.selectedMap ?? const {},
@@ -962,6 +959,31 @@ extension SetupControllerExt on AppController {
       rawConfig: isoixCloud && !system.isAndroid ? yamlString : '',
       suspendOnIdle: _ref.read(networkSettingProvider).suspendOnIdle,
     );
+    final appliedDigest = system.isAndroid
+        ? appliedConfigDigest(yamlString, updatedSetupParams)
+        : null;
+    // An engine attaching to a running service adopts the config it runs:
+    // pushing the same one again would reload every group and provider.
+    final adopted =
+        resume &&
+        appliedDigest != null &&
+        appliedDigest == await preferences.getAppliedConfigMd5();
+    if (!adopted) {
+      await _validateConfigYaml(yamlString);
+      if (!isCurrentApply()) return false;
+      if (appliedDigest != null) await preferences.saveAppliedConfigMd5(null);
+      final configFilePath = await appPath.configFilePath;
+      if (isoixCloud && system.isAndroid) {
+        final encryptedBytes = await encryptProfileBytes(
+          Uint8List.fromList(utf8.encode(yamlString)),
+        );
+        if (!isCurrentApply()) return false;
+        await writeEncryptedProfileSnapshot(configFilePath, encryptedBytes);
+      } else if (!isoixCloud) {
+        await durableCreateDirectory(File(configFilePath).parent.path);
+        await durableWriteBytes(configFilePath, utf8.encode(yamlString));
+      }
+    }
 
     if (!isCurrentApply()) {
       return false;
@@ -972,6 +994,10 @@ extension SetupControllerExt on AppController {
       Future<String> apply() async {
         if (!isCurrentApply()) throw const _CoreStartCancelledException();
         onApply();
+        if (adopted) {
+          await preloadInvoke?.call();
+          return '';
+        }
         final result = await coreController.setupConfig(
           params: updatedSetupParams,
           preloadInvoke: preloadInvoke,
@@ -986,6 +1012,9 @@ extension SetupControllerExt on AppController {
     }
     if (message.isNotEmpty) {
       throw message;
+    }
+    if (appliedDigest != null && !adopted) {
+      await preferences.saveAppliedConfigMd5(appliedDigest);
     }
     _ref.read(appliedProcessLookupRequiredProvider.notifier).applied(config);
     if (!isCurrentApply()) {
