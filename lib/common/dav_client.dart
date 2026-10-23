@@ -125,6 +125,9 @@ Duration _transferTimeout(Duration base, int? bytes) =>
     base +
     Duration(seconds: min(bytes ?? 0, maxBackupArchiveBytes) ~/ (32 * 1024));
 
+Future<void> _verifyBackupArchive(String path) =>
+    validateBackupArchiveDirectory(path, '$path.restore', verifyPayload: true);
+
 class DAVClient {
   static const _sendTimeout = Duration(seconds: 60);
   static final _backupLock = AsyncStorageLock();
@@ -386,11 +389,7 @@ class DAVClient {
           final pathError = token.cancelError;
           if (pathError != null) throw pathError;
           await io.File(candidate).writeAsBytes(bytes, flush: true);
-          await validateBackupArchiveDirectory(
-            candidate,
-            '$candidate.restore',
-            verifyPayload: true,
-          );
+          await compute(_verifyBackupArchive, candidate);
           final completionError = token.cancelError;
           if (completionError != null) throw completionError;
           valid = true;
