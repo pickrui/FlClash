@@ -63,16 +63,16 @@ func TestProbeStampLeavesTunnelProxiesUntouched(t *testing.T) {
 	apply()
 	before := maps.Clone(tunnel.ProxiesSnapshot())
 
-	_, picks := routeStamp()
+	epoch, picks := routeStamp()
 
 	if !maps.Equal(before, tunnel.ProxiesSnapshot()) {
 		t.Fatalf("probe changed the tunnel proxies: %d -> %d entries", len(before), len(tunnel.ProxiesSnapshot()))
 	}
-	if _, again := routeStamp(); again != picks {
-		t.Fatal("an unchanged tunnel changed the picks version")
+	if againEpoch, again := routeStamp(); againEpoch != epoch || again != picks {
+		t.Fatal("an unchanged tunnel changed the route stamp")
 	}
 	apply()
-	if _, next := routeStamp(); next == picks {
-		t.Fatal("new provider nodes did not change the picks version")
+	if nextEpoch, next := routeStamp(); nextEpoch == epoch && next == picks {
+		t.Fatal("new provider nodes left the route stamp unchanged")
 	}
 }

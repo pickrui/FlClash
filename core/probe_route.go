@@ -8,68 +8,47 @@ package core
 
 import (
 	"fmt"
-	"github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/tunnel"
 	"maps"
-	"sort"
-	"strings"
+
+	"github.com/metacubex/mihomo/tunnel"
 )
 
 var probeRouteEpoch uint64
 var probePicksVersion uint64
 var probeConfigStamp string
-var probePicksStamp string
+var probePicks map[string]string
+var probeProviders map[string]any
+var probeRuleSets map[string]any
 
+// Leaf nodes only change with the config or a provider, which move the epoch.
 func routeStamp() (uint64, uint64) {
 	runLock.Lock()
 	defer runLock.Unlock()
 	selectionLock.Lock()
 	defer selectionLock.Unlock()
 	configStamp := fmt.Sprintf("%p/%s/%t/%t", currentConfig, tunnel.Mode(), isRunning, networkExcluded)
-	var picks []string
-	for name, proxy := range probeProxiesLocked() {
-		value := fmt.Sprintf("%s=%p", name, proxy)
+	picks := map[string]string{}
+	for name, proxy := range tunnel.ProxiesSnapshot() {
 		if group, ok := proxy.Adapter().(interface{ Now() string }); ok {
-			value += "=" + group.Now()
+			picks[name] = group.Now()
 		}
-		picks = append(picks, value)
 	}
+	providers := map[string]any{}
 	for name, provider := range tunnel.ProvidersSnapshot() {
-		picks = append(picks, fmt.Sprintf("provider:%s=%d", name, provider.Version()))
+		providers[name] = [2]any{provider, provider.Version()}
 	}
+	ruleSets := map[string]any{}
 	for name, provider := range tunnel.RuleProvidersSnapshot() {
-		picks = append(picks, fmt.Sprintf("rules:%s=%p", name, provider.Strategy()))
+		ruleSets[name] = provider.Strategy()
 	}
-	sort.Strings(picks)
-	pickStamp := strings.Join(picks, "\x00")
-	if probeConfigStamp != configStamp {
+	if probeConfigStamp != configStamp || !maps.Equal(providers, probeProviders) ||
+		!maps.Equal(ruleSets, probeRuleSets) {
 		probeRouteEpoch++
-		probeConfigStamp = configStamp
+		probeConfigStamp, probeProviders, probeRuleSets = configStamp, providers, ruleSets
 	}
-	if probePicksStamp != pickStamp {
+	if !maps.Equal(picks, probePicks) {
 		probePicksVersion++
-		probePicksStamp = pickStamp
+		probePicks = picks
 	}
 	return probeRouteEpoch, probePicksVersion
-}
-
-func probeProxiesLocked() map[string]constant.Proxy {
-	// Connections read the tunnel's map without a lock; it is only ever replaced.
-	snapshot := tunnel.ProxiesSnapshot()
-	proxies := make(map[string]constant.Proxy, len(snapshot))
-	maps.Copy(proxies, snapshot)
-	providers := tunnel.ProvidersSnapshot()
-	names := make([]string, 0, len(providers))
-	for name := range providers {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-	for _, name := range names {
-		for _, proxy := range providers[name].Proxies() {
-			if _, ok := proxies[proxy.Name()]; !ok {
-				proxies[proxy.Name()] = proxy
-			}
-		}
-	}
-	return proxies
 }
