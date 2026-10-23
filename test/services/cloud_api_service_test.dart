@@ -1594,6 +1594,32 @@ void main() {
     });
   }
 
+  test(
+    'managed direct read without a fallback keeps the whole budget',
+    () async {
+      final adapter = QueuedCloudAdapter();
+      final service = CloudApiService.forTesting(client: adapter.createClient())
+        ..setToken('session');
+      final result = service.fetchManagedConfig('token=query-token');
+      final content = expectLater(
+        result.then((value) => utf8.decode(value.$1)),
+        completion('proxies: []'),
+      );
+      final direct = await adapter.takeRequest();
+      expect(direct.options.headers['X-oixCloud-Subscription-Route'], 'direct');
+      await Future<void>.delayed(const Duration(milliseconds: 5500));
+      final bytes = await AgeCrypto.encrypt(
+        utf8.encode('proxies: []'),
+        _decodeAgeRecipient(
+          direct.options.headers['X-Flclash-Age-Pubkey'] as String,
+        ),
+      );
+      direct.response.complete(_managedResponse(direct.options, bytes));
+      await content;
+      expect(adapter.requestCount, 1);
+    },
+  );
+
   for (final failure in ['signature', 'decryption']) {
     test(
       'managed configuration $failure failure falls back to proxy',

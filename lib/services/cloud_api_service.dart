@@ -1363,9 +1363,10 @@ class CloudApiService implements CloudNodeFilterApi {
     if (directFirst && routes.contains('DIRECT')) {
       final elapsed = Stopwatch()..start();
       final available = routes.length > 1 ? budget ~/ 2 : budget;
-      final directBudget = available < const Duration(seconds: 5)
-          ? available
-          : const Duration(seconds: 5);
+      final directBudget =
+          routes.length > 1 && available > const Duration(seconds: 5)
+          ? const Duration(seconds: 5)
+          : available;
       try {
         return await _syncRead(
           read,
