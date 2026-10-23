@@ -16,6 +16,7 @@ import (
 	urlpkg "net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -609,16 +610,50 @@ func allGeoResources() []geoResource {
 	}
 }
 
+// Every apply restarts the scheduler; a resource that keeps failing must not
+// be fetched again by each of them.
+const geoFailureRetryDelay = 30 * time.Minute
+
+var geoFailures = struct {
+	sync.Mutex
+	at map[string]time.Time
+}{at: map[string]time.Time{}}
+
+func setGeoFailure(geoType string, failed bool) {
+	geoFailures.Lock()
+	defer geoFailures.Unlock()
+	if failed {
+		geoFailures.at[geoType] = time.Now()
+	} else {
+		delete(geoFailures.at, geoType)
+	}
+}
+
+func geoFailedRecently(geoType string) bool {
+	geoFailures.Lock()
+	defer geoFailures.Unlock()
+	failedAt, ok := geoFailures.at[geoType]
+	return ok && time.Since(failedAt) < geoFailureRetryDelay
+}
+
 func updateAllGeoDataAction(ctx context.Context) error {
+	return updateGeoResourcesAction(ctx, allGeoResources())
+}
+
+func updateGeoResourcesAction(ctx context.Context, resources []geoResource) error {
 	var updateErr error
-	for _, resource := range allGeoResources() {
+	for _, resource := range resources {
 		if err := ctx.Err(); err != nil {
 			if errors.Is(updateErr, err) {
 				return updateErr
 			}
 			return errors.Join(updateErr, err)
 		}
-		if err := updateGeoDataLocked(ctx, resource.geoType, resource.path); err != nil {
+		err := updateGeoDataLocked(ctx, resource.geoType, resource.path)
+		if ctx.Err() == nil {
+			setGeoFailure(resource.geoType, err != nil)
+		}
+		if err != nil {
 			if silent, _ := ctx.Value(silentGeoUpdateKey{}).(bool); silent {
 				// Error-level logs also trigger UI notifications.
 				log.Warnln("[GEO] Failed to update %s: %s", resource.geoType, err.Error())
@@ -632,9 +667,24 @@ func updateAllGeoDataAction(ctx context.Context) error {
 }
 
 func updateAllGeoData(ctx context.Context) error {
+	return updateGeoResources(ctx, allGeoResources())
+}
+
+func updateGeoResources(ctx context.Context, resources []geoResource) error {
 	// Scheduled updates keep status events but suppress user notifications.
 	ctx = context.WithValue(ctx, silentGeoUpdateKey{}, true)
-	return runGeoUpdate(ctx, updateAllGeoDataAction)
+	return runGeoUpdate(ctx, func(ctx context.Context) error {
+		return updateGeoResourcesAction(ctx, resources)
+	})
+}
+
+func startupGeoUpdate(ctx context.Context, interval time.Duration) {
+	due := slices.DeleteFunc(dueGeoResources(interval), func(resource geoResource) bool {
+		return geoFailedRecently(resource.geoType)
+	})
+	if len(due) > 0 {
+		_ = updateGeoResources(ctx, due)
+	}
 }
 
 func tryUpdateAllGeoData(ctx context.Context) error {
@@ -684,9 +734,7 @@ func restartGeoScheduler() {
 
 	go func() {
 		defer close(state.done)
-		if shouldUpdateGeoData(duration) {
-			_ = updateAllGeoData(ctx)
-		}
+		startupGeoUpdate(ctx, duration)
 		if ctx.Err() != nil {
 			return
 		}
@@ -703,13 +751,14 @@ func restartGeoScheduler() {
 	}()
 }
 
-func shouldUpdateGeoData(interval time.Duration) bool {
-	resources := allGeoResources()
-	paths := make([]string, 0, len(resources))
-	for _, resource := range resources {
-		paths = append(paths, resource.path)
+func dueGeoResources(interval time.Duration) []geoResource {
+	var due []geoResource
+	for _, resource := range allGeoResources() {
+		if shouldUpdateGeoFiles([]string{resource.path}, interval) {
+			due = append(due, resource)
+		}
 	}
-	return shouldUpdateGeoFiles(paths, interval)
+	return due
 }
 
 func shouldUpdateGeoFiles(paths []string, interval time.Duration) bool {

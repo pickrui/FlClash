@@ -81,6 +81,13 @@ func setupGeoUpdateServer(
 	previousHome := constant.Path.HomeDir()
 	previousURLs := []string{geodata.MmdbUrl(), geodata.ASNUrl(), geodata.GeoIpUrl(), geodata.GeoSiteUrl()}
 	constant.SetHomeDir(t.TempDir())
+	clearGeoFailures := func() {
+		for _, resource := range allGeoResources() {
+			setGeoFailure(resource.geoType, false)
+		}
+	}
+	clearGeoFailures()
+	t.Cleanup(clearGeoFailures)
 	readFixture := func(name string) []byte {
 		t.Helper()
 		data, err := os.ReadFile(filepath.Join("Clash.Meta", "component", "mmdb", "testdata", name))
@@ -256,7 +263,7 @@ func TestUnchangedGeoDataIsNotDownloadedAgainBeforeTheNextInterval(t *testing.T)
 			t.Fatal(err)
 		}
 	}
-	if !shouldUpdateGeoData(24 * time.Hour) {
+	if len(dueGeoResources(24*time.Hour)) == 0 {
 		t.Fatal("fixture files were not made stale")
 	}
 
@@ -264,7 +271,7 @@ func TestUnchangedGeoDataIsNotDownloadedAgainBeforeTheNextInterval(t *testing.T)
 		t.Fatal(err)
 	}
 	assertGeoRequests(t, requests, []string{"MMDB", "ASN", "GEOIP", "GEOSITE"})
-	if shouldUpdateGeoData(24 * time.Hour) {
+	if len(dueGeoResources(24*time.Hour)) > 0 {
 		t.Fatal("checked GEO files are due for another download straight away")
 	}
 }
@@ -296,6 +303,20 @@ func TestUpdateAllGeoDataContinuesAfterResourceFailure(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSchedulerRestartsFetchOnlyDueResources(t *testing.T) {
+	_, requests := setupGeoUpdateServer(t, func(w http.ResponseWriter, r *http.Request) bool {
+		if r.URL.Path == "/ASN" {
+			http.Error(w, "gone", http.StatusNotFound)
+			return true
+		}
+		return false
+	})
+	startupGeoUpdate(context.Background(), 24*time.Hour)
+	assertGeoRequests(t, requests, []string{"MMDB", "ASN", "GEOIP", "GEOSITE"})
+	startupGeoUpdate(context.Background(), 24*time.Hour)
+	assertGeoRequests(t, requests, nil)
 }
 
 func TestUpdateAllGeoDataStopsAfterCancellation(t *testing.T) {
@@ -339,7 +360,7 @@ func TestShouldUpdateGeoDataChecksEveryResource(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if shouldUpdateGeoData(24 * time.Hour) {
+	if len(dueGeoResources(24*time.Hour)) > 0 {
 		t.Fatal("all resources are recent")
 	}
 	for geoType, path := range paths {
@@ -348,13 +369,13 @@ func TestShouldUpdateGeoDataChecksEveryResource(t *testing.T) {
 			if err := os.Chtimes(path, staleTime, staleTime); err != nil {
 				t.Fatal(err)
 			}
-			if !shouldUpdateGeoData(24 * time.Hour) {
+			if len(dueGeoResources(24*time.Hour)) == 0 {
 				t.Fatal("stale resource did not trigger an update")
 			}
 			if err := os.Remove(path); err != nil {
 				t.Fatal(err)
 			}
-			if !shouldUpdateGeoData(24 * time.Hour) {
+			if len(dueGeoResources(24*time.Hour)) == 0 {
 				t.Fatal("missing resource did not trigger an update")
 			}
 			if err := os.WriteFile(path, []byte("recent"), 0o600); err != nil {
