@@ -272,7 +272,7 @@ Future<void> main(List<String> arguments) async {
 
     tearDown(() => root.delete(recursive: true));
 
-    Future<String> probeLegacyLock() async {
+    Future<String> probeLock(File lockFile) async {
       final probe = File(p.join(root.path, 'lock_probe.dart'));
       await probe.writeAsString('''
 import 'dart:io';
@@ -290,14 +290,12 @@ Future<void> main(List<String> arguments) async {
   }
 }
 ''');
-      final result = await Process.run('dart', [
-        probe.path,
-        legacyLockFile.path,
-      ]);
+      final result = await Process.run('dart', [probe.path, lockFile.path]);
       return (result.stdout as String).trim();
     }
 
     test('leaves another FlClash unlocked once current data exists', () async {
+      await File(p.join(current.path, 'database.sqlite')).writeAsString('');
       final heldLock = await migrateLegacyApplicationSupport(
         legacyPath: legacy.path,
         currentPath: current.path,
@@ -305,11 +303,38 @@ Future<void> main(List<String> arguments) async {
       addTearDown(() => heldLock?.close());
 
       expect(heldLock, isNull);
-      expect(await probeLegacyLock(), 'locked');
+      expect(await probeLock(legacyLockFile), 'locked');
       expect(File(p.join(current.path, 'config.yaml')).existsSync(), isFalse);
     });
 
+    test('migrates beside the held single-instance lock', () async {
+      final instanceLockFile = File(p.join(current.path, 'FlClash.lock'));
+      final instanceLock = await instanceLockFile.open(mode: FileMode.write);
+      addTearDown(instanceLock.close);
+      await instanceLock.lock(FileLock.exclusive);
+      await File(p.join(legacy.path, 'database.sqlite'))
+          .writeAsString('database');
+
+      final heldLock = await migrateLegacyApplicationSupport(
+        legacyPath: legacy.path,
+        currentPath: current.path,
+      );
+      addTearDown(() => heldLock?.close());
+
+      expect(heldLock, isNotNull);
+      expect(
+        await File(p.join(current.path, 'database.sqlite')).readAsString(),
+        'database',
+      );
+      expect(
+        File(p.join(current.path, identityMigrationMarkerName)).existsSync(),
+        isTrue,
+      );
+      expect(await probeLock(instanceLockFile), 'blocked');
+    });
+
     test('starts while another FlClash runs on the legacy data', () async {
+      await File(p.join(current.path, 'database.sqlite')).writeAsString('');
       final holder = File(p.join(root.path, 'lock_holder.dart'));
       await holder.writeAsString('''
 import 'dart:io';
@@ -371,7 +396,7 @@ Future<void> main(List<String> arguments) async {
           await File(p.join(current.path, 'config.yaml')).readAsString(),
           'legacy',
         );
-        expect(await probeLegacyLock(), 'blocked');
+        expect(await probeLock(legacyLockFile), 'blocked');
       },
     );
   });

@@ -264,7 +264,7 @@ Future<RandomAccessFile?> migrateLegacyApplicationSupport({
 }) async {
   final legacyDirectory = Directory(legacyPath);
   if (!await legacyDirectory.exists() ||
-      await _directoryHasEntries(Directory(currentPath))) {
+      !await _acceptsLegacyApplicationSupport(Directory(currentPath))) {
     return null;
   }
   final legacyLock = await _tryLockLegacyApplicationSupport(legacyDirectory);
@@ -295,38 +295,52 @@ Future<bool> migrateLegacyApplicationSupportDirectory({
   final source = Directory(legacyPath);
   final destination = Directory(currentPath);
   if (legacyPath == currentPath || !await source.exists()) return false;
-  if (await _directoryHasEntries(destination)) return false;
+  if (!await _acceptsLegacyApplicationSupport(destination)) return false;
 
   final legacyLock =
       heldLegacyLock ?? await _tryLockLegacyApplicationSupport(source);
   if (legacyLock == null) {
     throw FileSystemException('Legacy application data is in use', legacyPath);
   }
-  final temporary = Directory(
-    '$currentPath.identity-migration-$pid-${DateTime.now().microsecondsSinceEpoch}',
-  );
+  final staging = Directory(join(currentPath, _identityMigrationStagingName));
+  final stagedMarker = File(join(staging.path, identityMigrationMarkerName));
   try {
-    if (await _directoryHasEntries(destination)) return false;
-    await _copyApplicationSupportDirectory(source, temporary);
-    await File(join(temporary.path, identityMigrationMarkerName))
-        .writeAsString(legacyPackageName, flush: true);
-    if (await _directoryHasEntries(destination)) return false;
-    if (await destination.exists()) {
-      await destination.delete(recursive: true);
+    if (!await stagedMarker.exists()) {
+      if (await _hasApplicationData(destination)) return false;
+      if (await staging.exists()) await staging.delete(recursive: true);
+      await _copyApplicationSupportDirectory(source, staging);
+      await stagedMarker.writeAsString(legacyPackageName, flush: true);
     }
-    await temporary.rename(currentPath);
+    // The running app holds FlClash.lock here, so entries move in one by one;
+    // the staged marker goes last and lets an interrupted move resume.
+    for (final entity in await staging.list(followLinks: false).toList()) {
+      final name = basename(entity.path);
+      final target = join(currentPath, name);
+      if (name != identityMigrationMarkerName &&
+          await FileSystemEntity.type(target, followLinks: false) ==
+              FileSystemEntityType.notFound) {
+        await entity.rename(target);
+      }
+    }
+    await stagedMarker.rename(join(currentPath, identityMigrationMarkerName));
+    await staging.delete(recursive: true);
     return true;
   } finally {
-    try {
-      if (await temporary.exists()) {
-        await temporary.delete(recursive: true);
-      }
-    } finally {
-      if (heldLegacyLock == null) {
-        await _releaseLegacyApplicationSupportLock(legacyLock);
-      }
+    if (heldLegacyLock == null) {
+      await _releaseLegacyApplicationSupportLock(legacyLock);
     }
   }
+}
+
+Future<bool> _acceptsLegacyApplicationSupport(Directory current) async {
+  final stagedMarker = File(
+    join(
+      current.path,
+      _identityMigrationStagingName,
+      identityMigrationMarkerName,
+    ),
+  );
+  return await stagedMarker.exists() || !await _hasApplicationData(current);
 }
 
 Future<void> _releaseLegacyApplicationSupportLock(
@@ -354,9 +368,13 @@ Future<RandomAccessFile?> _tryLockLegacyApplicationSupport(
   }
 }
 
-Future<bool> _directoryHasEntries(Directory directory) async {
+Future<bool> _hasApplicationData(Directory directory) async {
   return await directory.exists() &&
-      !await directory.list(followLinks: false).isEmpty;
+      await directory
+          .list(followLinks: false)
+          .any(
+            (entity) => !_transientEntryNames.contains(basename(entity.path)),
+          );
 }
 
 Future<void> _copyApplicationSupportDirectory(
@@ -366,7 +384,7 @@ Future<void> _copyApplicationSupportDirectory(
   await destination.create(recursive: true);
   await for (final entity in source.list(followLinks: false)) {
     final name = basename(entity.path);
-    if (name == 'FlClash.lock' || name == 'FlClash.wakeup') continue;
+    if (_transientEntryNames.contains(name)) continue;
     final targetPath = join(destination.path, name);
     final type = await FileSystemEntity.type(entity.path, followLinks: false);
     if (type == FileSystemEntityType.directory) {
@@ -379,6 +397,13 @@ Future<void> _copyApplicationSupportDirectory(
     }
   }
 }
+
+const _identityMigrationStagingName = '.identity-migration';
+const _transientEntryNames = {
+  'FlClash.lock',
+  'FlClash.wakeup',
+  _identityMigrationStagingName,
+};
 
 final appPath = AppPath();
 
