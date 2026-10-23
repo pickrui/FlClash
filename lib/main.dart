@@ -61,7 +61,6 @@ Future<void> main(List<String> arguments) async {
     // Startup may already reach the cloud API before HttpOverrides is set.
     await FlClashHttpOverrides.trustBundledRoots();
     await startupDiagnostics.run('rust', RustLib.init);
-    registerFetchManagedConfig(CloudApiService().fetchManagedConfig);
     cloudStorePageBuilder = (_) => const CloudStorePage();
     cloudNodeFilterPageBuilder = (_) => const CloudNodeFilterPage();
     tailscalePageBuilder = (_) => const TailscaleView();
@@ -71,6 +70,9 @@ Future<void> main(List<String> arguments) async {
       arguments: arguments,
       loadConfig: _loadStartupConfig,
     );
+    // Building the service reads and may write preferences, so it waits for
+    // init to migrate upstream data into the data directory.
+    registerFetchManagedConfig(CloudApiService().fetchManagedConfig);
     // Eagerly build the cloud-account notifier so it registers its
     // ensureCloudReady hook before any oixCloud profile setup runs.
     container.read(cloudAccountProvider);
