@@ -2086,6 +2086,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "minutesAgoShort": m51,
     "mixedPort": MessageLookupByLibrary.simpleMessage("Смешанный порт"),
     "mode": MessageLookupByLibrary.simpleMessage("Режим"),
+    "monochromeIcon": MessageLookupByLibrary.simpleMessage(
+      "Монохромный значок",
+    ),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Монохром"),
     "monthsAgo": m52,
     "monthsAgoShort": m53,

@@ -88,6 +88,7 @@ abstract class TrayState with _$TrayState {
     required Brightness? brightness,
     required List<Group> groups,
     required bool showTrayTitle,
+    @Default(true) bool monochromeTrayIcon,
     @Default({}) Map<String, Map<String, int>> delays,
     @Default({}) Map<HotAction, HotKeyAction> hotKeys,
   }) = _TrayState;

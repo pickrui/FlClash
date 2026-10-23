@@ -10387,6 +10387,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Monochrome icon`
+  String get monochromeIcon {
+    return Intl.message(
+      'Monochrome icon',
+      name: 'monochromeIcon',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Couldn't connect to the server. Check your network connection or proxy settings`
   String get networkConnectionError {
     return Intl.message(

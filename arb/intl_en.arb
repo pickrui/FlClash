@@ -1249,6 +1249,7 @@
   "toggleFlashlight": "Toggle flashlight",
   "networkTimeoutError": "The request timed out. Check your network or proxy, then try again",
   "networkHostLookupError": "Couldn't resolve the server address. Check that the URL is correct and DNS is working",
+  "monochromeIcon": "Monochrome icon",
   "networkConnectionError": "Couldn't connect to the server. Check your network connection or proxy settings",
   "networkTlsError": "Secure connection failed. The server's certificate may be invalid, or the connection is being intercepted",
   "networkCancelledError": "The request was cancelled",

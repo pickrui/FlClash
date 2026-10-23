@@ -124,9 +124,14 @@ TrayState trayState(Ref ref) {
       (state) => VM3(state.mode, state.mixedPort, state.tun.enable),
     ),
   );
-  final appSettingVm3 = ref.watch(
+  final appSettingVm4 = ref.watch(
     appSettingProvider.select(
-      (state) => VM3(state.autoLaunch, state.locale, state.showTrayTitle),
+      (state) => VM4(
+        state.autoLaunch,
+        state.locale,
+        state.showTrayTitle,
+        state.monochromeTrayIcon,
+      ),
     ),
   );
   final groups = _visibleGroups(ref).toList();
@@ -135,15 +140,16 @@ TrayState trayState(Ref ref) {
   return TrayState(
     mode: clashConfigVm3.a,
     port: clashConfigVm3.b,
-    autoLaunch: appSettingVm3.a,
+    autoLaunch: appSettingVm4.a,
     systemProxy: systemProxy,
     tunEnable: clashConfigVm3.c,
     isStart: isStart,
     suspended: isStart && ref.watch(suspendProvider),
-    locale: ref.watch(loadedLocaleProvider)?.toLanguageTag() ?? appSettingVm3.b,
+    locale: ref.watch(loadedLocaleProvider)?.toLanguageTag() ?? appSettingVm4.b,
     brightness: brightness,
     groups: groups,
-    showTrayTitle: appSettingVm3.c,
+    showTrayTitle: appSettingVm4.c,
+    monochromeTrayIcon: appSettingVm4.d,
     delays: ref.watch(trayDelaysProvider),
     hotKeys: {
       for (final key in ref.watch(hotKeyActionsProvider))

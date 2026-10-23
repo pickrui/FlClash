@@ -46,17 +46,24 @@ class Tray {
     await native.Tray.instance.hide();
   }
 
+  bool _isTemplate(bool monochrome) => isMacOS && monochrome;
+
   String getTryIcon({
     required bool isStart,
     required bool tunEnable,
     bool safeMode = safeModeBuild,
+    bool monochrome = true,
   }) {
     final directory = system.isWindows
         ? 'windows'
-        : isMacOS
+        : _isTemplate(monochrome)
         ? 'macos'
         : 'unix';
-    final status = switch ((safeMode, isMacOS || !isStart, tunEnable)) {
+    final status = switch ((
+      safeMode,
+      _isTemplate(monochrome) || !isStart,
+      tunEnable,
+    )) {
       (true, _, _) => 4,
       (false, true, _) => 1,
       (false, false, false) => 2,
@@ -78,8 +85,9 @@ class Tray {
           getTryIcon(
             isStart: trayState.isStart && !trayState.suspended,
             tunEnable: trayState.tunEnable,
+            monochrome: trayState.monochromeTrayIcon,
           ),
-          isTemplate: isMacOS,
+          isTemplate: _isTemplate(trayState.monochromeTrayIcon),
         ),
         toolTip: safeModeBuild
             ? appLocalizations.safeModeAppTitle(appName)
@@ -130,6 +138,15 @@ class Tray {
         checked: trayState.showTrayTitle,
       );
       menuItems.add(speedStatistics);
+      menuItems.add(
+        native.TrayMenuCheckbox(
+          label: appLocalizations.monochromeIcon,
+          onSelected: () async {
+            appController.updateMonochromeTrayIcon();
+          },
+          checked: trayState.monochromeTrayIcon,
+        ),
+      );
     }
     menuItems.add(const native.TrayMenuSeparator());
     for (final mode in Mode.values) {

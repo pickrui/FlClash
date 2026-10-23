@@ -44,6 +44,26 @@ void main() {
     });
   });
 
+  test('macOS shows the color icons once monochrome is off', () {
+    final macOS = Tray.forPlatform(isMacOS: true);
+    for (final (isStart, tunEnable, safeMode, status) in [
+      (false, false, false, 1),
+      (true, false, false, 2),
+      (true, true, false, 3),
+      (true, true, true, 4),
+    ]) {
+      expect(
+        macOS.getTryIcon(
+          isStart: isStart,
+          tunEnable: tunEnable,
+          safeMode: safeMode,
+          monochrome: false,
+        ),
+        'assets/images/tray/unix/status_$status.png',
+      );
+    }
+  }, skip: Platform.isWindows);
+
   test('isolated mode uses its own packaged tray icon', () {
     final path = Tray().getTryIcon(
       isStart: true,

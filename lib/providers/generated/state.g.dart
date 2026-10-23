@@ -219,7 +219,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'6dba3e418f1474cad8611dca4fb865a2f21b9170';
+String _$trayStateHash() => r'b982fab72bb93e2aa4c51fbc7e74e0271090835f';
 
 @ProviderFor(vpnState)
 final vpnStateProvider = VpnStateProvider._();

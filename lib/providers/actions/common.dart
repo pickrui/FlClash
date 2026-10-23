@@ -89,6 +89,15 @@ extension CommonControllerExt on AppController {
         .update((state) => state.copyWith(showTrayTitle: !state.showTrayTitle));
   }
 
+  void updateMonochromeTrayIcon() {
+    _ref
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) =>
+              state.copyWith(monochromeTrayIcon: !state.monochromeTrayIcon),
+        );
+  }
+
   void updateMode() {
     _ref.read(patchClashConfigProvider.notifier).update((state) {
       final index = Mode.values.indexWhere((item) => item == state.mode);
