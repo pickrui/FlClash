@@ -284,6 +284,21 @@ void main() {
     },
   );
 
+  test('a system DNS write failure leaves a Core apply successful', () async {
+    final system = _FakeDnsSystem()..failingService = 'Wi-Fi';
+    final errors = <Object>[];
+    final controller = MacosDnsController(
+      runProcess: system.run,
+      onUpdateError: (error, _) => errors.add(error),
+    );
+    await expectLater(controller.updateDns(false), throwsStateError);
+    expect(
+      await controller.applyCoreConfig({}, () async => 'applied'),
+      'applied',
+    );
+    expect(errors, [isStateError]);
+  });
+
   test('a new process restores the persisted DHCP DNS snapshot', () async {
     final system = _FakeDnsSystem()..dns['Wi-Fi'] = [];
     String? snapshot;

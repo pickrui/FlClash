@@ -15,6 +15,7 @@ class MacosDnsController {
   final DnsProcessRunner _runProcess;
   final Future<String?> Function()? readSnapshot;
   final Future<void> Function(String)? writeSnapshot;
+  final void Function(Object error, StackTrace stackTrace)? onUpdateError;
   final _overrides = <String, ({List<String> before, List<String> applied})>{};
   Future<void> _pending = Future.value();
   bool _loaded = false;
@@ -27,6 +28,7 @@ class MacosDnsController {
     DnsProcessRunner? runProcess,
     this.readSnapshot,
     this.writeSnapshot,
+    this.onUpdateError,
   }) : _runProcess =
            runProcess ?? ((command, args) => Process.run(command, args));
 
@@ -63,12 +65,22 @@ class MacosDnsController {
       result = await apply();
     } catch (_) {
       _coreDnsMode = previous;
-      await _enqueue(_restoreRequested);
+      await _settleRequested();
       rethrow;
     }
     _coreDnsMode = next;
-    await _enqueue(_restoreRequested);
+    await _settleRequested();
     return result;
+  }
+
+  // The outcome of the Core apply stands; a system DNS write that needs admin
+  // rights fails here on every apply and must not stop the running Core.
+  Future<void> _settleRequested() async {
+    try {
+      await _enqueue(_restoreRequested);
+    } catch (error, stackTrace) {
+      onUpdateError?.call(error, stackTrace);
+    }
   }
 
   Future<void> shutdownDns() {

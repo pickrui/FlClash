@@ -354,6 +354,10 @@ class MacOS extends MacosDnsController {
     : super(
         readSnapshot: preferences.getDnsRecoverySnapshot,
         writeSnapshot: preferences.saveDnsRecoverySnapshot,
+        onUpdateError: (error, stackTrace) => commonPrint.log(
+          'system DNS update failed: $error\n$stackTrace',
+          logLevel: LogLevel.warning,
+        ),
       );
 
   factory MacOS() {
