@@ -104,13 +104,11 @@ class ProfileApplyIntent {
 /// A newer download of a profile supersedes an older one, so the per-minute
 /// auto refresh skips running updates and backs off failing profiles.
 class ProfileUpdateRuns {
-  ProfileUpdateRuns({DateTime Function()? now}) : _now = now ?? DateTime.now;
+  ProfileUpdateRuns({DateTime Function()? now})
+    : _backoff = AutoUpdateBackoff(now: now);
 
-  static const maxRetryDelay = Duration(minutes: 20);
-
-  final DateTime Function() _now;
+  final AutoUpdateBackoff<int> _backoff;
   final _running = <int, int>{};
-  final _failures = <int, ({int count, DateTime retryAt})>{};
 
   void begin(int profileId) {
     _running.update(profileId, (count) => count + 1, ifAbsent: () => 1);
@@ -123,20 +121,37 @@ class ProfileUpdateRuns {
     } else {
       _running[profileId] = remaining;
     }
-    if (succeeded) _failures.remove(profileId);
+    if (succeeded) _backoff.succeeded(profileId);
   }
 
-  bool canAutoUpdate(int profileId) {
-    if (_running.containsKey(profileId)) return false;
-    final retryAt = _failures[profileId]?.retryAt;
+  bool canAutoUpdate(int profileId) =>
+      !_running.containsKey(profileId) && _backoff.isDue(profileId);
+
+  void autoUpdateFailed(Profile profile) =>
+      _backoff.failed(profile.id, profile.autoUpdateDuration);
+}
+
+/// Spaces out the per-minute automatic retries of a refresh that keeps failing.
+class AutoUpdateBackoff<K> {
+  AutoUpdateBackoff({DateTime Function()? now}) : _now = now ?? DateTime.now;
+
+  static const maxRetryDelay = Duration(minutes: 20);
+
+  final DateTime Function() _now;
+  final _failures = <K, ({int count, DateTime retryAt})>{};
+
+  bool isDue(K key) {
+    final retryAt = _failures[key]?.retryAt;
     return retryAt == null || !retryAt.isAfter(_now());
   }
 
-  void autoUpdateFailed(Profile profile) {
-    final count = (_failures[profile.id]?.count ?? 0) + 1;
+  void failed(K key, Duration interval) {
+    final count = (_failures[key]?.count ?? 0) + 1;
     var delay = Duration(minutes: 1 << (count < 6 ? count - 1 : 5));
     if (delay > maxRetryDelay) delay = maxRetryDelay;
-    if (delay > profile.autoUpdateDuration) delay = profile.autoUpdateDuration;
-    _failures[profile.id] = (count: count, retryAt: _now().add(delay));
+    if (delay > interval) delay = interval;
+    _failures[key] = (count: count, retryAt: _now().add(delay));
   }
+
+  void succeeded(K key) => _failures.remove(key);
 }

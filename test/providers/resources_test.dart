@@ -99,6 +99,21 @@ void main() {
     expect(container.exists(scriptsProvider), isFalse);
   });
 
+  test('automatic updates back off a failing resource', () async {
+    final service = container.read(resourcesProvider);
+    final updating = service.autoUpdate();
+    await requested.future.timeout(const Duration(seconds: 2));
+    response.completeError(const SocketException('fixture outage'));
+    await updating;
+    await service.autoUpdate();
+    expect(downloads, 1);
+    await expectLater(
+      service.updateProvider(item),
+      throwsA(isA<SocketException>()),
+    );
+    expect(downloads, 2);
+  });
+
   test('library errors propagate and release the temporary listener', () async {
     final failure = StateError('fixture library failure');
     var cancellations = 0;

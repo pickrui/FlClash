@@ -70,6 +70,7 @@ class ResourceUpdates {
   final Database _store;
   final Future<List<int>> Function(String) _download;
   final Map<String, Future<void>> _pending = {};
+  final _retries = AutoUpdateBackoff<String>();
   bool _autoUpdating = false;
 
   Future<List<T>> _loadLibrary<T>(
@@ -102,11 +103,13 @@ class ResourceUpdates {
     final subscription = ref.listen(isUpdatingProvider(key), (_, _) {});
     final notifier = ref.read(isUpdatingProvider(key).notifier);
     notifier.value = true;
-    final operation = Future<void>.sync(action).whenComplete(() {
-      _pending.remove(key);
-      if (ref.mounted) notifier.value = false;
-      subscription.close();
-    });
+    final operation = Future<void>.sync(action)
+        .then((_) => _retries.succeeded(key))
+        .whenComplete(() {
+          _pending.remove(key);
+          if (ref.mounted) notifier.value = false;
+          subscription.close();
+        });
     _pending[key] = operation;
     return operation;
   }
@@ -212,10 +215,12 @@ class ResourceUpdates {
       );
       bool due(DateTime? date) =>
           date == null || date.add(interval).isBefore(DateTime.now());
-      Future<void> run(Future<void> Function() action) async {
+      Future<void> run(String key, Future<void> Function() action) async {
+        if (!_retries.isDue(key)) return;
         try {
           await action();
         } catch (error) {
+          _retries.failed(key, interval);
           commonPrint.log(
             'Resource update failed: ${error.runtimeType}',
             logLevel: LogLevel.warning,
@@ -226,19 +231,19 @@ class ResourceUpdates {
       for (final item in await _loadLibrary(iconSetsProvider)) {
         if (!ref.mounted) return;
         if (item.isRemote && due(item.lastUpdateTime)) {
-          await run(() => updateIconSet(item));
+          await run(item.updatingKey, () => updateIconSet(item));
         }
       }
       for (final item in await _loadLibrary(scriptsProvider)) {
         if (!ref.mounted) return;
         if (item.url?.isNotEmpty == true && due(item.lastUpdateTime)) {
-          await run(() => updateScript(item));
+          await run(item.updatingKey, () => updateScript(item));
         }
       }
       for (final item in await _loadLibrary(clashProvidersProvider)) {
         if (!ref.mounted) return;
         if (item.isRemote) {
-          await run(() async {
+          await run(item.updatingKey, () async {
             final modified = (await item.fileInfo)?.lastModified;
             if (ref.mounted && due(modified)) {
               await updateProvider(item);
