@@ -832,6 +832,47 @@ extension SetupControllerExt on AppController {
     return res;
   }
 
+  Future<({Map<String, dynamic> config, String yaml})?> _validatedConfig(
+    SetupState setupState,
+    ClashConfig patchConfig, {
+    bool Function()? shouldContinue,
+  }) async {
+    final Map<String, dynamic> config;
+    try {
+      config = await getProfile(
+        setupState: setupState,
+        patchConfig: patchConfig,
+        validateSnapshot: false,
+      );
+    } on FormatException catch (error) {
+      // Composition errors have not touched the active core configuration.
+      // Handle them like core validation failures to keep the connection alive.
+      throw CandidateConfigValidationException(error.message);
+    }
+    final yaml = await encodeYamlTask(config);
+    if (shouldContinue?.call() == false) return null;
+    final validationMessage = await coreController.validateConfigWithBytes(
+      base64Encode(utf8.encode(yaml)),
+    );
+    if (validationMessage.isNotEmpty) {
+      throw CandidateConfigValidationException(validationMessage);
+    }
+    return (config: config, yaml: yaml);
+  }
+
+  Future<SetupState?> _currentSetupState() async {
+    final profileId = _ref.read(currentProfileIdProvider);
+    return profileId == null ? null : await _ref.readSetupState(profileId);
+  }
+
+  Future<void> _validateSetupConfig(SetupState setupState) async {
+    final patchConfig = _ref.read(patchClashConfigProvider);
+    await _validatedConfig(
+      setupState,
+      patchConfig.copyWith.tun(enable: _ref.read(realTunEnableProvider)),
+    );
+  }
+
   Future<bool> _setupConfig(
     int? profileId,
     int generation, {
@@ -891,30 +932,16 @@ extension SetupControllerExt on AppController {
     final realTunEnable = _ref.read(realTunEnableProvider);
     final realPatchConfig = patchConfig.copyWith.tun(enable: realTunEnable);
     final setupState = await _ref.readSetupState(profile?.id);
-    final Map<String, dynamic> config;
-    try {
-      config = await getProfile(
-        setupState: setupState,
-        patchConfig: realPatchConfig,
-        validateSnapshot: false,
-      );
-    } on FormatException catch (error) {
-      // Composition errors have not touched the active core configuration.
-      // Handle them like core validation failures to keep the connection alive.
-      throw CandidateConfigValidationException(error.message);
-    }
-    final configFilePath = await appPath.configFilePath;
-    final yamlString = await encodeYamlTask(config);
-    if (!isCurrentApply()) return false;
-    final validationMessage = await coreController.validateConfigWithBytes(
-      base64Encode(utf8.encode(yamlString)),
+    final candidate = await _validatedConfig(
+      setupState,
+      realPatchConfig,
+      shouldContinue: isCurrentApply,
     );
-    if (validationMessage.isNotEmpty) {
-      throw CandidateConfigValidationException(validationMessage);
-    }
-    if (!isCurrentApply()) {
+    if (candidate == null || !isCurrentApply()) {
       return false;
     }
+    final (:config, yaml: yamlString) = candidate;
+    final configFilePath = await appPath.configFilePath;
     final isoixCloud = profile?.isoixCloudProfile ?? false;
     if (isoixCloud && system.isAndroid) {
       final encryptedBytes = await encryptProfileBytes(

@@ -1442,6 +1442,8 @@ class PreparedProfileUpdate {
   final Uint8List? _bytes;
   final Object _token;
 
+  bool get replacesSnapshot => _bytes != null;
+
   void discard() {
     if (identical(_preparedProfileUpdates[profile.id], _token)) {
       _preparedProfileUpdates.remove(profile.id);

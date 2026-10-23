@@ -311,7 +311,7 @@ extension ProfilesControllerExt on AppController {
       }
       final source = preserveCurrentState ? current : profile;
       final prepared = await source.prepareUpdate();
-      return persistProfile(profile, () {
+      return persistProfile(profile, () async {
         final latest = _ref.read(profilesProvider).getProfile(profile.id);
         if (latest == null) {
           throw StateError('profile is no longer available');
@@ -322,7 +322,11 @@ extension ProfilesControllerExt on AppController {
             latest.ageSecretKey != current.ageSecretKey) {
           throw StateError('profile URL changed during download');
         }
-        return prepared.save();
+        return saveProfileRefresh(
+          prepared,
+          currentSetup: await _currentSetupState(),
+          validate: _validateSetupConfig,
+        );
       }, preserveCurrentState: preserveCurrentState);
     }
 

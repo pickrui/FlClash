@@ -302,6 +302,10 @@ extension SetupStateExt on SetupState {
         name: ?profileProviders[name],
   };
 
+  bool readsSnapshotOf(int id) =>
+      profileId == id ||
+      usedProfileProviders.values.any((source) => source.profileId == id);
+
   bool needSetup(SetupState? lastSetupState) {
     if (lastSetupState == null) {
       return false;

@@ -7,12 +7,14 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fl_clash/common/file.dart';
 import 'package:fl_clash/common/lock.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/database/database.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/models/profile.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/services/age_crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -301,6 +303,70 @@ void main() {
       expect(await file.readAsBytes(), secondBytes);
     },
   );
+
+  test('a refresh the current config rejects keeps the old snapshot', () async {
+    const profile = Profile(
+      id: 14,
+      url: 'oixcloud://managed',
+      autoUpdateDuration: Duration(hours: 1),
+    );
+    final file = await snapshot(profile.id, 'old');
+    final bytes = await encryptedBytes(13);
+    registerFetchManagedConfig((_, {validate}) async => (bytes, null));
+    const current = SetupState(
+      profileId: 14,
+      profileLastUpdateDate: null,
+      overwriteType: OverwriteType.standard,
+      addedRules: [Rule(id: 1, value: 'DOMAIN,a.com,G')],
+      proxyChains: [],
+      profileProxies: [],
+      customProxyGroups: [],
+      customRules: [],
+      script: null,
+      dns: Dns(),
+    );
+    final usingIt = current.copyWith(
+      profileId: 15,
+      profileType: ProfileType.custom,
+      customProxyGroups: const [
+        ProxyGroup(name: 'Out', type: GroupType.Selector, use: ['Sub']),
+      ],
+      profileProviders: const {'Sub': (profileId: 14, lastUpdate: null)},
+    );
+    final validated = <int?>[];
+    Future<void> refresh(SetupState currentSetup) async {
+      final prepared = await profile.prepareUpdate();
+      await withFileRollback(
+        file.path,
+        () => saveProfileRefresh(
+          prepared,
+          currentSetup: currentSetup,
+          validate: (setup) async {
+            validated.add(setup.profileId);
+            expect(await file.readAsBytes(), bytes);
+            throw const CandidateConfigValidationException('proxy G missing');
+          },
+        ),
+      );
+    }
+
+    for (final setup in [current, usingIt]) {
+      await expectLater(
+        refresh(setup),
+        throwsA(isA<CandidateConfigValidationException>()),
+      );
+      expect(await file.readAsString(), 'old');
+    }
+    registerCanFetchManagedConfig(() => false);
+    try {
+      await refresh(current);
+    } finally {
+      registerCanFetchManagedConfig(() => true);
+    }
+    await refresh(current.copyWith(profileId: 16));
+    expect(await file.readAsBytes(), bytes);
+    expect(validated, [14, 15]);
+  });
 
   test('discarded imports cannot write or cancel a newer download', () async {
     const profile = Profile(

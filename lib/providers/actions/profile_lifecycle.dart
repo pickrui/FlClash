@@ -53,6 +53,24 @@ Future<void> applyProfileAfterRefresh({
   applyDebounced();
 }
 
+/// Installs a refreshed snapshot inside the caller's file rollback. A failed
+/// apply keeps the Core on its old config, but every later start loads this
+/// snapshot, so the config [currentSetup] builds from it has to validate.
+@visibleForTesting
+Future<Profile> saveProfileRefresh(
+  PreparedProfileUpdate prepared, {
+  required SetupState? currentSetup,
+  required Future<void> Function(SetupState setupState) validate,
+}) async {
+  final saved = await prepared.save();
+  if (currentSetup != null &&
+      prepared.replacesSnapshot &&
+      currentSetup.readsSnapshotOf(saved.id)) {
+    await validate(currentSetup);
+  }
+  return saved;
+}
+
 class ProfileApplyIntent {
   bool _requiresForce = false;
   FutureOr<void> Function()? _preloadInvoke;
