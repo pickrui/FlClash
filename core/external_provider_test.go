@@ -255,17 +255,6 @@ rules: ['MATCH,g']
 		}
 	}
 
-	var written recordingConn
-	useTestConnection(t, &written)
-	setDNSAuth(&dnsAuthSettings{})
-	handleMethodCall(&MethodCall{ID: "definition", Method: getProxyDefinitionMethod, Arguments: json.RawMessage(`"a"`)}, MethodResponse{ID: "definition"})
-	var response MethodResponse
-	if err := json.Unmarshal(written.responseFrame(t, "definition"), &response); err != nil {
-		t.Fatal(err)
-	}
-	if response.Result != nil || response.Error == nil || response.Error.Code != "proxy_lookup_failed" || response.Error.Details != nil {
-		t.Fatalf("managed lookup answered %+v, want a redacted typed error", response)
-	}
 }
 
 func TestExternalProviderUpdateDoesNotOutliveReapply(t *testing.T) {

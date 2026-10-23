@@ -172,3 +172,19 @@ func TestIPCDisconnectInterruptsBlockedWriter(t *testing.T) {
 		t.Fatalf("peer read = %v", err)
 	}
 }
+
+func TestManagedProxyDefinitionRefusalIsRedacted(t *testing.T) {
+	previous := currentDNSAuth()
+	t.Cleanup(func() { setDNSAuth(previous) })
+	var written recordingConn
+	useTestConnection(t, &written)
+	setDNSAuth(&dnsAuthSettings{})
+	handleMethodCall(&MethodCall{ID: "definition", Method: getProxyDefinitionMethod, Arguments: json.RawMessage(`"a"`)}, MethodResponse{ID: "definition"})
+	var response MethodResponse
+	if err := json.Unmarshal(written.responseFrame(t, "definition"), &response); err != nil {
+		t.Fatal(err)
+	}
+	if response.Result != nil || response.Error == nil || response.Error.Code != "proxy_lookup_failed" || response.Error.Details != nil {
+		t.Fatalf("managed lookup answered %+v, want a redacted typed error", response)
+	}
+}
