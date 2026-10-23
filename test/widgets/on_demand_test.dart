@@ -171,6 +171,31 @@ void main() {
     });
   }
 
+  testWidgets('Windows refused location access offers the settings', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TestApp(
+        wrapInProviderScope: true,
+        homeBuilder: (child) => Scaffold(body: child),
+        child: SsidPermissionItem(
+          isMacOS: false,
+          isWindows: true,
+          checkPermission: () async => WifiSsidPermission.permanentlyDenied,
+          requestPermission: () async => WifiSsidPermission.permanentlyDenied,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(_authorize);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Location permission required'), findsOneWidget);
+    expect(find.text('Go'), findsOneWidget);
+  });
+
   testWidgets(
     'permission failures retry and authorization updates refresh SSID',
     (tester) async {

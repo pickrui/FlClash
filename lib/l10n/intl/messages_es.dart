@@ -506,6 +506,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "availableBalance": m0,
     "availablePlans": MessageLookupByLibrary.simpleMessage("Elegir un plan"),
     "back": MessageLookupByLibrary.simpleMessage("Atrás"),
+    "backgroundBlur": MessageLookupByLibrary.simpleMessage(
+      "Desenfoque de fondo",
+    ),
     "backup": MessageLookupByLibrary.simpleMessage("Copia de seguridad"),
     "backupAndRestore": MessageLookupByLibrary.simpleMessage(
       "Copia de seguridad y restauración",
@@ -3154,11 +3157,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Botón de detener en la notificación",
     ),
     "showPassword": MessageLookupByLibrary.simpleMessage("Mostrar contraseña"),
-    "sidebarBlur": MessageLookupByLibrary.simpleMessage(
-      "Difuminar barra lateral",
-    ),
+    "sidebar": MessageLookupByLibrary.simpleMessage("Barra lateral"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
-      "Mostrar un fondo translúcido del sistema tras la barra lateral",
+      "El desenfoque de fondo deja ver el escritorio detrás de la ventana a través de la barra lateral.",
     ),
     "signInWithGoogle": MessageLookupByLibrary.simpleMessage(
       "Iniciar sesión con Google",

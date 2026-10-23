@@ -12,6 +12,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
 
 import 'battery_optimization.dart';
@@ -22,12 +23,14 @@ class SsidPermissionItem extends ConsumerStatefulWidget {
   const SsidPermissionItem({
     super.key,
     required this.isMacOS,
+    this.isWindows = false,
     this.checkPermission,
     this.requestPermission,
     this.readSsid,
   });
 
   final bool isMacOS;
+  final bool isWindows;
   final Future<WifiSsidPermission> Function()? checkPermission;
   final Future<WifiSsidPermission> Function()? requestPermission;
   final Future<String?> Function()? readSsid;
@@ -132,8 +135,14 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem>
                 ? l10n.locationPermissionGuide(appName)
                 : l10n.ssidPermissionGuide,
           ),
+          confirmText: widget.isWindows ? l10n.go : null,
         );
-        if (open == true && system.isAndroid) await app?.openAppSettings();
+        if (open != true) return;
+        if (widget.isWindows) {
+          await launchUrl(Uri.parse('ms-settings:privacy-location'));
+        } else if (system.isAndroid) {
+          await app?.openAppSettings();
+        }
       }
     } catch (error) {
       if (mounted) context.showNotifier(error.toString());
@@ -204,10 +213,11 @@ class ExcludeNetworksItem extends ConsumerWidget {
 }
 
 class OnDemandView extends ConsumerStatefulWidget {
-  const OnDemandView({super.key, this.isAndroid, this.isMacOS});
+  const OnDemandView({super.key, this.isAndroid, this.isMacOS, this.isWindows});
 
   final bool? isAndroid;
   final bool? isMacOS;
+  final bool? isWindows;
 
   @override
   ConsumerState<OnDemandView> createState() => _OnDemandViewState();
@@ -217,6 +227,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
   final _selected = <String>{};
   bool get _isAndroid => widget.isAndroid ?? system.isAndroid;
   bool get _isMacOS => widget.isMacOS ?? system.isMacOS;
+  bool get _isWindows => widget.isWindows ?? system.isWindows;
   List<String> get _ssids => ref.read(networkSettingProvider).excludeSSIDs;
 
   Future<void> _edit([String? ssid]) async {
@@ -280,7 +291,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
           title: l.prerequisites,
           items: [
             if (_isAndroid) const BatteryOptimizationItem(),
-            SsidPermissionItem(isMacOS: _isMacOS),
+            SsidPermissionItem(isMacOS: _isMacOS, isWindows: _isWindows),
           ],
           footer: [
             if (_isAndroid) l.batteryOptimizationDesc,
@@ -399,7 +410,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
             padding: const EdgeInsets.symmetric(horizontal: 16)
                 .copyWith(top: context.contentTopPadding),
             sliver: SliverToBoxAdapter(
-              child: _isAndroid || _isMacOS
+              child: _isAndroid || _isMacOS || _isWindows
                   ? _buildPrerequisites()
                   : const SizedBox.shrink(),
             ),

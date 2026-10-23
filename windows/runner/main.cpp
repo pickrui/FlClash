@@ -116,6 +116,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
   flutter::DartProject project(L"data");
+  // flutter/flutter#193504: with Impeller, dragging a window edge can freeze
+  // the window on its last frame on some GPUs; release builds ignore the
+  // engine switches, so the runner turns it off.
+  project.set_impeller_switch(flutter::ImpellerSwitch::Disabled);
   project.set_dart_entrypoint_arguments(std::move(command_line_arguments));
 
   FlutterWindow window(project);

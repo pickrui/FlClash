@@ -9897,20 +9897,25 @@ class AppLocalizations {
     );
   }
 
-  /// `Blur sidebar`
-  String get sidebarBlur {
+  /// `Sidebar`
+  String get sidebar {
+    return Intl.message('Sidebar', name: 'sidebar', desc: '', args: []);
+  }
+
+  /// `Background blur`
+  String get backgroundBlur {
     return Intl.message(
-      'Blur sidebar',
-      name: 'sidebarBlur',
+      'Background blur',
+      name: 'backgroundBlur',
       desc: '',
       args: [],
     );
   }
 
-  /// `Show a translucent system backdrop behind the sidebar`
+  /// `Background blur lets the desktop behind the window show through the sidebar.`
   String get sidebarBlurDesc {
     return Intl.message(
-      'Show a translucent system backdrop behind the sidebar',
+      'Background blur lets the desktop behind the window show through the sidebar.',
       name: 'sidebarBlurDesc',
       desc: '',
       args: [],

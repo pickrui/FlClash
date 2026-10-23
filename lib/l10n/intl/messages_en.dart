@@ -489,6 +489,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "availableBalance": m0,
     "availablePlans": MessageLookupByLibrary.simpleMessage("Choose a Plan"),
     "back": MessageLookupByLibrary.simpleMessage("Back"),
+    "backgroundBlur": MessageLookupByLibrary.simpleMessage("Background blur"),
     "backup": MessageLookupByLibrary.simpleMessage("Backup"),
     "backupAndRestore": MessageLookupByLibrary.simpleMessage(
       "Backup and Restore",
@@ -2956,9 +2957,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Stop button in notification",
     ),
     "showPassword": MessageLookupByLibrary.simpleMessage("Show password"),
-    "sidebarBlur": MessageLookupByLibrary.simpleMessage("Blur sidebar"),
+    "sidebar": MessageLookupByLibrary.simpleMessage("Sidebar"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
-      "Show a translucent system backdrop behind the sidebar",
+      "Background blur lets the desktop behind the window show through the sidebar.",
     ),
     "signInWithGoogle": MessageLookupByLibrary.simpleMessage(
       "Sign in with Google",

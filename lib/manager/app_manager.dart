@@ -282,6 +282,7 @@ class AppSidebarContainer extends ConsumerWidget {
     final showLabel = ref.watch(appSettingProvider).showLabel;
     final canExpand = navigationState.viewMode == ViewMode.desktop;
     final version = ref.watch(versionProvider);
+    final backdropOpacity = ref.watch(windowBlurProvider);
     void selectDestination(int index) {
       final focus = FocusManager.instance.primaryFocus;
       final preserveFocus =
@@ -302,8 +303,10 @@ class AppSidebarContainer extends ConsumerWidget {
         AnimatedVisibility.sidebar(
           visible: !isMobileView,
           child: Material(
-            color: ref.watch(windowBlurProvider)
-                ? context.colorScheme.chromeSurface.withValues(alpha: 0.72)
+            color: backdropOpacity != null
+                ? context.colorScheme.chromeSurface.withValues(
+                    alpha: backdropOpacity,
+                  )
                 : context.colorScheme.chromeSurface,
             shape: BorderDirectional(end: Divider.createBorderSide(context)),
             child: NavigationSidebar(

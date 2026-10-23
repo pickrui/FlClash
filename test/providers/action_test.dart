@@ -30,11 +30,11 @@ class _CoreHandler extends Mock implements CoreHandlerInterface {}
 
 class _WindowPort implements WindowPort {
   @override
-  Future<bool> setBlur({
+  Future<double?> setBlur({
     required bool enabled,
     required Brightness brightness,
     required Color tint,
-  }) async => false;
+  }) async => null;
 
   int toggles = 0;
   @override

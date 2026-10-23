@@ -16,6 +16,7 @@ import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window/window.dart';
 
 class Window implements WindowPort {
+  static const _blurTintOpacity = 0.5;
   static Window? _instance;
   bool _supportsPosition = false;
   late final WindowVisibilityController _visibility =
@@ -184,16 +185,22 @@ class Window implements WindowPort {
     );
   }
 
+  /// Only Windows 10's accent blur takes the tint natively; it draws nothing
+  /// without one. Every material still keeps the sidebar's own color half over
+  /// it, or the rail takes the hue of whatever lies behind the window.
   @override
-  Future<bool> setBlur({
+  Future<double?> setBlur({
     required bool enabled,
     required Brightness brightness,
     required Color tint,
   }) async {
-    if (system.isLinux) return false;
+    if (system.isLinux) return null;
     var effect = WindowEffect.none;
     if (enabled) {
-      for (final candidate in [WindowEffect.acrylic, WindowEffect.blur]) {
+      final candidates = system.isMacOS
+          ? const [WindowEffect.glass, WindowEffect.blur]
+          : const [WindowEffect.mica, WindowEffect.acrylic, WindowEffect.blur];
+      for (final candidate in candidates) {
         if (await desktopWindow.isEffectSupported(candidate)) {
           effect = candidate;
           break;
@@ -202,10 +209,10 @@ class Window implements WindowPort {
     }
     await desktopWindow.setEffect(
       effect,
-      tint: system.isWindows ? tint.withValues(alpha: 0.72) : null,
+      tint: system.isWindows ? tint.withValues(alpha: _blurTintOpacity) : null,
       brightness: brightness,
     );
-    return effect != WindowEffect.none;
+    return effect == WindowEffect.none ? null : _blurTintOpacity;
   }
 
   Future<void> showInitFailure({VoidCallback? onExit}) async {

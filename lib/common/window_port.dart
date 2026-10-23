@@ -11,7 +11,10 @@ import 'package:material_ui/material_ui.dart' show Brightness, Color;
 
 abstract interface class WindowPort {
   Future<WindowProps?> captureNormalGeometry(WindowProps current);
-  Future<bool> setBlur({
+
+  /// Returns the opacity the sidebar keeps its own color at over the backdrop
+  /// now drawn behind the content, or null when none is drawn.
+  Future<double?> setBlur({
     required bool enabled,
     required Brightness brightness,
     required Color tint,

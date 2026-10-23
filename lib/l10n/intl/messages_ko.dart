@@ -405,6 +405,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "availableBalance": m0,
     "availablePlans": MessageLookupByLibrary.simpleMessage("요금제 선택"),
     "back": MessageLookupByLibrary.simpleMessage("뒤로"),
+    "backgroundBlur": MessageLookupByLibrary.simpleMessage("배경 흐림"),
     "backup": MessageLookupByLibrary.simpleMessage("백업"),
     "backupAndRestore": MessageLookupByLibrary.simpleMessage("백업 및 복원"),
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
@@ -2460,9 +2461,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "알림에 중지 버튼 표시",
     ),
     "showPassword": MessageLookupByLibrary.simpleMessage("비밀번호 표시"),
-    "sidebarBlur": MessageLookupByLibrary.simpleMessage("사이드바 흐림 효과"),
+    "sidebar": MessageLookupByLibrary.simpleMessage("사이드바"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
-      "사이드바 뒤에 반투명 시스템 배경을 표시합니다",
+      "배경 흐림은 창 뒤의 바탕화면을 사이드바에 비쳐 보이게 합니다.",
     ),
     "signInWithGoogle": MessageLookupByLibrary.simpleMessage("Google로 로그인"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("백그라운드 실행"),

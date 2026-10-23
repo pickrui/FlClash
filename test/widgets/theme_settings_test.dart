@@ -78,6 +78,24 @@ void main() {
     },
   );
 
+  testWidgets(
+    'sidebar blur starts off, with a working toggle on supported platforms',
+    (tester) async {
+      final c = await _pump(tester, const Size(900, 1800));
+      final toggle = find.text(AppLocalizations.current.backgroundBlur);
+
+      expect(c.read(themeSettingProvider).sidebarBlur, isFalse);
+      if (!Platform.isMacOS && !Platform.isWindows) {
+        expect(toggle, findsNothing);
+        return;
+      }
+      await _scrollTo(tester, toggle);
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(c.read(themeSettingProvider).sidebarBlur, isTrue);
+    },
+  );
+
   testWidgets('the system text scale follows a change at runtime', (
     tester,
   ) async {

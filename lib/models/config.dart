@@ -405,7 +405,7 @@ abstract class ThemeProps with _$ThemeProps {
     @JsonKey(readValue: _readColorStyle)
     ColorStyle colorStyle,
     @Default(false) bool pureBlack,
-    @Default(true) bool sidebarBlur,
+    @Default(false) bool sidebarBlur,
     @Default(LiquidGlassMode.none) LiquidGlassMode liquidGlass,
     @Default(TextScale()) TextScale textScale,
     // `fontFamily` held the names of a removed enum, which old configs may

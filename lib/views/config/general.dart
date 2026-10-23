@@ -493,6 +493,7 @@ class GeneralView extends ConsumerWidget {
     required bool isAndroid,
     required bool isDesktop,
     required bool isMacOS,
+    required bool isWindows,
   }) {
     return [
       if (isDesktop) ...const [AutoLaunchItem(), SilentLaunchItem()],
@@ -500,7 +501,11 @@ class GeneralView extends ConsumerWidget {
       if (isAndroid) const SuspendOnIdleItem(),
       ListItem.open(
         title: Text(appLocalizations.onDemand),
-        widget: OnDemandView(isAndroid: isAndroid, isMacOS: isMacOS),
+        widget: OnDemandView(
+          isAndroid: isAndroid,
+          isMacOS: isMacOS,
+          isWindows: isWindows,
+        ),
       ),
       const MinimizeItem(),
       if (isAndroid) ...const [HiddenItem(), NotificationStopItem()],
@@ -618,6 +623,7 @@ class GeneralView extends ConsumerWidget {
               isAndroid: isAndroid,
               isDesktop: isDesktop,
               isMacOS: target == TargetPlatform.macOS,
+              isWindows: target == TargetPlatform.windows,
             ),
             footer: [
               if (isDesktop) appLocalizations.silentLaunchDesc,

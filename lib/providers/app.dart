@@ -601,10 +601,12 @@ class HotKeyFailures extends _$HotKeyFailures
   Map<HotAction, String> build() => {};
 }
 
+/// The opacity the sidebar keeps its own color at over the backdrop the native
+/// window draws behind the content, or null while it draws none.
 @Riverpod(keepAlive: true)
-class WindowBlur extends _$WindowBlur with NotifierMixin<bool> {
+class WindowBlur extends _$WindowBlur with NotifierMixin<double?> {
   @override
-  bool build() => false;
+  double? build() => null;
 }
 
 final appliedProcessLookupRequiredProvider =

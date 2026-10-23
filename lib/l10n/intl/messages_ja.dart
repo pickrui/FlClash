@@ -400,6 +400,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "availableBalance": m0,
     "availablePlans": MessageLookupByLibrary.simpleMessage("プランを選択"),
     "back": MessageLookupByLibrary.simpleMessage("戻る"),
+    "backgroundBlur": MessageLookupByLibrary.simpleMessage("背景のぼかし"),
     "backup": MessageLookupByLibrary.simpleMessage("バックアップ"),
     "backupAndRestore": MessageLookupByLibrary.simpleMessage("バックアップと復元"),
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
@@ -2509,9 +2510,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "通知に停止ボタンを表示",
     ),
     "showPassword": MessageLookupByLibrary.simpleMessage("パスワードを表示"),
-    "sidebarBlur": MessageLookupByLibrary.simpleMessage("サイドバーのぼかし"),
+    "sidebar": MessageLookupByLibrary.simpleMessage("サイドバー"),
     "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
-      "サイドバーに半透明のシステム背景を表示",
+      "背景のぼかしでは、ウィンドウの背後のデスクトップがサイドバー越しに見えます",
     ),
     "signInWithGoogle": MessageLookupByLibrary.simpleMessage("Google でログイン"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("サイレント起動"),

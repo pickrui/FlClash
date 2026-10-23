@@ -384,6 +384,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "availableBalance": m0,
     "availablePlans": MessageLookupByLibrary.simpleMessage("选择套餐"),
     "back": MessageLookupByLibrary.simpleMessage("返回"),
+    "backgroundBlur": MessageLookupByLibrary.simpleMessage("背景模糊"),
     "backup": MessageLookupByLibrary.simpleMessage("备份"),
     "backupAndRestore": MessageLookupByLibrary.simpleMessage("备份与恢复"),
     "backupAndRestoreDesc": MessageLookupByLibrary.simpleMessage(
@@ -2209,8 +2210,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "通知栏显示停止按钮",
     ),
     "showPassword": MessageLookupByLibrary.simpleMessage("显示密码"),
-    "sidebarBlur": MessageLookupByLibrary.simpleMessage("侧边栏模糊"),
-    "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage("在侧边栏显示半透明系统背景"),
+    "sidebar": MessageLookupByLibrary.simpleMessage("侧边栏"),
+    "sidebarBlurDesc": MessageLookupByLibrary.simpleMessage(
+      "背景模糊会让侧边栏透出窗口后方的桌面",
+    ),
     "signInWithGoogle": MessageLookupByLibrary.simpleMessage("使用 Google 登录"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("静默启动"),
     "silentLaunchDesc": MessageLookupByLibrary.simpleMessage("后台启动"),

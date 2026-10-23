@@ -52,17 +52,17 @@ class _RecordingStoreAction extends StoreAction {
 
 class _RecordingWindowPort implements WindowPort {
   @override
-  Future<bool> setBlur({
+  Future<double?> setBlur({
     required bool enabled,
     required Brightness brightness,
     required Color tint,
   }) async {
     blurCalls.add(enabled);
-    return onBlur?.call(enabled) ?? false;
+    return onBlur?.call(enabled);
   }
 
   final blurCalls = <bool>[];
-  Future<bool> Function(bool)? onBlur;
+  Future<double?> Function(bool)? onBlur;
   Rect bounds = const Rect.fromLTWH(0, 0, 1000, 800);
   int shows = 0;
   Completer<void>? geometryGate;
@@ -188,44 +188,61 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets(
-    'blur updates are serialized and stale results cannot restore transparency',
-    (tester) async {
-      final first = Completer<bool>();
-      window.onBlur = (_) => first.future;
-      await pumpWindowManager(tester);
-      expect(window.blurCalls, [true]);
-      container
-          .read(themeSettingProvider.notifier)
-          .update((state) => state.copyWith(sidebarBlur: false));
-      await tester.pump();
-      expect(window.blurCalls, [true]);
-      window.onBlur = (enabled) async => enabled;
-      first.complete(true);
-      await tester.pumpAndSettle();
-      expect(window.blurCalls, [true, false]);
-      expect(container.read(windowBlurProvider), isFalse);
-    },
-  );
-
-  testWidgets('unsupported or failed blur keeps the sidebar opaque', (
+  testWidgets('sidebar blur starts off and start-up still asks for no effect', (
     tester,
   ) async {
-    window.onBlur = (_) async => throw StateError('unsupported');
-    await pumpWindowManager(tester);
-    expect(window.blurCalls, [true]);
-    expect(container.read(windowBlurProvider), isFalse);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('active blur outlasts the moment nothing watches it', (
-    tester,
-  ) async {
-    window.onBlur = (enabled) async => enabled;
     await pumpWindowManager(tester);
     await tester.pumpAndSettle();
-    expect(window.blurCalls, [true]);
-    expect(container.read(windowBlurProvider), isTrue);
+    expect(container.read(themeSettingProvider).sidebarBlur, isFalse);
+    expect(window.blurCalls, [false]);
+    expect(container.read(windowBlurProvider), isNull);
+  });
+
+  group('sidebar blur', () {
+    setUp(() {
+      container
+          .read(themeSettingProvider.notifier)
+          .update((state) => state.copyWith(sidebarBlur: true));
+    });
+
+    testWidgets(
+      'updates are serialized and stale results cannot restore transparency',
+      (tester) async {
+        final first = Completer<double?>();
+        window.onBlur = (_) => first.future;
+        await pumpWindowManager(tester);
+        expect(window.blurCalls, [true]);
+        container
+            .read(themeSettingProvider.notifier)
+            .update((state) => state.copyWith(sidebarBlur: false));
+        await tester.pump();
+        expect(window.blurCalls, [true]);
+        window.onBlur = (enabled) async => enabled ? 0.5 : null;
+        first.complete(0.5);
+        await tester.pumpAndSettle();
+        expect(window.blurCalls, [true, false]);
+        expect(container.read(windowBlurProvider), isNull);
+      },
+    );
+
+    testWidgets('unsupported or failed blur keeps the sidebar opaque', (
+      tester,
+    ) async {
+      window.onBlur = (_) async => throw StateError('unsupported');
+      await pumpWindowManager(tester);
+      expect(window.blurCalls, [true]);
+      expect(container.read(windowBlurProvider), isNull);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('active blur hands its opacity to the sidebar and outlasts '
+        'the moment nothing watches it', (tester) async {
+      window.onBlur = (enabled) async => enabled ? 0.5 : null;
+      await pumpWindowManager(tester);
+      await tester.pumpAndSettle();
+      expect(window.blurCalls, [true]);
+      expect(container.read(windowBlurProvider), 0.5);
+    });
   });
 
   testWidgets('renders its child untouched', (tester) async {

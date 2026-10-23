@@ -2031,10 +2031,17 @@ abstract class _$HotKeyFailures extends $Notifier<Map<HotAction, String>> {
   }
 }
 
+/// The opacity the sidebar keeps its own color at over the backdrop the native
+/// window draws behind the content, or null while it draws none.
+
 @ProviderFor(WindowBlur)
 final windowBlurProvider = WindowBlurProvider._();
 
-final class WindowBlurProvider extends $NotifierProvider<WindowBlur, bool> {
+/// The opacity the sidebar keeps its own color at over the backdrop the native
+/// window draws behind the content, or null while it draws none.
+final class WindowBlurProvider extends $NotifierProvider<WindowBlur, double?> {
+  /// The opacity the sidebar keeps its own color at over the backdrop the native
+  /// window draws behind the content, or null while it draws none.
   WindowBlurProvider._()
     : super(
         from: null,
@@ -2054,27 +2061,30 @@ final class WindowBlurProvider extends $NotifierProvider<WindowBlur, bool> {
   WindowBlur create() => WindowBlur();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
+  Override overrideWithValue(double? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
+      providerOverride: $SyncValueProvider<double?>(value),
     );
   }
 }
 
-String _$windowBlurHash() => r'25bc5eaf3c436dc394df2897f87ed84d01627b4e';
+String _$windowBlurHash() => r'dfe12278ec8ed6a2cc0da1bdb8957f008090a31e';
 
-abstract class _$WindowBlur extends $Notifier<bool> {
-  bool build();
+/// The opacity the sidebar keeps its own color at over the backdrop the native
+/// window draws behind the content, or null while it draws none.
+
+abstract class _$WindowBlur extends $Notifier<double?> {
+  double? build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<bool, bool>;
+    final ref = this.ref as $Ref<double?, double?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<bool, bool>,
-              bool,
+              AnyNotifier<double?, double?>,
+              double?,
               Object?,
               Object?
             >;

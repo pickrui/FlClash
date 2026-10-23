@@ -74,9 +74,9 @@ class _WindowManagerState extends ConsumerState<WindowManager>
       if (!mounted || revision != _windowBlurRevision) return;
       final port = windowPort;
       if (port == null) return;
-      bool active;
+      double? opacity;
       try {
-        active = await port.setBlur(
+        opacity = await port.setBlur(
           enabled: request.enabled,
           brightness: request.brightness,
           tint: request.tint,
@@ -86,10 +86,9 @@ class _WindowManagerState extends ConsumerState<WindowManager>
           'Window blur failed: ${error.runtimeType}',
           logLevel: LogLevel.warning,
         );
-        active = false;
       }
       if (!mounted || revision != _windowBlurRevision) return;
-      ref.read(windowBlurProvider.notifier).value = active;
+      ref.read(windowBlurProvider.notifier).value = opacity;
     });
   }
 

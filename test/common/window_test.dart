@@ -71,50 +71,66 @@ void main() {
     expect(Window(), same(Window()));
   });
 
-  for (final supportedEffect in ['acrylic', 'blur', null]) {
+  for (final supportedEffect in ['mica', 'glass', 'acrylic', 'blur', null]) {
     test(
       'sidebar blur selects ${supportedEffect ?? 'solid'} fallback',
       () async {
+        final candidates = Platform.isMacOS
+            ? ['glass', 'blur']
+            : ['mica', 'acrylic', 'blur'];
         final requested = <String>[];
         final applied = <String>[];
+        Object? appliedTint;
         binding.defaultBinaryMessenger.setMockMethodCallHandler(
           _windowChannel,
           (call) async {
-            final effect = (call.arguments as Map)['effect'] as String;
+            final arguments = call.arguments as Map;
+            final effect = arguments['effect'] as String;
             if (call.method == 'isEffectSupported') {
               requested.add(effect);
               return effect == supportedEffect;
             }
-            if (call.method == 'setEffect') applied.add(effect);
+            if (call.method == 'setEffect') {
+              applied.add(effect);
+              appliedTint = arguments['tint'];
+            }
             return null;
           },
         );
-        final active = await Window().setBlur(
+        const tint = Color(0xFF121212);
+        final opacity = await Window().setBlur(
           enabled: true,
           brightness: Brightness.dark,
-          tint: const Color(0xFF121212),
+          tint: tint,
         );
         if (Platform.isLinux) {
-          expect(active, isFalse);
+          expect(opacity, isNull);
           expect(requested, isEmpty);
           expect(applied, isEmpty);
           return;
         }
-        expect(active, supportedEffect != null);
+        final drawn = candidates.contains(supportedEffect);
+        expect(opacity, drawn ? 0.5 : isNull);
         expect(
           requested,
-          supportedEffect == 'acrylic' ? ['acrylic'] : ['acrylic', 'blur'],
+          drawn
+              ? candidates.sublist(0, candidates.indexOf(supportedEffect!) + 1)
+              : candidates,
         );
-        expect(applied, [supportedEffect ?? 'none']);
+        expect(applied, [if (drawn) supportedEffect! else 'none']);
+        expect(
+          appliedTint,
+          Platform.isWindows ? tint.withValues(alpha: 0.5).toARGB32() : null,
+        );
         requested.clear();
         applied.clear();
         expect(
           await Window().setBlur(
             enabled: false,
             brightness: Brightness.dark,
-            tint: const Color(0xFF121212),
+            tint: tint,
           ),
-          isFalse,
+          isNull,
         );
         expect(requested, isEmpty);
         expect(applied, ['none']);
