@@ -9,6 +9,7 @@ class _CodeForgeState extends State<CodeForge>
     with TickerProviderStateMixin, WidgetsBindingObserver
     implements CodeForgeView {
   late final ScrollController _hscrollController, _vscrollController;
+  ScrollController? _ownedVscrollController;
   late CodeForgeController _controller;
   late final FocusNode _focusNode;
   late final AnimationController _caretBlinkController;
@@ -42,7 +43,9 @@ class _CodeForgeState extends State<CodeForge>
     WidgetsBinding.instance.addObserver(this);
     _focusNode = FocusNode();
     _hscrollController = ScrollController();
-    _vscrollController = ScrollController();
+    _vscrollController =
+        widget.verticalScrollController ??
+        (_ownedVscrollController = ScrollController());
     _selectionActiveNotifier = ValueNotifier(false);
     _magnifierNotifier.addListener(_syncMagnifier);
     _selectionStyle = widget.selectionStyle ?? CodeSelectionStyle();
@@ -199,7 +202,7 @@ class _CodeForgeState extends State<CodeForge>
     _scrollbarLineNumberIndicator.dispose();
     _focusNode.dispose();
     _hscrollController.dispose();
-    _vscrollController.dispose();
+    _ownedVscrollController?.dispose();
     super.dispose();
   }
 
@@ -249,6 +252,23 @@ class _CodeForgeState extends State<CodeForge>
     if (_ownsUndoController) _undoRedoController.dispose();
   }
 
+  Map<Type, GestureRecognizerFactory> get _fieldGestures => {
+    TapGestureRecognizer:
+        GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+          TapGestureRecognizer.new,
+          (tap) => tap.onTap = () {
+            if (_isMobile) return;
+            _focusNode.requestFocus();
+          },
+        ),
+    if (_isMobile)
+      _SelectionDragHold:
+          GestureRecognizerFactoryWithHandlers<_SelectionDragHold>(
+            () => _SelectionDragHold(_selectionActiveNotifier),
+            (_) {},
+          ),
+  };
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -272,11 +292,8 @@ class _CodeForgeState extends State<CodeForge>
                 RawScrollbar(
                   thumbVisibility: _isHovering,
                   controller: _hscrollController,
-                  child: GestureDetector(
-                    onTap: () {
-                      if (_isMobile) return;
-                      _focusNode.requestFocus();
-                    },
+                  child: RawGestureDetector(
+                    gestures: _fieldGestures,
                     child: MouseRegion(
                       onEnter: (event) {
                         if (mounted) {
@@ -389,4 +406,45 @@ class _CodeForgeState extends State<CodeForge>
       ],
     );
   }
+}
+
+/// Wins the drag a touch selection follows, which the scroll views give up
+/// as it starts, so a sheet or route around the editor never moves with it.
+class _SelectionDragHold extends OneSequenceGestureRecognizer {
+  _SelectionDragHold(this._selecting);
+
+  final ValueListenable<bool> _selecting;
+  var _held = false;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    _held = false;
+    _holdIfSelecting();
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event is PointerMoveEvent) {
+      _holdIfSelecting();
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      if (!_held) resolve(GestureDisposition.rejected);
+      stopTrackingPointer(event.pointer);
+    }
+  }
+
+  void _holdIfSelecting() {
+    if (_held || !_selecting.value) return;
+    _held = true;
+    resolve(GestureDisposition.accepted);
+  }
+
+  @override
+  void rejectGesture(int pointer) => stopTrackingPointer(pointer);
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {}
+
+  @override
+  String get debugDescription => 'selection drag hold';
 }

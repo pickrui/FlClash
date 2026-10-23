@@ -123,7 +123,7 @@ void main() {
         final editor = tester
             .widget<CodeForge>(find.byType(CodeForge))
             .controller;
-        editor.text = 'payload: [example.net]';
+        editor.replaceText('payload: [example.net]');
         await settle(tester);
         await tester.tap(find.byTooltip(AppLocalizations.current.save));
         await settle(tester);

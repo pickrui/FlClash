@@ -416,9 +416,11 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
         title: context.appLocalizations.nodeDefinition,
         schema: EditorSchema.proxy,
         content: _yamlController.text,
-        onSave: (editorContext, _, content) {
+        onSave: (editorContext, _, content) async {
+          final text = await content.readText();
+          if (!editorContext.mounted) return;
           try {
-            final value = parseProfileProxyDefinition(content);
+            final value = parseProfileProxyDefinition(text);
             if (!mounted) return;
             setState(() {
               _proxy = value;

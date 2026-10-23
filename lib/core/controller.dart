@@ -198,10 +198,10 @@ class CoreController {
     return config;
   }
 
-  Future<String> validateConfigWithData(String data) async {
+  Future<String> validateConfigWithData(List<int> data) async {
     final file = File(await appPath.tempFilePath);
     try {
-      await file.safeWriteAsString(data);
+      await file.safeWriteAsBytes(data);
       return await _interface.validateConfig(file.path);
     } finally {
       await file.safeDelete();

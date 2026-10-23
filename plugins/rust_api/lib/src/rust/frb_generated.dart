@@ -69,7 +69,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.13.0';
 
   @override
-  int get rustContentHash => -1831657017;
+  int get rustContentHash => -87979830;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -111,8 +111,8 @@ abstract class RustLibApi extends BaseApi {
 
   RopeBridge crateApiEditorRopeBridgeCreate({required String initialText});
 
-  Future<RopeBridge> crateApiEditorRopeBridgeCreateInBackground({
-    required String initialText,
+  Future<RopeBridge> crateApiEditorRopeBridgeFromUtf8({
+    required List<int> bytes,
   });
 
   String crateApiEditorRopeBridgeGetText({required RopeBridge that});
@@ -137,16 +137,41 @@ abstract class RustLibApi extends BaseApi {
     required BigInt lineIdx,
   });
 
+  Future<RopeBridge> crateApiEditorRopeBridgeOpenFile({required String path});
+
   void crateApiEditorRopeBridgeRemove({
     required RopeBridge that,
     required BigInt start,
     required BigInt end,
   });
 
+  bool crateApiEditorRopeBridgeSameText({
+    required RopeBridge that,
+    required RopeBridge original,
+    required BigInt spliceStart,
+    required BigInt spliceLen,
+    required String spliceText,
+  });
+
   String crateApiEditorRopeBridgeSlice({
     required RopeBridge that,
     required BigInt start,
     required BigInt end,
+  });
+
+  RopeBridge crateApiEditorRopeBridgeSnapshot({required RopeBridge that});
+
+  Future<Uint8List> crateApiEditorRopeBridgeUtf8Bytes({
+    required RopeBridge that,
+  });
+
+  Future<RopeBridge> crateApiEditorRopeUploadFinish({required RopeUpload that});
+
+  RopeUpload crateApiEditorRopeUploadNew({required BigInt capacity});
+
+  Future<void> crateApiEditorRopeUploadPush({
+    required RopeUpload that,
+    required List<int> chunk,
   });
 
   Future<ScriptEvaluation> crateApiScriptEvaluateScript({
@@ -196,6 +221,14 @@ abstract class RustLibApi extends BaseApi {
   get rust_arc_decrement_strong_count_RopeBridge;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_RopeBridgePtr;
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_RopeUpload;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_RopeUpload;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_RopeUploadPtr;
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -472,14 +505,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<RopeBridge> crateApiEditorRopeBridgeCreateInBackground({
-    required String initialText,
+  Future<RopeBridge> crateApiEditorRopeBridgeFromUtf8({
+    required List<int> bytes,
   }) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(initialText, serializer);
+          sse_encode_list_prim_u_8_loose(bytes, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -490,19 +523,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         codec: SseCodec(
           decodeSuccessData:
               sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeBridge,
-          decodeErrorData: null,
+          decodeErrorData: sse_decode_editor_open_error,
         ),
-        constMeta: kCrateApiEditorRopeBridgeCreateInBackgroundConstMeta,
-        argValues: [initialText],
+        constMeta: kCrateApiEditorRopeBridgeFromUtf8ConstMeta,
+        argValues: [bytes],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiEditorRopeBridgeCreateInBackgroundConstMeta =>
+  TaskConstMeta get kCrateApiEditorRopeBridgeFromUtf8ConstMeta =>
       const TaskConstMeta(
-        debugName: "RopeBridge_create_in_background",
-        argNames: ["initialText"],
+        debugName: "RopeBridge_from_utf8",
+        argNames: ["bytes"],
       );
 
   @override
@@ -691,6 +724,38 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<RopeBridge> crateApiEditorRopeBridgeOpenFile({required String path}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(path, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 16,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeBridge,
+          decodeErrorData: sse_decode_editor_open_error,
+        ),
+        constMeta: kCrateApiEditorRopeBridgeOpenFileConstMeta,
+        argValues: [path],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEditorRopeBridgeOpenFileConstMeta =>
+      const TaskConstMeta(
+        debugName: "RopeBridge_open_file",
+        argNames: ["path"],
+      );
+
+  @override
   void crateApiEditorRopeBridgeRemove({
     required RopeBridge that,
     required BigInt start,
@@ -706,7 +771,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_usize(start, serializer);
           sse_encode_usize(end, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 16)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -726,6 +791,54 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  bool crateApiEditorRopeBridgeSameText({
+    required RopeBridge that,
+    required RopeBridge original,
+    required BigInt spliceStart,
+    required BigInt spliceLen,
+    required String spliceText,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeBridge(
+            that,
+            serializer,
+          );
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeBridge(
+            original,
+            serializer,
+          );
+          sse_encode_usize(spliceStart, serializer);
+          sse_encode_usize(spliceLen, serializer);
+          sse_encode_String(spliceText, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEditorRopeBridgeSameTextConstMeta,
+        argValues: [that, original, spliceStart, spliceLen, spliceText],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEditorRopeBridgeSameTextConstMeta =>
+      const TaskConstMeta(
+        debugName: "RopeBridge_same_text",
+        argNames: [
+          "that",
+          "original",
+          "spliceStart",
+          "spliceLen",
+          "spliceText",
+        ],
+      );
+
+  @override
   String crateApiEditorRopeBridgeSlice({
     required RopeBridge that,
     required BigInt start,
@@ -741,7 +854,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
           sse_encode_usize(start, serializer);
           sse_encode_usize(end, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -761,6 +874,165 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  RopeBridge crateApiEditorRopeBridgeSnapshot({required RopeBridge that}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeBridge(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeBridge,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEditorRopeBridgeSnapshotConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEditorRopeBridgeSnapshotConstMeta =>
+      const TaskConstMeta(debugName: "RopeBridge_snapshot", argNames: ["that"]);
+
+  @override
+  Future<Uint8List> crateApiEditorRopeBridgeUtf8Bytes({
+    required RopeBridge that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeBridge(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 21,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEditorRopeBridgeUtf8BytesConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEditorRopeBridgeUtf8BytesConstMeta =>
+      const TaskConstMeta(
+        debugName: "RopeBridge_utf8_bytes",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<RopeBridge> crateApiEditorRopeUploadFinish({
+    required RopeUpload that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 22,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeBridge,
+          decodeErrorData: sse_decode_editor_open_error,
+        ),
+        constMeta: kCrateApiEditorRopeUploadFinishConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEditorRopeUploadFinishConstMeta =>
+      const TaskConstMeta(debugName: "RopeUpload_finish", argNames: ["that"]);
+
+  @override
+  RopeUpload crateApiEditorRopeUploadNew({required BigInt capacity}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_usize(capacity, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEditorRopeUploadNewConstMeta,
+        argValues: [capacity],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEditorRopeUploadNewConstMeta =>
+      const TaskConstMeta(debugName: "RopeUpload_new", argNames: ["capacity"]);
+
+  @override
+  Future<void> crateApiEditorRopeUploadPush({
+    required RopeUpload that,
+    required List<int> chunk,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+            that,
+            serializer,
+          );
+          sse_encode_list_prim_u_8_loose(chunk, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 24,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEditorRopeUploadPushConstMeta,
+        argValues: [that, chunk],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEditorRopeUploadPushConstMeta =>
+      const TaskConstMeta(
+        debugName: "RopeUpload_push",
+        argNames: ["that", "chunk"],
+      );
+
+  @override
   Future<ScriptEvaluation> crateApiScriptEvaluateScript({
     required String script,
     required String config,
@@ -774,7 +1046,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 25,
             port: port_,
           );
         },
@@ -812,7 +1084,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 19,
+            funcId: 26,
             port: port_,
           );
         },
@@ -847,7 +1119,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_usize(targetOffset, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 27)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_opt_box_autoadd_usize,
@@ -884,7 +1156,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_usize(firstVisible, serializer);
           sse_encode_usize(lastVisible, serializer);
           sse_encode_usize(tabSize, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 28)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_guide_block,
@@ -915,7 +1187,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 22,
+              funcId: 29,
               port: port_,
             );
           },
@@ -944,7 +1216,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 23,
+            funcId: 30,
             port: port_,
           );
         },
@@ -974,7 +1246,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 24,
+            funcId: 31,
             port: port_,
           );
         },
@@ -1005,7 +1277,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 25,
+            funcId: 32,
             port: port_,
           );
         },
@@ -1039,6 +1311,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   get rust_arc_decrement_strong_count_RopeBridge => wire
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeBridge;
 
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_RopeUpload => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_RopeUpload => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload;
+
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -1061,6 +1341,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return RopeBridgeImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  RopeUpload
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return RopeUploadImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  RopeUpload
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return RopeUploadImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
@@ -1100,6 +1398,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  RopeUpload
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return RopeUploadImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   RustStreamSink<IpcEvent> dco_decode_StreamSink_ipc_event_Sse(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError();
@@ -1133,6 +1440,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt dco_decode_box_autoadd_usize(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_usize(raw);
+  }
+
+  @protected
+  EditorOpenError dco_decode_editor_open_error(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return EditorOpenError(
+      kind: dco_decode_editor_open_error_kind(arr[0]),
+      message: dco_decode_String(arr[1]),
+    );
+  }
+
+  @protected
+  EditorOpenErrorKind dco_decode_editor_open_error_kind(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return EditorOpenErrorKind.values[raw as int];
   }
 
   @protected
@@ -1371,6 +1696,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  RopeUpload
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return RopeUploadImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  RopeUpload
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return RopeUploadImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   IpcServer
   sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerIpcServer(
     SseDeserializer deserializer,
@@ -1419,6 +1768,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  RopeUpload
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return RopeUploadImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   RustStreamSink<IpcEvent> sse_decode_StreamSink_ipc_event_Sse(
     SseDeserializer deserializer,
   ) {
@@ -1457,6 +1818,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt sse_decode_box_autoadd_usize(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_usize(deserializer));
+  }
+
+  @protected
+  EditorOpenError sse_decode_editor_open_error(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_kind = sse_decode_editor_open_error_kind(deserializer);
+    var var_message = sse_decode_String(deserializer);
+    return EditorOpenError(kind: var_kind, message: var_message);
+  }
+
+  @protected
+  EditorOpenErrorKind sse_decode_editor_open_error_kind(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return EditorOpenErrorKind.values[inner];
   }
 
   @protected
@@ -1752,6 +2130,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+    RopeUpload self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as RopeUploadImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+    RopeUpload self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as RopeUploadImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
+  }
+
+  @protected
+  void
   sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerIpcServer(
     IpcServer self,
     SseSerializer serializer,
@@ -1798,6 +2202,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
       (self as RopeBridgeImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRopeUpload(
+    RopeUpload self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as RopeUploadImpl).frbInternalSseEncode(move: null),
       serializer,
     );
   }
@@ -1858,6 +2275,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_box_autoadd_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(self, serializer);
+  }
+
+  @protected
+  void sse_encode_editor_open_error(
+    EditorOpenError self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_editor_open_error_kind(self.kind, serializer);
+    sse_encode_String(self.message, serializer);
+  }
+
+  @protected
+  void sse_encode_editor_open_error_kind(
+    EditorOpenErrorKind self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
   }
 
   @protected
@@ -2199,8 +2635,53 @@ class RopeBridgeImpl extends RustOpaque implements RopeBridge {
       .api
       .crateApiEditorRopeBridgeRemove(that: this, start: start, end: end);
 
+  bool sameText({
+    required RopeBridge original,
+    required BigInt spliceStart,
+    required BigInt spliceLen,
+    required String spliceText,
+  }) => RustLib.instance.api.crateApiEditorRopeBridgeSameText(
+    that: this,
+    original: original,
+    spliceStart: spliceStart,
+    spliceLen: spliceLen,
+    spliceText: spliceText,
+  );
+
   String slice({required BigInt start, required BigInt end}) => RustLib
       .instance
       .api
       .crateApiEditorRopeBridgeSlice(that: this, start: start, end: end);
+
+  RopeBridge snapshot() =>
+      RustLib.instance.api.crateApiEditorRopeBridgeSnapshot(that: this);
+
+  Future<Uint8List> utf8Bytes() =>
+      RustLib.instance.api.crateApiEditorRopeBridgeUtf8Bytes(that: this);
+}
+
+@sealed
+class RopeUploadImpl extends RustOpaque implements RopeUpload {
+  // Not to be used by end users
+  RopeUploadImpl.frbInternalDcoDecode(List<dynamic> wire)
+    : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  RopeUploadImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        RustLib.instance.api.rust_arc_increment_strong_count_RopeUpload,
+    rustArcDecrementStrongCount:
+        RustLib.instance.api.rust_arc_decrement_strong_count_RopeUpload,
+    rustArcDecrementStrongCountPtr:
+        RustLib.instance.api.rust_arc_decrement_strong_count_RopeUploadPtr,
+  );
+
+  Future<RopeBridge> finish() =>
+      RustLib.instance.api.crateApiEditorRopeUploadFinish(that: this);
+
+  Future<void> push({required List<int> chunk}) => RustLib.instance.api
+      .crateApiEditorRopeUploadPush(that: this, chunk: chunk);
 }

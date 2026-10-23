@@ -32,7 +32,8 @@ Future<void> showCustomQuickEdit(
     content: content,
     readOnly: false,
     schema: schema,
-    onPop: (context, _, next) async {
+    onPop: (context, _, edited) async {
+      final next = await edited.readText();
       if (next == content) {
         return true;
       }

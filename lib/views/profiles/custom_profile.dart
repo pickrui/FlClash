@@ -206,23 +206,23 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
         final file = await picker.pickerFile();
         return file?.readBytes;
       case CustomImportSource.text:
-        String? text;
+        Uint8List? data;
         await BaseNavigator.push(
           context,
           EditorPage(
             title: appLocalizations.importText,
             content: '',
             readOnly: false,
-            onSave: (editorContext, _, content) {
-              text = content;
+            onSave: (editorContext, _, content) async {
+              final bytes = await content.readBytes();
+              if (!editorContext.mounted) return;
+              data = bytes;
               Navigator.of(editorContext).pop();
             },
           ),
         );
-        final content = text;
-        return content == null
-            ? null
-            : () async => Uint8List.fromList(utf8.encode(content));
+        final content = data;
+        return content == null ? null : () async => content;
     }
   }
 

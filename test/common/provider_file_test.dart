@@ -26,7 +26,7 @@ void main() {
       final file = File('${directory.path}/provider');
       await file.writeAsString(content);
       expect(await probeProviderFile(file.path), ProviderFileType.text);
-      expect(await readProviderText(file.path), content);
+      expect(utf8.decode(await readProviderBytes(file.path)), content);
       for (final bytes in [
         [0x28, 0xb5, 0x2f, 0xfd, 0],
         [0, 10, 13],
@@ -34,7 +34,7 @@ void main() {
       ]) {
         await file.writeAsBytes(bytes);
         expect(() => decodeProviderText(bytes), throwsFormatException);
-        await expectLater(readProviderText(file.path), throwsFormatException);
+        await expectLater(readProviderBytes(file.path), throwsFormatException);
       }
       await file.writeAsBytes([0x28, 0xb5, 0x2f, 0xfd, 0]);
       expect(await probeProviderFile(file.path), ProviderFileType.ruleSet);
@@ -48,13 +48,13 @@ void main() {
     () async {
       final path = '${directory.path}/new.yaml';
       expect(await probeProviderFile(path), ProviderFileType.text);
-      expect(await readProviderText(path), '');
+      expect(await readProviderBytes(path), isEmpty);
       expect(await probeProviderFile(null), ProviderFileType.binary);
       final file = await File(path).open(mode: FileMode.write);
       await file.truncate(maxExternalProviderBytes + 1);
       await file.close();
       await expectLater(
-        readProviderText(path),
+        readProviderBytes(path),
         throwsA(isA<ProviderFileTooLarge>()),
       );
       expect(decodeProviderText(utf8.encode('payload: []')), 'payload: []');

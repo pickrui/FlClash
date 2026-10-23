@@ -740,7 +740,7 @@ void main() {
       });
 
       await expectLater(
-        controller.validateConfigWithData('proxies: []'),
+        controller.validateConfigWithData(utf8.encode('proxies: []')),
         throwsA(isA<CoreMethodException>()),
       );
 

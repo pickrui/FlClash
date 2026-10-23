@@ -203,8 +203,10 @@ void main() {
       final actions = await openLibrary(tester);
       await tester.tap(find.text('Fixture'));
       await waitForEditor(tester);
-      tester.widget<CodeForge>(find.byType(CodeForge)).controller.text =
-          'const edited = true;';
+      tester
+          .widget<CodeForge>(find.byType(CodeForge))
+          .controller
+          .replaceText('const edited = true;');
       await settle(tester, 2);
       final saving = Completer<void>();
       library.completeSave = () => saving.future;
@@ -262,7 +264,7 @@ void main() {
         .widget<CodeForge>(find.byType(CodeForge))
         .controller;
     expect(controller.text, 'const original = true;');
-    controller.text = 'const edited = true;';
+    controller.replaceText('const edited = true;');
     await settle(tester, 2);
     await tester.tap(find.byTooltip('Save'));
     await settle(tester, 12);
@@ -296,7 +298,7 @@ void main() {
     final controller = tester
         .widget<CodeForge>(find.byType(CodeForge))
         .controller;
-    controller.text = 'const edited = true;';
+    controller.replaceText('const edited = true;');
     library.completeSave = () async => throw StateError('fixture write failed');
     await tester.pump();
     await tester.binding.handlePopRoute();

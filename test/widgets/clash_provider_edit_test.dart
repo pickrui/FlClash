@@ -274,8 +274,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fixture'));
     await settle(tester, 12);
-    tester.widget<CodeForge>(find.byType(CodeForge)).controller.text =
-        'payload: [example.test]';
+    tester
+        .widget<CodeForge>(find.byType(CodeForge))
+        .controller
+        .replaceText('payload: [example.test]');
     await tester.pump();
     await tester.tap(find.byTooltip('Save'));
     await tester.pump();
@@ -323,8 +325,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fixture'));
     await settle(tester, 12);
-    tester.widget<CodeForge>(find.byType(CodeForge)).controller.text =
-        'payload: [example.test]';
+    tester
+        .widget<CodeForge>(find.byType(CodeForge))
+        .controller
+        .replaceText('payload: [example.test]');
     await tester.pump();
     await tester.tap(find.byTooltip('Save'));
     await tester.pump();

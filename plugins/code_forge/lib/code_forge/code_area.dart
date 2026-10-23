@@ -42,6 +42,9 @@ class CodeForge extends StatefulWidget {
 
   final UndoRedoController? undoController;
 
+  /// Read once as the editor mounts; the host owns it.
+  final ScrollController? verticalScrollController;
+
   final Map<String, TextStyle> editorTheme;
 
   final Mode language;
@@ -98,6 +101,7 @@ class CodeForge extends StatefulWidget {
     required this.suggestionPopupBuilder,
     this.undoController,
     this.findController,
+    this.verticalScrollController,
     this.textStyle,
     this.innerPadding,
     this.readOnly = false,

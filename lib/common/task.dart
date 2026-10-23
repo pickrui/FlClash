@@ -13,10 +13,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
-Future<String> readTextFileTask(String path) => compute(_readTextFile, path);
-
-Future<String> _readTextFile(String path) => File(path).readAsString();
-
 Future<T> decodeJSONTask<T>(String data) async {
   return compute<String, T>(_decodeJSON, data);
 }

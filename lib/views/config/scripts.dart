@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/network_error.dart';
@@ -27,7 +28,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
-Future<List<int>> _readScriptBytes(Script script) async {
+Future<Uint8List> _readScriptBytes(Script script) async {
   final file = File(await script.path);
   if (!await file.exists()) throw const ScriptLibraryException('changed');
   return file.readAsBytes();
@@ -144,7 +145,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
   Future<void> _save(
     BuildContext editorContext,
     String title,
-    String content,
+    EditorContent content,
     Script? script,
     List<int>? previousBytes,
   ) async {
@@ -167,10 +168,12 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
           '';
       if (label.isEmpty || !mounted) return;
     }
+    final text = await content.readText();
+    if (!mounted) return;
     final next = script?.copyWith(label: label) ?? Script.create(label: label);
     await _library.save(
       next,
-      content,
+      text,
       previous: script,
       previousBytes: previousBytes,
     );
@@ -178,7 +181,6 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
   }
 
   void _edit([Script? script]) {
-    late String raw;
     List<int>? previousBytes;
     BaseNavigator.push(
       context,
@@ -187,14 +189,14 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
         titleEditable: true,
         language: Language.javaScript,
         load: () async {
-          if (script == null) return raw = scriptTemplate;
-          previousBytes = await _readScriptBytes(script);
-          return raw = utf8.decode(previousBytes!);
+          if (script == null) return CodeForgeDocument.fromText(scriptTemplate);
+          final bytes = await _readScriptBytes(script);
+          previousBytes = bytes;
+          return CodeForgeDocument.fromUtf8(bytes);
         },
         onSave: (context, title, content) =>
             _save(context, title, content, script, previousBytes),
         onPop: (editorContext, title, content) async {
-          if (content == raw && title == (script?.label ?? '')) return true;
           final answer = await globalState.showMessage(
             message: TextSpan(text: context.appLocalizations.saveChanges),
           );

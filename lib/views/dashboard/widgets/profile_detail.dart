@@ -65,10 +65,12 @@ class ProfileDetailSheet extends ConsumerWidget {
           title: profile.realLabel,
           readOnly: true,
           load: profile.type == ProfileType.custom
-              ? () async => encodeYamlTask(
-                  await setupAction.getProfileWithId(profile.id),
+              ? () async => CodeForgeDocument.fromText(
+                  await encodeYamlTask(
+                    await setupAction.getProfileWithId(profile.id),
+                  ),
                 )
-              : () async => readTextFileTask((await profile.file).path),
+              : () async => openEditorFile((await profile.file).path),
         ),
       ),
     );

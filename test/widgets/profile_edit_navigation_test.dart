@@ -132,7 +132,7 @@ void main() {
     final controller = tester
         .widget<CodeForge>(find.byType(CodeForge))
         .controller;
-    controller.text = 'mode: direct';
+    controller.replaceText('mode: direct');
     await settle(tester, 2);
     return profiles;
   }

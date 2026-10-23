@@ -129,9 +129,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(EditorPage), findsOneWidget);
       final editor = tester.widget<CodeForge>(find.byType(CodeForge));
-      editor.controller.text = ntp
-          ? 'server: time.fixture.example\nport: 123'
-          : 'nameserver: [192.0.2.42]\nfallback-filter:\n  geoip: false';
+      editor.controller.replaceText(
+        ntp
+            ? 'server: time.fixture.example\nport: 123'
+            : 'nameserver: [192.0.2.42]\nfallback-filter:\n  geoip: false',
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Save'));
       await tester.pumpAndSettle();
@@ -189,8 +191,10 @@ void main() {
 
     await tester.tap(find.byTooltip('Quick edit'));
     await tester.pumpAndSettle();
-    tester.widget<CodeForge>(find.byType(CodeForge)).controller.text =
-        'fallback: []\nipv6: true';
+    tester
+        .widget<CodeForge>(find.byType(CodeForge))
+        .controller
+        .replaceText('fallback: []\nipv6: true');
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Save'));
     await tester.pumpAndSettle();

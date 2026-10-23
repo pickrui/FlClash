@@ -241,7 +241,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
     Future<void> save(
       BuildContext editorContext,
       String label,
-      String content,
+      EditorContent content,
     ) async {
       var name = label.trim();
       if (name.isEmpty) {
@@ -259,7 +259,9 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
             '';
         if (name.isEmpty || !mounted) return;
       }
-      var next = draft.copyWith(label: name, content: utf8.encode(content));
+      final bytes = await content.readBytes();
+      if (!mounted) return;
+      var next = draft.copyWith(label: name, content: bytes);
       if (provider == null && draft.kind == ProviderKind.rule) {
         final behavior = await globalState
             .showCommonDialog<RuleProviderBehavior>(
@@ -291,7 +293,6 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
           errorContext: editorContext,
         ),
         onPop: (editorContext, title, content) async {
-          if (title == draft.label && content == raw) return true;
           final answer = await globalState.showMessage(
             message: TextSpan(text: context.appLocalizations.saveChanges),
           );
@@ -324,7 +325,9 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
           if (bytes.length > maxProviderContentBytes) {
             throw const ProviderLibraryException('size');
           }
-          return core.previewRuleSet(bytes, provider.behavior.name);
+          return CodeForgeDocument.fromText(
+            await core.previewRuleSet(bytes, provider.behavior.name),
+          );
         },
         schema: EditorSchema.provider,
       ),
@@ -711,13 +714,13 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
         content: content,
         language: Language.yaml,
         onPop: (editorContext, _, value) async {
-          if (value == content) return true;
           final answer = await globalState.showMessage(
             message: TextSpan(text: context.appLocalizations.saveChanges),
           );
           if (answer == null) return false;
           if (answer && mounted) {
-            final bytes = utf8.encode(value);
+            final bytes = await value.readBytes();
+            if (!mounted) return false;
             if (bytes.length > maxProviderContentBytes) {
               if (editorContext.mounted) {
                 editorContext.showNotifier(
@@ -730,9 +733,9 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
           }
           return true;
         },
-        onSave: (editorContext, _, content) {
+        onSave: (editorContext, _, content) async {
+          final bytes = await content.readBytes();
           if (!mounted || !editorContext.mounted) return;
-          final bytes = utf8.encode(content);
           if (bytes.length > maxProviderContentBytes) {
             editorContext.showNotifier(
               editorContext.appLocalizations.providerContentTooLarge,

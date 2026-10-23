@@ -545,13 +545,14 @@ class OverrideView<K extends Enum, M> extends ConsumerWidget {
         schema: quickEdit.schema,
         readOnly: false,
         onSave: (context, _, content) async {
-          if (await _handleQuickEditPop(ref, quickEdit, content, raw) &&
+          final text = await content.readText();
+          if (await _handleQuickEditPop(ref, quickEdit, text, raw) &&
               context.mounted) {
             Navigator.of(context).pop();
           }
         },
-        onPop: (_, _, content) =>
-            _handleQuickEditPop(ref, quickEdit, content, raw),
+        onPop: (_, _, content) async =>
+            _handleQuickEditPop(ref, quickEdit, await content.readText(), raw),
       ),
     );
   }

@@ -45,15 +45,18 @@ String decodeProviderText(List<int> bytes) {
   return utf8.decode(bytes);
 }
 
-Future<String> readProviderText(String path) =>
-    compute(_readProviderText, path);
+/// The text is checked off the UI isolate and handed over as UTF-8.
+Future<Uint8List> readProviderBytes(String path) =>
+    compute(_readProviderBytes, path);
 
-Future<String> _readProviderText(String path) async {
+Future<Uint8List> _readProviderBytes(String path) async {
   final file = File(path);
-  if (!await file.exists()) return '';
-  final bytes = BytesBuilder(copy: false);
+  if (!await file.exists()) return Uint8List(0);
+  final builder = BytesBuilder(copy: false);
   await for (final chunk in file.openRead(0, maxExternalProviderBytes + 1)) {
-    bytes.add(chunk);
+    builder.add(chunk);
   }
-  return decodeProviderText(bytes.takeBytes());
+  final bytes = builder.takeBytes();
+  decodeProviderText(bytes);
+  return bytes;
 }

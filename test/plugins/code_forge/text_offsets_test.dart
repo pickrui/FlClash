@@ -31,7 +31,7 @@ void main() {
         TextRange(start: 1, end: 3),
         TextRange(start: 5, end: 7),
       ]),
-      const [TextRange(start: 1, end: 2), TextRange(start: 4, end: 5)],
+      [1, 2, 4, 5],
     );
   });
 }

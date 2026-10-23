@@ -187,7 +187,7 @@ void main() {
         final leaving = editor.onPop!(
           tester.element(find.byType(EditorPage)),
           editor.title,
-          scenario == 'apply' ? 'ss://edited' : '',
+          EditorContent.text(scenario == 'apply' ? 'ss://edited' : ''),
         );
         await tester.pumpAndSettle();
         if (scenario == 'apply') {
