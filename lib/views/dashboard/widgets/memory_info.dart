@@ -428,8 +428,10 @@ class _MemoryDetailSheetState extends ConsumerState<MemoryDetailSheet>
         ),
       ],
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16)
-            .copyWith(top: context.contentTopPadding, bottom: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+          top: context.contentTopPadding,
+          bottom: 20 + context.bottomInset,
+        ),
         children: [
           _MemoryOverview(snapshot: snapshot),
           if (feedback != null)

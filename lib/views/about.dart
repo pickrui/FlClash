@@ -155,9 +155,9 @@ class _AboutViewState extends State<AboutView> {
       title: appLocalizations.about,
       body: AppBarClearance(
         child: Padding(
-          padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
+          padding: const EdgeInsets.only(top: 16),
           child: ListView(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.only(bottom: 32 + context.bottomInset),
             children: items,
           ),
         ),

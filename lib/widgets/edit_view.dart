@@ -238,7 +238,7 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
           nullStatus: NullStatus(label: appLocalizations.noData),
           child: ReorderableListView.builder(
             padding: EdgeInsets.only(
-              bottom: 16 + 64,
+              bottom: 16 + context.bottomInset,
               top: context.contentTopPadding,
               left: 16,
               right: 16,

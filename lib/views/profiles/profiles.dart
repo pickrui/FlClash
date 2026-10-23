@@ -221,7 +221,7 @@ class _ProfilesGridState extends ConsumerState<_ProfilesGrid> {
     left: _horizontalPadding,
     right: _horizontalPadding,
     top: context.contentTopPadding,
-    bottom: 16 + BottomInsetScope.of(context),
+    bottom: 16 + context.bottomInset,
   );
 
   int _columnsFor(double width) => getProfilesColumns(
@@ -720,26 +720,25 @@ class _ReorderableProfilesSheetState
         onPressed: _handleSave,
         tooltip: context.appLocalizations.save,
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(bottom: 32),
-        child: ReorderableListView.builder(
-          buildDefaultDragHandles: false,
-          padding: const EdgeInsets.symmetric(horizontal: 16)
-              .copyWith(top: context.contentTopPadding),
-          proxyDecorator: (child, index, animation) {
-            return commonProxyDecorator(_buildItem(index), index, animation);
-          },
-          onReorderItem: (oldIndex, newIndex) {
-            setState(() {
-              final profile = profiles.removeAt(oldIndex);
-              profiles.insert(newIndex, profile);
-            });
-          },
-          itemBuilder: (_, index) {
-            return _buildItem(index);
-          },
-          itemCount: profiles.length,
+      body: ReorderableListView.builder(
+        buildDefaultDragHandles: false,
+        padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+          top: context.contentTopPadding,
+          bottom: 32 + context.bottomInset,
         ),
+        proxyDecorator: (child, index, animation) {
+          return commonProxyDecorator(_buildItem(index), index, animation);
+        },
+        onReorderItem: (oldIndex, newIndex) {
+          setState(() {
+            final profile = profiles.removeAt(oldIndex);
+            profiles.insert(newIndex, profile);
+          });
+        },
+        itemBuilder: (_, index) {
+          return _buildItem(index);
+        },
+        itemCount: profiles.length,
       ),
       title: appLocalizations.profilesSort,
     );

@@ -57,11 +57,15 @@ class _AddProfileViewState extends ConsumerState<AddProfileView> {
       return;
     }
     final url = await BaseNavigator.push<String>(context, const ScanPage());
-    if (url != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        profileAction.addProfilesFromLinks([(label: '', url: url)]);
-      });
+    if (url == null) {
+      return;
     }
+    if (context.mounted) {
+      await whenRouteUncovered(context);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      profileAction.addProfilesFromLinks([(label: '', url: url)]);
+    });
   }
 
   Future<void> _toAdd() async {
@@ -172,7 +176,10 @@ class _AddProfileViewState extends ConsumerState<AddProfileView> {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: EdgeInsets.only(top: context.contentTopPadding, bottom: 16),
+      padding: EdgeInsets.only(
+        top: context.contentTopPadding,
+        bottom: 16 + context.bottomInset,
+      ),
       children: [
         ListItem(
           leading: const GlyphIcon(AppGlyphs.qrCode),

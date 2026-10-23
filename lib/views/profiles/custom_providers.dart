@@ -93,8 +93,10 @@ class CustomProvidersView extends ConsumerWidget {
           illustration: NullStatusIllustration.proxies,
         ),
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16)
-              .copyWith(top: context.contentTopPadding, bottom: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+            top: context.contentTopPadding,
+            bottom: 16 + context.bottomInset,
+          ),
           children: [
             generateSection(
               title: appLocalizations.proxyProviders,

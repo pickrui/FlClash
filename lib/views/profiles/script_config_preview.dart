@@ -80,7 +80,7 @@ class ScriptConfigPreviewPage extends StatelessWidget {
             l10n.scriptChangesRemoved(changes.removed.length),
             changes.removed,
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          SliverToBoxAdapter(child: SizedBox(height: 24 + context.bottomInset)),
         ],
       ),
     );

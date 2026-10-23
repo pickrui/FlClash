@@ -434,7 +434,7 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
             const RulesRequireRuleModeHint(),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16)
-                  .copyWith(bottom: 24),
+                  .copyWith(bottom: 24 + context.bottomInset),
               sliver: SliverMainAxisGroup(
                 slivers: [
                   SliverToBoxAdapter(child: _Overview(widget.profileId)),
@@ -631,8 +631,10 @@ class _MoreSectionsView extends ConsumerWidget {
     return CommonScaffold(
       title: appLocalizations.more,
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16)
-            .copyWith(top: context.contentTopPadding, bottom: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+          top: context.contentTopPadding,
+          bottom: 16 + context.bottomInset,
+        ),
         children: [
           generateSection(
             items: [
@@ -692,7 +694,7 @@ class _ProfileProxiesView extends StatelessWidget {
             child: SizedBox(height: context.contentTopPadding),
           ),
           ProfileProxiesContent(profileId: profileId),
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          SliverToBoxAdapter(child: SizedBox(height: 24 + context.bottomInset)),
         ],
       ),
     );

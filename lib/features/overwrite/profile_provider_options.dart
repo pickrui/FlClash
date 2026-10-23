@@ -470,7 +470,7 @@ class _ProfileProviderOptionsDialogState
               builder: (context) => ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
                   top: context.contentTopPadding,
-                  bottom: 20 + BottomInsetScope.of(context),
+                  bottom: 20 + context.bottomInset,
                 ),
                 children: [
                   ErrorBanner(message: issue?.message ?? _error),

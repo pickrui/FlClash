@@ -118,14 +118,29 @@ Future<void> whenRouteSettled(BuildContext context) async {
 bool isRouteArriving(BuildContext context) => routesCarrying(context)
     .any((route) => route.offstage || (route.animation?.isAnimating ?? false));
 
+/// Completes once the route [context] is on stops moving under the route
+/// above it, as while that route still leaves after its pop.
+Future<void> whenRouteUncovered(BuildContext context) async {
+  final animation = ModalRoute.of(context)?.secondaryAnimation;
+  if (animation != null) {
+    await _whenStill(animation);
+  }
+}
+
 Future<void> _whenSettled(ModalRoute<Object?> route) async {
   // The offstage Hero pass reports a completed animation before the first frame.
   while (route.offstage && route.isActive) {
     await SchedulerBinding.instance.endOfFrame;
   }
   final animation = route.animation;
-  if (animation == null || !animation.isAnimating) {
-    return;
+  if (animation != null) {
+    await _whenStill(animation);
+  }
+}
+
+Future<void> _whenStill(Animation<double> animation) {
+  if (!animation.isAnimating) {
+    return Future.value();
   }
   final completer = Completer<void>();
   void handleStatus(AnimationStatus status) {

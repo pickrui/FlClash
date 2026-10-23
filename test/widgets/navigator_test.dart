@@ -183,6 +183,40 @@ void main() {
     expect(isRouteArriving(page), isFalse);
   });
 
+  testWidgets('a page waits for the page above it to finish leaving', (
+    tester,
+  ) async {
+    late BuildContext page;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            page = context;
+            return const Scaffold(body: Text('page'));
+          },
+        ),
+      ),
+    );
+    unawaited(
+      Navigator.of(page).push(
+        MaterialPageRoute<void>(
+          builder: (_) => const Scaffold(body: Text('top')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    Navigator.of(tester.element(find.text('top'))).pop();
+    var uncovered = false;
+    unawaited(whenRouteUncovered(page).then((_) => uncovered = true));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(uncovered, isFalse);
+
+    await tester.pumpAndSettle();
+    expect(uncovered, isTrue);
+  });
+
   testWidgets('closing twice returns one result and preserves the root', (
     tester,
   ) async {

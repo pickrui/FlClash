@@ -43,6 +43,12 @@ extension UiBuildContextExtension on BuildContext {
       TopInsetScope.of(this) ??
       (isInCompactSheet ? sheetAppBarHeight : appBarInset + 12);
 
+  /// What the end of a body scrolls clear of: the system bar the body runs
+  /// under and what floats over its foot. A docked search only counts below
+  /// the scaffold that docks it.
+  double get bottomInset =>
+      BottomInsetScope.of(this) + MediaQuery.paddingOf(this).bottom;
+
   TextStyle get listTitleStyle =>
       AppTextStyle.body.of(this).copyWith(color: colorScheme.onSurface);
 

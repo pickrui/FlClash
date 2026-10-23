@@ -275,7 +275,12 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
 
   Widget _buildOnePane(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        context.contentTopPadding,
+        16,
+        24 + context.bottomInset,
+      ),
       child: CloudContentWidth(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -291,6 +296,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
 
   Widget _buildTwoPanes(BuildContext context) {
     final top = context.contentTopPadding;
+    final bottom = 24 + context.bottomInset;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1120),
@@ -300,7 +306,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
             Expanded(
               flex: 11,
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(16, top, 8, 24),
+                padding: EdgeInsets.fromLTRB(16, top, 8, bottom),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: _buildFilters(context),
@@ -310,7 +316,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
             Expanded(
               flex: 9,
               child: Padding(
-                padding: EdgeInsets.fromLTRB(8, top, 16, 24),
+                padding: EdgeInsets.fromLTRB(8, top, 16, bottom),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

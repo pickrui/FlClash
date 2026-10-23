@@ -185,6 +185,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView>
           const RulesRequireRuleModeHint(),
           ProfileProxyChainsContent(profileId: widget.profileId),
           _Content(widget.profileId),
+          SliverToBoxAdapter(child: SizedBox(height: context.bottomInset)),
         ],
       ),
     );
@@ -850,9 +851,7 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
               onPressed: _handleToAddedRules,
             ),
           ),
-          SliverToBoxAdapter(
-            child: SizedBox(height: 12 + BottomInsetScope.of(context)),
-          ),
+          SliverToBoxAdapter(child: SizedBox(height: 12 + context.bottomInset)),
         ],
       ),
     );

@@ -246,7 +246,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
                 return KeyedAnimatedList<TrackerInfo>(
                   padding: EdgeInsets.only(
                     top: context.contentTopPadding,
-                    bottom: BottomInsetScope.of(context) + 16,
+                    bottom: context.bottomInset + 16,
                   ),
                   controller: _scrollController,
                   items: connections,

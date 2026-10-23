@@ -78,7 +78,12 @@ class PagedSheetForm extends StatelessWidget {
     return CommonScaffold(
       title: title,
       body: Padding(
-        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          context.contentTopPadding,
+          16,
+          16 + context.bottomInset,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

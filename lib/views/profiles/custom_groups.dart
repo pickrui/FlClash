@@ -56,17 +56,21 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
       searchState: AppBarSearchState(
         onSearch: (value) => setState(() => _query = value),
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16)
-                .copyWith(top: context.contentTopPadding, bottom: 24),
-            sliver: CustomProxyGroupsSection(
-              profileId: widget.profileId,
-              query: _query,
+      body: Builder(
+        builder: (context) => CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+                top: context.contentTopPadding,
+                bottom: 24 + context.bottomInset,
+              ),
+              sliver: CustomProxyGroupsSection(
+                profileId: widget.profileId,
+                query: _query,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

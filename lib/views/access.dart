@@ -332,7 +332,7 @@ class _AccessViewState extends ConsumerState<AccessView>
         child: Builder(
           builder: (context) => ListView.builder(
             controller: _controller,
-            padding: EdgeInsets.only(bottom: BottomInsetScope.of(context)),
+            padding: EdgeInsets.only(bottom: context.bottomInset),
             scrollCacheExtent: arrivalScrollCacheExtent(routeSettled),
             itemCount: packages.length,
             itemBuilder: (_, index) {
@@ -606,8 +606,10 @@ class AccessControlPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16)
-          .copyWith(top: context.contentTopPadding, bottom: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+        top: context.contentTopPadding,
+        bottom: 32 + context.bottomInset,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -239,7 +239,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
             appLocalizations.ruleProviders,
             providers.where((item) => item.type == 'Rule').toList(),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverToBoxAdapter(child: SizedBox(height: 16 + context.bottomInset)),
         ],
       ),
       title: appLocalizations.providers,

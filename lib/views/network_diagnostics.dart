@@ -212,7 +212,7 @@ class _NetworkDiagnosticsPageState
                 16,
                 context.contentTopPadding,
                 16,
-                24,
+                24 + context.bottomInset,
               ),
               children: [
                 generateSection(
@@ -319,7 +319,12 @@ class _NetworkDiagnosticsPageState
               onPressed: _busy ? null : _run,
             ),
       body: ListView(
-        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          context.contentTopPadding,
+          16,
+          24 + context.bottomInset,
+        ),
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),

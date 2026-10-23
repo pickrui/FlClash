@@ -159,8 +159,10 @@ class _RulePresetSheetState extends State<RulePresetSheet> {
         body: ListView(
           controller: _scroll,
           shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(horizontal: 16)
-              .copyWith(top: context.contentTopPadding, bottom: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+            top: context.contentTopPadding,
+            bottom: 20 + context.bottomInset,
+          ),
           children: [
             ErrorBanner(message: _error),
             generateSection(

@@ -25,11 +25,13 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
 
   Completer<void>? permission;
   Completer<void>? stopping;
+  Completer<void>? pausing;
   Object? stopFailure;
   bool denied = false;
   bool running = false;
   int startCalls = 0;
   int stopCalls = 0;
+  int pauseCalls = 0;
   int disposeCalls = 0;
 
   void emit(BarcodeCapture capture) => _barcodes.add(capture);
@@ -68,6 +70,13 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
     stopCalls++;
     await stopping?.future;
     if (stopFailure case final error?) throw error;
+    running = false;
+  }
+
+  @override
+  Future<void> pause() async {
+    pauseCalls++;
+    await pausing?.future;
     running = false;
   }
 
@@ -569,6 +578,67 @@ void main() {
     expect(pops, 1);
     expect(result, 'https://sub.example/ok');
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the close button pauses the camera before the page leaves', (
+    tester,
+  ) async {
+    final pausing = platform.pausing = Completer<void>();
+    var popped = false;
+    await pumpScanPage(tester, onPopped: (_) => popped = true);
+
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pump();
+    expect(platform.pauseCalls, 1);
+    expect(popped, isFalse);
+
+    pausing.complete();
+    await tester.pumpAndSettle();
+    expect(popped, isTrue);
+    expect(find.byType(ScanPage), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a back while the camera runs pauses it first', (tester) async {
+    final pausing = platform.pausing = Completer<void>();
+    var popped = false;
+    await pumpScanPage(tester, onPopped: (_) => popped = true);
+    final context = tester.element(find.byType(ScanPage));
+    expect(
+      ModalRoute.of(context)!.popDisposition,
+      RoutePopDisposition.doNotPop,
+    );
+
+    unawaited(Navigator.of(context).maybePop());
+    await tester.pump();
+    expect(platform.pauseCalls, 1);
+    expect(popped, isFalse);
+
+    pausing.complete();
+    await tester.pumpAndSettle();
+    expect(popped, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a captured code leaves on the last frame', (tester) async {
+    await pumpScanPage(tester, onPopped: (_) {});
+
+    platform.emit(_capture(BarcodeType.url, 'https://sub.example/x'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final cover = tester.widget<AnimatedOpacity>(
+      find.ancestor(
+        of: find.byWidgetPredicate(
+          (widget) => widget is ColoredBox && widget.color == Colors.black,
+        ),
+        matching: find.byType(AnimatedOpacity),
+      ),
+    );
+    expect(find.byType(ScanPage), findsOneWidget);
+    expect(cover.opacity, 0);
+    expect(platform.pauseCalls, 1);
+    expect(platform.stopCalls, 0);
   });
 
   testWidgets('landscape camera window stays inside available height', (

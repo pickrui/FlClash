@@ -344,8 +344,10 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
                 label: l.nullTip(l.script),
               ),
               child: ReorderableListView.builder(
-                padding: const EdgeInsets.all(16)
-                    .copyWith(top: context.contentTopPadding),
+                padding: const EdgeInsets.all(16).copyWith(
+                  top: context.contentTopPadding,
+                  bottom: 16 + context.bottomInset,
+                ),
                 buildDefaultDragHandles: false,
                 itemCount: scripts.length,
                 itemBuilder: (_, index) => _buildItem(scripts, index),
@@ -532,8 +534,10 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
                 illustration: NullStatusIllustration.scripts,
               )
             : ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16)
-                    .copyWith(top: context.contentTopPadding, bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+                  top: context.contentTopPadding,
+                  bottom: 16 + context.bottomInset,
+                ),
                 children: [
                   generateSection(
                     items: [

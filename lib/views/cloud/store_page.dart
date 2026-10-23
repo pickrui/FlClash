@@ -141,7 +141,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
                   16,
                   context.contentTopPadding,
                   16,
-                  32,
+                  32 + context.bottomInset,
                 ),
                 children: [
                   CloudContentWidth(
@@ -560,7 +560,12 @@ class _PlanPickerSheet extends StatelessWidget {
         title: title,
         body: ListView(
           shrinkWrap: true,
-          padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            context.contentTopPadding,
+            16,
+            24 + context.bottomInset,
+          ),
           children: [
             generateSection(
               items: [

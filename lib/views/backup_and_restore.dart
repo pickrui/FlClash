@@ -235,7 +235,12 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
       title: appLocalizations.backupAndRestore,
       body: Builder(
         builder: (context) => ListView(
-          padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            context.contentTopPadding,
+            16,
+            16 + context.bottomInset,
+          ),
           children: [
             generateSection(
               title: appLocalizations.remote,

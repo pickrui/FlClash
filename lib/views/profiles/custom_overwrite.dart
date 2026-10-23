@@ -49,6 +49,7 @@ class CustomOverwriteDraftView extends StatelessWidget {
             ),
           ),
           CustomOverwriteContent(profileId: profileId),
+          SliverToBoxAdapter(child: SizedBox(height: context.bottomInset)),
         ],
       ),
     );
@@ -603,7 +604,6 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
           : KeyedSubtree(key: ObjectKey(rule), child: row);
     }
 
-    final padding = EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24);
     return CommonScaffold(
       title: appLocalizations.rule,
       canSort: !selecting && !_deleting && query.isEmpty && rules.length > 1,
@@ -657,36 +657,46 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
             ),
           ),
       ],
-      body: NullStatusSwitcher(
-        isEmpty: visible.isEmpty,
-        isSearching: query.isNotEmpty,
-        nullStatus: NullStatus(
-          label: appLocalizations.ruleEmpty,
-          illustration: NullStatusIllustration.rules,
-        ),
-        child: query.isEmpty
-            ? ReorderableListView.builder(
-                padding: padding,
-                buildDefaultDragHandles: false,
-                proxyDecorator: (child, index, animation) =>
-                    commonProxyDecorator(
-                      rowAt(index, reorderable: true),
-                      index,
-                      animation,
-                    ),
-                itemCount: visible.length,
-                itemBuilder: (_, index) => rowAt(index, reorderable: true),
-                onReorderItem: (oldIndex, newIndex) {
-                  if (!selecting && !_deleting) {
-                    _reorder(ref, oldIndex, newIndex, rules);
-                  }
-                },
-              )
-            : ListView.builder(
-                padding: padding,
-                itemCount: visible.length,
-                itemBuilder: (_, index) => rowAt(index, reorderable: false),
-              ),
+      body: Builder(
+        builder: (context) {
+          final padding = EdgeInsets.fromLTRB(
+            16,
+            context.contentTopPadding,
+            16,
+            24 + context.bottomInset,
+          );
+          return NullStatusSwitcher(
+            isEmpty: visible.isEmpty,
+            isSearching: query.isNotEmpty,
+            nullStatus: NullStatus(
+              label: appLocalizations.ruleEmpty,
+              illustration: NullStatusIllustration.rules,
+            ),
+            child: query.isEmpty
+                ? ReorderableListView.builder(
+                    padding: padding,
+                    buildDefaultDragHandles: false,
+                    proxyDecorator: (child, index, animation) =>
+                        commonProxyDecorator(
+                          rowAt(index, reorderable: true),
+                          index,
+                          animation,
+                        ),
+                    itemCount: visible.length,
+                    itemBuilder: (_, index) => rowAt(index, reorderable: true),
+                    onReorderItem: (oldIndex, newIndex) {
+                      if (!selecting && !_deleting) {
+                        _reorder(ref, oldIndex, newIndex, rules);
+                      }
+                    },
+                  )
+                : ListView.builder(
+                    padding: padding,
+                    itemCount: visible.length,
+                    itemBuilder: (_, index) => rowAt(index, reorderable: false),
+                  ),
+          );
+        },
       ),
     );
   }

@@ -516,9 +516,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                                 ),
                               ),
                             SliverToBoxAdapter(
-                              child: SizedBox(
-                                height: BottomInsetScope.of(context) + 16,
-                              ),
+                              child: SizedBox(height: context.bottomInset + 16),
                             ),
                           ],
                         ),

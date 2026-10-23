@@ -1380,7 +1380,12 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
                   sliver: _buildMembers(invalid.contains(_Field.members)),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    0,
+                    16,
+                    20 + context.bottomInset,
+                  ),
                   sliver: SliverList.list(
                     children: [
                       if (_hasDynamicMembers ||
@@ -1547,7 +1552,7 @@ class _MemberPickerState extends State<_MemberPicker> {
                     16,
                     context.contentTopPadding,
                     16,
-                    16 + BottomInsetScope.of(context),
+                    16 + context.bottomInset,
                   ),
                   sliver: SliverMainAxisGroup(
                     slivers: [

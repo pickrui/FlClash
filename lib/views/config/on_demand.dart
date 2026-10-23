@@ -410,9 +410,8 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
           ),
           _buildList(ssids, selected),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-            ).copyWith(bottom: MediaQuery.viewPaddingOf(context).bottom + 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16)
+                .copyWith(bottom: 16 + context.bottomInset),
             sliver: SliverToBoxAdapter(
               child: ListFooter(text: l.excludeSsidsDesc),
             ),

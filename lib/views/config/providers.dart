@@ -549,7 +549,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
                           16,
                           16,
                           16,
-                          16 + BottomInsetScope.of(context),
+                          16 + context.bottomInset,
                         ),
                         buildDefaultDragHandles: false,
                         itemCount: visible.length,

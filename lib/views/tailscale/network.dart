@@ -859,7 +859,12 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
             : () => unawaited(_save()),
       ),
       body: ListView(
-        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          context.contentTopPadding,
+          16,
+          24 + context.bottomInset,
+        ),
         children: [
           if (saved != null) ..._buildDeviceSection(l),
           ..._buildFormSection(l),

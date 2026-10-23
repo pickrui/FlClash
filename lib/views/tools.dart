@@ -138,7 +138,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
             16,
             context.contentTopPadding,
             16,
-            20 + BottomInsetScope.of(context),
+            20 + context.bottomInset,
           ),
         ),
       ),

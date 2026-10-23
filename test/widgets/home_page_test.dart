@@ -10,9 +10,11 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/state.dart';
+import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -167,6 +169,62 @@ void main() {
     ]);
     await tester.pumpAndSettle();
     expect(find.text('proxies:true'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the dock over the system bar leaves the content one clearance', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(500, 800)
+      ..devicePixelRatio = 1
+      ..padding = const FakeViewPadding(bottom: 24);
+    addTearDown(tester.view.reset);
+    double? inset;
+    final container = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWithValue([]),
+        currentNavigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              for (final label in [PageLabel.dashboard, PageLabel.tools])
+                NavigationItem(
+                  label: label,
+                  builder: (_) => CommonScaffold(
+                    title: label.name,
+                    body: Builder(
+                      builder: (context) {
+                        inset = context.bottomInset;
+                        return SizedBox.expand(
+                          key: ValueKey('${label.name} body'),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+      ),
+    );
+    await tester.pump();
+
+    final dockInset = NavigationDock.insetOf(
+      tester.element(find.byType(NavigationDock)),
+    );
+    final bodyBottom = tester
+        .getRect(find.byKey(const ValueKey('dashboard body')))
+        .bottom;
+    expect(bodyBottom, 800);
+    expect(bodyBottom - inset!, 800 - dockInset);
     expect(tester.takeException(), isNull);
   });
 

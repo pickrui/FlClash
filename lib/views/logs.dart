@@ -170,7 +170,7 @@ class _LogsViewState extends ConsumerState<LogsView>
                   child: SuperListView.separated(
                     padding: EdgeInsets.only(
                       top: context.contentTopPadding,
-                      bottom: BottomInsetScope.of(context) + 16,
+                      bottom: context.bottomInset + 16,
                     ),
                     physics: _physics,
                     reverse: true,

@@ -157,7 +157,7 @@ class _TailscaleViewState extends ConsumerState<TailscaleView>
                 16,
                 context.contentTopPadding,
                 16,
-                20,
+                20 + context.bottomInset,
               ),
               children: [
                 generateSection(
@@ -221,7 +221,12 @@ class TailscaleGuidePage extends StatelessWidget {
     return CommonScaffold(
       title: l.tailscaleGuide,
       body: ListView(
-        padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 24),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          context.contentTopPadding,
+          16,
+          24 + context.bottomInset,
+        ),
         children: [
           for (final (title, text) in sections) ...[
             ListHeader(title: title),

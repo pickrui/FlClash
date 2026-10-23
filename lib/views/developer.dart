@@ -91,7 +91,12 @@ class DeveloperView extends ConsumerWidget {
       title: appLocalizations.developerMode,
       body: Builder(
         builder: (context) => ListView(
-          padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            context.contentTopPadding,
+            16,
+            16 + context.bottomInset,
+          ),
           children: [
             generateSection(
               items: [

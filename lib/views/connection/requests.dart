@@ -151,7 +151,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                     child: SuperListView.separated(
                       padding: EdgeInsets.only(
                         top: context.contentTopPadding,
-                        bottom: BottomInsetScope.of(context) + 16,
+                        bottom: context.bottomInset + 16,
                       ),
                       reverse: true,
                       shrinkWrap: true,

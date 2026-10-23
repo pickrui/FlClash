@@ -860,7 +860,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                 16,
                 context.contentTopPadding,
                 16,
-                20 + BottomInsetScope.of(context),
+                20 + context.bottomInset,
               ),
               children: [
                 SegmentedControl<int>(

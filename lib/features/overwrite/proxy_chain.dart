@@ -358,6 +358,7 @@ class _ProfileProxyChainsViewState extends State<ProfileProxyChainsView> {
             showEmptyStatus: true,
             handlePop: true,
           ),
+          SliverToBoxAdapter(child: SizedBox(height: context.bottomInset)),
         ],
       ),
     );
@@ -1313,7 +1314,9 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                 ),
               ],
             ],
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            SliverToBoxAdapter(
+              child: SizedBox(height: 16 + context.bottomInset),
+            ),
           ],
         ),
       ),

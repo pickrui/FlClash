@@ -34,7 +34,10 @@ class ThemeView extends StatelessWidget {
     return BaseScaffold(
       title: appLocalizations.theme,
       body: ListView(
-        padding: EdgeInsets.only(top: context.appBarInset, bottom: 32),
+        padding: EdgeInsets.only(
+          top: context.appBarInset,
+          bottom: 32 + context.bottomInset,
+        ),
         children: const [
           ThemeLivePreview(),
           SizedBox(height: 16),
@@ -1146,7 +1149,7 @@ class _CustomColorSheetState extends State<_CustomColorSheet> {
           max(16, gestureInsets.left),
           8,
           max(16, gestureInsets.right),
-          20,
+          20 + context.bottomInset,
         ),
         children: [
           ValueListenableBuilder(

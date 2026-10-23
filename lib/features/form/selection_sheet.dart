@@ -342,7 +342,7 @@ class _SelectionSheetState<T> extends ConsumerState<SelectionSheet<T>>
                 ),
               ],
               SliverToBoxAdapter(
-                child: SizedBox(height: 20 + BottomInsetScope.of(context)),
+                child: SizedBox(height: 20 + context.bottomInset),
               ),
             ],
           ),

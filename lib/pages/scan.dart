@@ -70,7 +70,11 @@ class _ScanPageState extends ConsumerState<ScanPage>
 
   void _syncEffect() {
     if (_disposed) return;
-    if (_disableAnimations || !_shouldRun || !controller.value.isRunning) {
+    if (_leaving) {
+      _effectController.stop();
+    } else if (_disableAnimations ||
+        !_shouldRun ||
+        !controller.value.isRunning) {
       _effectController.reset();
     } else if (!_effectController.isAnimating) {
       _effectController.repeat();
@@ -83,12 +87,14 @@ class _ScanPageState extends ConsumerState<ScanPage>
   StreamSubscription<BarcodeCapture>? _subscription;
   bool _leftApp = false;
   bool _pickingImage = false;
-  bool _completed = false;
+  bool _leaving = false;
+  bool _holdsLastFrame = false;
   bool _foreground = true;
   bool _routeCurrent = true;
   bool _retryDenied = false;
   bool _cameraSyncing = false;
   bool _cameraSyncRequested = false;
+  Completer<void>? _cameraIdle;
   bool _disposed = false;
   Timer? _invalidTimer;
   final _invalid = ValueNotifier(false);
@@ -161,7 +167,7 @@ class _ScanPageState extends ConsumerState<ScanPage>
   bool get _shouldRun =>
       !_disposed &&
       routeSettled &&
-      !_completed &&
+      !_leaving &&
       _foreground &&
       _routeCurrent &&
       !_pickingImage;
@@ -189,7 +195,15 @@ class _ScanPageState extends ConsumerState<ScanPage>
             return;
           }
           if (!_shouldRun) {
-            await controller.stop();
+            // Android unbinds the camera on the platform thread the UI
+            // shares, so it pauses before the page leaves; a pause keeps the
+            // preview's last frame.
+            if (_leaving) {
+              _holdsLastFrame = controller.value.isRunning;
+              await controller.pause();
+            } else {
+              await controller.stop();
+            }
             continue;
           }
           final retryDenied = _retryDenied;
@@ -210,7 +224,22 @@ class _ScanPageState extends ConsumerState<ScanPage>
       }
     } finally {
       _cameraSyncing = false;
+      _cameraIdle?.complete();
+      _cameraIdle = null;
     }
+  }
+
+  Future<void> _release() {
+    _leaving = true;
+    _requestCameraSync();
+    if (!_cameraSyncing) return Future.value();
+    return (_cameraIdle ??= Completer<void>()).future;
+  }
+
+  Future<bool> _handlePop(BuildContext context) async {
+    if (_leaving) return false;
+    await _release();
+    return true;
   }
 
   void _showInvalid() {
@@ -235,26 +264,27 @@ class _ScanPageState extends ConsumerState<ScanPage>
       _showInvalid();
       return;
     }
-    _complete(url);
+    unawaited(_leave(url));
   }
 
-  void _complete(String url) {
-    if (_disposed || _completed || ModalRoute.isCurrentOf(context) == false) {
+  Future<void> _leave([String? url]) async {
+    if (_disposed || _leaving || ModalRoute.isCurrentOf(context) == false) {
       return;
     }
-    _completed = true;
-    _requestCameraSync();
-    Navigator.pop<String>(context, url);
+    await _release();
+    if (mounted && ModalRoute.isCurrentOf(context) != false) {
+      Navigator.pop<String>(context, url);
+    }
   }
 
   Future<void> _pickImage() async {
-    if (_disposed || _pickingImage || _completed) return;
+    if (_disposed || _pickingImage || _leaving) return;
     final profileAction = context.profileAction;
     setState(() => _pickingImage = true);
     _requestCameraSync();
     try {
       final url = await profileAction.pickProfileQrCode();
-      if (url != null) _complete(url);
+      if (url != null) unawaited(_leave(url));
     } finally {
       _pickingImage = false;
       if (!_disposed) {
@@ -278,111 +308,119 @@ class _ScanPageState extends ConsumerState<ScanPage>
         child: AnnotatedRegion<SystemUiOverlayStyle>(
           value: _systemUiOverlayStyle,
           sized: false,
-          child: Scaffold(
-            body: LayoutBuilder(
-              builder: (context, constraints) {
-                final hintStyle = AppTextStyle.subheadline.of(context);
-                final layout = _ScanLayout(
-                  size: constraints.biggest,
-                  padding: MediaQuery.paddingOf(context),
-                  hintHeight:
-                      MediaQuery.textScalerOf(context)
-                          .scale(hintStyle.fontSize!) *
-                      hintStyle.height! *
-                      _hintMaxLines,
-                );
-                return Stack(
-                  children: [
-                    Positioned.fill(
-                      child: MobileScanner(
-                        controller: controller,
-                        scanWindow: layout.scanWindow,
-                        errorBuilder: (_, _) => const SizedBox.shrink(),
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: ValueListenableBuilder<MobileScannerState>(
-                        valueListenable: controller,
-                        builder: (context, state, _) => AnimatedOpacity(
-                          opacity: state.isRunning || state.error != null
-                              ? 0
-                              : 1,
-                          duration: _disableAnimations || !state.isRunning
-                              ? Duration.zero
-                              : _previewRevealDuration,
-                          curve: _previewRevealAwaitingFirstFrame,
-                          child: const ColoredBox(color: Colors.black),
+          child: ValueListenableBuilder<MobileScannerState>(
+            valueListenable: controller,
+            builder: (context, state, child) => CommonPopScope(
+              onPop: state.isRunning || state.isStarting ? _handlePop : null,
+              child: child!,
+            ),
+            child: Scaffold(
+              body: LayoutBuilder(
+                builder: (context, constraints) {
+                  final hintStyle = AppTextStyle.subheadline.of(context);
+                  final layout = _ScanLayout(
+                    size: constraints.biggest,
+                    padding: MediaQuery.paddingOf(context),
+                    hintHeight:
+                        MediaQuery.textScalerOf(context)
+                            .scale(hintStyle.fontSize!) *
+                        hintStyle.height! *
+                        _hintMaxLines,
+                  );
+                  return Stack(
+                    children: [
+                      Positioned.fill(
+                        child: MobileScanner(
+                          controller: controller,
+                          scanWindow: layout.scanWindow,
+                          errorBuilder: (_, _) => const SizedBox.shrink(),
                         ),
                       ),
-                    ),
-                    Positioned.fill(
-                      child: ValueListenableBuilder<MobileScannerState>(
-                        valueListenable: controller,
-                        builder: (context, state, _) {
-                          final error = state.error;
-                          if (error != null) {
-                            return _ScannerError(
-                              errorCode: error.errorCode,
-                              onRetry: _start,
-                              onOpenSettings: () => app?.openAppSettings(),
-                            );
-                          }
-                          return _buildScanFrame(theme, layout, hintStyle);
-                        },
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: TonalButtonTheme(
-                        glass: glass,
-                        child: AppBarInsetScope(
-                          child: AppBar(
-                            backgroundColor: Colors.transparent,
-                            surfaceTintColor: Colors.transparent,
-                            automaticallyImplyLeading: false,
-                            leading: Center(
-                              child: ElasticPress(
-                                child: AppBarActionButton(
-                                  data: IconButtonData(
-                                    glyph: AppGlyphs.close,
-                                    tooltip: appLocalizations.close,
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                            actions: genActions([
-                              ElasticPress(
-                                child: AppBarActionButton(
-                                  data: IconButtonData(
-                                    glyph: AppGlyphs.photos,
-                                    tooltip: appLocalizations.pickFromAlbum,
-                                    isLoading: _pickingImage,
-                                    onPressed: _pickingImage
-                                        ? null
-                                        : _pickImage,
-                                  ),
-                                ),
-                              ),
-                            ], edge: AppBarActionEdge.container),
+                      Positioned.fill(
+                        child: ValueListenableBuilder<MobileScannerState>(
+                          valueListenable: controller,
+                          builder: (context, state, _) => AnimatedOpacity(
+                            opacity:
+                                state.isRunning ||
+                                    state.error != null ||
+                                    _holdsLastFrame
+                                ? 0
+                                : 1,
+                            duration: _disableAnimations || !state.isRunning
+                                ? Duration.zero
+                                : _previewRevealDuration,
+                            curve: _previewRevealAwaitingFirstFrame,
+                            child: const ColoredBox(color: Colors.black),
                           ),
                         ),
                       ),
-                    ),
-                    Positioned.fromRect(
-                      rect: layout.torch,
-                      child: TonalButtonTheme(
-                        glass: glass,
-                        child: _TorchButton(controller: controller),
+                      Positioned.fill(
+                        child: ValueListenableBuilder<MobileScannerState>(
+                          valueListenable: controller,
+                          builder: (context, state, _) {
+                            final error = state.error;
+                            if (error != null) {
+                              return _ScannerError(
+                                errorCode: error.errorCode,
+                                onRetry: _start,
+                                onOpenSettings: () => app?.openAppSettings(),
+                              );
+                            }
+                            return _buildScanFrame(theme, layout, hintStyle);
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: TonalButtonTheme(
+                          glass: glass,
+                          child: AppBarInsetScope(
+                            child: AppBar(
+                              backgroundColor: Colors.transparent,
+                              surfaceTintColor: Colors.transparent,
+                              automaticallyImplyLeading: false,
+                              leading: Center(
+                                child: ElasticPress(
+                                  child: AppBarActionButton(
+                                    data: IconButtonData(
+                                      glyph: AppGlyphs.close,
+                                      tooltip: appLocalizations.close,
+                                      onPressed: _leave,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              actions: genActions([
+                                ElasticPress(
+                                  child: AppBarActionButton(
+                                    data: IconButtonData(
+                                      glyph: AppGlyphs.photos,
+                                      tooltip: appLocalizations.pickFromAlbum,
+                                      isLoading: _pickingImage,
+                                      onPressed: _pickingImage
+                                          ? null
+                                          : _pickImage,
+                                    ),
+                                  ),
+                                ),
+                              ], edge: AppBarActionEdge.container),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned.fromRect(
+                        rect: layout.torch,
+                        child: TonalButtonTheme(
+                          glass: glass,
+                          child: _TorchButton(controller: controller),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

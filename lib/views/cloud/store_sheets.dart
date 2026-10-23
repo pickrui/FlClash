@@ -134,7 +134,7 @@ class _StorePurchaseSheetState extends State<StorePurchaseSheet> {
       type: widget.type,
       title: appLocalizations.confirmPurchase,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + context.bottomInset),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -304,7 +304,7 @@ class _StoreRechargeSheetState extends State<StoreRechargeSheet> {
       type: widget.type,
       title: appLocalizations.recharge,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + context.bottomInset),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

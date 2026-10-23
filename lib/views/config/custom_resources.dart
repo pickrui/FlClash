@@ -22,7 +22,12 @@ class CustomResourcesView extends StatelessWidget {
       title: l.customProfileResources,
       body: Builder(
         builder: (context) => ListView(
-          padding: EdgeInsets.fromLTRB(16, context.contentTopPadding, 16, 16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            context.contentTopPadding,
+            16,
+            16 + context.bottomInset,
+          ),
           children: [
             generateSection(
               items: [

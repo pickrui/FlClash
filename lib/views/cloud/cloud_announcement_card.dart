@@ -31,7 +31,7 @@ class CloudAnnouncementCard extends StatelessWidget {
         type: type,
         title: context.appLocalizations.announcement,
         body: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + context.bottomInset),
           child: CloudContentWidth(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
