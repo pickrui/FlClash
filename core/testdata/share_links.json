@@ -32,6 +32,12 @@
     "password": "pass",
     "protocol-param": "pp"
   },
+  "ssr://MS4yLjMuNDo4Mzg4Om9yaWdpbjphZXMtMjU2LWNmYjpwbGFpbjpjR0UrUG5OelB6OD0vP3JlbWFya3M9U0V0K2ZuNHdNVDQvJm9iZnNwYXJhbT1iMkptY3l0b2IzTjBMejg9": {
+    "name": "HK~~~01>?",
+    "type": "ssr",
+    "password": "pa>>ss??",
+    "obfs-param": "obfs+host/?"
+  },
   "vmess://eyJ2IjoiMiIsInBzIjoiVk1lc3MgSlNPTiIsImFkZCI6IjEuMi4zLjQiLCJwb3J0IjoiNDQzIiwiaWQiOiJ1dWlkLTEiLCJhaWQiOiIwIiwibmV0Ijoid3MiLCJwYXRoIjoiL3dzIiwiaG9zdCI6ImguZXhhbXBsZSIsInRscyI6InRscyIsInNuaSI6InNuaS5leGFtcGxlIn0=": {
     "name": "VMess JSON",
     "type": "vmess",

@@ -343,7 +343,8 @@ func decodeSSRLink(body string) map[string]any {
 		return v
 	}
 	server := strings.Trim(strings.Join(parts[:len(parts)-5], ":"), "[]")
-	q, err := url.ParseQuery(query)
+	// Parameters are base64, where '+' is data rather than an encoded space.
+	q, err := url.ParseQuery(strings.ReplaceAll(query, "+", "%2B"))
 	if err != nil {
 		return nil
 	}
