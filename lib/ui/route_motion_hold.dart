@@ -63,6 +63,21 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
   ModalRoute<Object?>? _route;
   _RouteMotion? _motion;
   VoidCallback? _heldUpdate;
+  VoidCallback? _frameUpdate;
+
+  // Frames stop while the window is hidden, so producers that tick meanwhile
+  // must not queue one post-frame callback each.
+  void updateAfterFrameWhenRouteSettled(VoidCallback update) {
+    final scheduled = _frameUpdate != null;
+    _frameUpdate = update;
+    if (scheduled) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final update = _frameUpdate;
+      _frameUpdate = null;
+      if (update != null && mounted) updateWhenRouteSettled(update);
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
+  }
 
   void updateWhenRouteSettled(VoidCallback update) {
     if (_motion?.isMoving ?? false) {
@@ -89,6 +104,7 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
   void dispose() {
     _detach();
     _heldUpdate = null;
+    _frameUpdate = null;
     super.dispose();
   }
 

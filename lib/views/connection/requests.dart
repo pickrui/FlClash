@@ -89,23 +89,19 @@ class _RequestsViewState extends ConsumerState<RequestsView>
       if (isEquality) {
         return;
       }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      updateAfterFrameWhenRouteSettled(() {
         if (!mounted) return;
-        updateWhenRouteSettled(() {
-          if (!mounted) return;
-          final state = _requestsStateNotifier.value;
-          final buffer = ref.read(requestsProvider);
-          _requestsStateNotifier.value = state.copyWith(
-            trackerInfos: state.autoScrollToEnd
-                ? buffer.list
-                : buffer.retainTrimmedHead(
-                    state.trackerInfos,
-                    keyOf: (item) => item.id,
-                  ),
-          );
-        });
+        final state = _requestsStateNotifier.value;
+        final buffer = ref.read(requestsProvider);
+        _requestsStateNotifier.value = state.copyWith(
+          trackerInfos: state.autoScrollToEnd
+              ? buffer.list
+              : buffer.retainTrimmedHead(
+                  state.trackerInfos,
+                  keyOf: (item) => item.id,
+                ),
+        );
       });
-      WidgetsBinding.instance.ensureVisualUpdate();
     }, duration: commonDuration);
   }
 

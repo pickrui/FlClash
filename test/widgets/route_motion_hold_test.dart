@@ -105,4 +105,24 @@ void main() {
     await tester.pump();
     expect(find.text('shown 3'), findsOneWidget);
   });
+
+  testWidgets('frame updates queued while frames are off run once', (
+    tester,
+  ) async {
+    await pumpFeed(tester);
+    final feed = tester.state<_FeedState>(find.byType(_Feed));
+    var runs = 0;
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    await tester.pump();
+    for (var i = 0; i < 100; i++) {
+      feed.updateAfterFrameWhenRouteSettled(() => runs++);
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    expect(runs, 0);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(runs, 1);
+  });
 }

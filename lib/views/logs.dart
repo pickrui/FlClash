@@ -114,20 +114,16 @@ class _LogsViewState extends ConsumerState<LogsView>
       if (isEquality) {
         return;
       }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      updateAfterFrameWhenRouteSettled(() {
         if (!mounted) return;
-        updateWhenRouteSettled(() {
-          if (!mounted) return;
-          final state = _logsStateNotifier.value;
-          final buffer = ref.read(logsProvider);
-          _logsStateNotifier.value = state.copyWith(
-            logs: state.autoScrollToEnd
-                ? buffer.list
-                : buffer.retainTrimmedHead(state.logs),
-          );
-        });
+        final state = _logsStateNotifier.value;
+        final buffer = ref.read(logsProvider);
+        _logsStateNotifier.value = state.copyWith(
+          logs: state.autoScrollToEnd
+              ? buffer.list
+              : buffer.retainTrimmedHead(state.logs),
+        );
       });
-      WidgetsBinding.instance.ensureVisualUpdate();
     }, duration: commonDuration);
   }
 
