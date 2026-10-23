@@ -340,6 +340,17 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			return
 		}
 		response.success(result)
+	case getProxyDefinitionMethod:
+		name := ""
+		if !decodeMethodArguments(call, response, &name) {
+			return
+		}
+		result, err := handleGetProxyDefinition(name)
+		if err != nil {
+			response.failure("proxy_lookup_failed", "Proxy definition is unavailable", nil)
+			return
+		}
+		response.success(result)
 	case getExternalProviderMethod:
 		params := ExternalProviderRequest{}
 		if !decodeMethodArguments(call, response, &params) {

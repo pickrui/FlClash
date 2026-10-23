@@ -1653,5 +1653,8 @@
     }
   },
   "select": "Выбрать",
-  "preferred": "Предпочтительный"
+  "preferred": "Предпочтительный",
+  "addToLocalProxies": "Добавить в пользовательские узлы",
+  "addedToLocalProxies": "«{name}» добавлен в пользовательские узлы",
+  "alreadyInLocalProxies": "«{name}» уже есть в пользовательских узлах"
 }

@@ -75,6 +75,9 @@ mixin CoreInterface {
     String proxyName,
   );
 
+  /// Null for a group, a built-in outbound or a node the config lacks.
+  Future<Map<String, dynamic>?> getProxyDefinition(String name);
+
   Future<String> dumpRuleSet(String providerName, String path);
   Future<String> previewRuleSet(List<int> content, String behavior);
   Future<RuleSetInfo> compileRuleSet(
@@ -309,6 +312,22 @@ abstract class CoreHandlerInterface with CoreInterface {
         method: CoreMethod.decryptConfigBytes,
         arguments: {'data': data, 'secretKey': secretKey},
       );
+
+  @override
+  Future<Map<String, dynamic>?> getProxyDefinition(String name) async {
+    final result = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.getProxyDefinition,
+      arguments: name,
+    );
+    if (result == null && !isConnected) {
+      throw CoreMethodException(
+        code: 'transport_disconnected',
+        message:
+            'Core is not connected for ${CoreMethod.getProxyDefinition.name}',
+      );
+    }
+    return result;
+  }
 
   @override
   Future<Map<String, dynamic>> getProviderProxy(

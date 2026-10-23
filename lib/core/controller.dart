@@ -589,6 +589,9 @@ class CoreController {
     String proxyName,
   ) => _interface.getProviderProxy(providerName, proxyName);
 
+  Future<Map<String, dynamic>?> getProxyDefinition(String name) =>
+      _interface.getProxyDefinition(name);
+
   Future<Map<String, dynamic>> getConfig(String path) async {
     return normalizeCoreRawConfig(await _interface.getConfig(path));
   }

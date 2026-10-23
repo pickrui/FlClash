@@ -9,6 +9,8 @@ package core
 import (
 	"cmp"
 	"errors"
+	"os"
+	"path/filepath"
 	"unicode/utf8"
 
 	"github.com/metacubex/mihomo/adapter/provider"
@@ -188,11 +190,18 @@ func handleSideLoadExternalProvider(providerName, providerType string, data []by
 	})
 }
 
+var errManagedLookup = errors.New("managed lookup is disabled")
+
+// A managed config's nodes carry the account's credentials.
+func managedLookupRefused() bool {
+	return currentDNSAuth() != nil || runningConfigInMemory
+}
+
 func handleGetProviderProxy(providerName, proxyName string) (map[string]any, error) {
 	runLock.Lock()
 	defer runLock.Unlock()
-	if currentDNSAuth() != nil {
-		return nil, errors.New("managed provider lookup is disabled")
+	if managedLookupRefused() {
+		return nil, errManagedLookup
 	}
 	if providerName == "" || len(providerName) > 1024 || proxyName == "" || utf8.RuneCountInString(proxyName) > 255 {
 		return nil, errors.New("invalid provider lookup")
@@ -209,4 +218,42 @@ func handleGetProviderProxy(providerName, proxyName string) (map[string]any, err
 		return map[string]any{}, nil
 	}
 	return result, nil
+}
+
+// Android keeps a managed config encrypted on disk; this never decrypts it.
+func handleGetProxyDefinition(name string) (map[string]any, error) {
+	runLock.Lock()
+	defer runLock.Unlock()
+	if managedLookupRefused() {
+		return nil, errManagedLookup
+	}
+	if name == "" || utf8.RuneCountInString(name) > 255 {
+		return nil, errors.New("invalid proxy lookup")
+	}
+	data, err := os.ReadFile(filepath.Join(constant.Path.HomeDir(), "config.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	if isEncryptedConfig(data) {
+		return nil, errManagedLookup
+	}
+	raw, err := unmarshalRawConfig(data)
+	if err != nil {
+		return nil, err
+	}
+	if proxy := tunnel.AllProxies()[name]; proxy != nil {
+		if pdName := proxy.ProxyInfo().ProviderName; pdName != "" {
+			pd, running := tunnel.ProvidersSnapshot()[pdName]
+			if _, declared := raw.ProxyProvider[pdName]; !running || !declared {
+				return nil, nil
+			}
+			return provider.ProxyMapping(pd, name)
+		}
+	}
+	for _, mapping := range raw.Proxy {
+		if mapping["name"] == name {
+			return mapping, nil
+		}
+	}
+	return nil, nil
 }

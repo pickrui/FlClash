@@ -116,6 +116,60 @@ class ProxiesAction extends _$ProxiesAction {
   Future<void> Function(String) providerEditorSaver(
     ExternalProvider provider,
   ) => _controller.providerEditorSaver(provider);
+
+  /// Copies a node of the current profile into that profile's custom nodes.
+  Future<void> addToLocalProxies(String proxyName) async {
+    final profile = ref.read(currentProfileProvider);
+    if (profile == null || profile.isoixCloudProfile) return;
+    bool isCurrent() {
+      final current = ref.read(currentProfileProvider);
+      return current?.id == profile.id && current?.isoixCloudProfile == false;
+    }
+
+    final definition = await ref
+        .read(coreHandlerProvider)
+        .getProxyDefinition(proxyName);
+    if (!isCurrent()) return;
+    if (definition == null) {
+      globalState.showNotifier(appLocalizations.noData);
+      return;
+    }
+    final setupAction = ref.read(setupActionProvider.notifier);
+    final rawConfig = await setupAction.getRawProfileConfig(profile.id);
+    final current = ref.read(currentProfileProvider);
+    if (current == null || !isCurrent()) return;
+    final (:name, :added) = importCustomNode(
+      definition,
+      existing: current.profileProxies,
+      taken: {
+        proxyName,
+        ...rawProxyNames(rawConfig),
+        ...rawProxyGroupNames(rawConfig),
+        for (final group in current.customProxyGroups) group.name,
+        for (final group in ref.read(groupsProvider)) ...[
+          group.name,
+          for (final proxy in group.all) proxy.name,
+        ],
+      },
+    );
+    if (added == null) {
+      globalState.showNotifier(appLocalizations.alreadyInLocalProxies(name));
+      return;
+    }
+    ref
+        .read(profilesProvider.notifier)
+        .updateProfile(
+          profile.id,
+          (state) => state.copyWith(
+            profileProxies: state.profileProxies.copyAndPut(added),
+          ),
+        );
+    setupAction.applyProfileDebounce(silence: true);
+    globalState.showNotifier(
+      appLocalizations.addedToLocalProxies(name),
+      level: MessageLevel.success,
+    );
+  }
 }
 
 extension ProxiesControllerExt on AppController {

@@ -175,6 +175,99 @@ rules: ['RULE-SET,shared,select', 'MATCH,DIRECT']
 	}
 }
 
+func TestProxyDefinitionLeavesOnlyAPlainConfigAndSkipsGroups(t *testing.T) {
+	setValidationTestHome(t)
+	home := constant.Path.HomeDir()
+	const subscription = "proxies:\n  - {name: b, type: socks5, server: 127.0.0.2, port: 1080}\n"
+	const running = `proxies:
+  - {name: a, type: socks5, server: 127.0.0.1, port: 1080, username: u, password: secret}
+proxy-providers:
+  sub: {type: file, path: sub.yaml, override: {additional-prefix: "S-"}}
+proxy-groups:
+  - {name: g, type: select, proxies: [a], use: [sub]}
+rules: ['MATCH,g']
+`
+	for name, content := range map[string]string{"sub.yaml": subscription, "config.yaml": running} {
+		if err := os.WriteFile(filepath.Join(home, name), []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	previousNames := slices.Clone(config.GetProxyNameList())
+	previousProxies, previousProviders := tunnel.ProxiesSnapshot(), tunnel.ProvidersSnapshot()
+	previousAuth, previousInMemory := currentDNSAuth(), runningConfigInMemory
+	t.Cleanup(func() {
+		config.SetProxyNameList(previousNames)
+		tunnel.UpdateProxies(previousProxies, previousProviders)
+		setDNSAuth(previousAuth)
+		runningConfigInMemory = previousInMemory
+	})
+	raw, err := config.UnmarshalRawConfig([]byte(running))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := config.ParseRawConfig(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closeParsedProviders(parsed)
+	tunnel.UpdateProxies(parsed.Proxies, parsed.Providers)
+	if err := parsed.Providers["sub"].Initial(); err != nil {
+		t.Fatal(err)
+	}
+	setDNSAuth(nil)
+	runningConfigInMemory = false
+
+	for name, want := range map[string]map[string]any{
+		"a":      {"name": "a", "type": "socks5", "server": "127.0.0.1", "port": 1080, "username": "u", "password": "secret"},
+		"S-b":    {"name": "S-b", "type": "socks5", "server": "127.0.0.2", "port": 1080},
+		"g":      nil,
+		"DIRECT": nil,
+		"gone":   nil,
+	} {
+		got, err := handleGetProxyDefinition(name)
+		if err != nil {
+			t.Fatalf("definition of %s: %v", name, err)
+		}
+		if fmt.Sprint(got) != fmt.Sprint(want) {
+			t.Errorf("definition of %s = %v, want %v", name, got, want)
+		}
+	}
+
+	refused := map[string]func(){
+		"dns auth":  func() { setDNSAuth(&dnsAuthSettings{}) },
+		"in memory": func() { runningConfigInMemory = true },
+		"encrypted": func() {
+			_ = os.WriteFile(filepath.Join(home, "config.yaml"), []byte(ageArmorBegin+"\n"), 0o600)
+		},
+	}
+	for name, manage := range refused {
+		setDNSAuth(nil)
+		runningConfigInMemory = false
+		if err := os.WriteFile(filepath.Join(home, "config.yaml"), []byte(running), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		manage()
+		if got, err := handleGetProxyDefinition("a"); err == nil || got != nil {
+			t.Errorf("%s config handed out %v", name, got)
+		}
+		if got, err := handleGetProviderProxy("sub", "S-b"); name != "encrypted" && (err == nil || got != nil) {
+			t.Errorf("%s config handed out provider node %v", name, got)
+		}
+	}
+
+	var written recordingConn
+	useTestConnection(t, &written)
+	setDNSAuth(&dnsAuthSettings{})
+	handleMethodCall(&MethodCall{ID: "definition", Method: getProxyDefinitionMethod, Arguments: json.RawMessage(`"a"`)}, MethodResponse{ID: "definition"})
+	var response MethodResponse
+	if err := json.Unmarshal(written.responseFrame(t, "definition"), &response); err != nil {
+		t.Fatal(err)
+	}
+	if response.Result != nil || response.Error == nil || response.Error.Code != "proxy_lookup_failed" || response.Error.Details != nil {
+		t.Fatalf("managed lookup answered %+v, want a redacted typed error", response)
+	}
+}
+
 func TestExternalProviderUpdateDoesNotOutliveReapply(t *testing.T) {
 	const childEnv = "FLCLASH_TEST_PROVIDER_REAPPLY_CHILD"
 	if os.Getenv(childEnv) != "1" {

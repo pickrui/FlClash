@@ -29,6 +29,9 @@ var (
 	exiting atomic.Bool
 )
 
+// Set with currentConfig: desktop passes a managed config in memory.
+var runningConfigInMemory bool
+
 var isInit atomic.Bool
 
 func handleInitClash(params *InitParams) bool {
@@ -96,6 +99,7 @@ func handleShutdown() bool {
 	closeCurrentProviders()
 	executor.Shutdown()
 	currentConfig = nil
+	runningConfigInMemory = false
 	flushReclaimOwnership()
 	handleForceGC()
 	return true

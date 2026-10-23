@@ -258,6 +258,7 @@ func applyConfig(params *SetupParams) error {
 	stopGeoScheduler()
 	retireCurrentProviders()
 	currentConfig = candidate
+	runningConfigInMemory = params.RawConfig != ""
 	setProbeTestURL(constant.DefaultTestURL)
 	resetCloudIPs()
 	// Config loading owns all tunnel status transitions until ApplyConfig returns.

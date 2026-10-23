@@ -142,6 +142,7 @@ const (
 	getExternalProvidersMethod     CoreMethod = "getExternalProviders"
 	getExternalProviderMethod      CoreMethod = "getExternalProvider"
 	getProviderProxyMethod         CoreMethod = "getProviderProxy"
+	getProxyDefinitionMethod       CoreMethod = "getProxyDefinition"
 	dumpRuleSetMethod              CoreMethod = "dumpRuleSet"
 	previewRuleSetMethod           CoreMethod = "previewRuleSet"
 	compileRuleSetMethod           CoreMethod = "compileRuleSet"

@@ -72,6 +72,30 @@ void main() {
     },
   );
 
+  test(
+    'a node without a definition answers null, a lost Core still throws',
+    () async {
+      final handler = _FakeCoreHandler();
+      expect(await handler.getProxyDefinition('group'), isNull);
+      expect(handler.arguments, 'group');
+      handler.response = <String, dynamic>{'name': 'node', 'type': 'ss'};
+      expect(await handler.getProxyDefinition('node'), handler.response);
+      handler
+        ..response = null
+        ..connected = false;
+      await expectLater(
+        handler.getProxyDefinition('node'),
+        throwsA(
+          isA<CoreMethodException>().having(
+            (error) => error.code,
+            'code',
+            'transport_disconnected',
+          ),
+        ),
+      );
+    },
+  );
+
   test('cache inventory rejects missing and malformed Core replies', () async {
     final handler = _FakeCoreHandler()..response = <dynamic>[];
     expect(await handler.getExternalProviders(), isEmpty);

@@ -488,6 +488,79 @@ void main() {
     }
   });
 
+  testWidgets('a card offers a copy into custom nodes only where one can '
+      'be made', (tester) async {
+    const profile = Profile(id: 1, autoUpdateDuration: Duration.zero);
+    Future<bool> offered(
+      Profile? current, {
+      String name = 'Node',
+      String type = 'Shadowsocks',
+      bool tap = false,
+    }) async {
+      final action = _DelayAction();
+      final container = ProviderContainer(
+        overrides: [
+          proxiesActionProvider.overrideWith(() => action),
+          realSelectedProxyStateProvider(name)
+              .overrideWith((_) => SelectedProxyState(proxyName: name)),
+          getSelectedProxyNameProvider('Group').overrideWith((_) => ''),
+          currentProfileProvider.overrideWith((_) => current),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: _TestApp(
+            child: SizedBox(
+              width: 240,
+              height: 100,
+              child: ProxyCard(
+                groupName: 'Group',
+                proxy: Proxy(name: name, type: type),
+                groupType: GroupType.Selector,
+                type: ProxyCardType.compact,
+                testUrl: null,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final items = tester
+          .widget<ContextMenuRegion>(find.byType(ContextMenuRegion))
+          .menuItems!;
+      final offered = items.any((item) => item.label == 'Add to custom nodes');
+      if (tap && offered) {
+        await tester.longPress(find.byType(ProxyCard));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Add to custom nodes'));
+        await tester.pumpAndSettle();
+        expect(action.copies, [name]);
+      }
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+      return offered;
+    }
+
+    expect(await offered(profile, tap: true), isTrue);
+    expect(await offered(null), isFalse);
+    expect(await offered(profile.copyWith(url: 'oixcloud://managed')), isFalse);
+    expect(await offered(profile, name: 'DIRECT', type: 'Direct'), isFalse);
+    expect(await offered(profile, type: 'Selector'), isFalse);
+    expect(await offered(profile, type: 'Tailscale'), isFalse);
+    expect(
+      await offered(
+        profile.copyWith(
+          profileProxies: const [
+            ProfileProxy(id: 2, proxy: {'name': 'Node', 'type': 'ss'}),
+          ],
+        ),
+      ),
+      isFalse,
+    );
+  });
+
   for (final type in ProxyCardType.values) {
     testWidgets('arrow right enters measured latency and enter retests without '
         'selecting: ${type.name}', (tester) async {
@@ -1326,5 +1399,11 @@ class _DelayAction extends ProxiesAction {
   @override
   void changeProxyDebounce(String groupName, String proxyName) {
     selections.add(proxyName);
+  }
+
+  final copies = <String>[];
+  @override
+  Future<void> addToLocalProxies(String proxyName) async {
+    copies.add(proxyName);
   }
 }

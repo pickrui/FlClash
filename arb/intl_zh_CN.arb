@@ -1653,5 +1653,8 @@
     }
   },
   "select": "选中",
-  "preferred": "首选"
+  "preferred": "首选",
+  "addToLocalProxies": "添加到自定义节点",
+  "addedToLocalProxies": "已将 {name} 添加到自定义节点",
+  "alreadyInLocalProxies": "自定义节点中已有 {name}"
 }

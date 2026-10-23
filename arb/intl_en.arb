@@ -1653,5 +1653,8 @@
     }
   },
   "select": "Select",
-  "preferred": "Preferred"
+  "preferred": "Preferred",
+  "addToLocalProxies": "Add to custom nodes",
+  "addedToLocalProxies": "Added {name} to custom nodes",
+  "alreadyInLocalProxies": "{name} is already in custom nodes"
 }

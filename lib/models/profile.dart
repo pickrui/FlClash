@@ -1056,6 +1056,71 @@ extension ProfileCustomOverwriteExt on Profile {
   }
 }
 
+/// Parentheses would end a logic rule's RULE-SET, so a copy is `name 2`.
+String freeNodeName(String base, Set<String> taken) {
+  var name = base;
+  for (var suffix = 2; taken.contains(name); suffix++) {
+    name = '$base $suffix';
+  }
+  return name;
+}
+
+/// What [definition] joins [existing] custom nodes as: one already holding it
+/// under any name leaves nothing [added], and a [taken] name gets a free one.
+({String name, ProfileProxy? added}) importCustomNode(
+  Map<String, Object?> definition, {
+  required Iterable<ProfileProxy> existing,
+  required Set<String> taken,
+}) {
+  final node = normalizeProfileProxyMap(definition)..remove('dialer-proxy');
+  final comparable = _comparableNode(node);
+  for (final item in existing) {
+    if (_nodeEquality.equals(
+      _comparableNode(item.normalizedProxy),
+      comparable,
+    )) {
+      return (name: item.name, added: null);
+    }
+  }
+  final name = freeNodeName(node['name']?.toString().trim() ?? '', {
+    ...RuleTarget.ruleTargets,
+    ...taken,
+    for (final item in existing) item.name,
+  });
+  return (
+    name: name,
+    added: ProfileProxy.create(uri: '', proxy: {...node, 'name': name}),
+  );
+}
+
+const _nodeEquality = DeepCollectionEquality();
+
+Object? _comparableNode(Map<String, Object?> proxy) =>
+    _weaklyTyped({...proxy}..remove('name'));
+
+Object? _weaklyTyped(Object? value) => switch (value) {
+  final Map map => {
+    for (final MapEntry(:key, :value) in map.entries)
+      '$key': _weaklyTyped(value),
+  },
+  final List list => [for (final item in list) _weaklyTyped(item)],
+  num() || bool() => '$value',
+  _ => value,
+};
+
+Set<String> rawProxyNames(Map rawConfig) {
+  final proxies = rawConfig['proxies'];
+  if (proxies is! List) {
+    return const {};
+  }
+  return proxies
+      .whereType<Map>()
+      .map((proxy) => proxy['name'])
+      .whereType<String>()
+      .where((name) => name.isNotEmpty)
+      .toSet();
+}
+
 Set<String> rawProxyGroupNames(Map rawConfig) {
   final groups = rawConfig['proxy-groups'];
   if (groups is! List) {

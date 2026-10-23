@@ -51,6 +51,7 @@ enum CoreMethod {
   getExternalProviders,
   getExternalProvider,
   getProviderProxy,
+  getProxyDefinition,
   dumpRuleSet,
   previewRuleSet,
   compileRuleSet,

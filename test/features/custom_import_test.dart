@@ -298,6 +298,47 @@ proxies:
     },
   );
 
+  test('a node joins the custom nodes once, under a free name', () {
+    const existing = ProfileProxy(
+      id: 1,
+      proxy: {'name': 'Kept', 'type': 'socks5', 'server': 'a', 'port': '1080'},
+    );
+    final same = importCustomNode(
+      {'name': 'HK', 'type': 'socks5', 'server': 'a', 'port': 1080},
+      existing: const [existing],
+      taken: const {'HK'},
+    );
+    expect(same.name, 'Kept');
+    expect(same.added, isNull);
+
+    final copy = importCustomNode(
+      {
+        'name': 'HK',
+        'type': 'socks5',
+        'server': 'b',
+        'port': 1080,
+        'dialer-proxy': 'Relay',
+      },
+      existing: const [existing],
+      taken: const {'HK', 'HK 2'},
+    );
+    expect(copy.name, 'HK 3');
+    expect(copy.added?.proxy, {
+      'name': 'HK 3',
+      'type': 'socks5',
+      'server': 'b',
+      'port': 1080,
+    });
+    expect(copy.added?.uri, '');
+
+    final named = importCustomNode(
+      {'name': 'Kept', 'type': 'socks5', 'server': 'c', 'port': 1080},
+      existing: const [existing],
+      taken: const {},
+    );
+    expect(named.name, 'Kept 2');
+  });
+
   test('only a config with something to import is read', () {
     for (final content in ['', 'just text', '[1, 2]', 'mode: rule', ': :']) {
       expect(

@@ -109,19 +109,6 @@ String? findProxyChainRenameConflict(
   return hasDuplicate ? nextName : null;
 }
 
-Set<String> _rawProxyNames(Map rawConfig) {
-  final proxies = rawConfig['proxies'];
-  if (proxies is! List) {
-    return const {};
-  }
-  return proxies
-      .whereType<Map>()
-      .map((proxy) => proxy['name'])
-      .whereType<String>()
-      .where((name) => name.isNotEmpty)
-      .toSet();
-}
-
 Map<String, String> _rawDialerRelations(
   Map rawConfig,
   Set<String> overriddenNames,
@@ -475,7 +462,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         );
         return false;
       }
-      if (!_rawProxyNames(rawConfig).contains(previousName) &&
+      if (!rawProxyNames(rawConfig).contains(previousName) &&
           _isRawReferenced(rawConfig, [previousName])) {
         return false;
       }
@@ -562,7 +549,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         return;
       }
       rawConfig = loadedRawConfig;
-      overrideNames = _rawProxyNames(rawConfig).intersection(relatedNames);
+      overrideNames = rawProxyNames(rawConfig).intersection(relatedNames);
       if (_isRawReferenced(rawConfig, relatedNames.difference(overrideNames))) {
         return;
       }
@@ -657,7 +644,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         return;
       }
       rawConfig = loadedRawConfig;
-      isOverride = _rawProxyNames(rawConfig).contains(name);
+      isOverride = rawProxyNames(rawConfig).contains(name);
       if (!isOverride) {
         final hasCustomReferences =
             ref
@@ -811,7 +798,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
               .where((node) => removedIds.contains(node.id))
               .map((node) => node.name)
               .toSet()
-              .difference(_rawProxyNames(raw));
+              .difference(rawProxyNames(raw));
           for (final name in removedNames) {
             final reference = findRawOutboundReference(
               raw,

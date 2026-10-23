@@ -217,7 +217,7 @@ List<ShareLinkNode> withFreeNodeNames(
   final result = <ShareLinkNode>[];
   for (final (:uri, :proxy) in nodes) {
     final name = _textOf(proxy['name']);
-    final free = _freeName(name, names);
+    final free = freeNodeName(name, names);
     names.add(free);
     result.add(
       free == name
@@ -235,15 +235,6 @@ Map<String, Object?>? _mapOf(Object? value) => value is Map
     : null;
 
 String _textOf(Object? value) => value?.toString().trim() ?? '';
-
-/// Parentheses would end a logic rule's RULE-SET, so a copy is `name 2`.
-String _freeName(String base, Set<String> taken) {
-  var name = base;
-  for (var suffix = 2; taken.contains(name); suffix++) {
-    name = '$base $suffix';
-  }
-  return name;
-}
 
 bool _isRemoteUrl(String url) {
   final uri = Uri.tryParse(url);
@@ -323,7 +314,7 @@ class _Importer {
         _invalidProxies++;
         continue;
       }
-      final imported = _freeName(name, taken);
+      final imported = freeNodeName(name, taken);
       taken.add(imported);
       names.putIfAbsent(name, () => imported);
       if (_textOf(proxy['dialer-proxy']) case final dialer
@@ -339,7 +330,7 @@ class _Importer {
       if (group == null || name.isEmpty) {
         continue;
       }
-      final imported = _freeName(name, taken);
+      final imported = freeNodeName(name, taken);
       taken.add(imported);
       names.putIfAbsent(name, () => imported);
       groups.add((imported, group));
@@ -456,7 +447,7 @@ class _Importer {
         continue;
       }
       final base = key.replaceAll(RegExp(r'[,\r\n]'), ' ').trim();
-      final label = _freeName(base.isEmpty ? kind.name : base, taken);
+      final label = freeNodeName(base.isEmpty ? kind.name : base, taken);
       taken.add(label);
       if (url.isNotEmpty) {
         bySource[url] = label;

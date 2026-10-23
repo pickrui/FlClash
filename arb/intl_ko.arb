@@ -1653,5 +1653,8 @@
     }
   },
   "select": "선택",
-  "preferred": "우선"
+  "preferred": "우선",
+  "addToLocalProxies": "사용자 지정 노드에 추가",
+  "addedToLocalProxies": "{name}을(를) 사용자 지정 노드에 추가했습니다",
+  "alreadyInLocalProxies": "{name}은(는) 이미 사용자 지정 노드에 있습니다"
 }

@@ -1653,5 +1653,8 @@
     }
   },
   "select": "選択",
-  "preferred": "優先"
+  "preferred": "優先",
+  "addToLocalProxies": "カスタムノードに追加",
+  "addedToLocalProxies": "{name} をカスタムノードに追加しました",
+  "alreadyInLocalProxies": "{name} はすでにカスタムノードにあります"
 }

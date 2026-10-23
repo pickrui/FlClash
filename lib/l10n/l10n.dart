@@ -13928,6 +13928,36 @@ class AppLocalizations {
   String get preferred {
     return Intl.message('Preferred', name: 'preferred', desc: '', args: []);
   }
+
+  /// `Add to custom nodes`
+  String get addToLocalProxies {
+    return Intl.message(
+      'Add to custom nodes',
+      name: 'addToLocalProxies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added {name} to custom nodes`
+  String addedToLocalProxies(Object name) {
+    return Intl.message(
+      'Added $name to custom nodes',
+      name: 'addedToLocalProxies',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name} is already in custom nodes`
+  String alreadyInLocalProxies(Object name) {
+    return Intl.message(
+      '$name is already in custom nodes',
+      name: 'alreadyInLocalProxies',
+      desc: '',
+      args: [name],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

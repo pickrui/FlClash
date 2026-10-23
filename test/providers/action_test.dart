@@ -8,8 +8,12 @@ import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/views/profiles/add.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +21,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
 
 class _ProfileAction extends ProfileAction {
   int imports = 0;
@@ -27,6 +32,23 @@ class _ProfileAction extends ProfileAction {
 }
 
 class _CoreHandler extends Mock implements CoreHandlerInterface {}
+
+class _RawSetupAction extends SetupAction {
+  _RawSetupAction(this.raw);
+
+  final Map<String, dynamic> raw;
+  int applies = 0;
+
+  @override
+  Future<Map<String, dynamic>> getRawProfileConfig(
+    int profileId, {
+    bool refetchCloud = true,
+  }) async => raw;
+
+  @override
+  void applyProfileDebounce({bool silence = false, bool force = false}) =>
+      applies++;
+}
 
 class _WindowPort implements WindowPort {
   @override
@@ -153,6 +175,91 @@ void main() {
       await expectLater(action.clearDnsCacheOnNetworkChange(), completes);
     },
   );
+
+  group('custom node copies', () {
+    late _CoreHandler handler;
+    late _RawSetupAction setup;
+
+    ProviderContainer containerFor(Profile profile) {
+      final container = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.forTesting(handler: handler),
+          ),
+          profilesProvider.overrideWith(() => TestProfiles([profile])),
+          setupActionProvider.overrideWith(() => setup),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(currentProfileIdProvider.notifier).value = profile.id;
+      return container;
+    }
+
+    setUp(() async {
+      await AppLocalizations.load(const Locale('en'));
+      handler = _CoreHandler();
+      setup = _RawSetupAction({
+        'proxies': [
+          {'name': 'HK', 'type': 'socks5'},
+        ],
+        'proxy-groups': [
+          {'name': 'HK 2', 'type': 'select'},
+        ],
+      });
+      when(() => handler.getProxyDefinition('HK')).thenAnswer(
+        (_) async => {
+          'name': 'HK',
+          'type': 'socks5',
+          'server': 'hk.example',
+          'port': 1080,
+        },
+      );
+    });
+
+    test('a node joins the current profile once under a free name', () async {
+      final container = containerFor(
+        const Profile(id: 1, autoUpdateDuration: Duration.zero),
+      );
+      final action = container.read(proxiesActionProvider.notifier);
+
+      await action.addToLocalProxies('HK');
+      await action.addToLocalProxies('HK');
+
+      expect(
+        container
+            .read(currentProfileProvider)!
+            .profileProxies
+            .map((node) => node.proxy),
+        [
+          {
+            'name': 'HK 3',
+            'type': 'socks5',
+            'server': 'hk.example',
+            'port': 1080,
+          },
+        ],
+      );
+      expect(setup.applies, 1);
+    });
+
+    test('a managed profile hands no node to the Core lookup', () async {
+      final container = containerFor(
+        const Profile(
+          id: 1,
+          url: 'oixcloud://managed',
+          autoUpdateDuration: Duration.zero,
+        ),
+      );
+
+      await container
+          .read(proxiesActionProvider.notifier)
+          .addToLocalProxies('HK');
+
+      verifyNever(() => handler.getProxyDefinition(any()));
+      expect(container.read(currentProfileProvider)!.profileProxies, isEmpty);
+      expect(setup.applies, 0);
+    });
+  });
 
   test('visibility actions use the serialized window toggle', () async {
     final previous = windowPort;
