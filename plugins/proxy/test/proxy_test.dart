@@ -306,6 +306,29 @@ USB 10/100/1000 LAN
       expect(File(statePath).existsSync(), false);
     });
 
+    test('the persisted snapshot and its directory stay private', () async {
+      final root = await Directory.systemTemp.createTemp('proxy_private_');
+      addTearDown(() => root.delete(recursive: true));
+      final statePath = '${root.path}/state/restore.json';
+      final proxy = Proxy(
+        processRunner: _gsettingsRunner(_gnomeProxyState()),
+        executableChecker: (executable) async => executable == 'gsettings',
+        stateFilePath: statePath,
+      );
+
+      expect(
+        await proxy.startLinuxProxyForTest(
+          7890,
+          const [],
+          desktop: 'GNOME',
+          homeDir: '/home/user',
+        ),
+        true,
+      );
+      expect(File(statePath).statSync().mode & 0x1ff, 0x180);
+      expect(File(statePath).parent.statSync().mode & 0x1ff, 0x1c0);
+    });
+
     test('a corrupt persisted snapshot blocks new proxy changes', () async {
       final root = await Directory.systemTemp.createTemp('proxy_corrupt_');
       addTearDown(() => root.delete(recursive: true));

@@ -636,12 +636,17 @@ bool _isAllowedRestoreCommand(String executable, List<String> args) {
   return false;
 }
 
+// NixOS and Guix have no /bin/chmod, so the mode is set in-process.
 Future<bool> _setPermissions(String path, String mode) async {
+  final pathPointer = path.toNativeUtf8();
   try {
-    final result = await Process.run('/bin/chmod', [mode, path]);
-    return result.exitCode == 0;
+    return _UnixFileBindings.instance
+            .chmod(pathPointer, int.parse(mode, radix: 8)) ==
+        0;
   } catch (_) {
     return false;
+  } finally {
+    calloc.free(pathPointer);
   }
 }
 
@@ -691,12 +696,15 @@ String? _defaultStateFilePath() {
 
 class _UnixFileBindings {
   final int Function(Pointer<Utf8>, int) open;
+  final int Function(Pointer<Utf8>, int) chmod;
   final int Function(int) fsync;
   final int Function(int) close;
 
   _UnixFileBindings._(DynamicLibrary library)
       : open = library.lookupFunction<Int32 Function(Pointer<Utf8>, Int32),
             int Function(Pointer<Utf8>, int)>('open'),
+        chmod = library.lookupFunction<Int32 Function(Pointer<Utf8>, Uint32),
+            int Function(Pointer<Utf8>, int)>('chmod'),
         fsync =
             library.lookupFunction<Int32 Function(Int32), int Function(int)>(
           'fsync',
