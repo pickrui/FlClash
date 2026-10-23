@@ -230,6 +230,26 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('the update time keeps counting while the card stays', (
+    tester,
+  ) async {
+    setUpProfiles([
+      _profile(1, remote: true).copyWith(
+        lastUpdateDate: DateTime.now().subtract(
+          const Duration(seconds: 59, milliseconds: 800),
+        ),
+      ),
+    ]);
+    await pumpCard(tester, card: desktopCard(), width: 600);
+    expect(find.text('Updated Just now'), findsOneWidget);
+
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    await tester.pump(const Duration(minutes: 1));
+    expect(find.text('Updated 1 minute ago'), findsOneWidget);
+  });
+
   testWidgets('a compact card puts the days left beside the name and leaves '
       'the update time to the details', (tester) async {
     setUpProfiles([_profile(1, info: _quota(), remote: true), _profile(2)]);

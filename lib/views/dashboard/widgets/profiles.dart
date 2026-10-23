@@ -176,33 +176,36 @@ class ProfilesCard extends ConsumerWidget {
           else
             nameRow,
           if (profile != null && !compact)
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final time = updatedAt?.lastUpdateTimeDesc;
-                final updated = time == null
-                    ? null
-                    : appLocalizations.profileUpdatedAt(time);
-                final fits =
-                    updated == null ||
-                    _widthOf(updated, label) +
-                            _rowGap +
-                            _widthOf(endText ?? '', label) <=
-                        constraints.maxWidth;
-                return Row(
-                  spacing: _rowGap,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        (fits ? updated : time) ?? '',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: label,
+            TickBuilder(
+              duration: const Duration(minutes: 1),
+              builder: (context, _) => LayoutBuilder(
+                builder: (context, constraints) {
+                  final time = updatedAt?.lastUpdateTimeDesc;
+                  final updated = time == null
+                      ? null
+                      : appLocalizations.profileUpdatedAt(time);
+                  final fits =
+                      updated == null ||
+                      _widthOf(updated, label) +
+                              _rowGap +
+                              _widthOf(endText ?? '', label) <=
+                          constraints.maxWidth;
+                  return Row(
+                    spacing: _rowGap,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          (fits ? updated : time) ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: label,
+                        ),
                       ),
-                    ),
-                    ?end,
-                  ],
-                );
-              },
+                      ?end,
+                    ],
+                  );
+                },
+              ),
             ),
           if (profile != null) ...[
             if (mobile) const SizedBox(height: 14) else const Spacer(),
