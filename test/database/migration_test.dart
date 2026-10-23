@@ -122,7 +122,7 @@ void main() {
     expect(await database.select(database.profileRuleLinks).get(), isEmpty);
   });
 
-  test('upgraded and already upgraded databases get the v4 indexes', () async {
+  test('upgraded and already upgraded databases get their indexes', () async {
     final tempDir = await Directory.systemTemp.createTemp('flclash_indexes_');
     addTearDown(() => tempDir.delete(recursive: true));
     final file = File('${tempDir.path}/database.sqlite');
@@ -135,21 +135,23 @@ void main() {
                 .get())
             .map((row) => row.read<String>('name'))
             .toSet();
-    const fromV4 = {
+    const expected = {
       'idx_rule_target',
       'idx_profile_name_order',
       'last_accessed_url',
+      'idx_rule_link_rule',
     };
 
     final upgraded = Database(NativeDatabase(file));
-    expect(await indexes(upgraded), containsAll(fromV4));
+    expect(await indexes(upgraded), containsAll(expected));
     await upgraded.customStatement('DROP INDEX idx_profile_name_order');
     await upgraded.customStatement('DROP INDEX last_accessed_url');
+    await upgraded.customStatement('DROP INDEX idx_rule_link_rule');
     await upgraded.close();
 
     final reopened = Database(NativeDatabase(file));
     addTearDown(reopened.close);
-    expect(await indexes(reopened), containsAll(fromV4));
+    expect(await indexes(reopened), containsAll(expected));
   });
 
   test('migrated v2 profiles retain personal routing after reopen', () async {

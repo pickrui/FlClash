@@ -57,6 +57,11 @@ class Database extends _$Database {
   MigrationStrategy get migration {
     return MigrationStrategy(
       beforeOpen: (details) async {
+        // Every rule write checks this foreign key; unindexed, it scans all links.
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_rule_link_rule '
+          'ON profile_rule_mapping (rule_id)',
+        );
         await customStatement('''
           DELETE FROM profile_rule_mapping
           WHERE rule_id NOT IN (SELECT id FROM rules)
