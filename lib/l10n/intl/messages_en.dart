@@ -314,16 +314,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m118(value) => "Total ${value}";
 
-  static String m119(build) => "Build: ${build}";
+  static String m119(transport) => "${transport} Headers";
 
-  static String m120(version) => "Version: ${version}";
+  static String m120(build) => "Build: ${build}";
 
-  static String m121(label) => "${label} must be a url";
+  static String m121(version) => "Version: ${version}";
 
-  static String m122(count) =>
+  static String m122(label) => "${label} must be a url";
+
+  static String m123(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
-  static String m123(count) => "${Intl.plural(count, other: '${count}y ago')}";
+  static String m124(count) => "${Intl.plural(count, other: '${count}y ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2309,8 +2311,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please upload a valid QR code",
     ),
     "plugin": MessageLookupByLibrary.simpleMessage("Plugin"),
+    "pluginCipher": MessageLookupByLibrary.simpleMessage("Plugin cipher"),
     "pluginHost": MessageLookupByLibrary.simpleMessage("Plugin host"),
     "pluginMode": MessageLookupByLibrary.simpleMessage("Plugin mode"),
+    "pluginPassword": MessageLookupByLibrary.simpleMessage("Plugin password"),
+    "pluginPath": MessageLookupByLibrary.simpleMessage("Plugin path"),
+    "pluginUsername": MessageLookupByLibrary.simpleMessage("Plugin username"),
     "points": MessageLookupByLibrary.simpleMessage("Points"),
     "port": MessageLookupByLibrary.simpleMessage("Port"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
@@ -2524,6 +2530,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Scan QR code to obtain profile",
     ),
+    "qrcodeTooLongTip": MessageLookupByLibrary.simpleMessage(
+      "This link is too long for a QR code. Use Copy link instead.",
+    ),
     "quickActions": MessageLookupByLibrary.simpleMessage("Quick actions"),
     "quickAdd": MessageLookupByLibrary.simpleMessage("Quick add"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Quick edit"),
@@ -2594,6 +2603,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "replace": MessageLookupByLibrary.simpleMessage("Replace"),
     "replaceAll": MessageLookupByLibrary.simpleMessage("Replace all"),
     "request": MessageLookupByLibrary.simpleMessage("Request"),
+    "requestHeaders": MessageLookupByLibrary.simpleMessage("Request headers"),
     "requests": MessageLookupByLibrary.simpleMessage("Requests"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
       "View recently request records",
@@ -2919,7 +2929,33 @@ class MessageLookup extends MessageLookupByLibrary {
       "Select upgrade target",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
+    "send": MessageLookupByLibrary.simpleMessage("Send"),
     "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
+    "sendFromPhone": MessageLookupByLibrary.simpleMessage("Send from phone"),
+    "sendFromPhoneConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Import the link from your phone?",
+    ),
+    "sendFromPhoneDesc": MessageLookupByLibrary.simpleMessage(
+      "Scan with your phone and send a link to this device",
+    ),
+    "sendFromPhoneNoNetwork": MessageLookupByLibrary.simpleMessage(
+      "This device is not connected to a local network",
+    ),
+    "sendFromPhonePageHint": MessageLookupByLibrary.simpleMessage(
+      "Subscription link or proxy share link",
+    ),
+    "sendFromPhonePageSent": MessageLookupByLibrary.simpleMessage(
+      "Sent. Confirm the import on the other device.",
+    ),
+    "sendFromPhonePageTitle": MessageLookupByLibrary.simpleMessage(
+      "Send a link to FlClash",
+    ),
+    "sendFromPhonePermissionDenied": MessageLookupByLibrary.simpleMessage(
+      "Receiving a link from your phone needs the Nearby devices permission, which lets FlClash reach the local network. Turn it on in the app\'s settings.",
+    ),
+    "sendFromPhoneTip": MessageLookupByLibrary.simpleMessage(
+      "Scan the code with your phone\'s camera and paste the link on the page that opens. Both devices need to be on the same network.",
+    ),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("Send reset email"),
     "server": MessageLookupByLibrary.simpleMessage("Server"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage(
@@ -2932,6 +2968,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "shareLinkNodesAdded": m108,
     "shareLinkNodesPreserved": m109,
     "shareLinksNotRead": m110,
+    "shareQrcodeTip": MessageLookupByLibrary.simpleMessage(
+      "Scan with FlClash on another device to import this profile.",
+    ),
     "show": MessageLookupByLibrary.simpleMessage("Show"),
     "showLess": MessageLookupByLibrary.simpleMessage("Collapse"),
     "showMore": MessageLookupByLibrary.simpleMessage("Expand"),
@@ -3273,6 +3312,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The system will confirm automatically after the transfer is completed, and the selected plan will be activated.",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Transport"),
+    "transportHeaders": m119,
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
       "TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.",
@@ -3326,7 +3366,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Automatic update did not complete. Retry or update from the download page.",
     ),
-    "updateBuildNumber": m119,
+    "updateBuildNumber": m120,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Cancel download",
     ),
@@ -3373,7 +3413,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "The app will close, update in place, and reopen. Your settings will be preserved.",
     ),
-    "updateVersionNumber": m120,
+    "updateVersionNumber": m121,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Upgrade plan"),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Upload bandwidth"),
@@ -3381,7 +3421,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain profile through URL",
     ),
-    "urlTip": m121,
+    "urlTip": m122,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("used"),
@@ -3415,8 +3455,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Write to system also sets the system clock; Android ignores it",
     ),
-    "yearsAgo": m122,
-    "yearsAgoShort": m123,
+    "yearsAgo": m123,
+    "yearsAgoShort": m124,
     "yes": MessageLookupByLibrary.simpleMessage("Yes"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

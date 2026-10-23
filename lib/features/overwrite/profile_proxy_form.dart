@@ -27,9 +27,24 @@ extension on ProxyField {
     ProxyField.flow => 'Flow',
     ProxyField.wsPath => 'WebSocket Path',
     ProxyField.wsHost => 'WebSocket Host',
+    ProxyField.wsHeaders => l.transportHeaders('WebSocket'),
+    ProxyField.wsMaxEarlyData => 'Max Early Data',
+    ProxyField.wsEarlyDataHeaderName => 'Early Data Header',
+    ProxyField.wsHttpUpgrade => 'HTTPUpgrade',
+    ProxyField.wsHttpUpgradeFastOpen => 'HTTPUpgrade Fast Open',
+    ProxyField.httpMethod => 'HTTP Method',
+    ProxyField.httpPath => 'HTTP Path',
+    ProxyField.httpHost => 'HTTP Host',
+    ProxyField.httpHeaders => l.transportHeaders('HTTP'),
+    ProxyField.h2Host => 'HTTP/2 Host',
+    ProxyField.h2Path => 'HTTP/2 Path',
     ProxyField.grpcServiceName => 'gRPC Service Name',
     ProxyField.xhttpPath => 'XHTTP Path',
     ProxyField.xhttpHost => 'XHTTP Host',
+    ProxyField.mkcpSeed => 'mKCP Seed',
+    ProxyField.mkcpHeader => 'mKCP Header',
+    ProxyField.mekyaUrl => 'Mekya URL',
+    ProxyField.headers => l.requestHeaders,
     ProxyField.tls => 'TLS',
     ProxyField.sni || ProxyField.servername => 'SNI',
     ProxyField.alpn => 'ALPN',
@@ -40,6 +55,17 @@ extension on ProxyField {
     ProxyField.plugin => l.plugin,
     ProxyField.pluginMode => l.pluginMode,
     ProxyField.pluginHost => l.pluginHost,
+    ProxyField.pluginPath => l.pluginPath,
+    ProxyField.pluginUsername => l.pluginUsername,
+    ProxyField.pluginPassword => l.pluginPassword,
+    ProxyField.pluginVersion => l.protocolVersion,
+    ProxyField.pluginVersionHint => 'TLS Version',
+    ProxyField.pluginRestlsScript => 'Restls Script',
+    ProxyField.pluginKey => l.secretKey,
+    ProxyField.pluginCrypt => l.pluginCipher,
+    ProxyField.pluginTls => 'TLS',
+    ProxyField.pluginMux => 'Mux',
+    ProxyField.pluginSkipCertVerify => l.skipCertVerify,
     ProxyField.udpOverTcp => 'UDP over TCP',
     ProxyField.protocolParam => l.protocolParam,
     ProxyField.obfsParam => l.obfsParam,
@@ -85,9 +111,23 @@ extension on ProxyField {
     ProxyField.flow ||
     ProxyField.wsPath ||
     ProxyField.wsHost ||
+    ProxyField.wsHeaders ||
+    ProxyField.wsMaxEarlyData ||
+    ProxyField.wsEarlyDataHeaderName ||
+    ProxyField.wsHttpUpgrade ||
+    ProxyField.wsHttpUpgradeFastOpen ||
+    ProxyField.httpMethod ||
+    ProxyField.httpPath ||
+    ProxyField.httpHost ||
+    ProxyField.httpHeaders ||
+    ProxyField.h2Host ||
+    ProxyField.h2Path ||
     ProxyField.grpcServiceName ||
     ProxyField.xhttpPath ||
-    ProxyField.xhttpHost => _OptionSection.transport,
+    ProxyField.xhttpHost ||
+    ProxyField.mkcpSeed ||
+    ProxyField.mkcpHeader ||
+    ProxyField.mekyaUrl => _OptionSection.transport,
     ProxyField.tls ||
     ProxyField.sni ||
     ProxyField.servername ||
@@ -111,7 +151,12 @@ extension on ProxyField {
     ProxyField.ipv6 ||
     ProxyField.allowedIps => TextInputLimits.cidr,
     ProxyField.dns => TextInputLimits.dnsServer,
-    ProxyField.wsPath || ProxyField.xhttpPath => TextInputLimits.url,
+    ProxyField.wsPath ||
+    ProxyField.httpPath ||
+    ProxyField.h2Path ||
+    ProxyField.xhttpPath ||
+    ProxyField.mekyaUrl ||
+    ProxyField.pluginPath => TextInputLimits.url,
     _ when kind == ProxyFieldKind.number => TextInputLimits.number,
     _ => TextInputLimits.domain,
   };
@@ -119,6 +164,7 @@ extension on ProxyField {
   String? get hintText => switch (this) {
     ProxyField.up || ProxyField.down => '100 Mbps',
     ProxyField.ports => '443,8000-9000',
+    ProxyField.httpMethod => 'GET',
     _ => null,
   };
 }
@@ -590,6 +636,32 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
           },
           leading: leading,
         );
+      case ProxyFieldKind.map:
+        final entries = _definition.stringMapOf(field);
+        return _choiceRow(
+          title,
+          entries.isEmpty
+              ? context.appLocalizations.none
+              : context.appLocalizations.itemsCount(entries.length),
+          () async {
+            final result = await showFormSheet<Map<String, String>>(
+              context: context,
+              builder: (_, _) => _ProxyMapForm(
+                title: title,
+                entries: entries,
+                ownedKeys: _definition.ownedKeysOf(field),
+                valueMaxLength: field.maxLength,
+              ),
+            );
+            if (result != null && mounted) {
+              _updateField(
+                field,
+                _definition.withEntries(field, result).valueOf(field),
+              );
+            }
+          },
+          leading: leading,
+        );
       default:
         return _textRow(
           key,
@@ -651,7 +723,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
   }
 
   Widget _rawList(String key, String title, int maxLength) {
-    final values = _definition.stringsOf(key);
+    final values = _definition.stringsOf([key]);
     return _choiceRow(
       title,
       context.appLocalizations.itemsCount(values.length),
@@ -890,6 +962,67 @@ class _ProxyListFormState extends State<_ProxyListForm> {
         return;
       }
       Navigator.of(context).pop(parsed.entries);
+    },
+    children: [
+      TextField(
+        controller: _controller,
+        minLines: 4,
+        maxLines: null,
+        inputFormatters: TextInputLimits.limit(TextInputLimits.batchLinks),
+        autocorrect: false,
+      ),
+    ],
+  );
+}
+
+/// Writes one header per line as `Key: value`; a key another field edits, or
+/// one given twice in a different case, is refused.
+class _ProxyMapForm extends StatefulWidget {
+  const _ProxyMapForm({
+    required this.title,
+    required this.entries,
+    required this.ownedKeys,
+    required this.valueMaxLength,
+  });
+  final String title;
+  final Map<String, String> entries;
+  final Set<String> ownedKeys;
+  final int valueMaxLength;
+  @override
+  State<_ProxyMapForm> createState() => _ProxyMapFormState();
+}
+
+class _ProxyMapFormState extends State<_ProxyMapForm> {
+  late final _controller = TextEditingController(
+    text: [
+      for (final MapEntry(:key, :value) in widget.entries.entries)
+        '$key: $value',
+    ].join('\n'),
+  );
+  String? _error;
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FormPage(
+    title: widget.title,
+    error: _error,
+    onSave: () {
+      final parsed = parseMapInput(
+        _controller.text,
+        existingKeys: widget.ownedKeys,
+        keyMaxLength: TextInputLimits.name,
+        valueMaxLength: widget.valueMaxLength,
+        ignoreKeyCase: true,
+      );
+      if (!parsed.isValid || parsed.skippedExisting > 0) {
+        setState(() => _error = context.appLocalizations.nodeInvalidDefinition);
+        return;
+      }
+      Navigator.of(context).pop(Map.fromEntries(parsed.entries));
     },
     children: [
       TextField(

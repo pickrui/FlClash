@@ -152,6 +152,10 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
             "requestInstalledAppsPermission" -> requestInstalledAppsPermission(result)
 
+            "requestLocalNetworkPermission" -> {
+                requestLocalNetworkPermission { granted -> result.success(granted) }
+            }
+
             "openAppSettings" -> {
                 val context = activityRef?.get() ?: GlobalState.application
                 val opened = runCatching {

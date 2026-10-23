@@ -253,5 +253,16 @@ void main() {
       expect(Map.fromEntries(parsed.entries), {'a': '1', 'c': '4'});
       expect(parsed.skippedExisting, 1);
     });
+
+    test('compares keys case-insensitively when asked', () {
+      final parsed = parseMapInput(
+        'host x\nAccept y\naccept z\nHost w',
+        existingKeys: {'Host'},
+        ignoreKeyCase: true,
+      );
+
+      expect(Map.fromEntries(parsed.entries), {'Accept': 'y'});
+      expect(parsed.skippedExisting, 1);
+    });
   });
 }

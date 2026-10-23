@@ -309,16 +309,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m118(value) => "Всего ${value}";
 
-  static String m119(build) => "Номер сборки: ${build}";
+  static String m119(transport) => "Заголовки ${transport}";
 
-  static String m120(version) => "Версия: ${version}";
+  static String m120(build) => "Номер сборки: ${build}";
 
-  static String m121(label) => "${label} должен быть URL";
+  static String m121(version) => "Версия: ${version}";
 
-  static String m122(count) =>
-      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+  static String m122(label) => "${label} должен быть URL";
 
   static String m123(count) =>
+      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
+
+  static String m124(count) =>
       "${Intl.plural(count, one: '${count} г. назад', few: '${count} г. назад', many: '${count} л. назад', other: '${count} г. назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2406,8 +2408,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пожалуйста, загрузите действительный QR-код",
     ),
     "plugin": MessageLookupByLibrary.simpleMessage("Плагин"),
+    "pluginCipher": MessageLookupByLibrary.simpleMessage("Шифр плагина"),
     "pluginHost": MessageLookupByLibrary.simpleMessage("Хост плагина"),
     "pluginMode": MessageLookupByLibrary.simpleMessage("Режим плагина"),
+    "pluginPassword": MessageLookupByLibrary.simpleMessage("Пароль плагина"),
+    "pluginPath": MessageLookupByLibrary.simpleMessage("Путь плагина"),
+    "pluginUsername": MessageLookupByLibrary.simpleMessage(
+      "Имя пользователя плагина",
+    ),
     "points": MessageLookupByLibrary.simpleMessage("Баллы"),
     "port": MessageLookupByLibrary.simpleMessage("Порт"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
@@ -2631,6 +2639,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Сканируйте QR-код для получения профиля",
     ),
+    "qrcodeTooLongTip": MessageLookupByLibrary.simpleMessage(
+      "Ссылка слишком длинная для QR-кода. Используйте «Копировать ссылку».",
+    ),
     "quickActions": MessageLookupByLibrary.simpleMessage("Быстрые действия"),
     "quickAdd": MessageLookupByLibrary.simpleMessage("Быстрое добавление"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Быстрое редактирование"),
@@ -2701,6 +2712,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "replace": MessageLookupByLibrary.simpleMessage("Заменить"),
     "replaceAll": MessageLookupByLibrary.simpleMessage("Заменить все"),
     "request": MessageLookupByLibrary.simpleMessage("Запрос"),
+    "requestHeaders": MessageLookupByLibrary.simpleMessage("Заголовки запроса"),
     "requests": MessageLookupByLibrary.simpleMessage("Запросы"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
       "Просмотр последних записей запросов",
@@ -3056,7 +3068,35 @@ class MessageLookup extends MessageLookupByLibrary {
       "Выберите тариф для улучшения",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
+    "send": MessageLookupByLibrary.simpleMessage("Отправить"),
     "sendCode": MessageLookupByLibrary.simpleMessage("Отправить код"),
+    "sendFromPhone": MessageLookupByLibrary.simpleMessage(
+      "Отправить с телефона",
+    ),
+    "sendFromPhoneConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "Импортировать ссылку с телефона?",
+    ),
+    "sendFromPhoneDesc": MessageLookupByLibrary.simpleMessage(
+      "Отсканируйте телефоном и отправьте ссылку на это устройство",
+    ),
+    "sendFromPhoneNoNetwork": MessageLookupByLibrary.simpleMessage(
+      "Это устройство не подключено к локальной сети",
+    ),
+    "sendFromPhonePageHint": MessageLookupByLibrary.simpleMessage(
+      "Ссылка на подписку или ссылка на прокси",
+    ),
+    "sendFromPhonePageSent": MessageLookupByLibrary.simpleMessage(
+      "Отправлено. Подтвердите импорт на другом устройстве.",
+    ),
+    "sendFromPhonePageTitle": MessageLookupByLibrary.simpleMessage(
+      "Отправить ссылку в FlClash",
+    ),
+    "sendFromPhonePermissionDenied": MessageLookupByLibrary.simpleMessage(
+      "Чтобы получить ссылку с телефона, FlClash нужно разрешение «Устройства поблизости» для доступа к локальной сети. Включите его в настройках приложения.",
+    ),
+    "sendFromPhoneTip": MessageLookupByLibrary.simpleMessage(
+      "Отсканируйте код камерой телефона и вставьте ссылку на открывшейся странице. Оба устройства должны быть в одной сети.",
+    ),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage(
       "Отправить письмо для сброса",
     ),
@@ -3071,6 +3111,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "shareLinkNodesAdded": m108,
     "shareLinkNodesPreserved": m109,
     "shareLinksNotRead": m110,
+    "shareQrcodeTip": MessageLookupByLibrary.simpleMessage(
+      "Отсканируйте в FlClash на другом устройстве, чтобы импортировать этот профиль.",
+    ),
     "show": MessageLookupByLibrary.simpleMessage("Показать"),
     "showLess": MessageLookupByLibrary.simpleMessage("Свернуть"),
     "showMore": MessageLookupByLibrary.simpleMessage("Развернуть"),
@@ -3434,6 +3477,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "После завершения перевода система подтвердит автоматически, и выбранный тариф будет активирован.",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("Транспорт"),
+    "transportHeaders": m119,
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
       "Для TUN нужна учётная запись администратора этого Mac. Войдите как администратор и включите TUN.",
@@ -3489,7 +3533,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "Автоматическое обновление не завершено. Повторите попытку или обновите приложение со страницы загрузки.",
     ),
-    "updateBuildNumber": m119,
+    "updateBuildNumber": m120,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage(
       "Отменить загрузку",
     ),
@@ -3540,7 +3584,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "Приложение закроется, обновится и откроется снова. Ваши настройки сохранятся.",
     ),
-    "updateVersionNumber": m120,
+    "updateVersionNumber": m121,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("Улучшить тариф"),
     "upload": MessageLookupByLibrary.simpleMessage("Загрузка"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Скорость отдачи"),
@@ -3548,7 +3592,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Получить профиль через URL",
     ),
-    "urlTip": m121,
+    "urlTip": m122,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -3592,8 +3636,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "«Записывать в систему» также устанавливает системные часы; Android это игнорирует",
     ),
-    "yearsAgo": m122,
-    "yearsAgoShort": m123,
+    "yearsAgo": m123,
+    "yearsAgoShort": m124,
     "yes": MessageLookupByLibrary.simpleMessage("Да"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };

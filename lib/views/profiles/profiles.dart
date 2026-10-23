@@ -17,6 +17,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/qr_code.dart';
 import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
@@ -384,6 +385,41 @@ class ProfileItem extends ConsumerWidget {
     }
   }
 
+  void _handleShowQrCode() {
+    if (profile.isoixCloudProfile) return;
+    final data = profile.url;
+    globalState.showCommonDialog<void>(
+      child: Builder(
+        builder: (context) => CommonDialog(
+          title: profile.realLabel,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(context.appLocalizations.close),
+            ),
+          ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 16,
+            children: [
+              if (QrCodeView.fits(data)) ...[
+                QrCodeView(data: data),
+                Text(
+                  context.appLocalizations.shareQrcodeTip,
+                  textAlign: TextAlign.center,
+                ),
+              ] else
+                Text(
+                  context.appLocalizations.qrcodeTooLongTip,
+                  textAlign: TextAlign.center,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _handleExportFile(BuildContext context) async {
     final commonAction = context.commonAction;
 
@@ -512,6 +548,12 @@ class ProfileItem extends ConsumerWidget {
                 glyph: AppGlyphs.copy,
                 label: appLocalizations.copyLink,
                 onPressed: () => _handleCopyLink(context),
+              ),
+            if (isUrl)
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.qrCode,
+                label: appLocalizations.qrcode,
+                onPressed: _handleShowQrCode,
               ),
             CommonPopupMenuItem(
               glyph: AppGlyphs.export,

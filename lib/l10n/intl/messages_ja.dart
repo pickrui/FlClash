@@ -271,15 +271,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m118(value) => "累計 ${value}";
 
-  static String m119(build) => "ビルド番号: ${build}";
+  static String m119(transport) => "${transport} リクエストヘッダー";
 
-  static String m120(version) => "バージョン：${version}";
+  static String m120(build) => "ビルド番号: ${build}";
 
-  static String m121(label) => "${label}はURLである必要があります";
+  static String m121(version) => "バージョン：${version}";
 
-  static String m122(count) => "${count}年前";
+  static String m122(label) => "${label}はURLである必要があります";
 
-  static String m123(count) => "${count} 年前";
+  static String m123(count) => "${count}年前";
+
+  static String m124(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1950,8 +1952,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "有効なQRコードをアップロードしてください",
     ),
     "plugin": MessageLookupByLibrary.simpleMessage("プラグイン"),
+    "pluginCipher": MessageLookupByLibrary.simpleMessage("プラグイン暗号方式"),
     "pluginHost": MessageLookupByLibrary.simpleMessage("プラグインホスト"),
     "pluginMode": MessageLookupByLibrary.simpleMessage("プラグインモード"),
+    "pluginPassword": MessageLookupByLibrary.simpleMessage("プラグインパスワード"),
+    "pluginPath": MessageLookupByLibrary.simpleMessage("プラグインパス"),
+    "pluginUsername": MessageLookupByLibrary.simpleMessage("プラグインユーザー名"),
     "points": MessageLookupByLibrary.simpleMessage("ポイント"),
     "port": MessageLookupByLibrary.simpleMessage("ポート"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("別のポートを入力してください"),
@@ -2139,6 +2145,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("純黒モード"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QRコード"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("QRコードをスキャンしてプロファイルを取得"),
+    "qrcodeTooLongTip": MessageLookupByLibrary.simpleMessage(
+      "このリンクは長すぎて QR コードにできません。「リンクをコピー」を使ってください",
+    ),
     "quickActions": MessageLookupByLibrary.simpleMessage("クイック操作"),
     "quickAdd": MessageLookupByLibrary.simpleMessage("クイック追加"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("クイック編集"),
@@ -2191,6 +2200,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "replace": MessageLookupByLibrary.simpleMessage("置換"),
     "replaceAll": MessageLookupByLibrary.simpleMessage("すべて置換"),
     "request": MessageLookupByLibrary.simpleMessage("リクエスト"),
+    "requestHeaders": MessageLookupByLibrary.simpleMessage("リクエストヘッダー"),
     "requests": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("最近のリクエスト記録を表示"),
     "required": MessageLookupByLibrary.simpleMessage("必須"),
@@ -2472,7 +2482,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectBackup": MessageLookupByLibrary.simpleMessage("バックアップを選択"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("アップグレード対象を選択"),
     "selected": MessageLookupByLibrary.simpleMessage("選択済み"),
+    "send": MessageLookupByLibrary.simpleMessage("送信"),
     "sendCode": MessageLookupByLibrary.simpleMessage("コードを送信"),
+    "sendFromPhone": MessageLookupByLibrary.simpleMessage("スマートフォンから送信"),
+    "sendFromPhoneConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "スマートフォンから届いたリンクをインポートしますか？",
+    ),
+    "sendFromPhoneDesc": MessageLookupByLibrary.simpleMessage(
+      "スマートフォンでスキャンして、このデバイスにリンクを送信します",
+    ),
+    "sendFromPhoneNoNetwork": MessageLookupByLibrary.simpleMessage(
+      "このデバイスはローカルネットワークに接続されていません",
+    ),
+    "sendFromPhonePageHint": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションリンクまたはプロキシ共有リンク",
+    ),
+    "sendFromPhonePageSent": MessageLookupByLibrary.simpleMessage(
+      "送信しました。もう一方のデバイスでインポートを確認してください",
+    ),
+    "sendFromPhonePageTitle": MessageLookupByLibrary.simpleMessage(
+      "FlClash にリンクを送信",
+    ),
+    "sendFromPhonePermissionDenied": MessageLookupByLibrary.simpleMessage(
+      "スマートフォンからリンクを受け取るには、FlClash がローカルネットワークにアクセスするための「付近のデバイス」権限が必要です。アプリの設定でオンにしてください",
+    ),
+    "sendFromPhoneTip": MessageLookupByLibrary.simpleMessage(
+      "スマートフォンのカメラでコードをスキャンし、開いたページにリンクを貼り付けてください。両方のデバイスを同じネットワークに接続する必要があります",
+    ),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("リセットメールを送信"),
     "server": MessageLookupByLibrary.simpleMessage("サーバー"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage("サービスチェック失敗"),
@@ -2483,6 +2519,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "shareLinkNodesAdded": m108,
     "shareLinkNodesPreserved": m109,
     "shareLinksNotRead": m110,
+    "shareQrcodeTip": MessageLookupByLibrary.simpleMessage(
+      "別のデバイスの FlClash でスキャンすると、このプロファイルをインポートできます",
+    ),
     "show": MessageLookupByLibrary.simpleMessage("表示"),
     "showLess": MessageLookupByLibrary.simpleMessage("折りたたむ"),
     "showMore": MessageLookupByLibrary.simpleMessage("展開"),
@@ -2770,6 +2809,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "送金完了後、システムが自動的に確認し、選択したプランが自動的に有効になります",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("トランスポート"),
+    "transportHeaders": m119,
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
       "TUN を有効にするには、この Mac の管理者アカウントでログインする必要があります",
@@ -2819,7 +2859,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "自動更新を完了できませんでした。再試行するか、ダウンロードページから更新してください。",
     ),
-    "updateBuildNumber": m119,
+    "updateBuildNumber": m120,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("ダウンロードを中止"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "バックグラウンドでダウンロード",
@@ -2854,13 +2894,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "アプリを終了して更新し、再起動します。設定は保持されます。",
     ),
-    "updateVersionNumber": m120,
+    "updateVersionNumber": m121,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("プランをアップグレード"),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("アップロード帯域幅"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL経由でプロファイルを取得"),
-    "urlTip": m121,
+    "urlTip": m122,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
@@ -2888,8 +2928,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます",
     ),
-    "yearsAgo": m122,
-    "yearsAgoShort": m123,
+    "yearsAgo": m123,
+    "yearsAgoShort": m124,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

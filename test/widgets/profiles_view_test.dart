@@ -19,6 +19,7 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/profiles/custom_profile.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/views/profiles/profiles.dart';
+import 'package:fl_clash/ui/qr_code.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -248,6 +249,39 @@ void main() {
     expect(setup.previews, hasLength(2));
     setup.previews.last.complete({});
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('a subscription shows its link as a QR code and a managed '
+      'oixCloud profile offers no QR code or link', (tester) async {
+    final managed = _second.copyWith(
+      id: 4,
+      label: 'Managed',
+      url: 'oixcloud://managed',
+    );
+    await _pushRoute(tester, [
+      profilesProvider.overrideWith(() => _Profiles([_second, managed])),
+    ], () => const ProfilesView());
+
+    await tester.longPress(find.text('Second'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('More'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('QR code'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<QrCodeView>(find.byType(QrCodeView)).data,
+      _second.url,
+    );
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+    expect(find.byType(QrCodeView), findsNothing);
+
+    await tester.longPress(find.text('Managed'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete'), findsOneWidget);
+    for (final label in ['More', 'QR code', 'Copy link', 'Export file']) {
+      expect(find.text(label), findsNothing, reason: label);
+    }
   });
 
   testWidgets('local-only profiles have no update action', (tester) async {

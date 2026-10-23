@@ -279,15 +279,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m118(value) => "합계 ${value}";
 
-  static String m119(build) => "빌드: ${build}";
+  static String m119(transport) => "${transport} 요청 헤더";
 
-  static String m120(version) => "버전: ${version}";
+  static String m120(build) => "빌드: ${build}";
 
-  static String m121(label) => "${label}은(는) URL이어야 합니다";
+  static String m121(version) => "버전: ${version}";
 
-  static String m122(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m122(label) => "${label}은(는) URL이어야 합니다";
 
   static String m123(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m124(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1915,8 +1917,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "올바른 QR 코드를 업로드하세요",
     ),
     "plugin": MessageLookupByLibrary.simpleMessage("플러그인"),
+    "pluginCipher": MessageLookupByLibrary.simpleMessage("플러그인 암호화 방식"),
     "pluginHost": MessageLookupByLibrary.simpleMessage("플러그인 호스트"),
     "pluginMode": MessageLookupByLibrary.simpleMessage("플러그인 모드"),
+    "pluginPassword": MessageLookupByLibrary.simpleMessage("플러그인 비밀번호"),
+    "pluginPath": MessageLookupByLibrary.simpleMessage("플러그인 경로"),
+    "pluginUsername": MessageLookupByLibrary.simpleMessage("플러그인 사용자 이름"),
     "points": MessageLookupByLibrary.simpleMessage("포인트"),
     "port": MessageLookupByLibrary.simpleMessage("포트"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("다른 포트를 입력하세요"),
@@ -2100,6 +2106,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("퓨어 블랙 모드"),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR 코드"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("QR 코드를 스캔하여 프로필 가져오기"),
+    "qrcodeTooLongTip": MessageLookupByLibrary.simpleMessage(
+      "이 링크는 너무 길어 QR 코드로 만들 수 없습니다. 링크 복사를 사용하세요.",
+    ),
     "quickActions": MessageLookupByLibrary.simpleMessage("빠른 작업"),
     "quickAdd": MessageLookupByLibrary.simpleMessage("빠른 추가"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("빠른 편집"),
@@ -2152,6 +2161,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "replace": MessageLookupByLibrary.simpleMessage("바꾸기"),
     "replaceAll": MessageLookupByLibrary.simpleMessage("모두 바꾸기"),
     "request": MessageLookupByLibrary.simpleMessage("요청"),
+    "requestHeaders": MessageLookupByLibrary.simpleMessage("요청 헤더"),
     "requests": MessageLookupByLibrary.simpleMessage("요청"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("최근 요청 기록 보기"),
     "required": MessageLookupByLibrary.simpleMessage("필수"),
@@ -2423,7 +2433,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectBackup": MessageLookupByLibrary.simpleMessage("백업 선택"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("업그레이드 대상 선택"),
     "selected": MessageLookupByLibrary.simpleMessage("선택됨"),
+    "send": MessageLookupByLibrary.simpleMessage("보내기"),
     "sendCode": MessageLookupByLibrary.simpleMessage("코드 전송"),
+    "sendFromPhone": MessageLookupByLibrary.simpleMessage("휴대폰에서 보내기"),
+    "sendFromPhoneConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "휴대폰에서 받은 링크를 가져올까요?",
+    ),
+    "sendFromPhoneDesc": MessageLookupByLibrary.simpleMessage(
+      "휴대폰으로 스캔해 이 기기로 링크를 보냅니다",
+    ),
+    "sendFromPhoneNoNetwork": MessageLookupByLibrary.simpleMessage(
+      "이 기기는 로컬 네트워크에 연결되어 있지 않습니다",
+    ),
+    "sendFromPhonePageHint": MessageLookupByLibrary.simpleMessage(
+      "구독 링크 또는 프록시 공유 링크",
+    ),
+    "sendFromPhonePageSent": MessageLookupByLibrary.simpleMessage(
+      "보냈습니다. 다른 기기에서 가져오기를 확인하세요.",
+    ),
+    "sendFromPhonePageTitle": MessageLookupByLibrary.simpleMessage(
+      "FlClash로 링크 보내기",
+    ),
+    "sendFromPhonePermissionDenied": MessageLookupByLibrary.simpleMessage(
+      "휴대폰에서 링크를 받으려면 FlClash가 로컬 네트워크에 접근할 수 있도록 \'근처 기기\' 권한이 필요합니다. 앱 설정에서 켜 주세요.",
+    ),
+    "sendFromPhoneTip": MessageLookupByLibrary.simpleMessage(
+      "휴대폰 카메라로 코드를 스캔한 뒤 열린 페이지에 링크를 붙여 넣으세요. 두 기기가 같은 네트워크에 연결되어 있어야 합니다.",
+    ),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("재설정 이메일 전송"),
     "server": MessageLookupByLibrary.simpleMessage("서버"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage("서비스 확인 실패"),
@@ -2434,6 +2470,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "shareLinkNodesAdded": m108,
     "shareLinkNodesPreserved": m109,
     "shareLinksNotRead": m110,
+    "shareQrcodeTip": MessageLookupByLibrary.simpleMessage(
+      "다른 기기의 FlClash로 스캔하면 이 프로필을 가져올 수 있습니다.",
+    ),
     "show": MessageLookupByLibrary.simpleMessage("표시"),
     "showLess": MessageLookupByLibrary.simpleMessage("접기"),
     "showMore": MessageLookupByLibrary.simpleMessage("펼치기"),
@@ -2713,6 +2752,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "이체가 완료되면 시스템에서 자동으로 확인하고 선택한 요금제를 활성화합니다.",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("전송"),
+    "transportHeaders": m119,
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
       "이 Mac에서 TUN을 사용하려면 관리자 계정이 필요합니다. 관리자 계정으로 로그인한 후 켜세요.",
@@ -2764,7 +2804,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "자동 업데이트를 완료하지 못했습니다. 다시 시도하거나 다운로드 페이지에서 업데이트하세요.",
     ),
-    "updateBuildNumber": m119,
+    "updateBuildNumber": m120,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("다운로드 취소"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage(
       "백그라운드에서 다운로드",
@@ -2799,13 +2839,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "앱이 닫힌 뒤 현재 위치에서 업데이트되고 다시 열립니다. 설정은 유지됩니다.",
     ),
-    "updateVersionNumber": m120,
+    "updateVersionNumber": m121,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("요금제 업그레이드"),
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL로 프로필 가져오기"),
-    "urlTip": m121,
+    "urlTip": m122,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -2833,8 +2873,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m122,
-    "yearsAgoShort": m123,
+    "yearsAgo": m123,
+    "yearsAgoShort": m124,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

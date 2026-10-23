@@ -262,15 +262,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m118(value) => "累计 ${value}";
 
-  static String m119(build) => "构建号：${build}";
+  static String m119(transport) => "${transport} 请求头";
 
-  static String m120(version) => "版本号：${version}";
+  static String m120(build) => "构建号：${build}";
 
-  static String m121(label) => "${label}必须为URL";
+  static String m121(version) => "版本号：${version}";
 
-  static String m122(count) => "${count} 年前";
+  static String m122(label) => "${label}必须为URL";
 
   static String m123(count) => "${count} 年前";
+
+  static String m124(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1712,8 +1714,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "请上传有效的二维码",
     ),
     "plugin": MessageLookupByLibrary.simpleMessage("插件"),
+    "pluginCipher": MessageLookupByLibrary.simpleMessage("插件加密方式"),
     "pluginHost": MessageLookupByLibrary.simpleMessage("插件主机"),
     "pluginMode": MessageLookupByLibrary.simpleMessage("插件模式"),
+    "pluginPassword": MessageLookupByLibrary.simpleMessage("插件密码"),
+    "pluginPath": MessageLookupByLibrary.simpleMessage("插件路径"),
+    "pluginUsername": MessageLookupByLibrary.simpleMessage("插件用户名"),
     "points": MessageLookupByLibrary.simpleMessage("积分"),
     "port": MessageLookupByLibrary.simpleMessage("端口"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("请输入不同的端口"),
@@ -1881,6 +1887,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("纯黑模式"),
     "qrcode": MessageLookupByLibrary.simpleMessage("二维码"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("扫描二维码获取配置文件"),
+    "qrcodeTooLongTip": MessageLookupByLibrary.simpleMessage(
+      "链接过长，无法生成二维码，请改用“复制链接”",
+    ),
     "quickActions": MessageLookupByLibrary.simpleMessage("快捷操作"),
     "quickAdd": MessageLookupByLibrary.simpleMessage("快捷添加"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("快速编辑"),
@@ -1927,6 +1936,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "replace": MessageLookupByLibrary.simpleMessage("替换"),
     "replaceAll": MessageLookupByLibrary.simpleMessage("全部替换"),
     "request": MessageLookupByLibrary.simpleMessage("请求"),
+    "requestHeaders": MessageLookupByLibrary.simpleMessage("请求头"),
     "requests": MessageLookupByLibrary.simpleMessage("请求"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage("查看最近请求记录"),
     "required": MessageLookupByLibrary.simpleMessage("必填"),
@@ -2172,7 +2182,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectBackup": MessageLookupByLibrary.simpleMessage("选择备份"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("选择升级目标套餐"),
     "selected": MessageLookupByLibrary.simpleMessage("已选择"),
+    "send": MessageLookupByLibrary.simpleMessage("发送"),
     "sendCode": MessageLookupByLibrary.simpleMessage("获取验证码"),
+    "sendFromPhone": MessageLookupByLibrary.simpleMessage("从手机发送"),
+    "sendFromPhoneConfirmTitle": MessageLookupByLibrary.simpleMessage(
+      "导入手机发来的链接？",
+    ),
+    "sendFromPhoneDesc": MessageLookupByLibrary.simpleMessage(
+      "用手机扫码，把链接发到这台设备",
+    ),
+    "sendFromPhoneNoNetwork": MessageLookupByLibrary.simpleMessage(
+      "这台设备没有连接局域网",
+    ),
+    "sendFromPhonePageHint": MessageLookupByLibrary.simpleMessage(
+      "订阅链接或代理分享链接",
+    ),
+    "sendFromPhonePageSent": MessageLookupByLibrary.simpleMessage(
+      "已发送，请在另一台设备上确认导入",
+    ),
+    "sendFromPhonePageTitle": MessageLookupByLibrary.simpleMessage(
+      "把链接发送到 FlClash",
+    ),
+    "sendFromPhonePermissionDenied": MessageLookupByLibrary.simpleMessage(
+      "从手机接收链接需要「附近的设备」权限，FlClash 才能访问局域网，请在应用设置中开启",
+    ),
+    "sendFromPhoneTip": MessageLookupByLibrary.simpleMessage(
+      "用手机相机扫描二维码，在打开的页面里粘贴链接；两台设备需要连在同一个网络",
+    ),
     "sendResetEmail": MessageLookupByLibrary.simpleMessage("发送重置邮件"),
     "server": MessageLookupByLibrary.simpleMessage("服务器"),
     "serviceCheckFailed": MessageLookupByLibrary.simpleMessage("服务检测失败"),
@@ -2183,6 +2219,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "shareLinkNodesAdded": m108,
     "shareLinkNodesPreserved": m109,
     "shareLinksNotRead": m110,
+    "shareQrcodeTip": MessageLookupByLibrary.simpleMessage(
+      "在另一台设备上用 FlClash 扫码即可导入此配置",
+    ),
     "show": MessageLookupByLibrary.simpleMessage("显示"),
     "showLess": MessageLookupByLibrary.simpleMessage("收起"),
     "showMore": MessageLookupByLibrary.simpleMessage("展开"),
@@ -2444,6 +2483,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "转账完成后系统会自动确认，确认后将自动开通已选套餐",
     ),
     "transport": MessageLookupByLibrary.simpleMessage("传输协议"),
+    "transportHeaders": m119,
     "tun": MessageLookupByLibrary.simpleMessage("虚拟网卡"),
     "tunAdminAccountRequired": MessageLookupByLibrary.simpleMessage(
       "开启 TUN 需要本机管理员账户，请使用管理员账户登录后再开启",
@@ -2491,7 +2531,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateApplyFailed": MessageLookupByLibrary.simpleMessage(
       "自动更新未完成，请重试或从下载页面更新",
     ),
-    "updateBuildNumber": m119,
+    "updateBuildNumber": m120,
     "updateCancelDownload": MessageLookupByLibrary.simpleMessage("取消下载"),
     "updateDownloadBackground": MessageLookupByLibrary.simpleMessage("移到后台下载"),
     "updateDownloadBrowser": MessageLookupByLibrary.simpleMessage("使用浏览器下载"),
@@ -2518,13 +2558,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "updateRestartHint": MessageLookupByLibrary.simpleMessage(
       "应用将退出、原位更新并重新打开，已有配置会保留",
     ),
-    "updateVersionNumber": m120,
+    "updateVersionNumber": m121,
     "upgradePlan": MessageLookupByLibrary.simpleMessage("升级套餐"),
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m121,
+    "urlTip": m122,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
@@ -2552,8 +2592,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效",
     ),
-    "yearsAgo": m122,
-    "yearsAgoShort": m123,
+    "yearsAgo": m123,
+    "yearsAgoShort": m124,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

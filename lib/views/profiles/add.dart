@@ -6,7 +6,10 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/link_receiver.dart';
+import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/qr_code.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -103,6 +106,35 @@ class _AddProfileViewState extends ConsumerState<AddProfileView> {
     }
   }
 
+  Future<void> _toSendFromPhone() async {
+    final origin = parentContext;
+    final profileAction = origin.profileAction;
+    final l = origin.appLocalizations;
+    if (!(await app?.requestLocalNetworkPermission() ?? true)) {
+      final res = await globalState.showMessage(
+        message: TextSpan(text: l.sendFromPhonePermissionDenied),
+        confirmText: l.settings,
+      );
+      if (res == true) await app?.openAppSettings();
+      return;
+    }
+    final link = await globalState.showCommonDialog<String>(
+      child: const _SendFromPhoneDialog(),
+    );
+    if (link == null || !origin.mounted) return;
+    final confirmed = await globalState.showMessage(
+      title: l.sendFromPhoneConfirmTitle,
+      message: TextSpan(text: link),
+      confirmText: l.import,
+    );
+    if (confirmed != true) return;
+    try {
+      await profileAction.addProfilesFromLinks([(label: '', url: link)]);
+    } catch (error) {
+      if (origin.mounted) origin.showNotifier(error.toString());
+    }
+  }
+
   Future<void> _toAddCustom(
     BuildContext context, [
     CustomImportSource? importSource,
@@ -160,6 +192,13 @@ class _AddProfileViewState extends ConsumerState<AddProfileView> {
           subtitle: Text(appLocalizations.linkDesc),
           onTap: _toAdd,
         ),
+        if (system.isTV)
+          ListItem(
+            leading: const GlyphIcon(AppGlyphs.devices),
+            title: Text(appLocalizations.sendFromPhone),
+            subtitle: Text(appLocalizations.sendFromPhoneDesc),
+            onTap: _toSendFromPhone,
+          ),
         ListItem(
           leading: const GlyphIcon(AppGlyphs.customize),
           title: Text(appLocalizations.customProfile),
@@ -181,6 +220,90 @@ class _AddProfileViewState extends ConsumerState<AddProfileView> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SendFromPhoneDialog extends StatefulWidget {
+  const _SendFromPhoneDialog();
+
+  @override
+  State<_SendFromPhoneDialog> createState() => _SendFromPhoneDialogState();
+}
+
+class _SendFromPhoneDialogState extends State<_SendFromPhoneDialog> {
+  LinkReceiver? _receiver;
+  bool _failed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_start());
+  }
+
+  Future<void> _start() async {
+    final l = appLocalizations;
+    final receiver = await LinkReceiver.start((
+      title: l.sendFromPhonePageTitle,
+      hint: l.sendFromPhonePageHint,
+      send: l.send,
+      sent: l.sendFromPhonePageSent,
+      invalid: l.invalidLinkTip,
+    )).catchError((Object _) => null);
+    if (!mounted) {
+      unawaited(receiver?.close());
+      return;
+    }
+    setState(() {
+      _receiver = receiver;
+      _failed = receiver == null;
+    });
+    final link = await receiver?.link;
+    if (link != null && mounted) {
+      Navigator.of(context).pop(link);
+    }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_receiver?.close());
+    super.dispose();
+  }
+
+  Widget _buildContent(BuildContext context) {
+    final l = context.appLocalizations;
+    if (_failed) {
+      return Text(l.sendFromPhoneNoNetwork, textAlign: TextAlign.center);
+    }
+    final address = _receiver?.address.toString();
+    if (address == null) {
+      return const SizedBox.square(
+        dimension: 96,
+        child: Center(child: CommonCircleLoading()),
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 16,
+      children: [
+        QrCodeView(data: address, size: 200),
+        SelectableText(address, textAlign: TextAlign.center),
+        Text(l.sendFromPhoneTip, textAlign: TextAlign.center),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonDialog(
+      title: context.appLocalizations.sendFromPhone,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(context.appLocalizations.cancel),
+        ),
+      ],
+      child: _buildContent(context),
     );
   }
 }

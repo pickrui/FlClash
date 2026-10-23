@@ -76,6 +76,98 @@ void main() {
     expect(trojan.definition.containsKey('cipher'), isFalse);
   });
 
+  test('a header map leaves Host to its own field and keeps listed values', () {
+    const proxy = ProxyDefinition({
+      'type': 'vmess',
+      'network': 'http',
+      'http-opts': {
+        'headers': {
+          'Host': ['a.example', 'b.example'],
+          'Accept': ['text/html', 'application/xml'],
+        },
+      },
+    });
+
+    expect(proxy.stringMapOf(ProxyField.httpHeaders), {
+      'Accept': 'text/html, application/xml',
+    });
+    expect(
+      proxy.withEntries(ProxyField.httpHeaders, {
+        'Accept': 'text/html, application/xml',
+        'Connection': 'keep-alive',
+      }).definition['http-opts'],
+      {
+        'headers': {
+          'Host': ['a.example', 'b.example'],
+          'Accept': ['text/html', 'application/xml'],
+          'Connection': ['keep-alive'],
+        },
+      },
+    );
+    expect(
+      proxy.withEntries(ProxyField.httpHeaders, {}).definition['http-opts'],
+      {
+        'headers': {
+          'Host': ['a.example', 'b.example'],
+        },
+      },
+    );
+
+    const ws = ProxyDefinition({
+      'type': 'vless',
+      'network': 'ws',
+      'ws-opts': {
+        'headers': {'host': 'a.example', 'User-Agent': 'a'},
+      },
+    });
+    expect(ws.stringMapOf(ProxyField.wsHeaders), {'User-Agent': 'a'});
+    expect(
+      ws.withEntries(ProxyField.wsHeaders, {
+        'User-Agent': 'b',
+      }).definition['ws-opts'],
+      {
+        'headers': {'host': 'a.example', 'User-Agent': 'b'},
+      },
+    );
+  });
+
+  test('a plugin offers the options its struct reads', () {
+    List<ProxyField> optionsOf(String plugin) =>
+        ProxyDefinition({'type': 'ss', 'plugin': plugin}).options;
+
+    expect(optionsOf('kcptun'), isNot(contains(ProxyField.pluginHost)));
+    expect(
+      optionsOf('kcptun'),
+      containsAll([ProxyField.pluginKey, ProxyField.pluginCrypt]),
+    );
+    expect(
+      optionsOf('shadow-tls'),
+      containsAll([ProxyField.pluginPassword, ProxyField.pluginVersion]),
+    );
+    expect(optionsOf('shadow-tls'), isNot(contains(ProxyField.pluginMode)));
+    expect(
+      optionsOf('restls'),
+      containsAll([ProxyField.pluginPassword, ProxyField.pluginVersionHint]),
+    );
+    expect(
+      optionsOf('jls'),
+      containsAll([ProxyField.pluginUsername, ProxyField.pluginPassword]),
+    );
+    expect(optionsOf('obfs'), isNot(contains(ProxyField.pluginPath)));
+  });
+
+  test('HTTPUpgrade fast open is offered only while HTTPUpgrade is on', () {
+    const ws = ProxyDefinition({'type': 'vmess', 'network': 'ws'});
+    expect(ws.options, isNot(contains(ProxyField.wsHttpUpgradeFastOpen)));
+    final upgraded = ws.withField(ProxyField.wsHttpUpgrade, true);
+    expect(upgraded.options, contains(ProxyField.wsHttpUpgradeFastOpen));
+    final fastOpen = upgraded.withField(ProxyField.wsHttpUpgradeFastOpen, true);
+    expect(fastOpen.withField(ProxyField.wsHttpUpgrade, null).definition, {
+      'type': 'vmess',
+      'network': 'ws',
+    });
+  });
+
   test('unmodified future types retain their raw definition', () {
     const initial = ProxyDefinition({
       'type': 'future-protocol',

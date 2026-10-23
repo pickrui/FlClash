@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/features/form/form_page.dart';
 import 'package:fl_clash/features/overwrite/profile_proxy.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -147,6 +148,58 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(requests, hasLength(2));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an http proxy edits the headers it sends', (tester) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final core = _Core();
+    when(() => core.isCompleted).thenReturn(true);
+    when(() => core.validateProxies(any())).thenAnswer((_) async => ['']);
+    ProfileProxy? saved;
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(core),
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
+        ],
+        child: ProfileProxyEditView(
+          profileProxy: const ProfileProxy(
+            id: 1,
+            proxy: {
+              'name': 'Node',
+              'type': 'http',
+              'server': 'example.com',
+              'port': 8080,
+              'headers': {'X-A': '1'},
+            },
+          ),
+          canSave: (next) async {
+            saved = next;
+            return false;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.requestHeaders));
+    await tester.pumpAndSettle();
+    final input = find.descendant(
+      of: find.byType(FormPage),
+      matching: find.byType(TextField),
+    );
+    expect(tester.widget<TextField>(input).controller!.text, 'X-A: 1');
+
+    await tester.enterText(input, 'X-A: 2\nx-a: 3\nAccept: */*');
+    tester.widget<FormPage>(find.byType(FormPage)).onSave();
+    await tester.pumpAndSettle();
+    expect(find.byType(FormPage), findsNothing);
+    await tester.tap(find.byTooltip(AppLocalizations.current.save));
+    await tester.pumpAndSettle();
+
+    expect(saved?.proxy['headers'], {'X-A': '2', 'Accept': '*/*'});
   });
 
   testWidgets('a refused save keeps the node editor and its draft open', (

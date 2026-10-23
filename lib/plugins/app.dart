@@ -77,6 +77,15 @@ class App {
         false;
   }
 
+  /// Android 17 drops traffic between the app and the local network until the
+  /// user grants this; earlier versions answer true.
+  Future<bool> requestLocalNetworkPermission() async {
+    return await methodChannel.invokeMethod<bool>(
+          'requestLocalNetworkPermission',
+        ) ??
+        false;
+  }
+
   Future<bool> openAppSettings() async {
     return await methodChannel.invokeMethod<bool>('openAppSettings') ?? false;
   }

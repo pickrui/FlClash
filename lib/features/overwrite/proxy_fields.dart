@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:collection/collection.dart';
 
-enum ProxyFieldKind { text, secret, number, toggle, choice, list }
+enum ProxyFieldKind { text, secret, number, toggle, choice, list, map }
 
 enum ProxyField {
   username(['username']),
@@ -29,9 +29,27 @@ enum ProxyField {
   flow(['flow'], ProxyFieldKind.choice),
   wsPath(['ws-opts', 'path']),
   wsHost(['ws-opts', 'headers', 'Host']),
+  wsHeaders(['ws-opts', 'headers'], ProxyFieldKind.map),
+  wsMaxEarlyData(['ws-opts', 'max-early-data'], ProxyFieldKind.number),
+  wsEarlyDataHeaderName(['ws-opts', 'early-data-header-name']),
+  wsHttpUpgrade(['ws-opts', 'v2ray-http-upgrade'], ProxyFieldKind.toggle),
+  wsHttpUpgradeFastOpen([
+    'ws-opts',
+    'v2ray-http-upgrade-fast-open',
+  ], ProxyFieldKind.toggle),
+  httpMethod(['http-opts', 'method']),
+  httpPath(['http-opts', 'path'], ProxyFieldKind.list),
+  httpHost(['http-opts', 'headers', 'Host'], ProxyFieldKind.list),
+  httpHeaders(['http-opts', 'headers'], ProxyFieldKind.map),
+  h2Host(['h2-opts', 'host'], ProxyFieldKind.list),
+  h2Path(['h2-opts', 'path']),
   grpcServiceName(['grpc-opts', 'grpc-service-name']),
   xhttpPath(['xhttp-opts', 'path']),
   xhttpHost(['xhttp-opts', 'host']),
+  mkcpSeed(['mkcp-opts', 'seed'], ProxyFieldKind.secret),
+  mkcpHeader(['mkcp-opts', 'header'], ProxyFieldKind.choice),
+  mekyaUrl(['mekya-opts', 'url']),
+  headers(['headers'], ProxyFieldKind.map),
   tls(['tls'], ProxyFieldKind.toggle),
   sni(['sni']),
   servername(['servername']),
@@ -43,6 +61,20 @@ enum ProxyField {
   plugin(['plugin'], ProxyFieldKind.choice),
   pluginMode(['plugin-opts', 'mode']),
   pluginHost(['plugin-opts', 'host']),
+  pluginPath(['plugin-opts', 'path']),
+  pluginUsername(['plugin-opts', 'username']),
+  pluginPassword(['plugin-opts', 'password'], ProxyFieldKind.secret),
+  pluginVersion(['plugin-opts', 'version'], ProxyFieldKind.number),
+  pluginVersionHint(['plugin-opts', 'version-hint'], ProxyFieldKind.choice),
+  pluginRestlsScript(['plugin-opts', 'restls-script']),
+  pluginKey(['plugin-opts', 'key'], ProxyFieldKind.secret),
+  pluginCrypt(['plugin-opts', 'crypt'], ProxyFieldKind.choice),
+  pluginTls(['plugin-opts', 'tls'], ProxyFieldKind.toggle),
+  pluginMux(['plugin-opts', 'mux'], ProxyFieldKind.toggle),
+  pluginSkipCertVerify([
+    'plugin-opts',
+    'skip-cert-verify',
+  ], ProxyFieldKind.toggle),
   udpOverTcp(['udp-over-tcp'], ProxyFieldKind.toggle),
   protocolParam(['protocol-param']),
   obfsParam(['obfs-param']),
@@ -276,9 +308,24 @@ extension ProxyDefinitionExt on ProxyDefinition {
       ProxyField.protocol || ProxyField.obfsSecret => type == 'hysteria',
       ProxyField.network => choicesOf(field).isNotEmpty,
       ProxyField.flow => type == 'vless',
-      ProxyField.wsPath || ProxyField.wsHost => _usesNetwork('ws'),
+      ProxyField.wsPath ||
+      ProxyField.wsHost ||
+      ProxyField.wsHeaders ||
+      ProxyField.wsMaxEarlyData ||
+      ProxyField.wsEarlyDataHeaderName ||
+      ProxyField.wsHttpUpgrade => _usesNetwork('ws'),
+      ProxyField.wsHttpUpgradeFastOpen =>
+        _usesNetwork('ws') && valueOf(ProxyField.wsHttpUpgrade) == true,
+      ProxyField.httpMethod ||
+      ProxyField.httpPath ||
+      ProxyField.httpHost ||
+      ProxyField.httpHeaders => _usesNetwork('http'),
+      ProxyField.h2Host || ProxyField.h2Path => _usesNetwork('h2'),
       ProxyField.grpcServiceName => _usesNetwork('grpc'),
       ProxyField.xhttpPath || ProxyField.xhttpHost => _usesNetwork('xhttp'),
+      ProxyField.mkcpSeed || ProxyField.mkcpHeader => _usesNetwork('mkcp'),
+      ProxyField.mekyaUrl => _usesNetwork('mekya'),
+      ProxyField.headers => type == 'http',
       ProxyField.tls => const {
         'socks5',
         'http',
@@ -340,8 +387,20 @@ extension ProxyDefinitionExt on ProxyDefinition {
         'trojan',
       }.contains(type),
       ProxyField.plugin || ProxyField.udpOverTcp => type == 'ss',
-      ProxyField.pluginMode => type == 'ss' && _pluginReads('mode'),
-      ProxyField.pluginHost => type == 'ss' && _pluginReads('host'),
+      ProxyField.pluginMode ||
+      ProxyField.pluginHost ||
+      ProxyField.pluginPath ||
+      ProxyField.pluginUsername ||
+      ProxyField.pluginPassword ||
+      ProxyField.pluginVersion ||
+      ProxyField.pluginVersionHint ||
+      ProxyField.pluginRestlsScript ||
+      ProxyField.pluginKey ||
+      ProxyField.pluginCrypt ||
+      ProxyField.pluginTls ||
+      ProxyField.pluginMux ||
+      ProxyField.pluginSkipCertVerify =>
+        type == 'ss' && _pluginReads(field.path.last),
       ProxyField.protocolParam || ProxyField.obfsParam => type == 'ssr',
       ProxyField.obfsMode ||
       ProxyField.obfsHost ||
@@ -385,9 +444,30 @@ extension ProxyDefinitionExt on ProxyDefinition {
   }
 
   bool _pluginReads(String key) => switch (valueOf(ProxyField.plugin)) {
-    'obfs' || 'v2ray-plugin' || 'gost-plugin' => true,
-    'kcptun' => key == 'mode',
-    'shadow-tls' || 'restls' || 'jls' => key == 'host',
+    'obfs' => key == 'mode' || key == 'host',
+    'v2ray-plugin' || 'gost-plugin' => const {
+      'mode',
+      'host',
+      'path',
+      'tls',
+      'mux',
+      'skip-cert-verify',
+    }.contains(key),
+    'kcptun' => const {'mode', 'key', 'crypt'}.contains(key),
+    'shadow-tls' => const {
+      'host',
+      'password',
+      'version',
+      'skip-cert-verify',
+    }.contains(key),
+    'restls' => const {
+      'host',
+      'password',
+      'version-hint',
+      'restls-script',
+      'skip-cert-verify',
+    }.contains(key),
+    'jls' => const {'host', 'username', 'password'}.contains(key),
     _ => false,
   };
 
@@ -465,6 +545,31 @@ extension ProxyDefinitionExt on ProxyDefinition {
       'jls',
       'kcptun',
     ],
+    ProxyField.pluginVersionHint => const ['tls13', 'tls12'],
+    ProxyField.pluginCrypt => const [
+      'aes',
+      'aes-128',
+      'aes-192',
+      'aes-128-gcm',
+      'salsa20',
+      'blowfish',
+      'twofish',
+      'cast5',
+      '3des',
+      'tea',
+      'xtea',
+      'xor',
+      'none',
+      'null',
+    ],
+    ProxyField.mkcpHeader => const [
+      'none',
+      'srtp',
+      'utp',
+      'wechat-video',
+      'dtls',
+      'wireguard',
+    ],
     ProxyField.obfsMode => const ['http', 'tls', 'shadow-tls', 'restls', 'jls'],
     ProxyField.congestionController => const [
       'cubic',
@@ -484,9 +589,11 @@ extension ProxyDefinitionExt on ProxyDefinition {
     _ => const [],
   };
 
-  Object? valueOf(ProxyField field) {
+  Object? valueOf(ProxyField field) => _valueAt(field.path);
+
+  Object? _valueAt(List<String> path) {
     Object? value = definition;
-    for (final key in field.path) {
+    for (final key in path) {
       if (value is! Map) {
         return null;
       }
@@ -541,13 +648,66 @@ extension ProxyDefinitionExt on ProxyDefinition {
     return next;
   }
 
-  List<String> stringsOf(String key) =>
-      switch (definition[_keyIn(definition, key)]) {
-        final List items => [for (final item in items) item.toString()],
-        final String item when item.isNotEmpty => [item],
-        _ => const [],
-      };
+  List<String> stringsOf(List<String> path) => switch (_valueAt(path)) {
+    final List items => [for (final item in items) item.toString()],
+    final String item when item.isNotEmpty => [item],
+    _ => const [],
+  };
+
+  /// The entries of [field]'s map less the keys other fields edit, as
+  /// WebSocket Host, with a list of values shown as one line.
+  Map<String, String> stringMapOf(ProxyField field) {
+    final owned = {for (final key in ownedKeysOf(field)) key.toLowerCase()};
+    return switch (valueOf(field)) {
+      final Map map => {
+        for (final MapEntry(:key, :value) in map.entries)
+          if (value != null && !owned.contains(key.toString().toLowerCase()))
+            key.toString(): switch (value) {
+              final List items => items.join(', '),
+              _ => value.toString(),
+            },
+      },
+      _ => const {},
+    };
+  }
+
+  /// Keeps the keys other fields edit, and each value [entries] leaves as
+  /// [stringMapOf] showed it, so a list of values survives editing the rest.
+  ProxyDefinition withEntries(ProxyField field, Map<String, String> entries) {
+    final previous = switch (valueOf(field)) {
+      final Map map => map,
+      _ => const {},
+    };
+    final shown = stringMapOf(field);
+    final owned = {for (final key in ownedKeysOf(field)) key.toLowerCase()};
+    // The core reads each http-opts header as values to pick from.
+    final listsValues = field == ProxyField.httpHeaders;
+    return withField(field, {
+      for (final MapEntry(:key, :value) in previous.entries)
+        if (owned.contains(key.toString().toLowerCase())) key.toString(): value,
+      for (final MapEntry(:key, :value) in entries.entries)
+        key: shown[key] == value
+            ? previous[key]
+            : listsValues
+            ? [value]
+            : value,
+    });
+  }
+
+  /// The keys of [field]'s map that fields of their own edit.
+  Set<String> ownedKeysOf(ProxyField field) {
+    final path = field.path;
+    return {
+      for (final other in ProxyField.values)
+        if (other.path.length == path.length + 1 &&
+            _choiceEquality.equals(other.path.sublist(0, path.length), path))
+          other.path.last,
+    };
+  }
 
   ProxyDefinition withValue(String key, Object? value) =>
-      copyWith(definition: _withPath(definition, [key], value));
+      withValueAt([key], value);
+
+  ProxyDefinition withValueAt(List<String> path, Object? value) =>
+      copyWith(definition: _withPath(definition, path, value));
 }
