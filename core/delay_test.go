@@ -134,6 +134,29 @@ func TestHandleAsyncTestDelayReturnsScopedResultWithoutDuplicateEvent(t *testing
 	}
 }
 
+func TestHandleAsyncTestDelayAnswersAndReleasesAfterAPanic(t *testing.T) {
+	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
+	t.Cleanup(func() { tunnel.UpdateProxies(previousProxies, previousProviders) })
+	tunnel.UpdateProxies(map[string]constant.Proxy{"node": &delayProbeProxy{
+		onTest: func(context.Context, string) (uint16, error) { panic("protocol bug") },
+	}}, nil)
+	result := make(chan *Delay, 1)
+	handleAsyncTestDelay(&TestDelayParams{
+		ProxyName: "node", TestUrl: "https://example.com", Timeout: 5000,
+	}, func(delay *Delay) { result <- delay })
+	select {
+	case got := <-result:
+		if got.Value != -1 || got.Failure != "other" {
+			t.Fatalf("panicking probe answered %+v", got)
+		}
+		if manualDelayEvents.message("https://example.com", "node", 25, true) == nil {
+			t.Fatal("a panicking probe kept background events suppressed")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("panicking probe never answered")
+	}
+}
+
 func TestHandleAsyncTestDelayPreservesURLForMissingProxy(t *testing.T) {
 	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
 	t.Cleanup(func() { tunnel.UpdateProxies(previousProxies, previousProviders) })

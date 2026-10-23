@@ -223,6 +223,18 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 			Name:  params.ProxyName,
 			Value: -1,
 		}
+		replied := false
+		reply := func() {
+			replied = true
+			fn(delayData)
+		}
+		// A probe that panics in protocol code still answers its caller.
+		defer func() {
+			if !replied {
+				delayData.Failure = "other"
+				fn(delayData)
+			}
+		}()
 		timeout := delayTestTimeout(params.Timeout)
 		runCtx, cancelRun := context.WithCancel(context.Background())
 		defer cancelRun()
@@ -238,7 +250,7 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 			if runCtx.Err() != nil {
 				delayData.Failure = delayFailureReason(runCtx.Err())
 			}
-			fn(delayData)
+			reply()
 			return
 		}
 		defer delaySem.Release(1)
@@ -246,14 +258,15 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 		proxy := tunnel.AllProxies()[params.ProxyName]
 		if proxy == nil {
 			delayData.Failure = "missingProxy"
-			fn(delayData)
+			reply()
 			return
 		}
 
 		ctx, cancel := context.WithTimeout(runCtx, timeout)
 		defer cancel()
 
-		finish := manualDelayEvents.begin(proxy.Name(), testUrl)
+		finish := sync.OnceFunc(manualDelayEvents.begin(proxy.Name(), testUrl))
+		defer finish()
 		if latency, handled, err := tailscaleDelay(ctx, proxy); handled {
 			finish()
 			if err == nil {
@@ -261,7 +274,7 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 			} else {
 				delayData.Failure = delayFailureReason(err)
 			}
-			fn(delayData)
+			reply()
 			return
 		}
 		delay, err := proxy.URLTest(ctx, testUrl, anyDelayTestStatus)
@@ -273,7 +286,7 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 		}
 		// Invalidate the group's cached choice after a member's health changes.
 		resetURLTestSelections(testUrl)
-		fn(delayData)
+		reply()
 	})
 }
 
