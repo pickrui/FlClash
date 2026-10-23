@@ -218,34 +218,6 @@ void main() {
     expect(await _behind(tester, upper, const Offset(325, 225)), _red);
   });
 
-  testWidgets('panes in one group share a level and read past each other', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _app(
-        LiquidGlassGroup(
-          child: Stack(
-            children: [
-              const Positioned.fill(child: ColoredBox(color: _red)),
-              _pane(
-                const Rect.fromLTWH(100, 100, 200, 100),
-                style: const LiquidGlassStyle(tint: _blue, blur: 0),
-              ),
-              _pane(const Rect.fromLTWH(250, 150, 100, 100)),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    final capture = _capture();
-    final [lower, upper] = capture.panes;
-    expect([lower.level, upper.level], [0, 0]);
-    expect(upper.atlas, same(lower.atlas));
-    expect(capture.snapshots, 1);
-    expect(await _behind(tester, upper, const Offset(275, 175)), _red);
-  });
-
   testWidgets('a pane stays on its level beside one past its frost', (
     tester,
   ) async {

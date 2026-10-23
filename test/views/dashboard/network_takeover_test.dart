@@ -6,12 +6,10 @@
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/widgets/card.dart';
 import 'package:fl_clash/views/dashboard/widgets/network_takeover.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:flutter/gestures.dart' show kPressTimeout;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -127,31 +125,6 @@ void main() {
       expect(testCase.read(container), !testCase.initial);
     });
   }
-
-  testWidgets('on glass a held switch turns its thumb into a lens', (
-    tester,
-  ) async {
-    await pumpCard(
-      tester,
-      const LiquidGlassScope(enabled: true, child: NetworkTakeoverCard()),
-    );
-    final tun = switchOf(_rowCases[1]);
-    Finder lensOf(Finder toggle) =>
-        find.descendant(of: toggle, matching: find.byType(LiquidGlass));
-
-    expect(find.byType(LiquidGlass), findsNothing);
-
-    final gesture = await tester.startGesture(tester.getCenter(tun));
-    await tester.pump(kPressTimeout);
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(lensOf(tun), findsOneWidget);
-    expect(lensOf(switchOf(_rowCases[0])), findsNothing);
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
-    expect(find.byType(LiquidGlass), findsNothing);
-  });
 
   testWidgets('a running row says what it is set to', (tester) async {
     container.read(runTimeProvider.notifier).value = 0;

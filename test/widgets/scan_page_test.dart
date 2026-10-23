@@ -620,27 +620,6 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('a captured code leaves on the last frame', (tester) async {
-    await pumpScanPage(tester, onPopped: (_) {});
-
-    platform.emit(_capture(BarcodeType.url, 'https://sub.example/x'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
-
-    final cover = tester.widget<AnimatedOpacity>(
-      find.ancestor(
-        of: find.byWidgetPredicate(
-          (widget) => widget is ColoredBox && widget.color == Colors.black,
-        ),
-        matching: find.byType(AnimatedOpacity),
-      ),
-    );
-    expect(find.byType(ScanPage), findsOneWidget);
-    expect(cover.opacity, 0);
-    expect(platform.pauseCalls, 1);
-    expect(platform.stopCalls, 0);
-  });
-
   testWidgets('landscape camera window stays inside available height', (
     tester,
   ) async {

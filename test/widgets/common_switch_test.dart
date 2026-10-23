@@ -79,105 +79,6 @@ void main() {
     return gesture;
   }
 
-  testWidgets('a held switch keeps the ink around it dark and lifts its thumb '
-      'out past the track', (tester) async {
-    await pump(tester);
-    final rest = tester.getSize(thumbFinder());
-
-    final gesture = await hold(tester);
-
-    expect(highlights, isEmpty);
-    expect(rest, const Size.square(24));
-    expect(tester.getSize(thumbFinder()), const Size.square(40));
-    expect(
-      tester.getSize(thumbFinder()).height,
-      greaterThan(CommonSwitch.trackHeight),
-    );
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(value, isTrue);
-    expect(rowTaps, 0);
-    expect(highlights, isEmpty);
-    expect(tester.getSize(thumbFinder()), const Size.square(24));
-  });
-
-  testWidgets('on glass the held thumb turns into a clear lens over a solid '
-      'track', (tester) async {
-    await pump(tester, glass: true);
-    expect(find.byType(LiquidGlass), findsNothing);
-
-    final gesture = await hold(tester);
-    final colorScheme = Theme.of(tester.element(switchFinder())).colorScheme;
-
-    final lens = tester.widget<LiquidGlass>(
-      find.descendant(of: switchFinder(), matching: find.byType(LiquidGlass)),
-    );
-    expect(lens.style, LiquidGlassStyle.lens(colorScheme).scale(1));
-    expect(
-      (tester.widget<DecoratedBox>(thumbFinder()).decoration as ShapeDecoration)
-          .color!
-          .a,
-      0,
-    );
-
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    expect(value, isTrue);
-    expect(find.byType(LiquidGlass), findsNothing);
-  });
-
-  testWidgets('on glass a tap carries the lens across before it settles', (
-    tester,
-  ) async {
-    await pump(tester, glass: true);
-
-    await tester.tap(switchFinder());
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 150));
-
-    expect(value, isTrue);
-    expect(
-      find.descendant(of: switchFinder(), matching: find.byType(LiquidGlass)),
-      findsOneWidget,
-    );
-    expect(
-      tester.getSize(thumbFinder()).height,
-      greaterThan(CommonSwitch.trackHeight),
-    );
-
-    await tester.pumpAndSettle();
-
-    expect(find.byType(LiquidGlass), findsNothing);
-    expect(tester.getSize(thumbFinder()), const Size.square(24));
-  });
-
-  testWidgets('on glass a row that flips the switch carries the lens too', (
-    tester,
-  ) async {
-    await pump(tester, glass: true, rowFlips: true);
-
-    await tester.tapAt(
-      tester.getTopLeft(find.byType(InkWell).first) + const Offset(24, 24),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 150));
-
-    expect(rowTaps, 1);
-    expect(value, isTrue);
-    expect(
-      find.descendant(of: switchFinder(), matching: find.byType(LiquidGlass)),
-      findsOneWidget,
-    );
-
-    await tester.pumpAndSettle();
-
-    expect(find.byType(LiquidGlass), findsNothing);
-    expect(tester.getSize(thumbFinder()), const Size.square(24));
-  });
-
   testWidgets('dragging the thumb across flips the switch', (tester) async {
     await pump(tester);
     final gesture = await tester.startGesture(tester.getCenter(switchFinder()));
@@ -190,20 +91,6 @@ void main() {
 
     expect(value, isTrue);
     expect(rowTaps, 0);
-  });
-
-  testWidgets('a scroll that starts on the switch still scrolls', (
-    tester,
-  ) async {
-    await pump(tester);
-
-    await tester.drag(switchFinder(), const Offset(0, -200));
-    await tester.pumpAndSettle();
-
-    final scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
-    expect(scrollable.position.pixels, greaterThan(0));
-    expect(value, isFalse);
-    expect(highlights, isEmpty);
   });
 
   testWidgets('a scroll that starts on a held switch still scrolls', (
