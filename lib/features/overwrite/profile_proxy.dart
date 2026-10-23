@@ -268,7 +268,7 @@ class OverwriteEntryTile extends StatelessWidget {
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Switch(value: enable, onChanged: onToggle),
+                      CommonSwitch(value: enable, onChanged: onToggle),
                       CommonPopupBox(
                         popupBuilder: (_) => CommonPopupMenu(
                           items: [

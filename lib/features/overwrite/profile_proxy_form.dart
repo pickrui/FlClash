@@ -593,7 +593,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
           key: ValueKey('proxy-row-$key'),
           title: title,
           leading: leading,
-          trailing: Switch(
+          trailing: CommonSwitch(
             value: value == true,
             onChanged: (value) => _updateField(field, value),
           ),
@@ -793,7 +793,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
             if (!field.isCredential) _fieldRow(field),
           FormRow(
             title: 'UDP',
-            trailing: Switch(
+            trailing: CommonSwitch(
               value: _udp ?? false,
               onChanged: (value) {
                 setState(() => _udp = value);

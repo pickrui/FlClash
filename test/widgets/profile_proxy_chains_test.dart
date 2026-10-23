@@ -13,6 +13,7 @@ import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/ui/switch.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -126,7 +127,7 @@ Finder _tile(String title) =>
     find.widgetWithText(OverwriteEntryTile, title).first;
 
 Finder _switchOf(String title) =>
-    find.descendant(of: _tile(title), matching: find.byType(Switch));
+    find.descendant(of: _tile(title), matching: find.byType(CommonSwitch));
 
 Future<void> _deleteFromMenu(WidgetTester tester, String title) async {
   await tester.tap(

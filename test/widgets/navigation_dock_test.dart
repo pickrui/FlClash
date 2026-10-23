@@ -184,6 +184,33 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
+  testWidgets('the lens stops asking for frames once its wobble cannot show', (
+    tester,
+  ) async {
+    Widget dock(int selected) => MaterialApp(
+      home: Align(
+        alignment: Alignment.bottomCenter,
+        child: SizedBox(
+          width: 400,
+          child: NavigationDock(
+            destinations: _destinations,
+            selectedIndex: selected,
+            onSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(dock(0));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(dock(_destinations.length - 1));
+    var elapsed = Duration.zero;
+    while (tester.binding.hasScheduledFrame && elapsed.inSeconds < 3) {
+      await tester.pump(const Duration(milliseconds: 16));
+      elapsed += const Duration(milliseconds: 16);
+    }
+    expect(elapsed, lessThan(const Duration(milliseconds: 1200)));
+  });
+
   testWidgets('a quick tap lifts the lens all the way before it drops', (
     tester,
   ) async {

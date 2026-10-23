@@ -375,7 +375,6 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
             ),
         ]),
       ],
-      const SizedBox(height: cloudSectionGap),
       CloudFormFields(
         enabled: editable,
         child: generateSection(

@@ -17,6 +17,7 @@ import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:fl_clash/views/dashboard/widgets/intranet_ip.dart';
 import 'package:fl_clash/views/dashboard/widgets/network_takeover.dart';
+import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -168,14 +169,14 @@ void main() {
       await tester.pumpAndSettle();
       final toggleFinder = find.descendant(
         of: find.byType(entry.value.runtimeType),
-        matching: find.byType(Switch),
+        matching: find.byType(CommonSwitch),
       );
-      final toggle = tester.widget<Switch>(toggleFinder);
+      final toggle = tester.widget<CommonSwitch>(toggleFinder);
       expect(toggle.value, !safeModeBuild);
       expect(toggle.onChanged, safeModeBuild ? isNull : isNotNull);
       await tester.tap(toggleFinder, warnIfMissed: false);
       await tester.pumpAndSettle();
-      expect(tester.widget<Switch>(toggleFinder).value, isFalse);
+      expect(tester.widget<CommonSwitch>(toggleFinder).value, isFalse);
       if (safeModeBuild) {
         expect(container.read(networkSettingProvider).systemProxy, isTrue);
         expect(container.read(networkSettingProvider).autoSetSystemDns, isTrue);

@@ -20,6 +20,7 @@ import 'package:fl_clash/widgets/error_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/ui/loading.dart';
+import 'package:fl_clash/ui/switch.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:rust_api/rust_api.dart';
 
@@ -112,7 +113,7 @@ void main() {
     final container = ProviderScope.containerOf(
       tester.element(find.byType(ScriptOptionsPage)),
     );
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(CommonSwitch));
     await tester.pump();
     return container;
   }
@@ -152,7 +153,10 @@ void main() {
       find.text(AppLocalizations.current.routingApplyFailed),
       findsOneWidget,
     );
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+    expect(
+      tester.widget<CommonSwitch>(find.byType(CommonSwitch)).value,
+      isFalse,
+    );
     final saving = Completer<bool>();
     setup.apply = () => saving.future;
     await tester.tap(find.byTooltip('Save'));
@@ -238,14 +242,20 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       await open();
       expect(evaluations, 1);
-      await tester.tap(find.byType(Switch).at(1));
+      await tester.tap(find.byType(CommonSwitch).at(1));
       await tester.pump();
       await tester.tap(find.byTooltip('Refresh'));
       await tester.pump();
       await _pumpUntil(tester, find.text('Allow'));
       expect(evaluations, 2);
-      expect(tester.widget<Switch>(find.byType(Switch).first).value, isTrue);
-      expect(tester.widget<Switch>(find.byType(Switch).at(1)).value, isFalse);
+      expect(
+        tester.widget<CommonSwitch>(find.byType(CommonSwitch).first).value,
+        isTrue,
+      );
+      expect(
+        tester.widget<CommonSwitch>(find.byType(CommonSwitch).at(1)).value,
+        isFalse,
+      );
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.runAsync(
         () => files[3]!.writeAsString('const changed = true;'),

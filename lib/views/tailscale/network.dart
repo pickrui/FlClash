@@ -514,10 +514,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
         if (status != null && !status.isRunning) ...status.health,
       ])
         _footnote(message, color: context.colorScheme.error),
-      if (running && peers.isNotEmpty && _showPeers) ...[
-        const SizedBox(height: 12),
+      if (running && peers.isNotEmpty && _showPeers)
         generateSection(items: [for (final peer in peers) _buildPeer(l, peer)]),
-      ],
     ];
   }
 
@@ -600,7 +598,6 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
             ),
           ),
           if (_loginMethod == TailscaleLoginMethod.authKey) ...[
-            const SizedBox(height: 12),
             generateSection(
               items: [
                 _FormField(
@@ -635,7 +632,6 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
               _footnote(l.tailscaleAuthKeyInvalid, color: error),
           ],
           _footnote(l.tailscaleLoginFooter),
-          const SizedBox(height: 24),
           generateSection(
             items: [
               ListItem.toggle(
@@ -869,7 +865,6 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
           if (saved != null) ..._buildDeviceSection(l),
           ..._buildFormSection(l),
           ..._buildAccountSection(l),
-          const SizedBox(height: 24),
           generateSection(
             items: [
               ListItem(

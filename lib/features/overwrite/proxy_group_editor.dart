@@ -916,7 +916,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
       title: title,
       leading: leading,
       onPressed: () => onChanged(!value),
-      trailing: Switch(value: value, onChanged: onChanged),
+      trailing: CommonSwitch(value: value, onChanged: onChanged),
     );
   }
 
@@ -1112,41 +1112,44 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
           (colorScheme.secondaryContainer, colorScheme.onSecondaryContainer),
         ),
       };
-      return ItemPositionProvider(
+      return ReorderableDelayedDragStartListener(
         key: keys[index],
-        position: ItemPosition.get(index, members.length + 1),
-        child: DecorationListItem(
-          invalid: !isValid,
-          contentPadding: const EdgeInsets.only(left: 16),
-          leading: EntryButton.remove(onPressed: () => _removeMember(index)),
-          title: TooltipText(
-            text: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-          ),
-          subtitle: chip == null
-              ? null
-              : Padding(
-                  padding: const EdgeInsets.only(top: 4, bottom: 2),
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: TonalChip(
-                          label: chip,
-                          color: chipColors.$1,
-                          foregroundColor: chipColors.$2,
+        index: index,
+        child: ItemPositionProvider(
+          position: ItemPosition.get(index, members.length + 1),
+          child: DecorationListItem(
+            invalid: !isValid,
+            contentPadding: const EdgeInsets.only(left: 16),
+            leading: EntryButton.remove(onPressed: () => _removeMember(index)),
+            title: TooltipText(
+              text: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+            subtitle: chip == null
+                ? null
+                : Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 2),
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: TonalChip(
+                            label: chip,
+                            color: chipColors.$1,
+                            foregroundColor: chipColors.$2,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (!isValid)
-                InfoMessageButton(
-                  message: appLocalizations.outboundUnavailable,
-                ),
-              SortHandle(index: index),
-            ],
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!isValid)
+                  InfoMessageButton(
+                    message: appLocalizations.outboundUnavailable,
+                  ),
+                SortHandle(index: index),
+              ],
+            ),
           ),
         ),
       );

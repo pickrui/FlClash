@@ -278,17 +278,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("关于"),
     "accessControl": MessageLookupByLibrary.simpleMessage("访问控制"),
-    "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "只允许选中应用进入VPN",
-    ),
     "accessControlDesc": MessageLookupByLibrary.simpleMessage("配置应用访问代理"),
-    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
-      "应用访问控制已关闭",
-    ),
-    "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "选中应用将会被排除在VPN之外",
-    ),
-    "accessControlSettings": MessageLookupByLibrary.simpleMessage("访问控制设置"),
     "accessToken": MessageLookupByLibrary.simpleMessage("Access Token"),
     "account": MessageLookupByLibrary.simpleMessage("账号"),
     "accountBalance": MessageLookupByLibrary.simpleMessage("余额"),
@@ -783,12 +773,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "delay": MessageLookupByLibrary.simpleMessage("延迟"),
     "delayConcurrency": MessageLookupByLibrary.simpleMessage("批量测速并发数"),
-    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
-      "Android 默认 16，网络拥堵时可降低；下一轮批量测速生效",
-    ),
-    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
-      "默认 50，网络拥堵时可降低；下一轮批量测速生效",
-    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("延迟测试"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("测试失败"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("排队中"),
@@ -1260,9 +1244,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "hideIp": MessageLookupByLibrary.simpleMessage("隐藏 IP"),
     "hidePassword": MessageLookupByLibrary.simpleMessage("隐藏密码"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage("隐藏测速失败的节点"),
-    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
-      "保留当前选中节点和尚未完成测速的节点",
-    ),
     "hopInterval": MessageLookupByLibrary.simpleMessage("跳跃间隔"),
     "host": MessageLookupByLibrary.simpleMessage("主机"),
     "hostname": MessageLookupByLibrary.simpleMessage("主机名"),
@@ -2181,7 +2162,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("选择备份"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("选择升级目标套餐"),
-    "selected": MessageLookupByLibrary.simpleMessage("已选择"),
     "send": MessageLookupByLibrary.simpleMessage("发送"),
     "sendCode": MessageLookupByLibrary.simpleMessage("获取验证码"),
     "sendFromPhone": MessageLookupByLibrary.simpleMessage("从手机发送"),

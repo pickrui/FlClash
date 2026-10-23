@@ -16,6 +16,7 @@ import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/null_status.dart';
+import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -117,7 +118,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Status'), findsOneWidget);
       expect(find.byTooltip('Add override entry'), findsOneWidget);
-      await tester.tap(find.byType(Switch).last);
+      await tester.tap(find.byType(CommonSwitch).last);
       await tester.pumpAndSettle();
       var patch = container.read(patchClashConfigProvider);
       expect(ntp ? patch.ntp.enable : patch.dns.enable, ntp);

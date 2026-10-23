@@ -10,7 +10,6 @@ import 'dart:convert';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/route_motion_hold.dart';
-import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -18,7 +17,6 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/installed_apps.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:fl_clash/widgets/config_item.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -194,19 +192,6 @@ class _AccessViewState extends ConsumerState<AccessView>
         );
   }
 
-  Future<void> _handleToSetting() async {
-    await showSheet<int>(
-      context: context,
-      builder: (_, type) {
-        return AdaptiveSheetScaffold(
-          type: type,
-          body: const AccessControlPanel(),
-          title: appLocalizations.accessControlSettings,
-        );
-      },
-    );
-  }
-
   void _handleSelected(String packageName) {
     ref.read(accessControlStateProvider.notifier).update((state) {
       final newSet = Set<String>.from(state.currentList)
@@ -215,10 +200,8 @@ class _AccessViewState extends ConsumerState<AccessView>
     });
   }
 
-  void _handleToggle() {
-    ref.read(accessControlStateProvider.notifier).update((state) {
-      return state.copyWith(enable: !state.enable);
-    });
+  void _update(AccessControlProps Function(AccessControlProps state) update) {
+    ref.read(accessControlStateProvider.notifier).update(update);
   }
 
   Future<void> _handleBack() async {
@@ -266,44 +249,99 @@ class _AccessViewState extends ConsumerState<AccessView>
     });
   }
 
-  List<CommonPopupMenuItem> _buildMenuItems({required bool enable}) => [
-    CommonPopupMenuItem(
-      glyph: AppGlyphs.shuffle,
-      label: enable ? appLocalizations.turnOff : appLocalizations.turnOn,
-      onPressed: _handleToggle,
-    ),
-    CommonPopupMenuItem(
-      glyph: AppGlyphs.refresh,
-      label: appLocalizations.refresh,
-      onPressed: _reloadPackages,
-    ),
-    CommonPopupMenuItem(
-      glyph: AppGlyphs.sliders,
-      label: appLocalizations.settings,
-      onPressed: _handleToSetting,
-    ),
-    CommonPopupMenuItem(
-      glyph: AppGlyphs.moreCircle,
-      label: appLocalizations.action,
-      subItems: [
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.sparkle,
-          label: appLocalizations.intelligentSelected,
-          onPressed: _intelligentSelected,
-        ),
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.copy,
-          label: appLocalizations.clipboardExport,
-          onPressed: _exportToClipboard,
-        ),
-        CommonPopupMenuItem(
-          glyph: AppGlyphs.paste,
-          label: appLocalizations.clipboardImport,
-          onPressed: _importFromClipboard,
-        ),
-      ],
-    ),
-  ];
+  List<CommonPopupMenuItem> _buildMenuItems(AccessControlProps accessControl) {
+    String modeText(AccessControlMode mode) => switch (mode) {
+      AccessControlMode.acceptSelected => appLocalizations.whitelistMode,
+      AccessControlMode.rejectSelected => appLocalizations.blacklistMode,
+    };
+    return [
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.toggleOn,
+        label: appLocalizations.turnOn,
+        checked: accessControl.enable,
+        section: CommonPopupMenuSection(title: appLocalizations.accessControl),
+        onPressed: () => _update((state) => state.copyWith(enable: true)),
+      ),
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.toggle,
+        label: appLocalizations.turnOff,
+        checked: !accessControl.enable,
+        onPressed: () => _update((state) => state.copyWith(enable: false)),
+      ),
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.refresh,
+        label: appLocalizations.refresh,
+        section: const CommonPopupMenuSection(),
+        onPressed: _reloadPackages,
+      ),
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.sliders,
+        label: appLocalizations.settings,
+        subtitle: modeText(accessControl.mode),
+        subItems: [
+          ..._optionsSection(
+            title: appLocalizations.mode,
+            options: AccessControlMode.values,
+            value: accessControl.mode,
+            textOf: modeText,
+            onSelected: (mode) =>
+                _update((state) => state.copyWith(mode: mode)),
+          ),
+          ..._optionsSection(
+            title: appLocalizations.sort,
+            options: AccessSortType.values,
+            value: accessControl.sort,
+            textOf: (type) => switch (type) {
+              AccessSortType.none => appLocalizations.defaultText,
+              AccessSortType.name => appLocalizations.name,
+              AccessSortType.time => appLocalizations.time,
+            },
+            onSelected: (sort) =>
+                _update((state) => state.copyWith(sort: sort)),
+          ),
+          CommonPopupMenuItem(
+            label: appLocalizations.systemApp,
+            checked: !accessControl.isFilterSystemApp,
+            section: CommonPopupMenuSection(title: appLocalizations.source),
+            onPressed: () => _update(
+              (state) =>
+                  state.copyWith(isFilterSystemApp: !state.isFilterSystemApp),
+            ),
+          ),
+          CommonPopupMenuItem(
+            label: appLocalizations.noNetworkApp,
+            checked: !accessControl.isFilterNonInternetApp,
+            onPressed: () => _update(
+              (state) => state.copyWith(
+                isFilterNonInternetApp: !state.isFilterNonInternetApp,
+              ),
+            ),
+          ),
+        ],
+      ),
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.moreCircle,
+        label: appLocalizations.action,
+        subItems: [
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.sparkle,
+            label: appLocalizations.intelligentSelected,
+            onPressed: _intelligentSelected,
+          ),
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.copy,
+            label: appLocalizations.clipboardExport,
+            onPressed: _exportToClipboard,
+          ),
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.paste,
+            label: appLocalizations.clipboardImport,
+            onPressed: _importFromClipboard,
+          ),
+        ],
+      ),
+    ];
+  }
 
   Widget _buildContent({
     required List<Package> packages,
@@ -408,54 +446,6 @@ class _AccessViewState extends ConsumerState<AccessView>
     );
   }
 
-  Widget _buildBannerBar(AccessControlMode mode, int count, bool enable) {
-    if (!enable) {
-      return MaterialBanner(
-        backgroundColor: context.raisedSurfaceLevel.colorOf(
-          context.colorScheme,
-        ),
-        leading: GlyphIcon(AppGlyphs.info, color: context.colorScheme.outline),
-        content: Text(context.appLocalizations.accessControlDisabledDesc),
-        actions: [
-          FilledButton.tonal(
-            onPressed: _handleToggle,
-            child: Text(context.appLocalizations.turnOn),
-          ),
-        ],
-      );
-    }
-    final describe = mode == AccessControlMode.acceptSelected
-        ? appLocalizations.accessControlAllowDesc
-        : appLocalizations.accessControlNotAllowDesc;
-    final textStyle = AppTextStyle.subheadline
-        .of(context, emphasized: true)
-        .copyWith(color: context.colorScheme.onPrimary);
-    return MaterialBanner(
-      backgroundColor: context.raisedSurfaceLevel.colorOf(context.colorScheme),
-      content: Text(describe),
-      actions: [
-        Card.filled(
-          color: context.colorScheme.primary,
-          elevation: 0,
-          shape: RoundedSuperellipseBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(appLocalizations.selected, style: textStyle),
-                const SizedBox(width: 4),
-                Flexible(child: Text('$count', style: textStyle)),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   void _onSearch(String value) {
     ref.read(queryProvider(QueryTag.access).notifier).value = value;
     _pinedList = null;
@@ -487,7 +477,6 @@ class _AccessViewState extends ConsumerState<AccessView>
         )
         .where((package) => query.matches([package.label, package.packageName]))
         .toList();
-    final mode = accessControl.mode;
     final currentList = accessControl.currentList;
     final viewPackageNameList = viewPackages.map((e) => e.packageName).toList();
     final valueList = currentList.intersection(viewPackageNameList);
@@ -526,32 +515,17 @@ class _AccessViewState extends ConsumerState<AccessView>
                 onPressed: _handleSave,
               )
             : null,
-        menuItems: [
-          ..._buildMenuItems(enable: accessControl.enable),
-          if (selectAll != null)
-            CommonPopupMenuItem(
-              glyph: selectAll.glyph,
-              label: selectAll.tooltip!,
-              onPressed: selectAll.onPressed,
-            ),
-        ],
+        iconActions: [?selectAll],
+        menuItems: _buildMenuItems(accessControl),
         body: AppBarClearance(
-          child: Column(
-            children: [
-              _buildBannerBar(mode, valueList.length, accessControl.enable),
-              const SizedBox(height: 8),
-              Expanded(
-                child: DisabledMask(
-                  status:
-                      !accessControl.enable &&
-                      installed.value?.permissionGranted == true,
-                  child: _buildContent(
-                    packages: viewPackages,
-                    selected: valueList.toSet(),
-                  ),
-                ),
-              ),
-            ],
+          child: DisabledMask(
+            status:
+                !accessControl.enable &&
+                installed.value?.permissionGranted == true,
+            child: _buildContent(
+              packages: viewPackages,
+              selected: valueList.toSet(),
+            ),
           ),
         ),
       ),
@@ -591,89 +565,22 @@ class PackageListItem extends StatelessWidget {
   }
 }
 
-class AccessControlPanel extends StatelessWidget {
-  const AccessControlPanel({super.key});
-
-  static ConfigWriter<T> _writer<T>(
-    AccessControlProps Function(AccessControlProps state, T value) update,
-  ) {
-    return (ref, value) => ref
-        .read(accessControlStateProvider.notifier)
-        .update((state) => update(state, value));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-        top: context.contentTopPadding,
-        bottom: 32 + context.bottomInset,
+List<CommonPopupMenuItem> _optionsSection<T>({
+  required String title,
+  required List<T> options,
+  required T value,
+  required String Function(T option) textOf,
+  required ValueSetter<T> onSelected,
+}) {
+  return [
+    for (final option in options)
+      CommonPopupMenuItem(
+        label: textOf(option),
+        checked: option == value,
+        section: option == options.first
+            ? CommonPopupMenuSection(title: title)
+            : null,
+        onPressed: () => onSelected(option),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          generateSection(
-            items: [
-              ConfigOptionsItem<AccessControlMode>(
-                title: (l) => l.mode,
-                options: AccessControlMode.values,
-                textBuilder: (mode) => switch (mode) {
-                  AccessControlMode.acceptSelected =>
-                    appLocalizations.whitelistMode,
-                  AccessControlMode.rejectSelected =>
-                    appLocalizations.blacklistMode,
-                },
-                selector: accessControlStateProvider.select(
-                  (state) => state.mode,
-                ),
-                onChanged: _writer(
-                  (state, value) => state.copyWith(mode: value),
-                ),
-              ),
-              ConfigOptionsItem<AccessSortType>(
-                title: (l) => l.sort,
-                options: AccessSortType.values,
-                textBuilder: (type) => switch (type) {
-                  AccessSortType.none => appLocalizations.defaultText,
-                  AccessSortType.name => appLocalizations.name,
-                  AccessSortType.time => appLocalizations.time,
-                },
-                selector: accessControlStateProvider.select(
-                  (state) => state.sort,
-                ),
-                onChanged: _writer(
-                  (state, value) => state.copyWith(sort: value),
-                ),
-              ),
-            ],
-          ),
-          generateSection(
-            title: appLocalizations.source,
-            items: [
-              ConfigToggleItem(
-                title: (l) => l.systemApp,
-                selector: accessControlStateProvider.select(
-                  (state) => !state.isFilterSystemApp,
-                ),
-                onChanged: _writer(
-                  (state, value) => state.copyWith(isFilterSystemApp: !value),
-                ),
-              ),
-              ConfigToggleItem(
-                title: (l) => l.noNetworkApp,
-                selector: accessControlStateProvider.select(
-                  (state) => !state.isFilterNonInternetApp,
-                ),
-                onChanged: _writer(
-                  (state, value) =>
-                      state.copyWith(isFilterNonInternetApp: !value),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  ];
 }

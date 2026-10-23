@@ -12,6 +12,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/installed_apps.dart';
 import 'package:fl_clash/views/access.dart';
 import 'package:fl_clash/ui/dialog.dart';
+import 'package:fl_clash/ui/popup.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter/services.dart';
@@ -254,27 +255,25 @@ void main() {
         props: original,
       );
       final l10n = AppLocalizations.current;
-      await tester.tap(find.byTooltip(l10n.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(l10n.settings));
-      await tester.pumpAndSettle();
-      final panel = find.byType(AccessControlPanel);
-      Finder row(String label) =>
-          find.descendant(of: panel, matching: find.text(label));
-      await tester.tap(row(l10n.mode));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(l10n.blacklistMode));
-      await tester.pumpAndSettle();
-      await tester.tap(row(l10n.sort));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(l10n.name));
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(row(l10n.systemApp));
-      await tester.tap(row(l10n.systemApp));
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(row(l10n.noNetworkApp));
-      await tester.tap(row(l10n.noNetworkApp));
-      await tester.pumpAndSettle();
+      Finder inMenu(String label) => find.descendant(
+        of: find.byType(CommonPopupMenu),
+        matching: find.text(label),
+      );
+      Future<void> pickSetting(String label) async {
+        await tester.tap(find.byTooltip(l10n.more));
+        await tester.pumpAndSettle();
+        await tester.tap(inMenu(l10n.settings).last);
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(inMenu(label).last);
+        await tester.pumpAndSettle();
+        await tester.tap(inMenu(label).last);
+        await tester.pumpAndSettle();
+      }
+
+      await pickSetting(l10n.blacklistMode);
+      await pickSetting(l10n.name);
+      await pickSetting(l10n.systemApp);
+      await pickSetting(l10n.noNetworkApp);
       final draft = container.read(accessControlStateProvider);
       expect(draft.mode, AccessControlMode.rejectSelected);
       expect(draft.sort, AccessSortType.name);
@@ -283,9 +282,7 @@ void main() {
       expect(draft.acceptList, original.acceptList);
       expect(draft.rejectList, original.rejectList);
       expect(container.read(vpnSettingProvider).accessControlProps, original);
-      await tester.binding.handlePopRoute();
-      await tester.pumpAndSettle();
-      expect(panel, findsNothing);
+      expect(find.byType(CommonPopupMenu), findsNothing);
       expect(find.text('system.app'), findsWidgets);
       expect(find.text('offline.app'), findsWidgets);
       await tester.tap(find.byTooltip(l10n.save));
@@ -309,31 +306,35 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'disabled access explains the state and offers an enable action',
-    (tester) async {
-      final api = InstalledAppsFake()
-        ..packages = [installedPackage('fixture.app')];
-      final container = await openAccess(
-        tester,
-        api,
-        props: const AccessControlProps(enable: false),
-      );
-      expect(
-        find.text(AppLocalizations.current.accessControlDisabledDesc),
-        findsOneWidget,
-      );
-      await tester.tap(find.text(AppLocalizations.current.turnOn));
-      await tester.pumpAndSettle();
-      expect(container.read(accessControlStateProvider).enable, isTrue);
-      await tester.tap(find.byTooltip(AppLocalizations.current.save));
-      await tester.pumpAndSettle();
-      expect(
-        container.read(vpnSettingProvider).accessControlProps.enable,
-        isTrue,
-      );
-    },
-  );
+  testWidgets('disabled access is turned on from its section in the bar menu', (
+    tester,
+  ) async {
+    final api = InstalledAppsFake()
+      ..packages = [installedPackage('fixture.app')];
+    final container = await openAccess(
+      tester,
+      api,
+      props: const AccessControlProps(enable: false),
+    );
+    await tester.tap(find.byTooltip(AppLocalizations.current.more));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(CommonPopupMenu),
+        matching: find.text(AppLocalizations.current.accessControl),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.text(AppLocalizations.current.turnOn));
+    await tester.pumpAndSettle();
+    expect(container.read(accessControlStateProvider).enable, isTrue);
+    await tester.tap(find.byTooltip(AppLocalizations.current.save));
+    await tester.pumpAndSettle();
+    expect(
+      container.read(vpnSettingProvider).accessControlProps.enable,
+      isTrue,
+    );
+  });
 
   for (final locale in const [
     Locale('en'),

@@ -489,7 +489,6 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
           ),
         ),
         if (_emailSent) ...[
-          const SizedBox(height: cloudSectionGap),
           CloudFormFields(
             enabled: !_isSubmitting,
             child: generateSection(

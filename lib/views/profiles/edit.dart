@@ -427,7 +427,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             FormRow(
               title: appLocalizations.autoUpdate,
               onPressed: () => _setAutoUpdate(!_autoUpdate),
-              trailing: Switch(value: _autoUpdate, onChanged: _setAutoUpdate),
+              trailing: CommonSwitch(
+                value: _autoUpdate,
+                onChanged: _setAutoUpdate,
+              ),
             ),
             if (_autoUpdate)
               _AutoUpdateIntervalField(
@@ -455,10 +458,14 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
           ],
         ),
       if (!isoixCloud && widget.profile.type != ProfileType.custom)
-        _ProfileFileItem(
-          fileInfo: _fileInfo,
-          onEdit: _editProfileFile,
-          onUpload: _uploadProfileFile,
+        generateSection(
+          items: [
+            _ProfileFileItem(
+              fileInfo: _fileInfo,
+              onEdit: _editProfileFile,
+              onUpload: _uploadProfileFile,
+            ),
+          ],
         ),
     ];
     return FocusTraversalGroup(
@@ -500,9 +507,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                               sliver: SliverList.list(
                                 children: [
                                   ErrorBanner(message: issue?.message),
-                                  ...sections.separated(
-                                    const SizedBox(height: 24),
-                                  ),
+                                  ...sections,
                                 ],
                               ),
                             ),
@@ -665,29 +670,26 @@ class _ProfileFileItem extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     final style = context.listCaptionStyle;
     final fileInfo = this.fileInfo;
-    return ItemPositionProvider(
-      position: ItemPosition.startAndEnd,
-      child: ContextMenuRegion(
-        menuItems: _menuItems(context),
-        child: DecorationListItem(
-          contentPadding: const EdgeInsets.only(left: 16),
-          title: Text(appLocalizations.profile),
-          subtitle: fileInfo == null
-              ? Text(appLocalizations.noData, style: style)
-              : LastUpdateTimeText(
-                  lastUpdateDate: fileInfo.lastModified,
-                  style: style,
-                ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (fileInfo != null)
-                Text(fileInfo.size.traffic.show, style: style),
-              const DisclosureIndicator(),
-            ],
-          ),
-          onPressed: fileInfo == null ? onUpload : onEdit,
+    return ContextMenuRegion(
+      menuItems: _menuItems(context),
+      child: DecorationListItem(
+        contentPadding: const EdgeInsets.only(left: 16),
+        title: Text(appLocalizations.profile),
+        subtitle: fileInfo == null
+            ? Text(appLocalizations.noData, style: style)
+            : LastUpdateTimeText(
+                lastUpdateDate: fileInfo.lastModified,
+                style: style,
+              ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (fileInfo != null)
+              Text(fileInfo.size.traffic.show, style: style),
+            const DisclosureIndicator(),
+          ],
         ),
+        onPressed: fileInfo == null ? onUpload : onEdit,
       ),
     );
   }

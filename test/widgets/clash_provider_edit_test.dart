@@ -366,7 +366,7 @@ void main() {
     final gesture = await tester.startGesture(
       tester.getCenter(find.byType(SortHandle).last),
     );
-    await tester.pump(kPressTimeout);
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
     final distance =
         tester.getCenter(find.text('Second')).dy -
         tester.getTopLeft(find.text('Fixture')).dy;

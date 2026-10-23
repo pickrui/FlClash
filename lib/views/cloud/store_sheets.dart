@@ -189,7 +189,6 @@ class _StorePurchaseSheetState extends State<StorePurchaseSheet> {
                     ),
                 ],
               ),
-            const SizedBox(height: cloudSectionGap),
             generateSection(
               items: [
                 FormRow(

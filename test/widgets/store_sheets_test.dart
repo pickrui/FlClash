@@ -78,7 +78,10 @@ void main() {
       ),
     );
     expect(find.text('Available ¥12.50'), findsOneWidget);
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
+    expect(
+      tester.widget<CommonSwitch>(find.byType(CommonSwitch)).value,
+      isTrue,
+    );
 
     await tester.tap(find.text('Yearly · ¥150'));
     await tester.pumpAndSettle();
@@ -103,7 +106,7 @@ void main() {
         methods: const [_alipay],
       ),
     );
-    expect(find.byType(Switch), findsNothing);
+    expect(find.byType(CommonSwitch), findsNothing);
     await tester.tap(find.text('Alipay'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(FilledButton, 'Buy'), findsNothing);

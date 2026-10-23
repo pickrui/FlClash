@@ -183,7 +183,6 @@ class _TailscaleViewState extends ConsumerState<TailscaleView>
                       ),
                   ],
                 ),
-                const SizedBox(height: 24),
                 generateSection(
                   items: [
                     ListItem(

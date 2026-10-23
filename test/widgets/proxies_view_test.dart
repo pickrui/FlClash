@@ -33,7 +33,6 @@ import 'package:fl_clash/views/proxies/group_tabs.dart';
 import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
-import 'package:fl_clash/views/proxies/setting.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -291,42 +290,66 @@ void main() {
     },
   );
 
-  for (final isAndroid in [true, false]) {
-    testWidgets(
-      'concurrency setting shows and saves the effective platform value: Android=$isAndroid',
-      (tester) async {
-        final container = ProviderContainer(
-          overrides: [
-            viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
-          ],
-        );
-        addTearDown(container.dispose);
-        await tester.pumpWidget(
-          UncontrolledProviderScope(
-            container: container,
-            child: _TestApp(
-              child: DelayConcurrencySetting(isAndroid: isAndroid),
-            ),
+  testWidgets('the page menu marks the default concurrency and saves a pick', (
+    tester,
+  ) async {
+    const first = Group(name: 'First', type: GroupType.Selector);
+    final container = ProviderContainer(
+      overrides: [
+        currentProfileIdProvider.overrideWithBuild((_, _) => 1),
+        currentProfileProvider.overrideWith((_) => null),
+        proxiesTabStateProvider.overrideWith(
+          (_) => const ProxiesTabState(
+            groups: [first],
+            currentGroupName: 'First',
+            proxyCardType: ProxyCardType.compact,
           ),
-        );
-        await tester.pumpAndSettle();
-        expect(
-          find.textContaining(isAndroid ? 'Default: 16' : 'Default: 50'),
-          findsOneWidget,
-        );
-        expect(find.text(isAndroid ? '16' : '50'), findsOneWidget);
-        await tester.tap(find.text('Concurrent batch latency tests'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('32').last);
-        await tester.pumpAndSettle();
-        final saved = container.read(proxiesStyleSettingProvider);
-        expect(saved.delayTestConcurrency(isAndroid: isAndroid), 32);
-        expect(saved.concurrencyLimit, isAndroid ? 50 : 32);
-        expect(saved.androidConcurrencyLimit, isAndroid ? 32 : null);
-        expect(tester.takeException(), isNull);
-      },
+        ),
+        proxiesTabControllerStateProvider.overrideWith(
+          (_) => const VM2(['First'], 'First'),
+        ),
+      ],
     );
-  }
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const _TestApp(child: ProxiesView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final l10n = AppLocalizations.current;
+    Finder inMenu(Finder finder) =>
+        find.descendant(of: find.byType(CommonPopupMenu), matching: finder);
+
+    await tester.tap(find.byTooltip(l10n.more));
+    await tester.pumpAndSettle();
+    await tester.tap(inMenu(find.text(l10n.delayConcurrency)));
+    await tester.pumpAndSettle();
+    Finder rowOf(String label) => find
+        .ancestor(of: inMenu(find.text(label)), matching: find.byType(Column))
+        .first;
+    expect(
+      find.descendant(
+        of: rowOf('$defaultDelayTestConcurrency'),
+        matching: find.text(l10n.defaultText),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: rowOf('32'), matching: find.text(l10n.defaultText)),
+      findsNothing,
+    );
+    await tester.tap(inMenu(find.text('32')));
+    await tester.pumpAndSettle();
+
+    final saved = container.read(proxiesStyleSettingProvider);
+    expect(saved.delayTestConcurrency(isAndroid: false), 32);
+    expect(saved.androidConcurrencyLimit, isNull);
+    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets(
     'node cards distinguish pending, interrupted, failed and measured results',

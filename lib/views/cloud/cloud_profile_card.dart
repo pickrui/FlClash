@@ -14,8 +14,6 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 
-import 'cloud_layout.dart';
-
 class CloudProfileCard extends StatelessWidget {
   final CloudProfile profile;
 
@@ -36,7 +34,6 @@ class CloudProfileCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _UsageCard(profile: profile),
-        const SizedBox(height: cloudSectionGap),
         generateSection(
           items: [
             figure(l10n.balance, storeMoneyText(profile.balance)),

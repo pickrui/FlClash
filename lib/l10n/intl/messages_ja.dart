@@ -287,19 +287,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("について"),
     "accessControl": MessageLookupByLibrary.simpleMessage("アクセス制御"),
-    "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "選択したアプリのみVPNを許可",
-    ),
     "accessControlDesc": MessageLookupByLibrary.simpleMessage(
       "アプリケーションのプロキシアクセスを設定",
     ),
-    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
-      "アプリアクセス制御は無効です",
-    ),
-    "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "選択したアプリをVPNから除外",
-    ),
-    "accessControlSettings": MessageLookupByLibrary.simpleMessage("アクセス制御設定"),
     "accessToken": MessageLookupByLibrary.simpleMessage("Access Token"),
     "account": MessageLookupByLibrary.simpleMessage("アカウント"),
     "accountBalance": MessageLookupByLibrary.simpleMessage("残高"),
@@ -889,12 +879,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "delay": MessageLookupByLibrary.simpleMessage("遅延"),
     "delayConcurrency": MessageLookupByLibrary.simpleMessage("一括測定の同時実行数"),
-    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
-      "Android の既定値は 16、回線が混雑する場合は減らしてください。次回の一括測定から適用",
-    ),
-    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
-      "既定値は 50、回線が混雑する場合は減らしてください。次回の一括測定から適用",
-    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("遅延テスト"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("測定失敗"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("待機中"),
@@ -1425,9 +1409,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "hidePassword": MessageLookupByLibrary.simpleMessage("パスワードを隠す"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "測定に失敗したノードを非表示",
-    ),
-    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
-      "選択中のノードと測定が完了していないノードは表示します",
     ),
     "hopInterval": MessageLookupByLibrary.simpleMessage("ホップ間隔"),
     "host": MessageLookupByLibrary.simpleMessage("ホスト"),
@@ -2481,7 +2462,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("すべて選択"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("バックアップを選択"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("アップグレード対象を選択"),
-    "selected": MessageLookupByLibrary.simpleMessage("選択済み"),
     "send": MessageLookupByLibrary.simpleMessage("送信"),
     "sendCode": MessageLookupByLibrary.simpleMessage("コードを送信"),
     "sendFromPhone": MessageLookupByLibrary.simpleMessage("スマートフォンから送信"),

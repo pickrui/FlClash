@@ -361,7 +361,6 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
                   ),
               ],
             ),
-            const SizedBox(height: cloudSectionGap),
             generateSection(
               footer: l10n.passwordRuleHint,
               items: [
@@ -400,7 +399,6 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
               ],
             ),
             if (config.inviteRequired) ...[
-              const SizedBox(height: cloudSectionGap),
               generateSection(
                 items: [
                   FormRow(

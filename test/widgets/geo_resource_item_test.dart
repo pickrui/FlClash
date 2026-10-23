@@ -8,9 +8,16 @@ import 'dart:io';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/clash_providers.dart';
+import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/providers/icon_sets.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/input.dart';
+import 'package:fl_clash/ui/switch.dart';
 import 'package:fl_clash/views/resources.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,6 +62,16 @@ void main() {
       }
     }
     fail('timed out waiting for $finder');
+  }
+
+  Future<void> pumpUntilAbsent(WidgetTester tester, Finder finder) async {
+    for (var i = 0; i < 100; i++) {
+      await settle(tester);
+      if (finder.evaluate().isEmpty) {
+        return;
+      }
+    }
+    fail('timed out waiting for $finder to leave');
   }
 
   Future<void> mount(WidgetTester tester) async {
@@ -154,6 +171,59 @@ void main() {
     await pumpUntilFound(tester, find.textContaining(4096.traffic.show));
 
     expect(find.textContaining(1024.traffic.show), findsNothing);
+    expect(tester.takeException(), null);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a switch row turns auto update on and reveals its interval', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        iconSetsProvider.overrideWithBuild((_, _) => Stream.value(const [])),
+        clashProvidersProvider.overrideWith((_) => Stream.value(const [])),
+        scriptsProvider.overrideWithBuild((_, _) => Stream.value(const [])),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(geoAutoUpdate: false));
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(locale: Locale('en'), child: ResourcesView()),
+      ),
+    );
+    final l10n = AppLocalizations.current;
+    await pumpUntilFound(tester, find.text(l10n.autoUpdate));
+    bool autoUpdate() => container.read(patchClashConfigProvider).geoAutoUpdate;
+    final interval = find.text(l10n.geoAutoUpdateInterval);
+    expect(interval, findsNothing);
+
+    await tester.tap(find.text(l10n.autoUpdate));
+    await settle(tester);
+    expect(autoUpdate(), isTrue);
+    expect(
+      find.text('${defaultClashConfig.geoUpdateInterval} ${l10n.hours}'),
+      findsOneWidget,
+    );
+
+    await tester.tap(interval);
+    await settle(tester, rounds: 3);
+    expect(find.byType(InputDialog), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField), '6');
+    await tester.tap(find.text(l10n.submit));
+    await pumpUntilAbsent(tester, find.byType(InputDialog));
+    expect(container.read(patchClashConfigProvider).geoUpdateInterval, 6);
+    expect(find.text('6 ${l10n.hours}'), findsOneWidget);
+
+    await tester.tap(find.byType(CommonSwitch));
+    await settle(tester);
+    expect(autoUpdate(), isFalse);
+    expect(interval, findsNothing);
     expect(tester.takeException(), null);
 
     await tester.pumpWidget(const SizedBox.shrink());

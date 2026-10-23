@@ -397,7 +397,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16)
-                .copyWith(top: context.appBarInset),
+                .copyWith(top: context.contentTopPadding),
             sliver: SliverToBoxAdapter(
               child: _isAndroid || _isMacOS
                   ? _buildPrerequisites()

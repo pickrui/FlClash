@@ -13,6 +13,7 @@ import 'package:fl_clash/features/form/selection_sheet.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
+import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -274,13 +275,13 @@ void main() {
     final source = find.widgetWithText(FormRow, l.sourceIp);
     final noResolve = find.descendant(
       of: find.widgetWithText(FormRow, l.noResolve),
-      matching: find.byType(Switch),
+      matching: find.byType(CommonSwitch),
     );
     await tester.ensureVisible(source);
     await tester.pumpAndSettle();
     await tester.tap(source);
     await tester.pumpAndSettle();
-    final toggle = tester.widget<Switch>(noResolve);
+    final toggle = tester.widget<CommonSwitch>(noResolve);
     expect(toggle.value, isTrue);
     expect(toggle.onChanged, isNull);
     final save = tester

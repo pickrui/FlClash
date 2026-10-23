@@ -357,7 +357,7 @@ class _ProfileProviderOptionsDialogState
       title: title,
       leading: leading,
       onPressed: () => onChanged(!value),
-      trailing: Switch(value: value, onChanged: onChanged),
+      trailing: CommonSwitch(value: value, onChanged: onChanged),
     );
   }
 

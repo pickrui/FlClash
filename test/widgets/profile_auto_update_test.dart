@@ -21,6 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/ui/loading.dart';
+import 'package:fl_clash/ui/switch.dart';
 
 import '../helpers/test_app.dart';
 
@@ -107,7 +108,7 @@ void main() {
         expect(reads, hasLength(1));
         expect(_saveButton(tester).onPressed, isNull);
         expect(find.byType(CommonCircleLoading), findsOneWidget);
-        expect(find.byType(Switch), findsNothing);
+        expect(find.byType(CommonSwitch), findsNothing);
         if (failFirst) {
           reads.single.completeError(StateError('fixture storage unavailable'));
           await tester.pumpAndSettle();
@@ -126,7 +127,7 @@ void main() {
         expect(_saveButton(tester).onPressed, isNotNull);
         expect(
           tester
-              .widgetList<Switch>(find.byType(Switch))
+              .widgetList<CommonSwitch>(find.byType(CommonSwitch))
               .every((toggle) => toggle.value),
           isTrue,
         );

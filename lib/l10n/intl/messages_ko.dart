@@ -295,17 +295,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("정보"),
     "accessControl": MessageLookupByLibrary.simpleMessage("접근 제어"),
-    "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "선택한 앱만 VPN 사용",
-    ),
     "accessControlDesc": MessageLookupByLibrary.simpleMessage("앱의 프록시 접근 설정"),
-    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
-      "앱 접근 제어가 꺼져 있습니다",
-    ),
-    "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "선택한 앱을 VPN에서 제외",
-    ),
-    "accessControlSettings": MessageLookupByLibrary.simpleMessage("접근 제어 설정"),
     "accessToken": MessageLookupByLibrary.simpleMessage("액세스 토큰"),
     "account": MessageLookupByLibrary.simpleMessage("계정"),
     "accountBalance": MessageLookupByLibrary.simpleMessage("잔액"),
@@ -864,12 +854,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayConcurrency": MessageLookupByLibrary.simpleMessage(
       "일괄 지연 테스트 동시 실행 수",
     ),
-    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
-      "Android 기본값: 16. 혼잡한 네트워크에서는 줄이세요. 다음 일괄 테스트부터 적용됩니다",
-    ),
-    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
-      "기본값: 50. 혼잡한 네트워크에서는 줄이세요. 다음 일괄 테스트부터 적용됩니다",
-    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("지연 테스트"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("실패"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("대기 중"),
@@ -1403,9 +1387,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "hideIp": MessageLookupByLibrary.simpleMessage("IP 숨기기"),
     "hidePassword": MessageLookupByLibrary.simpleMessage("비밀번호 숨기기"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage("실패한 노드 숨기기"),
-    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
-      "선택한 노드와 테스트가 끝나지 않은 노드는 유지합니다",
-    ),
     "hopInterval": MessageLookupByLibrary.simpleMessage("호핑 간격"),
     "host": MessageLookupByLibrary.simpleMessage("호스트"),
     "hostname": MessageLookupByLibrary.simpleMessage("호스트 이름"),
@@ -2432,7 +2413,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectAll": MessageLookupByLibrary.simpleMessage("모두 선택"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("백업 선택"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("업그레이드 대상 선택"),
-    "selected": MessageLookupByLibrary.simpleMessage("선택됨"),
     "send": MessageLookupByLibrary.simpleMessage("보내기"),
     "sendCode": MessageLookupByLibrary.simpleMessage("코드 전송"),
     "sendFromPhone": MessageLookupByLibrary.simpleMessage("휴대폰에서 보내기"),

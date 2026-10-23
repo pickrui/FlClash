@@ -139,7 +139,6 @@ class SubscriptionInfoDetailView extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
           generateSection(
             title: appLocalizations.expiresAtLabel,
             items: [_buildItem(value: expire)],

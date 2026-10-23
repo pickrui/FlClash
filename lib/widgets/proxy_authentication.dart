@@ -124,15 +124,13 @@ class ProxyAuthenticationItem extends ConsumerWidget {
     final enable = ref.watch(
       networkSettingProvider.select((state) => state.authentication.enable),
     );
-    return generateSection(
-      items: [
-        const AuthenticationItem(),
-        if (enable) ...const [
-          AuthenticationAccountItem(),
-          AuthenticationPasswordItem(),
-        ],
+    return generateGroup([
+      const AuthenticationItem(),
+      if (enable) ...const [
+        AuthenticationAccountItem(),
+        AuthenticationPasswordItem(),
       ],
-    );
+    ]);
   }
 }
 

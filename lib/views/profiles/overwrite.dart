@@ -718,16 +718,14 @@ class _ScriptContent extends ConsumerWidget {
           child: SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: generateSection(
-                items: [
-                  for (final script in scripts)
-                    _ScriptOption(
-                      label: script.label,
-                      isSelected: script.id == scriptId,
-                      onSelected: () => _handleChange(ref, script.id),
-                    ),
-                ],
-              ),
+              child: generateGroup([
+                for (final script in scripts)
+                  _ScriptOption(
+                    label: script.label,
+                    isSelected: script.id == scriptId,
+                    onSelected: () => _handleChange(ref, script.id),
+                  ),
+              ]),
             ),
           ),
         ),

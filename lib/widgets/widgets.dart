@@ -54,6 +54,8 @@ export 'package:fl_clash/ui/scroll.dart';
 
 export 'package:fl_clash/ui/setting.dart';
 
+export 'package:fl_clash/ui/switch.dart';
+
 export 'sheet_scaffold.dart';
 export 'subscription_info_view.dart';
 

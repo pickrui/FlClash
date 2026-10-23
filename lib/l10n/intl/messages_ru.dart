@@ -327,20 +327,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("О программе"),
     "accessControl": MessageLookupByLibrary.simpleMessage("Контроль доступа"),
-    "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "Разрешить только выбранным приложениям доступ к VPN",
-    ),
     "accessControlDesc": MessageLookupByLibrary.simpleMessage(
       "Настройка доступа приложений к прокси",
-    ),
-    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
-      "Контроль доступа приложений отключён",
-    ),
-    "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "Выбранные приложения будут исключены из VPN",
-    ),
-    "accessControlSettings": MessageLookupByLibrary.simpleMessage(
-      "Настройки контроля доступа",
     ),
     "accessToken": MessageLookupByLibrary.simpleMessage("Access Token"),
     "account": MessageLookupByLibrary.simpleMessage("Аккаунт"),
@@ -1060,12 +1048,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayConcurrency": MessageLookupByLibrary.simpleMessage(
       "Параллельные проверки в группе",
     ),
-    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
-      "По умолчанию 16 на Android. Уменьшите при перегрузке сети; действует со следующей групповой проверки",
-    ),
-    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
-      "По умолчанию 50. Уменьшите при перегрузке сети; действует со следующей групповой проверки",
-    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("Тест задержки"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("Ошибка проверки"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("В очереди"),
@@ -1750,9 +1732,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "hidePassword": MessageLookupByLibrary.simpleMessage("Скрыть пароль"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "Скрывать узлы с ошибкой проверки",
-    ),
-    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
-      "Сохранять выбранный узел и узлы с незавершённой проверкой",
     ),
     "hopInterval": MessageLookupByLibrary.simpleMessage("Интервал перескока"),
     "host": MessageLookupByLibrary.simpleMessage("Хост"),
@@ -3067,7 +3046,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
       "Выберите тариф для улучшения",
     ),
-    "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
     "send": MessageLookupByLibrary.simpleMessage("Отправить"),
     "sendCode": MessageLookupByLibrary.simpleMessage("Отправить код"),
     "sendFromPhone": MessageLookupByLibrary.simpleMessage(

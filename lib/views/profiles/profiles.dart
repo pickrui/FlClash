@@ -687,13 +687,16 @@ class _ReorderableProfilesSheetState
 
   Widget _buildItem(int index) {
     final profile = profiles[index];
-    return ItemPositionProvider(
+    return ReorderableDelayedDragStartListener(
       key: Key(profile.id.toString()),
-      position: ItemPosition.get(index, profiles.length),
-      child: DecorationListItem(
-        contentPadding: const EdgeInsets.only(left: 16),
-        trailing: SortHandle(index: index),
-        title: Text(profile.realLabel),
+      index: index,
+      child: ItemPositionProvider(
+        position: ItemPosition.get(index, profiles.length),
+        child: DecorationListItem(
+          contentPadding: const EdgeInsets.only(left: 16),
+          trailing: SortHandle(index: index),
+          title: Text(profile.realLabel),
+        ),
       ),
     );
   }

@@ -470,14 +470,12 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
                         ? _nodeFilterRecovery?.result
                         : null,
                   ),
-                const SizedBox(height: cloudSectionGap),
                 _buildStoreEntry(),
                 if (state.latestNotification case final notice?
                     when notice.cleanMessage.isNotEmpty) ...[
                   const SizedBox(height: cloudSectionGap),
                   CloudAnnouncementCard(notice: notice),
                 ],
-                const SizedBox(height: cloudSectionGap),
                 generateSection(
                   items: [
                     ListItem(
@@ -688,30 +686,27 @@ class _CloudNodeFilterEntryState extends ConsumerState<CloudNodeFilterEntry> {
       (_, final error?) => CloudApiException.clean(error),
       _ => AppLocalizations.current.loading,
     };
-    return Padding(
-      padding: const EdgeInsets.only(top: cloudSectionGap),
-      child: generateSection(
-        items: [
-          ListItem(
-            leading: const GlyphIcon(AppGlyphs.filter),
-            title: Text(AppLocalizations.current.nodeFilter),
-            subtitle: Text(
-              summary,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: showError
-                  ? context.listSubtitleStyle.copyWith(
-                      color: context.colorScheme.error,
-                    )
-                  : null,
-            ),
-            trailing: const GlyphIcon(AppGlyphs.chevronForward),
-            onTap: !widget.enabled || cloudNodeFilterPageBuilder == null
-                ? null
-                : _open,
+    return generateSection(
+      items: [
+        ListItem(
+          leading: const GlyphIcon(AppGlyphs.filter),
+          title: Text(AppLocalizations.current.nodeFilter),
+          subtitle: Text(
+            summary,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: showError
+                ? context.listSubtitleStyle.copyWith(
+                    color: context.colorScheme.error,
+                  )
+                : null,
           ),
-        ],
-      ),
+          trailing: const GlyphIcon(AppGlyphs.chevronForward),
+          onTap: !widget.enabled || cloudNodeFilterPageBuilder == null
+              ? null
+              : _open,
+        ),
+      ],
     );
   }
 }

@@ -331,20 +331,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("About"),
     "accessControl": MessageLookupByLibrary.simpleMessage("AccessControl"),
-    "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "Only allow selected app to enter VPN",
-    ),
     "accessControlDesc": MessageLookupByLibrary.simpleMessage(
       "Configure application access proxy",
-    ),
-    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
-      "App access control is disabled",
-    ),
-    "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "The selected application will be excluded from VPN",
-    ),
-    "accessControlSettings": MessageLookupByLibrary.simpleMessage(
-      "Access Control Settings",
     ),
     "accessToken": MessageLookupByLibrary.simpleMessage("Access Token"),
     "account": MessageLookupByLibrary.simpleMessage("Account"),
@@ -1038,12 +1026,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayConcurrency": MessageLookupByLibrary.simpleMessage(
       "Concurrent batch latency tests",
     ),
-    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
-      "Default: 16 on Android. Reduce on congested networks; applies to the next batch",
-    ),
-    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
-      "Default: 50. Reduce on congested networks; applies to the next batch",
-    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("Delay Test"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("Failed"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("Queued"),
@@ -1696,9 +1678,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "hidePassword": MessageLookupByLibrary.simpleMessage("Hide password"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "Hide failed nodes",
-    ),
-    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
-      "Keep the selected node and nodes that have not finished testing",
     ),
     "hopInterval": MessageLookupByLibrary.simpleMessage("Hop interval"),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
@@ -2928,7 +2907,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
       "Select upgrade target",
     ),
-    "selected": MessageLookupByLibrary.simpleMessage("Selected"),
     "send": MessageLookupByLibrary.simpleMessage("Send"),
     "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
     "sendFromPhone": MessageLookupByLibrary.simpleMessage("Send from phone"),

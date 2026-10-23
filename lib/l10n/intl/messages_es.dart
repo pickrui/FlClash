@@ -336,20 +336,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("Acerca de"),
     "accessControl": MessageLookupByLibrary.simpleMessage("Control de acceso"),
-    "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "Solo las aplicaciones seleccionadas usan la VPN",
-    ),
     "accessControlDesc": MessageLookupByLibrary.simpleMessage(
       "Configurar el acceso de las aplicaciones al proxy",
-    ),
-    "accessControlDisabledDesc": MessageLookupByLibrary.simpleMessage(
-      "El control de acceso de apps está desactivado",
-    ),
-    "accessControlNotAllowDesc": MessageLookupByLibrary.simpleMessage(
-      "Las aplicaciones seleccionadas se excluyen de la VPN",
-    ),
-    "accessControlSettings": MessageLookupByLibrary.simpleMessage(
-      "Ajustes de control de acceso",
     ),
     "accessToken": MessageLookupByLibrary.simpleMessage("Token de acceso"),
     "account": MessageLookupByLibrary.simpleMessage("Cuenta"),
@@ -1071,12 +1059,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayConcurrency": MessageLookupByLibrary.simpleMessage(
       "Pruebas de latencia simultáneas",
     ),
-    "delayConcurrencyAndroidDesc": MessageLookupByLibrary.simpleMessage(
-      "Valor predeterminado en Android: 16. Reduzca en redes congestionadas; se aplica al siguiente lote",
-    ),
-    "delayConcurrencyDesc": MessageLookupByLibrary.simpleMessage(
-      "Valor predeterminado: 50. Reduzca en redes congestionadas; se aplica al siguiente lote",
-    ),
     "delayTest": MessageLookupByLibrary.simpleMessage("Prueba de latencia"),
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("Error"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("En cola"),
@@ -1775,9 +1757,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "hidePassword": MessageLookupByLibrary.simpleMessage("Ocultar contraseña"),
     "hideTimeoutProxies": MessageLookupByLibrary.simpleMessage(
       "Ocultar nodos fallidos",
-    ),
-    "hideTimeoutProxiesDesc": MessageLookupByLibrary.simpleMessage(
-      "Conservar el nodo seleccionado y aquellos cuya prueba no haya terminado",
     ),
     "hopInterval": MessageLookupByLibrary.simpleMessage("Intervalo de salto"),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
@@ -3120,7 +3099,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
       "Seleccionar el plan de destino",
     ),
-    "selected": MessageLookupByLibrary.simpleMessage("Seleccionado"),
     "send": MessageLookupByLibrary.simpleMessage("Enviar"),
     "sendCode": MessageLookupByLibrary.simpleMessage("Enviar código"),
     "sendFromPhone": MessageLookupByLibrary.simpleMessage(

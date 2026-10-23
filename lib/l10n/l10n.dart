@@ -700,31 +700,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Only allow selected app to enter VPN`
-  String get accessControlAllowDesc {
-    return Intl.message(
-      'Only allow selected app to enter VPN',
-      name: 'accessControlAllowDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The selected application will be excluded from VPN`
-  String get accessControlNotAllowDesc {
-    return Intl.message(
-      'The selected application will be excluded from VPN',
-      name: 'accessControlNotAllowDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Selected`
-  String get selected {
-    return Intl.message('Selected', name: 'selected', desc: '', args: []);
-  }
-
   /// `Profile parse error`
   String get profileParseErrorDesc {
     return Intl.message(
@@ -3505,16 +3480,6 @@ class AppLocalizations {
   /// `Just now`
   String get justNow {
     return Intl.message('Just now', name: 'justNow', desc: '', args: []);
-  }
-
-  /// `Access Control Settings`
-  String get accessControlSettings {
-    return Intl.message(
-      'Access Control Settings',
-      name: 'accessControlSettings',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Turn On`
@@ -8717,26 +8682,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Default: 50. Reduce on congested networks; applies to the next batch`
-  String get delayConcurrencyDesc {
-    return Intl.message(
-      'Default: 50. Reduce on congested networks; applies to the next batch',
-      name: 'delayConcurrencyDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Default: 16 on Android. Reduce on congested networks; applies to the next batch`
-  String get delayConcurrencyAndroidDesc {
-    return Intl.message(
-      'Default: 16 on Android. Reduce on congested networks; applies to the next batch',
-      name: 'delayConcurrencyAndroidDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Failed`
   String get delayTestFailed {
     return Intl.message('Failed', name: 'delayTestFailed', desc: '', args: []);
@@ -9697,16 +9642,6 @@ class AppLocalizations {
     return Intl.message(
       'Hide failed nodes',
       name: 'hideTimeoutProxies',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Keep the selected node and nodes that have not finished testing`
-  String get hideTimeoutProxiesDesc {
-    return Intl.message(
-      'Keep the selected node and nodes that have not finished testing',
-      name: 'hideTimeoutProxiesDesc',
       desc: '',
       args: [],
     );
@@ -11796,16 +11731,6 @@ class AppLocalizations {
     return Intl.message(
       'Start from scratch',
       name: 'startFromScratch',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `App access control is disabled`
-  String get accessControlDisabledDesc {
-    return Intl.message(
-      'App access control is disabled',
-      name: 'accessControlDisabledDesc',
       desc: '',
       args: [],
     );

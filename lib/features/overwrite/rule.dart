@@ -17,6 +17,7 @@ import 'package:fl_clash/features/form/selection_sheet.dart';
 import 'package:fl_clash/ui/text.dart';
 import 'package:fl_clash/ui/inherited.dart' show sheetScrollController;
 import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/switch.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'overwrite_sheet.dart';
@@ -157,7 +158,7 @@ class RuleStatusItem extends StatelessWidget {
           style: AppTextStyle.subheadline.of(context).toJetBrainsMono,
         ),
       ),
-      trailing: Switch(value: status, onChanged: onChange),
+      trailing: CommonSwitch(value: status, onChanged: onChange),
       onPressed: () => onChange(!status),
     );
   }
@@ -365,7 +366,7 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
   }) => FormRow(
     title: title,
     onPressed: onChanged == null ? null : () => onChanged(!value),
-    trailing: Switch(value: value, onChanged: onChanged),
+    trailing: CommonSwitch(value: value, onChanged: onChanged),
   );
 
   @override
