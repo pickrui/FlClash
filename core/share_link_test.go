@@ -137,6 +137,25 @@ func TestShareLinksPreserveEscapedCredentialsAndLegacyTLS(t *testing.T) {
 					t.Errorf("%s: got %#v, want %#v", key, got[key], want)
 				}
 			}
+			if _, ok := got["alpn"]; ok {
+				t.Errorf("an empty ALPN came back as %#v", got["alpn"])
+			}
+		})
+	}
+}
+
+func TestShareLinksKeepHTTPUpgradeTransport(t *testing.T) {
+	opts := map[string]any{"path": "/u", "headers": map[string]any{"Host": "h.example"}, "v2ray-http-upgrade": true}
+	for _, source := range []map[string]any{
+		{"type": "vless", "name": "upgrade", "server": "example.com", "port": 443, "uuid": "fixture", "tls": true, "network": "ws", "ws-opts": opts},
+		{"type": "vmess", "name": "legacy", "server": "example.com", "port": 443, "uuid": "fixture", "alterId": 64, "network": "ws", "ws-opts": opts},
+	} {
+		t.Run(source["type"].(string), func(t *testing.T) {
+			got := decodeShareLink(handleEncodeShareLinks([]map[string]any{source})[0])
+			wsOpts, _ := got["ws-opts"].(map[string]any)
+			if got["network"] != "ws" || wsOpts["v2ray-http-upgrade"] != true || wsOpts["path"] != "/u" {
+				t.Fatalf("HTTPUpgrade became %#v", got)
+			}
 		})
 	}
 }

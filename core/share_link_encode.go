@@ -206,6 +206,9 @@ func encodeVmess(f proxyFields) string {
 	switch network := f.str("network"); network {
 	case "ws", "httpupgrade":
 		opts := f.sub("ws-opts")
+		if opts.flag("v2ray-http-upgrade") {
+			network = "httpupgrade"
+		}
 		values["net"] = network
 		values["host"] = opts.sub("headers").str("Host")
 		values["path"] = opts.str("path")
@@ -285,6 +288,9 @@ func vShareQuery(f proxyFields) url.Values {
 		setIf(query, "host", opts.first("host"))
 	case "ws", "httpupgrade":
 		opts := f.sub("ws-opts")
+		if opts.flag("v2ray-http-upgrade") {
+			network = "httpupgrade"
+		}
 		query.Set("type", network)
 		setIf(query, "path", opts.str("path"))
 		setIf(query, "host", opts.sub("headers").str("Host"))
