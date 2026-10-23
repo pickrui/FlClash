@@ -8,6 +8,7 @@ package com.oixcloud.clash
 import android.app.Activity
 import android.app.Application
 import android.content.Intent
+import android.service.quicksettings.Tile
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -46,5 +47,22 @@ class TempActivityTest {
         assertEquals("test.VPN_CONSENT", consent.intent.action)
         shadowOf(activity).receiveResult(consent.intent, Activity.RESULT_CANCELED, null)
         assertTrue(activity.isFinishing)
+    }
+
+    @Test
+    fun tileShowsAStartHoldingTheRunLockAsUnavailable() {
+        val tile = Robolectric.buildService(TileService::class.java).create().get()
+        tile.qsTile.state = Tile.STATE_INACTIVE
+        State.runStateFlow.value = RunState.PENDING
+        assertTrue(State.runLock.tryLock())
+        try {
+            tile.onStartListening()
+
+            assertEquals(Tile.STATE_UNAVAILABLE, tile.qsTile.state)
+        } finally {
+            tile.onStopListening()
+            State.runLock.unlock()
+            State.runStateFlow.value = RunState.STOP
+        }
     }
 }

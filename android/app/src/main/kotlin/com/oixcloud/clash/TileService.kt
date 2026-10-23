@@ -38,11 +38,14 @@ class TileService : TileService() {
         super.onStartListening()
         scope?.cancel()
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        // The sync waits for runLock, which a shortcut or always-on start holds through setup.
         scope?.launch {
-            State.handleSyncState()
             State.runStateFlow.collect {
                 updateTile(it)
             }
+        }
+        scope?.launch {
+            State.handleSyncState()
         }
     }
 
