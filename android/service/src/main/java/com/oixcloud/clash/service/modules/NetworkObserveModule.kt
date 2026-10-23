@@ -6,6 +6,7 @@
 package com.oixcloud.clash.service.modules
 
 import android.app.Service
+import android.content.Context
 import android.net.ConnectivityManager
 import android.net.LinkProperties
 import android.net.Network
@@ -18,17 +19,20 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import androidx.core.content.getSystemService
+import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.core.Core
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
 
-class NetworkObserveModule(private val service: Service) : Module() {
+// Process-wide: a stopped Core still resolves `system` DNS for delays and providers.
+object NetworkObserver {
     private val lock = Any()
-    private val handler = Handler(Looper.getMainLooper())
-    private val connectivity by lazy { service.getSystemService<ConnectivityManager>() }
+    private val handler by lazy { Handler(Looper.getMainLooper()) }
     private var callback: ConnectivityManager.NetworkCallback? = null
-    private var tracker: NetworkDnsTracker<Network>? = null
+
+    @Volatile
+    var resetsConnections = false
 
     private val request = NetworkRequest.Builder().apply {
         addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
@@ -39,8 +43,9 @@ class NetworkObserveModule(private val service: Service) : Module() {
         addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
     }.build()
 
-    override fun onInstall(): Unit = synchronized(lock) {
+    fun start(context: Context): Unit = synchronized(lock) {
         if (callback != null) return
+        val connectivity = context.applicationContext.getSystemService<ConnectivityManager>() ?: return
         val session = NetworkDnsTracker<Network>(
             now = SystemClock::elapsedRealtime,
             schedule = { delay, action ->
@@ -50,14 +55,16 @@ class NetworkObserveModule(private val service: Service) : Module() {
                 cancel
             },
             publish = { Core.updateDNS(it.joinToString(",")) },
-            reset = { Core.invokeMethod("{\"method\":\"resetNetwork\"}") {} },
+            reset = {
+                if (resetsConnections) Core.invokeMethod("{\"method\":\"resetNetwork\"}") {}
+            },
         )
         val listener = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 // O+ delivers capabilities immediately after availability. Earlier
                 // releases need an initial query to preserve transport priority.
                 val priority = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    connectivity?.getNetworkCapabilities(network)?.let(::networkPriority) ?: 100
+                    connectivity.getNetworkCapabilities(network)?.let(::networkPriority) ?: 100
                 } else 100
                 session.available(network, priority)
             }
@@ -75,9 +82,9 @@ class NetworkObserveModule(private val service: Service) : Module() {
                     network, properties.dnsServers.map { it.asSocketAddressText(53) },
                 )
         }
-        tracker = session
-        callback = listener
-        connectivity?.registerNetworkCallback(request, listener)
+        runCatching { connectivity.registerNetworkCallback(request, listener) }
+            .onSuccess { callback = listener }
+            .onFailure { GlobalState.log("Unable to observe networks: $it") }
     }
 
     private fun networkPriority(capabilities: NetworkCapabilities): Int = when {
@@ -92,16 +99,16 @@ class NetworkObserveModule(private val service: Service) : Module() {
             capabilities.hasTransport(TRANSPORT_SATELLITE) -> 5
         else -> 20
     }
+}
 
-    override fun onUninstall(): Unit = synchronized(lock) {
-        val listener = callback
-        callback = null
-        try {
-            listener?.let { connectivity?.unregisterNetworkCallback(it) }
-        } finally {
-            tracker?.stop()
-            tracker = null
-        }
+class NetworkObserveModule(private val service: Service) : Module() {
+    override fun onInstall() {
+        NetworkObserver.start(service)
+        NetworkObserver.resetsConnections = true
+    }
+
+    override fun onUninstall() {
+        NetworkObserver.resetsConnections = false
     }
 }
 

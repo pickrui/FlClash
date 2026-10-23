@@ -22,6 +22,7 @@ import com.oixcloud.clash.service.State.intent
 import com.oixcloud.clash.service.State.runLock
 import com.oixcloud.clash.service.models.NotificationParams
 import com.oixcloud.clash.service.models.VpnOptions
+import com.oixcloud.clash.service.modules.NetworkObserver
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -318,6 +319,11 @@ class RemoteService : Service(),
         }
 
         override fun getRunState(): String = Gson().toJson(State.running)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        NetworkObserver.start(this)
     }
 
     override fun onBind(intent: Intent?): IBinder {
