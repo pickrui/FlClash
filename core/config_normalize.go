@@ -20,9 +20,11 @@ func unmarshalRawConfig(data []byte) (*config.RawConfig, error) {
 		return config.UnmarshalRawConfig(data)
 	}
 	var root yaml.Node
-	if yaml.Unmarshal(data, &root) != nil || !retagShortIds(&root, "") {
+	// Anything but a mapping (age envelopes, parse errors) takes the upstream path.
+	if yaml.Unmarshal(data, &root) != nil || len(root.Content) == 0 || root.Content[0].Kind != yaml.MappingNode {
 		return config.UnmarshalRawConfig(data)
 	}
+	retagShortIds(&root, "")
 	rawConfig := config.DefaultRawConfig()
 	if err := root.Decode(rawConfig); err != nil {
 		return nil, err
@@ -30,14 +32,11 @@ func unmarshalRawConfig(data []byte) (*config.RawConfig, error) {
 	return rawConfig, nil
 }
 
-func retagShortIds(node *yaml.Node, parentKey string) bool {
-	changed := false
+func retagShortIds(node *yaml.Node, parentKey string) {
 	switch node.Kind {
 	case yaml.DocumentNode, yaml.SequenceNode:
 		for _, child := range node.Content {
-			if retagShortIds(child, parentKey) {
-				changed = true
-			}
+			retagShortIds(child, parentKey)
 		}
 	case yaml.MappingNode:
 		for i := 0; i+1 < len(node.Content); i += 2 {
@@ -48,13 +47,9 @@ func retagShortIds(node *yaml.Node, parentKey string) bool {
 				value.Kind == yaml.ScalarNode &&
 				(value.Tag == "!!int" || value.Tag == "!!float") {
 				value.Tag = "!!str"
-				changed = true
 				continue
 			}
-			if retagShortIds(value, key.Value) {
-				changed = true
-			}
+			retagShortIds(value, key.Value)
 		}
 	}
-	return changed
 }
