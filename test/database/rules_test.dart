@@ -382,4 +382,35 @@ void main() {
       'MATCH,Proxy',
     ]);
   });
+
+  test('rule sets past the SQLite variable limit save and restore', () async {
+    final rules = [
+      for (var id = 1; id <= 33000; id++)
+        Rule(id: id, value: 'DOMAIN,host$id.example,DIRECT'),
+    ];
+    final profile = Profile(
+      id: 1,
+      autoUpdateDuration: Duration.zero,
+      customRules: rules,
+    );
+    await database.putProfile(profile);
+    await database.putProfile(profile.copyWith(customRules: const []));
+    expect(await database.rules.count.getSingle(), 0);
+
+    await database.rulesDao.putGlobalRule(
+      const Rule(id: 40000, value: 'MATCH,DIRECT'),
+    );
+    final keys = indexing.generateNKeys(rules.length);
+    await database.restore(const [], const [], rules, [
+      for (final (index, rule) in rules.indexed)
+        ProfileRuleLink(ruleId: rule.id, order: keys[index]),
+    ], isOverride: true);
+
+    expect(
+      (await database.rulesDao.allGlobalAddedRules().get()).map(
+        (rule) => rule.id,
+      ),
+      rules.reversed.map((rule) => rule.id),
+    );
+  });
 }

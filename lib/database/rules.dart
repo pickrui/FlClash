@@ -5,6 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of 'database.dart';
 
+// The bundled SQLite rejects a statement with more than 32766 variables.
+const _maxInValues = 30000;
+
 @DataClassName('RawRule')
 @TableIndex(name: 'idx_rule_target', columns: {#ruleTarget})
 class Rules extends Table {
@@ -93,12 +96,13 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
     }
     final linkedIds = selectOnly(profileRuleLinks)
       ..addColumns([profileRuleLinks.ruleId]);
-    batch.deleteWhere(
-      rules,
-      (row) =>
-          row.id.isIn(links.map((link) => link.ruleId)) &
-          row.id.isNotInQuery(linkedIds),
-    );
+    final oldRuleIds = links.map((link) => link.ruleId);
+    for (final ruleIds in oldRuleIds.slices(_maxInValues)) {
+      batch.deleteWhere(
+        rules,
+        (row) => row.id.isIn(ruleIds) & row.id.isNotInQuery(linkedIds),
+      );
+    }
   }
 
   Future<void> setCustomRules(int profileId, List<Rule> rules) =>
@@ -180,23 +184,39 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
     });
   }
 
-  void restoreWithBatch(
+  Future<void> restoreWithBatch(
     Batch batch,
     Iterable<Rule> rules,
     Iterable<ProfileRuleLink> links,
-  ) {
+  ) async {
+    final ruleIds = rules.map((item) => item.id).toSet();
+    final linkKeys = links.map((item) => item.key).toSet();
+    final storedRuleIds =
+        await (selectOnly(this.rules)..addColumns([this.rules.id]))
+            .map((row) => row.read(this.rules.id)!)
+            .get();
+    final storedLinkKeys =
+        await (selectOnly(profileRuleLinks)..addColumns([profileRuleLinks.id]))
+            .map((row) => row.read(profileRuleLinks.id)!)
+            .get();
     batch.insertAllOnConflictUpdate(
       this.rules,
       rules.map((item) => item.toCompanion()),
     );
-    final ruleIds = rules.map((item) => item.id);
-    batch.deleteWhere(this.rules, (t) => t.id.isNotIn(ruleIds));
+    final staleRuleIds = storedRuleIds.where((id) => !ruleIds.contains(id));
+    for (final ids in staleRuleIds.slices(_maxInValues)) {
+      batch.deleteWhere(this.rules, (t) => t.id.isIn(ids));
+    }
     batch.insertAllOnConflictUpdate(
       profileRuleLinks,
       links.map((item) => item.toCompanion()),
     );
-    final linkKeys = links.map((item) => item.key);
-    batch.deleteWhere(profileRuleLinks, (t) => t.id.isNotIn(linkKeys));
+    final staleLinkKeys = storedLinkKeys.where(
+      (key) => !linkKeys.contains(key),
+    );
+    for (final keys in staleLinkKeys.slices(_maxInValues)) {
+      batch.deleteWhere(profileRuleLinks, (t) => t.id.isIn(keys));
+    }
   }
 
   Future<void> delRules(Iterable<int> ruleIds) {

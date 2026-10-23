@@ -236,11 +236,11 @@ class Database extends _$Database {
     List<IconSet> iconSets = const [],
   }) async {
     await transaction(() async {
-      await batch((b) {
+      await batch((b) async {
         if (isOverride) {
           profilesDao.setAllWithBatch(b, profiles);
           scriptsDao.setAllWithBatch(b, scripts);
-          rulesDao.restoreWithBatch(b, rules, links);
+          await rulesDao.restoreWithBatch(b, rules, links);
         } else {
           profilesDao.putAllWithBatch(
             b,
