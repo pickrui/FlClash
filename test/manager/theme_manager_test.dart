@@ -54,7 +54,7 @@ void main() {
     expect(themes[2], isNot(same(themes[1])));
     expect(
       themes[2].extension<ElevatedColorScheme>()?.colorScheme,
-      themes[0].colorScheme,
+      themes[2].colorScheme.elevated,
     );
     expect(themes[3], isNot(same(themes[2])));
     expect(themes[3].textTheme.bodyMedium?.fontFamily, 'Inter');

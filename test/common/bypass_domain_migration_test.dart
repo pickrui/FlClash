@@ -235,5 +235,36 @@ void main() {
         expect(await preferences.getUpgradeVersion(), Migration.upgradeVersion);
       }
     });
+
+    test('moves presets picked before to the current system colors, '
+        'once', () async {
+      const picked = ThemeProps(
+        primaryColor: 0xFFFF9500,
+        primaryColors: [
+          0xFF007AFF,
+          0xFFAF52DE,
+          0xFFCB30E0,
+          0xFFFF9500,
+          0xFF123456,
+        ],
+      );
+      Future<ThemeProps> upgrade(int from) async {
+        await mockPreferences({
+          'version': migration.currentVersion,
+          'upgradeVersion': from,
+        });
+        return load(stored(picked), []);
+      }
+
+      final moved = await upgrade(1);
+      expect(moved.primaryColor, 0xFFFF8D28);
+      expect(moved.primaryColors, [
+        0xFF007AFF,
+        0xFFCB30E0,
+        0xFFFF8D28,
+        0xFF123456,
+      ]);
+      expect((await upgrade(2)).primaryColor, 0xFFFF9500);
+    });
   });
 }

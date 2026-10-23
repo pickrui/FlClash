@@ -40,25 +40,18 @@ final _appThemes = <Brightness, ({Object inputs, ThemeData theme})>{};
 
 ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
   final locale = ref.watch(appSettingProvider.select((state) => state.locale));
-  final themeSetting = ref.watch(
-    themeSettingProvider.select(
-      (state) => (fontFamily: state.fontFamily, pureBlack: state.pureBlack),
-    ),
+  final fontFamily = ref.watch(
+    themeSettingProvider.select((state) => state.fontFamily),
   );
-  final pureBlack = brightness == Brightness.dark && themeSetting.pureBlack;
   final colorScheme = ref.watch(genColorSchemeProvider(brightness));
-  final plainDark = pureBlack
-      ? ref.watch(genColorSchemeProvider(brightness, pureBlack: false))
-      : null;
   final locales = [
     ?getLocaleForString(locale),
     ...WidgetsBinding.instance.platformDispatcher.locales,
   ];
   final inputs = (
     platform: defaultTargetPlatform,
-    fontFamily: themeSetting.fontFamily,
+    fontFamily: fontFamily,
     colorScheme: colorScheme,
-    plainDark: plainDark,
     locales: locales.join(','),
   );
   if (_appThemes[brightness] case (inputs: final cached, :final theme)
@@ -70,16 +63,15 @@ ThemeData watchAppTheme(WidgetRef ref, Brightness brightness) {
       useMaterial3: true,
       pageTransitionsTheme: _pageTransitionsTheme,
       colorScheme: colorScheme,
-      fontFamily: themeSetting.fontFamily,
+      fontFamily: fontFamily,
       fontFamilyFallback: appFontFamilyFallback(
         platform: defaultTargetPlatform,
         locales: locales,
-        fontFamily: themeSetting.fontFamily,
+        fontFamily: fontFamily,
       ),
       extensions: [
         if (brightness == Brightness.dark)
-          // Pure black steps up to the plain dark scheme, keeping its tint.
-          ElevatedColorScheme(plainDark ?? colorScheme.elevated),
+          ElevatedColorScheme(colorScheme.elevated),
       ],
     ).withAppShapes.withAppSurfaces.withAppTypography,
   );

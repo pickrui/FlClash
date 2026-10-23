@@ -168,7 +168,7 @@ void main() {
             mainAxisSize: MainAxisSize.min,
             children: [
               pane(keys[0], const []),
-              pane(keys[1], glassMenuShadows(colorScheme, 8)),
+              pane(keys[1], menuShadows(colorScheme, 8)),
             ],
           ),
         ),

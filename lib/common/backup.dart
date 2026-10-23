@@ -977,7 +977,7 @@ class Migration {
   final currentVersion = 2;
 
   /// Apart from [currentVersion], which backups carry and older apps refuse.
-  static const upgradeVersion = 1;
+  static const upgradeVersion = 2;
 
   factory Migration() {
     _instance ??= Migration._internal();
@@ -1004,7 +1004,11 @@ class Migration {
     if (from >= upgradeVersion) {
       return config;
     }
-    final upgraded = installed ? _moveLegacyThemeDefaults(config) : config;
+    var upgraded = config;
+    if (installed) {
+      if (from < 1) upgraded = _moveLegacyThemeDefaults(upgraded);
+      if (from < 2) upgraded = _followSystemColors(upgraded);
+    }
     if (upgraded != config) {
       await persist(upgraded);
     }
@@ -1095,6 +1099,29 @@ Config _moveLegacyThemeDefaults(Config config) {
     themeProps: theme.copyWith(
       primaryColor: defaultPrimaryColor,
       primaryColors: defaultPrimaryColors,
+    ),
+  );
+}
+
+const _formerSystemColors = {
+  0xFFAF52DE: 0xFFCB30E0,
+  0xFFFF3B30: 0xFFFF383C,
+  0xFFFF9500: 0xFFFF8D28,
+};
+
+// Every preset but blue moved to iOS 27's system color; one picked before moves.
+Config _followSystemColors(Config config) {
+  final theme = config.themeProps;
+  return config.copyWith(
+    themeProps: theme.copyWith(
+      primaryColor:
+          _formerSystemColors[theme.primaryColor] ?? theme.primaryColor,
+      primaryColors: [
+        ...{
+          for (final color in theme.primaryColors)
+            _formerSystemColors[color] ?? color,
+        },
+      ],
     ),
   );
 }

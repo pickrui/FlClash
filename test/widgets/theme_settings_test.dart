@@ -125,11 +125,11 @@ void main() {
       tester,
     ) async {
       final c = await _pump(tester, const Size(900, 1800));
-      await _scrollTo(tester, swatch(0xFFAF52DE));
+      await _scrollTo(tester, swatch(0xFFCB30E0));
 
-      await tester.tap(swatch(0xFFAF52DE));
+      await tester.tap(swatch(0xFFCB30E0));
       await tester.pumpAndSettle();
-      expect(c.read(themeSettingProvider).primaryColor, 0xFFAF52DE);
+      expect(c.read(themeSettingProvider).primaryColor, 0xFFCB30E0);
 
       await tester.tap(
         find.byWidgetPredicate(
@@ -150,28 +150,28 @@ void main() {
 
     testWidgets('deletes a color from its long-press menu', (tester) async {
       final c = await _pump(tester, const Size(900, 1800));
-      await _scrollTo(tester, swatch(0xFFFF9500));
-      await tester.tap(swatch(0xFFFF9500));
+      await _scrollTo(tester, swatch(0xFFFF8D28));
+      await tester.tap(swatch(0xFFFF8D28));
       await tester.pumpAndSettle();
 
-      await openMenu(tester, 0xFFFF9500);
+      await openMenu(tester, 0xFFFF8D28);
       await tester.tap(find.text(AppLocalizations.current.delete));
       await tester.pumpAndSettle();
       await tester.tap(find.text(AppLocalizations.current.delete));
       await tester.pumpAndSettle();
 
       final theme = c.read(themeSettingProvider);
-      expect(theme.primaryColors, isNot(contains(0xFFFF9500)));
+      expect(theme.primaryColors, isNot(contains(0xFFFF8D28)));
       expect(theme.primaryColor, defaultPrimaryColor);
-      expect(swatch(0xFFFF9500), findsNothing);
+      expect(swatch(0xFFFF8D28), findsNothing);
     });
 
     testWidgets('opens a color menu from the keyboard', (tester) async {
       await _pump(tester, const Size(900, 1800));
-      await _scrollTo(tester, swatch(0xFFFF9500));
+      await _scrollTo(tester, swatch(0xFFFF8D28));
       final content = find.descendant(
         of: find.descendant(
-          of: swatch(0xFFFF9500),
+          of: swatch(0xFFFF8D28),
           matching: find.byType(InkWell),
         ),
         matching: find.byType(Stack),
@@ -190,21 +190,21 @@ void main() {
       tester,
     ) async {
       final c = await _pump(tester, const Size(900, 1800));
-      await _scrollTo(tester, swatch(0xFFFF9500));
-      await tester.tap(swatch(0xFFFF9500));
+      await _scrollTo(tester, swatch(0xFFFF8D28));
+      await tester.tap(swatch(0xFFFF8D28));
       await tester.pumpAndSettle();
       final index = c
           .read(themeSettingProvider)
           .primaryColors
-          .indexOf(0xFFFF9500);
+          .indexOf(0xFFFF8D28);
 
-      await openMenu(tester, 0xFFFF9500);
+      await openMenu(tester, 0xFFFF8D28);
       await tester.tap(find.text(AppLocalizations.current.edit));
       await tester.pumpAndSettle();
       await enterHex(tester, '123456');
 
       final theme = c.read(themeSettingProvider);
-      expect(theme.primaryColors, isNot(contains(0xFFFF9500)));
+      expect(theme.primaryColors, isNot(contains(0xFFFF8D28)));
       expect(theme.primaryColors[index], 0xFF123456);
       expect(theme.primaryColor, 0xFF123456);
     });
