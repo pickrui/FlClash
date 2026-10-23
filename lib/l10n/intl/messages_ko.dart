@@ -872,6 +872,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("실패"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("대기 중"),
     "delayTestRunning": MessageLookupByLibrary.simpleMessage("테스트 중"),
+    "delayTestTimeout": MessageLookupByLibrary.simpleMessage("지연 테스트 시간 제한"),
     "delete": MessageLookupByLibrary.simpleMessage("삭제"),
     "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
       "WebDAV에서 이 백업을 삭제하시겠습니까?",
@@ -1936,6 +1937,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH 서버에 HTTP/3을 우선 시도합니다",
     ),
+    "preferred": MessageLookupByLibrary.simpleMessage("우선"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("사전 요건"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("키를 누르세요."),
     "preview": MessageLookupByLibrary.simpleMessage("미리보기"),
@@ -2416,6 +2418,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "secondsCount": m105,
     "secretKey": MessageLookupByLibrary.simpleMessage("키"),
     "sectionsInEffect": m106,
+    "select": MessageLookupByLibrary.simpleMessage("선택"),
     "selectAll": MessageLookupByLibrary.simpleMessage("모두 선택"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("백업 선택"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("업그레이드 대상 선택"),

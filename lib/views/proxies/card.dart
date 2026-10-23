@@ -8,6 +8,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
@@ -53,6 +54,40 @@ class ProxyCard extends StatelessWidget {
   });
 
   Measure get measure => globalState.measure;
+
+  void _handleSelect(WidgetRef ref) {
+    selectGroupProxy(
+      ref,
+      groupName: groupName,
+      groupType: groupType,
+      proxyName: proxy.name,
+    );
+  }
+
+  List<CommonPopupMenuItem> _menuItems(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool inUse,
+    required bool pinned,
+  }) {
+    final appLocalizations = context.appLocalizations;
+    return [
+      if (groupType == GroupType.Selector)
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.checkCircle,
+          label: appLocalizations.select,
+          checked: inUse,
+          onPressed: () => _handleSelect(ref),
+        )
+      else if (groupType.isComputedSelected)
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.pin,
+          label: appLocalizations.preferred,
+          checked: pinned,
+          onPressed: () => _handleSelect(ref),
+        ),
+    ];
+  }
 
   Widget _buildProxyNameText(BuildContext context) {
     final maxLines = type == ProxyCardType.compact ? 1 : 2;
@@ -122,40 +157,36 @@ class ProxyCard extends StatelessWidget {
               getProxyNameProvider(groupName)
                   .select((name) => name == proxy.name),
             );
-        return CommonCard(
-          radius: AppCorner.lg,
-          enterActionsOnRight: true,
-          key: key,
-          onPressed: () {
-            selectGroupProxy(
-              ref,
-              groupName: groupName,
-              groupType: groupType,
-              proxyName: proxy.name,
-            );
-          },
-          isSelected: inUse,
-          child: Container(
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 4,
-                  children: [
-                    Expanded(child: proxyNameText),
-                    if (pinned)
-                      SelectionBadge.preferred(inUse: inUse)
-                    else if (inUse)
-                      const SelectionBadge(),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                details,
-              ],
+        return ContextMenuRegion(
+          menuItems: _menuItems(context, ref, inUse: inUse, pinned: pinned),
+          child: CommonCard(
+            radius: AppCorner.lg,
+            enterActionsOnRight: true,
+            key: key,
+            onPressed: () => _handleSelect(ref),
+            isSelected: inUse,
+            child: Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 4,
+                    children: [
+                      Expanded(child: proxyNameText),
+                      if (pinned)
+                        SelectionBadge.preferred(inUse: inUse)
+                      else if (inUse)
+                        const SelectionBadge(),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  details,
+                ],
+              ),
             ),
           ),
         );

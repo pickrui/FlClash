@@ -66,10 +66,14 @@ double systemTextScaleOf(BuildContext context) {
   return WidgetsBinding.instance.platformDispatcher.textScaleFactor;
 }
 
-/// How long the Core may spend on one delay test. It spends this twice in the
-/// worst case, once queueing for a slot and once on the probe itself, so the
-/// guard has to outlast twice this value.
-const delayTestTimeoutDuration = Duration(seconds: 8);
+/// How long, in milliseconds, the Core may spend on one delay test. It spends
+/// this twice in the worst case, once queueing for a slot and once on the
+/// probe itself, so the guard has to outlast twice the longest option.
+const delayTestTimeoutOptions = [500, 1000, 2000, 5000, 8000];
+const defaultDelayTestTimeout = 8000;
+const delayTestTimeoutDuration = Duration(
+  milliseconds: defaultDelayTestTimeout,
+);
 const delayTestGuardDuration = Duration(seconds: 30);
 
 /// Probes one test run sends at once.

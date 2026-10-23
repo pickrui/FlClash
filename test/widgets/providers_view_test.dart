@@ -22,6 +22,7 @@ import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/ui/chip.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/views/proxies/providers.dart';
 import 'package:fl_clash/ui/sheet.dart';
@@ -344,6 +345,75 @@ void main() {
       },
     );
   }
+
+  testWidgets('a provider with a traffic quota shows its usage below the name '
+      'and moves the count beside it', (tester) async {
+    await mount(
+      tester,
+      providers: [
+        _providers.first.copyWith(
+          name: 'metered',
+          count: 128,
+          subscriptionInfo: const SubscriptionInfo(
+            upload: 1024,
+            download: 2048,
+            total: 1073741824,
+          ),
+        ),
+        _providers.last.copyWith(
+          name: 'unmetered',
+          subscriptionInfo: const SubscriptionInfo(),
+        ),
+      ],
+    );
+    Finder rowOf(String name) => find.ancestor(
+      of: find.text(name),
+      matching: find.byType(DecorationListItem),
+    );
+    final metered = rowOf('metered');
+    final usage = find.descendant(
+      of: metered,
+      matching: find.text('3KB / 1GB'),
+    );
+    final meter = find.descendant(
+      of: metered,
+      matching: find.byType(LinearProgressIndicator),
+    );
+    expect(
+      find.descendant(
+        of: metered,
+        matching: find.widgetWithText(TonalChip, '128'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text(AppLocalizations.current.proxiesCount(128)), findsNothing);
+    expect(
+      tester.getTopLeft(usage).dy,
+      greaterThanOrEqualTo(tester.getBottomLeft(find.text('metered')).dy),
+    );
+    expect(
+      tester.getTopLeft(meter).dy,
+      greaterThanOrEqualTo(tester.getBottomLeft(usage).dy),
+    );
+    expect(
+      tester.widget<LinearProgressIndicator>(meter).value,
+      3072 / 1073741824,
+    );
+    final unmetered = rowOf('unmetered');
+    expect(
+      find.descendant(
+        of: unmetered,
+        matching: find.text(AppLocalizations.current.proxiesCount(1)),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: unmetered, matching: find.byType(TonalChip)),
+      findsNothing,
+    );
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('managed providers do not offer node lookup', (tester) async {
     await mount(tester, managed: true);

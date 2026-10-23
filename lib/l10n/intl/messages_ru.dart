@@ -1068,6 +1068,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("Ошибка проверки"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("В очереди"),
     "delayTestRunning": MessageLookupByLibrary.simpleMessage("Проверка"),
+    "delayTestTimeout": MessageLookupByLibrary.simpleMessage(
+      "Тайм-аут теста задержки",
+    ),
     "delete": MessageLookupByLibrary.simpleMessage("Удалить"),
     "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
       "Удалить эту резервную копию из WebDAV?",
@@ -2427,6 +2430,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "«Предпочитать HTTP/3» сначала пробует HTTP/3 для серверов DoH",
     ),
+    "preferred": MessageLookupByLibrary.simpleMessage("Предпочтительный"),
     "prerequisites": MessageLookupByLibrary.simpleMessage(
       "Предварительные условия",
     ),
@@ -3043,6 +3047,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "secondsCount": m105,
     "secretKey": MessageLookupByLibrary.simpleMessage("Ключ"),
     "sectionsInEffect": m106,
+    "select": MessageLookupByLibrary.simpleMessage("Выбрать"),
     "selectAll": MessageLookupByLibrary.simpleMessage("Выбрать все"),
     "selectBackup": MessageLookupByLibrary.simpleMessage(
       "Выберите резервную копию",

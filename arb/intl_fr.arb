@@ -161,6 +161,7 @@
   "paste": "Coller",
   "userAgent": "User-Agent",
   "testUrl": "URL de test",
+  "delayTestTimeout": "Délai d’expiration du test de latence",
   "sync": "Synchroniser",
   "exclude": "Masquer des tâches récentes",
   "excludeDesc": "Masquer l’application des tâches récentes lorsqu’elle est en arrière-plan",
@@ -1634,5 +1635,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "select": "Sélectionner",
+  "preferred": "Préféré"
 }

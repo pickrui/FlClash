@@ -161,6 +161,7 @@
   "paste": "Paste",
   "userAgent": "User-Agent",
   "testUrl": "Test URL",
+  "delayTestTimeout": "Delay test timeout",
   "sync": "Sync",
   "exclude": "Hide from recent tasks",
   "excludeDesc": "When the app is in the background, the app is hidden from the recent task",
@@ -1634,5 +1635,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "select": "Select",
+  "preferred": "Preferred"
 }

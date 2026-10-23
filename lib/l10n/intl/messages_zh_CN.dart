@@ -791,6 +791,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("测试失败"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("排队中"),
     "delayTestRunning": MessageLookupByLibrary.simpleMessage("测速中"),
+    "delayTestTimeout": MessageLookupByLibrary.simpleMessage("延迟测试超时"),
     "delete": MessageLookupByLibrary.simpleMessage("删除"),
     "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
       "确定从 WebDAV 删除这个备份吗？",
@@ -1731,6 +1732,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "优先使用 HTTP/3 时，DoH 服务器优先使用 HTTP/3",
     ),
+    "preferred": MessageLookupByLibrary.simpleMessage("首选"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前置条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("请按下按键"),
     "preview": MessageLookupByLibrary.simpleMessage("预览"),
@@ -2165,6 +2167,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "secondsCount": m105,
     "secretKey": MessageLookupByLibrary.simpleMessage("密钥"),
     "sectionsInEffect": m106,
+    "select": MessageLookupByLibrary.simpleMessage("选中"),
     "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("选择备份"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("选择升级目标套餐"),

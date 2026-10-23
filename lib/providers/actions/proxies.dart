@@ -408,6 +408,9 @@ extension ProxiesControllerExt on AppController {
     final concurrency = _ref
         .read(proxiesStyleSettingProvider)
         .delayTestConcurrency(isAndroid: system.isAndroid);
+    final timeout = Duration(
+      milliseconds: _ref.read(appSettingProvider).delayTestTimeout,
+    );
     setDelays(
       targets.map(
         (target) => Delay(url: target.url, name: target.name, value: 0),
@@ -424,6 +427,7 @@ extension ProxiesControllerExt on AppController {
         target.url,
         target.name,
         isCurrent: () => isCurrentDelayGeneration(generation),
+        timeout: timeout,
         generation: generation,
         maxInFlight: concurrency + 1,
       ),

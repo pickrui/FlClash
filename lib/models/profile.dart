@@ -169,6 +169,9 @@ abstract class SubscriptionInfo with _$SubscriptionInfo {
 }
 
 extension SubscriptionInfoExt on SubscriptionInfo {
+  double? get usage =>
+      total > 0 ? ((upload + download) / total).clamp(0.0, 1.0) : null;
+
   /// Null for no expiry, and for seconds beyond what DateTime can hold,
   /// which only a broken subscription-userinfo header sends.
   DateTime? get expireTime => expire > 0 && expire <= 8640000000000

@@ -1240,6 +1240,16 @@ class AppLocalizations {
     return Intl.message('Test URL', name: 'testUrl', desc: '', args: []);
   }
 
+  /// `Delay test timeout`
+  String get delayTestTimeout {
+    return Intl.message(
+      'Delay test timeout',
+      name: 'delayTestTimeout',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Sync`
   String get sync {
     return Intl.message('Sync', name: 'sync', desc: '', args: []);
@@ -13756,6 +13766,16 @@ class AppLocalizations {
       desc: '',
       args: [count],
     );
+  }
+
+  /// `Select`
+  String get select {
+    return Intl.message('Select', name: 'select', desc: '', args: []);
+  }
+
+  /// `Preferred`
+  String get preferred {
+    return Intl.message('Preferred', name: 'preferred', desc: '', args: []);
   }
 }
 

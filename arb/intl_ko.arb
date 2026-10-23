@@ -161,6 +161,7 @@
   "paste": "붙여넣기",
   "userAgent": "User-Agent",
   "testUrl": "테스트 URL",
+  "delayTestTimeout": "지연 테스트 시간 제한",
   "sync": "동기화",
   "exclude": "최근 작업에서 숨기기",
   "excludeDesc": "앱이 백그라운드에 있을 때 최근 앱 목록에서 숨기기",
@@ -1634,5 +1635,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "select": "선택",
+  "preferred": "우선"
 }

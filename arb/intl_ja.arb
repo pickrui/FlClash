@@ -161,6 +161,7 @@
   "paste": "貼り付け",
   "userAgent": "User-Agent",
   "testUrl": "テストURL",
+  "delayTestTimeout": "遅延テストのタイムアウト",
   "sync": "同期",
   "exclude": "最近のタスクから隠す",
   "excludeDesc": "アプリがバックグラウンド時に最近のタスクから非表示",
@@ -1634,5 +1635,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "select": "選択",
+  "preferred": "優先"
 }

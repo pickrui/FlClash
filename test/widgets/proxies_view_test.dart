@@ -22,6 +22,7 @@ import 'package:fl_clash/views/proxies/card.dart';
 import 'package:fl_clash/views/proxies/common.dart';
 import 'package:fl_clash/ui/loading.dart';
 import 'package:fl_clash/ui/card.dart';
+import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/popup.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:flutter/services.dart';
@@ -398,6 +399,71 @@ void main() {
       }
     },
   );
+
+  testWidgets('a card menu selects in a selector and pins in a computed '
+      'group, and a group with nothing to pick has no menu', (tester) async {
+    for (final (groupType, label) in [
+      (GroupType.Selector, 'Select'),
+      (GroupType.URLTest, 'Preferred'),
+      (GroupType.LoadBalance, null),
+    ]) {
+      final action = _DelayAction();
+      final container = ProviderContainer(
+        overrides: [
+          proxiesActionProvider.overrideWith(() => action),
+          realSelectedProxyStateProvider('Node')
+              .overrideWith((_) => const SelectedProxyState(proxyName: 'Node')),
+          getSelectedProxyNameProvider('Group').overrideWith((_) => 'Node'),
+          getProxyNameProvider('Group').overrideWith((_) => 'Node'),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: _TestApp(
+            child: SizedBox(
+              width: 240,
+              height: 100,
+              child: ProxyCard(
+                groupName: 'Group',
+                proxy: const Proxy(name: 'Node', type: 'Shadowsocks'),
+                groupType: groupType,
+                type: ProxyCardType.compact,
+                testUrl: null,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      if (label == null) {
+        expect(
+          tester.widget<ContextMenuRegion>(find.byType(ContextMenuRegion)),
+          isA<ContextMenuRegion>().having(
+            (region) => region.menuItems,
+            'menuItems',
+            isEmpty,
+          ),
+        );
+      } else {
+        await tester.longPress(find.byType(ProxyCard));
+        await tester.pumpAndSettle();
+        final menu = find.byType(CommonPopupMenu);
+        expect(
+          find.descendant(of: menu, matching: find.byGlyph(AppGlyphs.check)),
+          findsOneWidget,
+        );
+        await tester.tap(find.descendant(of: menu, matching: find.text(label)));
+        await tester.pumpAndSettle();
+        expect(action.selections, [
+          if (groupType == GroupType.Selector) 'Node' else '',
+        ]);
+      }
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+    }
+  });
 
   for (final type in ProxyCardType.values) {
     testWidgets('arrow right enters measured latency and enter retests without '

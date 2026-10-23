@@ -472,19 +472,28 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
     final l = context.appLocalizations;
     final isUpdating = ref.watch(isUpdatingProvider(provider.updatingKey));
     final updateAt = provider.updateAt;
+    final subscriptionInfo = provider.subscriptionInfo;
+    final usage = subscriptionInfo?.usage;
     return ContextMenuRegion(
       menuItems: isUpdating ? null : _menuItems(l),
       child: DecorationListItem(
         onPressed: isUpdating || !_previewable ? null : _preview,
         title: ChipTitle(
           title: provider.name,
-          expire: provider.subscriptionInfo?.expireTime,
+          chip: usage == null ? null : provider.count.compact,
+          expire: subscriptionInfo?.expireTime,
         ),
-        subtitle: Text(
-          provider.type == 'Rule'
-              ? l.rulesCount(provider.count)
-              : l.proxiesCount(provider.count),
-        ),
+        subtitle: switch ((subscriptionInfo, usage)) {
+          (final info?, final usage?) => _TrafficMeter(
+            info: info,
+            usage: usage,
+          ),
+          _ => Text(
+            provider.type == 'Rule'
+                ? l.rulesCount(provider.count)
+                : l.proxiesCount(provider.count),
+          ),
+        },
         trailing: AnimatedSwitcher(
           duration: context.motionDuration(commonDuration),
           layoutBuilder: (current, previous) => Stack(
@@ -503,6 +512,34 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
                 ),
         ),
       ),
+    );
+  }
+}
+
+class _TrafficMeter extends StatelessWidget {
+  final SubscriptionInfo info;
+  final double usage;
+
+  const _TrafficMeter({required this.info, required this.usage});
+
+  @override
+  Widget build(BuildContext context) {
+    final used = info.upload + info.download;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 6,
+      children: [
+        Text(
+          '${used.traffic.show} / ${info.total.traffic.show}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        LinearProgressIndicator(
+          minHeight: 4,
+          value: usage,
+          backgroundColor: context.colorScheme.primary.opacity15,
+        ),
+      ],
     );
   }
 }

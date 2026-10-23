@@ -98,6 +98,23 @@ class TestUrlItem extends ConsumerWidget {
   }
 }
 
+class DelayTestTimeoutItem extends ConsumerWidget {
+  const DelayTestTimeoutItem({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    return ConfigOptionsItem<int>(
+      title: (l) => l.delayTestTimeout,
+      options: delayTestTimeoutOptions,
+      textBuilder: (value) => '$value ms',
+      selector: appSettingProvider.select((state) => state.delayTestTimeout),
+      onChanged: (ref, value) => ref
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(delayTestTimeout: value)),
+    );
+  }
+}
+
 class PortItem extends ConsumerWidget {
   const PortItem({super.key});
 
@@ -523,6 +540,7 @@ class GeneralView extends ConsumerWidget {
   List<Widget> _connectionItems() {
     return [
       const TestUrlItem(),
+      const DelayTestTimeoutItem(),
       const UaItem(),
       _clashToggle(
         title: (l) => l.unifiedDelay,

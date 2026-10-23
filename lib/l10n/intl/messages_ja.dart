@@ -897,6 +897,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("測定失敗"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("待機中"),
     "delayTestRunning": MessageLookupByLibrary.simpleMessage("測定中"),
+    "delayTestTimeout": MessageLookupByLibrary.simpleMessage("遅延テストのタイムアウト"),
     "delete": MessageLookupByLibrary.simpleMessage("削除"),
     "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
       "このバックアップを WebDAV から削除しますか？",
@@ -1969,6 +1970,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "HTTP/3 を優先すると、DoH サーバーで HTTP/3 を優先して使用します",
     ),
+    "preferred": MessageLookupByLibrary.simpleMessage("優先"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーボードを押してください"),
     "preview": MessageLookupByLibrary.simpleMessage("プレビュー"),
@@ -2465,6 +2467,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "secondsCount": m105,
     "secretKey": MessageLookupByLibrary.simpleMessage("キー"),
     "sectionsInEffect": m106,
+    "select": MessageLookupByLibrary.simpleMessage("選択"),
     "selectAll": MessageLookupByLibrary.simpleMessage("すべて選択"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("バックアップを選択"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage("アップグレード対象を選択"),

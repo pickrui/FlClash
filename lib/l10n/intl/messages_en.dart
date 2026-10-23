@@ -1046,6 +1046,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "delayTestFailed": MessageLookupByLibrary.simpleMessage("Failed"),
     "delayTestQueued": MessageLookupByLibrary.simpleMessage("Queued"),
     "delayTestRunning": MessageLookupByLibrary.simpleMessage("Testing"),
+    "delayTestTimeout": MessageLookupByLibrary.simpleMessage(
+      "Delay test timeout",
+    ),
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
     "deleteBackupTip": MessageLookupByLibrary.simpleMessage(
       "Delete this backup from WebDAV?",
@@ -2330,6 +2333,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Prefer HTTP/3 tries HTTP/3 first for DoH servers",
     ),
+    "preferred": MessageLookupByLibrary.simpleMessage("Preferred"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("Prerequisites"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage(
       "Please press the keyboard.",
@@ -2908,6 +2912,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "secondsCount": m105,
     "secretKey": MessageLookupByLibrary.simpleMessage("Key"),
     "sectionsInEffect": m106,
+    "select": MessageLookupByLibrary.simpleMessage("Select"),
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectBackup": MessageLookupByLibrary.simpleMessage("Select a backup"),
     "selectUpgradeTarget": MessageLookupByLibrary.simpleMessage(
