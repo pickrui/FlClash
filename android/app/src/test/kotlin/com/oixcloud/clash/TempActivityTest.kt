@@ -7,12 +7,24 @@ package com.oixcloud.clash
 
 import android.app.Activity
 import android.app.Application
+import android.content.ComponentName
 import android.content.Intent
+import android.os.Looper
 import android.service.quicksettings.Tile
+import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.service.ICallbackInterface
+import com.oixcloud.clash.service.IEventInterface
+import com.oixcloud.clash.service.IRemoteInterface
+import com.oixcloud.clash.service.IResultInterface
+import com.oixcloud.clash.service.RemoteService
+import com.oixcloud.clash.service.models.NotificationParams
+import com.oixcloud.clash.service.models.VpnOptions
+import java.util.concurrent.TimeUnit
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
@@ -20,6 +32,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowToast
 import org.robolectric.shadows.ShadowVpnService
 
 @RunWith(RobolectricTestRunner::class)
@@ -64,5 +77,60 @@ class TempActivityTest {
             State.runLock.unlock()
             State.runStateFlow.value = RunState.STOP
         }
+    }
+
+    @Test
+    fun tileReportsAnActionThatTimedOut() {
+        val app = RuntimeEnvironment.getApplication()
+        GlobalState.init(app)
+        val remote = StoppingRemote()
+        shadowOf(app).setComponentNameAndServiceForBindService(
+            ComponentName(app, RemoteService::class.java), remote,
+        )
+        val tile = Robolectric.buildService(TileService::class.java).create().get()
+        try {
+            tile.onClick()
+            idleMainLooperUntil { remote.cleanupRequested }
+            // Without Dart, the stop ends with a listener cleanup that nothing answers here.
+            shadowOf(Looper.getMainLooper()).idleFor(5, TimeUnit.SECONDS)
+            shadowOf(Looper.getMainLooper()).idle()
+
+            assertEquals("Timed out waiting for 5000 ms", ShadowToast.getTextOfLatestToast())
+        } finally {
+            Service.unbind()
+            shadowOf(Looper.getMainLooper()).idle()
+            State.runTime = 0L
+            State.runStateFlow.value = RunState.STOP
+        }
+    }
+
+    private fun idleMainLooperUntil(condition: () -> Boolean) {
+        repeat(1_000) {
+            if (condition()) return
+            shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(10)
+        }
+        fail("the tile action did not reach the service")
+    }
+
+    private class StoppingRemote : IRemoteInterface.Stub() {
+        @Volatile
+        var cleanupRequested = false
+
+        override fun getRunState() = """{"runTime":1}"""
+        override fun stopService(result: IResultInterface) = result.onResult(0L)
+        override fun invokeMethod(data: String, callback: ICallbackInterface) {
+            cleanupRequested = true
+        }
+
+        override fun quickSetup(init: String, setup: String, callback: ICallbackInterface) {}
+        override fun updateNotificationParams(params: NotificationParams?) {}
+        override fun startService(options: VpnOptions, runTime: Long, result: IResultInterface) {}
+        override fun setEventListener(event: IEventInterface?) {}
+        override fun getRunTime() = 0L
+        override fun updateExcludeSSIDs(ssids: Array<out String>?, networks: Array<out String>?) {}
+        override fun invokeMethodChunk(
+            requestId: String, data: ByteArray, isLast: Boolean, callback: ICallbackInterface?,
+        ) {}
     }
 }

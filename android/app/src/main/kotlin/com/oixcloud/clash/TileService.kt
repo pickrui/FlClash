@@ -17,6 +17,7 @@ import com.oixcloud.clash.common.toPendingIntent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
@@ -67,6 +68,8 @@ class TileService : TileService() {
                 } else {
                     State.handleQuickAction(QuickAction.TOGGLE)
                 }
+            } catch (error: TimeoutCancellationException) {
+                GlobalState.application.showToast(error.message ?: "VPN operation timed out")
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
