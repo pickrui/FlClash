@@ -130,17 +130,19 @@ void main() {
     expect(await currentFile.readAsString(), 'current');
   });
 
-  test('rejects migration while legacy data is in use', () async {
-    final root = await Directory.systemTemp.createTemp(
-      'flclash_identity_locked_',
-    );
-    addTearDown(() => root.delete(recursive: true));
-    final legacy = Directory(p.join(root.path, 'legacy'));
-    final current = Directory(p.join(root.path, 'current'));
-    final lockFile = File(p.join(legacy.path, 'FlClash.lock'));
-    await lockFile.create(recursive: true);
-    final helper = File(p.join(root.path, 'lock_helper.dart'));
-    await helper.writeAsString('''
+  test(
+    'a running upstream app keeps its data and does not block start',
+    () async {
+      final root = await Directory.systemTemp.createTemp(
+        'flclash_identity_locked_',
+      );
+      addTearDown(() => root.delete(recursive: true));
+      final legacy = Directory(p.join(root.path, 'legacy'));
+      final current = Directory(p.join(root.path, 'current'));
+      final lockFile = File(p.join(legacy.path, 'FlClash.lock'));
+      await lockFile.create(recursive: true);
+      final helper = File(p.join(root.path, 'lock_helper.dart'));
+      await helper.writeAsString('''
 import 'dart:io';
 
 Future<void> main(List<String> arguments) async {
@@ -152,34 +154,43 @@ Future<void> main(List<String> arguments) async {
   await lock.close();
 }
 ''');
-    final process = await Process.start('dart', [helper.path, lockFile.path]);
-    try {
-      await process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .first
-          .timeout(const Duration(seconds: 5));
-      await expectLater(
-        migrateLegacyApplicationSupportDirectory(
-          legacyPath: legacy.path,
-          currentPath: current.path,
-        ),
-        throwsA(isA<FileSystemException>()),
-      );
-    } finally {
+      final process = await Process.start('dart', [helper.path, lockFile.path]);
       try {
-        process.stdin.writeln();
-        await process.stdin.close();
-      } catch (_) {}
-      await process.exitCode.timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          process.kill();
-          return -1;
-        },
-      );
-    }
-  });
+        await process.stdout
+            .transform(utf8.decoder)
+            .transform(const LineSplitter())
+            .first
+            .timeout(const Duration(seconds: 5));
+        await expectLater(
+          migrateLegacyApplicationSupportDirectory(
+            legacyPath: legacy.path,
+            currentPath: current.path,
+          ),
+          throwsA(isA<FileSystemException>()),
+        );
+        expect(
+          await migrateLegacyApplicationSupport(
+            legacyPath: legacy.path,
+            currentPath: current.path,
+          ),
+          isNull,
+        );
+        expect(current.existsSync(), isFalse);
+      } finally {
+        try {
+          process.stdin.writeln();
+          await process.stdin.close();
+        } catch (_) {}
+        await process.exitCode.timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            process.kill();
+            return -1;
+          },
+        );
+      }
+    },
+  );
 
   test('keeps a caller-held legacy lock after migration', () async {
     final root = await Directory.systemTemp.createTemp(

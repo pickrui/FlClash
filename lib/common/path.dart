@@ -258,6 +258,8 @@ String? legacyApplicationSupportPathFor(
 }
 
 /// Upstream FlClash holds this lock while running; only a migration takes it.
+/// A running upstream app is left alone and this start goes on without its
+/// data, as starting never waits for another app.
 Future<RandomAccessFile?> migrateLegacyApplicationSupport({
   required String legacyPath,
   required String currentPath,
@@ -268,9 +270,7 @@ Future<RandomAccessFile?> migrateLegacyApplicationSupport({
     return null;
   }
   final legacyLock = await _tryLockLegacyApplicationSupport(legacyDirectory);
-  if (legacyLock == null) {
-    throw FileSystemException('Legacy application data is in use', legacyPath);
-  }
+  if (legacyLock == null) return null;
   try {
     if (await migrateLegacyApplicationSupportDirectory(
       legacyPath: legacyPath,
