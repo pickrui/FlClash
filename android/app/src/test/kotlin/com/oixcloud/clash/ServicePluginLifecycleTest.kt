@@ -6,13 +6,23 @@
 package com.oixcloud.clash
 
 import android.app.Application
+import android.content.ComponentName
 import android.os.Looper
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.plugins.ServicePlugin
+import com.oixcloud.clash.service.ICallbackInterface
+import com.oixcloud.clash.service.IEventInterface
+import com.oixcloud.clash.service.IRemoteInterface
+import com.oixcloud.clash.service.IResultInterface
+import com.oixcloud.clash.service.RemoteService
+import com.oixcloud.clash.service.models.NotificationParams
+import com.oixcloud.clash.service.models.VpnOptions
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.BinaryMessenger
 import java.nio.ByteBuffer
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
@@ -112,5 +122,60 @@ class ServicePluginLifecycleTest {
         } finally {
             plugin.onDetachedFromEngine(freshBinding)
         }
+    }
+
+    @Test
+    fun theNextEventReleasesTheChunksOfAnAbandonedOne() {
+        val app = RuntimeEnvironment.getApplication()
+        GlobalState.init(app)
+        val remote = EventRemote()
+        shadowOf(app).setComponentNameAndServiceForBindService(
+            ComponentName(app, RemoteService::class.java), remote,
+        )
+        val delivered = mutableListOf<String>()
+        Service.bind()
+        try {
+            val registered = GlobalState.async {
+                Service.setEventListener(Any(), { true }) { delivered.add(it.decodeToString()) }
+            }
+            while (!registered.isCompleted) {
+                shadowOf(Looper.getMainLooper()).idle()
+                Thread.sleep(10)
+            }
+            runBlocking { registered.await() }.getOrThrow()
+            val listener = checkNotNull(remote.listener)
+
+            listener.onEvent("abandoned", "stale".toByteArray(), false, null)
+            listener.onEvent("next", "ev".toByteArray(), false, null)
+            listener.onEvent("next", "ent".toByteArray(), true, null)
+            // Reusing the abandoned id shows whether its first chunk was kept.
+            listener.onEvent("abandoned", "fresh".toByteArray(), true, null)
+
+            assertEquals(listOf("event", "fresh"), delivered)
+        } finally {
+            Service.unbind()
+            shadowOf(Looper.getMainLooper()).idle()
+        }
+    }
+
+    private class EventRemote : IRemoteInterface.Stub() {
+        @Volatile
+        var listener: IEventInterface? = null
+
+        override fun setEventListener(event: IEventInterface?) {
+            listener = event
+        }
+
+        override fun invokeMethod(data: String, callback: ICallbackInterface) {}
+        override fun quickSetup(init: String, setup: String, callback: ICallbackInterface) {}
+        override fun updateNotificationParams(params: NotificationParams?) {}
+        override fun startService(options: VpnOptions, runTime: Long, result: IResultInterface) {}
+        override fun stopService(result: IResultInterface) {}
+        override fun getRunTime() = 0L
+        override fun updateExcludeSSIDs(ssids: Array<out String>?, networks: Array<out String>?) {}
+        override fun invokeMethodChunk(
+            requestId: String, data: ByteArray, isLast: Boolean, callback: ICallbackInterface?,
+        ) {}
+        override fun getRunState() = "{}"
     }
 }

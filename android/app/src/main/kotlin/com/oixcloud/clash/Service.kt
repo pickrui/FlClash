@@ -304,6 +304,8 @@ object Service {
                         id: String, data: ByteArray?, isSuccess: Boolean, ack: IAckInterface?
                     ) {
                         if (results[id] == null) {
+                            // RemoteService forwards one event at a time; a new id ends any other.
+                            results.clear()
                             results[id] = mutableListOf()
                         }
                         results[id]?.add(data ?: byteArrayOf())
