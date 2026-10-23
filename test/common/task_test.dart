@@ -6,6 +6,7 @@
 
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:fl_clash/common/backup.dart';
 import 'package:archive/archive.dart';
@@ -1017,6 +1018,67 @@ void main() {
         expect(root.listSync().map((file) => file.path), [path]);
       });
     }
+
+    test('stops inflating an entry once it passes the size limit', () async {
+      final root = await Directory.systemTemp.createTemp('zip_inflate_limit_');
+      addTearDown(() => root.delete(recursive: true));
+      // The sync flush ends the zeros on a byte boundary, so 0x07 starts an
+      // invalid block that only an inflater running past the limit reaches.
+      final deflater = RawZLibFilter.deflateFilter(raw: true)
+        ..process(Uint8List(4 << 20), 0, 4 << 20);
+      final payload = <int>[];
+      for (var out = deflater.processed(); out != null;) {
+        payload.addAll(out);
+        out = deflater.processed();
+      }
+      payload.add(0x07);
+      final bytes = ZipEncoder().encode(
+        Archive()
+          ..add(ArchiveFile.noCompress('file.txt', payload.length, payload)),
+      );
+      var central = -1;
+      for (var index = 0; index < bytes.length - 4; index++) {
+        if (bytes[index] == 0x50 &&
+            bytes[index + 1] == 0x4b &&
+            bytes[index + 2] == 0x01 &&
+            bytes[index + 3] == 0x02) {
+          central = index;
+          break;
+        }
+      }
+      expect(central, greaterThanOrEqualTo(0));
+      bytes[8] = bytes[central + 10] = ZipFile.zipCompressionDeflate;
+      bytes.setAll(central + 24, [1, 0, 0, 0]);
+      final path = '${root.path}/backup.zip';
+      await File(path).writeAsBytes(bytes);
+      final exceedsLimit = throwsA(
+        isA<FormatException>().having(
+          (error) => error.message,
+          'message',
+          contains('write exceeds limit'),
+        ),
+      );
+
+      await expectLater(
+        validateBackupArchiveDirectory(
+          path,
+          '${root.path}/restore',
+          maxFileBytes: 8,
+          verifyPayload: true,
+        ),
+        exceedsLimit,
+      );
+      final input = InputFileStream(path);
+      addTearDown(input.close);
+      await expectLater(
+        extractBackupArchive(
+          ZipDecoder().decodeStream(input),
+          '${root.path}/restore',
+          maxFileBytes: 8,
+        ),
+        exceedsLimit,
+      );
+    });
 
     test(
       'rejects symbolic links before ZipDecoder reads their content',

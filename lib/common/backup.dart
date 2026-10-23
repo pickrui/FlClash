@@ -467,7 +467,12 @@ Future<void> extractBackupArchive(
         budget,
       );
       try {
-        file.writeContent(outputStream);
+        final content = file.rawContent;
+        if (content is ZipFile) {
+          _writeZipEntry(content, outputStream);
+        } else {
+          file.writeContent(outputStream);
+        }
         if (outputStream.written != file.size) {
           throw const FormatException('archive entry size mismatch');
         }
@@ -538,7 +543,7 @@ Future<void> validateBackupArchiveDirectory(
       for (final header in directory.fileHeaders) {
         budget.reserve(header.uncompressedSize);
         final output = _LimitedOutputStream.discard(maxFileBytes, budget);
-        header.file!.decompress(output);
+        _writeZipEntry(header.file!, output);
         if (output.written != header.uncompressedSize ||
             output.crc32 != header.crc32) {
           throw const FormatException(
@@ -549,6 +554,40 @@ Future<void> validateBackupArchiveDirectory(
     }
   } finally {
     await input.close();
+  }
+}
+
+const _inflateChunkBytes = 64 * 1024;
+
+// ZipFile.decompress holds the whole inflated entry until it ends, so the
+// output limits would only apply after a small entry had expanded in memory.
+void _writeZipEntry(ZipFile file, OutputStream output) {
+  if (file.flags & 0x1 != 0) {
+    throw const FormatException('encrypted archives are not allowed');
+  }
+  final method = file.header?.compressionMethod;
+  if (method != ZipFile.zipCompressionStore &&
+      method != ZipFile.zipCompressionDeflate) {
+    throw const FormatException('unsupported archive compression');
+  }
+  final input = file.getStream(decompress: false);
+  final start = input.position;
+  try {
+    if (method == ZipFile.zipCompressionStore) {
+      output.writeStream(input);
+      return;
+    }
+    final inflater = ZLibCodec(raw: true).decoder
+        .startChunkedConversion(_OutputSink(output));
+    while (!input.isEOS) {
+      final size = input.length > _inflateChunkBytes
+          ? _inflateChunkBytes
+          : input.length;
+      inflater.add(input.readBytes(size).toUint8List());
+    }
+    inflater.close();
+  } finally {
+    input.setPosition(start);
   }
 }
 
@@ -779,6 +818,18 @@ class _LimitedOutputStream extends OutputStream {
     if (delegate == null) throw UnsupportedError('Discarded archive contents');
     return delegate.subset(start, end);
   }
+}
+
+final class _OutputSink implements Sink<List<int>> {
+  final OutputStream _output;
+
+  const _OutputSink(this._output);
+
+  @override
+  void add(List<int> data) => _output.writeBytes(data);
+
+  @override
+  void close() {}
 }
 
 Future<MigrationData> _restoreTask(RestoreArchiveRequest paths) async {
