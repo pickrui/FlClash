@@ -13,6 +13,8 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/backup.dart';
+import 'package:fl_clash/common/boot_guard.dart';
+import 'package:fl_clash/common/boot_record.dart';
 import 'package:fl_clash/common/restore_journal.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/common/javascript.dart';

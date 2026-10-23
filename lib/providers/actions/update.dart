@@ -125,6 +125,28 @@ class UpdateAction extends _$UpdateAction {
       _controller.dismissAppUpdateNotice(info);
 }
 
+/// Start, the tile and profile changes wait for init, even after a failure.
+@visibleForTesting
+Future<void> runBootAttempt(
+  BootGuard recovery,
+  BootDecision attempt, {
+  required Future<bool> Function() connect,
+  required Future<void> Function() initStatus,
+  required void Function() onInitialized,
+}) async {
+  try {
+    if (!await connect() || !recovery.isCurrent(attempt)) return;
+    await initStatus();
+    if (!recovery.isCurrent(attempt)) return;
+    onInitialized();
+    await recovery.markRunning(attempt);
+  } catch (error) {
+    await recovery.markFailed(attempt);
+    commonPrint.log('core startup failed: $error', logLevel: LogLevel.error);
+    if (recovery.isCurrent(attempt)) onInitialized();
+  }
+}
+
 extension InitControllerExt on AppController {
   Future<void> _init() async {
     FlutterError.onError = (details) {
@@ -176,31 +198,22 @@ extension InitControllerExt on AppController {
       processId: pid,
     );
     if (!startupRecovery.isCurrent(bootAttempt)) return;
-    var coreReady = false;
-    try {
+    await runBootAttempt(
+      startupRecovery,
+      bootAttempt,
       // A Start tapped during launch must queue behind this Core, not stop it
       // as disconnected while it is still starting.
-      final connected = await _serializeCoreLifecycle(() async {
+      connect: () => _serializeCoreLifecycle(() async {
         await _connectCore();
         if (!startupRecovery.isCurrent(bootAttempt)) return false;
         if (!coreController.isCompleted) throw _coreDisconnectedMessage;
         await _initCore();
         return true;
-      });
-      if (!connected || !startupRecovery.isCurrent(bootAttempt)) return;
-      coreReady = true;
-      await _initStatus();
-      if (!startupRecovery.isCurrent(bootAttempt)) return;
-      _ref.read(initProvider.notifier).value = true;
-      await startupRecovery.markRunning(bootAttempt);
-    } catch (error) {
-      await startupRecovery.markFailed(bootAttempt);
-      if (coreReady) rethrow;
-      commonPrint.log('core startup failed: $error', logLevel: LogLevel.error);
-      if (!startupRecovery.isCurrent(bootAttempt)) return;
-      // Later starts and profile switches wait for init, then reconnect.
-      _ref.read(initProvider.notifier).value = true;
-    }
+      }),
+      initStatus: _initStatus,
+      onInitialized: () => _ref.read(initProvider.notifier).value = true,
+    );
+    if (!startupRecovery.isCurrent(bootAttempt)) return;
     if (startupRecovery.automaticSetupPaused) {
       await window?.show();
       await globalState.showMessage(

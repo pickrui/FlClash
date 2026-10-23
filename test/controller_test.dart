@@ -9,6 +9,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/common/boot_guard.dart';
+import 'package:fl_clash/common/boot_record.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/common/preferences.dart';
 import 'package:fl_clash/common/system.dart';
@@ -298,6 +300,34 @@ void main() {
         expect(attempts, 1);
       },
     );
+  });
+
+  test('a status sync failure after the Core connected still initializes '
+      'the launch', () async {
+    final stages = <BootStage>[];
+    final recovery = BootGuard(
+      readRecord: () async => null,
+      writeRecord: (record) async => stages.add(record.stage),
+      readExitInfo: () async => null,
+      onError: (_) {},
+    );
+    final attempt = await recovery.begin(
+      profileId: 1,
+      version: '1',
+      processId: 1,
+    );
+    var initialized = false;
+
+    await runBootAttempt(
+      recovery,
+      attempt,
+      connect: () async => true,
+      initStatus: () async => throw StateError('service_error'),
+      onInitialized: () => initialized = true,
+    );
+
+    expect(initialized, isTrue);
+    expect(stages.last, BootStage.failed);
   });
 
   test('interactive core readiness recovers only when needed', () async {
