@@ -411,7 +411,19 @@ func collectOutboundResourcePaths(
 					return err
 				}
 			}
-		case "tailscale":
+		case "zerotier":
+			// Parsing the node already reads its planet file.
+			if err := normalizeValidationMappingPath(
+				proxy,
+				"planet",
+				sourceHome,
+				paths,
+				true,
+			); err != nil {
+				return err
+			}
+			fallthrough
+		case "tailscale", "easytier":
 			if err := normalizeValidationMappingPath(
 				proxy,
 				"state-dir",

@@ -459,6 +459,23 @@ func TestCollectOutboundResourcePathsKeepsInlineKeyPairInline(t *testing.T) {
 	}
 }
 
+func TestCollectOutboundResourcePathsCopiesZeroTierPlanet(t *testing.T) {
+	home := t.TempDir()
+	paths := map[string]struct{}{}
+	zeroTier := map[string]any{"name": "zt", "type": "zerotier", "planet": filepath.Join(home, "zt", "planet.bin"), "state-dir": filepath.Join(home, "zerotier", "zt")}
+	easyTier := map[string]any{"name": "et", "type": "easytier", "state-dir": filepath.Join(home, "easytier", "et")}
+	if err := collectOutboundResourcePaths([]map[string]any{zeroTier, easyTier}, home, paths); err != nil {
+		t.Fatal(err)
+	}
+	planet := filepath.Join("zt", "planet.bin")
+	if _, copied := paths[planet]; !copied || len(paths) != 1 || zeroTier["planet"] != planet {
+		t.Fatalf("planet = %v, copied = %v", zeroTier["planet"], paths)
+	}
+	if zeroTier["state-dir"] != filepath.Join("zerotier", "zt") || easyTier["state-dir"] != filepath.Join("easytier", "et") {
+		t.Fatalf("state dirs = %v, %v", zeroTier["state-dir"], easyTier["state-dir"])
+	}
+}
+
 func TestParseAndValidateConfigDataRejectsInvalidFileProvider(t *testing.T) {
 	home := t.TempDir()
 	oldHome := constant.Path.HomeDir()
