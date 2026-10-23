@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/log"
 )
 
@@ -205,16 +206,21 @@ func (t *tokenInjectResolver) ResolveECH(ctx context.Context, host string) ([]by
 	return t.Resolver.ResolveECH(ctx, tokenizeHost(host))
 }
 
-func installDNSAuthResolver() {
-	if currentDNSAuth() == nil {
-		return
-	}
-	inner := resolver.ProxyServerHostResolver
-	if inner == nil {
-		return
+// The retired resolver's queries are closed through the wrapper.
+func (t *tokenInjectResolver) CloseQueries() {
+	resolver.CloseQueries(t.Resolver)
+}
+
+func init() {
+	executor.WrapProxyServerResolver = wrapDNSAuthResolver
+}
+
+func wrapDNSAuthResolver(inner resolver.Resolver) resolver.Resolver {
+	if currentDNSAuth() == nil || inner == nil {
+		return inner
 	}
 	if _, ok := inner.(*tokenInjectResolver); ok {
-		return
+		return inner
 	}
-	resolver.ProxyServerHostResolver = &tokenInjectResolver{Resolver: inner}
+	return &tokenInjectResolver{Resolver: inner}
 }

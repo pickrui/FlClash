@@ -265,7 +265,6 @@ func applyConfig(params *SetupParams) error {
 	suspendOnIdle = params.SuspendOnIdle
 	previousProxies := tunnel.ProxiesSnapshot()
 	hub.ApplyConfig(currentConfig)
-	installDNSAuthResolver()
 	patchSelectGroup(params.SelectedMap)
 	updateListeners()
 	restartGeoScheduler()

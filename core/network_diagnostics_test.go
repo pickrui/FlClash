@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/hub/executor"
 )
 
 func TestNetworkDiagnosticManagedHost(t *testing.T) {
@@ -106,6 +107,31 @@ func TestNetworkDiagnosticUsesSignedResolver(t *testing.T) {
 	encoded, _ := json.Marshal(result)
 	if strings.Contains(string(encoded), inner.queried) {
 		t.Fatal("signed query escaped the Core")
+	}
+}
+
+type closingResolverStub struct {
+	resolver.Resolver
+	closed bool
+}
+
+func (s *closingResolverStub) CloseQueries() { s.closed = true }
+
+func TestProxyServerResolverIsSignedAsInstalledAndRetiresItsQueries(t *testing.T) {
+	previous := currentDNSAuth()
+	defer setDNSAuth(previous)
+	setDNSAuth(&dnsAuthSettings{privKey: ed25519.NewKeyFromSeed(make([]byte, ed25519.SeedSize)), window: dnsAuthWindowSeconds, suffixes: []string{"managed.example"}})
+	inner := &closingResolverStub{}
+	wrapped := executor.WrapProxyServerResolver(inner)
+	if _, ok := wrapped.(*tokenInjectResolver); !ok {
+		t.Fatalf("installed resolver = %T, want the signing wrapper", wrapped)
+	}
+	if executor.WrapProxyServerResolver(wrapped) != wrapped {
+		t.Fatal("an installed wrapper was wrapped again")
+	}
+	resolver.CloseQueries(wrapped)
+	if !inner.closed {
+		t.Fatal("retiring the wrapper left the inner resolver's queries open")
 	}
 }
 
