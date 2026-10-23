@@ -140,10 +140,24 @@ extension _RestoreProxy on Proxy {
       if (key == null || pendingByKey.containsKey(key)) return false;
       pendingByKey[key] = command;
     }
+    if (matchingKeys != null) {
+      final restoreKeys = commands.map(_commandStateKey).nonNulls.toSet();
+      for (final key in restoreKeys) {
+        final stateKey = _pairedProxyStateKey(key);
+        if (stateKey != null &&
+            restoreKeys.contains(stateKey) &&
+            !(matchingKeys.contains(key) && matchingKeys.contains(stateKey))) {
+          matchingKeys
+            ..remove(key)
+            ..remove(stateKey);
+        }
+      }
+    }
     final remainingCommands = <ProxyCommand>[];
     final remainingManaged = <ProxyCommand>[];
     final remainingPending = <ProxyCommand>[];
     final executedCommands = <ProxyCommand>[];
+    final deferredKeys = <String>{};
     for (final command in commands) {
       final key = _commandStateKey(command);
       if (managedCommands != null && key == null) {
@@ -153,8 +167,11 @@ extension _RestoreProxy on Proxy {
           (key == null || !matchingKeys.contains(key))) {
         continue;
       }
-      executedCommands.add(command);
-      if (!await _runCommands([command])) {
+      final deferred = deferredKeys.contains(key);
+      if (!deferred) executedCommands.add(command);
+      if (deferred || !await _runCommands([command])) {
+        final stateKey = key == null ? null : _pairedProxyStateKey(key);
+        if (stateKey != null) deferredKeys.add(stateKey);
         remainingCommands.add(command);
         final managed = key == null ? null : managedByKey[key];
         if (managed != null) remainingManaged.add(managed);
@@ -538,6 +555,15 @@ String? _commandStateKey(ProxyCommand command) {
     return setting == null ? null : 'm\u0000${args[1]}\u0000$setting';
   }
   return null;
+}
+
+// networksetup's endpoint setters also turn that proxy on.
+String? _pairedProxyStateKey(String key) {
+  if (!key.startsWith('m\u0000')) return null;
+  final setting = key.substring(key.lastIndexOf('\u0000') + 1);
+  return const {'webproxy', 'securewebproxy', 'socksproxy'}.contains(setting)
+      ? '${key}state'
+      : null;
 }
 
 String _commandStateValue(ProxyCommand command) {

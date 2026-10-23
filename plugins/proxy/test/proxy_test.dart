@@ -1101,6 +1101,43 @@ USB 10/100/1000 LAN
       expect(networksetup.snapshot(), original);
     });
 
+    test('stop leaves a proxy type alone once its endpoint or state changed',
+        () async {
+      final networksetup = _FakeNetworkSetup(['Wi-Fi']);
+      final proxy = Proxy(processRunner: networksetup.run);
+
+      expect(await proxy.startMacosProxyForTest(7890, const []), true);
+      networksetup.services['Wi-Fi']!
+        ..['webproxy.enabled'] = 'off'
+        ..['socksfirewallproxy.server'] = 'user-socks'
+        ..['socksfirewallproxy.port'] = '1081';
+      expect(await proxy.restoreProxyForTest(), true);
+
+      final service = networksetup.services['Wi-Fi']!;
+      expect(service['webproxy.enabled'], 'off');
+      expect(service['securewebproxy.server'], 'old-https');
+      expect(service['socksfirewallproxy.server'], 'user-socks');
+      expect(service['socksfirewallproxy.enabled'], 'on');
+    });
+
+    test('a failed endpoint restore keeps its state for the next stop',
+        () async {
+      final networksetup = _FakeNetworkSetup(['Wi-Fi']);
+      final original = networksetup.snapshot();
+      final proxy = Proxy(processRunner: networksetup.run);
+
+      expect(await proxy.startMacosProxyForTest(7890, const []), true);
+      var failed = false;
+      networksetup.fail = (args) {
+        if (failed || args.first != '-setwebproxy') return false;
+        failed = true;
+        return true;
+      };
+      expect(await proxy.restoreProxyForTest(), false);
+      expect(await proxy.restoreProxyForTest(), true);
+      expect(networksetup.snapshot(), original);
+    });
+
     test('repeated start after a partial stop restores every setting',
         () async {
       final networksetup = _FakeNetworkSetup(['Wi-Fi']);
