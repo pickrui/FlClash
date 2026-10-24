@@ -200,6 +200,19 @@ void main() {
         ),
         ['shadow-tls'],
       );
+      const options = 'type: snell\nobfs-opts:\n  mode: ech-tls\n  ';
+      expect(
+        _labels(_complete('${options}pre|', schema: EditorSchema.proxy)),
+        contains('preconnect'),
+      );
+      expect(
+        _labels(_complete('${options}identity-|', schema: EditorSchema.proxy)),
+        isNot(contains('identity-version')),
+      );
+      expect(
+        _labels(_complete('${options}legacy-|', schema: EditorSchema.proxy)),
+        isNot(contains('legacy-fallback')),
+      );
     });
 
     test('completes the keys of an item the caret line opens', () {

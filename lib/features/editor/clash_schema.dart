@@ -1017,8 +1017,6 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
       'host': _str,
       'sni': _str,
       'alpn': YamlSchema.scalar(['snell-ech/1', 'snell-ech/2']),
-      'identity-version': YamlSchema.scalar(['1', '2']),
-      'legacy-fallback': _bool,
       'preconnect': YamlSchema.scalar(['0', '1', '2', '3', '4']),
       'ech-config': _str,
       'ech-config-file': _str,
