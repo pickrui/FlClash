@@ -22,6 +22,7 @@ type
   TSetupStep = (ssInstall, ssPostInstall);
   TUninstallStep = (usUninstall, usPostUninstall);
 const HKLM = 1; HKCU = 2; SW_HIDE = 0; ewWaitUntilTerminated = 0;
+  mbConfirmation = 1; mbError = 2; MB_YESNO = 4; MB_DEFBUTTON2 = 256; IDYES = 6; MB_OK = 0;
 var
   ServiceExists, UpdateMode, Extracted, MissingHelper, ExtractFailure: Boolean;
   OwnerReadFailure, LegacyOwnerAbsent, SecurityFailure, RegisterFailure, RegisterException: Boolean;
@@ -32,6 +33,9 @@ var
   RecoveryExists, RecoveryWriteFailure, RecoveryDeleteFailure, MissingApp, MissingCore, HashReadFailure: Boolean;
   RecoveryReadError: LongWord;
   HiddenServiceKey, MissingServiceImage: Boolean;
+  SilentUninstall, ConfirmDataRemoval, DataMissing, DataReparse, DataAttrFailure, DataDeleteFailure: Boolean;
+  DataPrompts, DataErrors: Integer;
+  DeletedDirectories, RemovedParents: String;
 
 function DLLGetLastError: LongWord;
 begin Result := ApiError; end;
@@ -42,7 +46,44 @@ begin
   end else begin
     Result := StringReplace(S, '{app}', 'C:\app', [rfReplaceAll]);
     Result := StringReplace(Result, '{tmp}', 'C:\tmp', [rfReplaceAll]);
+    Result := StringReplace(Result, '{userappdata}', 'C:\fixture\Roaming', [rfReplaceAll]);
+    Result := StringReplace(Result, '{localappdata}', 'C:\fixture\Local', [rfReplaceAll]);
   end;
+end;
+function UninstallSilent: Boolean;
+begin Result := SilentUninstall; end;
+function GetUserNameString: String;
+begin Result := 'fixture-user'; end;
+function CustomMessage(Name: String): String;
+begin Result := Name; end;
+function FmtMessage(Message: String; Args: array of String): String;
+begin Assert(Length(Args) = 1); Assert(Args[0] = 'fixture-user'); Result := Message; end;
+function MsgBox(Message: String; Kind, Buttons: Integer): Integer;
+begin
+  if Kind = mbConfirmation then begin
+    Inc(DataPrompts); Assert(Message = 'RemoveUserData');
+    Assert(Buttons = (MB_YESNO or MB_DEFBUTTON2));
+    if ConfirmDataRemoval then Result := IDYES else Result := 7;
+  end else begin
+    Inc(DataErrors); Assert(Kind = mbError); Assert(Buttons = MB_OK);
+    Assert(Message = 'RemoveUserDataFailed'); Result := 1;
+  end;
+end;
+function DirExists(Path: String): Boolean;
+begin Result := not DataMissing; end;
+function DelTree(Path: String; IsDir, DeleteFiles, DeleteSubdirsAlso: Boolean): Boolean;
+begin
+  Assert((Path = 'C:\fixture\Roaming\com.oixcloud\clash') or
+    (Path = 'C:\fixture\Local\com.oixcloud\clash'));
+  Assert(IsDir and DeleteFiles and DeleteSubdirsAlso);
+  DeletedDirectories := DeletedDirectories + Path + '|';
+  Result := not (DataDeleteFailure and (Pos('Roaming', Path) > 0));
+end;
+function RemoveDir(Path: String): Boolean;
+begin
+  Assert((Path = 'C:\fixture\Roaming\com.oixcloud') or
+    (Path = 'C:\fixture\Local\com.oixcloud'));
+  RemovedParents := RemovedParents + Path + '|'; Result := True;
 end;
 function FileExists(S: String): Boolean;
 begin
@@ -130,6 +171,12 @@ end;
 '''
 
 DLL_STUBS = {
+    'DataDirectoryAttributes': r"""begin
+      Assert((Path = 'C:\fixture\Roaming\com.oixcloud') or
+        (Path = 'C:\fixture\Local\com.oixcloud'));
+      if DataAttrFailure then Result := $FFFFFFFF
+      else if DataReparse then Result := $400 else Result := $10;
+    end;""",
     'HelperReadRegistryString': r"""var i: Integer; Value: String;
     begin
       Assert(Root = HKLM); Assert(ValueType = 0);
@@ -183,6 +230,27 @@ begin
   ServiceExists := True;
   OwnerSid := 'S-1-5-21-123';
   InstallCompletePair;
+  if Pos('data_', Scenario) = 1 then begin
+    SilentUninstall := Scenario = 'data_silent';
+    UpdateMode := Scenario = 'data_update';
+    ConfirmDataRemoval := Scenario <> 'data_decline';
+    DataMissing := Scenario = 'data_missing';
+    DataReparse := Scenario = 'data_reparse';
+    DataAttrFailure := Scenario = 'data_attr_failure';
+    DataDeleteFailure := Scenario = 'data_delete_failure';
+    Assert(InitializeUninstall);
+    CurUninstallStepChanged(usUninstall);
+    Assert(DataPrompts = 0); Assert(DeletedDirectories = '');
+    CurUninstallStepChanged(usPostUninstall);
+    if SilentUninstall or UpdateMode then Assert(DataPrompts = 0) else Assert(DataPrompts = 1);
+    if SilentUninstall or UpdateMode or not ConfirmDataRemoval or DataMissing or DataReparse or DataAttrFailure then
+      Assert(DeletedDirectories = '')
+    else Assert(DeletedDirectories = 'C:\fixture\Roaming\com.oixcloud\clash|C:\fixture\Local\com.oixcloud\clash|');
+    if DataReparse or DataAttrFailure or DataDeleteFailure then Assert(DataErrors = 1) else Assert(DataErrors = 0);
+    if DataReparse or DataAttrFailure then Assert(RemovedParents = '');
+    if DataDeleteFailure then Assert(RemovedParents = 'C:\fixture\Local\com.oixcloud|');
+    DeinitializeUninstall; Assert(LockRefs = 0); Halt(0);
+  end;
   if (Scenario = 'lock_busy') or (Scenario = 'lock_error') or (Scenario = 'security_error') then begin
     if Scenario = 'lock_busy' then LockFailure := 183;
     if Scenario = 'lock_error' then LockFailure := 5;
@@ -425,7 +493,9 @@ class WindowsInstallerTest(unittest.TestCase):
                          'journal_delete_failure', 'uninstall_pending', 'uninstall_journal_delete_failure',
                          'changed_owner', 'missing_app_repair', 'journal_read_failure',
                          'journal_write_failure', 'malformed_record', 'other_directory',
-                         'missing_app_without_record', 'owner_key_hidden', 'missing_service_image']:
+                         'missing_app_without_record', 'owner_key_hidden', 'missing_service_image',
+                         'data_silent', 'data_update', 'data_decline', 'data_confirm',
+                         'data_missing', 'data_reparse', 'data_attr_failure', 'data_delete_failure']:
             with self.subTest(scenario=scenario):
                 result = subprocess.run([str(self.executable), scenario],
                                         capture_output=True, text=True, timeout=5)

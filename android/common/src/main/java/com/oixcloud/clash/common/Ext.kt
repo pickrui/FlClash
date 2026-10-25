@@ -126,7 +126,12 @@ fun Context.receiveBroadcastFlow(
         }
     }
     registerReceiverCompat(receiver, filter, exported)
-    awaitClose { unregisterReceiver(receiver) }
+    awaitClose {
+        try {
+            unregisterReceiver(receiver)
+        } catch (_: IllegalArgumentException) {
+        }
+    }
 }
 
 

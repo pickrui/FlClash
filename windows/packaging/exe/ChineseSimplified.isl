@@ -399,6 +399,9 @@ VerificationSignatureDoesntExist=签名文件“%1”不存在
 VerificationSignatureInvalid=签名文件“%1”无效
 
 [CustomMessages]
+RemoveUserData=是否同时删除当前 Windows 帐户（%1）的配置和设置？
+RemoveUserDataFailed=部分配置或设置未能删除，剩余文件已保留
+
 
 NameAndVersion=%1 版本 %2
 AdditionalIcons=附加快捷方式：

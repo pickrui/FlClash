@@ -12,6 +12,7 @@ OutputDir=.
 OutputBaseFilename={{OUTPUT_BASE_FILENAME}}
 Compression=lzma
 SolidCompression=yes
+RedirectionGuard=yes
 SetupIconFile={{SETUP_ICON_FILE}}
 WizardStyle=modern
 PrivilegesRequired={{PRIVILEGES_REQUIRED}}
@@ -40,6 +41,8 @@ function HelperGetCurrentProcessId: LongWord;
   external 'GetCurrentProcessId@kernel32.dll stdcall';
 function HelperConvertSecurity(Sddl: String; Revision: LongWord; var Descriptor: THandle; Size: THandle): Integer;
   external 'ConvertStringSecurityDescriptorToSecurityDescriptorW@advapi32.dll stdcall';
+function DataDirectoryAttributes(Path: String): LongWord;
+  external 'GetFileAttributesW@kernel32.dll stdcall';
 function HelperLocalFree(Memory: THandle): THandle;
   external 'LocalFree@kernel32.dll stdcall';
 
@@ -379,9 +382,47 @@ begin
   end;
 end;
 
+{ path_provider uses CompanyName and ProductName from windows/runner/Runner.rc. }
+function RemoveAppDataAt(BaseDir: String): Boolean;
+var
+  CompanyDir, DataDir: String;
+  Attributes: LongWord;
+begin
+  Result := True;
+  CompanyDir := AddBackslash(BaseDir) + 'com.oixcloud';
+  DataDir := AddBackslash(CompanyDir) + 'clash';
+  if not DirExists(CompanyDir) then Exit;
+  Attributes := DataDirectoryAttributes(CompanyDir);
+  if (Attributes = $FFFFFFFF) or ((Attributes and $400) <> 0) then
+  begin
+    Log('Preserving user data: the parent directory cannot be safely accessed');
+    Result := False;
+    Exit;
+  end;
+  if DirExists(DataDir) then Result := DelTree(DataDir, True, True, True);
+  if Result then RemoveDir(CompanyDir);
+end;
+
+procedure OfferRemoveUserData;
+var
+  RemovedRoaming, RemovedLocal: Boolean;
+begin
+  if UninstallSilent or IsAppUpdate then Exit;
+  if MsgBox(FmtMessage(CustomMessage('RemoveUserData'), [GetUserNameString]),
+    mbConfirmation, MB_YESNO or MB_DEFBUTTON2) <> IDYES then Exit;
+  RemovedRoaming := RemoveAppDataAt(ExpandConstant('{userappdata}'));
+  RemovedLocal := RemoveAppDataAt(ExpandConstant('{localappdata}'));
+  if not RemovedRoaming or not RemovedLocal then
+    MsgBox(CustomMessage('RemoveUserDataFailed'), mbError, MB_OK);
+end;
+
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
-  if CurUninstallStep = usPostUninstall then RemoveUserRegistrations;
+  if CurUninstallStep = usPostUninstall then
+  begin
+    RemoveUserRegistrations;
+    OfferRemoveUserData;
+  end;
 end;
 
 [Languages]
@@ -414,6 +455,10 @@ Name: "chineseSimplified"; MessagesFile: {% if locale.file %}{{ locale.file }}{%
 {% if locale.lang == 'tr' %}Name: "turkish"; MessagesFile: "compiler:Languages\\Turkish.isl"{% endif %}
 {% if locale.lang == 'uk' %}Name: "ukrainian"; MessagesFile: "compiler:Languages\\Ukrainian.isl"{% endif %}
 {% endfor %}
+
+[CustomMessages]
+english.RemoveUserData=Also delete the profiles and settings for the current Windows account (%1)?
+english.RemoveUserDataFailed=Some profiles or settings could not be deleted. The remaining files have been kept.
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: {% if CREATE_DESKTOP_ICON != true %}unchecked{% else %}checkedonce{% endif %}
