@@ -49,7 +49,9 @@ NavigationState navigationState(Ref ref) {
   );
   final currentIndex = index == -1 ? 0 : index;
   return NavigationState(
-    pageLabel: pageLabel,
+    pageLabel: navigationItems.isEmpty
+        ? pageLabel
+        : navigationItems[currentIndex].label,
     navigationItems: navigationItems,
     viewMode: viewMode,
     locale: locale,

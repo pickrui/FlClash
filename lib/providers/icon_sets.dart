@@ -127,21 +127,31 @@ class IconSetLibrary {
   }
 
   Future<IconSet> importUrl(String url, {String name = ''}) async {
+    final existing = (await database.iconSetsDao.all().get())
+        .where((row) => row.isRemote && row.url == url)
+        .firstOrNull;
+    if (existing != null) {
+      final requestedName = name.trim();
+      return sync(
+        requestedName.isEmpty
+            ? existing
+            : existing.copyWith(name: requestedName),
+        previousUrl: requestedName.isEmpty ? null : existing.url,
+      );
+    }
     final parsed = await _download(url);
     return _serialize(() async {
-      final existing = (await database.iconSetsDao.all().get())
+      final current = (await database.iconSetsDao.all().get())
           .where((row) => row.url == url)
           .firstOrNull;
-      final item = (existing ?? IconSet(id: snowflake.id, name: '', url: url))
-          .copyWith(
-            name: _name(
-              name.isEmpty ? existing?.name ?? '' : name,
-              parsed.name,
-              url,
-            ),
-            icons: parsed.icons,
-            lastUpdateTime: DateTime.now(),
-          );
+      if (current != null) return current;
+      final item = IconSet(
+        id: snowflake.id,
+        name: _name(name, parsed.name, url),
+        url: url,
+        icons: parsed.icons,
+        lastUpdateTime: DateTime.now(),
+      );
       await database.iconSetsDao.put(item);
       return item;
     });

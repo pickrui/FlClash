@@ -172,6 +172,59 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('same-length navigation changes keep the shown tab aligned', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final viewSize = viewSizeProvider.overrideWithBuild(
+      (_, _) => const Size(400, 800),
+    );
+    const initial = [PageLabel.dashboard, PageLabel.proxies, PageLabel.tools];
+    final container = ProviderContainer(
+      overrides: [
+        viewSize,
+        _items(initial),
+        profilesProvider.overrideWithValue([]),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(currentPageLabelProvider.notifier).value = PageLabel.proxies;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(child: HomePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    for (final labels in [
+      [PageLabel.dashboard, PageLabel.tools, PageLabel.proxies],
+      [PageLabel.dashboard, PageLabel.tools, PageLabel.logs],
+      initial,
+    ]) {
+      container.updateOverrides([
+        viewSize,
+        _items(labels),
+        profilesProvider.overrideWithValue([]),
+      ]);
+      await tester.pumpAndSettle();
+      final shown = labels.contains(PageLabel.proxies)
+          ? PageLabel.proxies
+          : PageLabel.dashboard;
+      expect(find.text('${shown.name}:true'), findsOneWidget);
+      expect(
+        tester
+            .widget<NavigationDock>(find.byType(NavigationDock))
+            .selectedIndex,
+        labels.indexOf(shown),
+      );
+      expect(container.read(currentPageLabelProvider), PageLabel.proxies);
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('the dock over the system bar leaves the content one clearance', (
     tester,
   ) async {

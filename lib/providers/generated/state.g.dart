@@ -780,7 +780,7 @@ final class NavigationStateProvider
   }
 }
 
-String _$navigationStateHash() => r'657dc47ecc35ba0807b58cb37e7f1baa14f6c2f9';
+String _$navigationStateHash() => r'ab62ed417008a7a0757097d59d7e9b11a25508ee';
 
 @ProviderFor(contentWidth)
 final contentWidthProvider = ContentWidthProvider._();

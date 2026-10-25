@@ -43,6 +43,8 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
   int _networkRevision = 0;
   bool _onWifi = false;
   bool _permissionRequested = false;
+  bool _permissionRequesting = false;
+  int _permissionGeneration = 0;
 
   @override
   void initState() {
@@ -64,6 +66,10 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
       networkSettingProvider.select((s) => s.excludeSSIDs.isNotEmpty),
       (_, enabled) {
         _timer?.cancel();
+        if (!enabled) {
+          _permissionRequested = false;
+          _permissionGeneration++;
+        }
         // connectivity_plus deduplicates Wi-Fi -> Wi-Fi changes. Refresh while
         // this feature is enabled, including when the same transport roams.
         _timer = enabled
@@ -124,10 +130,19 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager>
                   if (!mounted || revision != _revision) return null;
                   if (permission == WifiSsidPermission.denied &&
                       !_permissionRequested &&
+                      !_permissionRequesting &&
                       WidgetsBinding.instance.lifecycleState ==
                           AppLifecycleState.resumed) {
-                    _permissionRequested = true;
-                    permission = await wifiSsidManager.requestPermission();
+                    final generation = _permissionGeneration;
+                    _permissionRequesting = true;
+                    try {
+                      permission = await wifiSsidManager.requestPermission();
+                      if (generation == _permissionGeneration) {
+                        _permissionRequested = true;
+                      }
+                    } finally {
+                      _permissionRequesting = false;
+                    }
                     if (!mounted || revision != _revision) return null;
                     ref.read(ssidRefreshProvider.notifier).update((v) => v + 1);
                   }

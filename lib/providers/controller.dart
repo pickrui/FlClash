@@ -62,6 +62,12 @@ class AppController {
 
   AppController._internal();
 
+  @visibleForTesting
+  AppController.forTesting(BuildContext context, WidgetRef ref) {
+    _context = context;
+    _ref = ref;
+  }
+
   factory AppController() {
     _instance ??= AppController._internal();
     return _instance!;

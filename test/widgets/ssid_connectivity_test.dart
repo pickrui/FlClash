@@ -14,6 +14,146 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 
 void main() {
+  for (final retryAfter in ['failure', 'disable']) {
+    testWidgets('SSID authorization can recover after $retryAfter', (
+      tester,
+    ) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      void enable(bool value) => container
+          .read(networkSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(excludeSSIDs: value ? ['Home'] : []),
+          );
+      enable(true);
+      var requests = 0;
+      var ssidReads = 0;
+      const channel = MethodChannel('wifi_ssid');
+      final messenger = tester.binding.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'checkPermission') return 1;
+        if (call.method == 'requestPermission') {
+          requests++;
+          if (retryAfter == 'failure' && requests == 1) {
+            throw PlatformException(code: 'temporary_failure');
+          }
+          return 1;
+        }
+        ssidReads++;
+        return 'Home';
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      final lifecycle = tester.binding.lifecycleState;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      addTearDown(() {
+        if (lifecycle != null) {
+          tester.binding.handleAppLifecycleStateChanged(lifecycle);
+        }
+      });
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: ConnectivityManager(
+            connectivityStream: const Stream.empty(),
+            checkConnectivity: () async => [ConnectivityResult.wifi],
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(requests, 1);
+      if (retryAfter == 'disable') {
+        enable(false);
+        await tester.pump();
+        enable(true);
+      } else {
+        container
+            .read(ssidRefreshProvider.notifier)
+            .update((value) => value + 1);
+      }
+      await tester.pump();
+      expect(requests, 2);
+      container.read(ssidRefreshProvider.notifier).update((value) => value + 1);
+      await tester.pump();
+      expect(requests, 2);
+      expect(ssidReads, 0);
+      expect(container.read(currentSSIDProvider), isNull);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(Duration.zero);
+    });
+  }
+
+  testWidgets(
+    'an open SSID prompt survives policy toggles without duplication',
+    (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      void enable(bool value) => container
+          .read(networkSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(excludeSSIDs: value ? ['Home'] : []),
+          );
+      enable(true);
+      var requests = 0;
+      var ssidReads = 0;
+      final pending = Completer<int>();
+      const channel = MethodChannel('wifi_ssid');
+      final messenger = tester.binding.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'checkPermission') return 1;
+        if (call.method == 'requestPermission') {
+          requests++;
+          return requests == 1 ? pending.future : 1;
+        }
+        ssidReads++;
+        return 'Home';
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      final lifecycle = tester.binding.lifecycleState;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      addTearDown(() {
+        if (lifecycle != null) {
+          tester.binding.handleAppLifecycleStateChanged(lifecycle);
+        }
+      });
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: ConnectivityManager(
+            connectivityStream: const Stream.empty(),
+            checkConnectivity: () async => [ConnectivityResult.wifi],
+            child: const SizedBox(),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(requests, 1);
+      enable(false);
+      await tester.pump();
+      enable(true);
+      await tester.pump();
+      expect(requests, 1);
+      pending.complete(1);
+      await tester.pump();
+      expect(container.read(currentSSIDProvider), isNull);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      container.read(ssidRefreshProvider.notifier).update((value) => value + 1);
+      await tester.pump();
+      expect(requests, 1);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(requests, 2);
+      container.read(ssidRefreshProvider.notifier).update((value) => value + 1);
+      await tester.pump();
+      expect(requests, 2);
+      expect(ssidReads, 0);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(Duration.zero);
+    },
+  );
+
   for (final retiredBy in ['dispose', 'network', 'settings', 'permission']) {
     testWidgets('retired SSID lookup stops after $retiredBy changes', (
       tester,

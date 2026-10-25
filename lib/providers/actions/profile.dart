@@ -20,7 +20,7 @@ class ProfileAction extends _$ProfileAction {
       _controller.saveProfileMetadata(edited);
 
   Future<Profile> saveProfileFile(Profile profile, Uint8List bytes) =>
-      _controller.saveProfileFile(profile, bytes);
+      _controller.saveProfileFile(profile, bytes, requireExisting: true);
 
   Future<void> updateProfiles() => _controller.updateProfiles();
 
@@ -186,6 +186,7 @@ extension ProfilesControllerExt on AppController {
     Future<Profile> Function() update, {
     bool preserveCurrentState = false,
     bool invalidatePendingUpdates = false,
+    bool requireExisting = false,
   }) async {
     // Account bootstrap may remove expired profiles using this same lock.
     if (profile.isoixCloudProfile) {
@@ -194,6 +195,10 @@ extension ProfilesControllerExt on AppController {
     // Callers prepare downloads first. Snapshot backup, replacement, metadata
     // commit and rollback must all hold the same lock as other profile edits.
     Future<Profile> commit() async {
+      if (requireExisting &&
+          _ref.read(profilesProvider).getProfile(profile.id) == null) {
+        throw StateError('profile is no longer available');
+      }
       return withFileRollback(
         await appPath.getProfilePath(profile.id.toString()),
         () async {
@@ -219,12 +224,17 @@ extension ProfilesControllerExt on AppController {
         : storageLock.synchronized(commit);
   }
 
-  Future<Profile> saveProfileFile(Profile profile, Uint8List bytes) async {
+  Future<Profile> saveProfileFile(
+    Profile profile,
+    Uint8List bytes, {
+    bool requireExisting = false,
+  }) async {
     await ensureCoreReadyOrThrow();
     return persistProfile(
       profile,
       () => profile.saveFile(bytes),
       invalidatePendingUpdates: true,
+      requireExisting: requireExisting,
     );
   }
 

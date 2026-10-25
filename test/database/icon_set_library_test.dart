@@ -15,6 +15,21 @@ import 'package:test/test.dart';
 
 const content =
     '{"name":"Gallery","icons":[{"name":"HK","url":"https://example.invalid/hk.png"}]}';
+
+class _QueuedIconSetLibrary extends IconSetLibrary {
+  _QueuedIconSetLibrary(super.database) : super(download: (_) async => content);
+
+  final started = Completer<void>();
+  final resume = Completer<void>();
+
+  @override
+  Future<IconSet> sync(IconSet item, {String? previousUrl}) async {
+    started.complete();
+    await resume.future;
+    return super.sync(item, previousUrl: previousUrl);
+  }
+}
+
 void main() {
   late Database db;
   setUp(() => db = Database(NativeDatabase.memory()));
@@ -124,6 +139,84 @@ void main() {
     await library.sync(initial);
     expect(downloads, 2);
     expect((await db.iconSetsDao.all().getSingle()).url, changed.url);
+  });
+
+  for (final change in ['delete', 'source', 'refresh']) {
+    test('a repeated URL import respects a concurrent $change', () async {
+      const initial = IconSet(
+        id: 1,
+        name: 'Original',
+        url: 'https://example.invalid/icons.json',
+      );
+      await db.iconSetsDao.put(initial);
+      final started = Completer<void>();
+      final response = Completer<String>();
+      final library = IconSetLibrary(
+        db,
+        download: (_) {
+          started.complete();
+          return response.future;
+        },
+      );
+      final importing = library.importUrl(initial.url);
+      await started.future;
+      if (change == 'delete') {
+        await db.iconSetsDao.remove(initial.id);
+      } else if (change == 'source') {
+        await db.iconSetsDao.put(
+          initial.copyWith(url: 'https://example.invalid/new.json'),
+        );
+      } else {
+        await IconSetLibrary(
+          db,
+          download: (_) async => content.replaceAll('hk.png', 'newer.png'),
+        ).sync(initial);
+      }
+      final latest = await db.iconSetsDao.all().get();
+      response.complete(content);
+      await importing;
+      expect(await db.iconSetsDao.all().get(), latest);
+    });
+  }
+
+  test('overlapping first imports keep the first committed gallery', () async {
+    const url = 'https://example.invalid/icons.json';
+    final started = Completer<void>();
+    final response = Completer<String>();
+    final slow = IconSetLibrary(
+      db,
+      download: (_) {
+        started.complete();
+        return response.future;
+      },
+    ).importUrl(url, name: 'Old request');
+    await started.future;
+    await IconSetLibrary(
+      db,
+      download: (_) async => content.replaceAll('hk.png', 'newer.png'),
+    ).importUrl(url, name: 'Latest');
+    final latest = await db.iconSetsDao.all().getSingle();
+    response.complete(content);
+    expect(await slow, latest);
+    expect(await db.iconSetsDao.all().get(), [latest]);
+  });
+
+  test('a queued repeated import preserves a newly edited name', () async {
+    const initial = IconSet(
+      id: 1,
+      name: 'Original',
+      url: 'https://example.invalid/icons.json',
+    );
+    await db.iconSetsDao.put(initial);
+    final library = _QueuedIconSetLibrary(db);
+    final importing = library.importUrl(initial.url);
+    await library.started.future;
+    await db.iconSetsDao.rename(initial.id, 'User name');
+    library.resume.complete();
+    await importing;
+    final stored = await db.iconSetsDao.all().getSingle();
+    expect(stored.name, 'User name');
+    expect(stored.icons.single.url, 'https://example.invalid/hk.png');
   });
 
   test('a slow sync cannot resurrect a deleted gallery', () async {
@@ -242,6 +335,11 @@ void main() {
         throwsFormatException,
       );
       expect(await db.iconSetsDao.all().get(), isEmpty);
+      await library.importContent('local.json', content);
+      final local = await db.iconSetsDao.all().getSingle();
+      await expectLater(library.importUrl(''), throwsFormatException);
+      expect(calls, 0);
+      expect(await db.iconSetsDao.all().get(), [local]);
     },
   );
 

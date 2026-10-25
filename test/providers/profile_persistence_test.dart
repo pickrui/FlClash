@@ -10,7 +10,7 @@ import 'dart:typed_data';
 import 'package:fl_clash/common/file.dart';
 import 'package:fl_clash/common/lock.dart';
 import 'package:fl_clash/common/path.dart';
-import 'package:fl_clash/database/database.dart';
+import 'package:fl_clash/database/database.dart' hide Profiles;
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -18,9 +18,17 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/services/age_crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/widgets.dart';
 
 import '../helpers/app_paths.dart';
 import '../helpers/preferences.dart';
+
+class _Profiles extends Profiles {
+  @override
+  List<Profile> build() => const [
+    Profile(id: 42, autoUpdateDuration: Duration(hours: 1)),
+  ];
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +48,61 @@ void main() {
     final file = File(await appPath.getProfilePath('$id'));
     await file.parent.create(recursive: true);
     return file.writeAsString(contents);
+  }
+
+  for (final queued in [false, true]) {
+    testWidgets(
+      'file edits reject deleted profiles before writing (queued: $queued)',
+      (tester) async {
+        final container = ProviderContainer(
+          overrides: [profilesProvider.overrideWith(_Profiles.new)],
+        );
+        addTearDown(container.dispose);
+        late AppController controller;
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: Consumer(
+              builder: (context, ref, _) {
+                controller = AppController.forTesting(context, ref);
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
+        await tester.runAsync(() async {
+          final profile = container.read(profilesProvider).single;
+          final file = await snapshot(profile.id, 'old');
+          final entered = Completer<void>();
+          final release = Completer<void>();
+          final deletion = storageLock.synchronized(() async {
+            entered.complete();
+            if (queued) await release.future;
+            container.read(profilesProvider.notifier).replaceFromDatabase([]);
+            await file.delete();
+          });
+          await entered.future;
+          if (!queued) await deletion;
+          var writes = 0;
+          final rejected = expectLater(
+            controller.persistProfile(profile, () async {
+              writes++;
+              await file.writeAsString('stale editor');
+              throw const FormatException('save reached the content writer');
+            }, requireExisting: true),
+            throwsStateError,
+          );
+          release.complete();
+          await deletion;
+          await rejected;
+          expect(writes, 0);
+          expect(await file.exists(), isFalse);
+          expect(container.read(profilesProvider), isEmpty);
+        });
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(Duration.zero);
+      },
+    );
   }
 
   test(

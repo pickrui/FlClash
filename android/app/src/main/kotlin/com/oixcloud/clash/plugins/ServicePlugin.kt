@@ -149,11 +149,22 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     }
 
     private fun handleSyncState(call: MethodCall, result: MethodChannel.Result) {
-        val data = call.arguments<String>()!!
-        State.sharedState = Gson().fromJson(data, SharedState::class.java)
+        val state = try {
+            val data = call.arguments as? String ?: error("Missing shared state")
+            requireNotNull(Gson().fromJson(data, SharedState::class.java))
+        } catch (_: Exception) {
+            result.error("invalid_argument", "Invalid Android shared state", null)
+            return
+        }
+        State.sharedState = state
         launch {
-            State.syncState()
-            result.success("")
+            val error = try {
+                State.syncState()
+                ""
+            } catch (error: Exception) {
+                error.message?.takeIf { it.isNotBlank() } ?: "Android service state sync failed"
+            }
+            result.success(error)
         }
     }
 

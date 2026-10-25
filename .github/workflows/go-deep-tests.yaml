@@ -33,8 +33,7 @@ jobs:
         working-directory: core/Clash.Meta
         run: |
           go vet -tags "$GO_TAGS" ./...
-          # Sudoku and MKCP/Mekya run in their own steps of the job below.
-          go test -race -tags "$GO_TAGS" -p=2 -parallel=2 -timeout=900s -skip '^(TestInboundSudoku|TestInboundVMess_(MKCP|Mekya)$)' ./...
+          go test -race -tags "$GO_TAGS" -p=2 -parallel=2 -timeout=1200s ./...
       - name: Check Tailscale against the official test control server
         working-directory: core/Clash.Meta
         env:
@@ -78,6 +77,12 @@ jobs:
           go test -race -count=1 -timeout=120s github.com/metacubex/sing-shadowsocks2/...
           go test -race -count=1 -timeout=120s github.com/metacubex/sing-mux
           go test -race -count=1 -timeout=120s -skip '^(Test8GBTransfer|TestRandomLengthRandomDataTransfer)' github.com/metacubex/smux
+      - name: Check HTTP/2 SETTINGS deadlines and parallel inbound groups
+        working-directory: core/Clash.Meta
+        run: |
+          go vet github.com/metacubex/http/...
+          go test -race -count=1 -timeout=120s -run '^TestHTTP2FirstSettings' github.com/metacubex/http
+          go test -race -count=1 -tags "$GO_TAGS" -p=2 -parallel=3 -timeout=300s -run '^(TestInboundShadowSocks_JLS|TestInboundSnell_Restls|TestInboundShadowSocks_Basic)$/^(Conn|deoxys-ii-256-128)$/^(aes-256-gcm|Concurrent)$/^Concurrent$' ./listener/inbound
       - name: Check persistent cache regressions
         working-directory: core/Clash.Meta
         run: |
@@ -106,17 +111,3 @@ jobs:
         run: go test -race -tags "$GO_TAGS" -timeout=180s -run '^(TestNewMieru|TestInboundMieru)$' ./listener/inbound
       - name: Check QUIC dependency regressions
         run: python3 tool/check_quic_dependencies.py
-      - name: Validate all MKCP and Mekya variants
-        working-directory: core/Clash.Meta
-        run: |
-          # Retain each variant's 128 concurrent transfers and race detection.
-          # Serialize variants and packages, but let Go use the runner's available
-          # CPUs: capping GOMAXPROCS can starve UDP/H2 handshakes under -race.
-          echo "Available CPUs: $(nproc)"
-          go test -v -race -tags "$GO_TAGS" -p=1 -parallel=1 -count=2 -timeout=300s -run '^TestInboundVMess_(MKCP|Mekya)$' ./listener/inbound
-      - name: Validate all Sudoku inbound variants
-        working-directory: core/Clash.Meta
-        run: |
-          # Overlapping 128-transfer variants can exceed HTTP/2's 2s SETTINGS deadline under -race.
-          echo "Available CPUs: $(nproc)"
-          go test -v -race -tags "$GO_TAGS" -p=1 -parallel=1 -count=1 -timeout=900s -run '^TestInboundSudoku' ./listener/inbound

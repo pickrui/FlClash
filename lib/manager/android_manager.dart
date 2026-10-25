@@ -48,7 +48,7 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
           }
         }, duration: const Duration(seconds: 1));
         if (prev?.needSyncSharedState != next.needSyncSharedState) {
-          service?.syncState(next.needSyncSharedState);
+          _syncSharedState(next.needSyncSharedState);
         }
       }
     });
@@ -59,6 +59,15 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
     ref.listenManual(coreStatusProvider, (_, status) {
       if (status == CoreStatus.connected) onServiceStateChanged();
     });
+  }
+
+  Future<void> _syncSharedState(SharedState state) async {
+    try {
+      final error = await service?.syncState(state) ?? '';
+      if (error.isNotEmpty) throw StateError(error);
+    } catch (error) {
+      commonPrint.log('Android shared state sync failed: $error');
+    }
   }
 
   @override

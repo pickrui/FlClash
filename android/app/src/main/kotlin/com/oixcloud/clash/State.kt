@@ -43,7 +43,9 @@ object State {
     private val startPreparation = StartPreparation()
     private val serviceRunTime = ServiceRunTimeTracker()
 
+    @Volatile
     var sharedState: SharedState = SharedState()
+    private val sharedStateLock = Mutex()
 
     val runStateFlow: MutableStateFlow<RunState> = MutableStateFlow(RunState.STOP)
 
@@ -221,20 +223,21 @@ object State {
         }
     }
 
-    suspend fun syncState() {
-        val vpnOptions = sharedState.vpnOptions
+    suspend fun syncState() = sharedStateLock.withLock {
+        val current = sharedState
+        val vpnOptions = current.vpnOptions
         Service.updateExcludeSSIDs(
             vpnOptions?.excludeSSIDs.orEmpty(),
             vpnOptions?.excludeNetworks.orEmpty(),
-        )
+        ).getOrThrow()
         Service.updateNotificationParams(
             NotificationParams(
-                title = sharedState.currentProfileName,
-                stopText = sharedState.stopText,
-                onlyStatisticsProxy = sharedState.onlyStatisticsProxy,
-                showStopAction = sharedState.showNotificationStopAction
+                title = current.currentProfileName,
+                stopText = current.stopText,
+                onlyStatisticsProxy = current.onlyStatisticsProxy,
+                showStopAction = current.showNotificationStopAction
             )
-        )
+        ).getOrThrow()
     }
 
     private suspend fun setupAndStart(request: RunIntentArbiter.Token) {

@@ -12,6 +12,7 @@ import 'package:fl_clash/manager/app_manager.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +32,7 @@ class HomePage extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     return HomeBackScopeContainer(
+      isTV: system.isTV,
       child: AppSidebarContainer(
         child: _HomeShell(
           child: Consumer(
@@ -218,8 +220,7 @@ class _NavigationPage extends StatelessWidget {
       builder: (_, ref, child) {
         final isActive = ref.watch(
           navigationStateProvider.select(
-            (state) =>
-                state.navigationItems[state.currentIndex].label == item.label,
+            (state) => state.pageLabel == item.label,
           ),
         );
         // A kept-alive page off screen still ticks its animations, and
@@ -274,7 +275,10 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
   @override
   void didUpdateWidget(covariant _HomePageView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.navigationItems.length != widget.navigationItems.length) {
+    if (!listEquals(
+      [for (final item in oldWidget.navigationItems) item.label],
+      [for (final item in widget.navigationItems) item.label],
+    )) {
       _order = null;
       _slide++;
       _updatePageController();
@@ -427,8 +431,13 @@ class _FadeTabPage extends StatelessWidget {
 
 class HomeBackScopeContainer extends ConsumerWidget {
   final Widget child;
+  final bool isTV;
 
-  const HomeBackScopeContainer({super.key, required this.child});
+  const HomeBackScopeContainer({
+    super.key,
+    required this.child,
+    this.isTV = false,
+  });
 
   @override
   Widget build(BuildContext context, ref) {
@@ -436,13 +445,19 @@ class HomeBackScopeContainer extends ConsumerWidget {
 
     return CommonPopScope(
       onPop: (context) async {
-        final pageLabel = ref.read(currentPageLabelProvider);
+        final pageLabel = ref.read(navigationStateProvider).pageLabel;
         final realContext =
             GlobalObjectKey(pageLabel).currentContext ?? context;
         final canPop = Navigator.canPop(realContext);
         if (canPop) {
           // maybePop runs the pushed page's own unsaved-changes guard.
           await Navigator.of(realContext).maybePop();
+        } else if (isTV && pageLabel != PageLabel.dashboard) {
+          if (!ref.read(backBlockProvider)) {
+            ref
+                .read(currentPageLabelProvider.notifier)
+                .toPage(PageLabel.dashboard);
+          }
         } else {
           await systemAction.handleBackOrExit();
         }
