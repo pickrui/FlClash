@@ -174,6 +174,18 @@ enum DnsCacheAlgorithm { lru, arc }
 enum FakeIpFilterMode { blacklist, whitelist, rule }
 
 @JsonEnum(valueField: 'path')
+enum GeneralOverrideKey {
+  testUrl('test-url'),
+  unifiedDelay('unified-delay'),
+  tcpConcurrent('tcp-concurrent'),
+  ipv6('ipv6'),
+  geodataLoader('geodata-loader');
+
+  const GeneralOverrideKey(this.path);
+  final String path;
+}
+
+@JsonEnum(valueField: 'path')
 enum DnsOverrideKey {
   enable('enable'),
   listen('listen'),

@@ -37,11 +37,11 @@ abstract class UpdateParams with _$UpdateParams {
     required FindProcessMode findProcessMode,
     required Mode mode,
     @JsonKey(name: 'log-level') required LogLevel logLevel,
-    required bool ipv6,
-    @JsonKey(name: 'tcp-concurrent') required bool tcpConcurrent,
+    required bool? ipv6,
+    @JsonKey(name: 'tcp-concurrent') required bool? tcpConcurrent,
     @JsonKey(name: 'external-controller') required String externalController,
     required String secret,
-    @JsonKey(name: 'unified-delay') required bool unifiedDelay,
+    @JsonKey(name: 'unified-delay') required bool? unifiedDelay,
     @Default(true) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
     @Default(24) @JsonKey(name: 'geo-update-interval') int geoUpdateInterval,
     @Default({}) @JsonKey(name: 'geox-url') Map<String, String> geoXUrl,
@@ -210,6 +210,7 @@ abstract class ExternalProvider with _$ExternalProvider {
   const factory ExternalProvider({
     required String name,
     required String type,
+    @Default('') @JsonKey(name: 'content-version') String contentVersion,
     String? path,
     required int count,
     @JsonKey(name: 'subscription-info', fromJson: subscriptionInfoFormCore)
@@ -242,4 +243,30 @@ abstract class CoreMemoryStats with _$CoreMemoryStats {
 
 extension CoreMemoryStatsExt on CoreMemoryStats {
   int get runtimeTotal => heapInuse + heapIdle + stackInuse + runtimeOther;
+}
+
+class ProviderFileChange {
+  const ProviderFileChange({
+    required this.providerName,
+    required this.providerType,
+    required this.version,
+    required this.transaction,
+    required this.previousPath,
+    required this.path,
+    required this.previousDigest,
+    required this.digest,
+  });
+  final String providerName, providerType, version, transaction;
+  final String previousPath, path, previousDigest, digest;
+  Map<String, Object?> toJson({bool rollback = false}) => {
+    'providerName': providerName,
+    'providerType': providerType,
+    'version': version,
+    'transaction': transaction,
+    'previousPath': previousPath,
+    'path': path,
+    'previousDigest': previousDigest,
+    'digest': digest,
+    'rollback': rollback,
+  };
 }

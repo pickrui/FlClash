@@ -96,6 +96,7 @@ class SystemAction extends _$SystemAction {
 extension SystemControllerExt on AppController {
   Future<void> handleExit([bool needSave = true]) => _exitCoordinator.run(
     cleanup: () {
+      _profileApplyScheduler.takeForce();
       final dnsShutdown = macOS?.shutdownDns();
       dnsShutdown?.ignore();
       return runCleanupActions([

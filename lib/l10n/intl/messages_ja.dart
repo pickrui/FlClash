@@ -208,10 +208,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m88(count) => "プロキシ ${count} 件";
 
-  static String m89(name) =>
-      "ノード ${name} は別の有効なチェーンで使用されているか、プロキシチェーン関係の競合があります";
+  static String m89(name) => "プロキシ ${name} が他の有効なチェーンと競合するか、ループを形成します";
 
-  static String m90(name) => "ノード ${name} はこの位置では使用できません";
+  static String m90(name) => "プロキシ ${name} はこの位置では使用できません";
 
   static String m91(address) => "起動前、システムプロキシは ${address} に設定されていました";
 
@@ -382,6 +381,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "設定にシステムDNSを強制的に追加します",
     ),
     "application": MessageLookupByLibrary.simpleMessage("アプリケーション"),
+    "applyNow": MessageLookupByLibrary.simpleMessage("今すぐ適用"),
     "authentication": MessageLookupByLibrary.simpleMessage("ローカルプロキシ認証"),
     "authenticationApplyFailed": MessageLookupByLibrary.simpleMessage(
       "認証設定を適用できませんでした",
@@ -1335,6 +1335,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "format": MessageLookupByLibrary.simpleMessage("形式"),
     "fr": MessageLookupByLibrary.simpleMessage("フランス語"),
     "general": MessageLookupByLibrary.simpleMessage("一般"),
+    "generalOverrideDesc": MessageLookupByLibrary.simpleMessage(
+      "ここで追加した項目は、すべてのプロファイルの該当設定を上書きします。追加していない項目はプロファイル自身の設定のままで、プロファイルにない場合はコアの既定値を使います",
+    ),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("自動更新"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage("自動更新間隔"),
     "geoAutoUpdateIntervalTip": MessageLookupByLibrary.simpleMessage(
@@ -2059,7 +2062,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxies": MessageLookupByLibrary.simpleMessage("プロキシ"),
     "proxiesCount": m88,
     "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage(
-      "利用可能なノード",
+      "利用可能なノードとグループ",
     ),
     "proxyChainConflictTip": m89,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage("カスタムノード"),
@@ -2069,24 +2072,28 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("入口"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("出口"),
+    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
+      "グループは入口または出口に使用できます。中継は固定ノードにしてください",
+    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "ノードを順番に追加します。最初が入口、最後が出口です。保存後は出口ノードを選択して使用します",
+      "入口と出口にはノードまたはグループを選択できます。出口グループには独立したノードを、中継には固定ノードを使用してください。保存後は出口を選択して使用します。入口の測定は入口のみ、出口グループの測定はチェーン全体が対象です",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
-      "プロキシチェーンには少なくとも 2 つのノードが必要です",
+      "チェーンには入口と出口が必要です",
     ),
     "proxyChainMinimumNodesHint": MessageLookupByLibrary.simpleMessage(
-      "プロキシチェーンには少なくとも 2 つのノードが必要です。出口ノードを追加してください",
+      "出口ノードまたはグループを選択してください",
     ),
     "proxyChainNodeAdded": MessageLookupByLibrary.simpleMessage(
       "ノードをプロキシチェーンに追加しました",
     ),
     "proxyChainOtherNodes": MessageLookupByLibrary.simpleMessage("その他のノード"),
+    "proxyChainPolicyGroups": MessageLookupByLibrary.simpleMessage("ポリシーグループ"),
     "proxyChainRelatedChainsUpdated": MessageLookupByLibrary.simpleMessage(
       "関連するプロキシチェーンを更新しました",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "プロキシチェーンを保存して適用しました。使用するには出口ノードを選択してください",
+      "チェーンを保存して適用しました。出口ノードまたはグループを選択してください",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("プロキシチェーン"),
     "proxyChainUnavailableNodeTip": m90,

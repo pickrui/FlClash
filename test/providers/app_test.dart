@@ -430,13 +430,58 @@ void main() {
       request.dio.httpClientAdapter = originalAdapter;
     });
 
+    testWidgets(
+      'automatic route probes throttle, pause and reject late results',
+      (tester) async {
+        final adapter = _ControlledIpAdapter();
+        request.dio.httpClientAdapter = adapter;
+        final notifier = container.read(networkDetectionProvider.notifier);
+        container.read(initProvider.notifier).value = true;
+        final owner = Object();
+        notifier.setProbeActive(owner, true);
+        notifier.startCheck();
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pump();
+        expect(adapter.pending, hasLength(1));
+        adapter.succeed('1.1.1.1');
+        await tester.pump();
+        notifier.updateRoute({'core-epoch': 1, 'picks-version': 1});
+        notifier.updateRoute({'core-epoch': 1, 'picks-version': 2});
+        await tester.pump(const Duration(seconds: 1));
+        notifier.updateRoute({'core-epoch': 1, 'picks-version': 3});
+        await tester.pump(const Duration(seconds: 1));
+        expect(adapter.pending, hasLength(1));
+        notifier.setProbeActive(owner, false);
+        await tester.pump(const Duration(seconds: 6));
+        expect(adapter.pending, hasLength(1));
+        notifier.setProbeActive(owner, true);
+        await tester.pump(const Duration(seconds: 1));
+        expect(adapter.pending, hasLength(2));
+        notifier.setProbeActive(owner, false);
+        await tester.pump();
+        expect(adapter.cancellations, greaterThan(0));
+        adapter.pending.last.complete(
+          ResponseBody.fromString('{"ip":"2.2.2.2"}', 200),
+        );
+        await tester.pump();
+        expect(container.read(networkDetectionProvider).ipInfo, isNull);
+        notifier.setProbeActive(owner, true);
+        notifier.startCheck();
+        notifier.updateRoute({'core-epoch': 1, 'picks-version': 4});
+        await tester.pump(const Duration(seconds: 1));
+        expect(adapter.pending, hasLength(3));
+        container.dispose();
+        await tester.pump();
+      },
+    );
+
     test('all failed sources stop loading and permit a later retry', () async {
       final adapter = _ControlledIpAdapter();
       request.dio.httpClientAdapter = adapter;
       final notifier = container.read(networkDetectionProvider.notifier);
       container.read(initProvider.notifier).value = true;
       notifier.startCheck();
-      for (var index = 0; index < 7; index++) {
+      for (var index = 0; index < request.ipProbeHosts.length; index++) {
         await _waitForIpRequests(adapter, count: index + 1);
         adapter.pending[index].complete(ResponseBody.fromString('{}', 200));
       }
@@ -599,80 +644,81 @@ void main() {
       },
     );
 
-    test(
-      'ignores a canceled stale check after a newer check succeeds',
-      () async {
-        request.dio.httpClientAdapter = _DelayedCancelIpAdapter();
-        final container = ProviderContainer(
-          overrides: [
-            initProvider.overrideWithBuild((_, _) => true),
-            runTimeProvider.overrideWithBuild((_, _) => 1),
-          ],
-        );
-        addTearDown(container.dispose);
-
-        final notifier = container.read(networkDetectionProvider.notifier);
-        notifier.startCheck();
-        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
-
-        notifier.startCheck();
-        await Future.delayed(
-          commonDuration + const Duration(milliseconds: 120),
-        );
-
-        expect(container.read(networkDetectionProvider).ipInfo?.ip, '2.2.2.2');
-        expect(container.read(networkDetectionProvider).isLoading, false);
-
-        await Future.delayed(const Duration(milliseconds: 620));
-
-        expect(container.read(networkDetectionProvider).ipInfo?.ip, '2.2.2.2');
-        expect(container.read(networkDetectionProvider).isLoading, false);
-      },
-    );
-  });
-}
-
-class _DelayedCancelIpAdapter implements HttpClientAdapter {
-  int _requestCount = 0;
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) {
-    _requestCount++;
-    if (_requestCount == 1) {
-      final completer = Completer<ResponseBody>();
-      cancelFuture?.then((_) {
-        Timer(const Duration(milliseconds: 500), () {
-          if (completer.isCompleted) return;
-          completer.completeError(
-            DioException(
-              requestOptions: options,
-              type: DioExceptionType.cancel,
-              error: 'cancelled',
-            ),
+    for (final lateError in [true, false]) {
+      testWidgets(
+        lateError
+            ? 'ignores a canceled stale check after a newer check succeeds'
+            : 'ignores a late successful response from a canceled stale check',
+        (tester) async {
+          final adapter = _ControlledIpAdapter();
+          request.dio.httpClientAdapter = adapter;
+          final container = ProviderContainer(
+            overrides: [
+              initProvider.overrideWithBuild((_, _) => true),
+              runTimeProvider.overrideWithBuild((_, _) => 1),
+            ],
           );
-        });
-      });
-      return completer.future;
-    }
+          try {
+            final notifier = container.read(networkDetectionProvider.notifier);
+            notifier.startCheck();
+            await tester.pump(commonDuration);
+            await tester.pump();
+            expect(adapter.pending, hasLength(1));
 
-    return Future.delayed(
-      const Duration(milliseconds: 10),
-      () => ResponseBody.fromString(
-        '{"ip":"2.2.2.2","country_code":"US"}',
-        200,
-        headers: {
-          Headers.contentTypeHeader: ['application/json'],
+            notifier.startCheck();
+            await tester.pump();
+            expect(adapter.cancellations, 1);
+            expect(container.read(networkDetectionProvider).isLoading, isTrue);
+            await tester.pump(commonDuration);
+            await tester.pump();
+            expect(adapter.pending, hasLength(2));
+
+            await tester.pump(const Duration(milliseconds: 350));
+            expect(container.read(networkDetectionProvider).isLoading, isTrue);
+            expect(container.read(networkDetectionProvider).ipInfo, isNull);
+            adapter.pending[1].complete(
+              ResponseBody.fromString(
+                '{"ip":"2.2.2.2","country_code":"US"}',
+                200,
+                headers: {
+                  Headers.contentTypeHeader: ['application/json'],
+                },
+              ),
+            );
+            await tester.pump(Duration.zero);
+
+            expect(
+              container.read(networkDetectionProvider).ipInfo?.ip,
+              '2.2.2.2',
+            );
+            expect(container.read(networkDetectionProvider).isLoading, isFalse);
+
+            if (lateError) {
+              adapter.pending.first.completeError(
+                DioException(
+                  requestOptions: RequestOptions(),
+                  type: DioExceptionType.cancel,
+                  error: 'late cancellation',
+                ),
+              );
+            } else {
+              adapter.succeed('1.1.1.1');
+            }
+            await tester.pump(Duration.zero);
+
+            expect(
+              container.read(networkDetectionProvider).ipInfo?.ip,
+              '2.2.2.2',
+            );
+            expect(container.read(networkDetectionProvider).isLoading, isFalse);
+          } finally {
+            container.dispose();
+            await tester.pump();
+          }
         },
-      ),
-    );
-  }
-
-  @override
-  void close({bool force = false}) {}
+      );
+    }
+  });
 }
 
 /// Waits for the debounced check to reach the adapter; a fixed delay is too

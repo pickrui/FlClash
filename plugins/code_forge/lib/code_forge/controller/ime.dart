@@ -148,7 +148,7 @@ extension _ControllerIme on CodeForgeController {
     final caret = _selection.extentOffset;
     _supersededPlatformTexts.add(_imeProjectionText);
     _suppressImeSync = true;
-    final removal = _joinSelectionRemoval();
+    final removal = _joinSelectionRemoval(fromSupersededWindow: true);
     _handleInsertion(
       caret,
       text,
@@ -367,14 +367,25 @@ extension _ControllerIme on CodeForgeController {
   }
 
   /// Gboard types over a selection in two batches, which undo as one step.
-  CompoundOperationHandle? _joinSelectionRemoval() {
+  CompoundOperationHandle? _joinSelectionRemoval({
+    bool fromSupersededWindow = false,
+  }) {
     final removal = _selectionRemoval;
     _selectionRemoval = null;
     final follows =
         removal != null &&
         removal.version == _currentVersion &&
-        DateTime.now().difference(removal.at) <
-            const Duration(milliseconds: 150);
+        removal.selection == _selection &&
+        identical(removal.connection, connection) &&
+        removal.operation.target != null &&
+        identical(
+          removal.operation.target,
+          _undoController?.undoStack.lastOrNull,
+        ) &&
+        // Resending the window can delay the same replacement beyond 150 ms.
+        (fromSupersededWindow ||
+            DateTime.now().difference(removal.at) <
+                const Duration(milliseconds: 150));
     return follows ? _undoController?.resumeLast() : null;
   }
 

@@ -129,12 +129,12 @@ void main() {
     matching: find.byTooltip(tooltip),
   );
 
-  Finder scrollable() => find
-      .descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.byType(Scrollable),
-      )
-      .first;
+  Finder allScrollables() => find.descendant(
+    of: find.byType(CustomScrollView),
+    matching: find.byType(Scrollable),
+  );
+
+  Finder scrollable() => allScrollables().first;
 
   String locate() => AppLocalizations.current.locateSelected;
 
@@ -329,18 +329,89 @@ void main() {
     expect(third.left, first.left);
     expect(third.top, greaterThan(first.bottom));
 
-    final position = tester.state<ScrollableState>(scrollable()).position;
+    final position = tester.state<ScrollableState>(scrollable().first).position;
     position.jumpTo(40);
     await tester.pump();
 
     expect(tester.getRect(headerOf('G0')).top, first.top - 40);
-    expect(tester.getRect(headerOf('G1')).top, second.top - 40);
+    expect(tester.getRect(headerOf('G1')).top, second.top);
 
     position.jumpTo(third.top - first.top + 200);
     await tester.pump();
 
     expect(tester.getRect(headerOf('G2')).top, first.top);
   });
+
+  testWidgets('wide columns scroll, locate and fold independently', (
+    tester,
+  ) async {
+    await pumpList(
+      tester,
+      viewMode: ViewMode.desktop,
+      groups: [
+        _group('G0', 40),
+        _group('G1', 40, now: 'G1-25'),
+        _group('G2', 60),
+      ],
+    );
+    final positions = tester
+        .stateList<ScrollableState>(allScrollables())
+        .map((state) => state.position)
+        .toList();
+    expect(positions, hasLength(2));
+    final left = positions[0];
+    final right = positions[1];
+    left.jumpTo(120);
+    await tester.pump();
+    expect(right.pixels, 0);
+    await tester.dragFrom(
+      tester.getCenter(find.byKey(const ValueKey('G1.G1-0')).first),
+      const Offset(0, -220),
+    );
+    await tester.pumpAndSettle();
+    expect(right.pixels, greaterThan(0));
+    expect(left.pixels, 120);
+    await tester.tap(actionOf('G1', locate()));
+    await tester.pumpAndSettle();
+    final card = tester.getRect(find.byKey(const ValueKey('G1.G1-25')).first);
+    expect(card.top, tester.getRect(headerOf('G1')).bottom);
+    expect(left.pixels, 120);
+    await tester.tap(actionOf('G1', AppLocalizations.current.collapseList));
+    await tester.pumpAndSettle();
+    expect(container.read(unfoldSetProvider), isNot(contains('G1')));
+    expect(left.pixels, 120);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'foldable width changes restore each layout without linking columns',
+    (tester) async {
+      await pumpList(tester, viewMode: ViewMode.laptop);
+      var positions = tester
+          .stateList<ScrollableState>(allScrollables())
+          .map((state) => state.position)
+          .toList();
+      expect(positions, hasLength(2));
+      positions[0].jumpTo(120);
+      positions[1].jumpTo(240);
+      await tester.pump();
+      for (var rotation = 0; rotation < 2; rotation++) {
+        tester.view.physicalSize = const Size(500, 900);
+        await tester.pumpAndSettle();
+        expect(allScrollables(), findsOneWidget);
+        tester.view.physicalSize = const Size(900, 700);
+        await tester.pumpAndSettle();
+        positions = tester
+            .stateList<ScrollableState>(allScrollables())
+            .map((state) => state.position)
+            .toList();
+        expect(positions, hasLength(2));
+        expect(positions.map((position) => position.pixels), [120, 240]);
+        expect(tester.takeException(), isNull);
+      }
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
   testWidgets('scroll to selected stays put without a selection', (
     tester,
@@ -495,12 +566,12 @@ void main() {
     );
 
     final barBottom = tester.getRect(find.byType(AppBar)).bottom;
-    expect(tester.getRect(find.byType(ListHeader)).top, barBottom + 8);
+    expect(tester.getRect(find.byType(ListHeader)).top, barBottom + 12);
 
     await tester.drag(find.byType(ProxyCard).first, const Offset(0, -300));
     await tester.pump();
 
-    expect(tester.getRect(find.byType(ListHeader)).top, barBottom + 8);
+    expect(tester.getRect(find.byType(ListHeader)).top, barBottom + 12);
     expect(
       find
           .byType(ProxyCard)
@@ -556,7 +627,7 @@ void main() {
       of: find.text('Far'),
       matching: find.byType(ListHeader),
     );
-    expect(tester.getRect(far).top, barBottom + 8);
+    expect(tester.getRect(far).top, barBottom + 12);
     expect(find.text('G0', skipOffstage: false), findsNothing);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());

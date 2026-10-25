@@ -22,6 +22,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart' show testWidgets;
 
 class _ExitWindow extends Mock implements WindowPort {}
 
@@ -759,6 +760,41 @@ void main() {
       );
     }
   });
+
+  testWidgets(
+    'adaptive applies coalesce edits and retain force on immediate apply',
+    (tester) async {
+      final scheduler = ProfileApplyScheduler();
+      final applied = <bool>[];
+      void apply(bool force) => applied.add(force);
+      scheduler.schedule(apply, force: true);
+      await tester.pump(const Duration(milliseconds: 400));
+      scheduler.schedule(apply, force: false);
+      await tester.pump(const Duration(milliseconds: 599));
+      expect(applied, isEmpty);
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(applied, [true]);
+      scheduler.recordPush(const Duration(seconds: 3));
+      scheduler.schedule(apply, force: false);
+      await tester.pump(const Duration(seconds: 2));
+      expect(applied, [true]);
+      await tester.pump(const Duration(seconds: 1));
+      expect(applied, [true, false]);
+      scheduler.recordPush(const Duration(minutes: 1));
+      scheduler.schedule(apply, force: true);
+      expect(scheduler.takeForce(), isTrue);
+      await tester.pump(const Duration(seconds: 11));
+      expect(applied, [
+        true,
+        false,
+      ], reason: 'an explicit apply consumes the pending timer');
+      scheduler.schedule(apply, force: false);
+      await tester.pump(const Duration(seconds: 9));
+      expect(applied, [true, false]);
+      await tester.pump(const Duration(seconds: 1));
+      expect(applied, [true, false, false]);
+    },
+  );
 
   group('applyProfileAfterRefresh', () {
     test('awaits an immediate forced apply for the current profile', () async {

@@ -10,9 +10,7 @@ import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/models.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/search_field.dart';
-import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/sheet.dart';
-import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -154,78 +152,6 @@ void main() {
     expect(
       tester.getSize(find.byType(SearchField)).height,
       BottomInsetScope.dockedSearchHeight,
-    );
-  });
-
-  testWidgets('a docked field carries its own opaque surface', (tester) async {
-    await openModalSheet(tester);
-
-    final decoration = tester
-        .widget<TextField>(find.byType(TextField))
-        .decoration!;
-    final field = tester.element(find.byType(TextField));
-    final theme = Theme.of(field);
-    final inputTheme = InputDecorationTheme.of(field);
-    final fill = decoration.fillColor ?? inputTheme.fillColor;
-
-    expect(decoration.filled ?? inputTheme.filled, isTrue);
-    expect(
-      fill,
-      SurfaceLevel.floatingOf(theme.colorScheme).colorOf(theme.colorScheme),
-    );
-    expect(fill!.a, 1);
-    // The dock itself paints nothing, so no band spans the sheet behind it.
-    final dock = tester.widget<Material>(
-      find
-          .ancestor(
-            of: find.byType(SearchField),
-            matching: find.byType(Material),
-          )
-          .first,
-    );
-    expect(dock.type, MaterialType.transparency);
-  });
-
-  testWidgets('a docked field stands on glass in place of its fill', (
-    tester,
-  ) async {
-    await openModalSheet(tester, glass: true);
-
-    expect(
-      find.ancestor(
-        of: find.byType(SearchField),
-        matching: find.byType(LiquidGlass),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      InputDecorationTheme.of(tester.element(find.byType(TextField))).filled,
-      isFalse,
-    );
-  });
-
-  testWidgets('a docked field is a pill that strokes only while focused', (
-    tester,
-  ) async {
-    await openModalSheet(tester);
-
-    final field = tester.element(find.byType(TextField));
-    final inputTheme = InputDecorationTheme.of(field);
-    final border = inputTheme.border;
-    final focused = inputTheme.focusedBorder;
-
-    expect(border, isA<AppInputBorder>());
-    expect((border! as AppInputBorder).borderRadius, AppRadius.full);
-    expect(border.borderSide, BorderSide.none);
-    expect(focused, isA<AppInputBorder>());
-    expect((focused! as AppInputBorder).borderRadius, AppRadius.full);
-    expect(focused.borderSide.color, Theme.of(field).colorScheme.primary);
-    final decorator = tester.widget<InputDecorator>(
-      find.byType(InputDecorator),
-    );
-    expect(
-      decorator.decoration.floatingLabelBehavior,
-      FloatingLabelBehavior.never,
     );
   });
 

@@ -567,6 +567,10 @@ _ClashConfig _$ClashConfigFromJson(Map<String, dynamic> json) => _ClashConfig(
   geoUpdateInterval:
       (json['geo-update-interval'] as num?)?.toInt() ??
       defaultGeoUpdateInterval,
+  testUrl: json['test-url'] as String? ?? defaultTestUrl,
+  generalOverrideKeys: json['general-override-keys'] == null
+      ? const {}
+      : generalOverrideKeysFromJson(json['general-override-keys'] as List),
 );
 
 Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
@@ -613,6 +617,10 @@ Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
       'hosts': instance.hosts,
       'geo-auto-update': instance.geoAutoUpdate,
       'geo-update-interval': instance.geoUpdateInterval,
+      'test-url': instance.testUrl,
+      'general-override-keys': instance.generalOverrideKeys
+          .map((e) => _$GeneralOverrideKeyEnumMap[e]!)
+          .toList(),
     };
 
 const _$ModeEnumMap = {
@@ -706,4 +714,12 @@ const _$TunOverrideKeyEnumMap = {
   TunOverrideKey.excludeUid: 'exclude-uid',
   TunOverrideKey.excludeSrcPort: 'exclude-src-port',
   TunOverrideKey.excludeDstPort: 'exclude-dst-port',
+};
+
+const _$GeneralOverrideKeyEnumMap = {
+  GeneralOverrideKey.testUrl: 'test-url',
+  GeneralOverrideKey.unifiedDelay: 'unified-delay',
+  GeneralOverrideKey.tcpConcurrent: 'tcp-concurrent',
+  GeneralOverrideKey.ipv6: 'ipv6',
+  GeneralOverrideKey.geodataLoader: 'geodata-loader',
 };

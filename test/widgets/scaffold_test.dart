@@ -161,7 +161,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'hk');
     expect(queries, ['hk']);
 
-    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byTooltip('Cancel'));
     await tester.pumpAndSettle();
     expect(queries.last, '');
     expect(find.byType(TextField), findsNothing);

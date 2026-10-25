@@ -230,10 +230,12 @@ List<String> normalizeProxyChainProxies(Iterable<String> proxies) {
 class ProxyChainNameScope {
   final Set<String> targetNames;
   final Set<String> dialerNames;
+  final Set<String> groupNames;
 
   const ProxyChainNameScope({
     required this.targetNames,
     required this.dialerNames,
+    this.groupNames = const {},
   });
 
   bool isValid(Iterable<String> proxies) {
@@ -252,7 +254,8 @@ class ProxyChainNameScope {
         }
         continue;
       }
-      if (!targetNames.contains(name)) {
+      if (!targetNames.contains(name) &&
+          !(isExit && groupNames.contains(name))) {
         return name;
       }
       if (!isExit && !dialerNames.contains(name)) {
@@ -261,6 +264,61 @@ class ProxyChainNameScope {
     }
     return null;
   }
+}
+
+bool isProxyChainPolicyGroup(Object? type) =>
+    const {'select', 'url-test', 'fallback', 'load-balance'}.contains(type);
+
+Map<String, List<String>> proxyChainGroupDependencies(Map rawConfig) {
+  final groups = rawConfig['proxy-groups'];
+  if (groups is! List) return {};
+  final proxies = rawConfig['proxies'];
+  final proxyNames = proxies is List
+      ? proxies.whereType<Map>().map((p) => p['name']).whereType<String>()
+      : const <String>[];
+  return {
+    for (final group in groups.whereType<Map>())
+      if (group['name'] case final String name)
+        name: [
+          // Filtered membership is validated by the core with its own regex engine.
+          if ((group['exclude-filter'] ?? '') == '' &&
+              (group['exclude-type'] ?? '') == '') ...[
+            if (group['proxies'] case final List members)
+              ...members.whereType<String>(),
+            if ((group['include-all'] == true ||
+                    group['include-all-proxies'] == true) &&
+                (group['filter'] ?? '') == '')
+              ...proxyNames,
+          ],
+          if (group['empty-fallback'] case final String fallback) fallback,
+        ],
+  };
+}
+
+String? _findProxyChainGroupCycleName(Map<String, List<String>> dependencies) {
+  final done = <String>{};
+  final active = <String>{};
+  for (final name in dependencies.keys) {
+    final path = <(String, Iterator<String>)>[];
+    if (done.contains(name)) continue;
+    active.add(name);
+    path.add((name, (dependencies[name] ?? const <String>[]).iterator));
+    while (path.isNotEmpty) {
+      final (current, children) = path.last;
+      if (!children.moveNext()) {
+        active.remove(current);
+        done.add(current);
+        path.removeLast();
+        continue;
+      }
+      final next = children.current;
+      if (active.contains(next)) return next;
+      if (done.contains(next)) continue;
+      active.add(next);
+      path.add((next, (dependencies[next] ?? const <String>[]).iterator));
+    }
+  }
+  return null;
 }
 
 Map<String, Object?> normalizeProfileProxyMap(Map<String, Object?> proxy) {
@@ -541,6 +599,7 @@ String? _findProxyChainEntryTargetName(Iterable<ProxyChain> proxyChains) {
 String? findProxyChainConflictName(
   Iterable<ProxyChain> proxyChains, {
   Map<String, String> existingRelations = const {},
+  Map<String, List<String>> groupMembers = const {},
 }) {
   final duplicateExitName = _findProxyChainDuplicateExitName(proxyChains);
   if (duplicateExitName != null) {
@@ -570,7 +629,14 @@ String? findProxyChainConflictName(
       }
     }
   }
-  return null;
+  if (groupMembers.isEmpty) return null;
+  return _findProxyChainGroupCycleName({
+    for (final name in {...targetDialerMap.keys, ...groupMembers.keys})
+      name: [
+        if (targetDialerMap[name] case final String dialer) dialer,
+        ...?groupMembers[name],
+      ],
+  });
 }
 
 @freezed
@@ -694,6 +760,57 @@ abstract class ProfileOverrides with _$ProfileOverrides {
 }
 
 extension ProfileOverridesExt on ProfileOverrides {
+  Set<String> get dnsProxies => {
+    for (final (key, servers) in [
+      (DnsOverrideKey.nameserver, dns.nameserver),
+      (DnsOverrideKey.fallback, dns.fallback),
+      (DnsOverrideKey.defaultNameserver, dns.defaultNameserver),
+      (DnsOverrideKey.proxyServerNameserver, dns.proxyServerNameserver),
+      (DnsOverrideKey.directNameserver, dns.directNameserver),
+    ])
+      if (dnsOverrideKeys.contains(key))
+        for (final server in servers) ...dnsServerProxies(server),
+    for (final policy in _pickedPolicies)
+      for (final value in policy.values)
+        for (final server in _dnsPolicyServers(value))
+          ...dnsServerProxies(server),
+  };
+
+  String? get ntpProxy =>
+      ntpOverrideKeys.contains(NtpOverrideKey.dialerProxy) &&
+          ntp.dialerProxy.isNotEmpty
+      ? ntp.dialerProxy
+      : null;
+
+  ProfileOverrides renamedProxies(Map<String, String> names) {
+    List<String> servers(List<String> values) => [
+      for (final value in values) renamedDnsServer(value, names),
+    ];
+    String renamePolicy(String value) {
+      final previous = _dnsPolicyServers(value);
+      final renamed = servers(previous);
+      return stringListEquality.equals(previous, renamed)
+          ? value
+          : renamed.join(', ');
+    }
+
+    Map<String, String> policy(Map<String, String> values) => {
+      for (final entry in values.entries) entry.key: renamePolicy(entry.value),
+    };
+    return copyWith(
+      dns: dns.copyWith(
+        nameserver: servers(dns.nameserver),
+        fallback: servers(dns.fallback),
+        defaultNameserver: servers(dns.defaultNameserver),
+        proxyServerNameserver: servers(dns.proxyServerNameserver),
+        directNameserver: servers(dns.directNameserver),
+        nameserverPolicy: policy(dns.nameserverPolicy),
+        proxyServerNameserverPolicy: policy(dns.proxyServerNameserverPolicy),
+      ),
+      ntp: ntp.copyWith(dialerProxy: names[ntp.dialerProxy] ?? ntp.dialerProxy),
+    );
+  }
+
   Iterable<Map<String, String>> get _pickedPolicies => [
     if (dnsOverrideKeys.contains(DnsOverrideKey.nameserverPolicy))
       dns.nameserverPolicy,
@@ -993,6 +1110,9 @@ extension ProfileCustomOverwriteExt on Profile {
         .toSet();
 
     return copyWith(
+      overrides: type == ProfileType.custom
+          ? overrides.renamedProxies({previousName: nextName})
+          : overrides,
       matchTarget: matchTarget == previousName ? nextName : matchTarget,
       currentGroupName: currentGroupName == previousName
           ? nextName
@@ -1025,6 +1145,9 @@ extension ProfileCustomOverwriteExt on Profile {
     return groupReference ||
         ruleReference ||
         chainReference ||
+        (type == ProfileType.custom &&
+            (overrides.dnsProxies.contains(name) ||
+                overrides.ntpProxy == name)) ||
         matchTarget == name;
   }
 
@@ -1191,6 +1314,83 @@ String? ruleTarget(String value) {
   return targetIndex < 0 ? null : parts[targetIndex].trim();
 }
 
+List<String> _dnsPolicyServers(String value) =>
+    switch (value.splitByMultipleSeparators) {
+      final List<String> servers => servers,
+      _ => [value],
+    };
+
+String _decodeDnsPart(String value) {
+  try {
+    return Uri.decodeComponent(value);
+  } on FormatException {
+    return value;
+  } on ArgumentError {
+    return value;
+  }
+}
+
+(int, int)? _dnsProxyHostRange(String head) {
+  final separator = head.indexOf('://');
+  if (separator <= 0 ||
+      !const {
+        'ts',
+        'tailscale',
+        'et',
+        'easytier',
+      }.contains(head.substring(0, separator).toLowerCase())) {
+    return null;
+  }
+  final start = separator + 3;
+  final end = head.indexOf(RegExp(r'[/?]'), start);
+  return (start, end < 0 ? head.length : end);
+}
+
+List<String> dnsServerProxies(String server) {
+  final hash = server.indexOf('#');
+  final head = hash < 0 ? server : server.substring(0, hash);
+  final parts = hash < 0
+      ? const <String>[]
+      : _decodeDnsPart(server.substring(hash + 1)).split('&');
+  final dialer = parts.where((part) => !part.contains('=')).lastOrNull;
+  return [
+    if (_dnsProxyHostRange(head) case (final start, final end) when end > start)
+      _decodeDnsPart(head.substring(start, end)),
+    if (dialer != null && dialer.isNotEmpty) dialer,
+  ];
+}
+
+String renamedDnsServer(String server, Map<String, String> names) {
+  final hash = server.indexOf('#');
+  var head = hash < 0 ? server : server.substring(0, hash);
+  if (_dnsProxyHostRange(head) case (final start, final end)) {
+    if (names[_decodeDnsPart(head.substring(start, end))] case final name?) {
+      if (name.isEmpty || RegExp(r'[\s/?#@:%\[\]]').hasMatch(name)) {
+        throw const FormatException('Invalid DNS proxy host name');
+      }
+      head = head.replaceRange(start, end, name);
+    }
+  }
+  if (hash < 0) return head;
+  final fragment = server.substring(hash + 1);
+  final parts = _decodeDnsPart(fragment).split('&');
+  final index = parts.lastIndexWhere((part) => !part.contains('='));
+  final name = index < 0 ? null : names[parts[index]];
+  if (name == null || name == parts[index]) return '$head#$fragment';
+  // mihomo decodes the whole fragment before splitting, so &= cannot be escaped.
+  if (name.isEmpty || name.contains(RegExp(r'[&=]'))) {
+    throw const FormatException('Invalid DNS proxy fragment name');
+  }
+  final encoded = Uri.encodeComponent(name);
+  final rawParts = fragment.split('&');
+  if (rawParts.length == parts.length) {
+    rawParts[index] = encoded;
+    return '$head#${rawParts.join('&')}';
+  }
+  parts[index] = name;
+  return '$head#${parts.map((part) => Uri.encodeComponent(part).replaceAll('%3D', '=')).join('&')}';
+}
+
 String? findRawOutboundReference(
   Map<String, dynamic> rawConfig,
   String name, {
@@ -1219,15 +1419,7 @@ String? findRawOutboundReference(
 
   String? scanDnsServers(Object? value, String path) {
     if (value is String) {
-      final fragment = Uri.tryParse(value)?.fragment;
-      if (fragment == null || fragment.isEmpty) return null;
-      // Match mihomo's DNS fragment parser: key=value entries are options,
-      // while the last bare entry selects the outbound (after URI decoding).
-      String? outbound;
-      for (final part in Uri.decodeComponent(fragment).split('&')) {
-        if (!part.contains('=')) outbound = part;
-      }
-      return outbound == name ? path : null;
+      return dnsServerProxies(value).contains(name) ? path : null;
     }
     if (value is List) {
       for (var index = 0; index < value.length; index++) {
@@ -1468,7 +1660,20 @@ extension ProfilesExt on List<Profile> {
             ),
           );
     if (index == -1) {
-      profilesTemp.add(updateProfile);
+      final position = profilesTemp.indexWhere((item) {
+        final order = updateProfile.order;
+        final otherOrder = item.order;
+        if (order != otherOrder) {
+          if (order == null) return false;
+          if (otherOrder == null) return true;
+          return order < otherOrder;
+        }
+        return updateProfile.id < item.id;
+      });
+      profilesTemp.insert(
+        position < 0 ? profilesTemp.length : position,
+        updateProfile,
+      );
     } else {
       profilesTemp[index] = updateProfile;
     }

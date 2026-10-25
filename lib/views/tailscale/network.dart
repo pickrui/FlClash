@@ -25,7 +25,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:fl_clash/ui/qr_code.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'tailscale.dart';
@@ -768,12 +768,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
               color: Colors.white,
               shape: AppShape.lg,
             ),
-            child: QrImageView(
-              data: authUrl,
-              version: QrVersions.auto,
-              size: 180,
-              backgroundColor: Colors.white,
-            ),
+            child: QrCodeView(data: authUrl, size: 180),
           ),
         ),
       ],
@@ -857,7 +852,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
       body: ListView(
         padding: EdgeInsets.fromLTRB(
           16,
-          context.contentTopPadding,
+          context.sectionsTopPadding,
           16,
           24 + context.bottomInset,
         ),

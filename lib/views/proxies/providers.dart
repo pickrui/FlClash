@@ -602,9 +602,9 @@ class _ProviderEditorViewState extends ConsumerState<ProviderEditorView> {
 
   Future<bool> _pop(BuildContext context, EditorContent content) async {
     if (_saving) return false;
-    final choice = await globalState.showMessage(
+    final choice = await globalState.showSaveChanges(
+      context: context,
       title: widget.provider.name,
-      message: TextSpan(text: context.appLocalizations.saveChanges),
     );
     if (choice == null || !context.mounted) return false;
     if (!choice) return true;

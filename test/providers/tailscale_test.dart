@@ -279,6 +279,44 @@ void main() {
   );
 
   group('references', () {
+    test(
+      'an active custom-profile DNS reference protects the tailnet',
+      () async {
+        await action.saveNetwork(home);
+        profiles = const [
+          Profile(
+            id: 1,
+            label: 'DNS fixture',
+            profileType: ProfileType.custom,
+            autoUpdateDuration: Duration.zero,
+            overrides: ProfileOverrides(
+              dns: Dns(nameserver: ['ts://Home']),
+              dnsOverrideKeys: {DnsOverrideKey.nameserver},
+            ),
+          ),
+        ];
+        container.invalidate(profilesProvider);
+        await expectLater(
+          action.removeNetwork(home),
+          throwsA(isA<TailscaleNetworkInUseException>()),
+        );
+        await expectLater(
+          action.saveNetwork(home.copyWith(name: 'Renamed')),
+          throwsA(isA<TailscaleNetworkInUseException>()),
+        );
+        expect(backend.forgotten, isEmpty);
+        expect(networks(), [home]);
+        profiles = [
+          profiles.single.copyWith(
+            overrides: profiles.single.overrides.copyWith(dnsOverrideKeys: {}),
+          ),
+        ];
+        container.invalidate(profilesProvider);
+        await action.removeNetwork(home);
+        expect(networks(), isEmpty);
+      },
+    );
+
     test('a rule target blocks a rename and a removal', () async {
       await action.saveNetwork(home);
       backend.ruleTargets['Home'] = null;

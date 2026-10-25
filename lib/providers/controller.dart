@@ -10,6 +10,9 @@ class AppController {
   DesktopUpdateInstaller? desktopUpdateInstaller;
   final _exitCoordinator = ExitCoordinator();
   final _providerCacheLock = AsyncStorageLock();
+  Map<String, dynamic>? _appliedProfileConfig;
+  SetupParams? _appliedSetupParams;
+  String? _appliedRuntimeConfigDigest;
   // Returned previews can outlive their database revision and be validated later.
   final _providerCacheKeysInUse = <String>{};
   late final BuildContext _context;
@@ -49,7 +52,7 @@ class AppController {
   int _pendingProfileApplies = 0;
   int _runningProfileApplies = 0;
   final ProfileApplyIntent _profileApplyIntent = ProfileApplyIntent();
-  bool _debouncedApplyForce = false;
+  final _profileApplyScheduler = ProfileApplyScheduler();
   bool isAttach = false;
   bool _logsAttached = false;
   bool _isCloudLoginDialogShowing = false;
@@ -93,6 +96,16 @@ class AppController {
     return _coreLifecycleOperations.run(action);
   }
 
+  void _setAppliedSetupState(SetupState? value) {
+    if (value == null) {
+      _appliedProfileConfig = null;
+      _appliedSetupParams = null;
+      _appliedRuntimeConfigDigest = null;
+    }
+    globalState.lastSetupState = value;
+    _ref.read(appliedSetupStateProvider.notifier).value = value;
+  }
+
   void _synchronizeRestoredState({
     required List<Profile> profiles,
     required List<Script> scripts,
@@ -101,7 +114,7 @@ class AppController {
   }) {
     _ref.read(profilesProvider.notifier).replaceFromDatabase(profiles);
     _ref.read(scriptsProvider.notifier).replaceFromDatabase(scripts);
-    globalState.lastSetupState = null;
+    _setAppliedSetupState(null);
     _ref.invalidate(addedRuleStreamProvider);
     _ref.invalidate(setupStateProvider);
     _ref.read(currentProfileIdProvider.notifier).value =

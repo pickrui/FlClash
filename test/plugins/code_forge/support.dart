@@ -11,7 +11,7 @@ import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/services.dart';
 // ignore: depend_on_referenced_packages
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart'
-    show ExternalLibrary;
+    show BaseHandler, ExternalLibrary, NormalTask;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:re_highlight/languages/yaml.dart';
 import 'package:re_highlight/styles/atom-one-light.dart';
@@ -33,16 +33,62 @@ List<String> get _libraryCandidates => [
 ];
 
 Future<void>? _nativeInit;
+final _nativeHandler = _EditorNativeHandler();
+
+class _EditorNativeHandler extends BaseHandler {
+  int pendingFolds = 0;
+  Duration foldDelay = Duration.zero;
+
+  @override
+  Future<S> executeNormal<S, E extends Object>(NormalTask<S, E> task) {
+    if (task.constMeta.debugName != 'folds_compute_all') {
+      return super.executeNormal(task);
+    }
+    pendingFolds++;
+    final delay = foldDelay;
+    return super
+        .executeNormal(task)
+        .then((value) async {
+          if (delay != Duration.zero) await Future<void>.delayed(delay);
+          return value;
+        })
+        .whenComplete(() => pendingFolds--);
+  }
+}
+
+void delayEditorFolds(Duration delay) {
+  final previous = _nativeHandler.foldDelay;
+  _nativeHandler.foldDelay = delay;
+  addTearDown(() => _nativeHandler.foldDelay = previous);
+}
+
+Future<void> settleFolds(WidgetTester tester) async {
+  await tester.pump(const Duration(milliseconds: 400));
+  final elapsed = Stopwatch()..start();
+  do {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await tester.pump(const Duration(milliseconds: 50));
+    if (elapsed.elapsed > const Duration(seconds: 10)) {
+      fail('Native fold computation did not finish');
+    }
+  } while (_nativeHandler.pendingFolds != 0);
+  await tester.pump();
+}
 
 Future<void> initEditorNative() => _nativeInit ??= () async {
   final fixture = Platform.environment['FLCLASH_TEST_SCRIPT_LIB'];
   if (fixture != null) {
-    await RustLib.init(externalLibrary: ExternalLibrary.open(fixture));
+    await RustLib.init(
+      externalLibrary: ExternalLibrary.open(fixture),
+      handler: _nativeHandler,
+    );
     return;
   }
   final overrideDir =
       Platform.environment['FRB_DART_LOAD_EXTERNAL_LIBRARY_NATIVE_LIB_DIR'];
-  if (overrideDir != null) return RustLib.init();
+  if (overrideDir != null) return RustLib.init(handler: _nativeHandler);
   final path = _libraryCandidates.firstWhere(
     (path) => File(path).existsSync(),
     orElse: () => throw StateError(
@@ -54,6 +100,7 @@ Future<void> initEditorNative() => _nativeInit ??= () async {
   );
   await RustLib.init(
     externalLibrary: ExternalLibrary.open(File(path).absolute.path),
+    handler: _nativeHandler,
   );
 }();
 

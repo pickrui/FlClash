@@ -255,6 +255,62 @@ void main() {
     },
   );
 
+  for (final save in [false, true]) {
+    testWidgets(
+      'resource exit cancels without losing changes, then ${save ? 'saves' : 'discards'}',
+      (tester) async {
+        await tester.runAsync(initEditorNative);
+        await tester.pumpWidget(
+          TestApp(
+            overrides: [
+              clashProviderLibraryProvider.overrideWithValue(library),
+              clashProvidersProvider.overrideWith(
+                (_) => Stream.value([_original]),
+              ),
+              viewSizeProvider.overrideWithBuild(
+                (_, _) => const Size(800, 600),
+              ),
+            ],
+            child: const ClashProvidersView(),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Fixture'));
+        await settle(tester, 12);
+        final controller = tester
+            .widget<CodeForge>(find.byType(CodeForge))
+            .controller;
+        controller.replaceText('payload: [example.test]');
+        await tester.pump();
+        final navigator = Navigator.of(tester.element(find.byType(EditorPage)));
+        unawaited(navigator.maybePop());
+        await settle(tester, 12);
+        await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+        await tester.pumpAndSettle();
+        expect(find.byType(EditorPage), findsOneWidget);
+        expect(library.saved, isEmpty);
+        unawaited(navigator.maybePop());
+        await settle(tester, 12);
+        await tester.tap(
+          find.widgetWithText(TextButton, save ? 'Save' : 'Discard'),
+        );
+        await settle(tester, 12);
+        expect(find.byType(EditorPage), findsNothing);
+        if (save) {
+          expect(
+            utf8.decode(library.saved.single.content),
+            'payload: [example.test]',
+          );
+        } else {
+          expect(library.saved, isEmpty);
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('library content save preserves a newer dialog', (tester) async {
     await tester.runAsync(initEditorNative);
     final saving = Completer<void>();

@@ -152,8 +152,13 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		}
 		response.success(handleInitClash(&params))
 	case probeRouteMethod:
-		epoch, picks := routeStamp()
-		response.success(map[string]uint64{"core-epoch": epoch, "picks-version": picks})
+		var hosts []string
+		if len(call.Arguments) != 0 && string(call.Arguments) != "null" {
+			if !decodeMethodArguments(call, response, &hosts) {
+				return
+			}
+		}
+		response.success(probeRouteStatus(hosts))
 	case getProtectedDirectProxyMethod:
 		endpoint, err := handleGetProtectedDirectProxy()
 		if err != nil {
@@ -415,6 +420,12 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if decodeMethodArguments(call, response, &params) {
 			handleUpdateExternalProvider(params.Name, params.Type, response.providerResult)
 		}
+	case replaceProviderFileMethod:
+		params := ProviderFileChange{}
+		if !decodeMethodArguments(call, response, &params) {
+			return
+		}
+		safeGo("replaceProviderFile", func() { response.providerResult(handleReplaceProviderFile(params)) })
 	case sideLoadExternalProviderMethod:
 		params := map[string]string{}
 		if !decodeMethodArguments(call, response, &params) {

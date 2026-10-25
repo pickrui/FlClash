@@ -9,6 +9,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/cloud_account_provider.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/views/cloud/store_payment_dialog.dart';
+import 'package:fl_clash/ui/qr_code.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -36,8 +37,9 @@ class _Payments {
 Future<List<bool?>> _open(
   WidgetTester tester,
   _Payments payments,
-  _Account account,
-) async {
+  _Account account, {
+  bool renderQrcode = false,
+}) async {
   final results = <bool?>[];
   await tester.pumpWidget(
     TestApp(
@@ -52,11 +54,12 @@ Future<List<bool?>> _open(
             onPressed: () async => results.add(
               await showDialog<bool>(
                 context: context,
-                builder: (_) => const StorePaymentDialog(
+                builder: (_) => StorePaymentDialog(
                   init: PaymentInitiation(
                     kind: PaymentInitiationKind.externalUrl,
                     pid: 'fixture-order',
                     url: 'https://example.test/payment',
+                    renderQrcode: renderQrcode,
                   ),
                   payment: 'fixture-gateway',
                 ),
@@ -74,6 +77,26 @@ Future<List<bool?>> _open(
 }
 
 void main() {
+  testWidgets(
+    'an explicit payment QR preserves its destination and close result',
+    (tester) async {
+      final payments = _Payments();
+      final results = await _open(
+        tester,
+        payments,
+        _Account(),
+        renderQrcode: true,
+      );
+      final qr = tester.widget<QrCodeView>(find.byType(QrCodeView));
+      expect(qr.data, 'https://example.test/payment');
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      expect(results, [false]);
+      expect(payments.requests, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('manual checks show pending and failure, then accept payment', (
     tester,
   ) async {

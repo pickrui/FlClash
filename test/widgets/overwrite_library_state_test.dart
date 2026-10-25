@@ -5,6 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/state.dart';
+import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/providers/state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/rule.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -28,11 +33,59 @@ class _SetupAction extends SetupAction {
   void autoApplyProfile() {}
 }
 
+const _inputs = SetupState(
+  profileId: 1,
+  profileLastUpdateDate: null,
+  overwriteType: OverwriteType.standard,
+  addedRules: [],
+  proxyChains: [],
+  profileProxies: [],
+  customProxyGroups: [],
+  customRules: [],
+  script: null,
+  dns: Dns(),
+);
+
+class _ReadyCore extends CoreAction {
+  @override
+  void build() {}
+  @override
+  Future<bool> ensureCoreReady() async => true;
+}
+
+class _ValidatingCore implements CoreController {
+  @override
+  Future<String> validateConfigWithBytes(String data) async => '';
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _ApplyingSetup extends _SetupAction {
+  final pending = <Completer<bool>>[];
+  @override
+  Future<Map<String, dynamic>> getProfile({
+    required SetupState setupState,
+    required ClashConfig patchConfig,
+  }) async => {
+    'rules': ['MATCH,DIRECT'],
+  };
+  @override
+  Future<bool> applyProfile({
+    bool silence = false,
+    bool force = false,
+    FutureOr<void> Function()? preloadInvoke,
+  }) {
+    expect(force, isTrue);
+    return (pending..add(Completer<bool>())).last.future;
+  }
+}
+
 Future<void> _pumpPage(
   WidgetTester tester,
   OverwriteType mode,
   List<Override> overrides, {
   int? scriptId,
+  SetupAction? setup,
 }) async {
   const size = Size(800, 1400);
   await tester.binding.setSurfaceSize(size);
@@ -51,7 +104,7 @@ Future<void> _pumpPage(
             ),
           ],
         ),
-        setupActionProvider.overrideWith(_SetupAction.new),
+        setupActionProvider.overrideWith(() => setup ?? _SetupAction()),
         viewSizeProvider.overrideWithBuild((_, _) => size),
         routingSourceProvider(1).overrideWith((_) async => {}),
         ...overrides,
@@ -63,6 +116,75 @@ Future<void> _pumpPage(
 }
 
 void main() {
+  testWidgets('apply tracks failures, newer edits and the current profile', (
+    tester,
+  ) async {
+    final oldApplied = globalState.lastSetupState;
+    addTearDown(() => globalState.lastSetupState = oldApplied);
+    var inputs = _inputs;
+    final setup = _ApplyingSetup();
+    await _pumpPage(tester, OverwriteType.standard, [
+      coreActionProvider.overrideWith(_ReadyCore.new),
+      coreHandlerProvider.overrideWithValue(_ValidatingCore()),
+      currentProfileIdProvider.overrideWithBuild((_, _) => 1),
+      setupStateProvider(1).overrideWith((_) async => inputs),
+      profileAddedRulesProvider(1)
+          .overrideWithBuild((_, _) => Stream.value([])),
+    ], setup: setup);
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(OverwriteView)),
+    );
+    final apply = find.widgetWithText(
+      FilledButton,
+      AppLocalizations.current.applyNow,
+    );
+    expect(apply, findsOneWidget);
+    Future<void> start(int count) async {
+      await tester.tap(apply);
+      for (var i = 0; i < 30 && setup.pending.length < count; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+      }
+      expect(setup.pending, hasLength(count));
+      expect(tester.widget<FilledButton>(apply).onPressed, isNull);
+    }
+
+    void applied(SetupState value) {
+      globalState.lastSetupState = value;
+      container.read(appliedSetupStateProvider.notifier).value = value;
+    }
+
+    await start(1);
+    inputs = inputs.copyWith(blockQuic: true);
+    container.invalidate(setupStateProvider(1));
+    await tester.pump();
+    applied(_inputs);
+    setup.pending.last.complete(true);
+    await tester.pumpAndSettle();
+    expect(apply, findsOneWidget);
+    await start(2);
+    setup.pending.last.complete(false);
+    await tester.pumpAndSettle();
+    expect(apply, findsOneWidget);
+    await start(3);
+    applied(inputs);
+    setup.pending.last.complete(true);
+    await tester.pumpAndSettle();
+    expect(apply, findsNothing);
+    inputs = inputs.copyWith(blockQuic: false);
+    container.invalidate(setupStateProvider(1));
+    container.read(currentProfileIdProvider.notifier).value = 2;
+    await tester.pumpAndSettle();
+    expect(apply, findsNothing);
+    container.read(currentProfileIdProvider.notifier).value = 1;
+    await tester.pumpAndSettle();
+    expect(apply, findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final scripts in [false, true]) {
     testWidgets(
       '${scripts ? 'scripts' : 'rules'} in overwrite recover from a stream failure',

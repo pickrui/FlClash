@@ -130,7 +130,7 @@ class _DesktopDashboard extends StatelessWidget {
     final scale = DashboardDensityScope.scaleOf(context);
     final base = EdgeInsetsDirectional.fromSTEB(
       16,
-      MediaQuery.paddingOf(context).top,
+      context.contentTopPadding,
       24,
       24 + MediaQuery.paddingOf(context).bottom,
     );
@@ -301,7 +301,7 @@ class _MobileDashboard extends ConsumerWidget {
     final saved = ref.watch(
       dashboardStateProvider.select((state) => state.dashboardWidgets),
     );
-    final top = MediaQuery.paddingOf(context).top + 4;
+    final top = context.contentTopPadding;
     final bottom = 16 + context.bottomInset;
     return CustomScrollView(
       // A viewport per card lays them all out and holds the scroll end still.

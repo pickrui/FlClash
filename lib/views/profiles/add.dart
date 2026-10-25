@@ -24,28 +24,21 @@ import 'package:material_ui/material_ui.dart';
 
 import 'custom_profile.dart';
 
-void showAddProfilePage(BuildContext origin) {
-  final root = globalState.navigatorKey.currentContext ?? origin;
-  showExtend(
-    root,
-    builder: (_, type) => AdaptiveSheetScaffold(
-      type: type,
-      title: origin.appLocalizations.addProfile,
-      body: AddProfileView(parentContext: origin),
-    ),
-  );
-}
+class AddProfileMenu extends ConsumerStatefulWidget {
+  const AddProfileMenu({
+    super.key,
+    required this.parentContext,
+    required this.builder,
+  });
 
-class AddProfileView extends ConsumerStatefulWidget {
   final BuildContext parentContext;
-
-  const AddProfileView({super.key, required this.parentContext});
+  final Widget Function(PopupOpen open) builder;
 
   @override
-  ConsumerState<AddProfileView> createState() => _AddProfileViewState();
+  ConsumerState<AddProfileMenu> createState() => _AddProfileMenuState();
 }
 
-class _AddProfileViewState extends ConsumerState<AddProfileView> {
+class _AddProfileMenuState extends ConsumerState<AddProfileMenu> {
   BuildContext get parentContext => widget.parentContext;
   bool _creating = false;
 
@@ -152,12 +145,8 @@ class _AddProfileViewState extends ConsumerState<AddProfileView> {
         () => profileAction.addCustomProfile(appLocalizations.unnamed),
         silence: false,
       );
-      if (id == null || !context.mounted || !origin.mounted) return;
-      final closingRoute = ModalRoute.of(context);
-      if (closingRoute?.isCurrent != true) return;
-      context.safeNestedPop();
-      await whenRouteSettled(context);
-      if (!origin.mounted) return;
+      if (id == null || !origin.mounted) return;
+      if (ModalRoute.of(origin)?.isCurrent != true) return;
       unawaited(
         BaseNavigator.push(
           origin,
@@ -175,58 +164,47 @@ class _AddProfileViewState extends ConsumerState<AddProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.only(
-        top: context.contentTopPadding,
-        bottom: 16 + context.bottomInset,
-      ),
-      children: [
-        ListItem(
-          leading: const GlyphIcon(AppGlyphs.qrCode),
-          title: Text(appLocalizations.qrcode),
-          subtitle: Text(appLocalizations.qrcodeDesc),
-          onTap: () => _toScan(context),
-        ),
-        ListItem(
-          leading: const GlyphIcon(AppGlyphs.importFile),
-          title: Text(appLocalizations.file),
-          subtitle: Text(appLocalizations.fileDesc),
-          onTap: parentContext.profileAction.addProfileFormFile,
-        ),
-        ListItem(
-          leading: const GlyphIcon(AppGlyphs.cloudDownload),
-          title: Text(appLocalizations.link),
-          subtitle: Text(appLocalizations.linkDesc),
-          onTap: _toAdd,
-        ),
-        if (system.isTV)
-          ListItem(
-            leading: const GlyphIcon(AppGlyphs.devices),
-            title: Text(appLocalizations.sendFromPhone),
-            subtitle: Text(appLocalizations.sendFromPhoneDesc),
-            onTap: _toSendFromPhone,
+    return CommonPopupBox(
+      targetBuilder: widget.builder,
+      popupBuilder: (_) => CommonPopupMenu(
+        items: [
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.qrCode,
+            label: appLocalizations.qrcode,
+            onPressed: () => _toScan(parentContext),
           ),
-        ListItem(
-          leading: const GlyphIcon(AppGlyphs.customize),
-          title: Text(appLocalizations.customProfile),
-          subtitle: Text(appLocalizations.customProfileDesc),
-          onTap: _creating ? null : () => _toAddCustom(context),
-        ),
-        CommonPopupBox(
-          targetBuilder: (open) => ListItem(
-            leading: const GlyphIcon(AppGlyphs.importFile),
-            title: Text(appLocalizations.importConfig),
-            subtitle: Text(appLocalizations.importConfigDesc),
-            onTap: () => open(),
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.importFile,
+            label: appLocalizations.file,
+            onPressed: parentContext.profileAction.addProfileFormFile,
           ),
-          popupBuilder: (_) => CommonPopupMenu(
-            items: customImportMenuItems(
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.cloudDownload,
+            label: appLocalizations.link,
+            onPressed: _toAdd,
+          ),
+          if (system.isTV)
+            CommonPopupMenuItem(
+              glyph: AppGlyphs.devices,
+              label: appLocalizations.sendFromPhone,
+              onPressed: _toSendFromPhone,
+            ),
+          CommonPopupMenuItem(
+            section: const CommonPopupMenuSection(),
+            glyph: AppGlyphs.customize,
+            label: appLocalizations.customProfile,
+            onPressed: _creating ? null : () => _toAddCustom(parentContext),
+          ),
+          CommonPopupMenuItem(
+            glyph: AppGlyphs.importFile,
+            label: appLocalizations.importConfig,
+            subItems: customImportMenuItems(
               appLocalizations,
-              (source) => _toAddCustom(context, source),
+              (source) => _toAddCustom(parentContext, source),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

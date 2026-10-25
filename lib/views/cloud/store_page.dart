@@ -562,7 +562,7 @@ class _PlanPickerSheet extends StatelessWidget {
           shrinkWrap: true,
           padding: EdgeInsets.fromLTRB(
             16,
-            context.contentTopPadding,
+            context.sectionsTopPadding,
             16,
             24 + context.bottomInset,
           ),

@@ -431,87 +431,11 @@ extension SetupControllerExt on AppController {
     });
   }
 
-  Future<void> autoUpdateIpv6() async {
-    final networkSetting = _ref.read(networkSettingProvider);
-    if (!networkSetting.autoSetIpv6) {
-      return;
-    }
-    final generation = ++_autoIpv6CheckGeneration;
-    if (networkSetting.manualIpv6 == null) {
-      final currentIpv6 = _ref.read(
-        patchClashConfigProvider.select((state) => state.ipv6),
-      );
-      _ref
-          .read(networkSettingProvider.notifier)
-          .update((state) => state.copyWith(manualIpv6: currentIpv6));
-    }
-    final supported = await hasGlobalIpv6();
-    if (generation != _autoIpv6CheckGeneration) {
-      return;
-    }
-    final stillAutoSetIpv6 = _ref.read(
-      networkSettingProvider.select((state) => state.autoSetIpv6),
-    );
-    if (!stillAutoSetIpv6) {
-      return;
-    }
-    final current = _ref.read(
-      patchClashConfigProvider.select((state) => state.ipv6),
-    );
-    if (current == supported) {
-      return;
-    }
-    _ref
-        .read(patchClashConfigProvider.notifier)
-        .update((state) => state.copyWith(ipv6: supported));
-  }
-
-  Future<void> setAutoIpv6(bool value) async {
-    final currentIpv6 = _ref.read(
-      patchClashConfigProvider.select((state) => state.ipv6),
-    );
-    final manualIpv6 = _ref.read(
-      networkSettingProvider.select((state) => state.manualIpv6),
-    );
-    _ref
-        .read(networkSettingProvider.notifier)
-        .setAutoIpv6Enabled(value, currentIpv6: currentIpv6);
-    if (value) {
-      await autoUpdateIpv6();
-      return;
-    }
-    if (manualIpv6 == null || manualIpv6 == currentIpv6) {
-      return;
-    }
-    _ref
-        .read(patchClashConfigProvider.notifier)
-        .update((state) => state.copyWith(ipv6: manualIpv6));
-  }
-
-  void addCheckIp() {
-    _ref.read(checkIpNumProvider.notifier).add();
-  }
-
-  void tryCheckIp() {
-    final isTimeout = _ref.read(
-      networkDetectionProvider.select(
-        (state) => state.ipInfo == null && state.isLoading == false,
-      ),
-    );
-    if (!isTimeout) {
-      return;
-    }
-    _ref.read(checkIpNumProvider.notifier).add();
-  }
-
   void applyProfileDebounce({bool silence = false, bool force = false}) {
-    _debouncedApplyForce = _debouncedApplyForce || force;
     _coreLifecycleOperations.detached(
-      () => debouncer.call(FunctionTag.applyProfile, () {
-        final forced = _debouncedApplyForce;
-        _debouncedApplyForce = false;
-        return applyProfile(silence: silence, force: forced);
-      }),
+      () => _profileApplyScheduler.schedule((forced) async {
+        await applyProfile(silence: silence, force: forced);
+      }, force: force),
     );
   }
 
@@ -538,8 +462,9 @@ extension SetupControllerExt on AppController {
     FutureOr<void> Function()? preloadInvoke,
   }) {
     if (startupRecovery.automaticSetupPaused) return Future.value(false);
+    final pendingForce = _profileApplyScheduler.takeForce();
     _profileApplyIntent.merge(
-      force: force,
+      force: force || pendingForce,
       preloadInvoke: preloadInvoke,
       resume: resume,
     );
@@ -955,19 +880,32 @@ extension SetupControllerExt on AppController {
     final latestProfile = _ref.read(profilesProvider).getProfile(profileId);
     final updatedSetupParams = SetupParams(
       selectedMap: latestProfile?.selectedMap ?? const {},
-      testUrl: _ref.read(appSettingProvider).testUrl,
+      testUrl: realPatchConfig.effectiveTestUrl,
       rawConfig: isoixCloud && !system.isAndroid ? yamlString : '',
       suspendOnIdle: _ref.read(networkSettingProvider).suspendOnIdle,
     );
+    String? runtimeConfigDigest;
     final appliedDigest = system.isAndroid
         ? appliedConfigDigest(yamlString, updatedSetupParams)
         : null;
     // An engine attaching to a running service adopts the config it runs:
     // pushing the same one again would reload every group and provider.
-    final adopted =
+    var adopted =
         resume &&
         appliedDigest != null &&
         appliedDigest == await preferences.getAppliedConfigMd5();
+    if (adopted) {
+      try {
+        runtimeConfigDigest = ProviderContentFiles.digest(
+          await ProviderContentFiles.read(
+            await appPath.configFilePath,
+            ProviderContentFiles.configLimit,
+          ),
+        );
+      } catch (_) {
+        adopted = false;
+      }
+    }
     if (!adopted) {
       await _validateConfigYaml(yamlString);
       if (!isCurrentApply()) return false;
@@ -979,9 +917,12 @@ extension SetupControllerExt on AppController {
         );
         if (!isCurrentApply()) return false;
         await writeEncryptedProfileSnapshot(configFilePath, encryptedBytes);
+        runtimeConfigDigest = ProviderContentFiles.digest(encryptedBytes);
       } else if (!isoixCloud) {
         await durableCreateDirectory(File(configFilePath).parent.path);
-        await durableWriteBytes(configFilePath, utf8.encode(yamlString));
+        final bytes = utf8.encode(yamlString);
+        await durableWriteBytes(configFilePath, bytes);
+        runtimeConfigDigest = ProviderContentFiles.digest(bytes);
       }
     }
 
@@ -998,11 +939,13 @@ extension SetupControllerExt on AppController {
           await preloadInvoke?.call();
           return '';
         }
+        final watch = Stopwatch()..start();
         final result = await coreController.setupConfig(
           params: updatedSetupParams,
           preloadInvoke: preloadInvoke,
         );
         if (result.isNotEmpty) throw result;
+        _profileApplyScheduler.recordPush(watch.elapsed);
         return result;
       }
 
@@ -1020,7 +963,10 @@ extension SetupControllerExt on AppController {
     if (!isCurrentApply()) {
       return false;
     }
-    globalState.lastSetupState = setupState;
+    _appliedProfileConfig = config;
+    _appliedSetupParams = updatedSetupParams;
+    _appliedRuntimeConfigDigest = runtimeConfigDigest;
+    _setAppliedSetupState(setupState);
     _ref.read(appliedConfigCountsProvider.notifier).applied(profileId, config);
     if (system.isAndroid) {
       final shared = await this.sharedState;

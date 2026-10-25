@@ -278,6 +278,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       globalState.showMessage(
         title: appLocalizations.tip,
         message: TextSpan(text: message),
+        cancelable: false,
       );
       return;
     }
@@ -317,11 +318,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         if (context.mounted) await _handleSaveEdit(context, data);
       },
       onPop: (context, _, content) async {
-        final confirmed = await globalState.showMessage(
+        final confirmed = await globalState.showSaveChanges(
+          context: context,
           title: title,
-          message: TextSpan(text: appLocalizations.hasCacheChange),
-          confirmText: appLocalizations.save,
-          cancelText: appLocalizations.discard,
         );
         if (!context.mounted || confirmed == null) return false;
         if (!confirmed) return true;
@@ -352,11 +351,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   Future<bool> _handleBack() async {
     if (_saving || _fileBusy) return false;
     if (_fileData == null) return true;
-    final save = await globalState.showMessage(
+    final save = await globalState.showSaveChanges(
+      context: context,
       title: appLocalizations.tip,
-      message: TextSpan(text: appLocalizations.fileIsUpdate),
-      confirmText: appLocalizations.save,
-      cancelText: appLocalizations.discard,
+      message: appLocalizations.fileIsUpdate,
     );
     if (!mounted || save == null) return false;
     if (!save) return true;
@@ -500,7 +498,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                             SliverPadding(
                               padding: EdgeInsets.fromLTRB(
                                 16,
-                                context.contentTopPadding,
+                                context.sectionsTopPadding,
                                 16,
                                 0,
                               ),

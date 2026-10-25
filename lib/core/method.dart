@@ -58,6 +58,7 @@ enum CoreMethod {
   updateGeoData,
   updateExternalProvider,
   sideLoadExternalProvider,
+  replaceProviderFile,
   startLog,
   stopLog,
   startListener,

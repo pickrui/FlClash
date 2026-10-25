@@ -724,10 +724,13 @@ class Request {
     'https://api.myip.com': IpInfo.fromMyIpJson,
     'https://ipapi.co/json': IpInfo.fromIpApiCoJson,
     'https://ident.me/json': IpInfo.fromIdentMeJson,
-    'http://ip-api.com/json': IpInfo.fromIpAPIJson,
     'https://api.ip.sb/geoip': IpInfo.fromIpSbJson,
     'https://ipinfo.io/json': IpInfo.fromIpInfoIoJson,
   };
+
+  List<String> get ipProbeHosts => [
+    for (final url in _ipInfoSources.keys) Uri.parse(url).host,
+  ];
 
   Future<Result<IpInfo?>> checkIp({CancelToken? cancelToken}) async {
     final token = cancelToken ?? CancelToken();
@@ -756,6 +759,8 @@ class Request {
             responseType: ResponseType.json,
             // A connection from the previous VPN route must not be reused.
             persistentConnection: false,
+            // Route fingerprints cover these fixed hosts, not redirect targets.
+            followRedirects: false,
           ),
         );
         if (response.statusCode == HttpStatus.ok && response.data != null) {

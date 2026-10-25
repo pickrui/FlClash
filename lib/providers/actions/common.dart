@@ -209,7 +209,7 @@ extension CommonControllerExt on AppController {
               ? appLocalizations.profileParseErrorDesc
               : title ?? appLocalizations.tip,
           message: TextSpan(text: message),
-          cancelable: !isConfigValidationError,
+          cancelable: false,
         );
       }
       return null;

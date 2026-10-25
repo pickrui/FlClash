@@ -177,7 +177,7 @@ extension CoreControllerExt on AppController {
   Future<bool> _reinitializedCoreReady() async {
     if (!await _isCoreInitialized()) return false;
     final hadProfile = globalState.lastSetupState != null;
-    globalState.lastSetupState = null;
+    _setAppliedSetupState(null);
     // An apply running now may still fail or be superseded, so the reload
     // stays forced until one of them sets the state again.
     if (hadProfile) {

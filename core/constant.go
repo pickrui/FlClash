@@ -89,6 +89,7 @@ type Traffic struct {
 }
 
 type ExternalProvider struct {
+	ContentVersion   string                     `json:"content-version,omitempty"`
 	Name             string                     `json:"name"`
 	Type             string                     `json:"type"`
 	VehicleType      string                     `json:"vehicle-type"`
@@ -150,6 +151,7 @@ const (
 	updateGeoDataMethod            CoreMethod = "updateGeoData"
 	updateExternalProviderMethod   CoreMethod = "updateExternalProvider"
 	sideLoadExternalProviderMethod CoreMethod = "sideLoadExternalProvider"
+	replaceProviderFileMethod      CoreMethod = "replaceProviderFile"
 	startLogMethod                 CoreMethod = "startLog"
 	stopLogMethod                  CoreMethod = "stopLog"
 	startListenerMethod            CoreMethod = "startListener"

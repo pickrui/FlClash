@@ -60,6 +60,7 @@ void main() {
         final action = _DelayAction();
         final container = ProviderContainer(
           overrides: [
+            currentProfileProvider.overrideWith((_) => null),
             groupsProvider.overrideWithBuild((_, _) => [group]),
             selectedMapProvider.overrideWith((_) => {'Paged': 'Node-500'}),
             proxiesActionProvider.overrideWith(() => action),
@@ -357,6 +358,7 @@ void main() {
       const url = 'https://example.com';
       final container = ProviderContainer(
         overrides: [
+          currentProfileProvider.overrideWith((_) => null),
           realSelectedProxyStateProvider('Node')
               .overrideWith((_) => const SelectedProxyState(proxyName: 'Node')),
           getSelectedProxyNameProvider('Group').overrideWith((_) => ''),
@@ -433,6 +435,7 @@ void main() {
       final action = _DelayAction();
       final container = ProviderContainer(
         overrides: [
+          currentProfileProvider.overrideWith((_) => null),
           proxiesActionProvider.overrideWith(() => action),
           realSelectedProxyStateProvider('Node')
               .overrideWith((_) => const SelectedProxyState(proxyName: 'Node')),
@@ -567,6 +570,7 @@ void main() {
       final action = _DelayAction();
       final container = ProviderContainer(
         overrides: [
+          currentProfileProvider.overrideWith((_) => null),
           proxiesActionProvider.overrideWith(() => action),
           getSelectedProxyNameProvider('Group').overrideWith((_) => ''),
           getDelayProvider(
@@ -632,6 +636,7 @@ void main() {
   ) async {
     final container = ProviderContainer(
       overrides: [
+        currentProfileProvider.overrideWith((_) => null),
         for (final name in ['Group', 'Other'])
           getSelectedProxyNameProvider(name).overrideWith((_) => ''),
       ],

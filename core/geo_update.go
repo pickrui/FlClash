@@ -593,6 +593,7 @@ func replaceGeoData(ctx context.Context, geoType string, path string, data []byt
 	case "GEOSITE":
 		geodata.ClearGeoSiteCache()
 	}
+	probeRouteRevision.Add(1)
 	return nil
 }
 

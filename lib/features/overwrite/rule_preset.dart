@@ -160,11 +160,11 @@ class _RulePresetSheetState extends State<RulePresetSheet> {
           controller: _scroll,
           shrinkWrap: true,
           padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-            top: context.contentTopPadding,
+            top: context.sectionsTopPadding,
             bottom: 20 + context.bottomInset,
           ),
           children: [
-            ErrorBanner(message: _error),
+            ErrorBanner(message: _error, sectioned: true),
             generateSection(
               footer: l10n.rulePresetInsertHint,
               items: [

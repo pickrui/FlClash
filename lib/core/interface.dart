@@ -88,6 +88,11 @@ mixin CoreInterface {
 
   Future<String> updateGeoData(UpdateGeoDataParams params);
 
+  Future<String> replaceProviderFile(
+    ProviderFileChange change, {
+    bool rollback = false,
+  });
+
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,
@@ -480,6 +485,15 @@ abstract class CoreHandlerInterface with CoreInterface {
       arguments: params.toJson(),
     );
   }
+
+  @override
+  Future<String> replaceProviderFile(
+    ProviderFileChange change, {
+    bool rollback = false,
+  }) => _invokeRequiredMethod<String>(
+    method: CoreMethod.replaceProviderFile,
+    arguments: change.toJson(rollback: rollback),
+  );
 
   @override
   Future<String> sideLoadExternalProvider({

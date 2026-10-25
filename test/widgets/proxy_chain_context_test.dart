@@ -11,6 +11,7 @@ void main() {
     final context = buildProxyChainRawContext(
       customNodesLabel: 'Custom',
       otherNodesLabel: 'Other',
+      policyGroupsLabel: 'Groups',
       rawConfig: {
         'proxies': [
           {'name': 'Original Node', 'type': 'ss'},
@@ -33,12 +34,30 @@ void main() {
     expect(context.nameScope.targetNames, contains('Override Node'));
     expect(context.nameScope.dialerNames, contains('Override Group'));
     expect(context.existingRelations, isEmpty);
+    expect(context.sections.first.proxies, ['Override Group']);
+    expect(
+      context.nameScope.isValid(['Override Group', 'Original Node']),
+      isTrue,
+    );
+    expect(
+      context.nameScope.isValid(['Original Node', 'Override Group']),
+      isTrue,
+    );
+    expect(
+      context.nameScope.isValid([
+        'Original Node',
+        'Override Group',
+        'Override Node',
+      ]),
+      isFalse,
+    );
   });
 
   test('raw proxy-chain context excludes provider-expanded nodes', () {
     final context = buildProxyChainRawContext(
       customNodesLabel: 'Custom',
       otherNodesLabel: 'Other',
+      policyGroupsLabel: 'Groups',
       rawConfig: {
         'proxies': [
           {'name': 'Node A', 'type': 'ss'},
@@ -81,6 +100,7 @@ void main() {
       final context = buildProxyChainRawContext(
         customNodesLabel: 'Custom',
         otherNodesLabel: 'Other',
+        policyGroupsLabel: 'Groups',
         rawConfig: {
           'proxies': [
             {'name': 'A', 'type': 'ss'},
@@ -92,7 +112,7 @@ void main() {
       return context.sections.expand((section) => section.proxies).toSet();
     }
 
-    expect(candidatesFor([proxy, auto]), {'A'});
-    expect(candidatesFor([auto, proxy]), {'A'});
+    expect(candidatesFor([proxy, auto]), {'A', 'Proxy', 'Auto'});
+    expect(candidatesFor([auto, proxy]), {'A', 'Proxy', 'Auto'});
   });
 }

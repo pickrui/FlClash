@@ -40,6 +40,7 @@ func toExternalProvider(p cp.Provider) (*ExternalProvider, error) {
 	switch p := p.(type) {
 	case *provider.ProxySetProvider:
 		return &ExternalProvider{
+			ContentVersion:   providerFileVersion(p),
 			Name:             p.Name(),
 			Type:             p.Type().String(),
 			VehicleType:      p.VehicleType().String(),
@@ -50,12 +51,13 @@ func toExternalProvider(p cp.Provider) (*ExternalProvider, error) {
 		}, nil
 	case *rp.RuleSetProvider:
 		return &ExternalProvider{
-			Name:        p.Name(),
-			Type:        p.Type().String(),
-			VehicleType: p.VehicleType().String(),
-			Count:       p.Count(),
-			UpdateAt:    p.UpdatedAt(),
-			Path:        p.Vehicle().Path(),
+			ContentVersion: providerFileVersion(p),
+			Name:           p.Name(),
+			Type:           p.Type().String(),
+			VehicleType:    p.VehicleType().String(),
+			Count:          p.Count(),
+			UpdateAt:       p.UpdatedAt(),
+			Path:           p.Vehicle().Path(),
 		}, nil
 	default:
 		return nil, errors.New("not external provider")
@@ -76,6 +78,7 @@ func sideUpdateExternalProvider(p cp.Provider, data []byte) error {
 }
 
 func retireCurrentProviders() {
+	resetProviderFileRevisions()
 	externalProviders := getExternalProvidersRaw()
 	for _, provider := range tunnel.ProvidersSnapshot() {
 		closeProvider(provider)
@@ -153,7 +156,9 @@ func lookupExternalProviderLocked(name, providerType string) (cp.Provider, bool)
 }
 
 func handleGetExternalProvider(externalProviderName, providerType string) *ExternalProvider {
-	externalProvider, exist := lookupExternalProvider(externalProviderName, providerType)
+	runLock.Lock()
+	defer runLock.Unlock()
+	externalProvider, exist := lookupExternalProviderLocked(externalProviderName, providerType)
 	if !exist {
 		return nil
 	}

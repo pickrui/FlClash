@@ -48,14 +48,16 @@ class _Detection extends NetworkDetection {
   NetworkDetectionState build() => initial;
 
   @override
-  void startCheck() => checks++;
+  void startCheck({bool automatic = false}) => checks++;
 }
 
 class _Core implements CoreController {
   var probes = 0;
 
   @override
-  Future<Map<String, dynamic>> getProbeRoute() async {
+  Future<Map<String, dynamic>> getProbeRoute({
+    List<String> hosts = const [],
+  }) async {
     probes++;
     return {'core-epoch': 1, 'picks-version': 1};
   }

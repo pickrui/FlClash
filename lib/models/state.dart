@@ -291,6 +291,8 @@ abstract class SetupState with _$SetupState {
     @Default(false) bool disableKeepAlive,
     @Default(0) int routingMark,
     @Default(GeodataLoader.memconservative) GeodataLoader geodataLoader,
+    @Default({}) Set<GeneralOverrideKey> generalOverrideKeys,
+    @Default(defaultTestUrl) String testUrl,
   }) = _SetupState;
 }
 
@@ -418,6 +420,11 @@ extension SetupStateExt on SetupState {
         keepAliveIdle != lastSetupState.keepAliveIdle ||
         disableKeepAlive != lastSetupState.disableKeepAlive ||
         routingMark != lastSetupState.routingMark ||
-        geodataLoader != lastSetupState.geodataLoader;
+        geodataLoader != lastSetupState.geodataLoader ||
+        testUrl != lastSetupState.testUrl ||
+        !const SetEquality<GeneralOverrideKey>().equals(
+          generalOverrideKeys,
+          lastSetupState.generalOverrideKeys,
+        );
   }
 }

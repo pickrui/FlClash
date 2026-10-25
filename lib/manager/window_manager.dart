@@ -425,8 +425,12 @@ class _WindowHeaderState extends ConsumerState<WindowHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final backdropOpacity = ref.watch(isMobileViewProvider)
+        ? null
+        : ref.watch(windowBlurProvider);
     return WindowHeaderBar(
       height: kHeaderHeight,
+      backdropOpacity: backdropOpacity,
       onDragStart: desktopWindow.startDragging,
       onDoubleTap: caption.toggleMaximized,
       title: system.isMacOS ? const Text(appName) : null,
@@ -451,6 +455,7 @@ class WindowHeaderBar extends StatelessWidget {
     required this.height,
     required this.onDragStart,
     required this.onDoubleTap,
+    this.backdropOpacity,
     this.title,
     this.actions,
   });
@@ -458,12 +463,16 @@ class WindowHeaderBar extends StatelessWidget {
   final double height;
   final VoidCallback onDragStart;
   final VoidCallback onDoubleTap;
+  final double? backdropOpacity;
   final Widget? title;
   final Widget? actions;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final backdropOpacity = this.backdropOpacity;
     return Material(
+      color: backdropOpacity != null ? Colors.transparent : null,
       shape: Border(bottom: Divider.createBorderSide(context)),
       child: SizedBox(
         height: height,
@@ -476,7 +485,13 @@ class WindowHeaderBar extends StatelessWidget {
                   onDragStart();
                 },
                 onDoubleTap: onDoubleTap,
-                child: ColoredBox(color: context.colorScheme.chromeSurface),
+                child: ColoredBox(
+                  color: backdropOpacity != null
+                      ? colorScheme.chromeSurface.withValues(
+                          alpha: backdropOpacity,
+                        )
+                      : colorScheme.chromeSurface,
+                ),
               ),
             ),
             if (title != null)

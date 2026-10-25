@@ -50,6 +50,11 @@ final _noShine = List<double>.unmodifiable(
 final _flatProfile = List<double>.unmodifiable(
   List<double>.filled(_profileTurns, 0),
 );
+// The size of uPills in shaders/liquid_glass.frag.
+const _gooPills = 6;
+final _noGoo = List<double>.unmodifiable(
+  List<double>.filled(10 * _gooPills + 8, 0),
+);
 
 /// How much of iOS's glass the panes draw; standard leaves out what costs most.
 enum LiquidGlassQuality { standard, ultra }
@@ -999,6 +1004,51 @@ final class LiquidGlassOutline extends LiquidGlassShape {
   final Path path;
 }
 
+/// `GooSurface`'s pills, outlined by [path], each blending into the one before.
+/// With [firstRadius] the first is a rectangle rounded so, not a pill.
+final class LiquidGlassGoo extends LiquidGlassShape {
+  const LiquidGlassGoo(this.path, this.pills, this.blends, {this.firstRadius})
+    : assert(pills.length <= _gooPills);
+
+  final Path path;
+  final List<Rect> pills;
+  final List<double> blends;
+  final double? firstRadius;
+
+  List<double> get _uniforms {
+    final octants = [
+      for (var index = 0; index < _gooPills; index++)
+        index < pills.length
+            ? _superellipseOctant(
+                pills[index].longestSide / 2,
+                pills[index].shortestSide / 2,
+              )
+            : _noOctant,
+    ];
+    return [
+      for (var index = 0; index < _gooPills; index++)
+        if (index < pills.length) ...[
+          pills[index].center.dx,
+          pills[index].center.dy,
+          pills[index].width / 2,
+          pills[index].height / 2,
+        ] else ...const [0.0, 0.0, 0.0, 0.0],
+      pills.length.toDouble(),
+      for (var index = 1; index < _gooPills; index++)
+        index < pills.length ? blends[index - 1] : 0.0,
+      firstRadius ?? 0.0,
+      0.0,
+      for (final (:n, :joint, :radius, center: _) in octants) ...[
+        n,
+        joint.dx,
+        joint.dy,
+        radius,
+      ],
+      for (final octant in octants) ...[octant.center.dx, octant.center.dy],
+    ];
+  }
+}
+
 /// A pane for a render object that shapes the glass itself, as a morph does.
 class LiquidGlassPane {
   LiquidGlassPane(this.onReady);
@@ -1009,7 +1059,7 @@ class LiquidGlassPane {
   Path? _profiled;
   List<double> _profile = _flatProfile;
 
-  /// A pane moving within [hold] keeps one capture.
+  /// A pane keeps its capture while moving; steady frost stays in host pixels.
   void paint(
     PaintingContext context,
     Rect rect, {
@@ -1018,6 +1068,8 @@ class LiquidGlassPane {
     List<BoxShadow> shadows = const [],
     LiquidGlassGlow glow = LiquidGlassGlow.none,
     Rect? hold,
+    double? holdFrost,
+    bool steadyFrost = false,
     LiquidGlassRim? rim,
     Object? group,
   }) {
@@ -1033,13 +1085,14 @@ class LiquidGlassPane {
           bottomRight: radius.bottomRight.clamp(maximum: limit),
         );
         _profiled = null;
-        if (hold == null) {
+        if (hold == null && shadows.isNotEmpty) {
           _paintShadows(context.canvas, rect, corners, shadows);
         }
         pane
           ..corners = corners
           ..outline = null
-          ..profile = _flatProfile;
+          ..profile = _flatProfile
+          ..goo = _noGoo;
       case LiquidGlassOutline(:final path):
         assert(shadows.isEmpty, 'An outlined pane casts none');
         if (!identical(path, _profiled)) {
@@ -1049,7 +1102,16 @@ class LiquidGlassPane {
         pane
           ..corners = BorderRadius.zero
           ..outline = path.shift(rect.topLeft)
-          ..profile = _profile;
+          ..profile = _profile
+          ..goo = _noGoo;
+      case final LiquidGlassGoo goo:
+        assert(shadows.isEmpty, 'A pane of goo casts none');
+        _profiled = null;
+        pane
+          ..corners = BorderRadius.zero
+          ..outline = goo.path.shift(rect.topLeft)
+          ..profile = _flatProfile
+          ..goo = goo._uniforms;
     }
     pane
       ..program = _GlassProgram.request(onReady)
@@ -1057,10 +1119,12 @@ class LiquidGlassPane {
       ..style = style
       ..glow = glow
       ..hold = hold
+      ..holdFrost = holdFrost
+      ..steadyFrost = steadyFrost
       ..rim = rim
       ..group = group;
     context.addLayer(pane);
-    if (hold != null) {
+    if (hold != null && shadows.isNotEmpty) {
       _paintShadows(context.canvas, rect, pane.corners, shadows);
     }
   }
@@ -1078,9 +1142,6 @@ class LiquidGlassPane {
     BorderRadius corners,
     List<BoxShadow> shadows,
   ) {
-    if (shadows.isEmpty) {
-      return;
-    }
     final shape = AppShape.of(corners);
     final reach = shadows.fold(
       0.0,
@@ -1164,9 +1225,12 @@ class _LiquidGlassLayer extends Layer {
   BorderRadius corners = BorderRadius.zero;
   Path? outline;
   List<double> profile = _flatProfile;
+  List<double> goo = _noGoo;
   LiquidGlassStyle style = const LiquidGlassStyle(tint: Colors.transparent);
   LiquidGlassGlow glow = LiquidGlassGlow.none;
   Rect? hold;
+  double? holdFrost;
+  bool steadyFrost = false;
   LiquidGlassRim? rim;
   Object? group;
   _Placement? _held;
@@ -1239,9 +1303,14 @@ class _LiquidGlassLayer extends Layer {
     style.rimFocus,
     style.rimAdded,
     style._hairlineSide,
-    outline == null ? 0.0 : 1.0,
+    outline == null
+        ? 0.0
+        : identical(goo, _noGoo)
+        ? 1.0
+        : 2.0,
     ...profile,
     ...rim?._uniforms(rect.size, corners.topLeft.x) ?? _noShine,
+    ...goo,
   ];
 
   void _addFrost(ui.SceneBuilder builder) {
@@ -1349,6 +1418,15 @@ class _LiquidGlassLayer extends Layer {
     final haze = mapping[_hazeShare];
     if (haze > 0) {
       drawSlot(_hazeSample, Paint()..color = Color.fromRGBO(0, 0, 0, haze));
+    }
+    final veil = Color.from(
+      alpha: mapping[_veilColor + 3],
+      red: mapping[_veilColor],
+      green: mapping[_veilColor + 1],
+      blue: mapping[_veilColor + 2],
+    );
+    if (veil.a > 0) {
+      canvas.drawPaint(Paint()..color = veil);
     }
     _drawFrost(canvas, overCapture: true);
     canvas.restore();
@@ -1502,11 +1580,18 @@ List<double> _cornerCurve(double halfWidth, double halfHeight, double radius) {
 
 typedef _Octant = ({double n, Offset joint, Offset center, double radius});
 
+const _Octant _noOctant = (
+  n: 0,
+  joint: Offset.zero,
+  center: Offset.zero,
+  radius: 0,
+);
+
 /// ComputeOctant in impeller/geometry/round_superellipse_param.cc, which the
 /// shader's cornerInset follows.
 _Octant _superellipseOctant(double a, double radius) {
   if (radius <= 1e-3) {
-    return (n: 0, joint: Offset.zero, center: Offset.zero, radius: 0);
+    return _noOctant;
   }
   final (n, jointAt) = _octantFit(a * 2 / radius);
   final joint = Offset(

@@ -238,9 +238,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m88(count) => "${count} прокси";
 
   static String m89(name) =>
-      "Узел ${name} уже используется другой включенной цепочкой или имеет конфликт связей цепочки прокси";
+      "Прокси ${name} конфликтует с другой включённой цепочкой или создаёт цикл";
 
-  static String m90(name) => "Узел ${name} недоступен для этой позиции";
+  static String m90(name) => "Прокси ${name} недоступен для этой позиции";
 
   static String m91(address) =>
       "До запуска системный прокси указывал на ${address}.";
@@ -465,6 +465,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Принудительно добавить системный DNS к конфигурации",
     ),
     "application": MessageLookupByLibrary.simpleMessage("Приложение"),
+    "applyNow": MessageLookupByLibrary.simpleMessage("Применить сейчас"),
     "authentication": MessageLookupByLibrary.simpleMessage(
       "Аутентификация локального прокси",
     ),
@@ -1644,6 +1645,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "format": MessageLookupByLibrary.simpleMessage("Формат"),
     "fr": MessageLookupByLibrary.simpleMessage("Французский"),
     "general": MessageLookupByLibrary.simpleMessage("Общие"),
+    "generalOverrideDesc": MessageLookupByLibrary.simpleMessage(
+      "Добавленные здесь параметры заменяют соответствующие настройки всех профилей; остальные остаются такими, как в профиле, а если профиль их не задаёт, действуют значения ядра по умолчанию.",
+    ),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("Автообновление"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage(
       "Интервал автообновления",
@@ -2539,7 +2543,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxies": MessageLookupByLibrary.simpleMessage("Прокси"),
     "proxiesCount": m88,
     "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage(
-      "Доступные узлы",
+      "Доступные узлы и группы",
     ),
     "proxyChainConflictTip": m89,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage(
@@ -2553,24 +2557,30 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Вход"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Выход"),
+    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
+      "Группы можно использовать на входе или выходе. Промежуточные узлы должны быть фиксированными.",
+    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Добавляйте узлы по порядку: первый узел входной, последний выходной. После сохранения выберите выходной узел, чтобы использовать цепочку.",
+      "Выберите узлы или группы для входа и выхода. Группа выхода должна содержать самостоятельные узлы, промежуточные узлы должны быть фиксированными. После сохранения выберите выход. Проверка входа измеряет вход, проверка группы выхода — всю цепочку.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
-      "Для цепочки прокси нужно минимум 2 узла",
+      "Для цепочки нужны вход и выход",
     ),
     "proxyChainMinimumNodesHint": MessageLookupByLibrary.simpleMessage(
-      "Для цепочки прокси нужно минимум 2 узла. Добавьте выходной узел.",
+      "Выберите выходной узел или группу.",
     ),
     "proxyChainNodeAdded": MessageLookupByLibrary.simpleMessage(
       "Узел добавлен в цепочку прокси",
     ),
     "proxyChainOtherNodes": MessageLookupByLibrary.simpleMessage("Другие узлы"),
+    "proxyChainPolicyGroups": MessageLookupByLibrary.simpleMessage(
+      "Группы политик",
+    ),
     "proxyChainRelatedChainsUpdated": MessageLookupByLibrary.simpleMessage(
       "Связанные цепочки прокси обновлены",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Цепочка прокси сохранена и применена. Выберите выходной узел, чтобы использовать ее",
+      "Цепочка сохранена и применена. Выберите выходной узел или группу.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Цепочка прокси",

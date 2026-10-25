@@ -19,7 +19,6 @@ import 'package:material_ui/material_ui.dart';
 
 import 'card.dart';
 import 'connections_table.dart';
-import 'current_outbound.dart';
 
 const _stackedIcons = 4;
 
@@ -138,14 +137,11 @@ class _SelectedName extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final name = ref.watch(getSelectedProxyNameProvider(group.name)) ?? '';
-    final base = DashboardText.rowTitle(context);
     return EmojiText(
       name.isEmpty ? '—' : name,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: isBuiltinOutbound(name)
-          ? base.copyWith(color: context.colorScheme.onSurfaceVariant)
-          : base,
+      style: DashboardText.label(context),
     );
   }
 }
@@ -275,7 +271,7 @@ class ProxyGroupsCard extends ConsumerWidget {
             ),
             height: tileHeight,
             gap: tileGap,
-            iconSize: _figureMetricsOf(density).icon,
+            iconSize: tileHeight - _blockInset * 2,
             bottom: padding.bottom,
           );
           return Column(
@@ -540,11 +536,7 @@ class _GroupTile extends StatelessWidget {
                         group.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyle.caption1
-                            .of(context)
-                            .copyWith(
-                              color: context.colorScheme.onSurfaceVariant,
-                            ),
+                        style: DashboardText.rowTitle(context),
                       ),
                     ),
                     _GroupDelay(group: group),

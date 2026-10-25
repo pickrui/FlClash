@@ -40,6 +40,11 @@ abstract final class TextInputLimits {
     return [LengthLimitingTextInputFormatter(maxLength)];
   }
 
+  static List<TextInputFormatter> policyName(int maxLength) => [
+    FilteringTextInputFormatter.deny(','),
+    LengthLimitingTextInputFormatter(maxLength),
+  ];
+
   static List<TextInputFormatter> digitsOnly(int maxLength) {
     return [
       FilteringTextInputFormatter.digitsOnly,

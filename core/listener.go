@@ -80,6 +80,7 @@ func handleStartListener() bool {
 		listener.StopListener()
 		return false
 	}
+	probeRouteRevision.Add(1)
 	return true
 }
 

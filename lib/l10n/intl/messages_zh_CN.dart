@@ -201,9 +201,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m88(count) => "${count} 个代理";
 
-  static String m89(name) => "节点 ${name} 已处于其他启用链路中，或存在链式代理关系冲突";
+  static String m89(name) => "代理 ${name} 与其他启用链路冲突或形成回环";
 
-  static String m90(name) => "节点 ${name} 当前不可用于此位置";
+  static String m90(name) => "代理 ${name} 当前不可用于此位置";
 
   static String m91(address) => "启动前系统代理指向 ${address}";
 
@@ -366,6 +366,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("追加系统DNS"),
     "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage("强制为配置附加系统DNS"),
     "application": MessageLookupByLibrary.simpleMessage("应用程序"),
+    "applyNow": MessageLookupByLibrary.simpleMessage("立即应用"),
     "authentication": MessageLookupByLibrary.simpleMessage("本地代理认证"),
     "authenticationApplyFailed": MessageLookupByLibrary.simpleMessage(
       "未能应用认证设置",
@@ -1183,6 +1184,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "format": MessageLookupByLibrary.simpleMessage("格式"),
     "fr": MessageLookupByLibrary.simpleMessage("法语"),
     "general": MessageLookupByLibrary.simpleMessage("常规"),
+    "generalOverrideDesc": MessageLookupByLibrary.simpleMessage(
+      "添加的项会覆写所有配置的对应设置，未添加的项沿用配置自身的设置，配置未设置时使用内核默认值",
+    ),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("自动更新"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage("自动更新间隔"),
     "geoAutoUpdateIntervalTip": MessageLookupByLibrary.simpleMessage(
@@ -1812,29 +1816,35 @@ class MessageLookup extends MessageLookupByLibrary {
     "providers": MessageLookupByLibrary.simpleMessage("提供者"),
     "proxies": MessageLookupByLibrary.simpleMessage("代理"),
     "proxiesCount": m88,
-    "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage("可用节点"),
+    "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage(
+      "可用节点与策略组",
+    ),
     "proxyChainConflictTip": m89,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage("自定义节点"),
     "proxyChainCustomNodes": MessageLookupByLibrary.simpleMessage("自定义节点"),
     "proxyChainEmpty": MessageLookupByLibrary.simpleMessage("暂无代理链节点"),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("入口"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("出口"),
+    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
+      "策略组可用于入口或出口，中继必须为固定节点",
+    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "按顺序点击节点添加：第一个为入口，最后一个为出口；保存后选择出口节点使用",
+      "按顺序选择入口和出口，可使用节点或策略组；出口组使用独立节点成员，中继使用固定节点；保存后选择出口使用。入口组测速仅反映入口，出口组测速经过完整链路",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
-      "链式代理至少需要 2 个节点",
+      "链式代理至少需要入口和出口",
     ),
     "proxyChainMinimumNodesHint": MessageLookupByLibrary.simpleMessage(
-      "链式代理至少需要 2 个节点，请再添加一个出口节点",
+      "请选择出口节点或策略组",
     ),
     "proxyChainNodeAdded": MessageLookupByLibrary.simpleMessage("节点已加入链式代理"),
     "proxyChainOtherNodes": MessageLookupByLibrary.simpleMessage("其他节点"),
+    "proxyChainPolicyGroups": MessageLookupByLibrary.simpleMessage("策略组"),
     "proxyChainRelatedChainsUpdated": MessageLookupByLibrary.simpleMessage(
       "相关链式代理已更新",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "链式代理已保存并应用，请选择出口节点使用",
+      "链式代理已保存并应用，请选择出口节点或策略组使用",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("代理链"),
     "proxyChainUnavailableNodeTip": m90,

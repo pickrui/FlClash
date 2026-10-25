@@ -53,8 +53,6 @@ class ProfilesView extends StatefulWidget {
 class _ProfilesViewState extends State<ProfilesView> {
   bool _isUpdating = false;
 
-  void _handleShowAddExtendPage() => showAddProfilePage(context);
-
   Future<void> _updateProfiles(List<Profile> profiles) async {
     if (_isUpdating) return;
     final remoteProfiles = profiles
@@ -139,14 +137,18 @@ class _ProfilesViewState extends State<ProfilesView> {
         return CommonScaffold(
           isLoading: isLoading,
           title: appLocalizations.profiles,
-          primaryAction: state.profiles.isEmpty
+          actions: state.profiles.isEmpty
               ? null
-              : IconButtonData(
-                  glyph: AppGlyphs.addCircle,
-                  tooltip: context.appLocalizations.addProfile,
-                  onPressed: _handleShowAddExtendPage,
-                ),
-          foldPrimaryAction: true,
+              : [
+                  AddProfileMenu(
+                    parentContext: context,
+                    builder: (open) => IconButton(
+                      tooltip: appLocalizations.addProfile,
+                      onPressed: open,
+                      icon: const GlyphIcon(AppGlyphs.addCircle),
+                    ),
+                  ),
+                ],
           iconActions: _buildActions(state.profiles),
           body: NullStatusSwitcher(
             isEmpty: state.profiles.isEmpty,
@@ -154,11 +156,14 @@ class _ProfilesViewState extends State<ProfilesView> {
               label: appLocalizations.nullTip(appLocalizations.profiles),
               description: appLocalizations.nullProfileDesc,
               illustration: NullStatusIllustration.profile,
-              action: TonalButton(
-                size: TonalButtonSize.bar,
-                glyph: AppGlyphs.addCircle,
-                label: appLocalizations.addProfile,
-                onPressed: _handleShowAddExtendPage,
+              action: AddProfileMenu(
+                parentContext: context,
+                builder: (open) => TonalButton(
+                  size: TonalButtonSize.bar,
+                  glyph: AppGlyphs.addCircle,
+                  label: appLocalizations.addProfile,
+                  onPressed: open,
+                ),
               ),
             ),
             child: _ProfilesGrid(

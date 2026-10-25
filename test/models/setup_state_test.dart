@@ -60,6 +60,26 @@ void main() {
     },
   );
 
+  test(
+    'removing general picks or changing the effective URL reloads the profile',
+    () {
+      final original = buildState().copyWith(
+        generalOverrideKeys: {GeneralOverrideKey.ipv6},
+      );
+      expect(
+        original.copyWith(generalOverrideKeys: {}).needSetup(original),
+        isTrue,
+      );
+      expect(
+        original
+            .copyWith(testUrl: 'https://custom.test/204')
+            .needSetup(original),
+        isTrue,
+      );
+      expect(original.needSetup(original), isFalse);
+    },
+  );
+
   test('a change of profile type needs setup', () {
     final previous = buildState().copyWith(profileType: ProfileType.url);
     expect(

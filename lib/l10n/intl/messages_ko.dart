@@ -213,9 +213,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m88(count) =>
       "${Intl.plural(count, one: '프록시 1개', other: '프록시 ${count}개')}";
 
-  static String m89(name) => "노드 ${name}은 다른 활성 체인에서 사용 중이거나 체인 연결 관계가 충돌합니다";
+  static String m89(name) => "프록시 ${name}이 다른 활성 체인과 충돌하거나 루프를 만듭니다";
 
-  static String m90(name) => "이 위치에서는 노드 ${name}을 사용할 수 없습니다";
+  static String m90(name) => "프록시 ${name}은 이 위치에서 사용할 수 없습니다";
 
   static String m91(address) => "시작 전 시스템 프록시가 ${address}을(를) 가리키고 있었습니다.";
 
@@ -387,6 +387,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "설정에 시스템 DNS를 강제로 추가",
     ),
     "application": MessageLookupByLibrary.simpleMessage("애플리케이션"),
+    "applyNow": MessageLookupByLibrary.simpleMessage("지금 적용"),
     "authentication": MessageLookupByLibrary.simpleMessage("로컬 프록시 인증"),
     "authenticationApplyFailed": MessageLookupByLibrary.simpleMessage(
       "인증 설정을 적용하지 못했습니다",
@@ -1318,6 +1319,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "format": MessageLookupByLibrary.simpleMessage("형식"),
     "fr": MessageLookupByLibrary.simpleMessage("프랑스어"),
     "general": MessageLookupByLibrary.simpleMessage("일반"),
+    "generalOverrideDesc": MessageLookupByLibrary.simpleMessage(
+      "여기에 추가한 항목은 모든 프로필의 해당 설정을 대체합니다. 추가하지 않은 항목은 프로필 자체 설정을 유지하며, 프로필에 없으면 코어 기본값을 사용합니다.",
+    ),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("자동 업데이트"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage("자동 업데이트 간격"),
     "geoAutoUpdateIntervalTip": MessageLookupByLibrary.simpleMessage(
@@ -2024,7 +2028,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxies": MessageLookupByLibrary.simpleMessage("프록시"),
     "proxiesCount": m88,
     "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage(
-      "사용 가능한 노드",
+      "사용 가능한 노드 및 그룹",
     ),
     "proxyChainConflictTip": m89,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage("사용자 지정 노드"),
@@ -2032,24 +2036,28 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainEmpty": MessageLookupByLibrary.simpleMessage("프록시 체인에 노드가 없습니다"),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("진입"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("출구"),
+    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
+      "정책 그룹은 진입점이나 출구에 사용할 수 있습니다. 중계에는 고정 노드를 사용하세요.",
+    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "노드를 순서대로 선택하세요. 첫 번째 노드는 진입점, 마지막 노드는 출구입니다. 체인을 사용하려면 출구 노드를 선택하세요.",
+      "진입점과 출구로 노드 또는 그룹을 선택하세요. 출구 그룹에는 독립 노드, 중계에는 고정 노드가 필요합니다. 저장 후 출구를 선택하세요. 진입점 검사는 진입점만, 출구 그룹 검사는 전체 체인을 측정합니다.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
-      "프록시 체인에는 노드가 2개 이상 필요합니다",
+      "체인에는 진입점과 출구가 필요합니다",
     ),
     "proxyChainMinimumNodesHint": MessageLookupByLibrary.simpleMessage(
-      "프록시 체인에는 노드가 2개 이상 필요합니다. 출구 노드를 추가하세요.",
+      "출구 노드 또는 그룹을 선택하세요.",
     ),
     "proxyChainNodeAdded": MessageLookupByLibrary.simpleMessage(
       "프록시 체인에 노드를 추가했습니다",
     ),
     "proxyChainOtherNodes": MessageLookupByLibrary.simpleMessage("기타 노드"),
+    "proxyChainPolicyGroups": MessageLookupByLibrary.simpleMessage("정책 그룹"),
     "proxyChainRelatedChainsUpdated": MessageLookupByLibrary.simpleMessage(
       "관련 프록시 체인을 업데이트했습니다",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "프록시 체인을 저장하고 적용했습니다. 사용하려면 출구 노드를 선택하세요",
+      "체인을 저장하고 적용했습니다. 출구 노드 또는 그룹을 선택하세요.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("프록시 체인"),
     "proxyChainUnavailableNodeTip": m90,

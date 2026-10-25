@@ -148,7 +148,7 @@ bool currentGroupDelayTesting(Ref ref) {
 
 @riverpod
 String realTestUrl(Ref ref, [String? testUrl]) {
-  final currentTestUrl = ref.watch(appSettingProvider).testUrl;
+  final currentTestUrl = ref.watch(patchClashConfigProvider).effectiveTestUrl;
   return testUrl.takeFirstValid([currentTestUrl]);
 }
 

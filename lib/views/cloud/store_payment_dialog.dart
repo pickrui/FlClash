@@ -16,7 +16,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:fl_clash/ui/qr_code.dart';
 
 final paymentStatusQueryProvider = Provider(
   (_) => CloudApiService().queryPaymentPaid,
@@ -178,12 +178,7 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
                 color: Colors.white,
                 shape: AppShape.lg,
               ),
-              child: QrImageView(
-                data: qrData,
-                version: QrVersions.auto,
-                size: 200,
-                backgroundColor: Colors.white,
-              ),
+              child: QrCodeView(data: qrData, size: 200),
             ),
             const SizedBox(height: 16),
           ],

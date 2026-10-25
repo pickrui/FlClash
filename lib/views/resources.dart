@@ -28,6 +28,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/resource_file_info.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,6 +119,7 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
       await globalState.showMessage(
         title: context.appLocalizations.resources,
         message: TextSpan(text: failures.join('\n')),
+        cancelable: false,
       );
     }
   }, silence: false);
@@ -220,7 +222,7 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
               ),
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-                  top: context.contentTopPadding,
+                  top: context.sectionsTopPadding,
                   bottom: 16 + context.bottomInset,
                 ),
                 children: [
@@ -382,74 +384,6 @@ class _ResourceItem extends StatelessWidget {
   }
 }
 
-/// An update can rewrite the file without changing [source], so the file is
-/// read again once [updatingKey] settles.
-class _FileInfoBuilder extends ConsumerStatefulWidget {
-  final Object source;
-  final String updatingKey;
-  final Future<FileInfo?> Function() load;
-  final Widget Function(BuildContext context, FileInfo? fileInfo, bool pending)
-  builder;
-
-  const _FileInfoBuilder({
-    required this.source,
-    required this.updatingKey,
-    required this.load,
-    required this.builder,
-  });
-
-  @override
-  ConsumerState<_FileInfoBuilder> createState() => _FileInfoBuilderState();
-}
-
-class _FileInfoBuilderState extends ConsumerState<_FileInfoBuilder> {
-  Future<FileInfo?>? _fileInfoFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _fileInfoFuture = widget.load();
-  }
-
-  @override
-  void didUpdateWidget(covariant _FileInfoBuilder oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.source != widget.source) {
-      _fileInfoFuture = widget.load();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    ref.listen(isUpdatingProvider(widget.updatingKey), (previous, next) {
-      if (previous == true && !next) {
-        setState(() {
-          _fileInfoFuture = widget.load();
-        });
-      }
-    });
-    return FutureBuilder<FileInfo?>(
-      future: _fileInfoFuture,
-      builder: (context, snapshot) => snapshot.hasError
-          ? ListTile(
-              title: Text(context.appLocalizations.geoFileReadFailed),
-              trailing: TextButton(
-                onPressed: () =>
-                    setState(() => _fileInfoFuture = widget.load()),
-                child: Text(context.appLocalizations.retry),
-              ),
-            )
-          : widget.builder(
-              context,
-              snapshot.data,
-              _fileInfoFuture != null &&
-                  snapshot.connectionState != ConnectionState.done &&
-                  !snapshot.hasData,
-            ),
-    );
-  }
-}
-
 class _IconSetItem extends ConsumerWidget {
   final IconSet iconSet;
 
@@ -477,7 +411,7 @@ class _RuleProviderItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isUpdating = ref.watch(isUpdatingProvider(provider.updatingKey));
-    return _FileInfoBuilder(
+    return ResourceFileInfoBuilder(
       source: provider,
       updatingKey: provider.updatingKey,
       load: () => provider.fileInfo,
@@ -506,7 +440,7 @@ class _ScriptItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isUpdating = ref.watch(isUpdatingProvider(script.updatingKey));
-    return _FileInfoBuilder(
+    return ResourceFileInfoBuilder(
       source: script,
       updatingKey: script.updatingKey,
       load: () => script.fileInfo,
@@ -577,6 +511,7 @@ class _GeoDataListItemState extends ConsumerState<GeoDataListItem> {
       globalState.showMessage(
         title: geoItem.label,
         message: TextSpan(text: appLocalizations.urlTip(geoItem.label)),
+        cancelable: false,
       );
       return;
     }

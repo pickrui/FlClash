@@ -15,7 +15,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/style.dart';
-import 'package:fl_clash/views/profiles/add.dart';
+import 'package:fl_clash/views/profiles/profiles.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -54,7 +54,7 @@ void _openProfile(BuildContext context, Profile? profile) {
     showProfileDetailSheet(context);
     return;
   }
-  showAddProfilePage(context);
+  showSheet<void>(context: context, builder: (_, _) => const ProfilesView());
 }
 
 const _nearlyUsedShare = 0.9;

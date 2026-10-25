@@ -18,7 +18,7 @@ import 'package:material_ui/material_ui.dart';
 
 void main() {
   final png = base64Decode(
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9V8AAAAASUVORK5CYII=',
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGMQMgn7DwAClAGcHVtGXwAAAABJRU5ErkJggg==',
   );
   const source = 'https://example.invalid/icon.png';
   const fallback = ValueKey('icon-fallback');
@@ -61,6 +61,107 @@ void main() {
     expect(displayedBytes(tester), same(png));
     await tester.pumpWidget(const SizedBox.shrink());
     await refresh.close();
+  });
+
+  for (final cached in [false, true]) {
+    testWidgets('preloading decodes the display cache entry (cached=$cached)', (
+      tester,
+    ) async {
+      tester.binding.imageCache.clear();
+      tester.binding.imageCache.clearLiveImages();
+      var reads = 0;
+      readRemoteIcon = (_) {
+        reads++;
+        return Stream.value(png);
+      };
+      if (cached) await precacheTargetIcons([source]);
+      final provider = ResizeImage(
+        MemoryImage(png),
+        width: 72,
+        height: 72,
+        policy: ResizeImagePolicy.fit,
+      );
+      final key = await provider.obtainKey(ImageConfiguration.empty);
+      expect(tester.binding.imageCache.containsKey(key), isFalse);
+      await tester.runAsync(
+        () => precacheTargetIcons([source], size: 24, devicePixelRatio: 3),
+      );
+      expect(tester.binding.imageCache.statusForKey(key).keepAlive, isTrue);
+      expect(reads, 1);
+      await tester.pumpWidget(remoteIcon());
+      final rendered = tester.widget<Image>(find.byType(Image)).image;
+      expect(await rendered.obtainKey(ImageConfiguration.empty), key);
+      await tester.pumpWidget(const SizedBox.shrink());
+      tester.binding.imageCache.clear();
+      tester.binding.imageCache.clearLiveImages();
+    });
+  }
+
+  testWidgets('invalid predecoded icons wait before retrying', (tester) async {
+    var reads = 0;
+    readRemoteIcon = (_) {
+      reads++;
+      return Stream.value(Uint8List.fromList([1, 2, 3]));
+    };
+    for (var attempt = 0; attempt < 2; attempt++) {
+      await tester.runAsync(
+        () => precacheTargetIcons([source], size: 24, devicePixelRatio: 3),
+      );
+    }
+    expect(reads, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('memory pressure prevents a late preload from decoding', (
+    tester,
+  ) async {
+    tester.binding.imageCache.clear();
+    tester.binding.imageCache.clearLiveImages();
+    await tester.runAsync(() async {
+      final release = Completer<Uint8List>();
+      final started = Completer<void>();
+      readRemoteIcon = (_) {
+        started.complete();
+        return Stream.fromFuture(release.future);
+      };
+      final preload = precacheTargetIcons(
+        [source],
+        size: 24,
+        devicePixelRatio: 3,
+      );
+      await started.future;
+      tester.binding.handleMemoryPressure();
+      release.complete(png);
+      await preload;
+    });
+    final key = await ResizeImage(
+      MemoryImage(png),
+      width: 72,
+      height: 72,
+      policy: ResizeImagePolicy.fit,
+    ).obtainKey(ImageConfiguration.empty);
+    expect(tester.binding.imageCache.containsKey(key), isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a failed refresh preserves the successfully predecoded icon', (
+    tester,
+  ) async {
+    var reads = 0;
+    readRemoteIcon = (_) async* {
+      if (++reads > 1) return;
+      yield png;
+      throw StateError('offline');
+    };
+    await tester.runAsync(
+      () => precacheTargetIcons([source], size: 24, devicePixelRatio: 3),
+    );
+    await tester.pumpWidget(remoteIcon());
+    expect(find.byKey(fallback), findsNothing);
+    expect(displayedBytes(tester), same(png));
+    await tester.pumpWidget(const SizedBox.shrink());
+    tester.binding.imageCache.clear();
+    tester.binding.imageCache.clearLiveImages();
   });
 
   testWidgets(
@@ -209,7 +310,7 @@ void main() {
     final bytes = Uint8List.fromList(utf8.encode(svg));
     const remote = 'https://example.invalid/icon.svg?revision=2';
     readRemoteIcon = (_) => Stream.value(bytes);
-    await precacheTargetIcons([remote]);
+    await precacheTargetIcons([remote], size: 24, devicePixelRatio: 3);
     for (final src in [
       'data:image/svg+xml;base64,${base64Encode(bytes)}',
       remote,

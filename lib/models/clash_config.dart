@@ -1358,6 +1358,31 @@ abstract class ClashConfigSnippet with _$ClashConfigSnippet {
       _$ClashConfigSnippetFromJson(json);
 }
 
+const generalOverrideKeysJsonKey = 'general-override-keys';
+const legacyGeneralOverrideKeys = {
+  GeneralOverrideKey.unifiedDelay,
+  GeneralOverrideKey.tcpConcurrent,
+  GeneralOverrideKey.ipv6,
+  GeneralOverrideKey.geodataLoader,
+};
+
+Set<GeneralOverrideKey> generalOverrideKeysFromJson(List<Object?> json) => {
+  for (final path in json)
+    ?GeneralOverrideKey.values.firstWhereOrNull((key) => key.path == path),
+};
+
+Map<String, Object?> _withLegacyGeneralOverrides(Map<String, Object?> json) {
+  if (json.containsKey(generalOverrideKeysJsonKey)) return json;
+  return {
+    ...json,
+    generalOverrideKeysJsonKey: [
+      for (final key in legacyGeneralOverrideKeys) key.path,
+      if (json['test-url'] != null && json['test-url'] != defaultTestUrl)
+        GeneralOverrideKey.testUrl.path,
+    ],
+  };
+}
+
 @freezed
 abstract class ClashConfig with _$ClashConfig {
   const factory ClashConfig({
@@ -1420,11 +1445,20 @@ abstract class ClashConfig with _$ClashConfig {
     @Default(defaultGeoUpdateInterval)
     @JsonKey(name: 'geo-update-interval')
     int geoUpdateInterval,
+    @Default(defaultTestUrl) @JsonKey(name: 'test-url') String testUrl,
+    @Default({})
+    @JsonKey(
+      name: generalOverrideKeysJsonKey,
+      fromJson: generalOverrideKeysFromJson,
+    )
+    Set<GeneralOverrideKey> generalOverrideKeys,
   }) = _ClashConfig;
 
   factory ClashConfig.fromJson(Map<String, Object?> json) =>
       _$ClashConfigFromJson(
-        _withLegacyTunOverride(_withLegacyDnsOverrideKeys(json)),
+        _withLegacyGeneralOverrides(
+          _withLegacyTunOverride(_withLegacyDnsOverrideKeys(json)),
+        ),
       );
 
   factory ClashConfig.safeFormJson(Map<String, Object?>? json) {
@@ -1432,6 +1466,21 @@ abstract class ClashConfig with _$ClashConfig {
       return defaultClashConfig;
     }
     return decodeSalvaging('clash config', json, ClashConfig.fromJson);
+  }
+}
+
+extension ClashGeneralOverrides on ClashConfig {
+  String get effectiveTestUrl =>
+      generalOverrideKeys.contains(GeneralOverrideKey.testUrl)
+      ? testUrl
+      : defaultTestUrl;
+
+  Map<String, dynamic> get generalOverrideJson {
+    final json = toJson();
+    return {
+      for (final key in generalOverrideKeys)
+        if (key != GeneralOverrideKey.testUrl) key.path: json[key.path],
+    };
   }
 }
 

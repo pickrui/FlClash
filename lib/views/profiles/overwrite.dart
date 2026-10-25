@@ -92,9 +92,12 @@ mixin ProfileRoutingActions<T extends ConsumerStatefulWidget>
     setState(() => checking = true);
     try {
       final error = await validateCustomRoutingDraft(ref, profile);
-      if (!mounted) return;
+      if (!mounted || routingProfileId != profile.id) return;
       if (error.isNotEmpty) {
-        globalState.showMessage(message: TextSpan(text: error));
+        globalState.showMessage(
+          message: TextSpan(text: error),
+          cancelable: false,
+        );
         return;
       }
       if (ref.read(currentProfileIdProvider) == profile.id) {
@@ -124,20 +127,38 @@ mixin ProfileRoutingActions<T extends ConsumerStatefulWidget>
     }
   }
 
-  List<Widget> buildRoutingActions(Profile? profile) => [
-    if (profile != null && !profile.isoixCloudProfile)
-      TextButton(
-        onPressed: previewing ? null : previewRouting,
-        child: Text(context.appLocalizations.preview),
+  List<Widget> buildRoutingActions(Profile? profile) {
+    final isCurrent = ref.watch(currentProfileIdProvider) == routingProfileId;
+    final inputs = isCurrent
+        ? ref.watch(setupStateProvider(routingProfileId)).value
+        : null;
+    final applied = ref.watch(appliedSetupStateProvider);
+    final pending =
+        inputs != null && (applied == null || inputs.needSetup(applied));
+    return [
+      if (isCurrent && (pending || checking))
+        FilledButton(
+          onPressed: checking ? null : checkAndApplyRouting,
+          child: Text(appLocalizations.applyNow),
+        ),
+      if (profile != null && !profile.isoixCloudProfile)
+        TextButton(
+          onPressed: previewing ? null : previewRouting,
+          child: Text(context.appLocalizations.preview),
+        ),
+      IconButton(
+        tooltip: appLocalizations.checkRouting,
+        onPressed: checking ? null : checkAndApplyRouting,
+        icon: checking
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CommonCircleLoading(),
+              )
+            : const GlyphIcon(AppGlyphs.rules),
       ),
-    IconButton(
-      tooltip: appLocalizations.checkRouting,
-      onPressed: checking ? null : checkAndApplyRouting,
-      icon: checking
-          ? const SizedBox(width: 20, height: 20, child: CommonCircleLoading())
-          : const GlyphIcon(AppGlyphs.rules),
-    ),
-  ];
+    ];
+  }
 }
 
 class RulesRequireRuleModeHint extends ConsumerWidget {
@@ -153,7 +174,12 @@ class RulesRequireRuleModeHint extends ConsumerWidget {
     }
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          listHeaderPaddingOf(context).top + 8,
+          16,
+          8,
+        ),
         child: Text(
           appLocalizations.rulesRequireRuleMode,
           style: TextStyle(color: context.colorScheme.error),
@@ -172,14 +198,14 @@ class _OverwriteViewState extends ConsumerState<OverwriteView>
   Widget build(BuildContext context) {
     return CommonScaffold(
       title: appLocalizations.override,
-      isLoading: previewing,
+      isLoading: previewing || checking,
       actions: buildRoutingActions(
         ref.watch(profileProvider(widget.profileId)),
       ),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: SizedBox(height: context.contentTopPadding),
+            child: SizedBox(height: context.sectionsTopPadding),
           ),
           OverwriteModeSelector(profileId: widget.profileId),
           const RulesRequireRuleModeHint(),
@@ -259,6 +285,7 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
     globalState.showMessage(
       context: context,
       message: TextSpan(text: error),
+      cancelable: false,
     );
   }
 

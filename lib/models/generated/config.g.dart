@@ -23,9 +23,11 @@ _AppSettingProps _$AppSettingPropsFromJson(
           ?.map((e) => e as String)
           .toList() ??
       defaultUserAgents,
-  dashboardWidgets: json['dashboardWidgets'] == null
+  dashboardWidgets: _readDashboardWidgets(json, 'dashboardWidgets') == null
       ? defaultDashboardWidgets
-      : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
+      : dashboardWidgetsSafeFormJson(
+          _readDashboardWidgets(json, 'dashboardWidgets') as List?,
+        ),
   showNetworkSpeedChart: json['showNetworkSpeedChart'] as bool? ?? true,
   onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
   showNotificationStopAction:
@@ -35,9 +37,6 @@ _AppSettingProps _$AppSettingPropsFromJson(
   autoRun: json['autoRun'] as bool? ?? false,
   openLogs: json['openLogs'] as bool? ?? false,
   closeConnections: json['closeConnections'] as bool? ?? true,
-  testUrl: json['testUrl'] == null
-      ? defaultTestUrl
-      : testUrlFromJson(json['testUrl'] as String?),
   delayTestTimeout:
       (json['delayTestTimeout'] as num?)?.toInt() ?? defaultDelayTestTimeout,
   tabAnimation:
@@ -100,7 +99,6 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'autoRun': instance.autoRun,
       'openLogs': instance.openLogs,
       'closeConnections': instance.closeConnections,
-      'testUrl': instance.testUrl,
       'delayTestTimeout': instance.delayTestTimeout,
       'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'floatingNavigationBar': instance.floatingNavigationBar,
@@ -438,9 +436,9 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
           ?.map((e) => HotKeyAction.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
-  appSettingProps: json['appSettingProps'] == null
+  appSettingProps: _readAppSettings(json, 'appSettingProps') == null
       ? defaultAppSettingProps
-      : AppSettingProps.safeFromJson(json['appSettingProps']),
+      : AppSettingProps.safeFromJson(_readAppSettings(json, 'appSettingProps')),
   davProps: json['davProps'] == null
       ? null
       : DAVProps.fromJson(json['davProps'] as Map<String, dynamic>),

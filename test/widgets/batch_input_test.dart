@@ -161,7 +161,7 @@ void main() {
 
   for (final map in [false, true]) {
     testWidgets(
-      '${map ? 'map' : 'list'} editor confirms deletion and returns its draft by gesture',
+      '${map ? 'map' : 'list'} editor confirms deletion and discards an unchanged draft by gesture',
       (tester) async {
         Object? result;
         late BuildContext editorContext;
@@ -251,10 +251,75 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.text('open editor'), findsOneWidget);
-        expect(
-          result,
-          map ? {'first': 'one', 'second': 'two'} : ['first', 'second'],
+        expect(result, isNull);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  for (final save in [true, false]) {
+    testWidgets(
+      'leaving a changed list can cancel, then ${save ? 'save' : 'discard'}',
+      (tester) async {
+        Object? result = 'pending';
+        late BuildContext editorContext;
+        await tester.pumpWidget(
+          TestApp(
+            locale: const Locale('en'),
+            wrapInProviderScope: true,
+            child: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  child: const Text('open editor'),
+                  onPressed: () async {
+                    result = await Navigator.of(context).push(
+                      CommonRoute<List<String>>(
+                        builder: (context) {
+                          editorContext = context;
+                          return const ListInputPage(
+                            title: 'Fixture editor',
+                            items: ['first', 'second'],
+                            titleBuilder: Text.new,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
         );
+        await tester.tap(find.text('open editor'));
+        await tester.pumpAndSettle();
+        tester
+            .widget<SelectedDecorationListItem>(
+              find.byType(SelectedDecorationListItem).first,
+            )
+            .onSelected();
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Delete'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+        await tester.pumpAndSettle();
+        await Navigator.of(editorContext).maybePop();
+        await tester.pumpAndSettle();
+        expect(find.text('Discard'), findsOneWidget);
+        await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+        await tester.pumpAndSettle();
+        expect(find.text('Fixture editor'), findsOneWidget);
+        expect(find.text('second'), findsOneWidget);
+        expect(result, 'pending');
+        if (save) {
+          await tester.tap(find.byTooltip('Save'));
+        } else {
+          await Navigator.of(editorContext).maybePop();
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Discard'));
+        }
+        await tester.pumpAndSettle();
+        expect(find.text('open editor'), findsOneWidget);
+        expect(result, save ? ['second'] : null);
         expect(tester.takeException(), isNull);
       },
     );
@@ -303,7 +368,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField), '192.168.1.0/24');
     await tester.tap(find.text('Confirm'));
     await tester.pumpAndSettle();
-    await tester.binding.handlePopRoute();
+    await tester.tap(find.byTooltip('Save'));
     await tester.pumpAndSettle();
 
     expect(container.read(patchClashConfigProvider).tun.routeAddress, [

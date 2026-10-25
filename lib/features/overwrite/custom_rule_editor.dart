@@ -809,13 +809,16 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
               builder: (context) => ListView(
                 controller: _scrollController,
                 padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-                  top: context.contentTopPadding,
+                  top: context.sectionsTopPadding,
                   bottom: 20 + context.bottomInset,
                 ),
                 children: [
                   Semantics(
                     liveRegion: true,
-                    child: ErrorBanner(message: issue?.message ?? _error),
+                    child: ErrorBanner(
+                      message: issue?.message ?? _error,
+                      sectioned: true,
+                    ),
                   ),
                   if (_failedCandidate != null && issue == null)
                     Padding(

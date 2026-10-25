@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/ui/view_scope.dart';
+
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -103,61 +105,48 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
       CoreStatus.connected => colorScheme.successContainer,
       CoreStatus.disconnected => colorScheme.errorContainer,
     };
+    final style = ElasticPress.buttonStyle
+        .merge(tinted(statusColor))
+        .merge(
+          FilledButton.styleFrom(
+            backgroundColor: statusColor,
+            foregroundColor: switch (coreStatus) {
+              CoreStatus.connecting => null,
+              CoreStatus.connected => colorScheme.onSuccessContainer,
+              CoreStatus.disconnected => colorScheme.onErrorContainer,
+            },
+          ),
+        );
+    final iconOnly =
+        coreStatus == CoreStatus.connected || ViewScope.isMobileOf(context);
+    final icon = switch (coreStatus) {
+      CoreStatus.connecting => CommonCircleLoading(
+        color: iconOnly ? null : colorScheme.onPrimary,
+      ),
+      CoreStatus.connected => const GlyphIcon(AppGlyphs.check, fill: 1),
+      CoreStatus.disconnected => const GlyphIcon(AppGlyphs.refresh, fill: 1),
+    };
     return Tooltip(
       message: appLocalizations.coreStatus,
       child: FadeScaleBox(
         alignment: Alignment.centerRight,
-        child: coreStatus == CoreStatus.connected
+        child: iconOnly
             ? IconButton.filled(
+                key: ValueKey(coreStatus),
                 tooltip: appLocalizations.coreStatus,
-                style: ElasticPress.buttonStyle
-                    .merge(tinted(statusColor))
-                    .merge(
-                      IconButton.styleFrom(
-                        backgroundColor: context.colorScheme.successContainer,
-                        foregroundColor: context.colorScheme.onSuccessContainer,
-                      ),
-                    ),
+                style: style,
                 onPressed: _handleConnection,
-                icon: const GlyphIcon(AppGlyphs.check, fill: 1),
+                icon: icon,
               )
             : FilledButton.icon(
                 key: ValueKey(coreStatus),
                 onPressed: _handleConnection,
-                style: ElasticPress.buttonStyle
-                    .merge(tinted(statusColor))
-                    .merge(
-                      FilledButton.styleFrom(
-                        backgroundColor: statusColor,
-                        foregroundColor: switch (coreStatus) {
-                          CoreStatus.connecting => null,
-                          CoreStatus.connected =>
-                            context.colorScheme.onSuccessContainer,
-                          CoreStatus.disconnected =>
-                            context.colorScheme.onErrorContainer,
-                        },
-                      ),
-                    ),
-                icon: SizedBox(
-                  height: globalState.measure.textHeight(
+                style: style,
+                icon: SizedBox.square(
+                  dimension: globalState.measure.textHeight(
                     AppTextStyle.subheadline,
                   ),
-                  width: globalState.measure.textHeight(
-                    AppTextStyle.subheadline,
-                  ),
-                  child: switch (coreStatus) {
-                    CoreStatus.connecting => CommonCircleLoading(
-                      color: context.colorScheme.onPrimary,
-                    ),
-                    CoreStatus.connected => const GlyphIcon(
-                      AppGlyphs.check,
-                      fill: 1,
-                    ),
-                    CoreStatus.disconnected => const GlyphIcon(
-                      AppGlyphs.refresh,
-                      fill: 1,
-                    ),
-                  },
+                  child: icon,
                 ),
                 label: Text(switch (coreStatus) {
                   CoreStatus.connecting => appLocalizations.connecting,

@@ -12,8 +12,9 @@ import 'package:material_ui/material_ui.dart';
 
 class ErrorBanner extends StatelessWidget {
   final String? message;
+  final bool sectioned;
 
-  const ErrorBanner({super.key, required this.message});
+  const ErrorBanner({super.key, required this.message, this.sectioned = false});
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +26,7 @@ class ErrorBanner extends StatelessWidget {
       child: message == null
           ? const SizedBox(width: double.infinity)
           : _Banner(
+              sectioned: sectioned,
               glyph: AppGlyphs.error,
               message: message,
               color: colorScheme.errorContainer,
@@ -35,12 +37,14 @@ class ErrorBanner extends StatelessWidget {
 }
 
 class _Banner extends StatelessWidget {
+  final bool sectioned;
   final Glyph glyph;
   final String message;
   final Color color;
   final Color foregroundColor;
 
   const _Banner({
+    required this.sectioned,
     required this.glyph,
     required this.message,
     required this.color,
@@ -51,7 +55,10 @@ class _Banner extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(
+        top: sectioned ? listHeaderPaddingOf(context).top : 0,
+        bottom: 16,
+      ),
       padding: const EdgeInsets.all(16),
       decoration: ShapeDecoration(color: color, shape: AppShape.xl),
       child: Row(

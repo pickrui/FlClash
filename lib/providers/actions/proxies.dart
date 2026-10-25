@@ -83,6 +83,18 @@ class ProxiesAction extends _$ProxiesAction {
 
   late AppController _controller;
 
+  Future<void> serializeLibraryOperation(Future<void> Function() action) =>
+      _controller._serializeCoreLifecycle(
+        () => storageLock.synchronized(
+          () => runExclusiveDatabaseOperation(action),
+        ),
+      );
+
+  Future<ProviderLibraryChange?> prepareLibraryContent(
+    ClashProvider previous,
+    ClashProvider next,
+  ) => _controller.prepareLibraryContent(previous, next);
+
   void updateGroupsDebounce() => _controller.updateGroupsDebounce();
 
   void changeProxyDebounce(String groupName, String proxyName) =>
@@ -665,6 +677,7 @@ extension ProxiesControllerExt on AppController {
     return (data) => _serializeCoreLifecycle(() async {
       var applied = false;
       if (!isCurrent()) throw appLocalizations.providerChanged;
+      if (await _saveLibraryProviderContent(provider, data, isCurrent)) return;
       final message = await _updateExternalProvider(
         provider,
         profileId: profileId,
@@ -702,11 +715,22 @@ extension ProxiesControllerExt on AppController {
         provider,
         profileId: profileId,
         generation: generation,
-        update: () => coreController.sideLoadExternalProvider(
-          providerName: provider.name,
-          providerType: provider.type,
-          data: data,
-        ),
+        update: () async {
+          if (await _saveLibraryProviderContent(
+            provider,
+            data,
+            () =>
+                generation == _profileApplyGeneration &&
+                profileId == _ref.read(currentProfileIdProvider),
+          )) {
+            return '';
+          }
+          return coreController.sideLoadExternalProvider(
+            providerName: provider.name,
+            providerType: provider.type,
+            data: data,
+          );
+        },
       ),
     );
   }

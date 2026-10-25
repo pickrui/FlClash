@@ -885,6 +885,8 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
       autocorrect: false,
       inputFormatters: keyboardType == TextInputType.number
           ? TextInputLimits.digitsOnly(maxLength)
+          : controller == _nameController
+          ? TextInputLimits.policyName(maxLength)
           : TextInputLimits.limit(maxLength),
       hintText: hintText ?? appLocalizations.optional,
       onChanged: (_) => _handleChanged(),
@@ -1311,7 +1313,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
                     16,
-                    context.contentTopPadding,
+                    context.sectionsTopPadding,
                     16,
                     0,
                   ),
@@ -1319,7 +1321,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        ErrorBanner(message: _bannerMessage),
+                        ErrorBanner(message: _bannerMessage, sectioned: true),
                         if (_canSaveDraft && !_saving)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -1553,7 +1555,7 @@ class _MemberPickerState extends State<_MemberPicker> {
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
                     16,
-                    context.contentTopPadding,
+                    context.sectionsTopPadding,
                     16,
                     16 + context.bottomInset,
                   ),

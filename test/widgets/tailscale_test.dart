@@ -18,7 +18,7 @@ import 'package:fl_clash/ui/inherited.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:fl_clash/ui/qr_code.dart';
 
 import '../helpers/fake_tailscale_backend.dart';
 import '../helpers/glyph_finders.dart';
@@ -399,7 +399,7 @@ void main() {
     );
     expect(find.text('Login required'), findsOneWidget);
     expect(find.text('Open login page'), findsOneWidget);
-    expect(find.byType(QrImageView), findsOneWidget);
+    expect(find.byType(QrCodeView), findsOneWidget);
     expect(find.textContaining('last login error'), findsOneWidget);
     await _unmount(tester);
   });

@@ -13,7 +13,8 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/dns.dart';
-import 'package:fl_clash/views/config/network.dart';
+import 'package:fl_clash/views/config/general.dart';
+import 'package:fl_clash/views/config/network.dart' hide Ipv6Item;
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/null_status.dart';
 import 'package:fl_clash/ui/switch.dart';
@@ -74,6 +75,63 @@ Future<void> _submitText(WidgetTester tester, String text) async {
 
 void main() {
   setUpAll(initEditorNative);
+  testWidgets('canceling Hosts preserves the saved map', (tester) async {
+    final container = await _pumpOverrides(
+      tester,
+      const Scaffold(body: HostsItem()),
+      (state) => state.copyWith(hosts: const {'fixture.invalid': '192.0.2.1'}),
+    );
+    await tester.tap(find.byType(HostsItem));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(container.read(patchClashConfigProvider).hosts, {
+      'fixture.invalid': '192.0.2.1',
+    });
+  });
+  testWidgets(
+    'dropping the IPv6 override stops auto mode and keeps the manual preference',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final container = await _pumpOverrides(
+        tester,
+        const GeneralView(platform: TargetPlatform.macOS),
+        (state) => state.copyWith(
+          ipv6: false,
+          generalOverrideKeys: {GeneralOverrideKey.ipv6},
+        ),
+      );
+      container
+          .read(networkSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(autoSetIpv6: true, manualIpv6: true),
+          );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byTooltip('Remove').hitTestable(),
+        400,
+      );
+      await tester.pumpAndSettle();
+      final switchFinder = find.descendant(
+        of: find.byType(Ipv6Item),
+        matching: find.byType(CommonSwitch),
+      );
+      expect(tester.widget<CommonSwitch>(switchFinder).onChanged, isNull);
+      await tester.tap(find.byTooltip('Remove'));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(patchClashConfigProvider).generalOverrideKeys,
+        isEmpty,
+      );
+      expect(container.read(networkSettingProvider).autoSetIpv6, isFalse);
+      expect(container.read(networkSettingProvider).manualIpv6, isTrue);
+      expect(container.read(updateParamsProvider).ipv6, isNull);
+    },
+  );
+
   for (final ntp in [false, true]) {
     testWidgets('override fields can be added, edited and removed: NTP=$ntp', (
       tester,
@@ -443,7 +501,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(confirm);
     await tester.pumpAndSettle();
-    await tester.binding.handlePopRoute();
+    await tester.tap(find.byTooltip('Save'));
     await tester.pumpAndSettle();
 
     expect(container.read(patchClashConfigProvider).dns.fallbackFilter.ipcidr, [

@@ -429,7 +429,7 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: SizedBox(height: context.contentTopPadding),
+              child: SizedBox(height: context.sectionsTopPadding),
             ),
             const RulesRequireRuleModeHint(),
             SliverPadding(
@@ -555,6 +555,7 @@ class _Overview extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ErrorBanner(
+          sectioned: true,
           message: issueCount > 0
               ? appLocalizations.customIssuesSummary(issueCount)
               : null,
@@ -632,7 +633,7 @@ class _MoreSectionsView extends ConsumerWidget {
       title: appLocalizations.more,
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-          top: context.contentTopPadding,
+          top: context.sectionsTopPadding,
           bottom: 16 + context.bottomInset,
         ),
         children: [
@@ -691,7 +692,7 @@ class _ProfileProxiesView extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: SizedBox(height: context.contentTopPadding),
+            child: SizedBox(height: context.sectionsTopPadding),
           ),
           ProfileProxiesContent(profileId: profileId),
           SliverToBoxAdapter(child: SizedBox(height: 24 + context.bottomInset)),

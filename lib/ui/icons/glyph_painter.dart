@@ -16,7 +16,7 @@ const _fillStart = Glyph.strokeWidth / 2;
 const _detailSwap = 0.5;
 
 // Lines have nothing to fill, so they gain weight instead and hold their own
-// beside filled bodies.
+// beside filled bodies; a solid line, such as a dot, grows with them.
 const _filledLineWidth = 2.2;
 
 class GlyphPainter extends CustomPainter {
@@ -34,10 +34,12 @@ class GlyphPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final opaque = color.withValues(alpha: 1);
     final stroke = _stroke(opaque, Glyph.strokeWidth);
-    final line = _stroke(
-      opaque,
-      lerpDouble(Glyph.strokeWidth, _filledLineWidth, fill.clamp(0, 1))!,
-    );
+    final lineWidth = lerpDouble(
+      Glyph.strokeWidth,
+      _filledLineWidth,
+      fill.clamp(0, 1),
+    )!;
+    final line = _stroke(opaque, lineWidth);
     final area = Paint()..color = opaque;
     Paint paintFor(GlyphShape shape) => shape.solid
         ? area
@@ -74,7 +76,9 @@ class GlyphPainter extends CustomPainter {
       }
     }
     for (final shape in glyph.shapes) {
-      if (shape.role != GlyphRole.detail) {
+      if (shape.role == GlyphRole.line && shape.solid) {
+        _drawScaled(canvas, shape.path, area, lineWidth / Glyph.strokeWidth);
+      } else if (shape.role != GlyphRole.detail) {
         canvas.drawPath(shape.path, paintFor(shape));
       }
     }
@@ -113,17 +117,23 @@ class GlyphPainter extends CustomPainter {
       );
       return;
     }
-    final center = detail.path.getBounds().center;
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
-    canvas.scale(scale);
-    canvas.translate(-center.dx, -center.dy);
-    canvas.drawPath(
+    _drawScaled(
+      canvas,
       detail.path,
       Paint()
         ..color = color
         ..blendMode = blendMode,
+      scale,
     );
+  }
+
+  void _drawScaled(Canvas canvas, Path path, Paint paint, double scale) {
+    final center = path.getBounds().center;
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.scale(scale);
+    canvas.translate(-center.dx, -center.dy);
+    canvas.drawPath(path, paint);
     canvas.restore();
   }
 

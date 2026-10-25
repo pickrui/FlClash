@@ -155,7 +155,7 @@ class _TailscaleViewState extends ConsumerState<TailscaleView>
           : ListView(
               padding: EdgeInsets.fromLTRB(
                 16,
-                context.contentTopPadding,
+                context.sectionsTopPadding,
                 16,
                 20 + context.bottomInset,
               ),

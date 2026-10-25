@@ -91,7 +91,28 @@ class _SetupAction extends SetupAction {
   void autoApplyProfile() => autoApplies++;
 }
 
+class _ImmediateCommon extends CommonAction {
+  @override
+  void build() {}
+  @override
+  Future<T?> safeRun<T>(
+    FutureOr<T> Function() action, {
+    String? title,
+    VoidCallback? onStart,
+    VoidCallback? onEnd,
+    bool silence = true,
+  }) async => action();
+}
+
 class _CustomProfileAction extends ProfileAction {
+  final creating = Completer<int>();
+  int creates = 0;
+  @override
+  Future<int> addCustomProfile(String label) {
+    creates++;
+    return creating.future;
+  }
+
   final deleted = <int>[];
   final saved = <Profile>[];
 
@@ -283,6 +304,30 @@ void main() {
       expect(find.text(label), findsNothing, reason: label);
     }
   });
+
+  testWidgets(
+    'a link beyond QR capacity shows the length hint without rendering',
+    (tester) async {
+      final long = _second.copyWith(
+        url: 'https://example.invalid/${'x' * 4000}',
+      );
+      await _pushRoute(tester, [
+        profilesProvider.overrideWith(() => _Profiles([long])),
+      ], () => const ProfilesView());
+      await tester.longPress(find.text('Second'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('More'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('QR code'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(AppLocalizations.current.qrcodeTooLongTip),
+        findsOneWidget,
+      );
+      expect(find.byType(QrCodeView), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('local-only profiles have no update action', (tester) async {
     final action = _UpdatingProfileAction();
@@ -492,6 +537,42 @@ void main() {
     expect(setup.autoApplies, 1);
     expect(tester.takeException(), isNull);
   });
+
+  for (final empty in [true, false]) {
+    testWidgets(
+      'add menu keeps the new editor after async creation (empty=$empty)',
+      (tester) async {
+        final profiles = _Profiles(empty ? [] : [_first]);
+        final action = _CustomProfileAction();
+        await _pushRoute(tester, [
+          profilesProvider.overrideWith(() => profiles),
+          profileActionProvider.overrideWith(() => action),
+          commonActionProvider.overrideWith(_ImmediateCommon.new),
+          setupActionProvider.overrideWith(_SetupAction.new),
+          clashProvidersProvider.overrideWith((_) => Stream.value([])),
+        ], () => const ProfilesView());
+        final l = AppLocalizations.current;
+        await tester.tap(
+          empty ? find.text(l.addProfile) : find.byTooltip(l.addProfile),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text(l.link), findsOneWidget);
+        expect(find.text(l.importConfig), findsOneWidget);
+        await tester.tap(find.text(l.customProfile));
+        await tester.pumpAndSettle();
+        expect(action.creates, 1);
+        final created = Profile.custom(label: 'Unnamed').copyWith(id: 9);
+        profiles.replace([if (!empty) _first, created]);
+        await tester.pumpAndSettle();
+        action.creating.complete(created.id);
+        await tester.pumpAndSettle();
+        expect(find.byType(CustomProfileView), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump(const Duration(milliseconds: 1));
+      },
+    );
+  }
 
   group('a new custom profile', () {
     final created = Profile.custom(label: 'Unnamed').copyWith(id: 9);

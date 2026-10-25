@@ -436,6 +436,11 @@ class CoreController {
         });
   }
 
+  Future<String> replaceProviderFile(
+    ProviderFileChange change, {
+    bool rollback = false,
+  }) => _interface.replaceProviderFile(change, rollback: rollback);
+
   Future<String> sideLoadExternalProvider({
     required String providerName,
     required String data,
@@ -505,9 +510,12 @@ class CoreController {
     }
   }
 
-  Future<Map<String, dynamic>> getProbeRoute() async {
+  Future<Map<String, dynamic>> getProbeRoute({
+    List<String> hosts = const [],
+  }) async {
     final result = await _interface.invokeMethod<Map<String, dynamic>>(
       method: CoreMethod.probeRoute,
+      arguments: hosts,
       timeout: const Duration(seconds: 5),
     );
     if (result == null) throw StateError('Missing probe route');

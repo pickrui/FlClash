@@ -12,6 +12,7 @@ import 'package:fl_clash/features/overwrite/profile_proxy.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/widgets/input.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
@@ -186,6 +187,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text(AppLocalizations.current.requestHeaders));
     await tester.pumpAndSettle();
+    expect(find.byType(MapInputPage), findsOneWidget);
+    await tester.tap(find.byTooltip(AppLocalizations.current.quickEdit));
+    await tester.pumpAndSettle();
     final input = find.descendant(
       of: find.byType(FormPage),
       matching: find.byType(TextField),
@@ -196,6 +200,9 @@ void main() {
     tester.widget<FormPage>(find.byType(FormPage)).onSave();
     await tester.pumpAndSettle();
     expect(find.byType(FormPage), findsNothing);
+    await tester.tap(find.byTooltip(AppLocalizations.current.save));
+    await tester.pumpAndSettle();
+    expect(find.byType(MapInputPage), findsNothing);
     await tester.tap(find.byTooltip(AppLocalizations.current.save));
     await tester.pumpAndSettle();
 
@@ -274,6 +281,162 @@ void main() {
     expect(result?.name, 'Taken');
     expect(find.byType(ProfileProxyEditView), findsNothing);
   });
+
+  for (final size in [const Size(320, 800), const Size(800, 1000)]) {
+    testWidgets('nested lists and headers retain their values at $size', (
+      tester,
+    ) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final core = _Core();
+      when(() => core.isCompleted).thenReturn(true);
+      when(() => core.validateProxies(any())).thenAnswer((_) async => ['']);
+      ProfileProxy? saved;
+      await tester.pumpWidget(
+        TestApp(
+          locale: const Locale('en'),
+          overrides: [
+            coreHandlerProvider.overrideWithValue(core),
+            viewSizeProvider.overrideWithBuild((_, _) => size),
+          ],
+          child: ProfileProxyEditView(
+            profileProxy: const ProfileProxy(
+              id: 7,
+              enable: false,
+              emptyOptions: {'interfaceName'},
+              proxy: {
+                'name': 'Node',
+                'type': 'vmess',
+                'server': 'example.com',
+                'port': 443,
+                'uuid': 'fixture',
+                'network': 'http',
+                'http-opts': {
+                  'path': ['/one', '/two'],
+                  'headers': {
+                    'Host': ['a.example', 'b.example'],
+                    'Accept': ['text/html', 'application/xml'],
+                  },
+                  'future': {'keep': true},
+                },
+              },
+            ),
+            canSave: (next) async {
+              saved = next;
+              return false;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      Future<void> openField(String label) async {
+        final field = find.text(label);
+        await tester.dragUntilVisible(
+          field,
+          find.byType(ListView).first,
+          const Offset(0, -200),
+        );
+        await tester.ensureVisible(field);
+        await tester.pumpAndSettle();
+        await tester.tap(field);
+        await tester.pumpAndSettle();
+      }
+
+      Future<void> confirmMap() async {
+        final label = find.text('Confirm').hitTestable();
+        await tester.tap(
+          label.evaluate().isNotEmpty ? label : find.byTooltip('Confirm'),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      await openField('HTTP Path');
+      expect(find.byType(ListInputPage), findsOneWidget);
+      await tester.tap(find.byTooltip('Quick edit'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '/discarded');
+      Navigator.of(tester.element(find.byType(FormPage))).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('/one'), findsOneWidget);
+      expect(find.text('/discarded'), findsNothing);
+      final dropAt =
+          tester.getBottomLeft(find.text('/two')) + const Offset(20, 60);
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('/one')),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      await gesture.moveBy(const Offset(0, 20));
+      await tester.pump();
+      await gesture.moveTo(dropAt);
+      await tester.pump(const Duration(seconds: 1));
+      await gesture.up();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('/one'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '/edited');
+      await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Add'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Batch add'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '/two\n/three\n/three');
+      await tester.pumpAndSettle();
+      expect(find.text('1 to add, 1 skipped as existing'), findsOneWidget);
+      await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Save'));
+      await tester.pumpAndSettle();
+      expect(saved, isNull);
+
+      await openField(AppLocalizations.current.transportHeaders('HTTP'));
+      expect(find.byType(MapInputPage), findsOneWidget);
+      expect(find.text('Host'), findsNothing);
+      await tester.tap(find.text('Accept'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).first, 'HOST');
+      await confirmMap();
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(
+        find.text(AppLocalizations.current.existsTip('Key')),
+        findsOneWidget,
+      );
+      await tester.enterText(find.byType(TextField).first, 'accept');
+      await confirmMap();
+      expect(find.text('accept'), findsOneWidget);
+      await tester.tap(find.byTooltip('Add'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Batch add'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byType(TextField),
+        'ACCEPT: replaced\nhOsT: replaced\nX-New: first\nx-new: duplicate',
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('1 to add, 2 skipped as existing'), findsOneWidget);
+      await confirmMap();
+      await tester.tap(find.byTooltip('Save'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Save'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.enable, isFalse);
+      expect(saved?.emptyOptions, {'interfaceName'});
+      expect(saved?.proxy['http-opts'], {
+        'path': ['/two', '/edited', '/three'],
+        'headers': {
+          'Host': ['a.example', 'b.example'],
+          'accept': ['text/html', 'application/xml'],
+          'X-New': ['first'],
+        },
+        'future': {'keep': true},
+      });
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   for (final size in [const Size(390, 844), const Size(1200, 1000)]) {
     testWidgets(
       'nested edits retain advanced fields and empty options at $size',

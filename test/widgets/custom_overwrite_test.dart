@@ -636,6 +636,70 @@ void main() {
     expect(result, expected);
   });
 
+  testWidgets('provider validation failure keeps the draft and allows retry', (
+    tester,
+  ) async {
+    ProxyProviderOptions? result;
+    var checks = 0;
+    await _openProviderOptions(
+      tester,
+      validate: (_) async {
+        if (++checks == 1) throw StateError('fixture validation failure');
+        return '';
+      },
+      onResult: (value) => result = value,
+    );
+    await tester.enterText(_field('Proxy filter'), 'JP');
+    await _save(tester);
+    expect(tester.takeException(), isNull);
+    expect(find.textContaining('fixture validation failure'), findsOneWidget);
+    expect(
+      tester.widget<TextFormField>(_field('Proxy filter')).controller!.text,
+      'JP',
+    );
+    expect(result, isNull);
+    await _save(tester);
+    expect(result?.filter, 'JP');
+    expect(checks, 2);
+  });
+
+  testWidgets('provider validation cannot dismiss a page opened above it', (
+    tester,
+  ) async {
+    final pending = Completer<String>();
+    ProxyProviderOptions? result;
+    var checks = 0;
+    await _openProviderOptions(
+      tester,
+      validate: (_) => ++checks == 1 ? pending.future : Future.value(''),
+      onResult: (value) => result = value,
+    );
+    await tester.enterText(_field('Proxy filter'), 'JP');
+    await tester.tap(find.byTooltip('Save'));
+    await tester.pump();
+    final navigator = Navigator.of(
+      tester.element(find.byType(ProfileProviderOptionsDialog)),
+    );
+    unawaited(
+      navigator.push<ProxyProviderOptions>(
+        MaterialPageRoute(
+          builder: (_) => const Scaffold(body: Text('Covering page')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    pending.complete('');
+    await tester.pumpAndSettle();
+    expect(find.text('Covering page'), findsOneWidget);
+    expect(result, isNull);
+    navigator.pop();
+    await tester.pumpAndSettle();
+    await _save(tester);
+    expect(result?.filter, 'JP');
+    expect(checks, 2);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('removing a provider option leaves it to the core again', (
     tester,
   ) async {
@@ -689,6 +753,39 @@ Finder _field(String title) => find.descendant(
   of: find.widgetWithText(FormRow, title),
   matching: find.byType(TextFormField),
 );
+
+Future<void> _openProviderOptions(
+  WidgetTester tester, {
+  required Future<String> Function(ProxyProviderOptions) validate,
+  required ValueChanged<ProxyProviderOptions?> onResult,
+}) async {
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 1000)),
+      ],
+      child: _TestApp(
+        child: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async => onResult(
+              await _push<ProxyProviderOptions>(
+                context,
+                ProfileProviderOptionsDialog(
+                  label: 'Subscription',
+                  options: const ProxyProviderOptions(filter: 'HK'),
+                  validate: validate,
+                ),
+              ),
+            ),
+            child: const Text('Open options'),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.text('Open options'));
+  await tester.pumpAndSettle();
+}
 
 Future<void> _save(WidgetTester tester) async {
   await tester.tap(find.byTooltip('Save'));

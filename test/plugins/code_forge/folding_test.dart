@@ -357,11 +357,12 @@ void main() {
   });
 
   group('past the per-line folding limit, a whole-document pass', () {
+    setUp(() => delayEditorFolds(const Duration(milliseconds: 1500)));
+
     Future<CodeForgeController> pump(WidgetTester tester) async {
       final controller = CodeForgeController()..text = _document(1700);
       await pumpEditor(tester, controller);
-      await tester.pump(const Duration(milliseconds: 400));
-      await settle(tester);
+      await settleFolds(tester);
       return controller;
     }
 
@@ -371,9 +372,7 @@ void main() {
     ) async {
       final end = controller.getLineStartOffset(_optsLine(0) + 2) - 1;
       controller.replaceRange(end, end, ' }');
-      await settle(tester);
-      await tester.pump(const Duration(milliseconds: 400));
-      await settle(tester);
+      await settleFolds(tester);
     }
 
     testWidgets('unfolds a fold an edit ended on an earlier line', (
@@ -420,9 +419,7 @@ void main() {
       expect(controller.getFoldStartForLine(line), line - 1);
 
       controller.replaceRange(above, above, '    udp: true\n');
-      await settle(tester);
-      await tester.pump(const Duration(milliseconds: 400));
-      await settle(tester);
+      await settleFolds(tester);
       expect(controller.getFoldStartForLine(line + 1), line);
       expect(controller.isLineInFoldedRegion(line + 3), isFalse);
     });
@@ -438,9 +435,7 @@ void main() {
       await settle(tester);
 
       controller.replaceRange(0, 0, '# top\n');
-      await settle(tester);
-      await tester.pump(const Duration(milliseconds: 400));
-      await settle(tester);
+      await settleFolds(tester);
       expect(controller.getFoldStartForLine(inner + 1), 1);
       controller.toggleFold(1);
       await settle(tester);

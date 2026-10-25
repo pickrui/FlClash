@@ -1906,7 +1906,7 @@ final class NetworkDetectionProvider
   }
 }
 
-String _$networkDetectionHash() => r'e4e0067f4e590af55e04d26cfc00bbff0d7e2589';
+String _$networkDetectionHash() => r'e2cc3f192e87f9ec555a5001723053f5d03bc998';
 
 abstract class _$NetworkDetection extends $Notifier<NetworkDetectionState> {
   NetworkDetectionState build();
@@ -2085,6 +2085,58 @@ abstract class _$WindowBlur extends $Notifier<double?> {
             as $ClassProviderElement<
               AnyNotifier<double?, double?>,
               double?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(AppliedSetupState)
+final appliedSetupStateProvider = AppliedSetupStateProvider._();
+
+final class AppliedSetupStateProvider
+    extends $NotifierProvider<AppliedSetupState, SetupState?> {
+  AppliedSetupStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'appliedSetupStateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$appliedSetupStateHash();
+
+  @$internal
+  @override
+  AppliedSetupState create() => AppliedSetupState();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SetupState? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SetupState?>(value),
+    );
+  }
+}
+
+String _$appliedSetupStateHash() => r'f818e56eaa6ec80a7de67efc4578bbeb3a2e370b';
+
+abstract class _$AppliedSetupState extends $Notifier<SetupState?> {
+  SetupState? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<SetupState?, SetupState?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<SetupState?, SetupState?>,
+              SetupState?,
               Object?,
               Object?
             >;

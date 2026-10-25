@@ -183,6 +183,51 @@ void main() {
     expect(AppSettingProps.fromJson(saved), props);
   });
 
+  test(
+    'legacy general values and test URL migrate once without losing picks',
+    () {
+      final restored = Config.fromJson({
+        'appSettingProps': {'testUrl': 'https://custom.test/204'},
+        'patchClashConfig': {
+          'ipv6': true,
+          'unified-delay': false,
+          'tcp-concurrent': false,
+          'geodata-loader': 'standard',
+        },
+      });
+      final patch = restored.patchClashConfig;
+      expect(patch.generalOverrideKeys, GeneralOverrideKey.values.toSet());
+      expect(patch.effectiveTestUrl, 'https://custom.test/204');
+      expect(patch.generalOverrideJson, {
+        'ipv6': true,
+        'unified-delay': false,
+        'tcp-concurrent': false,
+        'geodata-loader': 'standard',
+      });
+      expect(roundTrip(restored.toJson, Config.fromJson), restored);
+      final saved = jsonDecode(jsonEncode(restored)) as Map<String, dynamic>;
+      expect(saved['appSettingProps'], isNot(contains('testUrl')));
+      saved['appSettingProps']['testUrl'] = 'https://obsolete.test';
+      saved['patchClashConfig']['general-override-keys'] = <String>[];
+      final unpicked = Config.fromJson(saved).patchClashConfig;
+      expect(unpicked.generalOverrideKeys, isEmpty);
+      expect(unpicked.testUrl, 'https://custom.test/204');
+      expect(unpicked.effectiveTestUrl, defaultTestUrl);
+      expect(
+        Config.realFromJson(null).patchClashConfig.generalOverrideKeys,
+        isEmpty,
+      );
+    },
+  );
+
+  test('the old default test URL migrates without adding an override', () {
+    final restored = Config.fromJson({
+      'appSettingProps': {'testUrl': 'https://www.gstatic.com/generate_204'},
+    }).patchClashConfig;
+    expect(restored.effectiveTestUrl, defaultTestUrl);
+    expect(restored.generalOverrideKeys, legacyGeneralOverrideKeys);
+  });
+
   group('AppSettingProps JSON round-trip', () {
     test(
       'expanded sidebar default preserves an existing collapsed preference',
@@ -213,7 +258,6 @@ void main() {
       expect(restored.showLabel, true);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
-      expect(restored.testUrl, defaultTestUrl);
     });
 
     test('custom values survive round-trip', () {
@@ -222,7 +266,6 @@ void main() {
         onlyStatisticsProxy: true,
         autoLaunch: true,
         closeConnections: false,
-        testUrl: 'https://custom.test',
       );
       final restored = roundTrip(
         () => props.toJson(),
@@ -232,22 +275,6 @@ void main() {
       expect(restored.onlyStatisticsProxy, true);
       expect(restored.autoLaunch, true);
       expect(restored.closeConnections, false);
-      expect(restored.testUrl, 'https://custom.test');
-    });
-
-    test('missing test URL uses the Cloudflare default', () {
-      final restored = AppSettingProps.fromJson({});
-
-      expect(restored.testUrl, defaultTestUrl);
-      expect(restored.testUrl, 'http://cp.cloudflare.com/generate_204');
-    });
-
-    test('gstatic default migrates to Cloudflare', () {
-      final restored = AppSettingProps.fromJson({
-        'testUrl': 'https://www.gstatic.com/generate_204',
-      });
-
-      expect(restored.testUrl, defaultTestUrl);
     });
 
     test('safeFromJson returns default on null', () {

@@ -71,6 +71,36 @@ Future<Profile> saveProfileRefresh(
   return saved;
 }
 
+class ProfileApplyScheduler {
+  final _debouncer = Debouncer();
+  bool _force = false;
+  Duration _lastPush = Duration.zero;
+
+  Duration get delay => Duration(
+    microseconds: _lastPush.inMicroseconds.clamp(
+      const Duration(milliseconds: 600).inMicroseconds,
+      const Duration(seconds: 10).inMicroseconds,
+    ),
+  );
+
+  void recordPush(Duration elapsed) => _lastPush = elapsed;
+
+  void schedule(
+    FutureOr<void> Function(bool force) apply, {
+    required bool force,
+  }) {
+    _force |= force;
+    _debouncer.call(this, () => apply(takeForce()), duration: delay);
+  }
+
+  bool takeForce() {
+    _debouncer.cancel(this);
+    final force = _force;
+    _force = false;
+    return force;
+  }
+}
+
 class ProfileApplyIntent {
   bool _requiresForce = false;
   FutureOr<void> Function()? _preloadInvoke;

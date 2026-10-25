@@ -14,9 +14,12 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/providers/resources.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/resource_file_info.dart';
+import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -84,6 +87,11 @@ class CustomProvidersView extends ConsumerWidget {
     final (:proxy, :rule) = referencedProviders(profile);
     final sources = watchProviderSources(ref);
     final profiles = ref.watch(profilesProvider);
+    final ruleProviders = {
+      for (final provider
+          in ref.watch(clashProvidersProvider).value ?? const <ClashProvider>[])
+        if (provider.kind == ProviderKind.rule) provider.label: provider,
+    };
     return CommonScaffold(
       title: appLocalizations.providers,
       body: NullStatusSwitcher(
@@ -94,7 +102,7 @@ class CustomProvidersView extends ConsumerWidget {
         ),
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-            top: context.contentTopPadding,
+            top: context.sectionsTopPadding,
             bottom: 16 + context.bottomInset,
           ),
           children: [
@@ -118,7 +126,9 @@ class CustomProvidersView extends ConsumerWidget {
               items: [
                 for (final name in rule)
                   _RuleProviderItem(
+                    key: ValueKey(name),
                     name: name,
+                    provider: ruleProviders[name],
                     invalid: sources != null && !sources.hasRule(name),
                   ),
               ],
@@ -148,6 +158,8 @@ class _ProxyProviderItem extends ConsumerWidget {
   Future<void> _handleEdit(BuildContext context, WidgetRef ref) async {
     final profile = ref.read(profileProvider(profileId));
     if (profile == null) return;
+    final original = profile.overrides.proxyProviders[name];
+    Profile? validatedProfile;
     ProfileOverrides withOptions(
       Profile profile,
       ProxyProviderOptions options,
@@ -167,18 +179,35 @@ class _ProxyProviderItem extends ConsumerWidget {
             profile.overrides.proxyProviders[name] ??
             const ProxyProviderOptions(),
         validate: (options) async {
+          validatedProfile = null;
+          if (!context.mounted) return appLocalizations.routingChanged;
           final current = ref.read(profileProvider(profileId));
-          if (!context.mounted || current == null) {
+          if (current == null ||
+              current.type != profile.type ||
+              current.overwriteType != profile.overwriteType ||
+              current.overrides.proxyProviders[name] != original ||
+              !referencedProviders(current).proxy.contains(name)) {
             return appLocalizations.routingChanged;
           }
-          return validateCustomRoutingDraft(
+          final message = await validateCustomRoutingDraft(
             ref,
             current.copyWith(overrides: withOptions(current, options)),
           );
+          if (!context.mounted ||
+              ref.read(profileProvider(profileId)) != current) {
+            return appLocalizations.routingChanged;
+          }
+          if (message.isEmpty) validatedProfile = current;
+          return message;
         },
       ),
     );
     if (result == null || !context.mounted) return;
+    if (validatedProfile == null ||
+        ref.read(profileProvider(profileId)) != validatedProfile) {
+      context.showNotifier(appLocalizations.routingChanged);
+      return;
+    }
     ref
         .read(profilesProvider.notifier)
         .updateProfile(
@@ -232,22 +261,45 @@ class _ProxyProviderItem extends ConsumerWidget {
 class _RuleProviderItem extends StatelessWidget {
   final String name;
   final bool invalid;
+  final ClashProvider? provider;
 
-  const _RuleProviderItem({required this.name, required this.invalid});
+  const _RuleProviderItem({
+    super.key,
+    required this.name,
+    required this.invalid,
+    required this.provider,
+  });
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    return DecorationListItem(
+    Widget item([FileInfo? info]) => DecorationListItem(
       invalid: invalid,
       contentPadding: const EdgeInsets.only(left: 16, right: 8),
       title: TooltipText(
         text: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
-      subtitle: invalid ? null : Text(appLocalizations.providerSourceApp),
+      subtitle: invalid
+          ? null
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(appLocalizations.providerSourceApp),
+                if (info != null)
+                  LastUpdateTimeText(lastUpdateDate: info.lastModified),
+              ],
+            ),
       trailing: invalid
           ? InfoMessageButton(message: appLocalizations.invalidRuleSet(name))
           : null,
+    );
+    final source = provider;
+    if (invalid || source == null) return item();
+    return ResourceFileInfoBuilder(
+      source: source,
+      updatingKey: source.updatingKey,
+      load: () => source.fileInfo,
+      builder: (_, info, _) => item(info),
     );
   }
 }

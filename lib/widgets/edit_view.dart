@@ -10,9 +10,6 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
   List<T> _entries = [];
   late final List<T> _initialEntries;
   final _selectionKey = uniqueId;
-  DragBackRouteMixin<dynamic>? _resultRoute;
-  late final ValueGetter<Object?> _readResult = _currentResult;
-  Object _currentResult() => popResult(_entries);
   bool _confirming = false;
 
   String get title;
@@ -31,6 +28,8 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
 
   Object popResult(List<T> entries);
 
+  Future<List<T>?> Function(List<T>)? get editAll => null;
+
   /// Adds when [entry] is null and edits it otherwise; an add may return
   /// several entries from batch mode.
   Future<List<T>?> showEntryDialog(T? entry);
@@ -40,30 +39,6 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
     super.initState();
     _entries = List<T>.from(initialEntries);
     _initialEntries = List<T>.from(_entries);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _releaseResult();
-    final route = ModalRoute.of(context);
-    if (route is DragBackRouteMixin<dynamic>) {
-      _resultRoute = route;
-      route.pageResult = _readResult;
-    }
-  }
-
-  void _releaseResult() {
-    if (identical(_resultRoute?.pageResult, _readResult)) {
-      _resultRoute?.pageResult = null;
-    }
-    _resultRoute = null;
-  }
-
-  @override
-  void dispose() {
-    _releaseResult();
-    super.dispose();
   }
 
   void _handleReorder(int oldIndex, int newIndex) {
@@ -138,6 +113,45 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
     }
   }
 
+  void _handleSave() => Navigator.of(context).pop(popResult(_entries));
+
+  Future<void> _handleEditAll() async {
+    final edit = editAll;
+    if (_confirming || edit == null) return;
+    final original = List<T>.unmodifiable(_entries);
+    final route = ModalRoute.of(context);
+    setState(() => _confirming = true);
+    try {
+      final next = await edit(original);
+      if (!mounted ||
+          route?.isCurrent == false ||
+          next == null ||
+          !sameEntries(_entries, original)) {
+        return;
+      }
+      setState(() => _entries = List<T>.from(next));
+    } finally {
+      if (mounted) setState(() => _confirming = false);
+    }
+  }
+
+  Future<void> _handleBack() async {
+    if (_confirming) return;
+    final route = ModalRoute.of(context);
+    setState(() => _confirming = true);
+    try {
+      final save = await globalState.showSaveChanges(context: context);
+      if (!mounted || route?.isCurrent == false || save == null) return;
+      if (save) {
+        _handleSave();
+      } else {
+        Navigator.of(context).pop();
+      }
+    } finally {
+      if (mounted) setState(() => _confirming = false);
+    }
+  }
+
   Future<void> _handleReset() async {
     if (_confirming) return;
     final route = ModalRoute.of(context);
@@ -190,8 +204,9 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
     final appLocalizations = context.appLocalizations;
     final selected = ref.watch(itemsProvider(_selectionKey));
     final isEditing = selected.isNotEmpty;
+    final hasChanges = !sameEntries(_entries, _initialEntries);
     return CommonPopScope(
-      onPop: !isEditing && !_confirming && _resultRoute != null
+      onPop: !isEditing && !_confirming && !hasChanges
           ? null
           : (_) {
               if (_confirming) return false;
@@ -199,11 +214,18 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
                 ref.read(itemsProvider(_selectionKey).notifier).value = {};
                 return false;
               }
-              Navigator.of(context).pop(popResult(_entries));
+              _handleBack();
               return false;
             },
       child: CommonScaffold(
         title: title,
+        confirmationAction: !isEditing && hasChanges
+            ? IconButtonData(
+                glyph: AppGlyphs.check,
+                tooltip: appLocalizations.save,
+                onPressed: _confirming ? null : _handleSave,
+              )
+            : null,
         selectionActions: [
           if (isEditing) ...[
             IconButtonData(
@@ -220,17 +242,23 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
         ],
         iconActions: [
           if (!isEditing) ...[
+            IconButtonData(
+              glyph: AppGlyphs.addCircle,
+              tooltip: appLocalizations.add,
+              onPressed: _confirming ? null : _handleAdd,
+            ),
             if (!sameEntries(_entries, _initialEntries))
               IconButtonData(
                 glyph: AppGlyphs.reset,
                 tooltip: appLocalizations.reset,
                 onPressed: _confirming ? null : _handleReset,
               ),
-            IconButtonData(
-              glyph: AppGlyphs.addCircle,
-              tooltip: appLocalizations.add,
-              onPressed: _confirming ? null : _handleAdd,
-            ),
+            if (editAll != null)
+              IconButtonData(
+                glyph: AppGlyphs.compose,
+                tooltip: appLocalizations.quickEdit,
+                onPressed: _confirming ? null : _handleEditAll,
+              ),
           ],
         ],
         body: NullStatusSwitcher(
@@ -286,6 +314,7 @@ class ListInputPage extends ConsumerStatefulWidget {
   final String? valueLabel;
   final int? itemMaxLength;
   final String? Function(String item)? itemValidator;
+  final Future<List<String>?> Function(BuildContext, List<String>)? onEditAll;
 
   const ListInputPage({
     super.key,
@@ -297,6 +326,7 @@ class ListInputPage extends ConsumerStatefulWidget {
     this.subtitleBuilder,
     this.itemMaxLength,
     this.itemValidator,
+    this.onEditAll,
   });
 
   @override
@@ -333,6 +363,12 @@ class _ListInputPageState extends _EditViewState<ListInputPage, String> {
 
   @override
   Object popResult(List<String> entries) => entries;
+
+  @override
+  Future<List<String>?> Function(List<String>)? get editAll =>
+      widget.onEditAll == null
+      ? null
+      : (entries) => widget.onEditAll!(context, entries);
 
   String get _valueLabel => widget.valueLabel ?? context.appLocalizations.value;
 
@@ -419,6 +455,13 @@ class MapInputPage extends ConsumerStatefulWidget {
   final String? valueLabel;
   final int? keyMaxLength;
   final int? valueMaxLength;
+  final bool ignoreKeyCase;
+  final Set<String> reservedKeys;
+  final Future<Map<String, String>?> Function(
+    BuildContext,
+    Map<String, String>,
+  )?
+  onEditAll;
 
   const MapInputPage({
     super.key,
@@ -431,6 +474,9 @@ class MapInputPage extends ConsumerStatefulWidget {
     this.subtitleBuilder,
     this.keyMaxLength,
     this.valueMaxLength,
+    this.ignoreKeyCase = false,
+    this.reservedKeys = const {},
+    this.onEditAll,
   });
 
   @override
@@ -472,17 +518,29 @@ class _MapInputPageState
       Map<String, String>.fromEntries(entries);
 
   @override
+  Future<List<MapEntry<String, String>>?> Function(
+    List<MapEntry<String, String>>,
+  )?
+  get editAll => widget.onEditAll == null
+      ? null
+      : (entries) async => (await widget.onEditAll!(
+          context,
+          Map.fromEntries(entries),
+        ))?.entries.toList();
+
+  @override
   Future<List<MapEntry<String, String>>?> showEntryDialog(
     MapEntry<String, String>? entry,
   ) => showFormSheet<List<MapEntry<String, String>>>(
     context: context,
     builder: (_, _) => MapEntryForm(
       entry: entry,
-      existingKeys: _entries.map(idOf).toSet(),
+      existingKeys: {..._entries.map(idOf), ...widget.reservedKeys},
       keyLabel: widget.keyLabel,
       valueLabel: widget.valueLabel,
       keyMaxLength: widget.keyMaxLength,
       valueMaxLength: widget.valueMaxLength,
+      ignoreKeyCase: widget.ignoreKeyCase,
     ),
   );
 }

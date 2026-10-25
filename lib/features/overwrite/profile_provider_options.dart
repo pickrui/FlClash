@@ -216,12 +216,16 @@ class _ProfileProviderOptionsDialogState
     });
     try {
       final message = await widget.validate?.call(options) ?? '';
-      if (!mounted) return;
+      if (!mounted || ModalRoute.of(context)?.isCurrent != true) return;
       if (message.isNotEmpty) {
         setState(() => _error = message);
         return;
       }
       context.safeNestedPop(options);
+    } catch (error) {
+      if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+        setState(() => _error = error.toString());
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -469,11 +473,14 @@ class _ProfileProviderOptionsDialogState
             child: Builder(
               builder: (context) => ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-                  top: context.contentTopPadding,
+                  top: context.sectionsTopPadding,
                   bottom: 20 + context.bottomInset,
                 ),
                 children: [
-                  ErrorBanner(message: issue?.message ?? _error),
+                  ErrorBanner(
+                    message: issue?.message ?? _error,
+                    sectioned: true,
+                  ),
                   generateSection(
                     title: l.filters,
                     items: [

@@ -226,7 +226,7 @@ class _CommonSwitchState extends State<CommonSwitch>
     final lens = LiquidGlassScope.of(context) && lift > 0;
     final thumbFill = lens
         ? thumbColor.withValues(alpha: thumbColor.a * (1 - lift))
-        : thumbColor;
+        : Color.lerp(thumbColor, Colors.white, lift)!;
     final thumb = DecoratedBox(
       decoration: ShapeDecoration(
         color: thumbFill,

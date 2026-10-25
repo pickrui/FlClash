@@ -287,14 +287,20 @@ void main() {
         overrides: [profileActionProvider.overrideWith(() => action)],
         child: Scaffold(
           body: Builder(
-            builder: (context) => AddProfileView(parentContext: context),
+            builder: (context) => AddProfileMenu(
+              parentContext: context,
+              builder: (open) =>
+                  TextButton(onPressed: open, child: const Text('Add profile')),
+            ),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Add profile'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(appLocalizations.file));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(action.imports, 1);
     expect(otherAction.imports, 0);
   });

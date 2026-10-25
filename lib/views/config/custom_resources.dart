@@ -24,7 +24,7 @@ class CustomResourcesView extends StatelessWidget {
         builder: (context) => ListView(
           padding: EdgeInsets.fromLTRB(
             16,
-            context.contentTopPadding,
+            context.sectionsTopPadding,
             16,
             16 + context.bottomInset,
           ),

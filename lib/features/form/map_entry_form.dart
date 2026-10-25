@@ -20,6 +20,7 @@ class MapEntryForm extends StatefulWidget {
   final String? valueLabel;
   final int? keyMaxLength;
   final int? valueMaxLength;
+  final bool ignoreKeyCase;
 
   const MapEntryForm({
     super.key,
@@ -29,6 +30,7 @@ class MapEntryForm extends StatefulWidget {
     this.valueLabel,
     this.keyMaxLength,
     this.valueMaxLength,
+    this.ignoreKeyCase = false,
   });
 
   @override
@@ -55,6 +57,7 @@ class _MapEntryFormState extends State<MapEntryForm> {
         existingKeys: widget.existingKeys,
         keyMaxLength: widget.keyMaxLength,
         valueMaxLength: widget.valueMaxLength,
+        ignoreKeyCase: widget.ignoreKeyCase,
       );
 
   @override
@@ -81,7 +84,12 @@ class _MapEntryFormState extends State<MapEntryForm> {
     if (widget.keyMaxLength case final max? when key.length > max) {
       return (key: true, message: l.maxLengthTip(_keyLabel, max));
     }
-    if (key != widget.entry?.key && widget.existingKeys.contains(key)) {
+    String fold(String value) =>
+        widget.ignoreKeyCase ? value.toLowerCase() : value;
+    if (widget.existingKeys.any(
+      (existing) =>
+          existing != widget.entry?.key && fold(existing) == fold(key),
+    )) {
       return (key: true, message: l.existsTip(_keyLabel));
     }
     if (value.isEmpty) return (key: false, message: l.emptyTip(_valueLabel));

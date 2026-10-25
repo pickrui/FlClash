@@ -16,6 +16,7 @@ import 'package:intl/intl.dart';
 import 'package:webdav_client/webdav_client.dart';
 
 import 'bounded_http_client_adapter.dart';
+import 'dav_transport.dart';
 import 'http_read_race.dart';
 
 bool isValidDavUri(String value) {
@@ -177,10 +178,10 @@ class DAVClient {
       );
 
   Client _newClient({String? route}) {
-    final result = newClient(
-      _dav.uri,
-      user: _dav.user,
-      password: _dav.password,
+    final result = Client(
+      uri: _dav.uri.replaceFirst(RegExp(r'/+$'), ''),
+      c: DavTransport(),
+      auth: Auth(user: _dav.user, pwd: _dav.password),
     );
     final origin = Uri.parse(_dav.uri);
     result.c.options.persistentConnection = false;
@@ -219,6 +220,13 @@ class DAVClient {
         },
         onResponse: (response, handler) {
           final method = response.requestOptions.method;
+          if (method == 'OPTIONS' && response.statusCode == 204) {
+            response.statusCode = 200;
+          }
+          if (method == 'MKCOL' &&
+              const {200, 204}.contains(response.statusCode)) {
+            response.statusCode = 201;
+          }
           if (method == 'GET' &&
               response.statusCode == 206 &&
               _spansWholeObject(response)) {
@@ -275,7 +283,7 @@ class DAVClient {
           '/',
           cancelToken: token,
         );
-        if (response.statusCode != 200 && response.statusCode != 204) {
+        if (response.statusCode != 200) {
           throw DioException(
             requestOptions: response.requestOptions,
             response: response,

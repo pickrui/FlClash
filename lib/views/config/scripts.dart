@@ -197,8 +197,8 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
         onSave: (context, title, content) =>
             _save(context, title, content, script, previousBytes),
         onPop: (editorContext, title, content) async {
-          final answer = await globalState.showMessage(
-            message: TextSpan(text: context.appLocalizations.saveChanges),
+          final answer = await globalState.showSaveChanges(
+            context: editorContext,
           );
           if (answer == false) return true;
           if (answer == true && mounted && editorContext.mounted) {
@@ -535,7 +535,7 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
               )
             : ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-                  top: context.contentTopPadding,
+                  top: context.sectionsTopPadding,
                   bottom: 16 + context.bottomInset,
                 ),
                 children: [

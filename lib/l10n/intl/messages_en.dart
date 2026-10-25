@@ -244,9 +244,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: '1 proxy', other: '${count} proxies')}";
 
   static String m89(name) =>
-      "Node ${name} is already used by another enabled chain or has a proxy chain relation conflict";
+      "Proxy ${name} conflicts with another enabled chain or creates a loop";
 
-  static String m90(name) => "Node ${name} is not available in this position";
+  static String m90(name) => "Proxy ${name} is not available in this position";
 
   static String m91(address) =>
       "Before starting, the system proxy pointed to ${address}.";
@@ -462,6 +462,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Forcefully append system DNS to the configuration",
     ),
     "application": MessageLookupByLibrary.simpleMessage("Application"),
+    "applyNow": MessageLookupByLibrary.simpleMessage("Apply now"),
     "authentication": MessageLookupByLibrary.simpleMessage(
       "Local proxy authentication",
     ),
@@ -1591,6 +1592,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "format": MessageLookupByLibrary.simpleMessage("Format"),
     "fr": MessageLookupByLibrary.simpleMessage("French"),
     "general": MessageLookupByLibrary.simpleMessage("General"),
+    "generalOverrideDesc": MessageLookupByLibrary.simpleMessage(
+      "Entries added here replace the setting of every profile; anything not added keeps the profile\'s own setting, or the core default when the profile has none.",
+    ),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage("Auto Update"),
     "geoAutoUpdateInterval": MessageLookupByLibrary.simpleMessage(
       "Auto Update Interval",
@@ -2431,7 +2435,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxies": MessageLookupByLibrary.simpleMessage("Proxies"),
     "proxiesCount": m88,
     "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage(
-      "Available nodes",
+      "Available nodes and groups",
     ),
     "proxyChainConflictTip": m89,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage("Custom node"),
@@ -2443,24 +2447,30 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Entry"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Exit"),
+    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
+      "Policy groups can be used at the entry or exit. Relay hops must be fixed nodes.",
+    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Click nodes in order: the first node is the entry and the last node is the exit. Select the exit node to use the chain.",
+      "Choose an entry and exit using nodes or policy groups. Exit groups require standalone node members; relay hops use fixed nodes. Select the exit to use the chain. Entry tests measure the entry; exit group tests measure the full chain.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
-      "Proxy chains require at least 2 nodes",
+      "A proxy chain needs an entry and an exit",
     ),
     "proxyChainMinimumNodesHint": MessageLookupByLibrary.simpleMessage(
-      "Proxy chains require at least 2 nodes. Add an exit node.",
+      "Choose an exit node or policy group.",
     ),
     "proxyChainNodeAdded": MessageLookupByLibrary.simpleMessage(
       "Node added to proxy chain",
     ),
     "proxyChainOtherNodes": MessageLookupByLibrary.simpleMessage("Other nodes"),
+    "proxyChainPolicyGroups": MessageLookupByLibrary.simpleMessage(
+      "Policy groups",
+    ),
     "proxyChainRelatedChainsUpdated": MessageLookupByLibrary.simpleMessage(
       "Related proxy chains updated",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Proxy chain saved and applied. Select the exit node to use it",
+      "Proxy chain saved and applied. Select the exit node or group to use it.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Proxy chain",

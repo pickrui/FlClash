@@ -9,6 +9,112 @@ import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('outbound renames follow profile DNS and NTP overrides', () {
+    const profile = Profile(
+      id: 1,
+      profileType: ProfileType.custom,
+      autoUpdateDuration: Duration.zero,
+      overrides: ProfileOverrides(
+        dns: Dns(
+          nameserver: ['https://dns.example/query#h3=true&Node'],
+          fallback: ['tls://dns.example#Node%26h3=true'],
+          directNameserver: ['ts://Node'],
+          proxyServerNameserver: ['et://Node'],
+          defaultNameserver: ['1.1.1.1#Node'],
+          nameserverPolicy: {'+.example.com': '1.1.1.1#Node, 8.8.8.8#Other'},
+          proxyServerNameserverPolicy: {
+            'example.org': 'tls://dns.example#Node',
+          },
+        ),
+        dnsOverrideKeys: {DnsOverrideKey.nameserver},
+        ntp: Ntp(dialerProxy: 'Node'),
+        ntpOverrideKeys: {NtpOverrideKey.dialerProxy},
+      ),
+    );
+    final renamed = profile.copyAndRenameOutboundReferences('Node', 'Renamed');
+    expect(renamed.overrides.dns.nameserver, [
+      'https://dns.example/query#h3=true&Renamed',
+    ]);
+    expect(renamed.overrides.dns.fallback, [
+      'tls://dns.example#Renamed&h3=true',
+    ]);
+    expect(renamed.overrides.dns.directNameserver, ['ts://Renamed']);
+    expect(renamed.overrides.dns.proxyServerNameserver, ['et://Renamed']);
+    expect(renamed.overrides.dns.defaultNameserver, ['1.1.1.1#Renamed']);
+    expect(renamed.overrides.dns.nameserverPolicy, {
+      '+.example.com': '1.1.1.1#Renamed, 8.8.8.8#Other',
+    });
+    expect(renamed.overrides.dns.proxyServerNameserverPolicy, {
+      'example.org': 'tls://dns.example#Renamed',
+    });
+    expect(renamed.overrides.ntp.dialerProxy, 'Renamed');
+    expect(
+      renamed.overrides.dnsOverrideKeys,
+      profile.overrides.dnsOverrideKeys,
+    );
+    expect(
+      renamed.overrides.ntpOverrideKeys,
+      profile.overrides.ntpOverrideKeys,
+    );
+    expect(profile.overrides.ntp.dialerProxy, 'Node');
+  });
+
+  test('only active DNS and NTP references block outbound deletion', () {
+    const profile = Profile(
+      id: 1,
+      profileType: ProfileType.custom,
+      autoUpdateDuration: Duration.zero,
+      overrides: ProfileOverrides(
+        dns: Dns(
+          nameserverPolicy: {'example.com': '1.1.1.1#Node, 8.8.8.8#Other'},
+          directNameserver: ['ts://Tailnet'],
+          fallback: ['1.1.1.1#Inactive'],
+        ),
+        dnsOverrideKeys: {
+          DnsOverrideKey.nameserverPolicy,
+          DnsOverrideKey.directNameserver,
+        },
+        ntp: Ntp(dialerProxy: 'Clock'),
+        ntpOverrideKeys: {NtpOverrideKey.dialerProxy},
+      ),
+    );
+    for (final name in ['Node', 'Other', 'Tailnet', 'Clock']) {
+      expect(profile.hasCustomOutboundReferences(name), isTrue, reason: name);
+    }
+    expect(profile.hasCustomOutboundReferences('Inactive'), isFalse);
+    expect(
+      profile
+          .copyWith(profileType: ProfileType.file)
+          .hasCustomOutboundReferences('Node'),
+      isFalse,
+    );
+    expect(
+      profile
+          .copyWith(
+            overrides: profile.overrides.copyWith(
+              dnsOverrideKeys: {},
+              ntpOverrideKeys: {},
+            ),
+          )
+          .hasCustomOutboundReferences('Node'),
+      isFalse,
+    );
+  });
+
+  test('overlay DNS hosts also protect raw subscription outbounds', () {
+    for (final scheme in ['ts', 'tailscale', 'et', 'easytier']) {
+      expect(
+        findRawOutboundReference({
+          'dns': {
+            'nameserver': ['$scheme://Target'],
+          },
+        }, 'Target'),
+        'dns.nameserver[0]',
+        reason: scheme,
+      );
+    }
+  });
+
   test('empty fallback participates in rename and deletion protection', () {
     const profile = Profile(
       id: 1,
@@ -143,6 +249,19 @@ void main() {
       expect(duplicates, hasLength(2000));
     },
   );
+
+  test('inserting profiles follows persisted order with stable id ties', () {
+    Profile profile(int id, int? order) =>
+        Profile(id: id, order: order, autoUpdateDuration: Duration.zero);
+    final initial = [profile(1, 0), profile(3, 2), profile(5, null)];
+    final inserted = initial.copyAndAddProfile(profile(2, 1)).a;
+    expect(inserted.map((item) => item.id), [1, 2, 3, 5]);
+    final tied = inserted.copyAndAddProfile(profile(4, 2)).a;
+    expect(tied.map((item) => item.id), [1, 2, 3, 4, 5]);
+    final withoutOrder = tied.copyAndAddProfile(profile(6, null)).a;
+    expect(withoutOrder.map((item) => item.id), [1, 2, 3, 4, 5, 6]);
+    expect(initial.map((item) => item.id), [1, 3, 5]);
+  });
 
   group('profiles as proxy providers', () {
     const subscription = Profile(

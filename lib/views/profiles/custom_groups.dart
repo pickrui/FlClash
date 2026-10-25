@@ -157,6 +157,7 @@ class _CustomProxyGroupsSectionState
     if (!context.mounted) {
       return;
     }
+    Profile? validatedProfile;
     final result = await showOverwriteSheet<ProxyGroup>(
       context: context,
       builder: (_) => ProxyGroupDialog(
@@ -177,6 +178,7 @@ class _CustomProxyGroupsSectionState
             : const [],
         validateFilters: ref.read(coreHandlerProvider).validateFilters,
         validate: (result) async {
+          validatedProfile = null;
           if (!context.mounted) {
             throw ProxyGroupEditBlocked(appLocalizations.routingChanged);
           }
@@ -187,6 +189,17 @@ class _CustomProxyGroupsSectionState
               current.url != profile.url ||
               (group != null && !current.customProxyGroups.contains(group))) {
             throw ProxyGroupEditBlocked(appLocalizations.routingChanged);
+          }
+          if (current.customProxyGroups.any(
+                (item) => item != group && item.name == result.name,
+              ) ||
+              (result.name != group?.name &&
+                  current.profileProxies.any(
+                    (item) => item.name == result.name,
+                  ))) {
+            throw ProxyGroupEditBlocked(
+              appLocalizations.existsTip(appLocalizations.name),
+            );
           }
           if (group != null && group.name != result.name) {
             final String? rawReference;
@@ -210,40 +223,31 @@ class _CustomProxyGroupsSectionState
                 appLocalizations.rawOutboundInUse(group.name, rawReference),
               );
             }
-            final latest = ref.read(profileProvider(profileId));
-            if (latest == null ||
-                latest.overwriteType != current.overwriteType ||
-                latest.lastUpdateDate != current.lastUpdateDate ||
-                latest.url != current.url ||
-                !proxyGroupsEquality.equals(
-                  latest.customProxyGroups,
-                  current.customProxyGroups,
-                ) ||
-                !ruleListEquality.equals(
-                  latest.customRules,
-                  current.customRules,
-                ) ||
-                !profileProxyListEquality.equals(
-                  latest.profileProxies,
-                  current.profileProxies,
-                ) ||
-                !proxyChainListEquality.equals(
-                  latest.proxyChains,
-                  current.proxyChains,
-                )) {
+            if (ref.read(profileProvider(profileId)) != current) {
               throw ProxyGroupEditBlocked(appLocalizations.routingChanged);
             }
           }
-          final candidate = current.copyAndPutCustomProxyGroup(
-            result,
-            previous: group,
-          );
-          final cycle = findProxyGroupCycle(candidate.customProxyGroups);
-          if (cycle != null) return appLocalizations.groupCycleError(cycle);
-          final message = await validateCustomRoutingDraft(ref, candidate);
-          if (message == appLocalizations.routingChanged) {
-            throw ProxyGroupEditBlocked(message);
+          final Profile candidate;
+          try {
+            candidate = current.copyAndPutCustomProxyGroup(
+              result,
+              previous: group,
+            );
+          } on FormatException {
+            throw ProxyGroupEditBlocked(
+              appLocalizations.customOutboundInUse(group?.name ?? result.name),
+            );
           }
+          final cycle = findProxyGroupCycle(candidate.customProxyGroups);
+          final message = cycle != null
+              ? appLocalizations.groupCycleError(cycle)
+              : await validateCustomRoutingDraft(ref, candidate);
+          if (!context.mounted ||
+              ref.read(profileProvider(profileId)) != current ||
+              message == appLocalizations.routingChanged) {
+            throw ProxyGroupEditBlocked(appLocalizations.routingChanged);
+          }
+          validatedProfile = current;
           return message;
         },
       ),
@@ -251,12 +255,8 @@ class _CustomProxyGroupsSectionState
     if (result == null || !context.mounted) {
       return;
     }
-    final latest = ref.read(profileProvider(profileId));
-    if (latest == null ||
-        latest.overwriteType != profile.overwriteType ||
-        latest.lastUpdateDate != profile.lastUpdateDate ||
-        latest.url != profile.url ||
-        (group != null && !latest.customProxyGroups.contains(group))) {
+    if (validatedProfile == null ||
+        ref.read(profileProvider(profileId)) != validatedProfile) {
       context.showNotifier(appLocalizations.routingChanged);
       return;
     }

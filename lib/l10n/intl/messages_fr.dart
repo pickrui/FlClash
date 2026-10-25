@@ -251,10 +251,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: '${count} proxy', other: '${count} proxies')}";
 
   static String m89(name) =>
-      "Le nœud ${name} appartient déjà à une autre chaîne active ou présente un conflit de chaînage";
+      "Le proxy ${name} entre en conflit avec une autre chaîne active ou crée une boucle";
 
   static String m90(name) =>
-      "Le nœud ${name} n’est pas disponible à cette position";
+      "Le proxy ${name} n’est pas disponible à cette position";
 
   static String m91(address) =>
       "Avant le démarrage, le proxy système pointait vers ${address}.";
@@ -477,6 +477,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ajouter systématiquement le DNS du système à la configuration",
     ),
     "application": MessageLookupByLibrary.simpleMessage("Application"),
+    "applyNow": MessageLookupByLibrary.simpleMessage("Appliquer maintenant"),
     "authentication": MessageLookupByLibrary.simpleMessage(
       "Authentification du proxy local",
     ),
@@ -1666,6 +1667,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "format": MessageLookupByLibrary.simpleMessage("Format"),
     "fr": MessageLookupByLibrary.simpleMessage("Français"),
     "general": MessageLookupByLibrary.simpleMessage("Général"),
+    "generalOverrideDesc": MessageLookupByLibrary.simpleMessage(
+      "Les entrées ajoutées ici remplacent le réglage correspondant de tous les profils ; tout ce qui n’est pas ajouté garde le réglage du profil, ou la valeur par défaut du cœur si le profil n’en a pas.",
+    ),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage(
       "Mise à jour automatique",
     ),
@@ -2598,7 +2602,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxies": MessageLookupByLibrary.simpleMessage("Proxys"),
     "proxiesCount": m88,
     "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage(
-      "Nœuds disponibles",
+      "Nœuds et groupes disponibles",
     ),
     "proxyChainConflictTip": m89,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage(
@@ -2612,14 +2616,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Entrée"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Sortie"),
+    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
+      "Les groupes peuvent servir d’entrée ou de sortie. Les relais doivent être des nœuds fixes.",
+    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Sélectionnez les nœuds dans l’ordre : le premier est l’entrée et le dernier la sortie. Sélectionnez le nœud de sortie pour utiliser la chaîne.",
+      "Choisissez des nœuds ou groupes pour l’entrée et la sortie. Le groupe de sortie doit contenir des nœuds indépendants et les relais des nœuds fixes. Sélectionnez la sortie après enregistrement. Le test d’entrée mesure l’entrée, celui du groupe de sortie toute la chaîne.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
-      "Une chaîne nécessite au moins 2 nœuds",
+      "Une chaîne nécessite une entrée et une sortie",
     ),
     "proxyChainMinimumNodesHint": MessageLookupByLibrary.simpleMessage(
-      "Une chaîne nécessite au moins 2 nœuds. Ajoutez un nœud de sortie.",
+      "Choisissez un nœud ou groupe de sortie.",
     ),
     "proxyChainNodeAdded": MessageLookupByLibrary.simpleMessage(
       "Nœud ajouté à la chaîne",
@@ -2627,11 +2634,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainOtherNodes": MessageLookupByLibrary.simpleMessage(
       "Autres nœuds",
     ),
+    "proxyChainPolicyGroups": MessageLookupByLibrary.simpleMessage(
+      "Groupes de stratégie",
+    ),
     "proxyChainRelatedChainsUpdated": MessageLookupByLibrary.simpleMessage(
       "Chaînes associées mises à jour",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Chaîne enregistrée et appliquée. Sélectionnez le nœud de sortie pour l’utiliser",
+      "Chaîne enregistrée et appliquée. Sélectionnez le nœud ou groupe de sortie.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Chaîne de proxies",

@@ -41,6 +41,37 @@ Widget _page({
 }
 
 void main() {
+  testWidgets(
+    'restored and externally changed queries keep search accessible',
+    (tester) async {
+      final query = ValueNotifier<String?>('restored');
+      addTearDown(query.dispose);
+      await tester.pumpWidget(
+        TestApp(
+          overrides: [
+            backBlockActionProvider.overrideWith(TestBackBlockAction.new),
+          ],
+          child: ValueListenableBuilder<String?>(
+            valueListenable: query,
+            builder: (_, value, _) => CommonScaffold(
+              title: 'Items',
+              searchState: AppBarSearchState(query: value, onSearch: (_) {}),
+              body: const SizedBox.expand(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getSemantics(find.byType(EditableText)).value, 'restored');
+      query.value = null;
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsNothing);
+      query.value = 'incoming';
+      await tester.pumpAndSettle();
+      expect(tester.getSemantics(find.byType(EditableText)).value, 'incoming');
+    },
+  );
+
   testWidgets('rebuilding filtered content retains search and query', (
     tester,
   ) async {
@@ -68,7 +99,7 @@ void main() {
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
       'one two',
     );
-    await tester.tap(find.byTooltip('Back'));
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNothing);
     expect(query, isEmpty);

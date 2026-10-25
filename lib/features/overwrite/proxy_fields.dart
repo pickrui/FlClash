@@ -682,15 +682,20 @@ extension ProxyDefinitionExt on ProxyDefinition {
     final owned = {for (final key in ownedKeysOf(field)) key.toLowerCase()};
     // The core reads each http-opts header as values to pick from.
     final listsValues = field == ProxyField.httpHeaders;
+    Object? entryValue(String key, String value) {
+      final oldKey = _keyIn(previous, key);
+      return oldKey != null && shown[oldKey] == value
+          ? previous[oldKey]
+          : listsValues
+          ? [value]
+          : value;
+    }
+
     return withField(field, {
       for (final MapEntry(:key, :value) in previous.entries)
         if (owned.contains(key.toString().toLowerCase())) key.toString(): value,
       for (final MapEntry(:key, :value) in entries.entries)
-        key: shown[key] == value
-            ? previous[key]
-            : listsValues
-            ? [value]
-            : value,
+        if (!owned.contains(key.toLowerCase())) key: entryValue(key, value),
     });
   }
 

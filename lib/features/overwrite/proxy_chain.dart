@@ -45,6 +45,7 @@ class ProxyChainRawContext {
   final Map<String, ProxyChainNodeInfo> nodeInfoMap;
   final Map<String, String> existingRelations;
   final Set<String> groupNames;
+  final Map<String, List<String>> groupMembers;
 
   const ProxyChainRawContext({
     required this.sections,
@@ -52,6 +53,7 @@ class ProxyChainRawContext {
     required this.nodeInfoMap,
     required this.existingRelations,
     required this.groupNames,
+    required this.groupMembers,
   });
 }
 
@@ -77,6 +79,7 @@ ProxyChainRawContext buildProxyChainRawContext({
   Iterable<String> extra = const [],
   String? customNodesLabel,
   String? otherNodesLabel,
+  String? policyGroupsLabel,
 }) {
   final validCustom = _getValidProfileProxies(profileProxies).toList();
   final proxyInfo = <String, ProxyChainNodeInfo>{};
@@ -105,6 +108,9 @@ ProxyChainRawContext buildProxyChainRawContext({
       final name = group['name'];
       if (name is! String || name.isEmpty) continue;
       groupNames.add(name);
+      if (group['dialer-proxy'] case final String dialer) {
+        if (dialer.isNotEmpty) existingRelations[name] = dialer;
+      }
       proxyInfo[name] = ProxyChainNodeInfo(
         type: group['type']?.toString() ?? '',
         testUrl: group['url'] as String?,
@@ -129,6 +135,14 @@ ProxyChainRawContext buildProxyChainRawContext({
     }
   }
 
+  final entryGroups = groupNames
+      .where((name) => isProxyChainPolicyGroup(proxyInfo[name]?.type))
+      .toSet();
+  addSection(
+    policyGroupsLabel ?? appLocalizations.proxyChainPolicyGroups,
+    AppGlyphs.split,
+    entryGroups,
+  );
   addSection(
     customNodesLabel ?? appLocalizations.proxyChainCustomNodes,
     AppGlyphs.link,
@@ -150,11 +164,13 @@ ProxyChainRawContext buildProxyChainRawContext({
     sections: sections,
     nameScope: ProxyChainNameScope(
       targetNames: targetNames,
-      dialerNames: {...targetNames, ...groupNames},
+      dialerNames: {...targetNames, ...entryGroups},
+      groupNames: entryGroups,
     ),
     nodeInfoMap: proxyInfo,
     existingRelations: existingRelations,
     groupNames: groupNames,
+    groupMembers: proxyChainGroupDependencies(rawConfig),
   );
 }
 
@@ -431,10 +447,7 @@ class _ProfileProxyChainsContentState
         rawConfig: rawConfig,
         canSave: (next) =>
             mounted &&
-            _canPutProxyChains(
-              resolve(next).proxyChains,
-              rawContext.existingRelations,
-            ),
+            _canPutProxyChains(resolve(next).proxyChains, rawContext),
       ),
     );
     if (res == null) {
@@ -444,10 +457,7 @@ class _ProfileProxyChainsContentState
       return;
     }
     final resolved = resolve(res);
-    if (!_canPutProxyChains(
-      resolved.proxyChains,
-      rawContext.existingRelations,
-    )) {
+    if (!_canPutProxyChains(resolved.proxyChains, rawContext)) {
       return;
     }
     _putProxyChains(resolved.proxyChains);
@@ -481,11 +491,12 @@ class _ProfileProxyChainsContentState
 
   bool _canPutProxyChains(
     List<ProxyChain> proxyChains,
-    Map<String, String> existingRelations,
+    ProxyChainRawContext rawContext,
   ) {
     final conflictName = findProxyChainConflictName(
       proxyChains,
-      existingRelations: existingRelations,
+      existingRelations: rawContext.existingRelations,
+      groupMembers: rawContext.groupMembers,
     );
     if (conflictName == null) {
       return true;
@@ -605,10 +616,7 @@ class _ProfileProxyChainsContentState
     }
     final nextProxyChains = profile.proxyChains
         .copyAndPutResolvingTargetConflicts(nextProxyChain);
-    if (!_canPutProxyChains(
-      nextProxyChains.proxyChains,
-      rawContext.existingRelations,
-    )) {
+    if (!_canPutProxyChains(nextProxyChains.proxyChains, rawContext)) {
       return;
     }
     _putProxyChains(nextProxyChains.proxyChains);
@@ -759,6 +767,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
   final _nameController = TextEditingController();
   List<String> _proxies = [];
   late ProxyChainRawContext _rawContext;
+  late Map<String, dynamic> _rawConfig;
 
   late final List<Object?> _origin;
   List<Object?> get _snapshot => [_nameController.text, ..._proxies];
@@ -769,6 +778,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     final proxyChain = widget.proxyChain;
     _nameController.text = proxyChain?.name ?? '';
     _proxies = List<String>.from(proxyChain?.proxies ?? []);
+    _rawConfig = widget.rawConfig;
     _refreshRawContext();
     _origin = _snapshot;
   }
@@ -785,13 +795,24 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
 
   bool _validateProxies(List<String> proxies) {
     final invalidProxyName = _rawContext.nameScope.getInvalidName(proxies);
-    if (invalidProxyName == null) {
-      return true;
+    if (invalidProxyName != null) {
+      context.showNotifier(
+        _rawContext.groupNames.contains(invalidProxyName)
+            ? appLocalizations.proxyChainGroupEndpointsOnly
+            : appLocalizations.proxyChainUnavailableNodeTip(invalidProxyName),
+      );
+      return false;
     }
-    context.showNotifier(
-      appLocalizations.proxyChainUnavailableNodeTip(invalidProxyName),
+    final conflict = findProxyChainConflictName(
+      [ProxyChain(id: widget.proxyChain?.id ?? 0, proxies: proxies)],
+      existingRelations: _rawContext.existingRelations,
+      groupMembers: _rawContext.groupMembers,
     );
-    return false;
+    if (conflict != null) {
+      context.showNotifier(appLocalizations.proxyChainConflictTip(conflict));
+      return false;
+    }
+    return true;
   }
 
   void _appendProxy(String proxyName) {
@@ -824,7 +845,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
 
   void _refreshRawContext() {
     _rawContext = buildProxyChainRawContext(
-      rawConfig: widget.rawConfig,
+      rawConfig: _rawConfig,
       profileProxies:
           ref.read(profileProvider(widget.profileId))?.profileProxies ?? [],
       extra: _proxies,
@@ -852,6 +873,16 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       );
     });
     _appendProxy(proxyName);
+    try {
+      final config = await setupAction.getProxyChainProfileConfig(
+        widget.profileId,
+      );
+      if (!mounted) return;
+      _rawConfig = config;
+    } catch (error) {
+      if (!mounted) return;
+      context.showNotifier(error.toString());
+    }
     _refreshRawContext();
     setState(() {});
     setupAction.applyProfileDebounce(silence: true);
@@ -903,6 +934,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     final proxies = List<String>.from(_proxies);
     final proxy = proxies.removeAt(oldIndex);
     proxies.insert(newIndex, proxy);
+    if (!_validateProxies(proxies)) return;
     _proxies = proxies;
     setState(() {});
   }
@@ -1084,6 +1116,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     return ItemPositionProvider(
       position: ItemPosition.get(index, totalLength),
       child: DecorationListItem(
+        key: ValueKey('proxy-chain-candidate-$proxy'),
         onPressed: () => _handleAdd(proxy),
         leading: GlyphIcon(glyph),
         title: Text(
@@ -1092,6 +1125,9 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
           overflow: TextOverflow.ellipsis,
           style: AppTextStyle.subheadline.of(context).toJetBrainsMono,
         ),
+        subtitle: _rawContext.groupNames.contains(proxy)
+            ? Text(_rawContext.nodeInfoMap[proxy]?.type ?? '')
+            : null,
         trailing: const GlyphIcon(AppGlyphs.add),
       ),
     );
@@ -1103,7 +1139,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     return _rawContext.sections
         .map((section) {
           final proxies = section.proxies.where((item) {
-            return !selectedProxies.contains(item);
+            return !selectedProxies.contains(item) &&
+                _rawContext.nameScope.isValid([...selectedProxies, item]);
           }).toList();
           return ProxyChainCandidateSection(
             label: section.label,

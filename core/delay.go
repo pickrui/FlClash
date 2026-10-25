@@ -255,7 +255,7 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 		}
 		defer delaySem.Release(1)
 
-		proxy := tunnel.AllProxies()[params.ProxyName]
+		proxy := proxyForDelay(params.ProxyName, testUrl)
 		if proxy == nil {
 			delayData.Failure = "missingProxy"
 			reply()
@@ -288,6 +288,27 @@ func handleAsyncTestDelay(params *TestDelayParams, fn func(*Delay)) {
 		resetURLTestSelections(testUrl)
 		reply()
 	})
+}
+
+func proxyForDelay(name, testURL string) constant.Proxy {
+	if outboundgroup.IsDialerTestURL(testURL) {
+		for _, proxy := range tunnel.ProxiesSnapshot() {
+			group, ok := proxy.Adapter().(interface {
+				DialerTestURL() string
+				Proxies() []constant.Proxy
+			})
+			if !ok || group.DialerTestURL() != testURL {
+				continue
+			}
+			for _, member := range group.Proxies() {
+				if member.Name() == name {
+					return member
+				}
+			}
+		}
+		return nil
+	}
+	return tunnel.AllProxies()[name]
 }
 
 func resetURLTestSelections(testUrl string) {

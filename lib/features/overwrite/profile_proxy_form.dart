@@ -554,6 +554,8 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
       keyboardType: number ? TextInputType.number : TextInputType.text,
       inputFormatters: number
           ? TextInputLimits.digitsOnly(maxLength)
+          : key == 'name'
+          ? TextInputLimits.policyName(maxLength)
           : TextInputLimits.limit(
               secret ? TextInputLimits.password : maxLength,
             ),
@@ -620,15 +622,10 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
               ? context.appLocalizations.none
               : context.appLocalizations.itemsCount(1),
           () async {
-            final result = await showFormSheet<List<String>>(
-              context: context,
-              builder: (_, _) => _ProxyListForm(
-                title: title,
-                values: value is List
-                    ? value.map((item) => item.toString()).toList()
-                    : [if (value != null) value.toString()],
-                maxLength: field.maxLength,
-              ),
+            final result = await _editValues(
+              title,
+              _definition.stringsOf(field.path),
+              field.maxLength,
             );
             if (result != null && mounted) {
               _updateField(field, result.isEmpty ? null : result);
@@ -644,13 +641,27 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
               ? context.appLocalizations.none
               : context.appLocalizations.itemsCount(entries.length),
           () async {
-            final result = await showFormSheet<Map<String, String>>(
-              context: context,
-              builder: (_, _) => _ProxyMapForm(
+            final result = await BaseNavigator.push<Map<String, String>>(
+              context,
+              MapInputPage(
                 title: title,
                 entries: entries,
-                ownedKeys: _definition.ownedKeysOf(field),
+                titleBuilder: (entry) => Text(entry.key),
+                subtitleBuilder: (entry) => Text(entry.value),
+                keyMaxLength: TextInputLimits.name,
                 valueMaxLength: field.maxLength,
+                ignoreKeyCase: true,
+                reservedKeys: _definition.ownedKeysOf(field),
+                onEditAll: (context, entries) =>
+                    showFormSheet<Map<String, String>>(
+                      context: context,
+                      builder: (_, _) => _ProxyMapForm(
+                        title: title,
+                        entries: entries,
+                        ownedKeys: _definition.ownedKeysOf(field),
+                        valueMaxLength: field.maxLength,
+                      ),
+                    ),
               ),
             );
             if (result != null && mounted) {
@@ -722,20 +733,32 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
     _scheduleValidation();
   }
 
+  Future<List<String>?> _editValues(
+    String title,
+    List<String> values,
+    int maxLength,
+  ) => BaseNavigator.push<List<String>>(
+    context,
+    ListInputPage(
+      title: title,
+      items: values.toSet().toList(),
+      titleBuilder: (value) => Text(value),
+      itemMaxLength: maxLength,
+      onEditAll: (context, entries) => showFormSheet<List<String>>(
+        context: context,
+        builder: (_, _) =>
+            _ProxyListForm(title: title, values: entries, maxLength: maxLength),
+      ),
+    ),
+  );
+
   Widget _rawList(String key, String title, int maxLength) {
     final values = _definition.stringsOf([key]);
     return _choiceRow(
       title,
       context.appLocalizations.itemsCount(values.length),
       () async {
-        final result = await showFormSheet<List<String>>(
-          context: context,
-          builder: (_, _) => _ProxyListForm(
-            title: title,
-            values: values,
-            maxLength: maxLength,
-          ),
-        );
+        final result = await _editValues(title, values, maxLength);
         if (result != null && mounted) {
           _updateRaw(key, result.isEmpty ? null : result);
         }
@@ -950,6 +973,7 @@ class _ProxyListFormState extends State<_ProxyListForm> {
 
   @override
   Widget build(BuildContext context) => FormPage(
+    sectioned: false,
     title: widget.title,
     error: _error,
     onSave: () {
@@ -1008,6 +1032,7 @@ class _ProxyMapFormState extends State<_ProxyMapForm> {
 
   @override
   Widget build(BuildContext context) => FormPage(
+    sectioned: false,
     title: widget.title,
     error: _error,
     onSave: () {

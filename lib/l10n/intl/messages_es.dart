@@ -247,10 +247,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: '1 proxy', other: '${count} proxies')}";
 
   static String m89(name) =>
-      "El nodo ${name} ya pertenece a otra cadena activa o tiene un conflicto de encadenamiento";
+      "El proxy ${name} entra en conflicto con otra cadena activa o crea un bucle";
 
   static String m90(name) =>
-      "El nodo ${name} no está disponible en esta posición";
+      "El proxy ${name} no está disponible en esta posición";
 
   static String m91(address) =>
       "Antes del inicio, el proxy del sistema apuntaba a ${address}.";
@@ -475,6 +475,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Añadir siempre el DNS del sistema a la configuración",
     ),
     "application": MessageLookupByLibrary.simpleMessage("Aplicación"),
+    "applyNow": MessageLookupByLibrary.simpleMessage("Aplicar ahora"),
     "authentication": MessageLookupByLibrary.simpleMessage(
       "Autenticación del proxy local",
     ),
@@ -1666,6 +1667,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "format": MessageLookupByLibrary.simpleMessage("Formato"),
     "fr": MessageLookupByLibrary.simpleMessage("Francés"),
     "general": MessageLookupByLibrary.simpleMessage("General"),
+    "generalOverrideDesc": MessageLookupByLibrary.simpleMessage(
+      "Las entradas añadidas aquí sustituyen el ajuste correspondiente de todos los perfiles; lo que no añadas conserva el ajuste del propio perfil, o el valor predeterminado del núcleo si el perfil no lo define.",
+    ),
     "geoAutoUpdate": MessageLookupByLibrary.simpleMessage(
       "Actualización automática",
     ),
@@ -2583,7 +2587,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxies": MessageLookupByLibrary.simpleMessage("Proxies"),
     "proxiesCount": m88,
     "proxyChainAvailableNodes": MessageLookupByLibrary.simpleMessage(
-      "Nodos disponibles",
+      "Nodos y grupos disponibles",
     ),
     "proxyChainConflictTip": m89,
     "proxyChainCustomNode": MessageLookupByLibrary.simpleMessage(
@@ -2597,24 +2601,30 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Entrada"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Salida"),
+    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
+      "Los grupos pueden ser la entrada o la salida. Los saltos intermedios deben ser nodos fijos.",
+    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Seleccione los nodos en orden: el primero es la entrada y el último la salida. Seleccione el nodo de salida para usar la cadena.",
+      "Elija nodos o grupos para la entrada y la salida. El grupo de salida requiere nodos independientes y los saltos intermedios nodos fijos. Seleccione la salida tras guardar. La prueba de entrada mide solo la entrada; la del grupo de salida mide toda la cadena.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
-      "Una cadena requiere al menos 2 nodos",
+      "Una cadena necesita una entrada y una salida",
     ),
     "proxyChainMinimumNodesHint": MessageLookupByLibrary.simpleMessage(
-      "Una cadena requiere al menos 2 nodos. Añada un nodo de salida.",
+      "Elija un nodo o grupo de salida.",
     ),
     "proxyChainNodeAdded": MessageLookupByLibrary.simpleMessage(
       "Nodo añadido a la cadena",
     ),
     "proxyChainOtherNodes": MessageLookupByLibrary.simpleMessage("Otros nodos"),
+    "proxyChainPolicyGroups": MessageLookupByLibrary.simpleMessage(
+      "Grupos de política",
+    ),
     "proxyChainRelatedChainsUpdated": MessageLookupByLibrary.simpleMessage(
       "Cadenas relacionadas actualizadas",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Cadena guardada y aplicada. Seleccione el nodo de salida para usarla",
+      "Cadena guardada y aplicada. Seleccione el nodo o grupo de salida.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Cadena de proxies",

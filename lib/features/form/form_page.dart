@@ -21,6 +21,7 @@ class FormPage extends StatelessWidget {
   final List<IconButtonData> actions;
   final String? error;
   final bool saving;
+  final bool sectioned;
   final List<Widget> children;
   final ScrollController? scrollController;
 
@@ -32,6 +33,7 @@ class FormPage extends StatelessWidget {
     this.actions = const [],
     this.error,
     this.saving = false,
+    this.sectioned = true,
     required this.children,
     this.scrollController,
   });
@@ -51,11 +53,13 @@ class FormPage extends StatelessWidget {
         controller: scrollController,
         shrinkWrap: true,
         padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-          top: context.contentTopPadding,
+          top: sectioned
+              ? context.sectionsTopPadding
+              : context.contentTopPadding,
           bottom: 20 + context.bottomInset,
         ),
         children: [
-          ErrorBanner(message: error),
+          ErrorBanner(message: error, sectioned: sectioned),
           ...children,
         ],
       ),

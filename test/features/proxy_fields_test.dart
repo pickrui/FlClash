@@ -112,6 +112,18 @@ void main() {
         },
       },
     );
+    expect(
+      proxy.withEntries(ProxyField.httpHeaders, {
+        'accept': 'text/html, application/xml',
+        'HOST': 'replacement.example',
+      }).definition['http-opts'],
+      {
+        'headers': {
+          'Host': ['a.example', 'b.example'],
+          'accept': ['text/html', 'application/xml'],
+        },
+      },
+    );
 
     const ws = ProxyDefinition({
       'type': 'vless',

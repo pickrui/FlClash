@@ -29,6 +29,52 @@ MakeRealProfileState state(Map<String, dynamic> raw, ClashConfig patch) =>
     );
 
 void main() {
+  test('general overrides preserve unpicked subscription values and nullable updates', () async {
+    const raw = <String, dynamic>{
+      'ipv6': true,
+      'unified-delay': false,
+      'tcp-concurrent': false,
+      'geodata-loader': 'standard',
+    };
+    final inherited = await makeRealProfileTask(
+      state(raw, const ClashConfig()),
+    );
+    for (final entry in raw.entries) {
+      expect(inherited[entry.key], entry.value);
+    }
+    const patch = ClashConfig(
+      ipv6: false,
+      unifiedDelay: true,
+      generalOverrideKeys: {
+        GeneralOverrideKey.ipv6,
+        GeneralOverrideKey.unifiedDelay,
+      },
+    );
+    final replaced = await makeRealProfileTask(state(raw, patch));
+    expect(replaced['ipv6'], false);
+    expect(replaced['unified-delay'], true);
+    expect(replaced['tcp-concurrent'], false);
+    expect(replaced['geodata-loader'], 'standard');
+    expect(raw['ipv6'], true);
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final subscription = container.listen(updateParamsProvider, (_, _) {});
+    addTearDown(subscription.close);
+    final inheritedUpdate = container.read(updateParamsProvider);
+    expect(inheritedUpdate.ipv6, isNull);
+    expect(inheritedUpdate.unifiedDelay, isNull);
+    expect(inheritedUpdate.tcpConcurrent, isNull);
+    container.read(patchClashConfigProvider.notifier).update((_) => patch);
+    final pickedUpdate = container.read(updateParamsProvider);
+    expect(pickedUpdate.ipv6, false);
+    expect(pickedUpdate.unifiedDelay, true);
+    expect(pickedUpdate.tcpConcurrent, isNull);
+    expect(
+      UpdateParams.fromJson(jsonDecode(jsonEncode(pickedUpdate))),
+      pickedUpdate,
+    );
+  });
+
   test(
     'interface selection follows, clears or overrides without mutating source',
     () async {

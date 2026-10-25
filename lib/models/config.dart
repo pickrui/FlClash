@@ -64,6 +64,16 @@ const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.connectionStats,
 ];
 
+final List<DashboardWidget> platformDefaultDashboardWidgets = system.isAndroid
+    ? const [
+        DashboardWidget.currentOutbound,
+        DashboardWidget.networkSpeed,
+        DashboardWidget.outboundMode,
+        DashboardWidget.profiles,
+        DashboardWidget.proxyGroups,
+      ]
+    : defaultDashboardWidgets;
+
 const _legacyDefaultDashboardWidgets = {
   'networkSpeed',
   'systemProxyButton',
@@ -90,7 +100,7 @@ const _legacyDashboardWidgets = {
 List<DashboardWidget> dashboardWidgetsSafeFormJson(
   List<dynamic>? dashboardWidgets,
 ) {
-  if (dashboardWidgets == null) return defaultDashboardWidgets;
+  if (dashboardWidgets == null) return platformDefaultDashboardWidgets;
   final byName = DashboardWidget.values.asNameMap();
   final known = dashboardWidgets
       .map((name) => _legacyDashboardWidgets[name] ?? byName[name])
@@ -104,11 +114,18 @@ List<DashboardWidget> dashboardWidgetsSafeFormJson(
   };
   if (names.length == _legacyDefaultDashboardWidgets.length &&
       names.containsAll(_legacyDefaultDashboardWidgets)) {
-    return defaultDashboardWidgets;
+    return platformDefaultDashboardWidgets;
   }
-  if (known.isEmpty) return defaultDashboardWidgets;
+  if (known.isEmpty) return platformDefaultDashboardWidgets;
   return {DashboardWidget.currentOutbound, ...known}.toList();
 }
+
+Object? _readDashboardWidgets(Map json, String key) =>
+    json[key] ??
+    [for (final widget in platformDefaultDashboardWidgets) widget.name];
+
+Object? _readAppSettings(Map json, String key) =>
+    json[key] ?? <String, Object?>{};
 
 String testUrlFromJson(String? value) {
   return value == null || value == 'https://www.gstatic.com/generate_204'
@@ -131,7 +148,10 @@ abstract class AppSettingProps with _$AppSettingProps {
     String? locale,
     @Default(defaultUserAgents) List<String> userAgents,
     @Default(defaultDashboardWidgets)
-    @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
+    @JsonKey(
+      fromJson: dashboardWidgetsSafeFormJson,
+      readValue: _readDashboardWidgets,
+    )
     List<DashboardWidget> dashboardWidgets,
     @Default(true) bool showNetworkSpeedChart,
     @Default(false) bool onlyStatisticsProxy,
@@ -141,7 +161,6 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool autoRun,
     @Default(false) bool openLogs,
     @Default(true) bool closeConnections,
-    @Default(defaultTestUrl) @JsonKey(fromJson: testUrlFromJson) String testUrl,
     @Default(defaultDelayTestTimeout) int delayTestTimeout,
     @Default(TabAnimation.fade)
     @JsonKey(readValue: _readTabAnimation, unknownEnumValue: TabAnimation.fade)
@@ -169,7 +188,7 @@ abstract class AppSettingProps with _$AppSettingProps {
   factory AppSettingProps.safeFromJson(Object? json) {
     return json is Map<String, Object?>
         ? decodeSalvaging('app settings', json, AppSettingProps.fromJson)
-        : defaultAppSettingProps;
+        : AppSettingProps(dashboardWidgets: platformDefaultDashboardWidgets);
   }
 }
 
@@ -430,7 +449,10 @@ abstract class Config with _$Config {
   const factory Config({
     int? currentProfileId,
     @Default([]) List<HotKeyAction> hotKeyActions,
-    @JsonKey(fromJson: AppSettingProps.safeFromJson)
+    @JsonKey(
+      fromJson: AppSettingProps.safeFromJson,
+      readValue: _readAppSettings,
+    )
     @Default(defaultAppSettingProps)
     AppSettingProps appSettingProps,
     DAVProps? davProps,
@@ -450,14 +472,38 @@ abstract class Config with _$Config {
       decodeSalvaging('config', json, Config.strictFromJson);
 
   factory Config.strictFromJson(Map<String, Object?> json) =>
-      _withLegacyOverrideSwitches(_$ConfigFromJson(json), json);
+      _withLegacyOverrideSwitches(
+        _$ConfigFromJson(_withLegacyTestUrl(json)),
+        json,
+      );
 
   factory Config.realFromJson(Map<String, Object?>? json) {
     if (json == null) {
-      return const Config(themeProps: defaultThemeProps);
+      return Config(
+        themeProps: defaultThemeProps,
+        appSettingProps: AppSettingProps(
+          dashboardWidgets: platformDefaultDashboardWidgets,
+        ),
+      );
     }
     return Config.fromJson(json);
   }
+}
+
+Map<String, Object?> _withLegacyTestUrl(Map<String, Object?> json) {
+  final settings = json['appSettingProps'];
+  final patch = json['patchClashConfig'];
+  if (settings is! Map || (patch != null && patch is! Map)) return json;
+  if (patch is Map && patch.containsKey('test-url')) return json;
+  final url = settings['testUrl'];
+  if (url is! String) return json;
+  return {
+    ...json,
+    'patchClashConfig': {
+      if (patch is Map) ...Map<String, Object?>.from(patch),
+      'test-url': testUrlFromJson(url),
+    },
+  };
 }
 
 /// Picked DNS and NTP keys once applied only while their removed switch was

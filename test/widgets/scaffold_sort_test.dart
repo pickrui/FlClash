@@ -57,7 +57,7 @@ Finder _inBar(Finder finder) =>
 void _expectIdle(WidgetTester tester) {
   expect(find.text('idle'), findsOneWidget);
   expect(find.byType(BackButton).hitTestable(), findsOneWidget);
-  expect(_inBar(find.byTooltip('Search')), findsOneWidget);
+  expect(find.byType(TextField), findsOneWidget);
   expect(_inBar(find.text('Add')), findsOneWidget);
 }
 

@@ -301,9 +301,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   rawConfig['skip-auth-prefixes'] = <String>[];
   rawConfig['external-ui'] = '';
   rawConfig['external-ui-url'] = '';
-  rawConfig['tcp-concurrent'] = realPatchConfig.tcpConcurrent;
-  rawConfig['unified-delay'] = realPatchConfig.unifiedDelay;
-  rawConfig['ipv6'] = realPatchConfig.ipv6;
+  rawConfig.addAll(realPatchConfig.generalOverrideJson);
   rawConfig['log-level'] = realPatchConfig.logLevel.name;
   rawConfig['keep-alive-interval'] = realPatchConfig.keepAliveInterval;
   rawConfig['keep-alive-idle'] = realPatchConfig.keepAliveIdle;
@@ -334,7 +332,6 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     ...realPatchConfig.tun.coreJson,
   };
   rawConfig['tun'] = tun;
-  rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
   rawConfig['geo-auto-update'] = realPatchConfig.geoAutoUpdate;
   rawConfig['geo-update-interval'] = normalizeGeoUpdateInterval(
     realPatchConfig.geoUpdateInterval,
@@ -840,6 +837,7 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
   final groupNames = proxyGroups is List
       ? proxyGroups
             .whereType<Map>()
+            .where((group) => isProxyChainPolicyGroup(group['type']))
             .map((group) => group['name'])
             .whereType<String>()
             .where((name) => name.isNotEmpty)
@@ -848,6 +846,7 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
   final scope = ProxyChainNameScope(
     targetNames: proxyMap.keys.toSet(),
     dialerNames: {...proxyMap.keys, ...groupNames},
+    groupNames: groupNames,
   );
   final applicableProxyChains = enabledProxyChains.where((chain) {
     return scope.isValid(chain.normalizedProxies);
@@ -855,24 +854,47 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
   if (applicableProxyChains.length != enabledProxyChains.length) {
     throw const FormatException('proxy chain references an unavailable node');
   }
+  final groups = <String, Map>{
+    if (proxyGroups is List)
+      for (final group in proxyGroups.whereType<Map>())
+        if (group['name'] case final String name) name: group,
+  };
   final existingRelations = <String, String>{
-    for (final entry in proxyMap.entries)
+    for (final entry in {...proxyMap, ...groups}.entries)
       if (entry.value['dialer-proxy'] case final String dialer)
         if (dialer.isNotEmpty) entry.key: dialer,
   };
   final conflict = findProxyChainConflictName(
     applicableProxyChains,
     existingRelations: existingRelations,
+    groupMembers: proxyChainGroupDependencies(rawConfig),
   );
   if (conflict != null) {
     throw FormatException('proxy chain conflict: $conflict');
+  }
+  final pending = [
+    for (final chain in applicableProxyChains) ...chain.normalizedProxies,
+  ];
+  final visited = <String>{};
+  while (pending.isNotEmpty) {
+    final name = pending.removeLast();
+    if (!visited.add(name)) continue;
+    final group = groups[name];
+    if (group == null) continue;
+    // Empty providers must not silently bypass an entry hop via COMPATIBLE.
+    if ((group['empty-fallback'] ?? '') == '') {
+      group['empty-fallback'] = 'REJECT';
+    }
+    if (group['proxies'] case final List members) {
+      pending.addAll(members.whereType<String>());
+    }
   }
   for (final chain in applicableProxyChains) {
     final chainProxies = chain.normalizedProxies;
     for (var i = 1; i < chainProxies.length; i++) {
       final proxyName = chainProxies[i];
       final dialerProxy = chainProxies[i - 1];
-      proxyMap[proxyName]!['dialer-proxy'] = dialerProxy;
+      (proxyMap[proxyName] ?? groups[proxyName])!['dialer-proxy'] = dialerProxy;
     }
   }
 }

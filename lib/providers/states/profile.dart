@@ -87,6 +87,8 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
         disableKeepAlive: state.disableKeepAlive,
         routingMark: state.routingMark,
         geodataLoader: state.geodataLoader,
+        generalOverrideKeys: state.generalOverrideKeys,
+        testUrl: state.effectiveTestUrl,
       ),
     ),
   );
@@ -166,6 +168,8 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     disableKeepAlive: setupOnly.disableKeepAlive,
     routingMark: setupOnly.routingMark,
     geodataLoader: setupOnly.geodataLoader,
+    generalOverrideKeys: setupOnly.generalOverrideKeys,
+    testUrl: setupOnly.testUrl,
   );
 }
 

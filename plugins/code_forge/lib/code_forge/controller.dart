@@ -101,7 +101,14 @@ class CodeForgeController implements DeltaTextInputClient {
   TextSelection? _pendingSelectionReplacement;
   final Set<String> _supersededPlatformTexts = {};
   ({int start, int length})? _imeHeldWindow;
-  ({int version, DateTime at})? _selectionRemoval;
+  ({
+    int version,
+    DateTime at,
+    TextSelection selection,
+    TextInputConnection? connection,
+    WeakReference<EditOperation> operation,
+  })?
+  _selectionRemoval;
   ({int start, int caret})? _imeShiftedWindow;
   String? _copiedLine;
   ({int start, String text})? _imeMirrorDeletion;
@@ -222,6 +229,7 @@ class CodeForgeController implements DeltaTextInputClient {
 
   void setUndoController(UndoRedoController? controller) {
     if (identical(controller, _undoController)) return;
+    _selectionRemoval = null;
     _undoController?.releaseApplyEditCallback(_applyUndoRedo);
     _undoController = controller;
     controller?.setApplyEditCallback(
@@ -357,6 +365,7 @@ class CodeForgeController implements DeltaTextInputClient {
   }
 
   void _replaceDocument(Rope rope, {String? cachedText}) {
+    _selectionRemoval = null;
     final previousLength = length;
     _flushTimer?.cancel();
     _debounceTimer?.cancel();
@@ -392,6 +401,7 @@ class CodeForgeController implements DeltaTextInputClient {
 
   set selection(TextSelection newSelection) {
     if (_selection == newSelection) return;
+    _selectionRemoval = null;
     final composing = isComposingActive;
     if (composing) {
       newSelection = _commitCompositionAndRemapSelection(newSelection);
@@ -643,8 +653,15 @@ class CodeForgeController implements DeltaTextInputClient {
       }
     }
     removalUndoGroup?.end();
-    _selectionRemoval = removedSelection
-        ? (version: _currentVersion, at: DateTime.now())
+    final operation = _undoController?.undoStack.lastOrNull;
+    _selectionRemoval = removedSelection && operation != null
+        ? (
+            version: _currentVersion,
+            at: DateTime.now(),
+            selection: _selection,
+            connection: connection,
+            operation: WeakReference(operation),
+          )
         : null;
     _suppressImeSync = false;
 
@@ -677,6 +694,7 @@ class CodeForgeController implements DeltaTextInputClient {
   }
 
   void commitCompositionOnClose({bool later = false}) {
+    _selectionRemoval = null;
     if (!isComposingActive) return;
     _commitCompositionInPlace();
     _imeProjectionDirty = true;

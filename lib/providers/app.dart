@@ -499,8 +499,15 @@ class NetworkDetection extends _$NetworkDetection
     with NotifierMixin<NetworkDetectionState> {
   CancelToken? _cancelToken;
   Timer? _checkTimer;
+  Timer? _throttleTimer;
+  final _probeOwners = <Object>{};
+  bool _observed = false;
+  bool _pendingCheck = false;
+  bool _pendingAutomatic = false;
+
+  bool get _canCheck => !_observed || _probeOwners.isNotEmpty;
   int _generation = 0;
-  (int, int)? _route;
+  (int, int, String?)? _route;
 
   @override
   NetworkDetectionState build() {
@@ -510,17 +517,48 @@ class NetworkDetection extends _$NetworkDetection
     ref.onDispose(() {
       _generation++;
       _checkTimer?.cancel();
+      _throttleTimer?.cancel();
       _cancelToken?.cancel();
     });
     return const NetworkDetectionState(isLoading: true, ipInfo: null);
   }
 
-  void startCheck() {
-    final generation = ++_generation;
+  void setProbeActive(Object owner, bool active) {
+    if (!ref.mounted) return;
+    _observed = true;
+    if (active) {
+      if (_probeOwners.add(owner)) _scheduleCheck();
+    } else {
+      _probeOwners.remove(owner);
+      if (_probeOwners.isEmpty) {
+        _generation++;
+        _checkTimer?.cancel();
+        if (_cancelToken != null) _pendingCheck = true;
+        _cancelToken?.cancel();
+        _cancelToken = null;
+      }
+    }
+  }
+
+  void startCheck({bool automatic = false}) {
+    ++_generation;
     _checkTimer?.cancel();
     _cancelToken?.cancel();
     // Invalidate the old route immediately, before the debounce delay.
     state = const NetworkDetectionState(isLoading: true, ipInfo: null);
+    _pendingAutomatic = automatic && (!_pendingCheck || _pendingAutomatic);
+    _pendingCheck = true;
+    _scheduleCheck();
+  }
+
+  void _scheduleCheck() {
+    if (!_canCheck ||
+        !_pendingCheck ||
+        (_pendingAutomatic && _throttleTimer?.isActive == true)) {
+      return;
+    }
+    _checkTimer?.cancel();
+    final generation = _generation;
     _checkTimer = Timer(commonDuration, () => _checkIp(generation));
   }
 
@@ -528,18 +566,30 @@ class NetworkDetection extends _$NetworkDetection
     final epoch = route['core-epoch'];
     final picks = route['picks-version'];
     if (epoch is! int || picks is! int) return;
-    final next = (epoch, picks);
+    final fingerprint = route['route-fingerprint'];
+    final next = (
+      epoch,
+      picks,
+      fingerprint is String && fingerprint.isNotEmpty ? fingerprint : null,
+    );
     final previous = _route;
     _route = next;
-    if (previous != null && previous != next) startCheck();
+    if (previous == null) return;
+    if (previous.$1 != epoch ||
+        (previous.$2 != picks && (next.$3 == null || previous.$3 != next.$3))) {
+      startCheck(automatic: previous.$1 == epoch);
+    }
   }
 
   Future<void> _checkIp(int generation) async {
-    if (!ref.mounted || generation != _generation) return;
+    if (!ref.mounted || generation != _generation || !_canCheck) return;
+    _pendingCheck = false;
     if (!ref.read(initProvider)) {
       state = const NetworkDetectionState(isLoading: false, ipInfo: null);
       return;
     }
+    _throttleTimer?.cancel();
+    _throttleTimer = Timer(const Duration(seconds: 5), _scheduleCheck);
     final token = CancelToken();
     _cancelToken = token;
     IpInfo? ipInfo;
@@ -648,4 +698,11 @@ class AppliedConfigStatistics extends Notifier<AppliedConfigCounts?> {
       rules: lengthOf(config['rules']),
     );
   }
+}
+
+@Riverpod(keepAlive: true)
+class AppliedSetupState extends _$AppliedSetupState
+    with NotifierMixin<SetupState?> {
+  @override
+  SetupState? build() => null;
 }

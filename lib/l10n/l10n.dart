@@ -55,6 +55,11 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
+  /// `Apply now`
+  String get applyNow {
+    return Intl.message('Apply now', name: 'applyNow', desc: '', args: []);
+  }
+
   /// `Rule`
   String get rule {
     return Intl.message('Rule', name: 'rule', desc: '', args: []);
@@ -3038,31 +3043,51 @@ class AppLocalizations {
     );
   }
 
-  /// `Click nodes in order: the first node is the entry and the last node is the exit. Select the exit node to use the chain.`
+  /// `Choose an entry and exit using nodes or policy groups. Exit groups require standalone node members; relay hops use fixed nodes. Select the exit to use the chain. Entry tests measure the entry; exit group tests measure the full chain.`
   String get proxyChainInstruction {
     return Intl.message(
-      'Click nodes in order: the first node is the entry and the last node is the exit. Select the exit node to use the chain.',
+      'Choose an entry and exit using nodes or policy groups. Exit groups require standalone node members; relay hops use fixed nodes. Select the exit to use the chain. Entry tests measure the entry; exit group tests measure the full chain.',
       name: 'proxyChainInstruction',
       desc: '',
       args: [],
     );
   }
 
-  /// `Proxy chains require at least 2 nodes`
+  /// `A proxy chain needs an entry and an exit`
   String get proxyChainMinimumNodes {
     return Intl.message(
-      'Proxy chains require at least 2 nodes',
+      'A proxy chain needs an entry and an exit',
       name: 'proxyChainMinimumNodes',
       desc: '',
       args: [],
     );
   }
 
-  /// `Proxy chains require at least 2 nodes. Add an exit node.`
+  /// `Choose an exit node or policy group.`
   String get proxyChainMinimumNodesHint {
     return Intl.message(
-      'Proxy chains require at least 2 nodes. Add an exit node.',
+      'Choose an exit node or policy group.',
       name: 'proxyChainMinimumNodesHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Policy groups`
+  String get proxyChainPolicyGroups {
+    return Intl.message(
+      'Policy groups',
+      name: 'proxyChainPolicyGroups',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Policy groups can be used at the entry or exit. Relay hops must be fixed nodes.`
+  String get proxyChainGroupEndpointsOnly {
+    return Intl.message(
+      'Policy groups can be used at the entry or exit. Relay hops must be fixed nodes.',
+      name: 'proxyChainGroupEndpointsOnly',
       desc: '',
       args: [],
     );
@@ -3123,30 +3148,30 @@ class AppLocalizations {
     );
   }
 
-  /// `Proxy chain saved and applied. Select the exit node to use it`
+  /// `Proxy chain saved and applied. Select the exit node or group to use it.`
   String get proxyChainSavedAndApplied {
     return Intl.message(
-      'Proxy chain saved and applied. Select the exit node to use it',
+      'Proxy chain saved and applied. Select the exit node or group to use it.',
       name: 'proxyChainSavedAndApplied',
       desc: '',
       args: [],
     );
   }
 
-  /// `Node {name} is already used by another enabled chain or has a proxy chain relation conflict`
+  /// `Proxy {name} conflicts with another enabled chain or creates a loop`
   String proxyChainConflictTip(Object name) {
     return Intl.message(
-      'Node $name is already used by another enabled chain or has a proxy chain relation conflict',
+      'Proxy $name conflicts with another enabled chain or creates a loop',
       name: 'proxyChainConflictTip',
       desc: '',
       args: [name],
     );
   }
 
-  /// `Node {name} is not available in this position`
+  /// `Proxy {name} is not available in this position`
   String proxyChainUnavailableNodeTip(Object name) {
     return Intl.message(
-      'Node $name is not available in this position',
+      'Proxy $name is not available in this position',
       name: 'proxyChainUnavailableNodeTip',
       desc: '',
       args: [name],
@@ -3173,10 +3198,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Available nodes`
+  /// `Available nodes and groups`
   String get proxyChainAvailableNodes {
     return Intl.message(
-      'Available nodes',
+      'Available nodes and groups',
       name: 'proxyChainAvailableNodes',
       desc: '',
       args: [],
@@ -13956,6 +13981,16 @@ class AppLocalizations {
       name: 'alreadyInLocalProxies',
       desc: '',
       args: [name],
+    );
+  }
+
+  /// `Entries added here replace the setting of every profile; anything not added keeps the profile's own setting, or the core default when the profile has none.`
+  String get generalOverrideDesc {
+    return Intl.message(
+      'Entries added here replace the setting of every profile; anything not added keeps the profile\'s own setting, or the core default when the profile has none.',
+      name: 'generalOverrideDesc',
+      desc: '',
+      args: [],
     );
   }
 }

@@ -207,12 +207,7 @@ class _AccessViewState extends ConsumerState<AccessView>
 
   Future<void> _handleBack() async {
     final route = ModalRoute.of(context);
-    final save = await globalState.showMessage(
-      title: appLocalizations.tip,
-      message: TextSpan(text: appLocalizations.saveChanges),
-      confirmText: appLocalizations.save,
-      cancelText: appLocalizations.discard,
-    );
+    final save = await globalState.showSaveChanges(context: context);
     if (!mounted || route?.isActive == false || save == null) return;
     if (save) _handleSave();
     BaseNavigator.close(context);
@@ -513,6 +508,7 @@ class _AccessViewState extends ConsumerState<AccessView>
         key: _scaffoldKey,
         isLoading: isLoading,
         searchState: AppBarSearchState(onSearch: _onSearch),
+        searchInBar: true,
         searchActions: [?selectAll],
         title: appLocalizations.appAccessControl,
         confirmationAction: hasChanges

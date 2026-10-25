@@ -1473,11 +1473,12 @@ class _SheetScrollPosition extends ScrollPositionWithSingleContext
 
   @override
   void beginActivity(ScrollActivity? newActivity) {
-    super.beginActivity(
-      newActivity.runtimeType == IdleScrollActivity && model.settling.value
-          ? _SettlingScrollActivity(this)
-          : newActivity,
-    );
+    if (newActivity.runtimeType == IdleScrollActivity && model.settling.value) {
+      newActivity!.dispose();
+      super.beginActivity(_SettlingScrollActivity(this));
+      return;
+    }
+    super.beginActivity(newActivity);
   }
 
   @override

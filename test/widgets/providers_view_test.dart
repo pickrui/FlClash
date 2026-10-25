@@ -144,7 +144,7 @@ void main() {
         if (saveOnBack) {
           await tester.binding.handlePopRoute();
           await settle(tester);
-          await tester.tap(find.text(AppLocalizations.current.confirm));
+          await tester.tap(find.text(AppLocalizations.current.save));
         } else {
           await tester.tap(find.byTooltip(AppLocalizations.current.save));
         }

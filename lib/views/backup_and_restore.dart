@@ -96,6 +96,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
     globalState.showMessage(
       title: title,
       message: TextSpan(text: successMessage),
+      cancelable: false,
     );
   }
 
@@ -108,6 +109,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
     globalState.showMessage(
       title: title,
       message: TextSpan(text: error),
+      cancelable: false,
     );
   }
 
@@ -163,6 +165,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
         globalState.showMessage(
           title: appLocalizations.restore,
           message: TextSpan(text: appLocalizations.noRemoteBackup),
+          cancelable: false,
         );
         return false;
       }
@@ -237,7 +240,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
         builder: (context) => ListView(
           padding: EdgeInsets.fromLTRB(
             16,
-            context.contentTopPadding,
+            context.sectionsTopPadding,
             16,
             16 + context.bottomInset,
           ),

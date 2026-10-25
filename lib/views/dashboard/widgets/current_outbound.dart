@@ -58,6 +58,26 @@ class CurrentOutboundCard extends ConsumerStatefulWidget {
 
 class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
     with WidgetsBindingObserver, ActivePollingMixin<CurrentOutboundCard> {
+  late final NetworkDetection _detection;
+
+  @override
+  void initState() {
+    super.initState();
+    _detection = ref.read(networkDetectionProvider.notifier);
+  }
+
+  @override
+  void startPolling() {
+    _detection.setProbeActive(this, canPoll);
+    super.startPolling();
+  }
+
+  @override
+  void stopPolling() {
+    _detection.setProbeActive(this, false);
+    super.stopPolling();
+  }
+
   @override
   Duration get pollInterval => const Duration(seconds: 1);
 
@@ -70,7 +90,9 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
     }
     final Map<String, dynamic> route;
     try {
-      route = await ref.read(coreHandlerProvider).getProbeRoute();
+      route = await ref
+          .read(coreHandlerProvider)
+          .getProbeRoute(hosts: request.ipProbeHosts);
     } catch (error) {
       commonPrint.log(
         'Probe route failed: $error',
@@ -614,7 +636,7 @@ class _StartToggleState extends ConsumerState<_StartToggle>
     duration: _morphDuration,
     value: _running ? 1 : 0,
   );
-  late final Animation<double> _progress = CurvedAnimation(
+  late final CurvedAnimation _progress = CurvedAnimation(
     parent: _controller,
     curve: Curves.easeOutBack,
     reverseCurve: Curves.easeInCubic,
@@ -646,6 +668,7 @@ class _StartToggleState extends ConsumerState<_StartToggle>
 
   @override
   void dispose() {
+    _progress.dispose();
     _controller.dispose();
     super.dispose();
   }

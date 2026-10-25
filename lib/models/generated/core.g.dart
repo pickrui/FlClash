@@ -32,11 +32,11 @@ _UpdateParams _$UpdateParamsFromJson(Map<String, dynamic> json) =>
       ),
       mode: $enumDecode(_$ModeEnumMap, json['mode']),
       logLevel: $enumDecode(_$LogLevelEnumMap, json['log-level']),
-      ipv6: json['ipv6'] as bool,
-      tcpConcurrent: json['tcp-concurrent'] as bool,
+      ipv6: json['ipv6'] as bool?,
+      tcpConcurrent: json['tcp-concurrent'] as bool?,
       externalController: json['external-controller'] as String,
       secret: json['secret'] as String,
-      unifiedDelay: json['unified-delay'] as bool,
+      unifiedDelay: json['unified-delay'] as bool?,
       geoAutoUpdate: json['geo-auto-update'] as bool? ?? true,
       geoUpdateInterval: (json['geo-update-interval'] as num?)?.toInt() ?? 24,
       geoXUrl:
@@ -262,6 +262,7 @@ _ExternalProvider _$ExternalProviderFromJson(Map<String, dynamic> json) =>
     _ExternalProvider(
       name: json['name'] as String,
       type: json['type'] as String,
+      contentVersion: json['content-version'] as String? ?? '',
       path: json['path'] as String?,
       count: (json['count'] as num).toInt(),
       subscriptionInfo: subscriptionInfoFormCore(
@@ -275,6 +276,7 @@ Map<String, dynamic> _$ExternalProviderToJson(_ExternalProvider instance) =>
     <String, dynamic>{
       'name': instance.name,
       'type': instance.type,
+      'content-version': instance.contentVersion,
       'path': instance.path,
       'count': instance.count,
       'subscription-info': instance.subscriptionInfo,

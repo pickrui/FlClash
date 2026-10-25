@@ -49,22 +49,21 @@ class _IconCache extends EncodedIconCache with WidgetsBindingObserver {
   }
 }
 
-ImageProvider _resizeIcon(
-  ImageProvider provider,
-  BuildContext context,
-  double size,
-) {
-  final pixels = (size * MediaQuery.devicePixelRatioOf(context)).ceil().clamp(
-    1,
-    1024,
-  );
-  return ResizeImage(
-    provider,
-    width: pixels,
-    height: pixels,
-    policy: ResizeImagePolicy.fit,
-  );
-}
+int _iconPixels(double size, double devicePixelRatio) =>
+    (size * devicePixelRatio).ceil().clamp(1, 1024);
+
+ImageProvider _iconImage(Uint8List bytes, int pixels) => ResizeImage(
+  MemoryImage(bytes),
+  width: pixels,
+  height: pixels,
+  policy: ResizeImagePolicy.fit,
+);
+
+ImageProvider _resizeIcon(Uint8List bytes, BuildContext context, double size) =>
+    _iconImage(
+      bytes,
+      _iconPixels(size, MediaQuery.devicePixelRatioOf(context)),
+    );
 
 class CommonTargetIcon extends StatelessWidget {
   final String src;
@@ -100,7 +99,7 @@ class CommonTargetIcon extends StatelessWidget {
         );
       }
       return Image(
-        image: _resizeIcon(MemoryImage(base64), context, size),
+        image: _resizeIcon(base64, context, size),
         gaplessPlayback: true,
         errorBuilder: (_, error, _) {
           return _defaultIcon();
@@ -222,7 +221,53 @@ final _preloadingIcons = <String>{};
 // Groups update on every selection; a failing icon URL waits this long.
 const _preloadRetryDelay = Duration(minutes: 5);
 
-Future<void> precacheTargetIcons(Iterable<String> srcs) async {
+Future<void> _decodeIconAhead(
+  Uint8List bytes,
+  int pixels,
+  bool Function() isCurrent,
+) async {
+  final provider = _iconImage(bytes, pixels);
+  final key = await provider.obtainKey(ImageConfiguration.empty);
+  final cache = PaintingBinding.instance.imageCache;
+  if (!isCurrent() || cache.containsKey(key)) return;
+  final stream = provider.resolve(ImageConfiguration.empty);
+  final completed = Completer<void>();
+  late final ImageStreamListener listener;
+  void finish([Object? error, StackTrace? stack]) {
+    stream.removeListener(listener);
+    if (!isCurrent()) cache.evict(key, includeLive: false);
+    if (error == null) {
+      completed.complete();
+    } else {
+      completed.completeError(error, stack);
+    }
+  }
+
+  listener = ImageStreamListener((info, _) {
+    info.dispose();
+    finish();
+  }, onError: finish);
+  stream.addListener(listener);
+  await completed.future;
+}
+
+Future<void> precacheTargetIcons(
+  Iterable<String> srcs, {
+  double? size,
+  double? devicePixelRatio,
+}) async {
+  final pixels = size == null
+      ? null
+      : _iconPixels(
+          size,
+          devicePixelRatio ??
+              WidgetsBinding
+                  .instance
+                  .platformDispatcher
+                  .implicitView
+                  ?.devicePixelRatio ??
+              1,
+        );
   final sources = srcs
       .where((src) {
         final uri = Uri.tryParse(src);
@@ -232,22 +277,38 @@ Future<void> precacheTargetIcons(Iterable<String> srcs) async {
       .take(_remoteIcons.maxEntries)
       .iterator;
   final generation = _remoteIcons.generation;
+  bool isCurrent() => generation == _remoteIcons.generation;
   Future<void> worker() async {
-    while (generation == _remoteIcons.generation && sources.moveNext()) {
+    while (isCurrent() && sources.moveNext()) {
       final src = sources.current;
       final failedAt = _remoteIcons.failedPreloads[src];
-      if (_remoteIcons[src] != null ||
+      final cached = _remoteIcons[src];
+      if (cached != null && pixels == null ||
           failedAt != null &&
               DateTime.now().difference(failedAt) < _preloadRetryDelay ||
           !_preloadingIcons.add(src)) {
         continue;
       }
       try {
-        await _loadRemoteIcon(src).drain<void>();
+        final bytes = cached == null
+            ? _loadRemoteIcon(src)
+            : Stream.value(cached);
+        await for (final data in bytes) {
+          if (pixels != null && !isSvgIconUrl(src) && isCurrent()) {
+            try {
+              await _decodeIconAhead(data, pixels, isCurrent);
+            } catch (_) {
+              if (isCurrent() && identical(_remoteIcons[src], data)) {
+                _remoteIcons.remove(src);
+              }
+              rethrow;
+            }
+          }
+        }
         _remoteIcons.failedPreloads.remove(src);
       } catch (error) {
         final failures = _remoteIcons.failedPreloads;
-        if (generation == _remoteIcons.generation) {
+        if (isCurrent()) {
           if (failures.length >= _remoteIcons.maxEntries) {
             failures.remove(failures.keys.first);
           }
@@ -371,7 +432,7 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
                 errorBuilder: (_, _, _) => _imageError(data),
               )
             : Image(
-                image: _resizeIcon(MemoryImage(data), context, widget.size),
+                image: _resizeIcon(data, context, widget.size),
                 gaplessPlayback: true,
                 errorBuilder: (_, _, _) => _imageError(data),
               );

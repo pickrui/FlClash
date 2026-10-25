@@ -103,6 +103,52 @@ void main() {
       );
 
       test(
+        'renamed custom-group DNS and NTP references survive native validation',
+        () async {
+          const group = ProxyGroup(
+            name: 'Old',
+            type: GroupType.Selector,
+            proxies: ['DIRECT'],
+          );
+          const profile = Profile(
+            id: 1,
+            profileType: ProfileType.custom,
+            overwriteType: OverwriteType.custom,
+            autoUpdateDuration: Duration.zero,
+            customProxyGroups: [group],
+            customRules: [Rule(id: 1, value: 'MATCH,Old')],
+            overrides: ProfileOverrides(
+              dns: Dns(nameserver: ['1.1.1.1#h3=true&Old']),
+              dnsOverrideKeys: {DnsOverrideKey.nameserver},
+              ntp: Ntp(dialerProxy: 'Old'),
+              ntpOverrideKeys: {NtpOverrideKey.dialerProxy},
+            ),
+          );
+          final renamed = profile.copyAndPutCustomProxyGroup(
+            group.copyWith(name: 'New Node'),
+            previous: group,
+          );
+          final config = await makeRealProfileTask(
+            overlayState(
+              rawConfig: const {},
+              overwriteType: OverwriteType.custom,
+              groups: renamed.customProxyGroups,
+              rules: renamed.customRules,
+            ).copyWith(
+              overrides: renamed.overrides,
+              customProfile: true,
+              realPatchConfig: const ClashConfig(geoAutoUpdate: false),
+            ),
+          );
+          expect(config['rules'], ['MATCH,New Node']);
+          expect(config['dns']['nameserver'], ['1.1.1.1#h3=true&New%20Node']);
+          expect(config['ntp']['dialer-proxy'], 'New Node');
+          final (exitCode, error) = await validate(config);
+          expect(exitCode, 0, reason: error);
+        },
+      );
+
+      test(
         'accepts emitted merged rules and exact personal selector members',
         () async {
           final config = await candidate(

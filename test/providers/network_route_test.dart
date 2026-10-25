@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 class _Detection extends NetworkDetection {
   int checks = 0;
   @override
-  void startCheck() {
+  void startCheck({bool automatic = false}) {
     checks++;
   }
 }
@@ -38,6 +38,35 @@ void main() {
       geoSub.close();
       localSub.close();
       container.dispose();
+    },
+  );
+
+  test(
+    'unrelated picks skip IP lookup but changed or uncertain routes refresh',
+    () {
+      final container = ProviderContainer(
+        overrides: [networkDetectionProvider.overrideWith(_Detection.new)],
+      );
+      addTearDown(container.dispose);
+      final notifier =
+          container.read(networkDetectionProvider.notifier) as _Detection;
+      void route(int epoch, int picks, String? fingerprint) =>
+          notifier.updateRoute({
+            'core-epoch': epoch,
+            'picks-version': picks,
+            'route-fingerprint': ?fingerprint,
+          });
+      route(1, 1, 'same-route');
+      route(1, 2, 'same-route');
+      expect(notifier.checks, 0);
+      route(1, 3, 'new-route');
+      expect(notifier.checks, 1);
+      route(1, 4, null);
+      expect(notifier.checks, 2);
+      route(1, 5, 'new-route');
+      expect(notifier.checks, 3);
+      route(2, 5, 'new-route');
+      expect(notifier.checks, 4);
     },
   );
 

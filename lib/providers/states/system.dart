@@ -32,8 +32,13 @@ UpdateParams updateParams(Ref ref) {
         findProcessMode: findProcessMode,
         mode: state.mode,
         logLevel: state.logLevel,
-        ipv6: state.ipv6,
-        tcpConcurrent: state.tcpConcurrent,
+        ipv6: state.generalOverrideKeys.contains(GeneralOverrideKey.ipv6)
+            ? state.ipv6
+            : null,
+        tcpConcurrent:
+            state.generalOverrideKeys.contains(GeneralOverrideKey.tcpConcurrent)
+            ? state.tcpConcurrent
+            : null,
         externalController:
             safeModeBuild ||
                 resolveExternalControllerSecret(state.secret).isEmpty
@@ -43,7 +48,10 @@ UpdateParams updateParams(Ref ref) {
                 state.externalControllerAddress,
               ),
         secret: resolveExternalControllerSecret(state.secret),
-        unifiedDelay: state.unifiedDelay,
+        unifiedDelay:
+            state.generalOverrideKeys.contains(GeneralOverrideKey.unifiedDelay)
+            ? state.unifiedDelay
+            : null,
         mixedPort: safeModeBuild ? 0 : state.mixedPort,
         geoXUrl: state.geoXUrl.toJson().cast<String, String>(),
         geoAutoUpdate: state.geoAutoUpdate,
@@ -93,7 +101,7 @@ Map<String, Map<String, int>> trayDelays(Ref ref) {
   final groups = _visibleGroups(ref);
   final allGroups = ref.watch(groupsProvider);
   final defaultTestUrl = ref.watch(
-    appSettingProvider.select((state) => state.testUrl),
+    patchClashConfigProvider.select((state) => state.effectiveTestUrl),
   );
   final delays = <String, Map<String, int>>{};
   final delayOf = proxyDelayLookup(groups: allGroups, delayMap: delayMap);
@@ -231,18 +239,15 @@ SharedState sharedState(Ref ref) {
       (state) => VM2(state?.label ?? '', state?.selectedMap ?? {}),
     ),
   );
-  final appSettingVM3 = ref.watch(
-    appSettingProvider.select(
-      (state) => VM2(state.onlyStatisticsProxy, state.testUrl),
-    ),
+  final onlyStatisticsProxy = ref.watch(
+    appSettingProvider.select((state) => state.onlyStatisticsProxy),
   );
   final suspendOnIdle = ref.watch(
     networkSettingProvider.select((state) => state.suspendOnIdle),
   );
   final currentProfileName = currentProfileVM2.a;
   final selectedMap = currentProfileVM2.b;
-  final onlyStatisticsProxy = appSettingVM3.a;
-  final testUrl = appSettingVM3.b;
+  final testUrl = ref.watch(realTestUrlProvider());
   return SharedState(
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,

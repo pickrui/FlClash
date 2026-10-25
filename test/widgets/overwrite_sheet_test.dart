@@ -273,6 +273,13 @@ void main() {
         find.text(AppLocalizations.current.dataChangedSave),
         findsOneWidget,
       );
+      await tester.tap(find.text(AppLocalizations.current.cancel).last);
+      await tester.pumpAndSettle();
+      expect(calls, 0);
+      expect(closed, isFalse);
+      expect(find.text('Changed'), findsOneWidget);
+      await tester.tap(find.byTooltip(AppLocalizations.current.close));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(AppLocalizations.current.save).last);
       await tester.pumpAndSettle();
       expect(calls, 1);

@@ -115,13 +115,18 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     if (!safeModeBuild) {
       ref.listenManual(groupsProvider, (prev, next) {
         if (prev != next) {
-          unawaited(precacheTargetIcons(next.map((group) => group.icon)));
+          unawaited(
+            precacheTargetIcons(next.map((group) => group.icon), size: 32),
+          );
         }
       }, fireImmediately: true);
       ref.listenManual(iconSetsProvider, (_, next) {
         if (next.value case final iconSets?) {
           unawaited(
-            precacheTargetIcons(iconSets.map((iconSet) => iconSet.cover)),
+            precacheTargetIcons(
+              iconSets.map((iconSet) => iconSet.cover),
+              size: 32,
+            ),
           );
         }
       }, fireImmediately: true);

@@ -34,6 +34,7 @@ import 'package:fl_clash/features/form/form_page.dart';
 import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/paged_sheet.dart';
+import 'package:fl_clash/ui/navigator.dart';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -391,11 +392,15 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
   Future<void> _handleAddOrUpdateProfileProxy([
     ProfileProxy? profileProxy,
   ]) async {
+    Profile? validatedProfile;
     final res = await showOverwriteSheet<ProfileProxy>(
       context: context,
       builder: (_) => ProfileProxyEditView(
         profileProxy: profileProxy,
-        canSave: (next) => _canPutProfileProxy(next, profileProxy?.name),
+        canSave: (next) async {
+          validatedProfile = await _profileForProxySave(next, profileProxy);
+          return validatedProfile != null;
+        },
       ),
     );
     if (res == null) {
@@ -404,70 +409,88 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     if (!mounted) {
       return;
     }
+    if (ref.read(profileProvider(widget.profileId)) != validatedProfile) {
+      context.showNotifier(appLocalizations.routingChanged);
+      return;
+    }
     _putProfileProxy(res, previousName: profileProxy?.name);
     _applyProfileChanges();
   }
 
-  Future<bool> _canPutProfileProxy(
+  Future<Profile?> _profileForProxySave(
     ProfileProxy res,
-    String? previousName,
+    ProfileProxy? previous,
   ) async {
     if (!mounted) {
-      return false;
-    }
-    final profileProxies =
-        ref.read(profileProvider(widget.profileId))?.profileProxies ?? [];
-    if (hasDuplicateProfileProxyName(profileProxies, res)) {
-      context.showNotifier(
-        appLocalizations.existsTip(appLocalizations.proxies),
-      );
-      return false;
+      return null;
     }
     final profile = ref.read(profileProvider(widget.profileId));
-    if (profile != null && hasProfileProxyCustomNameConflict(profile, res)) {
+    if (profile == null ||
+        (previous != null && !profile.profileProxies.contains(previous))) {
+      context.showNotifier(appLocalizations.routingChanged);
+      return null;
+    }
+    if (hasDuplicateProfileProxyName(profile.profileProxies, res)) {
       context.showNotifier(
         appLocalizations.existsTip(appLocalizations.proxies),
       );
-      return false;
+      return null;
+    }
+    if (hasProfileProxyCustomNameConflict(profile, res)) {
+      context.showNotifier(
+        appLocalizations.existsTip(appLocalizations.proxies),
+      );
+      return null;
     }
     final rawConfig = await _loadRawConfig();
     if (rawConfig == null || !mounted) {
-      return false;
+      return null;
+    }
+    if (ref.read(profileProvider(widget.profileId)) != profile) {
+      context.showNotifier(appLocalizations.routingChanged);
+      return null;
     }
     if (hasProfileProxyGroupNameConflict(rawConfig, res)) {
       context.showNotifier(
         appLocalizations.proxyChainUnavailableNodeTip(res.name),
       );
-      return false;
+      return null;
     }
+    final previousName = previous?.name;
     final nextName = res.name;
     if (previousName != null &&
         previousName.isNotEmpty &&
         nextName.isNotEmpty &&
         previousName != nextName) {
-      final currentProfile = ref.read(profileProvider(widget.profileId));
-      if (currentProfile == null) {
-        return false;
+      try {
+        if (profile.type == ProfileType.custom) {
+          profile.overrides.renamedProxies({previousName: nextName});
+        }
+      } on FormatException {
+        context.showNotifier(
+          appLocalizations.customOutboundInUse(previousName),
+        );
+        return null;
       }
       final conflictName = findProxyChainRenameConflict(
-        currentProfile.proxyChains,
+        profile.proxyChains,
         previousName,
         nextName,
         rawConfig: rawConfig,
-        nextProfileProxies: currentProfile.profileProxies.copyAndPut(res),
+        nextProfileProxies: profile.profileProxies.copyAndPut(res),
       );
       if (conflictName != null) {
         context.showNotifier(
           appLocalizations.proxyChainConflictTip(conflictName),
         );
-        return false;
+        return null;
       }
       if (!rawProxyNames(rawConfig).contains(previousName) &&
           _isRawReferenced(rawConfig, [previousName])) {
-        return false;
+        return null;
       }
     }
-    return true;
+    return profile;
   }
 
   void _putProfileProxy(ProfileProxy profileProxy, {String? previousName}) {

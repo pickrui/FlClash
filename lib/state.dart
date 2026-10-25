@@ -403,6 +403,39 @@ class GlobalState {
     }
   }
 
+  Future<bool?> showSaveChanges({
+    BuildContext? context,
+    String? title,
+    String? message,
+  }) {
+    return showCommonDialog<bool>(
+      context: context,
+      child: Builder(
+        builder: (context) {
+          final l = context.appLocalizations;
+          return AlertScope.of(context).dialog(
+            title: title ?? l.tip,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(l.discard),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(l.save),
+              ),
+            ],
+            child: Text(message ?? l.saveChanges),
+          );
+        },
+      ),
+    );
+  }
+
   Future<bool?> showMessage({
     required InlineSpan message,
     BuildContext? context,

@@ -152,10 +152,9 @@ class _OverwriteExitGuardState extends State<OverwriteExitGuard> {
     _closing = true;
     try {
       if (widget.isDirty?.call() == true) {
-        final save = await globalState.showMessage(
-          message: TextSpan(text: context.appLocalizations.dataChangedSave),
-          confirmText: context.appLocalizations.save,
-          cancelText: context.appLocalizations.discard,
+        final save = await globalState.showSaveChanges(
+          context: context,
+          message: context.appLocalizations.dataChangedSave,
         );
         if (!mounted || save == null) return;
         if (save) {

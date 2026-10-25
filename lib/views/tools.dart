@@ -136,7 +136,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           itemBuilder: (_, index) => items[index],
           padding: EdgeInsets.fromLTRB(
             16,
-            context.contentTopPadding,
+            context.sectionsTopPadding,
             16,
             20 + context.bottomInset,
           ),

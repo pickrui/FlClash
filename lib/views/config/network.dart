@@ -6,8 +6,6 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/features/form/form_row.dart';
-import 'package:fl_clash/ui/animated_entries.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -725,41 +723,15 @@ class TunSection extends ConsumerWidget {
         ].join('\n'),
       );
     }
-    final spec = appTunOverrideSpec(isLinux: isLinux, isWindows: isWindows);
-    final picked = ref.watch(
-      patchClashConfigProvider.select((state) => state.tunOverrideKeys),
-    );
-    final listed = [
-      for (final key in spec.values)
-        if (picked.contains(key)) key,
-    ];
-    void handleAdd() => showOverrideAddSheet(context, ref, spec);
-    return generateAnimatedSection(
+    return OverrideSection(
       title: appLocalizations.tun,
-      items: [
-        const BypassPrivateRouteItem(key: ValueKey(#bypassPrivateRoute)),
-        for (final key in listed)
-          OverrideEntry(key: ValueKey(key), spec: spec, overrideKey: key),
-        if (listed.length < spec.values.length)
-          FormRow(
-            key: const ValueKey(#add),
-            leading: EntryButton.add(onPressed: handleAdd),
-            title: spec.target.addEntry(appLocalizations),
-            titleStyle: TextStyle(color: context.colorScheme.primary),
-            onPressed: handleAdd,
-          ),
-      ],
-      footer: [
-        appLocalizations.bypassPrivateRouteDesc,
-        appLocalizations.tunOverrideDesc,
-        ?spec.footerOf(listed, appLocalizations),
-      ].join('\n'),
+      spec: appTunOverrideSpec(isLinux: isLinux, isWindows: isWindows),
+      items: const [BypassPrivateRouteItem(key: ValueKey(#bypassPrivateRoute))],
+      footer: [appLocalizations.bypassPrivateRouteDesc],
     );
   }
 }
 
-// mihomo keeps TCP keep-alive off on Android whatever the config says
-// (component/keepalive).
 // mihomo keeps TCP keep-alive off on Android whatever the config says
 // (component/keepalive), and only Linux honours a routing mark.
 List<Widget> outboundItems({required bool isDesktop, required bool isLinux}) {
@@ -806,7 +778,7 @@ class NetworkListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-        top: context.contentTopPadding,
+        top: context.sectionsTopPadding,
         bottom: 16 + context.bottomInset,
       ),
       children: [

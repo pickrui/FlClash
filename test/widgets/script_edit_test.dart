@@ -303,7 +303,7 @@ void main() {
     await tester.pump();
     await tester.binding.handlePopRoute();
     await settle(tester);
-    await tester.tap(find.text(AppLocalizations.current.confirm));
+    await tester.tap(find.text(AppLocalizations.current.save));
     await settle(tester, 12);
     expect(find.byType(EditorPage), findsOneWidget);
     expect(

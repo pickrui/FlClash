@@ -490,6 +490,23 @@ void main() {
       'composingExtent': at + typed.length,
     };
 
+    Future<String> removeTail(WidgetTester tester, {bool pump = true}) async {
+      await selectAll(tester);
+      final kept = document.substring(0, document.indexOf('line 10'));
+      controller.selection = TextSelection(
+        baseOffset: kept.length,
+        extentOffset: document.length,
+      );
+      await tester.pump();
+      window = controller.currentTextEditingValue.text;
+      await sendDeltas(tester, [
+        caretDelta(window, window.length),
+        textDelta(window, '', 0, window.length),
+      ], pump: pump);
+      expect(controller.text, kept);
+      return kept;
+    }
+
     testWidgets('cut by the platform reaches the clipboard whole', (
       tester,
     ) async {
@@ -577,25 +594,26 @@ void main() {
 
     testWidgets('takes what the input method typed into the window it had '
         'before the new one reached it', (tester) async {
-      await selectAll(tester);
-      final kept = document.substring(0, document.indexOf('line 10'));
-      controller.selection = TextSelection(
-        baseOffset: kept.length,
-        extentOffset: document.length,
-      );
-      await tester.pump();
-      window = controller.currentTextEditingValue.text;
-      await sendDeltas(tester, [
-        caretDelta(window, window.length),
-        textDelta(window, '', 0, window.length),
-      ]);
+      final kept = await removeTail(tester);
       expect(controller.text, kept);
       final resent = controller.currentTextEditingValue;
       expect(resent.text, isNotEmpty);
 
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 250)),
+      );
       await sendDeltas(tester, [composingDelta('', 'q', 0)]);
       expect(controller.text, '${kept}q');
       expect(controller.imeComposition, isNull);
+      expectOneUndoRestoresIt(
+        TextSelection(baseOffset: kept.length, extentOffset: document.length),
+      );
+      expect(undo.redo(), isTrue);
+      expect(controller.text, '${kept}q');
+      expect(
+        controller.selection,
+        TextSelection.collapsed(offset: kept.length + 1),
+      );
 
       await sendDeltas(tester, [
         caretDelta(resent.text, resent.selection.extentOffset),
@@ -611,20 +629,12 @@ void main() {
 
     testWidgets('takes what the input method typed into that window after '
         'hiding its keyboard', (tester) async {
-      await selectAll(tester);
-      final kept = document.substring(0, document.indexOf('line 10'));
-      controller.selection = TextSelection(
-        baseOffset: kept.length,
-        extentOffset: document.length,
-      );
-      await tester.pump();
-      window = controller.currentTextEditingValue.text;
-      await sendDeltas(tester, [
-        caretDelta(window, window.length),
-        textDelta(window, '', 0, window.length),
-      ]);
+      final kept = await removeTail(tester);
 
       await sendDeltas(tester, []);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 250)),
+      );
       await sendDeltas(tester, [composingDelta('', 'q', 0)]);
 
       expect(controller.text, '${kept}q');
@@ -634,20 +644,72 @@ void main() {
       await settle(tester, 2);
     });
 
+    for (final boundary in [
+      'caret movement',
+      'connection close',
+      'history reset',
+    ]) {
+      testWidgets('keeps replayed typing separate after $boundary', (
+        tester,
+      ) async {
+        final kept = await removeTail(tester, pump: false);
+        switch (boundary) {
+          case 'caret movement':
+            controller.selection = TextSelection.collapsed(
+              offset: kept.length - 1,
+            );
+            controller.selection = TextSelection.collapsed(offset: kept.length);
+          case 'connection close':
+            final previous = controller.connection;
+            await sendToInputClient(
+              tester,
+              'TextInputClient.onConnectionClosed',
+            );
+            expect(controller.connection, isNull);
+            await tester.pump();
+            controller.focusNode!.requestFocus();
+            await tester.pump();
+            expect(controller.connection?.attached, isTrue);
+            expect(controller.connection, isNot(same(previous)));
+            expect(controller.selection.extentOffset, kept.length);
+          case 'history reset':
+            undo.clear();
+        }
+        await sendDeltas(tester, [composingDelta('', 'q', 0)]);
+        expect(controller.text, '${kept}q');
+        expect(undo.undo(), isTrue);
+        expect(controller.text, kept);
+        if (boundary == 'history reset') {
+          expect(undo.canUndo, isFalse);
+        } else {
+          expect(undo.undo(), isTrue);
+          expect(controller.text, document);
+        }
+        await settle(tester, 2);
+      });
+    }
+
+    testWidgets('keeps later typing into the current window separate', (
+      tester,
+    ) async {
+      final kept = await removeTail(tester);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 250)),
+      );
+      final value = controller.currentTextEditingValue;
+      final caret = value.selection.extentOffset;
+      await sendDeltas(tester, [textDelta(value.text, 'q', caret, caret)]);
+      expect(controller.text, '${kept}q');
+      expect(undo.undo(), isTrue);
+      expect(controller.text, kept);
+      expect(undo.undo(), isTrue);
+      expect(controller.text, document);
+      await settle(tester, 2);
+    });
+
     testWidgets('takes what the input method went on typing into that '
         'window', (tester) async {
-      await selectAll(tester);
-      final kept = document.substring(0, document.indexOf('line 10'));
-      controller.selection = TextSelection(
-        baseOffset: kept.length,
-        extentOffset: document.length,
-      );
-      await tester.pump();
-      window = controller.currentTextEditingValue.text;
-      await sendDeltas(tester, [
-        caretDelta(window, window.length),
-        textDelta(window, '', 0, window.length),
-      ]);
+      final kept = await removeTail(tester);
 
       await sendDeltas(tester, [composingDelta('', 'q', 0)]);
       await sendDeltas(tester, [

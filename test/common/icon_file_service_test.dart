@@ -205,24 +205,49 @@ void main() {
   });
 
   test('deadline cancels a hanging image and closes its client', () async {
-    var cancelled = false;
+    final started = Completer<void>();
+    final cancelled = Completer<void>();
     final stream = StreamController<Uint8List>(
-      onCancel: () => cancelled = true,
+      onListen: started.complete,
+      onCancel: cancelled.complete,
     );
     late _Adapter adapter;
-    final service = IconFileService(
-      timeout: const Duration(milliseconds: 20),
-      resolveRoutes: (_) => ['direct'],
-      createAdapter: (_) =>
-          adapter = _Adapter((_) async => ResponseBody(stream.stream, 200)),
+    late void Function() expire;
+    const deadline = Duration(milliseconds: 20);
+    await runZoned(
+      () async {
+        final service = IconFileService(
+          timeout: deadline,
+          resolveRoutes: (_) => ['direct'],
+          createAdapter: (_) =>
+              adapter = _Adapter((_) async => ResponseBody(stream.stream, 200)),
+        );
+        final completed = expectLater(
+          service.get('https://icons.invalid/node.png'),
+          throwsA(isA<TimeoutException>()),
+        );
+        await started.future.timeout(const Duration(seconds: 5));
+        expire();
+        await completed;
+        await cancelled.future.timeout(const Duration(seconds: 5));
+        await adapter.whenClosed.future.timeout(const Duration(seconds: 5));
+        expect(adapter.closed, true);
+        await stream.close();
+      },
+      zoneSpecification: ZoneSpecification(
+        createTimer: (self, parent, zone, duration, callback) {
+          if (duration == deadline) {
+            expire = () => zone.run(callback);
+            return parent.createTimer(
+              zone,
+              const Duration(seconds: 10),
+              callback,
+            );
+          }
+          return parent.createTimer(zone, duration, callback);
+        },
+      ),
     );
-    await expectLater(
-      service.get('https://icons.invalid/node.png'),
-      throwsA(isA<TimeoutException>()),
-    );
-    await Future<void>.delayed(Duration.zero);
-    expect(cancelled, true);
-    expect(adapter.closed, true);
   });
 
   test('signed SVG URLs keep SVG validation and rendering', () async {
@@ -266,6 +291,7 @@ class _Adapter implements HttpClientAdapter {
   _Adapter(this.respond);
   final Future<ResponseBody> Function(RequestOptions) respond;
   var closed = false;
+  final whenClosed = Completer<void>();
   @override
   Future<ResponseBody> fetch(
     RequestOptions options,
@@ -273,5 +299,8 @@ class _Adapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) => respond(options);
   @override
-  void close({bool force = false}) => closed = true;
+  void close({bool force = false}) {
+    closed = true;
+    if (!whenClosed.isCompleted) whenClosed.complete();
+  }
 }

@@ -24,7 +24,6 @@ import 'card.dart';
 import 'common.dart';
 import 'pages.dart';
 
-const _pinnedHeaderGap = 8.0;
 const _headerInset = 10.0;
 const _headerButtonInset = 4.0;
 const _groupInset = 16.0;
@@ -47,20 +46,25 @@ class ProxiesListView extends ConsumerStatefulWidget {
 }
 
 class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
-  late final ScrollController _controller;
+  final _controllers = <int, ScrollController>{};
   int _columns = 1;
   int _groupColumns = 1;
   double _gap = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = sheetScrollController(context);
+  ScrollController _columnController(int column) =>
+      _controllers.putIfAbsent(column, () => sheetScrollController(context));
+
+  ScrollController? _groupController(String groupName) {
+    final groups = ref.read(proxiesListStateProvider).groups;
+    final index = groups.indexWhere((group) => group.name == groupName);
+    return index < 0 ? null : _columnController(index % _groupColumns);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -99,14 +103,8 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
     return GroupOffsets(state.groups, offsets);
   }
 
-  double _getGroupOffset(String groupName) {
-    if (!_controller.hasClients || _controller.position.maxScrollExtent == 0) {
-      return 0;
-    }
-    return _getGroupOffsets().offsetOf(groupName);
-  }
-
   void _scrollToMakeVisibleWithPadding({
+    required ScrollController controller,
     required double containerHeight,
     required double pixels,
     required double start,
@@ -138,24 +136,24 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
     }
 
     targetScrollOffset = targetScrollOffset.clamp(
-      _controller.position.minScrollExtent,
-      _controller.position.maxScrollExtent,
+      controller.position.minScrollExtent,
+      controller.position.maxScrollExtent,
     );
 
-    _controller.jumpTo(targetScrollOffset);
+    controller.jumpTo(targetScrollOffset);
   }
 
   void _autoScrollToGroup(String groupName) {
-    if (!_controller.hasClients) {
+    final controller = _groupController(groupName);
+    if (controller == null || !controller.hasClients) {
       return;
     }
-    final pixels = _controller.position.pixels;
-    final offset = _getGroupOffset(groupName);
+    final pixels = controller.position.pixels;
+    final offset = _getGroupOffsets().offsetOf(groupName);
     _scrollToMakeVisibleWithPadding(
+      controller: controller,
       containerHeight: max(
-        _controller.position.viewportDimension -
-            context.appBarInset -
-            _pinnedHeaderGap,
+        controller.position.viewportDimension - context.contentTopPadding,
         0,
       ),
       pixels: pixels,
@@ -178,7 +176,12 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
     if (rowOffset == null) {
       return;
     }
-    animateScrollTo(_controller, _getGroupOffset(groupName) + rowOffset);
+    final controller = _groupController(groupName);
+    if (controller == null || !controller.hasClients) return;
+    animateScrollTo(
+      controller,
+      _getGroupOffsets().offsetOf(groupName) + rowOffset,
+    );
   }
 
   @override
@@ -236,57 +239,54 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
                 onChange: _handleChange,
                 onScrollToSelected: _scrollToGroupSelected,
               );
-              final barInset = context.appBarInset;
-              return CommonScrollBar(
-                controller: _controller,
-                thumbVisibility: true,
-                child: CustomScrollView(
-                  key: proxiesListStoreKey,
-                  controller: _controller,
-                  slivers: [
-                    PinnedHeaderSliver(
-                      child: SizedBox(height: barInset + _pinnedHeaderGap),
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: _groupInset,
+              Widget buildColumn(int column) {
+                final controller = _columnController(column);
+                return CommonScrollBar(
+                  controller: controller,
+                  thumbVisibility: true,
+                  child: CustomScrollView(
+                    key: groupColumns == 1
+                        ? proxiesListStoreKey
+                        : PageStorageKey(
+                            '${proxiesListStoreKey.value}:$groupColumns:$column',
+                          ),
+                    controller: controller,
+                    slivers: [
+                      PinnedHeaderSliver(
+                        child: SizedBox(height: context.contentTopPadding),
                       ),
-                      sliver: groupColumns == 1
-                          ? SliverMainAxisGroup(
-                              slivers: groups.map(buildGroup).toList(),
+                      SliverPadding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: groupColumns == 1 ? _groupInset : 0,
+                        ),
+                        sliver: SliverMainAxisGroup(
+                          slivers: [
+                            for (
+                              var index = column;
+                              index < groups.length;
+                              index += groupColumns
                             )
-                          : SliverCrossAxisGroup(
-                              slivers: [
-                                for (
-                                  var column = 0;
-                                  column < groupColumns;
-                                  column++
-                                ) ...[
-                                  if (column > 0)
-                                    SliverConstrainedCrossAxis(
-                                      maxExtent: gap,
-                                      sliver: const SliverToBoxAdapter(),
-                                    ),
-                                  SliverCrossAxisExpanded(
-                                    flex: 1,
-                                    sliver: SliverMainAxisGroup(
-                                      slivers: [
-                                        for (
-                                          var index = column;
-                                          index < groups.length;
-                                          index += groupColumns
-                                        )
-                                          buildGroup(groups[index]),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: SizedBox(height: 16 + context.bottomInset),
-                    ),
+                              buildGroup(groups[index]),
+                          ],
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: SizedBox(height: 16 + context.bottomInset),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              if (groupColumns == 1) return buildColumn(0);
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: _groupInset),
+                child: Row(
+                  children: [
+                    for (var column = 0; column < groupColumns; column++) ...[
+                      if (column > 0) SizedBox(width: gap),
+                      Expanded(child: buildColumn(column)),
+                    ],
                   ],
                 ),
               );

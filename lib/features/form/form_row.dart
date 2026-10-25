@@ -30,6 +30,7 @@ class InfoMessageButton extends StatelessWidget {
           globalState.showMessage(
             context: context,
             message: TextSpan(text: message),
+            cancelable: false,
           );
         },
         icon: GlyphIcon(
