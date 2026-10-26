@@ -179,11 +179,6 @@ class GlobalState {
       );
     }
     await startupDiagnostics.run(
-      'dataMigration',
-      appPath.migrateLegacyApplicationSupportData,
-      seconds: 60,
-    );
-    await startupDiagnostics.run(
       'pendingRestore',
       () async => recoverPendingRestore(
         homePath: homePath,

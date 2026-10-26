@@ -806,6 +806,8 @@
   "installedAppsPermissionGrant": "Allow access",
   "installedAppsLoadFailed": "Could not load installed apps. Please try again.",
   "configRecoveryMissingKey": "The encryption key for your existing configuration is missing or invalid. Try the original system account on the original device or restore a backup. Retrying cannot recreate a lost key.",
+  "configRecoveryDatabaseUnavailable": "The local database cannot be accessed right now. Your files have been kept. Check permissions for this app’s data folder and whether another process is using the database, then retry.",
+  "configRecoveryIncompatibleDatabase": "The database in this app’s data folder is incompatible or damaged. Your files have been kept. Restore a compatible backup, or back up and reset to set up this app again. Data belonging to other apps will not be accessed.",
   "configRecoveryUnreadable": "The local configuration cannot be decrypted or is damaged. Existing files have been kept. Restore the matching key and configuration backup, or back up and reset.",
   "configRecoveryStorage": "The local configuration or its encryption key could not be read or saved. Check access to the application data folder and the system secure storage, then retry.",
   "configRecoveryReset": "Back up and reset",

@@ -42,6 +42,57 @@ void main() {
     });
   }
 
+  testWidgets(
+    'incompatible database offers a confirmed backup reset without exposing data',
+    (tester) async {
+      var resets = 0;
+      await _showRecovery(
+        tester,
+        initialReason: ConfigRecoveryReason.incompatibleDatabase,
+        onRetry: () async {},
+        onReset: () async {
+          resets++;
+          return 'private-backup';
+        },
+      );
+      expect(
+        find.text(AppLocalizations.current.configRecoveryIncompatibleDatabase),
+        findsOneWidget,
+      );
+      expect(resets, 0);
+      await tester.tap(find.text(AppLocalizations.current.configRecoveryReset));
+      await tester.pumpAndSettle();
+      expect(resets, 0);
+      await tester.tap(find.text(AppLocalizations.current.cancel));
+      await tester.pumpAndSettle();
+      expect(resets, 0);
+    },
+  );
+
+  testWidgets('database access errors do not offer keyring migration', (
+    tester,
+  ) async {
+    await _showRecovery(
+      tester,
+      initialReason: ConfigRecoveryReason.databaseUnavailable,
+      usesSystemKeyring: true,
+      onUseLocalStorage: () async {},
+      onRetry: () async {},
+    );
+    expect(
+      find.text(AppLocalizations.current.configRecoveryDatabaseUnavailable),
+      findsOneWidget,
+    );
+    expect(
+      find.text(AppLocalizations.current.configRecoveryKeyring),
+      findsNothing,
+    );
+    expect(
+      find.text(AppLocalizations.current.configRecoveryUseLocalStorage),
+      findsNothing,
+    );
+  });
+
   testWidgets('keeps recovery guidance after failure without exposing errors', (
     tester,
   ) async {

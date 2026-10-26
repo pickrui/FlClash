@@ -629,81 +629,14 @@ Future<BackupFailure?> _backupDatabaseFailure(String path) async {
     )) {
       return BackupFailure.invalid;
     }
-    final tables = backupDatabase
-        .select("SELECT name FROM sqlite_master WHERE type = 'table'")
-        .map((row) => row['name'])
-        .whereType<String>()
-        .toSet();
-    if ({
-      'profiles',
-      'scripts',
-      'rules',
-      'profile_rule_mapping',
-      if (schemaVersion >= 4) ...{'proxy_groups', 'icon_records'},
-      if (schemaVersion >= 8) 'icon_sets',
-    }.difference(tables).isNotEmpty) {
+    if (!hasCompatibleDatabaseSchema(
+      schemaVersion,
+      (table) => backupDatabase!
+          .select('PRAGMA table_info("$table")')
+          .map((row) => row['name'] as String)
+          .toSet(),
+    )) {
       return BackupFailure.invalid;
-    }
-    final requiredColumns = <String, Set<String>>{
-      'profiles': {
-        'id',
-        'label',
-        'url',
-        'overwrite_type',
-        'auto_update_duration_millis',
-        'auto_update',
-        'selected_map',
-        'unfold_set',
-        if (schemaVersion >= 2) ...{'proxy_chains', 'profile_proxies'},
-        if (schemaVersion >= 3) ...{'custom_proxy_groups', 'custom_rules'},
-        if (schemaVersion >= 4) 'match_target',
-        if (schemaVersion >= 7) ...{'profile_type', 'overrides'},
-      },
-      'scripts': {'id', 'label', 'last_update_time'},
-      'rules': {
-        'id',
-        'value',
-        if (schemaVersion >= 4) ...{
-          'rule_action',
-          'content',
-          'rule_target',
-          'rule_provider',
-          'sub_rule',
-          'no_resolve',
-          'src',
-        },
-      },
-      'profile_rule_mapping': {
-        'id',
-        'profile_id',
-        'rule_id',
-        'scene',
-        'order',
-        if (schemaVersion >= 4) 'source_id',
-      },
-      if (schemaVersion >= 4) ...{
-        'proxy_groups': {
-          'id',
-          'profile_id',
-          'name',
-          'type',
-          'order',
-          'tolerance',
-          'strategy',
-        },
-        'icon_records': {'url', 'last_accessed'},
-      },
-      if (schemaVersion >= 8) 'icon_sets': {'id', 'name', 'url', 'icons'},
-    };
-    for (final entry in requiredColumns.entries) {
-      final columns = backupDatabase
-          .select('PRAGMA table_info("${entry.key}")')
-          .map((row) => row['name'])
-          .whereType<String>()
-          .toSet();
-      if (entry.value.difference(columns).isNotEmpty) {
-        return BackupFailure.invalid;
-      }
     }
     return null;
   } catch (_) {

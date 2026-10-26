@@ -806,6 +806,8 @@
   "installedAppsPermissionGrant": "Permitir acceso",
   "installedAppsLoadFailed": "No se pudieron cargar las aplicaciones instaladas. Vuelva a intentarlo.",
   "configRecoveryMissingKey": "La clave de cifrado de su configuración falta o no es válida. Pruebe la cuenta y el dispositivo originales, o restaure una copia. Reintentar no recrea una clave perdida.",
+  "configRecoveryDatabaseUnavailable": "No se puede acceder a la base de datos local en este momento. Se han conservado los archivos. Comprueba los permisos de la carpeta de datos de esta aplicación y si otro proceso está usando la base de datos, y vuelve a intentarlo.",
+  "configRecoveryIncompatibleDatabase": "La base de datos de esta aplicación es incompatible o está dañada. Se han conservado los archivos. Restaura una copia compatible o crea una copia y restablece la aplicación para configurarla de nuevo. No se accederá a los datos de otras aplicaciones.",
   "configRecoveryUnreadable": "La configuración local no se puede descifrar o está dañada. Los archivos existentes se conservan. Restaure la clave y la copia correspondientes, o haga una copia y restablezca.",
   "configRecoveryStorage": "No se pudo leer o guardar la configuración local o su clave. Compruebe el acceso a la carpeta de datos y al almacenamiento seguro del sistema, y reintente.",
   "configRecoveryReset": "Copiar y restablecer",

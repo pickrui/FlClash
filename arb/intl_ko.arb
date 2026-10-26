@@ -806,6 +806,8 @@
   "installedAppsPermissionGrant": "접근 허용",
   "installedAppsLoadFailed": "설치된 앱을 불러오지 못했습니다. 다시 시도하세요.",
   "configRecoveryMissingKey": "기존 설정의 암호화 키가 없거나 유효하지 않습니다. 원래 기기의 원래 시스템 계정을 사용하거나 백업을 복원하세요. 재시도로 분실한 키를 다시 만들 수는 없습니다.",
+  "configRecoveryDatabaseUnavailable": "현재 로컬 데이터베이스에 접근할 수 없습니다. 기존 파일은 보존되었습니다. 이 앱의 데이터 폴더 접근 권한과 다른 프로세스가 데이터베이스를 사용 중인지 확인한 후 다시 시도하세요.",
+  "configRecoveryIncompatibleDatabase": "이 앱의 데이터 폴더에 있는 데이터베이스가 호환되지 않거나 손상되었습니다. 기존 파일은 보존되었습니다. 호환되는 백업을 복원하거나 백업 후 초기화하여 앱을 다시 설정하세요. 다른 앱의 데이터에는 접근하지 않습니다.",
   "configRecoveryUnreadable": "로컬 설정을 복호화할 수 없거나 설정이 손상되었습니다. 기존 파일은 보존되었습니다. 일치하는 키와 설정 백업을 복원하거나 백업 후 초기화하세요.",
   "configRecoveryStorage": "로컬 설정 또는 암호화 키를 읽거나 저장하지 못했습니다. 앱 데이터 폴더와 시스템 보안 저장소에 대한 접근 권한을 확인한 후 다시 시도하세요.",
   "configRecoveryReset": "백업 후 초기화",

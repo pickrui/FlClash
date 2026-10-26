@@ -806,6 +806,8 @@
   "installedAppsPermissionGrant": "授权访问",
   "installedAppsLoadFailed": "无法读取应用列表，请重试",
   "configRecoveryMissingKey": "原配置的加密密钥缺失或无效。请尝试使用原设备上的原系统用户，或恢复备份。重试无法重新生成已丢失的原密钥",
+  "configRecoveryDatabaseUnavailable": "暂时无法访问本地数据库，原有文件已保留，请检查本应用数据目录的访问权限，以及数据库是否被其他进程占用后重试",
+  "configRecoveryIncompatibleDatabase": "本应用数据目录中的数据库不兼容或已损坏，原有文件已保留，请恢复兼容的备份，或备份并重置后重新配置本应用，不会访问其他应用的数据",
   "configRecoveryUnreadable": "本地配置无法解密或文件已损坏，原文件已保留。请恢复匹配的密钥与配置备份，或备份后重置",
   "configRecoveryStorage": "无法读取或保存本地配置及其加密密钥。请检查应用数据目录和系统安全存储的访问权限后重试",
   "configRecoveryReset": "备份并重置",

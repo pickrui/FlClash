@@ -282,19 +282,26 @@ void main() {
     'clear waits for an in-flight recovery and prevents seed resurrection',
     () async {
       await File(configPath).writeAsString('existing encrypted configuration');
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
       final reading = Completer<void>();
-      final legacyValue = Completer<String>();
+      final result = Completer<String>();
+      String? stored = seedA;
       messenger.setMockMethodCallHandler(keychainChannel, (call) async {
+        if (call.method == 'delete') {
+          stored = null;
+          return null;
+        }
         expect(call.method, 'read');
+        if (reading.isCompleted) return stored;
         reading.complete();
-        return legacyValue.future;
+        return result.future;
       });
 
       final pending = ConfigKeyStore.seedBase64();
       final invalidated = expectLater(pending, throwsStateError);
       await reading.future;
       final clearing = ConfigKeyStore.clear();
-      legacyValue.complete(seedA);
+      result.complete(seedA);
       await invalidated;
       await clearing;
 
@@ -303,10 +310,7 @@ void main() {
       expect(persistedPreferences.containsKey(persistedSeedKey), isFalse);
       expect(prefs.getBool(SafeStorage.deletionMarkerKey(seedKey)), isTrue);
       await expectLater(ConfigKeyStore.seedBase64(), throwsStateError);
-      expect(
-        await SafeStorage.read(seedKey, retry: true, legacyEvidence: true),
-        isNull,
-      );
+      expect(await SafeStorage.read(seedKey, retry: true), isNull);
     },
   );
 }

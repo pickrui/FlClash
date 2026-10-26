@@ -6753,6 +6753,26 @@ class AppLocalizations {
     );
   }
 
+  /// `The local database cannot be accessed right now. Your files have been kept. Check permissions for this app’s data folder and whether another process is using the database, then retry.`
+  String get configRecoveryDatabaseUnavailable {
+    return Intl.message(
+      'The local database cannot be accessed right now. Your files have been kept. Check permissions for this app’s data folder and whether another process is using the database, then retry.',
+      name: 'configRecoveryDatabaseUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The database in this app’s data folder is incompatible or damaged. Your files have been kept. Restore a compatible backup, or back up and reset to set up this app again. Data belonging to other apps will not be accessed.`
+  String get configRecoveryIncompatibleDatabase {
+    return Intl.message(
+      'The database in this app’s data folder is incompatible or damaged. Your files have been kept. Restore a compatible backup, or back up and reset to set up this app again. Data belonging to other apps will not be accessed.',
+      name: 'configRecoveryIncompatibleDatabase',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The local configuration cannot be decrypted or is damaged. Existing files have been kept. Restore the matching key and configuration backup, or back up and reset.`
   String get configRecoveryUnreadable {
     return Intl.message(

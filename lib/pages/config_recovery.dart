@@ -133,6 +133,10 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
     if (_resetFailed) return localizations.configRecoveryResetFailed;
     return switch (_reason) {
       ConfigRecoveryReason.missingKey => localizations.configRecoveryMissingKey,
+      ConfigRecoveryReason.databaseUnavailable =>
+        localizations.configRecoveryDatabaseUnavailable,
+      ConfigRecoveryReason.incompatibleDatabase =>
+        localizations.configRecoveryIncompatibleDatabase,
       ConfigRecoveryReason.unreadableConfig =>
         localizations.configRecoveryUnreadable,
       ConfigRecoveryReason.storageUnavailable =>

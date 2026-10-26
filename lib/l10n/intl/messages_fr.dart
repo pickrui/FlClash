@@ -864,6 +864,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Données détectées dans la configuration",
     ),
     "configParseErrorAtLine": m10,
+    "configRecoveryDatabaseUnavailable": MessageLookupByLibrary.simpleMessage(
+      "La base de données locale est temporairement inaccessible. Vos fichiers sont conservés. Vérifiez les autorisations du dossier de données de cette application et si un autre processus utilise la base, puis réessayez.",
+    ),
+    "configRecoveryIncompatibleDatabase": MessageLookupByLibrary.simpleMessage(
+      "La base de données dans le dossier de cette application est incompatible ou endommagée. Vos fichiers sont conservés. Restaurez une sauvegarde compatible ou sauvegardez et réinitialisez pour reconfigurer cette application. Les données des autres applications ne seront pas consultées.",
+    ),
     "configRecoveryKeyring": MessageLookupByLibrary.simpleMessage(
       "Impossible d’accéder au trousseau système (Secret Service). Activez et déverrouillez KDE Wallet ou GNOME Keyring dans les paramètres système, puis réessayez.",
     ),

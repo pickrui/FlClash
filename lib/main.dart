@@ -70,8 +70,6 @@ Future<void> main(List<String> arguments) async {
       arguments: arguments,
       loadConfig: _loadStartupConfig,
     );
-    // Building the service reads and may write preferences, so it waits for
-    // init to migrate upstream data into the data directory.
     registerFetchManagedConfig(CloudApiService().fetchManagedConfig);
     // Eagerly build the cloud-account notifier so it registers its
     // ensureCloudReady hook before any oixCloud profile setup runs.
@@ -119,6 +117,10 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
   try {
     return await loadWithConfigRecovery(
       load: (retry) async {
+        await startupDiagnostics.run(
+          'databaseCompatibility',
+          () async => checkStartupDatabase(await appPath.databasePath),
+        );
         await startupDiagnostics.run<void>(
           'configurationKey',
           retry ? ConfigKeyStore.reload : ConfigKeyStore.seedBase64,

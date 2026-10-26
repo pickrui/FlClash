@@ -20,7 +20,13 @@ bool shouldPreserveConfigSeed({
   return !hasValidSeed && durableConfigExists;
 }
 
-enum ConfigRecoveryReason { storageUnavailable, missingKey, unreadableConfig }
+enum ConfigRecoveryReason {
+  storageUnavailable,
+  missingKey,
+  unreadableConfig,
+  incompatibleDatabase,
+  databaseUnavailable,
+}
 
 /// Storage can be retried without discarding the existing encrypted data.
 class ConfigKeyUnavailableException implements Exception {
@@ -34,7 +40,13 @@ class ConfigKeyUnavailableException implements Exception {
   ]);
 
   @override
-  String toString() => 'Config encryption key is temporarily unavailable';
+  String toString() => switch (reason) {
+    ConfigRecoveryReason.incompatibleDatabase =>
+      'Local database is incompatible or damaged',
+    ConfigRecoveryReason.databaseUnavailable =>
+      'Local database is temporarily unavailable',
+    _ => 'Config encryption key is temporarily unavailable',
+  };
 }
 
 @visibleForTesting
@@ -168,7 +180,6 @@ class ConfigKeyStore {
       readSeed: (retryRead) => SafeStorage.read(
         _seedKey,
         retry: retry || retryRead,
-        legacyEvidence: durableConfigExists,
         isValid: (value) => decodeSeed(value) != null,
       ),
       writeSeed: (seed) => SafeStorage.write(_seedKey, seed),

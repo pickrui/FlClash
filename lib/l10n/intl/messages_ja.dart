@@ -714,6 +714,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "設定内にデータが検出されました",
     ),
     "configParseErrorAtLine": m10,
+    "configRecoveryDatabaseUnavailable": MessageLookupByLibrary.simpleMessage(
+      "現在ローカルデータベースにアクセスできません。元のファイルは保持されています。このアプリのデータフォルダーのアクセス権と、他のプロセスがデータベースを使用していないかを確認してから、再試行してください。",
+    ),
+    "configRecoveryIncompatibleDatabase": MessageLookupByLibrary.simpleMessage(
+      "このアプリのデータフォルダー内のデータベースに互換性がないか、破損しています。元のファイルは保持されています。互換性のあるバックアップを復元するか、バックアップしてリセットした後、このアプリを再設定してください。他のアプリのデータにはアクセスしません。",
+    ),
     "configRecoveryKeyring": MessageLookupByLibrary.simpleMessage(
       "システムのキーリング（Secret Service）にアクセスできないため、システム設定で KDE ウォレットまたは GNOME キーリングを有効にしてロックを解除してから再試行してください",
     ),

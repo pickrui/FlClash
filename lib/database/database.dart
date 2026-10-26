@@ -23,6 +23,7 @@ part 'links.dart';
 part 'profiles.dart';
 part 'rules.dart';
 part 'scripts.dart';
+part 'schema.dart';
 
 const currentDatabaseSchemaVersion = 9;
 

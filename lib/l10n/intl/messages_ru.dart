@@ -842,6 +842,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Данные обнаружены в конфигурации",
     ),
     "configParseErrorAtLine": m10,
+    "configRecoveryDatabaseUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Локальная база данных временно недоступна. Файлы сохранены. Проверьте права доступа к папке данных приложения и не используется ли база другим процессом, затем повторите попытку.",
+    ),
+    "configRecoveryIncompatibleDatabase": MessageLookupByLibrary.simpleMessage(
+      "База данных в папке этого приложения несовместима или повреждена. Исходные файлы сохранены. Восстановите совместимую резервную копию или создайте копию и выполните сброс, затем настройте приложение заново. Данные других приложений не используются.",
+    ),
     "configRecoveryKeyring": MessageLookupByLibrary.simpleMessage(
       "Не удалось получить доступ к системной связке ключей (Secret Service). Включите и разблокируйте KWallet или GNOME Keyring в настройках системы, затем повторите попытку.",
     ),

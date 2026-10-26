@@ -48,47 +48,6 @@ void main() {
     messenger.setMockMethodCallHandler(channel, null);
   });
 
-  test('legacySecureStorageValue reads a string value', () {
-    expect(
-      legacySecureStorageValue(
-        '{"config_age_seed":"seed","cloud_token":"token"}',
-        'cloud_token',
-      ),
-      'token',
-    );
-  });
-
-  test('legacySecureStorageValue rejects a non-object payload', () {
-    expect(
-      () => legacySecureStorageValue('["token"]', 'cloud_token'),
-      throwsFormatException,
-    );
-  });
-
-  test('legacy macOS storage is read only with migration evidence', () {
-    expect(
-      shouldReadLegacyMacStorage(
-        migrationMarked: true,
-        identityMigrated: false,
-      ),
-      true,
-    );
-    expect(
-      shouldReadLegacyMacStorage(
-        migrationMarked: false,
-        identityMigrated: true,
-      ),
-      true,
-    );
-    expect(
-      shouldReadLegacyMacStorage(
-        migrationMarked: false,
-        identityMigrated: false,
-      ),
-      false,
-    );
-  });
-
   test('macOS fallback write clears a previous deletion marker', () async {
     await mockPreferences({SafeStorage.deletionMarkerKey('cloud_token'): true});
 
@@ -111,175 +70,69 @@ void main() {
     expect(prefs.getBool(SafeStorage.deletionMarkerKey('cloud_token')), true);
   });
 
-  test('macOS keychain failure can recover on explicit retry', () async {
-    const key = 'retry_seed';
-    var attempts = 0;
-    messenger.setMockMethodCallHandler(channel, (call) async {
-      expect(call.method, 'read');
-      expect(call.arguments['key'], key);
-      expect(
-        call.arguments['options']['authenticationUIBehavior'],
-        'u_AuthUIF',
-      );
-      expect(call.arguments['options']['usesDataProtectionKeychain'], 'false');
-      if (++attempts == 1) {
-        throw PlatformException(code: 'locked');
-      }
-      return 'recovered-seed';
-    });
-
-    expect(await SafeStorage.read(key, legacyEvidence: true), isNull);
-    expect(await SafeStorage.read(key, legacyEvidence: true), isNull);
-    expect(attempts, 1);
-    expect(
-      await SafeStorage.read(key, legacyEvidence: true, retry: true),
-      'recovered-seed',
-    );
-    expect(attempts, 2);
-    expect(await SafeStorage.read(key), 'recovered-seed');
-    expect(attempts, 2);
-  });
-
-  test(
-    'durable evidence allows legacy recovery without migration markers',
-    () async {
-      const key = 'evidence_seed';
-      messenger.setMockMethodCallHandler(channel, (call) async {
-        keychainCalls.add(call);
-        return 'recovered-seed';
-      });
-
-      expect(await SafeStorage.read(key), isNull);
-      expect(keychainCalls, isEmpty);
-      expect(
-        await SafeStorage.read(key, legacyEvidence: true),
-        'recovered-seed',
-      );
-      expect(keychainCalls, hasLength(1));
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString(key), 'recovered-seed');
-      expect(prefs.getBool('__safe_storage_migrated_$key'), isTrue);
-    },
-  );
-
-  for (final invalidValue in <Object>['damaged-seed', 123]) {
+  for (final migrated in [false, true]) {
     test(
-      'invalid macOS preference $invalidValue recovers a valid legacy seed',
+      'macOS never reads shared Keychain credentials, migrated=$migrated',
       () async {
         const key = 'config_age_seed';
-        await mockPreferences({key: invalidValue});
+        await mockPreferences({'__safe_storage_migrated_$key': migrated});
         messenger.setMockMethodCallHandler(channel, (call) async {
           keychainCalls.add(call);
-          return 'valid-seed';
+          return 'another-app-seed';
         });
 
-        expect(
-          await SafeStorage.read(
-            key,
-            legacyEvidence: true,
-            isValid: (value) => value == 'valid-seed',
-          ),
-          'valid-seed',
-        );
-        expect(keychainCalls, hasLength(1));
+        expect(await SafeStorage.read(key), isNull);
+        expect(await SafeStorage.read(key, retry: true), isNull);
+        expect(keychainCalls, isEmpty);
         final prefs = await SharedPreferences.getInstance();
-        expect(prefs.getString(key), 'valid-seed');
+        expect(prefs.containsKey(key), isFalse);
+        await SafeStorage.write(key, 'own-seed');
+        expect(await SafeStorage.read(key), 'own-seed');
+        expect(keychainCalls, isEmpty);
       },
     );
   }
 
-  test('invalid legacy seed does not replace a damaged preference', () async {
-    const key = 'invalid_legacy_seed';
-    await mockPreferences({key: 'damaged-seed'});
-    messenger.setMockMethodCallHandler(channel, (call) async => 'also-damaged');
+  for (final invalidValue in <Object>['damaged-seed', 123]) {
+    test(
+      'invalid local seed $invalidValue is preserved without shared Keychain recovery',
+      () async {
+        const key = 'config_age_seed';
+        await mockPreferences({key: invalidValue});
+        expect(
+          await SafeStorage.read(
+            key,
+            isValid: (value) => value == 'valid-seed',
+          ),
+          isNull,
+        );
+        expect(keychainCalls, isEmpty);
+        expect((await SharedPreferences.getInstance()).get(key), invalidValue);
+      },
+    );
+  }
 
+  test('Linux does not read upstream credentials even with an old migration marker', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    const upstream = MethodChannel('com.oixcloud.clash/legacy_secure_storage');
+    final calls = <MethodCall>[];
+    messenger.setMockMethodCallHandler(upstream, (call) async {
+      calls.add(call);
+      return '{"cloud_token":"upstream-token"}';
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(upstream, null));
+    final marker = File(
+      '${tempDir.path}/.identity-migrated-from-com.follow.clash',
+    );
+    await marker.writeAsString('com.follow.clash');
+    addTearDown(marker.delete);
+
+    expect(await SafeStorage.read('cloud_token'), isNull);
+    expect(calls, isEmpty);
     expect(
-      await SafeStorage.read(
-        key,
-        legacyEvidence: true,
-        isValid: (value) => value == 'valid-seed',
-      ),
+      (await SharedPreferences.getInstance()).getString('cloud_token'),
       isNull,
     );
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.getString(key), 'damaged-seed');
-    expect(prefs.containsKey('__safe_storage_migrated_$key'), isFalse);
-  });
-
-  test(
-    'another keychain key failing does not suppress seed recovery',
-    () async {
-      messenger.setMockMethodCallHandler(channel, (call) async {
-        keychainCalls.add(call);
-        if (call.arguments['key'] == 'cloud_token') {
-          throw PlatformException(code: 'locked');
-        }
-        return 'valid-seed';
-      });
-
-      expect(
-        await SafeStorage.read('cloud_token', legacyEvidence: true),
-        isNull,
-      );
-      expect(
-        await SafeStorage.read('config_age_seed', legacyEvidence: true),
-        'valid-seed',
-      );
-      expect(keychainCalls, hasLength(2));
-    },
-  );
-
-  test('retry and legacy evidence cannot override a deletion marker', () async {
-    const key = 'deleted_seed';
-    final deletionKey = SafeStorage.deletionMarkerKey(key);
-    await mockPreferences({key: 'deleted-seed', deletionKey: true});
-
-    expect(
-      await SafeStorage.read(key, retry: true, legacyEvidence: true),
-      isNull,
-    );
-    expect(keychainCalls, isEmpty);
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.containsKey(key), isFalse);
-    expect(prefs.getBool(deletionKey), isTrue);
-  });
-
-  test('deletion during legacy recovery cannot resurrect the seed', () async {
-    const key = 'deleted_while_reading_seed';
-    final started = Completer<void>();
-    final result = Completer<String>();
-    messenger.setMockMethodCallHandler(channel, (call) async {
-      started.complete();
-      return result.future;
-    });
-
-    final read = SafeStorage.read(key, legacyEvidence: true);
-    await started.future;
-    await SafeStorage.delete(key);
-    result.complete('old-seed');
-
-    expect(await read, isNull);
-    final prefs = await SharedPreferences.getInstance();
-    expect(prefs.containsKey(key), isFalse);
-    expect(prefs.getBool(SafeStorage.deletionMarkerKey(key)), isTrue);
-  });
-
-  test('a newer macOS write supersedes an in-flight legacy read', () async {
-    const key = 'replaced_while_reading_seed';
-    final started = Completer<void>();
-    final result = Completer<String>();
-    messenger.setMockMethodCallHandler(channel, (call) async {
-      started.complete();
-      return result.future;
-    });
-
-    final read = SafeStorage.read(key, legacyEvidence: true);
-    await started.future;
-    await SafeStorage.write(key, 'new-seed');
-    result.complete('old-seed');
-
-    expect(await read, isNull);
-    expect(await SafeStorage.read(key), 'new-seed');
   });
 
   for (final platform in [TargetPlatform.android, TargetPlatform.windows]) {

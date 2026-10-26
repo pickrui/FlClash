@@ -806,6 +806,8 @@
   "installedAppsPermissionGrant": "Autoriser l’accès",
   "installedAppsLoadFailed": "Impossible de charger les applications installées. Réessayez.",
   "configRecoveryMissingKey": "La clé de chiffrement de votre configuration est absente ou invalide. Essayez le compte système et l’appareil d’origine, ou restaurez une sauvegarde. Réessayer ne recrée pas une clé perdue.",
+  "configRecoveryDatabaseUnavailable": "La base de données locale est temporairement inaccessible. Vos fichiers sont conservés. Vérifiez les autorisations du dossier de données de cette application et si un autre processus utilise la base, puis réessayez.",
+  "configRecoveryIncompatibleDatabase": "La base de données dans le dossier de cette application est incompatible ou endommagée. Vos fichiers sont conservés. Restaurez une sauvegarde compatible ou sauvegardez et réinitialisez pour reconfigurer cette application. Les données des autres applications ne seront pas consultées.",
   "configRecoveryUnreadable": "La configuration locale est indéchiffrable ou endommagée. Les fichiers existants sont conservés. Restaurez la clé et la sauvegarde correspondantes, ou sauvegardez puis réinitialisez.",
   "configRecoveryStorage": "Impossible de lire ou d’enregistrer la configuration locale ou sa clé. Vérifiez l’accès au dossier de données de l’application et au stockage sécurisé du système, puis réessayez.",
   "configRecoveryReset": "Sauvegarder et réinitialiser",

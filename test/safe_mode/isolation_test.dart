@@ -36,7 +36,6 @@ void main() {
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       for (final channel in [
         'plugins.it_nomads.com/flutter_secure_storage',
-        'com.oixcloud.clash/legacy_secure_storage',
         'plugins.flutter.io/path_provider',
       ]) {
         messenger.setMockMethodCallHandler(MethodChannel(channel), (
@@ -81,7 +80,6 @@ void main() {
         ]) {
           expect(p.isWithin(home, file), isTrue, reason: file);
         }
-        expect(await appPath.migrateLegacyApplicationSupportData(), isFalse);
         expect(await preferences.getConfigMap(), isNull);
         await preferences.saveConfig(
           const Config(themeProps: defaultThemeProps),
@@ -101,14 +99,7 @@ void main() {
     test(
       'secret reads, writes and deletes never migrate normal credentials',
       () async {
-        expect(
-          await SafeStorage.read(
-            'cloud_token',
-            retry: true,
-            legacyEvidence: true,
-          ),
-          isNull,
-        );
+        expect(await SafeStorage.read('cloud_token', retry: true), isNull);
         final writing = SafeStorage.write('cloud_token', 'session-token');
         final deleting = SafeStorage.delete('cloud_token');
         await Future.wait([writing, deleting]);

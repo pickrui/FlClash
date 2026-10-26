@@ -631,6 +631,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "compatible": MessageLookupByLibrary.simpleMessage("兼容模式"),
     "configDataDetected": MessageLookupByLibrary.simpleMessage("检测到配置中存在数据"),
     "configParseErrorAtLine": m10,
+    "configRecoveryDatabaseUnavailable": MessageLookupByLibrary.simpleMessage(
+      "暂时无法访问本地数据库，原有文件已保留，请检查本应用数据目录的访问权限，以及数据库是否被其他进程占用后重试",
+    ),
+    "configRecoveryIncompatibleDatabase": MessageLookupByLibrary.simpleMessage(
+      "本应用数据目录中的数据库不兼容或已损坏，原有文件已保留，请恢复兼容的备份，或备份并重置后重新配置本应用，不会访问其他应用的数据",
+    ),
     "configRecoveryKeyring": MessageLookupByLibrary.simpleMessage(
       "无法访问系统密钥环（Secret Service），请在系统设置中启用并解锁 KDE 钱包或 GNOME 密钥环后重试",
     ),

@@ -862,6 +862,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Se han detectado datos en la configuración",
     ),
     "configParseErrorAtLine": m10,
+    "configRecoveryDatabaseUnavailable": MessageLookupByLibrary.simpleMessage(
+      "No se puede acceder a la base de datos local en este momento. Se han conservado los archivos. Comprueba los permisos de la carpeta de datos de esta aplicación y si otro proceso está usando la base de datos, y vuelve a intentarlo.",
+    ),
+    "configRecoveryIncompatibleDatabase": MessageLookupByLibrary.simpleMessage(
+      "La base de datos de esta aplicación es incompatible o está dañada. Se han conservado los archivos. Restaura una copia compatible o crea una copia y restablece la aplicación para configurarla de nuevo. No se accederá a los datos de otras aplicaciones.",
+    ),
     "configRecoveryKeyring": MessageLookupByLibrary.simpleMessage(
       "No se pudo acceder al llavero del sistema (Secret Service). Active y desbloquee KDE Wallet o GNOME Keyring en los ajustes del sistema y reintente.",
     ),
