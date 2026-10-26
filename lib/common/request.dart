@@ -116,10 +116,6 @@ String? normalizeReleaseNotes(String? source) {
       continue;
     }
     line = line.replaceFirst(RegExp(r'^#{1,6}\s+'), '');
-    line = line.replaceAllMapped(
-      RegExp(r'\[([^\]]+)]\([^)]+\)'),
-      (match) => match.group(1)!,
-    );
     line = line.replaceAll('**', '').replaceAll('`', '');
     final isEmpty = line.trim().isEmpty;
     if (isEmpty) {

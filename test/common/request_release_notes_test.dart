@@ -27,6 +27,25 @@ void main() {
     },
   );
 
+  test(
+    'release note sources preserve download targets after normalization',
+    () {
+      const link =
+          '[Apple Silicon](https://github.com/pickrui/FlClash/releases/'
+          'download/v0.9.2/flclash-v0.9.2-macos12-final-arm64.dmg)';
+      const notes = '重要变更\n\n$link';
+      const source = '## v0.9.2\n$notes\n<!-- hidden -->\n## v0.9.1\nOld';
+      for (final result in [
+        extractReleaseNotesFromChangelog(source, 'v0.9.2'),
+        extractReleaseNotesFromReleaseBody(source, 'v0.9.2'),
+        extractEmbeddedReleaseNotes({'release_notes': source}, 'v0.9.2'),
+      ]) {
+        expect(result, notes);
+        expect(normalizeReleaseNotes(result), notes);
+      }
+    },
+  );
+
   late List<RequestOptions> requests;
   late int closed;
 

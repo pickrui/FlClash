@@ -225,7 +225,7 @@ extension SetupControllerExt on AppController {
       // Load the selected profile before opening listeners. A freshly initialized
       // Core also rejects startListener when no config has been applied yet.
       // Listeners, TUN and the system proxy change only after the probe.
-      final started = await applyProfile(
+      final apply = _applyProfile(
         force: true,
         resume: resume,
         silence: !isInit,
@@ -236,10 +236,16 @@ extension SetupControllerExt on AppController {
           }
         },
       );
+      final applyGeneration = _profileApplyGeneration;
+      final result = await apply;
       final conflicts = await conflictProbe;
-      if (!started && _ref.read(isStartProvider)) {
+      if (generation != _startIntentGeneration ||
+          applyGeneration != _profileApplyGeneration) {
+        return;
+      }
+      if (result == _ProfileApplyResult.failed && _ref.read(isStartProvider)) {
         await updateStatus(false);
-      } else if (started && conflicts != null) {
+      } else if (result == _ProfileApplyResult.succeeded && conflicts != null) {
         unawaited(_reportProxyConflicts(conflicts, generation));
       }
     } else {
@@ -460,8 +466,24 @@ extension SetupControllerExt on AppController {
     bool force = false,
     bool resume = false,
     FutureOr<void> Function()? preloadInvoke,
+  }) async =>
+      await _applyProfile(
+        silence: silence,
+        force: force,
+        resume: resume,
+        preloadInvoke: preloadInvoke,
+      ) ==
+      _ProfileApplyResult.succeeded;
+
+  Future<_ProfileApplyResult> _applyProfile({
+    bool silence = false,
+    bool force = false,
+    bool resume = false,
+    FutureOr<void> Function()? preloadInvoke,
   }) {
-    if (startupRecovery.automaticSetupPaused) return Future.value(false);
+    if (startupRecovery.automaticSetupPaused) {
+      return Future.value(_ProfileApplyResult.failed);
+    }
     final pendingForce = _profileApplyScheduler.takeForce();
     _profileApplyIntent.merge(
       force: force || pendingForce,
@@ -490,7 +512,7 @@ extension SetupControllerExt on AppController {
     });
   }
 
-  Future<bool> _applyProfileUnlocked({
+  Future<_ProfileApplyResult> _applyProfileUnlocked({
     required int generation,
     required bool silence,
     FutureOr<void> Function()? preloadInvoke,
@@ -502,15 +524,11 @@ extension SetupControllerExt on AppController {
           profileId == _ref.read(currentProfileIdProvider);
     }
 
-    if (!isCurrentApply()) {
-      return true;
-    }
-    if (!_profileApplyIntent.requiresForce && !await needSetup()) {
-      return true;
-    }
-    if (!isCurrentApply()) {
-      return true;
-    }
+    if (!isCurrentApply()) return _ProfileApplyResult.superseded;
+    final requiresSetup =
+        _profileApplyIntent.requiresForce || await needSetup();
+    if (!isCurrentApply()) return _ProfileApplyResult.superseded;
+    if (!requiresSetup) return _ProfileApplyResult.succeeded;
     final startGeneration = _startIntentGeneration;
     bool canRecover() =>
         isCurrentApply() && startGeneration == _startIntentGeneration;
@@ -550,7 +568,7 @@ extension SetupControllerExt on AppController {
               return recovered;
             },
           )) {
-            return !isCurrentApply();
+            return false;
           }
         } on CandidateConfigValidationException {
           keepCurrentCore = !setupAttempted;
@@ -559,13 +577,9 @@ extension SetupControllerExt on AppController {
         // The running config is valid now. A later UI/provider refresh failure
         // must not turn off forwarding or discard this profile's usable groups.
         coreSetupSucceeded = true;
-        if (!isCurrentApply()) {
-          return true;
-        }
+        if (!isCurrentApply()) return false;
         if (!await _updateGroups(profileId)) {
-          if (!isCurrentApply()) {
-            return true;
-          }
+          if (!isCurrentApply()) return false;
           if (!canPublishGroupsForProfile(profileId, previouslyAppliedState)) {
             // Groups from another subscription must not be shown as current.
             _ref.read(groupsProvider.notifier).value = [];
@@ -576,9 +590,7 @@ extension SetupControllerExt on AppController {
           if (!_ref.read(initProvider)) return false;
           throw appLocalizations.noProxy;
         }
-        if (!isCurrentApply()) {
-          return true;
-        }
+        if (!isCurrentApply()) return false;
         // A published group list is never empty (see _updateGroups).
         final groups = _ref.read(groupsProvider);
         final hasProxy = groups.any(
@@ -603,9 +615,7 @@ extension SetupControllerExt on AppController {
       silence: true,
       tag: !silence ? LoadingTag.proxies : null,
     );
-    if (!isCurrentApply()) {
-      return true;
-    }
+    if (!isCurrentApply()) return _ProfileApplyResult.superseded;
     // needSetup skips a null applied state, so only a forced apply sets it.
     _profileApplyIntent.clear(keepForce: globalState.lastSetupState == null);
     if (res != true &&
@@ -616,9 +626,9 @@ extension SetupControllerExt on AppController {
         )) {
       await updateStatus(false);
     }
-    // Callers such as updateStatus also stop on false. Refreshing UI metadata
-    // is best-effort once setup (including listener startup) has succeeded.
-    return res == true || coreSetupSucceeded;
+    return res == true || coreSetupSucceeded
+        ? _ProfileApplyResult.succeeded
+        : _ProfileApplyResult.failed;
   }
 
   Future<Map<String, dynamic>> getProfile({

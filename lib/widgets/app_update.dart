@@ -19,8 +19,10 @@ import 'package:fl_clash/ui/icons/glyph_icon.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/update_download.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppUpdateAvailableNotice extends ConsumerWidget {
   const AppUpdateAvailableNotice({super.key});
@@ -205,10 +207,7 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
                           if (!snapshot.hasError &&
                               notes != null &&
                               notes.isNotEmpty) {
-                            return SelectableText(
-                              notes,
-                              style: AppTextStyle.body.of(context),
-                            );
+                            return _ReleaseNotesText(notes);
                           }
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,6 +246,92 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ReleaseNotesText extends StatefulWidget {
+  const _ReleaseNotesText(this.notes);
+
+  final String notes;
+
+  @override
+  State<_ReleaseNotesText> createState() => _ReleaseNotesTextState();
+}
+
+class _ReleaseNotesTextState extends State<_ReleaseNotesText> {
+  static final _linkPattern = RegExp(r'\[([^\]\n]+)\]\(([^\s)]+)\)');
+  final _links = <String, TapGestureRecognizer>{};
+
+  void _disposeLinks() {
+    for (final link in _links.values) {
+      link.dispose();
+    }
+    _links.clear();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReleaseNotesText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.notes != widget.notes) _disposeLinks();
+  }
+
+  @override
+  void dispose() {
+    _disposeLinks();
+    super.dispose();
+  }
+
+  Future<void> _openLink(Uri uri) async {
+    try {
+      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+    } catch (_) {}
+    if (mounted) context.showNotifier(context.appLocalizations.openLinkFailed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final spans = <TextSpan>[];
+    var offset = 0;
+    for (final match in _linkPattern.allMatches(widget.notes)) {
+      spans.add(TextSpan(text: widget.notes.substring(offset, match.start)));
+      final url = match.group(2)!;
+      final uri = Uri.tryParse(url);
+      final allowed =
+          uri != null &&
+          uri.scheme == 'https' &&
+          uri.host == 'github.com' &&
+          uri.port == 443 &&
+          uri.userInfo.isEmpty &&
+          uri.path.startsWith('/$releaseRepository/releases/') &&
+          uri.pathSegments.every(
+            (segment) => !segment.contains('/') && !segment.contains('\\'),
+          );
+      spans.add(
+        TextSpan(
+          text: match.group(1),
+          style: allowed
+              ? TextStyle(
+                  color: context.colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                )
+              : null,
+          recognizer: allowed
+              ? _links.putIfAbsent(
+                  url,
+                  () =>
+                      TapGestureRecognizer()
+                        ..onTap = () => unawaited(_openLink(uri)),
+                )
+              : null,
+        ),
+      );
+      offset = match.end;
+    }
+    spans.add(TextSpan(text: widget.notes.substring(offset)));
+    return SelectableText.rich(
+      TextSpan(children: spans),
+      style: AppTextStyle.body.of(context),
     );
   }
 }

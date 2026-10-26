@@ -50,10 +50,7 @@ typedef ManagedProfileRefresher<T> = Future<T> Function(
   required bool applyIfCurrent,
 });
 
-typedef ManagedProfileActivator<T> = Future<void> Function(
-  T profile, {
-  required bool applyIfRunning,
-});
+typedef ManagedProfileActivator<T> = Future<void> Function(T profile);
 
 class CloudManagedProfileUpdateFlow<T> {
   final ManagedProfileDeduplicator<T> deduplicate;
@@ -74,13 +71,13 @@ class CloudManagedProfileUpdateFlow<T> {
       throw StateError('No oixCloud profile to refresh');
     }
 
-    await deduplicate(existing);
     final updatedProfile = await refresh(
       existing.first,
       showLoading: showLoading,
       applyIfCurrent: false,
     );
-    await activate(updatedProfile, applyIfRunning: false);
+    await activate(updatedProfile);
+    await deduplicate(existing);
     return updatedProfile;
   }
 }

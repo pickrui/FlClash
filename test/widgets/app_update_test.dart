@@ -13,10 +13,15 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/update_download.dart';
 import 'package:fl_clash/widgets/app_update.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/test_app.dart';
+
+const _macOS12Download =
+    'https://github.com/pickrui/FlClash/releases/download/v0.9.2/'
+    'flclash-v0.9.2-macos12-final';
 
 const _release = AppUpdateInfo(
   version: 'v0.8.98+2026092110',
@@ -26,22 +31,114 @@ const _release = AppUpdateInfo(
 
 void main() {
   testWidgets(
-    'release details keep the compatibility notice first and hide comments',
+    'release details preserve selectable notes and open macOS 12 downloads',
     (tester) async {
-      const summary = '重要变更：升级至 Go 1.27，不再支持 macOS 12\n\n界面与交互：各列独立滚动';
+      final launched = <String>[];
+      const channel = MethodChannel('plugins.flutter.io/url_launcher');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+        call,
+      ) async {
+        if (call.method == 'launch') {
+          final args = call.arguments as Map;
+          launched.add(args['url'] as String);
+          expect(args['useWebView'], isFalse);
+          expect(args['useSafariVC'], isFalse);
+        }
+        return true;
+      });
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          channel,
+          null,
+        ),
+      );
+      const summary = '重要变更：升级至 Go 1.27，不再支持 macOS 12';
       await _openDetails(
         tester,
-        const AppUpdateInfo(
-          version: '0.9.3',
-          releaseNotes: '$summary\n<!-- Internal metadata -->',
-        ),
+        AppUpdateInfo.fromVersionData({
+          'version': '0.9.2',
+          'release_notes':
+              '$summary\n\nmacOS 12 最终兼容版下载：'
+              '[Apple Silicon]($_macOS12Download-arm64.dmg) · '
+              '[Intel]($_macOS12Download-amd64.dmg)\n'
+              '<!-- [Internal metadata](https://example.test) -->',
+        }),
         (_) {},
       );
-      expect(find.text(summary), findsOneWidget);
+      expect(
+        find.text('$summary\n\nmacOS 12 最终兼容版下载：Apple Silicon · Intel'),
+        findsOneWidget,
+      );
       expect(find.textContaining('Internal metadata'), findsNothing);
-      expect(tester.takeException(), isNull);
+      expect(find.byType(SelectableText), findsOneWidget);
+      await _tapNotesText(tester, 'Apple Silicon');
+      await _tapNotesText(tester, 'Intel');
+      expect(launched, [
+        '$_macOS12Download-arm64.dmg',
+        '$_macOS12Download-amd64.dmg',
+      ]);
+      for (final throws in [false, true]) {
+        var attempts = 0;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          channel,
+          (call) async {
+            attempts++;
+            if (throws) throw PlatformException(code: 'unavailable');
+            return false;
+          },
+        );
+        await _tapNotesText(tester, 'Intel');
+        expect(attempts, 1);
+        expect(tester.takeException(), isNull);
+      }
     },
   );
+
+  testWidgets('release notes do not activate unsafe or unrelated links', (
+    tester,
+  ) async {
+    const urls = [
+      'file:///tmp/installer.exe',
+      'javascript:alert',
+      'https://127.0.0.1/download',
+      'http://github.com/pickrui/FlClash/releases/download/example',
+      'https://github.com.evil.test/pickrui/FlClash/releases/download/example',
+      'https://user:password@github.com/pickrui/FlClash/releases/download/example',
+      'https://github.com:8443/pickrui/FlClash/releases/download/example',
+      'https://github.com/other/FlClash/releases/download/example',
+      'https://github.com/pickrui/FlClash/releases/%2e%2e%2fsettings',
+      'https://github.com/pickrui/FlClash/releases/%5c..%5csettings',
+    ];
+    var launched = 0;
+    const channel = MethodChannel('plugins.flutter.io/url_launcher');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+      call,
+    ) async {
+      launched++;
+      return true;
+    });
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      ),
+    );
+    await _openDetails(
+      tester,
+      AppUpdateInfo(
+        version: '0.9.2',
+        releaseNotes: [
+          for (var i = 0; i < urls.length; i++) '[Link $i](${urls[i]})',
+        ].join('\n'),
+      ),
+      (_) {},
+    );
+    for (var i = 0; i < urls.length; i++) {
+      await _tapNotesText(tester, 'Link $i');
+    }
+    expect(launched, 0);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('a new release remains a notice until the user opens details', (
     tester,
@@ -392,4 +489,17 @@ Future<void> _openDetails(
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
   }
+}
+
+Future<void> _tapNotesText(WidgetTester tester, String text) async {
+  final editor = tester.state<EditableTextState>(find.byType(EditableText));
+  final offset = editor.widget.controller.text.indexOf(text);
+  expect(offset, isNonNegative);
+  final box = editor.renderEditable
+      .getBoxesForSelection(
+        TextSelection(baseOffset: offset, extentOffset: offset + text.length),
+      )
+      .first;
+  await tester.tapAt(editor.renderEditable.localToGlobal(box.toRect().center));
+  await tester.pumpAndSettle();
 }

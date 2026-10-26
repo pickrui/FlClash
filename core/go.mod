@@ -174,3 +174,6 @@ tool (
 	golang.org/x/mobile/cmd/gobind
 	golang.org/x/mobile/cmd/gomobile
 )
+
+// Match Windows TFO socket layouts to the pinned Go toolchain.
+replace github.com/metacubex/tfo-go => ./Clash.Meta/third_party/tfo-go

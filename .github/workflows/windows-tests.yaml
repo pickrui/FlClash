@@ -25,6 +25,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+
+      - name: Setup Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: '1.27.3'
+          cache: false
+      - name: Check Windows TCP Fast Open compatibility
+        working-directory: core
+        env:
+          CGO_ENABLED: '0'
+        run: go test -count=1 -timeout=120s github.com/metacubex/tfo-go github.com/metacubex/mihomo/component/dialer
 
       - name: Compile Windows installer code
         run: python -m unittest discover -s test/ci -p test_windows_installer.py -v
@@ -42,11 +55,6 @@ jobs:
           flutter-version: ${{ inputs.flutter-version }}
           cache: true
       - run: flutter pub get
-      - name: Setup Go for hook regressions
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
-        with:
-          go-version: '1.27.3'
-          cache: false
       - name: Check Windows Go hook and build cache
         working-directory: plugins/setup/setup_hooks
         run: |

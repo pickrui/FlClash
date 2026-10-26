@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of '../action.dart';
 
+enum _ProfileApplyResult { succeeded, failed, superseded }
+
 Profile mergeRefreshedProfile(Profile current, Profile refreshed) {
   return current.copyWith(
     label: current.label.isNotEmpty ? current.label : refreshed.label,

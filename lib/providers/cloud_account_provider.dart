@@ -232,22 +232,18 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     );
   }
 
-  Future<void> _activateManagedProfile(
-    Profile profile, {
-    bool requestStartIfNeeded = true,
-    bool applyIfRunning = true,
-  }) async {
+  Future<void> _activateManagedProfile(Profile profile) async {
     ref.read(currentProfileIdProvider.notifier).value = profile.id;
-    if (!appController.isAttach) {
+    if (!appController.isAttach) return;
+    if (appController.isStart) {
+      if (!await appController.applyProfile(silence: true, force: true)) {
+        throw CloudApiException(
+          AppLocalizations.current.cloudConfigSyncIncomplete,
+        );
+      }
       return;
     }
-    if (applyIfRunning && appController.isStart) {
-      await appController.applyProfile(silence: true, force: true);
-      return;
-    }
-    if (requestStartIfNeeded) {
-      await appController.requestStartCore();
-    }
+    await appController.requestStartCore();
   }
 
   Future<Profile?> _addManagedProfile(String url) async {
@@ -278,21 +274,12 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
           applyIfCurrent: applyIfCurrent,
         );
       },
-      activate: (profile, {required applyIfRunning}) {
-        return _activateManagedProfile(profile, applyIfRunning: applyIfRunning);
-      },
+      activate: _activateManagedProfile,
     );
 
-    final updatedProfile = await updateFlow.refreshExisting(
-      existing,
-      showLoading: showLoading,
-    );
+    await updateFlow.refreshExisting(existing, showLoading: showLoading);
     if (showSuccessMessage) {
       globalState.showNotifier(AppLocalizations.current.getProfileSuccess);
-    }
-    if (updatedProfile.id == ref.read(currentProfileIdProvider) &&
-        appController.isStart) {
-      appController.applyProfileDebounce(silence: true, force: true);
     }
   }
 
@@ -641,7 +628,11 @@ class CloudAccountNotifier extends Notifier<CloudAccountState> {
     }
 
     final profiles = byId.values.toList();
+    final selectedId = ref.read(currentProfileIdProvider);
     profiles.sort((a, b) {
+      if (a.id == b.id) return 0;
+      if (a.id == selectedId) return -1;
+      if (b.id == selectedId) return 1;
       final orderA = a.order;
       final orderB = b.order;
       if (orderA != null && orderB != null && orderA != orderB) {

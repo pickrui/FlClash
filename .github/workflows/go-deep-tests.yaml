@@ -71,6 +71,7 @@ jobs:
       - name: Check retained transport dependency fixes
         working-directory: core/Clash.Meta
         run: |
+          go test -race -count=1 -timeout=120s github.com/metacubex/tfo-go
           go test -race -run '^TestKeyUpdateSpamPostHandshakeTLS13$' github.com/metacubex/tls
           go test -race -count=1 -parallel=4 -timeout=300s github.com/metacubex/restls-client-go
           go vet github.com/metacubex/restls-client-go github.com/metacubex/sing-mux github.com/metacubex/smux github.com/metacubex/sing-shadowsocks2/...

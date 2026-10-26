@@ -90,24 +90,27 @@ extension ProfilesControllerExt on AppController {
         }
       }
       await _ref.read(profilesProvider.notifier).del(id, reportOnWait: false);
-      final currentProfileId = _ref.read(currentProfileIdProvider);
-      if (currentProfileId == id) {
-        final profiles = _ref.read(profilesProvider);
-        if (profiles.isNotEmpty) {
-          final updateId = profiles.first.id;
-          _ref.read(currentProfileIdProvider.notifier).value = updateId;
-        } else {
-          _ref.read(currentProfileIdProvider.notifier).value = null;
-          updateStatus(false);
-        }
-      }
       try {
-        await clearEffect(id);
-      } catch (error) {
-        commonPrint.log(
-          'Profile cleanup failed: ${error.runtimeType}',
-          logLevel: LogLevel.warning,
-        );
+        final currentProfileId = _ref.read(currentProfileIdProvider);
+        if (currentProfileId == id) {
+          final profiles = _ref.read(profilesProvider);
+          if (profiles.isNotEmpty) {
+            final updateId = profiles.first.id;
+            _ref.read(currentProfileIdProvider.notifier).value = updateId;
+          } else {
+            _ref.read(currentProfileIdProvider.notifier).value = null;
+            await updateStatus(false);
+          }
+        }
+      } finally {
+        try {
+          await clearEffect(id);
+        } catch (error) {
+          commonPrint.log(
+            'Profile cleanup failed: ${error.runtimeType}',
+            logLevel: LogLevel.warning,
+          );
+        }
       }
     });
   }
