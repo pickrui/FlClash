@@ -93,7 +93,7 @@ func (s *Server) connect(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 	defer cancel()
 	// The core dialer protects Android sockets and binds desktop egress outside TUN routing.
-	remote, err := dialer.DialContext(ctx, "tcp", r.Host, dialer.WithResolver(resolver.DirectHostResolver))
+	remote, err := dialer.DialContext(ctx, "tcp", r.Host, dialer.WithResolver(resolver.DirectHostResolver.Load()))
 	if err != nil {
 		http.Error(w, "Direct connection failed", http.StatusBadGateway)
 		return

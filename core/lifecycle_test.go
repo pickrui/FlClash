@@ -35,13 +35,16 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	previousExiting := exiting.Load()
 	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
 	previousRules, previousRuleProviders := tunnel.Rules(), tunnel.RuleProviders()
-	previousDNS, previousProxyDNS, previousDirectDNS := resolver.DefaultResolver, resolver.ProxyServerHostResolver, resolver.DirectHostResolver
-	previousMapper, previousService := resolver.DefaultHostMapper, resolver.DefaultService
+	previousDNS, previousProxyDNS, previousDirectDNS := resolver.DefaultResolver.Load(), resolver.ProxyServerHostResolver.Load(), resolver.DirectHostResolver.Load()
+	previousMapper, previousService := resolver.DefaultHostMapper.Load(), resolver.DefaultService.Load()
 	servers := []dns.NameServer{{Net: "rcode", Addr: "success"}}
 	retiredDNS := dns.NewResolver(dns.Config{Main: servers, ProxyServer: servers, DirectServer: servers})
-	resolver.DefaultResolver, resolver.ProxyServerHostResolver, resolver.DirectHostResolver = retiredDNS.Resolver, retiredDNS.ProxyResolver, retiredDNS.DirectResolver
+	resolver.DefaultResolver.Store(retiredDNS.Resolver)
+	resolver.ProxyServerHostResolver.Store(retiredDNS.ProxyResolver)
+	resolver.DirectHostResolver.Store(retiredDNS.DirectResolver)
 	mapper := dns.NewEnhancer(dns.EnhancerConfig{})
-	resolver.DefaultHostMapper, resolver.DefaultService = mapper, nil
+	resolver.DefaultHostMapper.Store(mapper)
+	resolver.DefaultService.Store(nil)
 	selectionLock.Lock()
 	previousSnapshot := proxySnapshot
 	selectionLock.Unlock()
@@ -53,8 +56,11 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 		tunnel.UpdateRules(previousRules, previousSubRules, previousRuleProviders)
 		publishProxySnapshot(previousSnapshot)
 		retiredDNS.CloseQueries()
-		resolver.DefaultResolver, resolver.ProxyServerHostResolver, resolver.DirectHostResolver = previousDNS, previousProxyDNS, previousDirectDNS
-		resolver.DefaultHostMapper, resolver.DefaultService = previousMapper, previousService
+		resolver.DefaultResolver.Store(previousDNS)
+		resolver.ProxyServerHostResolver.Store(previousProxyDNS)
+		resolver.DirectHostResolver.Store(previousDirectDNS)
+		resolver.DefaultHostMapper.Store(previousMapper)
+		resolver.DefaultService.Store(previousService)
 		resetGeoLifecycle()
 	})
 	isInit.Store(true)
@@ -65,10 +71,10 @@ func TestShutdownDiscardsConfigurationBeforeLateControlCalls(t *testing.T) {
 	if currentConfig != nil {
 		t.Error("shutdown retained the retired configuration and providers")
 	}
-	if resolver.DefaultResolver != nil || resolver.ProxyServerHostResolver != nil || resolver.DirectHostResolver != nil || resolver.DefaultService != nil {
+	if resolver.DefaultResolver.Load() != nil || resolver.ProxyServerHostResolver.Load() != nil || resolver.DirectHostResolver.Load() != nil || resolver.DefaultService.Load() != nil {
 		t.Error("shutdown retained configured DNS references")
 	}
-	if resolver.DefaultHostMapper != mapper {
+	if resolver.DefaultHostMapper.Load() != mapper {
 		t.Error("shutdown dropped the fake-IP mapper an in-process restart patches from")
 	}
 	query := new(D.Msg)

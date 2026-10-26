@@ -34,17 +34,17 @@ func (tracker resetNetworkTracker) Close() error {
 // Android's NetworkObserveModule sends this method name through Core.invokeMethod.
 func TestResetNetworkClosesEveryTrackedConnection(t *testing.T) {
 	previousManager, previousNotify := statistic.DefaultManager, statistic.DefaultRequestNotify
-	previousResolver := resolver.DefaultResolver
+	previousResolver := resolver.DefaultResolver.Load()
 	client := &clearDNSClient{}
 	r := dns.NewResolverFromClient(client)
-	resolver.DefaultResolver = r
+	resolver.DefaultResolver.Store(r)
 	var written recordingConn
 	statistic.DefaultManager = &statistic.Manager{}
 	statistic.DefaultRequestNotify = nil
 	useTestConnection(t, &written)
 	t.Cleanup(func() {
 		r.CloseQueries()
-		resolver.DefaultResolver = previousResolver
+		resolver.DefaultResolver.Store(previousResolver)
 		statistic.DefaultManager = previousManager
 		statistic.DefaultRequestNotify = previousNotify
 	})

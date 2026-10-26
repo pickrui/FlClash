@@ -33,17 +33,19 @@ func (c *clearDNSClient) ExchangeContext(_ context.Context, query *D.Msg) (*D.Ms
 }
 
 func TestClearDnsStateRPCRequeriesWithoutClosingConnections(t *testing.T) {
-	previousResolver, previousSystem := resolver.DefaultResolver, resolver.SystemResolver
+	previousResolver, previousSystem := resolver.DefaultResolver.Load(), resolver.SystemResolver
 	previousManager, previousNotify := statistic.DefaultManager, statistic.DefaultRequestNotify
 	client := &clearDNSClient{}
 	r := dns.NewResolverFromClient(client)
-	resolver.DefaultResolver, resolver.SystemResolver = r, nil
+	resolver.DefaultResolver.Store(r)
+	resolver.SystemResolver = nil
 	statistic.DefaultManager, statistic.DefaultRequestNotify = &statistic.Manager{}, nil
 	var written recordingConn
 	useTestConnection(t, &written)
 	t.Cleanup(func() {
 		r.CloseQueries()
-		resolver.DefaultResolver, resolver.SystemResolver = previousResolver, previousSystem
+		resolver.DefaultResolver.Store(previousResolver)
+		resolver.SystemResolver = previousSystem
 		statistic.DefaultManager, statistic.DefaultRequestNotify = previousManager, previousNotify
 	})
 	var closed atomic.Int32

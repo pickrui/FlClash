@@ -125,8 +125,8 @@ func handleNetworkDiagnostics() map[string]any {
 	if device, err := net.InterfaceByName(tunConfig.Device); err == nil {
 		result["tunInterfaceUp"] = running && tunConfig.Enable && device.Flags&net.FlagUp != 0
 	}
-	defaultResolver := resolver.DefaultResolver
-	proxyResolver := resolver.ProxyServerHostResolver
+	defaultResolver := resolver.DefaultResolver.Load()
+	proxyResolver := resolver.ProxyServerHostResolver.Load()
 	auth := currentDNSAuth()
 	_, wrapped := proxyResolver.(*tokenInjectResolver)
 	result["dnsAuthReady"] = auth != nil && wrapped

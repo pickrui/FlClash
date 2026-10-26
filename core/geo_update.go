@@ -313,7 +313,7 @@ func downloadGeoData(ctx context.Context, url string, validate func([]byte) erro
 	routes := []geoDownloadRoute{{
 		name: "direct",
 		options: []mihomoHttp.Option{mihomoHttp.WithDialer(
-			dialer.NewDialer(dialer.WithResolver(resolver.DirectHostResolver)),
+			dialer.NewDialer(dialer.WithResolver(resolver.DirectHostResolver.Load())),
 		)},
 	}}
 	// Keep the configured routing and selected proxy groups for the other
