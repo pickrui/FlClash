@@ -536,11 +536,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
       "プロキシの切り替えに失敗したため、前回の選択に戻しました",
     ),
-    "changelogBreaking": MessageLookupByLibrary.simpleMessage("破壊的変更"),
-    "changelogFeatures": MessageLookupByLibrary.simpleMessage("新機能"),
-    "changelogFixes": MessageLookupByLibrary.simpleMessage("不具合修正"),
-    "changelogPerformance": MessageLookupByLibrary.simpleMessage("パフォーマンス"),
-    "changelogReverts": MessageLookupByLibrary.simpleMessage("取り消し"),
     "checkApi": MessageLookupByLibrary.simpleMessage("APIをチェック"),
     "checkRouting": MessageLookupByLibrary.simpleMessage("設定を確認"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("更新を確認"),

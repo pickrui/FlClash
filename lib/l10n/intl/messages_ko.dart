@@ -536,11 +536,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
       "프록시를 전환하지 못해 이전 선택을 복원했습니다",
     ),
-    "changelogBreaking": MessageLookupByLibrary.simpleMessage("호환성 변경"),
-    "changelogFeatures": MessageLookupByLibrary.simpleMessage("새로운 기능"),
-    "changelogFixes": MessageLookupByLibrary.simpleMessage("버그 수정"),
-    "changelogPerformance": MessageLookupByLibrary.simpleMessage("성능"),
-    "changelogReverts": MessageLookupByLibrary.simpleMessage("되돌림"),
     "checkApi": MessageLookupByLibrary.simpleMessage("API 확인"),
     "checkRouting": MessageLookupByLibrary.simpleMessage("설정 확인"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("업데이트 확인"),

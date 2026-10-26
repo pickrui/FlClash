@@ -8,7 +8,7 @@ on:
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
   FLUTTER_VERSION: '3.47.6'
-  GO_VERSION: '1.26.10'
+  GO_VERSION: '1.27.3'
   MSYS_NO_PATHCONV: 1
 
 permissions:
@@ -472,7 +472,7 @@ jobs:
           FLCLASH_APP_SECRET: ${{ secrets.FLCLASH_APP_SECRET }}
           DNS_AUTH_PRIVATE_KEY: ${{ secrets.DNS_AUTH_PRIVATE_KEY }}
           DNS_AUTH_DOMAINS: ${{ secrets.DNS_AUTH_DOMAINS }}
-          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform == 'macos' && '12.0' || '' }}
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform == 'macos' && '13.0' || '' }}
         run: |
           set -e
           BUILD_ARGS="${{ matrix.platform }}"
@@ -603,22 +603,6 @@ jobs:
             echo "No changelog entries found for $tag" >&2
             exit 1
           fi
-          RELEASE_TAG="$tag" python3 - <<'PYCODE'
-          import json, os
-          from pathlib import Path
-          source = Path('changelog.json')
-          if source.exists():
-              data = json.loads(source.read_text())
-              if data.get('schemaVersion') != 2:
-                  raise ValueError('Unsupported changelog schema')
-              versions = [v for v in data['versions'] if v['tag'] == os.environ['RELEASE_TAG']]
-              if len(versions) > 1:
-                  raise ValueError('Duplicate changelog tag')
-              if versions:
-                  payload = json.dumps({'schemaVersion': 2, 'versions': versions}, ensure_ascii=False).replace('>', r'\u003e')
-                  with open('release.md', 'a') as out:
-                      out.write('\n<!-- flclash:changelog:json\n' + payload + '\n-->\n')
-          PYCODE
 
       - name: Patch release.md
         run: |

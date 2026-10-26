@@ -108,7 +108,7 @@ class GoBuilder {
   Map<String, String> _buildEnvironment(Target target) => {
     ...goCacheEnvironment(rootDir: rootDir),
     // Use the release toolchain even when a newer global Go is installed.
-    'GOTOOLCHAIN': 'go1.26.10',
+    'GOTOOLCHAIN': 'go1.27.3',
     'GOOS': target.goos,
     'GOARCH': target.goarch,
     'CGO_ENABLED': '0',

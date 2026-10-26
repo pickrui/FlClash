@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  GO_VERSION: '1.26.10'
+  GO_VERSION: '1.27.3'
 
 jobs:
   go-deep-test:
@@ -72,8 +72,8 @@ jobs:
         working-directory: core/Clash.Meta
         run: |
           go test -race -run '^TestKeyUpdateSpamPostHandshakeTLS13$' github.com/metacubex/tls
-          go test -race -count=1 -timeout=180s -run '^(TestRestls|TestHandshakeMessageReaderAcrossRecords|TestNewRateLimitedConnDisabled|TestRateLimitedConn|TestBitRateLimiter)' github.com/metacubex/restls-client-go
-          go vet github.com/metacubex/sing-mux github.com/metacubex/smux github.com/metacubex/sing-shadowsocks2/...
+          go test -race -count=1 -parallel=4 -timeout=300s github.com/metacubex/restls-client-go
+          go vet github.com/metacubex/restls-client-go github.com/metacubex/sing-mux github.com/metacubex/smux github.com/metacubex/sing-shadowsocks2/...
           go test -race -count=1 -timeout=120s github.com/metacubex/sing-shadowsocks2/...
           go test -race -count=1 -timeout=120s github.com/metacubex/sing-mux
           go test -race -count=1 -timeout=120s -skip '^(Test8GBTransfer|TestRandomLengthRandomDataTransfer)' github.com/metacubex/smux
@@ -82,7 +82,8 @@ jobs:
         run: |
           go vet github.com/metacubex/http/...
           go test -race -count=1 -timeout=120s -run '^TestHTTP2FirstSettings' github.com/metacubex/http
-          go test -race -count=1 -tags "$GO_TAGS" -p=2 -parallel=3 -timeout=300s -run '^(TestInboundShadowSocks_JLS|TestInboundSnell_Restls|TestInboundShadowSocks_Basic)$/^(Conn|deoxys-ii-256-128)$/^(aes-256-gcm|Concurrent)$/^Concurrent$' ./listener/inbound
+          go test -race -count=10 -tags "$GO_TAGS" -p=2 -parallel=4 -timeout=300s -run '^(TestResetConnection.*|TestDoQConcurrentConnectionLifetime|TestKcpTunClientClose|TestInboundShadowSocks_KcpTun)$/^(quic|tls|https|autoexpire=.*|cancel_pending_dial|xchacha20-ietf-poly1305)$/^(trie|matcher|Sequential|Concurrent)$' ./dns ./listener/inbound
+          go test -race -count=10 -tags "$GO_TAGS" -parallel=4 -timeout=300s -run '^(TestInboundShadowSocks_KcpTun|TestInboundShadowSocks_JLS|TestInboundSnell_Restls|TestInboundShadowSocks_Basic)$/^(xchacha20-ietf-poly1305|Conn|deoxys-ii-256-128)$/^(aes-256-gcm|Concurrent)$/^Concurrent$' -skip '^TestInboundShadowSocks_Basic$/^xchacha20-ietf-poly1305$' ./listener/inbound
       - name: Check persistent cache regressions
         working-directory: core/Clash.Meta
         run: |

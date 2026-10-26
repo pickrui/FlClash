@@ -12,17 +12,9 @@ import '../../tool/src/changelog/render.dart';
 ChangelogVersion version({
   String tag = 'v0.8.96',
   String date = '2026-08-16',
-  bool prerelease = false,
   String summary = '',
   List<ChangelogGroup> groups = const [],
-}) => ChangelogVersion(
-  version: tag.substring(1),
-  tag: tag,
-  date: date,
-  prerelease: prerelease,
-  summary: summary,
-  groups: groups,
-);
+}) => ChangelogVersion(tag: tag, date: date, summary: summary, groups: groups);
 
 ChangelogGroup entryGroup(
   ChangelogType type,
@@ -37,7 +29,7 @@ ChangelogGroup entryGroup(
 
 void main() {
   test(
-    'editorial summaries keep the published style and structured history',
+    'editorial summaries keep the published style across Markdown outputs',
     () {
       const summary = '网络与按需运行：区分定位权限并展示 SSID\n\n界面与交互：展示 ASN 信息';
       final release = version(
@@ -48,8 +40,8 @@ void main() {
           ]),
         ],
       );
-      final decoded = decodeChangelog(
-        encodeChangelog(Changelog(versions: [release])),
+      final decoded = readMarkdown(
+        renderMarkdown(Changelog(versions: [release])),
       ).versions.single;
       final markdown = renderMarkdown(Changelog(versions: [decoded]));
       expect(markdown, contains('## v0.8.96\n\n$summary'));
@@ -61,9 +53,8 @@ void main() {
         published.split(releaseEndMarker).first,
         isNot(contains('Technical details')),
       );
-      expect(published, contains('abc1234'));
+      expect(published, isNot(contains('abc1234')));
       expect(renderTelegram(decoded), summary);
-      expect(decoded.groups.single.entries.single.id, 'abc1234');
     },
   );
 
@@ -208,54 +199,6 @@ void main() {
     test('says so when a version has no user facing changes', () {
       expect(renderRelease(version()), contains(emptyVersionNote));
     });
-
-    test('carries the translated payload the app reads', () {
-      final body = renderRelease(
-        version(
-          groups: [
-            const ChangelogGroup(
-              type: ChangelogType.feat,
-              entries: [ChangelogEntry(id: '1a2b3c4', text: 'Scripts')],
-            ),
-          ],
-        ),
-      );
-
-      final payload = _payloadOf(body);
-      final decoded = decodeChangelog(payload);
-      expect(decoded.versions.single.tag, 'v0.8.96');
-      expect(
-        decoded.versions.single.groups.single.entries.single.text,
-        'Scripts',
-      );
-      expect(body.trimRight(), endsWith(releaseJsonEndMarker));
-    });
-
-    test('escapes > so an entry cannot close the comment early', () {
-      final body = renderRelease(
-        version(
-          groups: [
-            entryGroup(ChangelogType.fix, [
-              ('1a2b3c4', null, 'Handle a --> sequence'),
-            ]),
-          ],
-        ),
-      );
-
-      final payload = _payloadOf(body);
-      expect(payload, isNot(contains(releaseJsonEndMarker)));
-      expect(
-        decodeChangelog(payload)
-            .versions
-            .single
-            .groups
-            .single
-            .entries
-            .single
-            .text,
-        'Handle a --> sequence',
-      );
-    });
   });
 
   group('renderTelegram', () {
@@ -316,39 +259,38 @@ void main() {
     });
   });
 
-  group('encodeChangelog', () {
-    test('round trips through json', () {
-      final changelog = Changelog(
-        versions: [
-          version(
-            groups: [
-              entryGroup(ChangelogType.feat, [
-                ('1a2b3c4', 'profiles', 'Scripts'),
-              ]),
-            ],
-          ),
-        ],
-      );
-
-      final decoded = decodeChangelog(encodeChangelog(changelog));
-
-      expect(decoded.versions.single.tag, 'v0.8.96');
-      expect(decoded.versions.single.groups.single.type, ChangelogType.feat);
+  group('readMarkdown', () {
+    test(
+      'preserves the first notice and separates versions from frozen metadata',
+      () {
+        final recorded = readMarkdown(
+          '## v0.9.3\n\n重要变更：不再支持 macOS 12\n\n界面：各列独立滚动\n'
+          '<!-- retained history -->\n## v0.9.2 (2026-10-25)\n\n旧版说明\n',
+        );
+        expect(recorded.versions.map((v) => v.tag), ['v0.9.3', 'v0.9.2']);
+        expect(
+          recorded.versions.first.summary,
+          '重要变更：不再支持 macOS 12\n\n界面：各列独立滚动',
+        );
+        expect(recorded.versions.last.summary, '旧版说明');
+        expect(recorded.versions.last.date, '2026-10-25');
+      },
+    );
+    test('rejects duplicate version sections', () {
       expect(
-        decoded.versions.single.groups.single.entries.single.scope,
-        'profiles',
+        () => readMarkdown('## v0.9.2\nFirst\n## v0.9.2\nSecond'),
+        throwsFormatException,
       );
     });
+  });
 
-    test('rejects a future schema version', () {
-      final decoded = decodeChangelog('{"schemaVersion": 99, "versions": []}');
-
-      expect(decoded.versions, isEmpty);
-    });
-
-    test('ends with a newline so the file is diff friendly', () {
-      expect(encodeChangelog(const Changelog(versions: [])), endsWith('\n'));
-    });
+  test('rebuilding Markdown without a frozen marker does not duplicate edited versions', () {
+    const original = '# Changelog\n\n## v0.9.3\n\n重要变更：需要 macOS 13\n';
+    final merged = mergeMarkdown(
+      renderMarkdown(readMarkdown(original)),
+      original,
+    );
+    expect(readMarkdown(merged).versions.single.summary, '重要变更：需要 macOS 13');
   });
 
   group('readPubspecVersion', () {
@@ -359,10 +301,4 @@ void main() {
       );
     });
   });
-}
-
-String _payloadOf(String body) {
-  final start =
-      body.indexOf(releaseJsonBeginMarker) + releaseJsonBeginMarker.length;
-  return body.substring(start, body.indexOf(releaseJsonEndMarker, start));
 }

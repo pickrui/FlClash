@@ -10638,56 +10638,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Breaking changes`
-  String get changelogBreaking {
-    return Intl.message(
-      'Breaking changes',
-      name: 'changelogBreaking',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `New features`
-  String get changelogFeatures {
-    return Intl.message(
-      'New features',
-      name: 'changelogFeatures',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Bug fixes`
-  String get changelogFixes {
-    return Intl.message(
-      'Bug fixes',
-      name: 'changelogFixes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Performance`
-  String get changelogPerformance {
-    return Intl.message(
-      'Performance',
-      name: 'changelogPerformance',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reverts`
-  String get changelogReverts {
-    return Intl.message(
-      'Reverts',
-      name: 'changelogReverts',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Expand`
   String get showMore {
     return Intl.message('Expand', name: 'showMore', desc: '', args: []);

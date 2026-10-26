@@ -31,7 +31,7 @@ if (( tag && ! apply )); then
   echo '--tag requires --apply' >&2
   exit 64
 fi
-echo "Prepare $version with structured notes; retain the pubspec build-number snapshot"
+echo "Prepare $version with Markdown notes; retain the pubspec build-number snapshot"
 if (( ! apply )); then exit 0; fi
 if [[ -n "$(git status --porcelain)" ]]; then
   echo 'Commit existing changes before preparing a release' >&2
@@ -49,7 +49,7 @@ PYCODE
 dart run tool/changelog.dart verify
 git diff --check
 if (( tag )); then
-  git add -- pubspec.yaml CHANGELOG.md changelog.json
+  git add -- pubspec.yaml CHANGELOG.md
   git commit -m "chore(release): prepare $version"
   git tag "v$version"
 fi

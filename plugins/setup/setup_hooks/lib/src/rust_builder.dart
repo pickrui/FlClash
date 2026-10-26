@@ -36,6 +36,19 @@ class RustBuilder {
   String get _outputPath => p.join(rootDir, config.outputDir);
 
   Future<BuildExecution> build(Target target, String coreSha256) async {
+    final rustVersion = runCommand('rustup', [
+      'run',
+      '--install',
+      _helperToolchain,
+      'rustc',
+      '-Vv',
+    ], workingDirectory: _helperPath);
+    final rustc = runCommand('rustup', [
+      'which',
+      '--toolchain',
+      _helperToolchain,
+      'rustc',
+    ], workingDirectory: _helperPath);
     final triple = target.rustTriple;
     final args = [
       'build',
@@ -46,6 +59,7 @@ class RustBuilder {
       '--release',
     ];
     final env = {
+      'RUSTC': (rustc.stdout as String).trim(),
       'CORE_SHA256': coreSha256,
       'CORE_NAME': '${config.coreName}${target.executableExtension}',
     };
@@ -68,6 +82,8 @@ class RustBuilder {
         target: target,
         coreSha256: coreSha256,
         args: args,
+        environment: env,
+        rustcVersion: (rustVersion.stdout as String).trim(),
       ),
       primaryOutput: destPath,
       notice: notice,
@@ -94,6 +110,8 @@ class RustBuilder {
     required Target target,
     required String coreSha256,
     required List<String> args,
+    required Map<String, String> environment,
+    required String rustcVersion,
   }) async {
     final builder = FingerprintBuilder(rootDir: rootDir)
       ..addValue('cache_schema', BuildCache.schemaVersion)
@@ -102,7 +120,8 @@ class RustBuilder {
       ..addValue('target', {'goos': target.goos, 'goarch': target.goarch})
       ..addValue('arguments', args)
       ..addValue('core_sha256', coreSha256)
-      ..addValue('environment', _rustEnvironment())
+      ..addValue('environment', {..._rustEnvironment(), ...environment})
+      ..addValue('rustc_version', rustcVersion)
       ..addValue('config', config.toFingerprintMap());
 
     final cargoVersion = runCommand('rustup', [
@@ -113,15 +132,6 @@ class RustBuilder {
       '--version',
     ], workingDirectory: _helperPath);
     builder.addValue('cargo_version', (cargoVersion.stdout as String).trim());
-    final rustVersion = runCommand('rustup', [
-      'run',
-      '--install',
-      _helperToolchain,
-      'rustc',
-      '-Vv',
-    ], workingDirectory: _helperPath);
-    builder.addValue('rustc_version', (rustVersion.stdout as String).trim());
-
     final inputs = collectFiles(
       _helperPath,
       excludedDirectories: const {'target', '.git', '.idea'},

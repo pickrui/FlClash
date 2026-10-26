@@ -47,7 +47,7 @@ Get the latest build from this repository's [GitHub Releases](https://github.com
 | --- | --- | --- |
 | Android | APK for `arm64-v8a`, `armeabi-v7a` and `x86_64` | Most phones use `arm64-v8a`. |
 | Windows 10 and later | Installer (`.exe`) or portable `.zip`, for x64 and ARM64 | Pick ARM64 on Snapdragon and other ARM laptops. |
-| macOS 12 and later | DMG for Apple Silicon and Intel | Pick the build for your Mac's chip. |
+| macOS 13 and later | DMG for Apple Silicon and Intel | Pick the build for your Mac's chip. macOS 12 users can download the one-time final compatibility edition from [v0.9.2](https://github.com/pickrui/FlClash/releases/tag/v0.9.2). It includes the v0.9.2 fixes but receives no further updates. |
 | Linux | `.deb`, `.rpm` and AppImage, for x64 and ARM64 | Arch Linux instructions are below. |
 
 <p>

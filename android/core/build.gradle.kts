@@ -282,7 +282,7 @@ val bindCore =
         moduleDirectory.set(goModule)
         goExecutable.set(goExecutablePath)
         // The release toolchain, which plugins/setup/setup_hooks pins for the desktop Core as well.
-        goToolchain.set("go1.26.10")
+        goToolchain.set("go1.27.3")
         targets.set(gomobileTargets)
         androidApi.set(libs.versions.minSdk.get().toInt())
         tags.set(goTags)

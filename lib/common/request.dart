@@ -102,10 +102,6 @@ String? latestReleaseTagNameFromChangelog(String source) {
 
 String? normalizeReleaseNotes(String? source) {
   if (source == null) return null;
-  final embedded = RegExp(
-    r'<!-- flclash:changelog:json.*?(?:-->|$)',
-    dotAll: true,
-  ).firstMatch(source)?.group(0);
   source = source.replaceAll(RegExp(r'<!--.*?(?:-->|$)', dotAll: true), '');
   final normalized = <String>[];
   var pendingEmptyLine = false;
@@ -138,7 +134,6 @@ String? normalizeReleaseNotes(String? source) {
     normalized.add(line);
     pendingEmptyLine = false;
   }
-  if (embedded != null) normalized.add(embedded);
   final result = normalized.join('\n').trim();
   return result.isEmpty ? null : result;
 }

@@ -56,7 +56,7 @@ guard first.hideCalls == 1 && second.hideCalls == 1 else {
             source_file.write_text(fixture)
             executable = directory / "window-startup"
             result = subprocess.run([
-                "xcrun", "swiftc", "-target", f"{platform.machine()}-apple-macosx12.0",
+                "xcrun", "swiftc", "-target", f"{platform.machine()}-apple-macosx13.0",
                 "-module-cache-path", str(directory / "module-cache"),
                 str(source_file), "-o", str(executable),
             ], capture_output=True, text=True, timeout=120)

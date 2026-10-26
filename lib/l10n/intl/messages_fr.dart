@@ -666,17 +666,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
       "Échec du changement de proxy ; la sélection précédente a été rétablie",
     ),
-    "changelogBreaking": MessageLookupByLibrary.simpleMessage(
-      "Changements majeurs",
-    ),
-    "changelogFeatures": MessageLookupByLibrary.simpleMessage("Nouveautés"),
-    "changelogFixes": MessageLookupByLibrary.simpleMessage(
-      "Corrections de bugs",
-    ),
-    "changelogPerformance": MessageLookupByLibrary.simpleMessage(
-      "Performances",
-    ),
-    "changelogReverts": MessageLookupByLibrary.simpleMessage("Annulations"),
     "checkApi": MessageLookupByLibrary.simpleMessage("Vérifier l’API"),
     "checkRouting": MessageLookupByLibrary.simpleMessage(
       "Vérifier la configuration",

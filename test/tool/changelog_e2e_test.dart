@@ -64,22 +64,10 @@ void main() {
   ).build(pending: pending);
 
   test('rebuilding a retagged release preserves its editorial summary and new fixes', () {
-    final original = build().changelog.versions.single;
-    resolve(repo.path, changelogDataPath).writeAsStringSync(
-      encodeChangelog(
-        Changelog(
-          versions: [
-            ChangelogVersion(
-              version: original.version,
-              tag: original.tag,
-              date: original.date,
-              summary: '稳定性与恢复：完善服务退出和恢复',
-              groups: original.groups,
-            ),
-          ],
-        ),
-      ),
-    );
+    resolve(
+      repo.path,
+      changelogMarkdownPath,
+    ).writeAsStringSync('## v1.1.0\n\n稳定性与恢复：完善服务退出和恢复\n');
     commit('fix: close inherited fixture handles');
     git(['tag', '-f', 'v1.1.0']);
     final rebuilt = build().changelog.versions.single;
@@ -217,7 +205,7 @@ void main() {
     );
   });
 
-  test('a tag with no version in changelog.json is reported', () {
+  test('a tag with no Markdown section is reported', () {
     final derived = build().changelog;
     final recorded = Changelog(
       versions: derived.versions
@@ -231,8 +219,8 @@ void main() {
 
   test('is deterministic across runs', () {
     expect(
-      encodeChangelog(build().changelog),
-      encodeChangelog(build().changelog),
+      renderMarkdown(build().changelog),
+      renderMarkdown(build().changelog),
     );
   });
 

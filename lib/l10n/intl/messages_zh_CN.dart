@@ -501,11 +501,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
       "切换代理失败，已恢复上一次的选择",
     ),
-    "changelogBreaking": MessageLookupByLibrary.simpleMessage("重大变更"),
-    "changelogFeatures": MessageLookupByLibrary.simpleMessage("新功能"),
-    "changelogFixes": MessageLookupByLibrary.simpleMessage("问题修复"),
-    "changelogPerformance": MessageLookupByLibrary.simpleMessage("性能优化"),
-    "changelogReverts": MessageLookupByLibrary.simpleMessage("已回滚"),
     "checkApi": MessageLookupByLibrary.simpleMessage("检查 API"),
     "checkRouting": MessageLookupByLibrary.simpleMessage("检查配置"),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("检查更新"),

@@ -121,6 +121,10 @@ void main() {
 
     test('hands over the first link and then stops listening', () async {
       const link = 'https://example.com/sub?token=a&b=1';
+      final handover = receiver.link.then((value) async {
+        await receiver.close();
+        return value;
+      });
       final (status, page) = await _request(
         receiver.address,
         method: 'POST',
@@ -128,7 +132,7 @@ void main() {
       );
       expect(status, HttpStatus.ok);
       expect(page, contains('Sent'));
-      expect(await receiver.link, link);
+      expect(await handover, link);
 
       await expectLater(
         _request(receiver.address),
@@ -156,7 +160,7 @@ void main() {
       expect(formStatus, HttpStatus.ok);
     });
 
-    test('accepts a clash install-config link', () async {
+    test('accepts a clash install-config link and stops listening', () async {
       const url = 'https://example.com/sub';
       final (status, _) = await _request(
         receiver.address,
@@ -165,6 +169,10 @@ void main() {
       );
       expect(status, HttpStatus.ok);
       expect(await receiver.link, url);
+      await expectLater(
+        _request(receiver.address),
+        throwsA(isA<SocketException>()),
+      );
     });
 
     test('completes the link with null when closed first', () async {

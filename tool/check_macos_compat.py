@@ -19,7 +19,7 @@ def version(value):
     return parts + (0,) * (3 - len(parts))
 
 
-def check_binary(path, architectures, maximum="12.0"):
+def check_binary(path, architectures, maximum="13.0"):
     slices = run("xcrun", "lipo", "-archs", path).split()
     missing = set(architectures) - set(slices)
     if missing:
@@ -44,10 +44,10 @@ def check_binary(path, architectures, maximum="12.0"):
             )
 
 
-def check_app(app, architectures, maximum="12.0"):
+def check_app(app, architectures, maximum="13.0"):
     info = plistlib.loads((app / "Contents/Info.plist").read_bytes())
-    if version(info["LSMinimumSystemVersion"]) > version(maximum):
-        raise ValueError(f"{app}: Info.plist requires macOS > {maximum}")
+    if version(info["LSMinimumSystemVersion"]) != version(maximum):
+        raise ValueError(f"{app}: Info.plist must declare macOS {maximum}")
     count = 0
     for path in sorted(app.rglob("*")):
         if path.is_symlink() or not path.is_file():

@@ -10,7 +10,7 @@ import PackageDescription
 let package = Package(
     name: "tray",
     platforms: [
-        .macOS(.v11)
+        .macOS(.v13)
     ],
     products: [
         .library(name: "tray", targets: ["tray"])

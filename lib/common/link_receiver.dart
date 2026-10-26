@@ -175,9 +175,11 @@ class LinkReceiver {
       await response.close();
       return;
     }
-    _link.complete(link);
     response.write(_page(done: true));
-    await response.close();
+    _link.complete(
+      response.close().then((_) => link, onError: (Object _) => link),
+    );
+    await _link.future;
     unawaited(close());
   }
 

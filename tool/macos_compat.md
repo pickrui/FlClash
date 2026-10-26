@@ -1,41 +1,28 @@
-# macOS 12 native assets
+# macOS 13 minimum requirement
 
-The Runner advertises macOS 12.0, but Flutter 3.47.4 passes a hardcoded macOS 13
-target to native build hooks. The sqlite3 3.5.2 release binaries also require
-macOS 13 on both x86_64 and arm64. Setting Xcode's deployment target or
-MACOSX_DEPLOYMENT_TARGET alone does not correct these libraries.
+The rebuilt v0.9.2 uses Go 1.27 and requires macOS 13. A one-time final
+macOS 12 edition uses Go 1.26 and includes the same production fixes, with app
+update checks and the update entry disabled. It is packaged separately as
+`flclash-v0.9.2-macos12-final-{arm64,amd64}.dmg`; it will receive no further
+updates. Do not add ongoing macOS 12 CI jobs or compatibility build switches.
+The user requested removal of tags at the original commit
+`431f54bb35ab7d5f3eb409882ab0db39921aade7`; do not recreate those tags.
 
-Before Flutter embeds native frameworks, `build_macos_compat.py` invokes the
-locked objective_c and sqlite3 package build hooks with a macOS 12 target.
-SQLite is compiled from the official 3.53.4 amalgamation, matching the existing
-package's SQLite version and default build options. The archive is verified
-against the SHA256 recorded in the script. Flutter then embeds and signs the
-resulting frameworks normally. No installed SDK or pub-cache source is edited.
+The app and Go 1.27 Core require macOS 13 Ventura or later. Runner, local Swift
+packages, the Rust Native Assets hook, and release CI all target 13.0.
 
-The private cache under `.dart_tool/macos_compat` includes the architecture,
-toolchain, dependency lockfile, package sources and build script in its key.
-A file lock serializes cache updates. The same path runs for local Flutter
-builds, setup.dart packaging and both macOS CI architectures.
+Native Assets builds SQLite and Objective-C through their package hooks. The
+previous macOS 12 source rebuild is retired; no libraries are rewritten after
+the package hooks complete.
 
-The final Xcode phase checks every bundled Mach-O slice for its deployment
-target and required architecture. A framework requiring macOS 13 fails the
-build before packaging. This is a build check, not proof of execution on
-macOS 12; that still requires a Monterey device or VM.
-
-When updating objective_c or sqlite3, review the hooks and upstream minimum
-versions, update the explicit package pins and `PACKAGES`, and update SQLite's
-source URL and checksum if its embedded SQLite version changes. Keep the
-upstream build options. Remove the rebuild workaround only when both Flutter's
-hook configuration and all downloaded native libraries respect macOS 12.
-
-Focused checks:
+Before signing, `check_macos_compat.py` checks the app Info.plist and every Mach-O
+binary, including all slices of universal libraries. The app must declare 13.0;
+no bundled binary may require a newer macOS version or omit a requested architecture.
 
 ```sh
-python3 -m unittest discover -s test/ci -p 'test_macos_compat.py' -v
-python3 tool/check_macos_compat.py "/path/to/FlClash for oixCloud.app" --archs x86_64
+python3 tool/check_macos_compat.py /absolute/path/FlClash.app --archs "arm64"
+python3 -m unittest test.ci.test_macos_compat
 ```
 
-The regression tests use the macOS linker to build fixtures for macOS 12 and
-13, including a universal binary with one incompatible slice. They never run
-the app. Any app smoke test must use SAFE_MODE and `run_macos_isolated.py` as
-described in AGENTS.md.
+These checks inspect metadata. Runtime verification still requires macOS 13
+hardware or a VM. Local smoke tests must use SAFE_MODE and run_macos_isolated.py.

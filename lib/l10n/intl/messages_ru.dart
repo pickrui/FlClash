@@ -646,15 +646,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
       "Не удалось переключить прокси; восстановлен предыдущий выбор",
     ),
-    "changelogBreaking": MessageLookupByLibrary.simpleMessage(
-      "Важные изменения",
-    ),
-    "changelogFeatures": MessageLookupByLibrary.simpleMessage("Новые функции"),
-    "changelogFixes": MessageLookupByLibrary.simpleMessage("Исправления"),
-    "changelogPerformance": MessageLookupByLibrary.simpleMessage(
-      "Производительность",
-    ),
-    "changelogReverts": MessageLookupByLibrary.simpleMessage("Откаты"),
     "checkApi": MessageLookupByLibrary.simpleMessage("Проверить API"),
     "checkRouting": MessageLookupByLibrary.simpleMessage(
       "Проверить конфигурацию",

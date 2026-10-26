@@ -10,7 +10,7 @@ import PackageDescription
 let package = Package(
     name: "window",
     platforms: [
-        .macOS(.v12)
+        .macOS(.v13)
     ],
     products: [
         .library(name: "window", targets: ["window"])
