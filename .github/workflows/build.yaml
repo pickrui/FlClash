@@ -706,6 +706,7 @@ jobs:
             "dist/aur/$AUR_PKGNAME-aur.tar.gz" dist/aur/SHA256SUMS --clobber --repo "$GITHUB_REPOSITORY"
 
       - name: Push to AUR
+        if: ${{ vars.AUR_PUBLISH_ENABLED == 'true' }}
         env:
           AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
           TAG: ${{ github.ref_name }}
