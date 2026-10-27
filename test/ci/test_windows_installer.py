@@ -515,7 +515,7 @@ end.
 
 def installer_code():
     source = Path(os.environ.get('FLCLASH_INSTALLER_SOURCE', 'windows/packaging/exe/inno_setup.iss'))
-    code = source.read_text().split('[Code]', 1)[1].split('[Languages]', 1)[0]
+    code = source.read_text(encoding='utf-8').split('[Code]', 1)[1].split('[Languages]', 1)[0]
     code = re.sub(r'^#emit .*PackagedHelperSHA256.*$', "  PackagedHelperSHA256 = '" + 'a' * 64 + "';", code, flags=re.M)
     code = re.sub(r'^#emit .*PackagedCoreSHA256.*$', "  PackagedCoreSHA256 = '" + 'b' * 64 + "';", code, flags=re.M)
     return code
@@ -523,14 +523,14 @@ def installer_code():
 
 class WindowsInstallerIdentityTest(unittest.TestCase):
     def test_installer_is_independent_from_upstream_and_keeps_directory_selection(self):
-        config = Path('windows/packaging/exe/make_config.yaml').read_text()
+        config = Path('windows/packaging/exe/make_config.yaml').read_text(encoding='utf-8')
         app_id = re.search(r'^app_id: (.+)$', config, re.M).group(1)
-        package = Path('lib/common/constant.dart').read_text()
+        package = Path('lib/common/constant.dart').read_text(encoding='utf-8')
         package_id = re.search(r"const packageName = '([^']+)'", package).group(1)
         self.assertEqual(app_id, package_id)
         self.assertNotEqual(app_id, '728B3532-C74B-4870-9068-BE70FE12A3E6')
         self.assertIn('FlClash for oixCloud', re.search(r'^install_dir_name: (.+)$', config, re.M).group(1))
-        script = Path('windows/packaging/exe/inno_setup.iss').read_text()
+        script = Path('windows/packaging/exe/inno_setup.iss').read_text(encoding='utf-8')
         self.assertIn('DisableDirPage=no', script.split('[Code]', 1)[0])
 
 
@@ -569,7 +569,7 @@ class WindowsInstallerTest(unittest.TestCase):
             code = re.sub(r'(function ' + name + r'\b[^\n]*;)\s*external [^;]+;',
                           lambda match: match[1] + '\n' + stub, code)
         script = root / 'installer.pas'
-        script.write_text(STUBS + code + SCENARIOS)
+        script.write_text(STUBS + code + SCENARIOS, encoding='utf-8')
         cls.executable = root / ('installer.exe' if os.name == 'nt' else 'installer')
         result = subprocess.run(['fpc', '-o' + str(cls.executable), str(script)],
                                 cwd=root, capture_output=True, text=True, timeout=30)
