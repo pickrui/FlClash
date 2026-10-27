@@ -600,8 +600,8 @@ final class HelperCoreLease implements CoreProcessLease {
 
 final windowsHelperClient = HelperClient();
 
-const linuxHelperSocketPath = '/run/flclash/helper.sock';
-const linuxHelperInstallRoot = '/usr/local/libexec/flclash';
+const linuxHelperSocketPath = '/run/flclash-oixcloud/helper.sock';
+const linuxHelperInstallRoot = '/usr/local/libexec/flclash-oixcloud';
 String linuxHelperInstalledPath(String sha256) =>
     '$linuxHelperInstallRoot/$sha256/$appHelperService';
 final linuxHelperClient = HelperClient(isLinux: true);

@@ -28,8 +28,8 @@ optdepends=(
   'polkit: authorize the privileged helper that TUN mode needs'
   'xdg-desktop-portal: file dialogs on Wayland'
 )
-provides=("flclash=$pkgver")
-conflicts=('flclash' 'flclash-bin')
+provides=("flclash-oixcloud=$pkgver")
+conflicts=('flclash-oixcloud')
 # The bundle ships prebuilt binaries: stripping them breaks the Core hash the
 # Helper verifies before it starts the Core as root.
 options=('!strip' '!debug' '!emptydirs')
@@ -52,12 +52,11 @@ package() {
 
   # The Debian package relies on a symlink its maintainer script creates.
   install -d "$pkgdir/usr/bin"
-  ln -s /usr/share/FlClash/FlClash "$pkgdir/usr/bin/FlClash"
-  ln -s /usr/share/FlClash/FlClash "$pkgdir/usr/bin/flclash"
+  ln -s /usr/share/flclash-oixcloud/flclash-oixcloud "$pkgdir/usr/bin/flclash-oixcloud"
 
   # Arch always runs systemd, so the Core stays unprivileged and TUN goes
   # through the Helper unit instead of a setuid Core.
-  chmod u-s "$pkgdir/usr/share/FlClash/FlClashCore"
+  chmod u-s "$pkgdir/usr/share/flclash-oixcloud/FlClashCore"
 
   install -Dm644 "LICENSE-$pkgver" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

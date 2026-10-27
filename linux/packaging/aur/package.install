@@ -1,5 +1,5 @@
-_helper=/usr/share/FlClash/FlClashHelperService
-_unit=/etc/systemd/system/flclash-helper.service
+_helper=/usr/share/flclash-oixcloud/FlClashHelperService
+_unit=/etc/systemd/system/flclash-oixcloud-helper.service
 
 # The unit pins the Helper path and the Core hash it will start as root, so an
 # upgrade has to restage both or the app falls back to a new polkit prompt.
@@ -28,14 +28,14 @@ post_upgrade() {
 
 pre_remove() {
   if [ -f "$_unit" ]; then
-    systemctl disable --now flclash-helper.service >/dev/null 2>&1 || true
+    systemctl disable --now flclash-oixcloud-helper.service >/dev/null 2>&1 || true
   fi
 }
 
 post_remove() {
   rm -f "$_unit"
-  if [ ! -L /usr/local/libexec/flclash ]; then
-    rm -rf /usr/local/libexec/flclash
+  if [ ! -L /usr/local/libexec/flclash-oixcloud ]; then
+    rm -rf /usr/local/libexec/flclash-oixcloud
   fi
   systemctl daemon-reload >/dev/null 2>&1 || true
 }

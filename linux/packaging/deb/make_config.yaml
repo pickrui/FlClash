@@ -1,5 +1,5 @@
-display_name: FlClash
-package_name: FlClash
+display_name: FlClash for oixCloud
+package_name: flclash-oixcloud
 maintainer:
   name: chen08209
   email: chen08209@gmail.com
@@ -25,7 +25,7 @@ keywords:
   - ClashMeta
   - Proxy
 
-generic_name: FlClash
+generic_name: FlClash for oixCloud
 
 categories:
   - Network
@@ -37,9 +37,9 @@ startup_wm_class: com.oixcloud.clash
 postinstall_scripts:
   - |
     set -eu
-    CORE_PATH="/usr/share/FlClash/FlClashCore"
-    HELPER_PATH="/usr/share/FlClash/FlClashHelperService"
-    UNIT_PATH="/etc/systemd/system/flclash-helper.service"
+    CORE_PATH="/usr/share/flclash-oixcloud/FlClashCore"
+    HELPER_PATH="/usr/share/flclash-oixcloud/FlClashHelperService"
+    UNIT_PATH="/etc/systemd/system/flclash-oixcloud-helper.service"
     # The app grants setuid to its user's group when TUN is first enabled.
     if [ -f "$CORE_PATH" ]; then chmod u-s "$CORE_PATH"; fi
     if [ -d /run/systemd/system ] && [ -x "$HELPER_PATH" ]; then
@@ -53,12 +53,12 @@ postuninstall_scripts:
   - |
     case "${1:-}" in remove|purge) ;; *) exit 0 ;; esac
     set -e
-    if [ -d /run/systemd/system ] && [ -f /etc/systemd/system/flclash-helper.service ]; then
-      systemctl disable --now flclash-helper.service
+    if [ -d /run/systemd/system ] && [ -f /etc/systemd/system/flclash-oixcloud-helper.service ]; then
+      systemctl disable --now flclash-oixcloud-helper.service
     fi
-    rm -f /etc/systemd/system/flclash-helper.service
-    if [ ! -L /usr/local/libexec/flclash ]; then
-      rm -rf /usr/local/libexec/flclash
+    rm -f /etc/systemd/system/flclash-oixcloud-helper.service
+    if [ ! -L /usr/local/libexec/flclash-oixcloud ]; then
+      rm -rf /usr/local/libexec/flclash-oixcloud
     fi
     if command -v systemctl >/dev/null 2>&1; then
       systemctl daemon-reload >/dev/null 2>&1 || true

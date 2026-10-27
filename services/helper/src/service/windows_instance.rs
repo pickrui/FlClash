@@ -21,7 +21,7 @@ use windows_sys::Win32::System::Registry::{
 use windows_sys::Win32::System::Threading::{GetProcessTimes, WaitForSingleObject};
 
 // Kept outside the service key: deleting/reinstalling the service must not erase the barrier.
-const INSTANCE_KEY: &str = r"SYSTEM\CurrentControlSet\Control\FlClashHelper";
+const INSTANCE_KEY: &str = r"SYSTEM\CurrentControlSet\Control\FlClashOixCloudHelper";
 const INSTANCE_VALUE: &str = "Instance";
 const PENDING_KEY: &str = "Pending";
 

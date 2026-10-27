@@ -28,7 +28,9 @@ var
   OwnerReadFailure, LegacyOwnerAbsent, SecurityFailure, RegisterFailure, RegisterException: Boolean;
   LockRefs, LockFailure, ApiError: Integer;
   FailureMode, Kills, Installs, Uninstalls: Integer;
-  LastUninstaller, LastInstallArgs: String;
+  LastUninstaller, LastInstallArgs, AppDirectory, LegacyInstallDirectory: String;
+  LegacyEntryDeleted: Boolean;
+  ForeignApp, IdentityFailure, LegacyServiceExists, LegacyForeignPath: Boolean;
   RecoveryValue, DiskHelperHash, DiskCoreHash, OwnerSid: String;
   RecoveryExists, RecoveryWriteFailure, RecoveryDeleteFailure, MissingApp, MissingCore, HashReadFailure: Boolean;
   RecoveryReadError: LongWord;
@@ -44,12 +46,15 @@ begin
   if S = '{param:FLCLASHUPDATE|0}' then begin
     if UpdateMode then Result := '1' else Result := '0';
   end else begin
-    Result := StringReplace(S, '{app}', 'C:\app', [rfReplaceAll]);
+    if AppDirectory = '' then AppDirectory := 'C:\app';
+    Result := StringReplace(S, '{app}', AppDirectory, [rfReplaceAll]);
     Result := StringReplace(Result, '{tmp}', 'C:\tmp', [rfReplaceAll]);
     Result := StringReplace(Result, '{userappdata}', 'C:\fixture\Roaming', [rfReplaceAll]);
     Result := StringReplace(Result, '{localappdata}', 'C:\fixture\Local', [rfReplaceAll]);
   end;
 end;
+function StringChangeEx(var S: String; FromStr, ToStr: String; SupportDBCS: Boolean): Integer;
+begin S := StringReplace(S, FromStr, ToStr, [rfReplaceAll]); Result := 0; end;
 function UninstallSilent: Boolean;
 begin Result := SilentUninstall; end;
 function GetUserNameString: String;
@@ -108,11 +113,18 @@ begin Result := Length(A); end;
 procedure Log(S: String);
 begin end;
 function AddBackslash(S: String): String;
-begin Result := S + '\'; end;
+begin
+  Result := S;
+  if (S = '') or (S[Length(S)] <> '\') then Result := S + '\';
+end;
 function RegKeyExists(Root: Integer; Key: String): Boolean;
 begin Result := ServiceExists and not HiddenServiceKey; end;
 function RegQueryStringValue(Root: Integer; Key, Name: String; var Value: String): Boolean;
 begin
+  if Name = 'InstallLocation' then begin
+    Assert(Root = HKLM); Assert(Pos('728B3532-C74B-4870-9068-BE70FE12A3E6_is1', Key) > 0);
+    Value := LegacyInstallDirectory; Result := Value <> ''; Exit;
+  end;
   Result := ServiceExists and not OwnerReadFailure and (Name = 'ImagePath');
   if Result then begin
     Value := '"C:\app\FlClashHelperService.exe"';
@@ -122,7 +134,7 @@ end;
 function RegWriteStringValue(Root: Integer; Key, Name, Value: String): Boolean;
 begin
   Assert(LockRefs > 0); Assert(Name = 'Upgrade');
-  Assert(Key = 'SYSTEM\CurrentControlSet\Control\FlClashHelperMaintenance');
+  Assert(Key = 'SYSTEM\CurrentControlSet\Control\FlClashOixCloudHelperMaintenance');
   Result := not RecoveryWriteFailure;
   if Result then begin RecoveryValue := Value; RecoveryExists := True; end;
 end;
@@ -135,7 +147,11 @@ begin
   end;
 end;
 procedure RegDeleteKeyIncludingSubkeys(Root: Integer; Key: String);
-begin end;
+begin
+  Assert(Root = HKLM);
+  Assert(Pos('728B3532-C74B-4870-9068-BE70FE12A3E6_is1', Key) > 0);
+  LegacyEntryDeleted := True;
+end;
 procedure ExtractTemporaryFile(Name: String);
 begin
   Assert(Name = 'FlClashHelperService.exe');
@@ -147,25 +163,48 @@ begin Result := Exception(ExceptObject).Message; end;
 function Exec(FileName, Args, Dir: String; Show, Wait: Integer; var Code: Integer): Boolean;
 begin
   Result := True; Code := 0;
-  if FileName = 'taskkill' then begin
-    Assert(Pos('FlClashHelperService.exe', Args) = 0, 'must not bypass the Helper barrier');
-    Inc(Kills);
+  if Pos('powershell.exe', FileName) > 0 then begin
+    Assert(Pos('-NoProfile -NonInteractive -Command "', Args) = 1);
+    if Pos('VersionInfo.InternalName', Args) > 0 then begin
+      Assert(Pos('Get-Item -LiteralPath ', Args) > 0);
+      if IdentityFailure then Result := False;
+      if ForeignApp then Code := 1;
+    end else begin
+      Assert(Pos('$targets -contains $_.ExecutablePath', Args) > 0, 'stop only exact executable paths');
+      Assert(Pos('Stop-Process -Id $_.ProcessId', Args) > 0);
+      Assert(Pos('FlClashHelperService.exe', Args) = 0, 'must not bypass the Helper barrier');
+      if Pos('O', AppDirectory) > 0 then
+        Assert(Pos('C:\O' + #39 + #39 + 'Brien & $safe\FlClash.exe', Args) > 0);
+      Inc(Kills);
+    end;
   end else if Pos('uninstall', Args) = 1 then begin
     Assert(LockRefs > 0, 'service removal must be inside the file replacement lock');
-    Assert(Pos(' --install-lock 42 256', Args) > 0);
+    if FileName = 'C:\app\FlClashHelperService.exe' then begin
+      if LegacyServiceExists then Assert(Args = 'uninstall')
+      else Assert(Pos(' --install-lock 42 256', Args) > 0);
+    end else Assert(Pos(' --install-lock 42 256', Args) > 0);
     Inc(Uninstalls); LastUninstaller := FileName;
     if FailureMode = 3 then raise Exception.Create('uninstall threw');
     Result := FailureMode <> 2;
     if FailureMode = 1 then Code := 1;
-    if Result and (Code = 0) then ServiceExists := False;
+    if Result and (Code = 0) then begin
+      if LegacyServiceExists and (FileName = 'C:\app\FlClashHelperService.exe') then
+        LegacyServiceExists := False
+      else ServiceExists := False;
+    end;
   end else begin
     Assert(LockRefs > 0, 'registration must remain in the same transaction');
-    Assert(FileName = 'C:\tmp\FlClashHelperService.exe', 'use new Helper for old-version rollback too');
-    Assert(Pos(' --service-path "C:\app\FlClashHelperService.exe"', Args) > 0, 'register installed executable');
-    Assert(Pos(' --install-lock 42 256', Args) > 0);
+    if FileName = 'C:\app\FlClashHelperService.exe' then begin
+      Assert(Args = 'install --owner-sid S-1-5-21-123'); LegacyServiceExists := True;
+    end else begin
+      Assert(FileName = 'C:\tmp\FlClashHelperService.exe');
+      Assert(Pos(' --service-path "C:\app\FlClashHelperService.exe"', Args) > 0);
+      Assert(Pos(' --install-lock 42 256', Args) > 0);
+    end;
     Inc(Installs); LastInstallArgs := Args;
     if RegisterException then raise Exception.Create('registration threw');
-    if RegisterFailure then Code := 1 else ServiceExists := True;
+    if RegisterFailure then Code := 1
+    else if FileName = 'C:\tmp\FlClashHelperService.exe' then ServiceExists := True;
   end;
 end;
 '''
@@ -181,18 +220,24 @@ DLL_STUBS = {
     begin
       Assert(Root = HKLM); Assert(ValueType = 0);
       if Name = 'Upgrade' then begin
-        Assert(Flags = 2); Assert(Key = 'SYSTEM\CurrentControlSet\Control\FlClashHelperMaintenance');
+        Assert(Flags = 2); Assert(Key = 'SYSTEM\CurrentControlSet\Control\FlClashOixCloudHelperMaintenance');
         Result := RecoveryReadError;
         if Result <> 0 then Exit;
         if not RecoveryExists then begin Result := 2; Exit; end;
         Value := RecoveryValue;
       end else begin
         Assert(Name = 'ImagePath'); Assert(Flags = $10000006);
-        Assert(Key = 'SYSTEM\CurrentControlSet\Services\FlClashHelperService');
+        if Key = 'SYSTEM\CurrentControlSet\Services\FlClashHelperService' then begin
+          if not LegacyServiceExists then begin Result := 2; Exit; end;
+          Value := '"C:\app\FlClashHelperService.exe" --owner-sid ' + OwnerSid;
+          if LegacyForeignPath then Value := '"C:\original\FlClashHelperService.exe" --owner-sid ' + OwnerSid;
+        end else begin
+        Assert(Key = 'SYSTEM\CurrentControlSet\Services\FlClashOixCloudHelper');
         if OwnerReadFailure then begin Result := 5; Exit; end;
         if not ServiceExists or MissingServiceImage then begin Result := 2; Exit; end;
         Value := '"C:\app\FlClashHelperService.exe"';
         if not LegacyOwnerAbsent then Value := Value + ' --owner-sid ' + OwnerSid;
+        end;
       end;
       if Size < (Length(Value) + 1) * 2 then begin Result := 234; Exit; end;
       for i := 1 to Length(Value) do PWideChar(Data)[i - 1] := Value[i];
@@ -202,7 +247,7 @@ DLL_STUBS = {
     'HelperCreateMutex': r'''begin
       Assert(Attributes.Length = 3 * SizeOf(THandle));
       Assert(Attributes.Descriptor = 512); Assert(Attributes.InheritHandle = 0);
-      Assert(InitialOwner = 0); Assert(Name = 'Global\FlClashHelperService.Install.v1');
+      Assert(InitialOwner = 0); Assert(Name = 'Global\FlClashOixCloudHelper.Install.v1');
       ApiError := LockFailure;
       if LockRefs > 0 then ApiError := 183;
       if (ApiError <> 0) and (ApiError <> 183) then Result := 0
@@ -230,6 +275,43 @@ begin
   ServiceExists := True;
   OwnerSid := 'S-1-5-21-123';
   InstallCompletePair;
+  if Scenario = 'quoted_directory' then begin
+    AppDirectory := 'C:\O' + #39 + 'Brien & $safe';
+    KillProcesses; Assert(Kills = 1); Halt(0);
+  end;
+  if (Scenario = 'foreign_app') or (Scenario = 'identity_failure') then begin
+    ForeignApp := Scenario = 'foreign_app'; IdentityFailure := Scenario = 'identity_failure';
+    Assert(PrepareToInstall(Restart) <> '');
+    Assert(Uninstalls = 0); Assert(Installs = 0); Assert(Kills = 0); Assert(LockRefs = 0);
+    Halt(0);
+  end;
+  if Pos('legacy_service_', Scenario) = 1 then begin
+    ServiceExists := False; LegacyServiceExists := True;
+    LegacyForeignPath := Scenario = 'legacy_service_foreign';
+    LegacyInstallDirectory := 'C:\app\';
+    if LegacyForeignPath then LegacyInstallDirectory := 'C:\original';
+    DiskHelperHash := StringOfChar('c', 64); DiskCoreHash := StringOfChar('d', 64);
+    Assert(PrepareToInstall(Restart) = '');
+    if LegacyForeignPath then begin
+      Assert(LegacyServiceExists); Assert(not RecoveryExists);
+    end else begin
+      Assert(not LegacyServiceExists); Assert(RecoveryExists);
+      Assert(LastUninstaller = 'C:\app\FlClashHelperService.exe');
+    end;
+    if Scenario = 'legacy_service_cancel' then begin
+      DeinitializeSetup; Assert(LegacyServiceExists); Assert(not RecoveryExists);
+      Assert(not LegacyEntryDeleted);
+    end else begin
+      if Scenario = 'legacy_service_crash' then begin
+        ResetInstallerAfterCrash; Assert(PrepareToInstall(Restart) = '');
+      end;
+      InstallCompletePair; CurStepChanged(ssPostInstall); DeinitializeSetup;
+      Assert(not RecoveryExists);
+      if LegacyForeignPath then begin Assert(LegacyServiceExists); Assert(not LegacyEntryDeleted); end
+      else begin Assert(ServiceExists); Assert(not LegacyServiceExists); Assert(LegacyEntryDeleted); end;
+    end;
+    Assert(LockRefs = 0); Halt(0);
+  end;
   if Pos('data_', Scenario) = 1 then begin
     SilentUninstall := Scenario = 'data_silent';
     UpdateMode := Scenario = 'data_update';
@@ -370,7 +452,7 @@ begin
     RecoveryWriteFailure := Scenario = 'journal_write_failure';
     if Scenario = 'malformed_record' then begin RecoveryExists := True; RecoveryValue := 'invalid'; end;
     if Scenario = 'other_directory' then begin
-      RecoveryExists := True; RecoveryValue := '1|S-1-5-21-123|||C:\other';
+      RecoveryExists := True; RecoveryValue := '2|0|S-1-5-21-123|||C:\other';
     end;
     if Scenario = 'missing_app_without_record' then begin MissingApp := True; UpdateMode := True; end;
     SavedOwner := RecoveryValue;
@@ -399,7 +481,7 @@ begin
     Assert(Installs = 0); Assert(Kills = 0);
     FailureMode := 0;
     Assert(PrepareToInstall(Restart) = '');
-    Assert(Uninstalls = 2); Assert(Kills = 2);
+    Assert(Uninstalls = 2); Assert(Kills = 1);
     Assert(LastUninstaller = 'C:\tmp\FlClashHelperService.exe');
     CurStepChanged(ssPostInstall); DeinitializeSetup;
     Assert(Installs = 1); Assert(Pos('install --owner-sid S-1-5-21-123 ', LastInstallArgs) = 1);
@@ -409,7 +491,7 @@ begin
     if Scenario = 'fresh_install' then ServiceExists := False;
     Assert(PrepareToInstall(Restart) = '');
     Assert(LastUninstaller = 'C:\tmp\FlClashHelperService.exe');
-    if UpdateMode then Assert(Kills = 0) else Assert(Kills = 2);
+    if UpdateMode then Assert(Kills = 0) else Assert(Kills = 1);
     if Scenario <> 'cancel_after_stop' then CurStepChanged(ssPostInstall);
     DeinitializeSetup;
     if (Scenario = 'fresh_install') or LegacyOwnerAbsent then Assert(Installs = 0)
@@ -421,7 +503,7 @@ begin
     Assert(not InitializeUninstall, 'failed cleanup must stop uninstall');
     Assert(Kills = 0); Assert(Installs = 0);
   end else if Scenario = 'uninstall_success' then begin
-    Assert(InitializeUninstall); Assert(Kills = 2);
+    Assert(InitializeUninstall); Assert(Kills = 1);
     Assert(LastUninstaller = 'C:\app\FlClashHelperService.exe');
     Assert(LockRefs = 1);
     DeinitializeUninstall;
@@ -437,6 +519,19 @@ def installer_code():
     code = re.sub(r'^#emit .*PackagedHelperSHA256.*$', "  PackagedHelperSHA256 = '" + 'a' * 64 + "';", code, flags=re.M)
     code = re.sub(r'^#emit .*PackagedCoreSHA256.*$', "  PackagedCoreSHA256 = '" + 'b' * 64 + "';", code, flags=re.M)
     return code
+
+
+class WindowsInstallerIdentityTest(unittest.TestCase):
+    def test_installer_is_independent_from_upstream_and_keeps_directory_selection(self):
+        config = Path('windows/packaging/exe/make_config.yaml').read_text()
+        app_id = re.search(r'^app_id: (.+)$', config, re.M).group(1)
+        package = Path('lib/common/constant.dart').read_text()
+        package_id = re.search(r"const packageName = '([^']+)'", package).group(1)
+        self.assertEqual(app_id, package_id)
+        self.assertNotEqual(app_id, '728B3532-C74B-4870-9068-BE70FE12A3E6')
+        self.assertIn('FlClash for oixCloud', re.search(r'^install_dir_name: (.+)$', config, re.M).group(1))
+        script = Path('windows/packaging/exe/inno_setup.iss').read_text()
+        self.assertIn('DisableDirPage=no', script.split('[Code]', 1)[0])
 
 
 @unittest.skipUnless(os.name == 'nt', 'requires the Windows Inno Setup compiler')
@@ -482,7 +577,8 @@ class WindowsInstallerTest(unittest.TestCase):
             raise AssertionError(result.stdout + result.stderr)
 
     def test_cleanup_and_retry_preserve_the_service_barrier_and_owner(self):
-        for scenario in ['cleanup_failure', 'launch_failure', 'extraction_failure', 'retry',
+        for scenario in ['foreign_app', 'identity_failure', 'quoted_directory', 'legacy_service_upgrade',
+                         'legacy_service_cancel', 'legacy_service_crash', 'legacy_service_foreign', 'cleanup_failure', 'launch_failure', 'extraction_failure', 'retry',
                          'update', 'cancel_after_stop', 'fresh_install', 'owner_read_failure',
                          'legacy_owner_absent', 'uninstall_failure',
                          'missing_helper', 'uninstall_success', 'lock_busy', 'lock_error',

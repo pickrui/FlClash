@@ -31,12 +31,12 @@ EOF
 chmod 755 "$fixture/bin/id" "$fixture/bin/systemctl"
 export FIXTURE="$fixture" PATH="$fixture/bin:$PATH" PKEXEC_UID=1000
 helper="$fixture/App Image 100%/FlClashHelperService"
-unit=/etc/systemd/system/flclash-helper.service
-installed="/usr/local/libexec/flclash/$CORE_SHA256/FlClashHelperService"
+unit=/etc/systemd/system/flclash-oixcloud-helper.service
+installed="/usr/local/libexec/flclash-oixcloud/$CORE_SHA256/FlClashHelperService"
 # pkexec keeps the caller's umask, and user-private-group desktops use 0002.
 (umask 0002 && "$helper" install)
 [ -x "$installed" ]
-[ "$(stat -c %a /usr/local/libexec /usr/local/libexec/flclash "$(dirname "$installed")" | tr '\n' ' ')" = '755 755 755 ' ]
+[ "$(stat -c %a /usr/local/libexec /usr/local/libexec/flclash-oixcloud "$(dirname "$installed")" | tr '\n' ' ')" = '755 755 755 ' ]
 [ "$(sha256sum "$(dirname "$installed")/FlClashCore" | cut -d ' ' -f 1)" = "$CORE_SHA256" ]
 grep -F "ExecStart=\"$installed\"" "$unit"
 cp "$unit" "$fixture/previous.unit"
@@ -45,9 +45,9 @@ expect_failure() {
   "$@" || status=$?
   [ "$status" = 125 ] || { echo "expected Helper failure 125, got $status" >&2; exit 1; }
 }
-chmod 775 /usr/local/libexec /usr/local/libexec/flclash "$(dirname "$installed")"
+chmod 775 /usr/local/libexec /usr/local/libexec/flclash-oixcloud "$(dirname "$installed")"
 "$helper" install
-[ "$(stat -c %a /usr/local/libexec /usr/local/libexec/flclash "$(dirname "$installed")" | tr '\n' ' ')" = '755 755 755 ' ]
+[ "$(stat -c %a /usr/local/libexec /usr/local/libexec/flclash-oixcloud "$(dirname "$installed")" | tr '\n' ' ')" = '755 755 755 ' ]
 # A helper-only upgrade must roll back both binaries as well as the unit.
 printf '\nprevious helper marker\n' >> "$installed"
 cp "$installed" "$fixture/previous.helper"
@@ -65,7 +65,7 @@ chmod 775 /usr/local
 expect_failure "$helper" install
 [ "$(stat -c %a /usr/local)" = 775 ]
 chmod 755 /usr/local
-root=/usr/local/libexec/flclash
+root=/usr/local/libexec/flclash-oixcloud
 chmod 777 "$root"
 expect_failure "$helper" install
 [ "$(stat -c %a "$root")" = 777 ]
@@ -110,7 +110,7 @@ printf '#!/bin/sh\nexit 1\n' > "$fixture/App Image 100%/FlClashCore"
 export CORE_SHA256=$(sha256sum "$fixture/App Image 100%/FlClashCore" | cut -d ' ' -f 1)
 cargo build --locked --offline
 cp target/debug/helper "$fixture/App Image 100%/FlClashHelperService"
-installed="/usr/local/libexec/flclash/$CORE_SHA256/FlClashHelperService"
+installed="/usr/local/libexec/flclash-oixcloud/$CORE_SHA256/FlClashHelperService"
 "$helper" install
 [ -x "$installed" ] && [ ! -e "$previous" ]
 grep -F "ExecStart=\"$installed\"" "$unit"
@@ -118,5 +118,5 @@ rm -rf "$fixture/App Image 100%"
 chmod 775 /usr/local/libexec "$root"
 "$installed" uninstall
 [ "$(stat -c %a /usr/local/libexec)" = 755 ]
-[ ! -e "$unit" ] && [ ! -e /usr/local/libexec/flclash ]
+[ ! -e "$unit" ] && [ ! -e /usr/local/libexec/flclash-oixcloud ]
 echo 'Linux installation, legacy permissions, failure codes, path isolation, rollback and upgrade cleanup passed'

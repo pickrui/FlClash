@@ -53,7 +53,10 @@ exit 23
           ..writeAsStringSync(
             File('docker/root/defaults/autostart')
                 .readAsStringSync()
-                .replaceAll('/usr/share/FlClash/FlClash', 'FlClash'),
+                .replaceAll(
+                  '/usr/share/flclash-oixcloud/flclash-oixcloud',
+                  'FlClash',
+                ),
           );
         final result = await Process.run(
           '/bin/bash',

@@ -17,6 +17,7 @@ import 'package:material_ui/material_ui.dart';
 const safeModeBuild = bool.fromEnvironment('SAFE_MODE');
 const appName = 'FlClash for oixCloud';
 const appHelperService = 'FlClashHelperService';
+const windowsHelperServiceName = 'FlClashOixCloudHelper';
 const coreManifestName = 'manifest.json';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
@@ -26,7 +27,7 @@ final unixSocketPath = createUnixSocketPath(isLinux: Platform.isLinux);
 final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${_randomPipeId()}';
 const helperPort = 47890;
 const helperPortKey =
-    'SYSTEM\\CurrentControlSet\\Services\\$appHelperService\\Runtime';
+    'SYSTEM\\CurrentControlSet\\Services\\$windowsHelperServiceName\\Runtime';
 const helperPortValue = 'Port';
 const helperProtocolVersionHeader = 'x-flclash-helper-protocol';
 final helperProtocolVersion = Platform.isWindows ? '8' : '6';

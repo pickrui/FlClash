@@ -19,7 +19,7 @@ use windows_sys::Win32::System::Threading::{
     SYNCHRONIZATION_SYNCHRONIZE,
 };
 
-const INSTALL_LOCK: &str = r"Global\FlClashHelperService.Install.v1";
+const INSTALL_LOCK: &str = r"Global\FlClashOixCloudHelper.Install.v1";
 const INSTALL_LOCK_SECURITY: &str = "D:P(A;;GA;;;SY)(A;;GA;;;BA)";
 
 pub(super) fn acquire(source: Option<InstallLockSource>) -> Result<OwnedHandle> {

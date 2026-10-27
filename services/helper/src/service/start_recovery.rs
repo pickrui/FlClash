@@ -54,7 +54,8 @@ pub(super) mod registry {
     use windows_sys::Win32::Foundation::ERROR_FILE_NOT_FOUND;
     use windows_sys::Win32::System::Registry::*;
 
-    pub(super) const PATH: &str = r"SYSTEM\CurrentControlSet\Control\FlClashHelperMaintenance";
+    pub(super) const PATH: &str =
+        r"SYSTEM\CurrentControlSet\Control\FlClashOixCloudHelperMaintenance";
     const VALUE: *const u16 = w!("DisabledStart");
 
     pub(in crate::service) struct RecoveryKey(HKEY);

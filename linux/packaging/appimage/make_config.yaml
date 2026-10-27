@@ -1,4 +1,4 @@
-display_name: FlClash
+display_name: FlClash for oixCloud
 
 icon: ./assets/images/icon.png
 
@@ -13,7 +13,7 @@ keywords:
   - ClashMeta
   - Proxy
 
-generic_name: FlClash
+generic_name: FlClash for oixCloud
 
 categories:
   - Network

@@ -7,6 +7,7 @@ AppPublisherURL={{PUBLISHER_URL}}
 AppSupportURL={{PUBLISHER_URL}}
 AppUpdatesURL={{PUBLISHER_URL}}
 DefaultDirName={{INSTALL_DIR_NAME}}
+DisableDirPage=no
 DisableProgramGroupPage=yes
 OutputDir=.
 OutputBaseFilename={{OUTPUT_BASE_FILENAME}}
@@ -21,7 +22,7 @@ ArchitecturesInstallIn64BitMode={% if ARCH == 'x64' %}x64os{% else %}{{ARCH}}{% 
 
 [Code]
 const
-  HelperRecoveryKey = 'SYSTEM\CurrentControlSet\Control\FlClashHelperMaintenance';
+  HelperRecoveryKey = 'SYSTEM\CurrentControlSet\Control\FlClashOixCloudHelperMaintenance';
 #emit "  PackagedHelperSHA256 = '" + GetSHA256OfFile("{{SOURCE_DIR}}\FlClashHelperService.exe") + "';"
 #emit "  PackagedCoreSHA256 = '" + GetSHA256OfFile("{{SOURCE_DIR}}\FlClashCore.exe") + "';"
 
@@ -51,6 +52,7 @@ function HelperReadRegistryString(Root: THandle; Key, Name: String; Flags: LongW
 
 var
   HelperRecoveryPending, HelperRestoreFailed: Boolean;
+  LegacyHelperService, LegacyHelperRecovery: Boolean;
   OldHelperSHA256, OldCoreSHA256: String;
   RestoreHelperService: Boolean;
   HelperOwnerSid: String;
@@ -68,7 +70,7 @@ begin
   Attributes.InheritHandle := 0;
   if HelperConvertSecurity('D:P(A;;GA;;;SY)(A;;GA;;;BA)', 1, Attributes.Descriptor, 0) = 0 then Exit;
   try
-    HelperInstallLock := HelperCreateMutex(Attributes, 0, 'Global\FlClashHelperService.Install.v1');
+    HelperInstallLock := HelperCreateMutex(Attributes, 0, 'Global\FlClashOixCloudHelper.Install.v1');
     ErrorCode := DLLGetLastError;
   finally
     HelperLocalFree(Attributes.Descriptor);
@@ -99,25 +101,47 @@ end;
 
 procedure KillProcesses;
 var
-  Processes: TArrayOfString;
-  i: Integer;
+  AppDir, Command: String;
   ResultCode: Integer;
 begin
-  Processes := ['FlClash.exe', 'FlClashCore.exe'];
-
-  for i := 0 to GetArrayLength(Processes)-1 do
-  begin
-    Exec('taskkill', '/f /im ' + Processes[i], '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  end;
+  AppDir := ExpandConstant('{app}');
+  StringChangeEx(AppDir, '''', '''''', True);
+  Command := '-NoProfile -NonInteractive -Command "' +
+    '$targets = @(' + '''' + AppDir + '\FlClash.exe' + '''' + ', ' +
+    '''' + AppDir + '\FlClashCore.exe' + '''' + '); ' +
+    'Get-CimInstance Win32_Process | Where-Object { $targets -contains $_.ExecutablePath } | ' +
+    'ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop }"';
+  Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'), Command,
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 end;
 
-function UnregisterHelperService(HelperPath: String): Boolean;
+function IsApplicationDirectory: Boolean;
 var
+  AppPath: String;
+  ResultCode: Integer;
+begin
+  AppPath := ExpandConstant('{app}\FlClash.exe');
+  Result := not FileExists(AppPath);
+  if Result then Exit;
+  StringChangeEx(AppPath, '''', '''''', True);
+  Result := Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
+    '-NoProfile -NonInteractive -Command "if ((Get-Item -LiteralPath ' +
+    '''' + AppPath + '''' + ').VersionInfo.InternalName -eq ' +
+    '''com.oixcloud.clash''' + ') { exit 0 } else { exit 1 }"',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  if Result then Result := ResultCode = 0;
+end;
+
+function UnregisterHelperService(HelperPath: String; Legacy: Boolean): Boolean;
+var
+  Arguments: String;
   ResultCode: Integer;
 begin
   Result := False;
   if not FileExists(HelperPath) then Exit;
-  Result := Exec(HelperPath, 'uninstall' + HelperInstallLockArguments, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Arguments := 'uninstall';
+  if not Legacy then Arguments := Arguments + HelperInstallLockArguments;
+  Result := Exec(HelperPath, Arguments, '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   if Result then Result := ResultCode = 0;
 end;
 
@@ -139,11 +163,20 @@ end;
 { Setup cannot tell which account the Helper serves, so it keeps the one registered before. }
 function ReadHelperOwner: Boolean;
 var
-  ImagePath: String;
+  ImagePath, ExpectedPath: String;
   FlagAt: Integer;
 begin
-  Result := ReadHelperRegistryString('SYSTEM\CurrentControlSet\Services\FlClashHelperService',
+  LegacyHelperService := False;
+  Result := ReadHelperRegistryString('SYSTEM\CurrentControlSet\Services\FlClashOixCloudHelper',
     'ImagePath', $10000006, ImagePath);
+  if not Result and FileExists(ExpandConstant('{app}\FlClash.exe')) then
+  begin
+    Result := ReadHelperRegistryString('SYSTEM\CurrentControlSet\Services\FlClashHelperService',
+      'ImagePath', $10000006, ImagePath);
+    ExpectedPath := '"' + ExpandConstant('{app}\FlClashHelperService.exe') + '"';
+    Result := Result and (CompareText(Copy(ImagePath, 1, Length(ExpectedPath)), ExpectedPath) = 0);
+    LegacyHelperService := Result;
+  end;
   if not Result then Exit;
   FlagAt := Pos(' --owner-sid ', ImagePath);
   if FlagAt > 0 then
@@ -173,12 +206,16 @@ end;
 
 procedure LoadHelperRecovery;
 var
-  Value: String;
+  Value, LegacyFlag: String;
   i: Integer;
 begin
   HelperRecoveryPending := False;
   if not ReadHelperRegistryString(HelperRecoveryKey, 'Upgrade', 2, Value) then Exit;
-  if TakeRecoveryField(Value) <> '1' then RaiseException('Unsupported FlClash helper recovery record');
+  if TakeRecoveryField(Value) <> '2' then RaiseException('Unsupported FlClash helper recovery record');
+  LegacyFlag := TakeRecoveryField(Value);
+  if (LegacyFlag <> '0') and (LegacyFlag <> '1') then
+    RaiseException('Invalid FlClash helper recovery service');
+  LegacyHelperRecovery := LegacyFlag = '1';
   HelperOwnerSid := TakeRecoveryField(Value);
   if (HelperOwnerSid <> '') and (Copy(HelperOwnerSid, 1, 4) <> 'S-1-') then
     RaiseException('Invalid FlClash helper recovery account');
@@ -201,11 +238,16 @@ begin
 end;
 
 procedure SaveHelperRecovery;
+var
+  RecordPrefix: String;
 begin
+  LegacyHelperRecovery := LegacyHelperService;
+  RecordPrefix := '2|0|';
+  if LegacyHelperRecovery then RecordPrefix := '2|1|';
   OldHelperSHA256 := InstalledHash('FlClashHelperService.exe');
   OldCoreSHA256 := InstalledHash('FlClashCore.exe');
   if not RegWriteStringValue(HKLM, HelperRecoveryKey, 'Upgrade',
-    '1|' + HelperOwnerSid + '|' + OldHelperSHA256 + '|' + OldCoreSHA256 + '|' + ExpandConstant('{app}')) then
+    RecordPrefix + HelperOwnerSid + '|' + OldHelperSHA256 + '|' + OldCoreSHA256 + '|' + ExpandConstant('{app}')) then
     RaiseException('The FlClash helper recovery record could not be saved');
   HelperRecoveryPending := True;
 end;
@@ -223,8 +265,8 @@ end;
 procedure RegisterHelperService(AllowUnchangedFiles: Boolean);
 var
   ResultCode: Integer;
-  HelperHash, CoreHash: String;
-  FilesComplete: Boolean;
+  HelperHash, CoreHash, HelperPath, Arguments: String;
+  FilesComplete, RestoreLegacy: Boolean;
 begin
   RestoreHelperService := False;
   HelperRestoreFailed := True;
@@ -235,14 +277,24 @@ begin
       CoreHash := InstalledHash('FlClashCore.exe');
       FilesComplete := (HelperHash = Lowercase(PackagedHelperSHA256)) and
         (CoreHash = Lowercase(PackagedCoreSHA256));
+      RestoreLegacy := False;
       if AllowUnchangedFiles and (OldHelperSHA256 <> '') and (OldCoreSHA256 <> '') then
+      begin
+        RestoreLegacy := LegacyHelperRecovery and not FilesComplete and
+          (HelperHash = OldHelperSHA256) and (CoreHash = OldCoreSHA256);
         FilesComplete := FilesComplete or ((HelperHash = OldHelperSHA256) and (CoreHash = OldCoreSHA256));
+      end;
       if not FilesComplete then
         RaiseException('The FlClash helper files are incomplete. Run the installer again to repair them');
-      if not Exec(ExpandConstant('{tmp}\FlClashHelperService.exe'),
-        'install --owner-sid ' + HelperOwnerSid + ' --service-path "' +
-        ExpandConstant('{app}\FlClashHelperService.exe') + '"' + HelperInstallLockArguments, '',
-        SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+      HelperPath := ExpandConstant('{tmp}\FlClashHelperService.exe');
+      Arguments := 'install --owner-sid ' + HelperOwnerSid + ' --service-path "' +
+        ExpandConstant('{app}\FlClashHelperService.exe') + '"' + HelperInstallLockArguments;
+      if RestoreLegacy then
+      begin
+        HelperPath := ExpandConstant('{app}\FlClashHelperService.exe');
+        Arguments := 'install --owner-sid ' + HelperOwnerSid;
+      end;
+      if not Exec(HelperPath, Arguments, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
         RaiseException('The FlClash helper registration could not be started. Please retry the installation');
       if ResultCode <> 0 then
         RaiseException('The FlClash helper service could not be registered. Please retry the installation');
@@ -263,9 +315,14 @@ end;
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
   HadHelperService: Boolean;
-  PendingOwner: String;
+  PendingOwner, HelperPath: String;
 begin
   Result := '';
+  if not IsApplicationDirectory then
+  begin
+    Result := 'This directory is not a verified FlClash for oixCloud installation. Choose a separate directory';
+    Exit;
+  end;
   if HelperInstallLock <> 0 then Exit;
   if not AcquireHelperInstallLock then
   begin
@@ -288,13 +345,15 @@ begin
     end
     else
     begin
-      if RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\FlClashHelperService') then
+      if RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\FlClashOixCloudHelper') then
         RaiseException('The FlClash helper service account could not be read. Please retry the installation');
       HelperOwnerSid := PendingOwner;
     end;
     ExtractTemporaryFile('FlClashHelperService.exe');
     if HadHelperService and not HelperRecoveryPending then SaveHelperRecovery;
-    if not UnregisterHelperService(ExpandConstant('{tmp}\FlClashHelperService.exe')) then
+    HelperPath := ExpandConstant('{tmp}\FlClashHelperService.exe');
+    if LegacyHelperService then HelperPath := ExpandConstant('{app}\FlClashHelperService.exe');
+    if not UnregisterHelperService(HelperPath, LegacyHelperService) then
       Result := 'The FlClash helper has not finished stopping. Please retry the installation';
   except
     Result := GetExceptionMessage;
@@ -309,12 +368,23 @@ begin
   if not IsAppUpdate then KillProcesses;
 end;
 
+procedure RemoveLegacyUninstallEntry;
+var
+  Key, InstallDir: String;
+begin
+  Key := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\728B3532-C74B-4870-9068-BE70FE12A3E6_is1';
+  if RegQueryStringValue(HKLM, Key, 'InstallLocation', InstallDir) and
+    (CompareText(AddBackslash(InstallDir), AddBackslash(ExpandConstant('{app}'))) = 0) then
+    RegDeleteKeyIncludingSubkeys(HKLM, Key);
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
     try
       if RestoreHelperService then RegisterHelperService(False);
+      if not HelperRestoreFailed then RemoveLegacyUninstallEntry;
     finally
       ReleaseHelperInstallLock;
     end;
@@ -338,7 +408,7 @@ begin
   Result := False;
   try
     LoadHelperRecovery;
-    if UnregisterHelperService(ExpandConstant('{app}\FlClashHelperService.exe')) then
+    if UnregisterHelperService(ExpandConstant('{app}\FlClashHelperService.exe'), False) then
     begin
       ClearHelperRecovery;
       KillProcesses;
@@ -366,10 +436,10 @@ var
   Value: String;
   i: Integer;
 begin
-  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{APP_NAME}}', Value) and PointsIntoApp(Value) then
+  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{DISPLAY_NAME}}', Value) and PointsIntoApp(Value) then
   begin
-    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{APP_NAME}}');
-    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run', '{{APP_NAME}}');
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{DISPLAY_NAME}}');
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run', '{{DISPLAY_NAME}}');
   end;
 
   Schemes := ['clash', 'clashmeta', 'flclash'];

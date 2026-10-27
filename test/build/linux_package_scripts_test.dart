@@ -22,13 +22,19 @@ void main() {
         ) as YamlMap;
         String script(String key) => (config[key] as YamlList)
             .join('\n')
-            .replaceAll('/usr/share/FlClash', '${root.path}/app')
-            .replaceAll('/usr/local/libexec/flclash', '${root.path}/installed')
+            .replaceAll('/usr/share/', '${root.path}/share/')
+            .replaceAll('/usr/local/libexec/', '${root.path}/libexec/')
             .replaceAll('/etc/systemd/system', '${root.path}/units')
             .replaceAll('/run/systemd/system', '${root.path}/systemd');
         final bin = Directory('${root.path}/bin')..createSync();
-        final app = Directory('${root.path}/app')..createSync();
+        final app = Directory('${root.path}/share/flclash-oixcloud')
+          ..createSync(recursive: true);
+        final original = Directory('${root.path}/libexec/flclash')
+          ..createSync(recursive: true);
+        File('${original.path}/core').writeAsStringSync('original');
         final units = Directory('${root.path}/units')..createSync();
+        final originalUnit = File('${units.path}/flclash-helper.service')
+          ..writeAsStringSync('original');
         final log = File('${root.path}/log')..writeAsStringSync('');
         Future<void> executable(String path, String body) async {
           File(path).writeAsStringSync('#!/bin/sh\n$body\n');
@@ -71,11 +77,12 @@ void main() {
         await run('postinstall_scripts', 'configure');
         expect(log.readAsStringSync(), contains('chmod u-s'));
         expect(log.readAsStringSync(), isNot(contains('helper install')));
-        final unit = File('${units.path}/flclash-helper.service')
+        final unit = File('${units.path}/flclash-oixcloud-helper.service')
           ..writeAsStringSync('Environment=FLCLASH_HELPER_OWNER_UID=1000\n');
         await run('postinstall_scripts', 'configure');
         expect(log.readAsStringSync(), contains('helper install owner=1000'));
-        final installed = Directory('${root.path}/installed')..createSync();
+        final installed = Directory('${root.path}/libexec/flclash-oixcloud')
+          ..createSync();
         File('${installed.path}/core')
             .writeAsStringSync('retained until removal');
         log.writeAsStringSync('');
@@ -86,7 +93,12 @@ void main() {
         await run('postuninstall_scripts', format == 'deb' ? 'remove' : '0');
         expect(unit.existsSync(), false);
         expect(installed.existsSync(), false);
-        expect(log.readAsStringSync(), contains('systemctl disable --now'));
+        expect(
+          log.readAsStringSync(),
+          contains('systemctl disable --now flclash-oixcloud-helper.service'),
+        );
+        expect(originalUnit.readAsStringSync(), 'original');
+        expect(File('${original.path}/core').readAsStringSync(), 'original');
       },
       skip: Platform.isWindows,
     );
