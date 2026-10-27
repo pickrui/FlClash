@@ -606,8 +606,8 @@ fn get_logs() -> impl Reply {
     let log_buffer = LOGS.lock().unwrap();
     let value = log_buffer
         .iter()
-        .cloned()
-        .collect::<Vec<String>>()
+        .map(String::as_str)
+        .collect::<Vec<_>>()
         .join("\n");
     warp::reply::with_header(
         warp::reply::with_header(value, "Content-Type", "text/plain; charset=utf-8"),

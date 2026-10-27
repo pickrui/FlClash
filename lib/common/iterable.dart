@@ -42,29 +42,12 @@ extension ListExt<T> on List<T> {
   }
 
   void addOrRemove(T value) {
-    if (contains(value)) {
-      remove(value);
-    } else {
-      add(value);
-    }
+    if (!remove(value)) add(value);
   }
 }
 
 extension SetExt<T> on Set<T> {
   void addOrRemove(T value) {
-    if (contains(value)) {
-      remove(value);
-    } else {
-      add(value);
-    }
-  }
-}
-
-extension MapExt<K, V> on Map<K, V> {
-  V updateCacheValue(K key, V Function() callback) {
-    if (this[key] == null) {
-      this[key] = callback();
-    }
-    return this[key]!;
+    if (!remove(value)) add(value);
   }
 }

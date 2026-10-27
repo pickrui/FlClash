@@ -241,13 +241,10 @@ class TunMtuItem extends ConsumerWidget {
             : null;
       },
       onChanged: (value) {
-        final parsed = int.tryParse(value ?? '');
-        if (parsed == null) return;
+        if (value == null) return;
         ref
             .read(patchClashConfigProvider.notifier)
-            .update(
-              (state) => state.copyWith.tun(mtu: normalizeTunMtu(parsed)),
-            );
+            .update((state) => state.copyWith.tun(mtu: int.parse(value)));
       },
     );
   }

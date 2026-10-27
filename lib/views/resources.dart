@@ -153,13 +153,8 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
         },
       ),
     );
-    final interval = int.tryParse(value ?? '');
-    if (interval == null ||
-        interval <= 0 ||
-        interval > maxGeoUpdateInterval ||
-        !mounted) {
-      return;
-    }
+    if (value == null || !mounted) return;
+    final interval = int.parse(value);
     ref
         .read(patchClashConfigProvider.notifier)
         .update((state) => state.copyWith(geoUpdateInterval: interval));

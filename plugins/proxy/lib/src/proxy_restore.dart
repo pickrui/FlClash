@@ -20,7 +20,6 @@ extension _RestoreProxy on Proxy {
     List<ProxyCommand> rollbackCommands,
   ) async {
     final appliedCommands = commands.toList();
-    final ownsProxy = _restoreCommands != null;
     final previousRestore = _restoreCommands;
     final previousManaged = _managedCommands;
     final restoreCommands = previousRestore == null
@@ -47,7 +46,6 @@ extension _RestoreProxy on Proxy {
       )) {
         await _rollbackProxyTransition(
           rollbackCommands,
-          ownsProxy: ownsProxy,
           previousRestore: previousRestore,
           previousManaged: previousManaged,
         );
@@ -59,7 +57,6 @@ extension _RestoreProxy on Proxy {
     }
     await _rollbackProxyTransition(
       rollbackCommands,
-      ownsProxy: ownsProxy,
       previousRestore: previousRestore,
       previousManaged: previousManaged,
     );
@@ -68,7 +65,6 @@ extension _RestoreProxy on Proxy {
 
   Future<bool> _rollbackProxyTransition(
     List<ProxyCommand> rollbackCommands, {
-    required bool ownsProxy,
     required List<ProxyCommand>? previousRestore,
     required List<ProxyCommand>? previousManaged,
   }) async {
@@ -78,9 +74,9 @@ extension _RestoreProxy on Proxy {
     );
     await _notifyKdeProxyChange(rollbackCommands);
     if (!rolledBack) return false;
-    if (ownsProxy) {
+    if (previousRestore != null) {
       if (!await _persistRestoreCommands(
-        previousRestore!,
+        previousRestore,
         previousManaged,
         null,
       )) {
@@ -337,22 +333,6 @@ extension _RestoreProxy on Proxy {
         2 || 3 => value['restoreCommands'],
         _ => null,
       };
-      if (rawCommands is! List) {
-        return (
-          status: _RestoreSnapshotStatus.invalid,
-          commands: null,
-          managedCommands: null,
-          pendingCommands: null,
-        );
-      }
-      if (rawCommands.isEmpty || rawCommands.length > 512) {
-        return (
-          status: _RestoreSnapshotStatus.invalid,
-          commands: null,
-          managedCommands: null,
-          pendingCommands: null,
-        );
-      }
       List<ProxyCommand>? parseCommands(Object? rawValue) {
         if (rawValue is! List || rawValue.isEmpty || rawValue.length > 512) {
           return null;

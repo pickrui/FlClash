@@ -125,7 +125,7 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
     if (!definedIds.add(id)) {
       throw const FormatException('duplicate legacy id');
     }
-    final newId = idMap.updateCacheValue(rawScript['id'], () => _legacyId(id));
+    final newId = idMap.putIfAbsent(rawScript['id'], () => _legacyId(id));
     final path = _getScriptPath(targetPath, newId.toString());
     final file = File(path);
     await file.safeWriteAsString(content);
@@ -146,10 +146,7 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
     if (rawRuleId == null || !definedIds.add(rawRuleId)) {
       throw const FormatException('invalid or duplicate legacy rule id');
     }
-    final id = idMap.updateCacheValue(
-      ruleMap['id'],
-      () => _legacyId(rawRuleId),
-    );
+    final id = idMap.putIfAbsent(ruleMap['id'], () => _legacyId(rawRuleId));
     ruleMap['id'] = id;
     rules.add(Rule.fromJson(ruleMap));
     links.add(ProfileRuleLink(ruleId: id, order: globalOrders[index]));
@@ -173,7 +170,7 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
     if (!await sourceFile.exists()) {
       continue;
     }
-    final profileId = idMap.updateCacheValue(rawId, () => _legacyId(rawId));
+    final profileId = idMap.putIfAbsent(rawId, () => _legacyId(rawId));
     profileMap['id'] = profileId;
     final overwrite = profileMap['overwrite'] as Map?;
     if (overwrite != null) {
@@ -187,7 +184,7 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
           if (addRuleId == null || !definedIds.add(addRuleId)) {
             throw const FormatException('invalid or duplicate legacy rule id');
           }
-          final id = idMap.updateCacheValue(
+          final id = idMap.putIfAbsent(
             addRuleMap['id'],
             () => _legacyId(addRuleId),
           );

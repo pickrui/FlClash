@@ -126,6 +126,32 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
         : isStart
         ? (appLocalizations.running, DashboardChipTone.ok)
         : (appLocalizations.notRunning, DashboardChipTone.idle);
+    final exit = Row(
+      spacing: metrics.gap,
+      children: [
+        Expanded(
+          child: _ExitRow(
+            info: ipInfo,
+            failed: failed,
+            checking: detection.isLoading,
+            onRefresh: _refresh,
+            active: isStart,
+            running: isStart && !suspended,
+            metrics: metrics,
+          ),
+        ),
+        SizedBox(
+          width: metrics.buttonSlot,
+          child: Center(
+            child: _StartToggle(
+              size: metrics.buttonSize,
+              hasProfile: hasProfile,
+              statusUpdater: widget.statusUpdater,
+            ),
+          ),
+        ),
+      ],
+    );
     return DashboardCard(
       padding: EdgeInsets.zero,
       semanticLabel: appLocalizations.status,
@@ -173,60 +199,34 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
           ),
           Padding(
             padding: metrics.padding,
-            child: Row(
-              spacing: metrics.gap,
+            child: Column(
+              mainAxisSize: density.isDesktop
+                  ? MainAxisSize.max
+                  : MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      DashboardCardHeader(
-                        glyph: AppGlyphs.status,
-                        title: appLocalizations.status,
-                        leading: [
-                          DashboardChip(
-                            label: chipLabel,
-                            tone: chipTone,
-                            dot: isStart,
-                          ),
-                        ],
-                        trailing: [
-                          if (density.isDesktop &&
-                              (system.isWindows || system.isMacOS))
-                            DashboardIconButton(
-                              glyph: AppGlyphs.wrench,
-                              tooltip: appLocalizations.diagTitle,
-                              onPressed: () => showNetworkDiagnostics(context),
-                            ),
-                        ],
-                      ),
-                      SizedBox(height: metrics.ipTop),
-                      _ExitRow(
-                        info: ipInfo,
-                        failed: failed,
-                        checking: detection.isLoading,
-                        onRefresh: _refresh,
-                        active: isStart,
-                        metrics: metrics,
-                      ),
-                      if (density.isDesktop)
-                        const Spacer()
-                      else
-                        const SizedBox(height: 16),
-                      _RunTimeCell(active: isStart && !suspended),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: metrics.buttonSlot,
-                  child: Center(
-                    child: _StartToggle(
-                      size: metrics.buttonSize,
-                      hasProfile: hasProfile,
-                      statusUpdater: widget.statusUpdater,
+                DashboardCardHeader(
+                  glyph: AppGlyphs.status,
+                  title: appLocalizations.status,
+                  leading: [
+                    DashboardChip(
+                      label: chipLabel,
+                      tone: chipTone,
+                      dot: isStart,
                     ),
-                  ),
+                  ],
+                  trailing: [
+                    if (density.isDesktop &&
+                        (system.isWindows || system.isMacOS))
+                      DashboardIconButton(
+                        glyph: AppGlyphs.wrench,
+                        tooltip: appLocalizations.diagTitle,
+                        onPressed: () => showNetworkDiagnostics(context),
+                      ),
+                  ],
                 ),
+                SizedBox(height: metrics.ipTop),
+                if (density.isDesktop) Expanded(child: exit) else exit,
               ],
             ),
           ),
@@ -308,6 +308,7 @@ class _ExitRow extends ConsumerWidget {
     required this.checking,
     required this.onRefresh,
     required this.active,
+    required this.running,
     required this.metrics,
   });
 
@@ -316,6 +317,7 @@ class _ExitRow extends ConsumerWidget {
   final bool checking;
   final VoidCallback onRefresh;
   final bool active;
+  final bool running;
   final _OutboundMetrics metrics;
 
   @override
@@ -327,7 +329,7 @@ class _ExitRow extends ConsumerWidget {
     final style = DashboardText.figure(
       context,
       metrics.ip,
-      color: active ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+      color: colorScheme.onSurface,
     ).copyWith(letterSpacing: 0);
     final info = this.info;
     final details = info == null || hideIp
@@ -341,78 +343,125 @@ class _ExitRow extends ConsumerWidget {
             if (info.asn case final asn?) 'AS$asn',
           ].join(' · ');
     final appLocalizations = context.appLocalizations;
-    final Widget ip = info != null
-        ? _IpText(ip: info.ip, hidden: hideIp, style: style)
-        : failed
-        ? Text(
-            appLocalizations.serviceFailed,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: style.copyWith(color: colorScheme.error),
-          )
-        : SkeletonText(width: 140, style: style);
-    return Row(
-      spacing: 12,
-      children: [
-        _CountryBadge(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stacked =
+            info != null &&
+            info.ip.contains(':') &&
+            info.ip.length > 20 &&
+            constraints.maxWidth < 320;
+        final badge = _CountryBadge(
           countryCode: hideIp ? null : info?.countryCode,
           size: metrics.badgeSize,
           active: active,
           checking: checking,
           onRefresh: onRefresh,
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height:
-                    metrics.ip.leading * DashboardDensityScope.scaleOf(context),
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: ip,
-                ),
-              ),
-              if (details.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Tooltip(
-                  message: details,
-                  child: Text(
-                    details,
+        );
+        final detailsCell = SizedBox(
+          height: 32 * DashboardDensityScope.scaleOf(context),
+          child: Align(
+            alignment: AlignmentDirectional.topStart,
+            child: details.isNotEmpty
+                ? Tooltip(
+                    message: details,
+                    child: Text(
+                      details,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: DashboardText.label(context),
+                    ),
+                  )
+                : failed
+                ? Text(
+                    appLocalizations.tapIconToRetry,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: DashboardText.label(context),
-                  ),
-                ),
-              ],
-              if (failed) ...[
-                const SizedBox(height: 4),
-                Text(
-                  appLocalizations.tapIconToRetry,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: DashboardText.label(context),
-                ),
-              ],
-            ],
+                  )
+                : null,
           ),
-        ),
-      ],
+        );
+        final text = Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height:
+                  metrics.ip.leading *
+                  DashboardDensityScope.scaleOf(context) *
+                  (stacked ? 1.5 : 1),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: info != null
+                    ? _IpText(
+                        ip: info.ip,
+                        hidden: hideIp,
+                        style: style,
+                        multiline: stacked,
+                      )
+                    : failed
+                    ? Text(
+                        appLocalizations.serviceFailed,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: style.copyWith(color: colorScheme.error),
+                      )
+                    : SkeletonText(width: 140, style: style),
+              ),
+            ),
+            const SizedBox(height: 4),
+            if (stacked)
+              Row(
+                spacing: 8,
+                children: [
+                  badge,
+                  Expanded(child: detailsCell),
+                ],
+              )
+            else
+              detailsCell,
+            SizedBox(height: stacked ? 6 : 10),
+            _RunTimeCell(active: running),
+          ],
+        );
+        return stacked
+            ? text
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 12,
+                children: [
+                  badge,
+                  Expanded(child: text),
+                ],
+              );
+      },
     );
   }
 }
 
 /// Taps hide the address, or show it again.
 class _IpText extends ConsumerWidget {
-  const _IpText({required this.ip, required this.hidden, required this.style});
+  const _IpText({
+    required this.ip,
+    required this.hidden,
+    required this.style,
+    required this.multiline,
+  });
 
   final String ip;
   final bool hidden;
   final TextStyle style;
+  final bool multiline;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final label = context.appLocalizations.hideIp;
+    final split = multiline ? ip.lastIndexOf(':', ip.length ~/ 2) + 1 : 0;
+    final address = hidden
+        ? _ipMask
+        : multiline
+        ? '${ip.substring(0, split)}\n${ip.substring(split)}'
+        : ip;
     return Tooltip(
       message: label,
       child: Semantics(
@@ -429,7 +478,18 @@ class _IpText extends ConsumerWidget {
             hoverColor: Colors.transparent,
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
-            child: DashboardFitText(hidden ? _ipMask : ip, style: style),
+            child: multiline
+                ? FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      address,
+                      maxLines: 2,
+                      softWrap: false,
+                      style: style,
+                    ),
+                  )
+                : DashboardFitText(address, style: style),
           ),
         ),
       ),
@@ -574,22 +634,24 @@ class _RunTimeCell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final runTime = active ? ref.watch(runTimeProvider) : null;
-    return Column(
+    return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
       children: [
-        Text(
-          context.appLocalizations.runTime,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: DashboardText.label(context),
+        Flexible(
+          child: Text(
+            context.appLocalizations.runTime,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: DashboardText.label(context),
+          ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          active ? getTimeText(runTime) : '—',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: _cellStyle(context),
+        Flexible(
+          flex: 2,
+          child: DashboardFitText(
+            active ? getTimeText(runTime) : '—',
+            style: _cellStyle(context),
+          ),
         ),
       ],
     );

@@ -84,19 +84,4 @@ void main() {
       expect(set, {1, 3});
     });
   });
-
-  group('MapExt.updateCacheValue', () {
-    test('creates entry when missing', () {
-      final map = <String, int>{};
-      final result = map.updateCacheValue('a', () => 42);
-      expect(result, 42);
-      expect(map['a'], 42);
-    });
-
-    test('returns existing entry', () {
-      final map = {'a': 10};
-      final result = map.updateCacheValue('a', () => 42);
-      expect(result, 10);
-    });
-  });
 }

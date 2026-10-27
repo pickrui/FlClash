@@ -69,12 +69,13 @@ class _Core implements CoreController {
 Widget _card({
   DashboardDensity density = DashboardDensity.standard,
   Future<void> Function(bool isStart)? statusUpdater,
+  double? width,
 }) => Scaffold(
   body: Align(
     alignment: Alignment.topLeft,
     child: SizedBox(
-      width: density.isDesktop ? 600 : 380,
-      height: density.isDesktop ? 208 : null,
+      width: width ?? (density.isDesktop ? 600 : 380),
+      height: density.isDesktop ? (density.isCompact ? 176 : 208) : null,
       child: DashboardDensityScope(
         density: density,
         scale: 1,
@@ -135,19 +136,26 @@ void main() {
     bool glass = false,
     bool disableAnimations = false,
     Locale? locale = const Locale('en'),
+    double? width,
+    TextScaler? textScaler,
   }) async {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
           locale: locale,
+          textScaler: textScaler,
           child: Builder(
             builder: (context) => MediaQuery(
               data: MediaQuery.of(context)
                   .copyWith(disableAnimations: disableAnimations),
               child: LiquidGlassScope(
                 enabled: glass,
-                child: _card(density: density, statusUpdater: statusUpdater),
+                child: _card(
+                  density: density,
+                  statusUpdater: statusUpdater,
+                  width: width,
+                ),
               ),
             ),
           ),
@@ -272,7 +280,7 @@ void main() {
       }
     });
 
-    testWidgets('short and full-length IPs stay complete on one line', (
+    testWidgets('short and full-length IPs stay complete without overflow', (
       tester,
     ) async {
       await pumpCard(tester);
@@ -287,7 +295,14 @@ void main() {
             ipInfo: IpInfo(ip: ip, countryCode: 'GB'),
           );
           await pumpCard(tester, density: density);
-          final text = find.text(ip);
+          final text = find.byWidgetPredicate(
+            (widget) =>
+                widget is Text && widget.data?.replaceAll('\n', '') == ip,
+          );
+          expect(text, findsOneWidget);
+          if (!ip.contains(':')) {
+            expect(tester.widget<Text>(text).data, ip);
+          }
           final fitted = find.ancestor(
             of: text,
             matching: find.byType(FittedBox),
@@ -304,6 +319,42 @@ void main() {
           expect(painted.right, lessThanOrEqualTo(available.right + 0.01));
           expect(tester.takeException(), isNull);
         }
+      }
+    });
+
+    testWidgets('a narrow card keeps the address and uptime with large text', (
+      tester,
+    ) async {
+      container.read(runTimeProvider.notifier).value = const Duration(
+        hours: 2,
+        minutes: 36,
+      ).inMilliseconds;
+      container.read(networkDetectionProvider);
+      for (final ip in [_ip, '2001:0db8:1234:5678:9abc:def0:1234:5678']) {
+        detection.value = NetworkDetectionState(
+          isLoading: false,
+          ipInfo: IpInfo(ip: ip, countryCode: 'GB'),
+        );
+        await pumpCard(
+          tester,
+          density: DashboardDensity.mobile,
+          width: 288,
+          textScaler: const TextScaler.linear(2),
+        );
+        final address = find.byWidgetPredicate(
+          (widget) => widget is Text && widget.data?.replaceAll('\n', '') == ip,
+        );
+        expect(address, findsOneWidget);
+        expect(find.text('02:36:00'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.tap(address);
+        await tester.pump();
+        expect(find.text('*****'), findsOneWidget);
+        expect(address, findsNothing);
+        await tester.tap(find.text('*****'));
+        await tester.pump();
+        expect(address, findsOneWidget);
+        expect(tester.takeException(), isNull);
       }
     });
 

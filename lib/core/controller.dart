@@ -38,28 +38,20 @@ class PortConflictException implements Exception {
 
 class CoreController {
   static CoreController? _instance;
-  late CoreHandlerInterface _interface;
+  final CoreHandlerInterface _interface;
   final Map<UpdateGeoDataParams, Future<String>> _geoUpdates = {};
   final Queue<Completer<void>> _delayWaiters = Queue();
   int _activeDelayTests = 0;
   final String _delayTestSession = uuidV4;
 
-  CoreController._internal() {
-    if (system.isAndroid) {
-      _interface = coreLib!;
-    } else {
-      _interface = coreService!;
-    }
-  }
+  CoreController._internal()
+    : _interface = system.isAndroid ? coreLib! : coreService!;
 
   @visibleForTesting
   CoreController.forTesting({required CoreHandlerInterface handler})
     : _interface = handler;
 
-  factory CoreController() {
-    _instance ??= CoreController._internal();
-    return _instance!;
-  }
+  factory CoreController() => _instance ??= CoreController._internal();
 
   bool get isCompleted => _interface.isConnected;
 
@@ -69,11 +61,7 @@ class CoreController {
 
   static Future<void> initGeo() async {
     final homePath = await appPath.homeDirPath;
-    final homeDir = Directory(homePath);
-    final isExists = await homeDir.exists();
-    if (!isExists) {
-      await homeDir.create(recursive: true);
-    }
+    await Directory(homePath).create(recursive: true);
     const geoFileNameList = [MMDB, GEOIP, GEOSITE, ASN];
     try {
       for (final geoFileName in geoFileNameList) {
@@ -109,9 +97,7 @@ class CoreController {
     );
   }
 
-  Future<bool> shutdown(bool isUser) async {
-    return _interface.shutdown(isUser);
-  }
+  Future<bool> shutdown(bool isUser) => _interface.shutdown(isUser);
 
   FutureOr<bool> get isInit => _interface.isInit;
 
@@ -132,10 +118,7 @@ class CoreController {
     return _interface.validateFilters(filters);
   }
 
-  Future<String> validateConfig(String path) async {
-    final res = await _interface.validateConfig(path);
-    return res;
-  }
+  Future<String> validateConfig(String path) => _interface.validateConfig(path);
 
   Future<Uint8List> decryptConfigBytes(
     Uint8List bytes,
@@ -144,10 +127,8 @@ class CoreController {
     await _interface.decryptConfigBytes(base64Encode(bytes), secretKey),
   );
 
-  Future<String> validateConfigWithBytes(String data) async {
-    final res = await _interface.validateConfigWithBytes(data);
-    return res;
-  }
+  Future<String> validateConfigWithBytes(String data) =>
+      _interface.validateConfigWithBytes(data);
 
   /// A config of the proxies in a share-link list, plain or base64, once the
   /// Core accepts it; null when [bytes] hold no share links.
@@ -208,9 +189,8 @@ class CoreController {
     }
   }
 
-  Future<String> updateConfig(UpdateParams updateParams) async {
-    return _interface.updateConfig(updateParams);
-  }
+  Future<String> updateConfig(UpdateParams updateParams) =>
+      _interface.updateConfig(updateParams);
 
   Future<String> setupConfig({
     required SetupParams params,
@@ -401,19 +381,16 @@ class CoreController {
     );
   }
 
-  Future<List<ExternalProvider>> getExternalProviders() async {
-    return _interface.getExternalProviders();
-  }
+  Future<List<ExternalProvider>> getExternalProviders() =>
+      _interface.getExternalProviders();
 
   Future<ExternalProvider?> getExternalProvider(
     String externalProviderName, {
     String? providerType,
-  }) async {
-    return _interface.getExternalProvider(
-      externalProviderName,
-      providerType: providerType,
-    );
-  }
+  }) => _interface.getExternalProvider(
+    externalProviderName,
+    providerType: providerType,
+  );
 
   Future<String> previewRuleSet(List<int> content, String behavior) =>
       _interface.previewRuleSet(content, behavior);
@@ -456,20 +433,14 @@ class CoreController {
   Future<String> updateExternalProvider({
     required String providerName,
     String? providerType,
-  }) async {
-    return _interface.updateExternalProvider(
-      providerName,
-      providerType: providerType,
-    );
-  }
+  }) => _interface.updateExternalProvider(
+    providerName,
+    providerType: providerType,
+  );
 
-  Future<bool> startListener() async {
-    return _interface.startListener();
-  }
+  Future<bool> startListener() => _interface.startListener();
 
-  Future<bool> stopListener() async {
-    return _interface.stopListener();
-  }
+  Future<bool> stopListener() => _interface.stopListener();
 
   Future<Delay> getDelay(
     String url,

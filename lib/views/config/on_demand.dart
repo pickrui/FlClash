@@ -200,7 +200,7 @@ class ExcludeNetworksItem extends ConsumerWidget {
       validator: (value) =>
           validNetworkRules(value ?? '') ? null : l10n.excludeNetworksInvalid,
       onChanged: (value) {
-        if (value == null || !validNetworkRules(value)) return;
+        if (value == null) return;
         ref
             .read(networkSettingProvider.notifier)
             .update(
@@ -247,7 +247,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
         },
       ),
     );
-    if (!mounted || value == null || value == ssid || value.isEmpty) return;
+    if (!mounted || value == null || value == ssid) return;
     ref.read(networkSettingProvider.notifier).update((state) {
       final items = state.excludeSSIDs.toList();
       if (items.contains(value)) return state;

@@ -278,17 +278,15 @@ extension BackupControllerExt on AppController {
                 durableMutationStarted = true;
                 var databaseChanged = false;
                 try {
-                  await database.transaction(() async {
-                    await database.restore(
-                      migrationData.profiles,
-                      migrationData.scripts,
-                      migrationData.rules,
-                      migrationData.links,
-                      isOverride: isOverride,
-                      clashProviders: migrationData.clashProviders,
-                      iconSets: migrationData.iconSets,
-                    );
-                  });
+                  await database.restore(
+                    migrationData.profiles,
+                    migrationData.scripts,
+                    migrationData.rules,
+                    migrationData.links,
+                    isOverride: isOverride,
+                    clashProviders: migrationData.clashProviders,
+                    iconSets: migrationData.iconSets,
+                  );
                   databaseChanged = true;
                   final profileIds = (await database.profilesDao.all().get())
                       .map((profile) => profile.id)
@@ -339,17 +337,15 @@ extension BackupControllerExt on AppController {
                   Object? rollbackError;
                   if (databaseChanged) {
                     try {
-                      await database.transaction(() async {
-                        await database.restore(
-                          previousProfiles,
-                          previousScripts,
-                          previousRules,
-                          previousLinks,
-                          isOverride: true,
-                          clashProviders: previousProviders,
-                          iconSets: previousIconSets,
-                        );
-                      });
+                      await database.restore(
+                        previousProfiles,
+                        previousScripts,
+                        previousRules,
+                        previousLinks,
+                        isOverride: true,
+                        clashProviders: previousProviders,
+                        iconSets: previousIconSets,
+                      );
                     } catch (failure) {
                       rollbackError = failure;
                     }

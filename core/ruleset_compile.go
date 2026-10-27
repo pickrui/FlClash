@@ -116,7 +116,8 @@ func compileRuleSetContent(params CompileRuleSetParams) (result *RuleSetInfo, fa
 		}
 		return info, nil
 	}
-	if behavior == cp.Classical {
+	classical := behavior == cp.Classical
+	if classical {
 		behavior, keys = classifyClassical(entries)
 		if behavior == cp.Classical {
 			return nil, errRuleSetUnsupported
@@ -125,12 +126,16 @@ func compileRuleSetContent(params CompileRuleSetParams) (result *RuleSetInfo, fa
 	if params.Behavior != "" && params.Behavior != "classical" && params.Behavior != strings.ToLower(behavior.String()) {
 		return nil, errRuleSetUnsupported
 	}
-	if failure := validateRuleSetEntries(keys); failure != nil {
-		return nil, failure
-	}
-	for _, key := range keys {
-		if failure := validateRuleSetKey(key, behavior); failure != nil {
+	if classical || normalized {
+		if failure := validateRuleSetEntries(keys); failure != nil {
 			return nil, failure
+		}
+	}
+	if classical {
+		for _, key := range keys {
+			if failure := validateRuleSetKey(key, behavior); failure != nil {
+				return nil, failure
+			}
 		}
 	}
 	output := &ruleSetCompileWriter{}

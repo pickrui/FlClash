@@ -217,9 +217,6 @@ extension ProxiesControllerExt on AppController {
         nextSelectedMap[entry.key] = proxyName;
       }
     }
-    if (!_isCurrentGroupsUpdate(profileId, generation)) {
-      return;
-    }
     if (stringAndStringMapEquality.equals(
       currentProfile.selectedMap,
       nextSelectedMap,
