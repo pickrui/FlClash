@@ -9,6 +9,9 @@ package core
 import (
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/listener"
+	LC "github.com/metacubex/mihomo/listener/config"
+	"github.com/metacubex/mihomo/tunnel"
+	"io"
 	"net"
 	"strconv"
 	"testing"
@@ -54,4 +57,83 @@ func TestNetworkExclusionPreservesRunIntentAcrossConfigAndManualStop(t *testing.
 	if isRunning || listener.GetPorts().MixedPort != 0 {
 		t.Fatal("network change undid manual stop")
 	}
+}
+
+func TestNetworkExclusionAndManualStopReleaseAndResumeTunnels(t *testing.T) {
+	resetSuspendTestState(t)
+	previousExcluded := networkExcluded
+	networkExcluded = false
+	t.Cleanup(func() {
+		handleStopListener()
+		listener.PatchTunnel(nil, tunnel.Tunnel)
+		networkExcluded = previousExcluded
+	})
+
+	tcp, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	udp, err := net.ListenPacket("udp", "127.0.0.1:0")
+	if err != nil {
+		tcp.Close()
+		t.Fatal(err)
+	}
+	currentConfig = &config.Config{
+		General: &config.General{BindAddress: "127.0.0.1"},
+		Tunnels: []LC.Tunnel{
+			{Network: []string{"tcp"}, Address: tcp.Addr().String(), Target: "127.0.0.1:9"},
+			{Network: []string{"udp"}, Address: udp.LocalAddr().String(), Target: "127.0.0.1:9"},
+		},
+	}
+	tcp.Close()
+	udp.Close()
+
+	checkPorts := func(stage string, bound bool) {
+		t.Helper()
+		for _, configured := range currentConfig.Tunnels {
+			var probe io.Closer
+			var err error
+			if configured.Network[0] == "tcp" {
+				probe, err = net.Listen("tcp", configured.Address)
+			} else {
+				probe, err = net.ListenPacket("udp", configured.Address)
+			}
+			if err == nil {
+				probe.Close()
+			}
+			if (err != nil) != bound {
+				t.Fatalf("%s: %s tunnel bound=%v, want %v (bind error: %v)", stage, configured.Network[0], err != nil, bound, err)
+			}
+		}
+	}
+
+	listener.PatchTunnel(currentConfig.Tunnels, tunnel.Tunnel)
+	if !handleStartListener() {
+		t.Fatal("listener not started")
+	}
+	checkPorts("start", true)
+	handleSetNetworkExcluded(true)
+	if !isRunning {
+		t.Fatal("exclusion discarded run intent")
+	}
+	checkPorts("excluded", false)
+	updateListeners()
+	if !handleStartListener() {
+		t.Fatal("start while excluded failed")
+	}
+	checkPorts("reload and start while excluded", false)
+	handleSetNetworkExcluded(false)
+	checkPorts("network resumed", true)
+	handleStopListener()
+	checkPorts("manually stopped", false)
+	handleSetNetworkExcluded(true)
+	handleSetNetworkExcluded(false)
+	checkPorts("network changed after manual stop", false)
+	if isRunning {
+		t.Fatal("network change undid manual stop")
+	}
+	if !handleStartListener() {
+		t.Fatal("manual restart failed")
+	}
+	checkPorts("manually restarted", true)
 }

@@ -387,18 +387,11 @@ class _ExitRow extends ConsumerWidget {
           children: [
             SizedBox(
               height:
-                  metrics.ip.leading *
-                  DashboardDensityScope.scaleOf(context) *
-                  (stacked ? 1.5 : 1),
+                  metrics.ip.leading * DashboardDensityScope.scaleOf(context),
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: info != null
-                    ? _IpText(
-                        ip: info.ip,
-                        hidden: hideIp,
-                        style: style,
-                        multiline: stacked,
-                      )
+                    ? _IpText(ip: info.ip, hidden: hideIp, style: style)
                     : failed
                     ? Text(
                         appLocalizations.serviceFailed,
@@ -441,27 +434,16 @@ class _ExitRow extends ConsumerWidget {
 
 /// Taps hide the address, or show it again.
 class _IpText extends ConsumerWidget {
-  const _IpText({
-    required this.ip,
-    required this.hidden,
-    required this.style,
-    required this.multiline,
-  });
+  const _IpText({required this.ip, required this.hidden, required this.style});
 
   final String ip;
   final bool hidden;
   final TextStyle style;
-  final bool multiline;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final label = context.appLocalizations.hideIp;
-    final split = multiline ? ip.lastIndexOf(':', ip.length ~/ 2) + 1 : 0;
-    final address = hidden
-        ? _ipMask
-        : multiline
-        ? '${ip.substring(0, split)}\n${ip.substring(split)}'
-        : ip;
+    final address = hidden ? _ipMask : ip;
     return Tooltip(
       message: label,
       child: Semantics(
@@ -478,18 +460,7 @@ class _IpText extends ConsumerWidget {
             hoverColor: Colors.transparent,
             splashColor: Colors.transparent,
             highlightColor: Colors.transparent,
-            child: multiline
-                ? FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Text(
-                      address,
-                      maxLines: 2,
-                      softWrap: false,
-                      style: style,
-                    ),
-                  )
-                : DashboardFitText(address, style: style),
+            child: DashboardFitText(address, style: style),
           ),
         ),
       ),

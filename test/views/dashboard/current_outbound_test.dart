@@ -280,7 +280,7 @@ void main() {
       }
     });
 
-    testWidgets('short and full-length IPs stay complete without overflow', (
+    testWidgets('short and full-length IPs fit on one line without overflow', (
       tester,
     ) async {
       await pumpCard(tester);
@@ -295,14 +295,8 @@ void main() {
             ipInfo: IpInfo(ip: ip, countryCode: 'GB'),
           );
           await pumpCard(tester, density: density);
-          final text = find.byWidgetPredicate(
-            (widget) =>
-                widget is Text && widget.data?.replaceAll('\n', '') == ip,
-          );
+          final text = find.text(ip);
           expect(text, findsOneWidget);
-          if (!ip.contains(':')) {
-            expect(tester.widget<Text>(text).data, ip);
-          }
           final fitted = find.ancestor(
             of: text,
             matching: find.byType(FittedBox),
@@ -310,6 +304,12 @@ void main() {
           expect(fitted, findsOneWidget);
           final paragraph = tester.renderObject<RenderParagraph>(text);
           expect(paragraph.didExceedMaxLines, isFalse);
+          expect(
+            paragraph.getBoxesForSelection(
+              TextSelection(baseOffset: 0, extentOffset: ip.length),
+            ),
+            hasLength(1),
+          );
           final painted = MatrixUtils.transformRect(
             paragraph.getTransformTo(null),
             Offset.zero & paragraph.size,
@@ -341,9 +341,7 @@ void main() {
           width: 288,
           textScaler: const TextScaler.linear(2),
         );
-        final address = find.byWidgetPredicate(
-          (widget) => widget is Text && widget.data?.replaceAll('\n', '') == ip,
-        );
+        final address = find.text(ip);
         expect(address, findsOneWidget);
         expect(find.text('02:36:00'), findsOneWidget);
         expect(tester.takeException(), isNull);

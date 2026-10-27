@@ -26,6 +26,7 @@ func updateListeners() {
 	listeners := currentConfig.Listeners
 	general := currentConfig.General
 	listener.PatchInboundListeners(listeners, tunnel.Tunnel, true)
+	listener.PatchTunnel(currentConfig.Tunnels, tunnel.Tunnel)
 
 	listener.SetAllowLan(general.AllowLan)
 	inbound.SetSkipAuthPrefixes(general.SkipAuthPrefixes)

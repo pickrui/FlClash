@@ -204,7 +204,10 @@ extension CoreControllerExt on AppController {
     );
   }
 
-  Future<AuthorizeCode> _requestAdmin(bool enableTun) async {
+  Future<AuthorizeCode> _requestAdmin(
+    bool enableTun, {
+    required bool Function() shouldContinue,
+  }) async {
     // Android's VpnService needs no elevation, and a TUN flag restored from a
     // desktop backup must not turn into an authorization failure.
     if (safeModeBuild || system.isAndroid) {
@@ -214,6 +217,7 @@ extension CoreControllerExt on AppController {
     final realTunEnable = _ref.read(realTunEnableProvider);
     if (enableTun != realTunEnable && realTunEnable == false) {
       final code = await system.authorizeCore();
+      if (!shouldContinue()) return AuthorizeCode.none;
       switch (code) {
         case AuthorizeCode.success:
           _ref.read(realTunEnableProvider.notifier).value = enableTun;

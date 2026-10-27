@@ -73,9 +73,13 @@ class NodePages extends ChangeNotifier {
   /// A selection made elsewhere leaves cached pages valid but moves the
   /// selected index, so the first page is read again.
   Future<int> locateSelected() async {
+    final generation = _generation;
     final first = _pages.remove(0);
     if (first != null) _previous[0] = first;
     await load(0);
+    if (_disposed || generation != _generation || !_pages.containsKey(0)) {
+      return -1;
+    }
     return selectedIndex;
   }
 

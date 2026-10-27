@@ -166,7 +166,11 @@ class _StreamSocket extends Stream<Uint8List> implements Socket {
       onListen: () => _setReadEvents(true),
       onPause: () => _setReadEvents(false),
       onResume: () => _setReadEvents(true),
-      onCancel: destroy,
+      onCancel: () {
+        if (!_handedOff && !_destroyed) {
+          _raw.shutdown(SocketDirection.receive);
+        }
+      },
     );
     _consumer = _SocketConsumer(this);
     _sink = IOSink(_consumer);

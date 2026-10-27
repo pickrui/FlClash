@@ -1285,7 +1285,7 @@ void main() {
     late CodeForgeController controller;
     late UndoRedoController undo;
 
-    Future<void> deleteHello(WidgetTester tester) async {
+    Future<void> deleteHello(WidgetTester tester, {bool pump = true}) async {
       controller = CodeForgeController()..text = 'hello world';
       undo = UndoRedoController();
       addTearDown(undo.dispose);
@@ -1304,7 +1304,7 @@ void main() {
             'selectionExtent': extent,
           },
         textDelta('hello world', '', 0, 5),
-      ]);
+      ], pump: pump);
       expect(controller.text, ' world');
     }
 
@@ -1325,7 +1325,7 @@ void main() {
     });
 
     testWidgets('is typed over in one undo step', (tester) async {
-      await deleteHello(tester);
+      await deleteHello(tester, pump: false);
       await sendDeltas(tester, [textDelta(' world', 'x', 0, 0)]);
       expect(controller.text, 'x world');
       expectOneUndoRestoresIt();
@@ -1333,7 +1333,7 @@ void main() {
     });
 
     testWidgets('is composed over in one undo step', (tester) async {
-      await deleteHello(tester);
+      await deleteHello(tester, pump: false);
       await sendDeltas(tester, [
         {
           ...textDelta(' world', 'k', 0, 0),

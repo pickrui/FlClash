@@ -416,7 +416,10 @@ extension SetupControllerExt on AppController {
     debouncer.call(FunctionTag.updateConfig, () async {
       await safeRun(() async {
         final updateParams = _ref.read(updateParamsProvider);
-        final authorization = await _requestAdmin(updateParams.tun.enable);
+        final authorization = await _requestAdmin(
+          updateParams.tun.enable,
+          shouldContinue: () => generation == _configUpdateGeneration,
+        );
         if (authorization == AuthorizeCode.success ||
             generation != _configUpdateGeneration) {
           return;
@@ -871,8 +874,11 @@ extension SetupControllerExt on AppController {
       return false;
     }
     final patchConfig = _ref.read(patchClashConfigProvider);
-    final authorization = await _requestAdmin(patchConfig.tun.enable);
-    if (authorization == AuthorizeCode.success) {
+    final authorization = await _requestAdmin(
+      patchConfig.tun.enable,
+      shouldContinue: isCurrentApply,
+    );
+    if (authorization == AuthorizeCode.success || !isCurrentApply()) {
       return false;
     }
     if (!await ensureCoreReady()) {

@@ -101,6 +101,78 @@ void main() {
     expect(await located, 7);
   });
 
+  for (final disposed in [false, true]) {
+    test(
+      'interrupted selection lookup has no result (disposed=$disposed)',
+      () async {
+        final reply = Completer<Map<String, dynamic>>();
+        var reads = 0;
+        final pages = NodePages(
+          total: 2000,
+          read: (offset, _) =>
+              ++reads == 1 ? Future.value(page(offset)) : reply.future,
+        );
+        if (!disposed) addTearDown(pages.dispose);
+        await pages.load(0);
+        final located = pages.locateSelected();
+        if (disposed) {
+          pages.dispose();
+        } else {
+          pages.reload();
+        }
+        reply.complete(page(0));
+        expect(await located, -1);
+      },
+    );
+  }
+
+  test('failed selection lookup does not return the previous index', () async {
+    var reads = 0;
+    final pages = NodePages(
+      total: 2000,
+      read: (offset, _) async {
+        if (++reads == 1) return page(offset);
+        throw StateError('disconnected');
+      },
+    );
+    addTearDown(pages.dispose);
+    await pages.load(0);
+    expect(await pages.locateSelected(), -1);
+  });
+
+  test(
+    'selection lookup cannot use an old index when the queue is full',
+    () async {
+      final replies = <int, Completer<Map<String, dynamic>>>{};
+      var initialized = false;
+      final pages = NodePages(
+        total: 2000,
+        read: (offset, _) {
+          if (!initialized) {
+            initialized = true;
+            return Future.value(page(offset));
+          }
+          return (replies[offset] = Completer<Map<String, dynamic>>()).future;
+        },
+      );
+      addTearDown(() async {
+        pages.dispose();
+        for (final entry in replies.entries) {
+          entry.value.complete(page(entry.key));
+        }
+        await Future<void>.delayed(Duration.zero);
+      });
+      await pages.load(0);
+      final waiting = [
+        for (var page = 1; page <= 4; page++) pages.load(page * 128),
+      ];
+      expect(replies.keys, [128, 256]);
+      expect(await pages.locateSelected(), -1);
+      pages.reload();
+      await Future.wait(waiting);
+    },
+  );
+
   test('replacement pages share the cache budget with previous rows', () async {
     var revision = 'a';
     final pages = NodePages(

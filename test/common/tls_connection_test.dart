@@ -32,6 +32,60 @@ void main() {
   });
   tearDown(() => server.close(force: true));
 
+  for (final peerFin in [false, true]) {
+    test(
+      peerFin
+          ? 'plain socket keeps its writer after the peer finishes sending'
+          : 'cancelling plain socket reads keeps its writer open',
+      () async {
+        final listener = await RawServerSocket.bind(
+          InternetAddress.loopbackIPv4,
+          0,
+        );
+        final accepted = Completer<RawSocket>();
+        final received = BytesBuilder(copy: false);
+        final delivered = Completer<void>();
+        final listenerSubscription = listener.listen((peer) {
+          accepted.complete(peer);
+        });
+        final task = await startPlainConnection(
+          InternetAddress.loopbackIPv4,
+          listener.port,
+        );
+        final socket = await task.socket;
+        final peer = await accepted.future;
+        final peerSubscription = peer.listen((event) {
+          if (event == RawSocketEvent.read) {
+            final bytes = peer.read();
+            if (bytes != null) received.add(bytes);
+            if (received.length == 3 && !delivered.isCompleted) {
+              delivered.complete();
+            }
+          }
+        });
+        addTearDown(() async {
+          socket.destroy();
+          await peer.close();
+          await peerSubscription.cancel();
+          await listenerSubscription.cancel();
+          await listener.close();
+        });
+        if (peerFin) {
+          final done = socket.drain<void>();
+          peer.shutdown(SocketDirection.send);
+          await done.timeout(const Duration(seconds: 2));
+        } else {
+          await socket.listen((_) {}).cancel();
+        }
+        socket.add(const [1, 2, 3]);
+        await socket.flush().timeout(const Duration(seconds: 2));
+        await delivered.future.timeout(const Duration(seconds: 2));
+        expect(received.takeBytes(), [1, 2, 3]);
+        await socket.close().timeout(const Duration(seconds: 2));
+      },
+    );
+  }
+
   for (final tunneled in [false, true]) {
     test(
       'trusted HTTPS streams and reuses connections (tunneled=$tunneled)',

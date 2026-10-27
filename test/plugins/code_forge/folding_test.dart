@@ -111,8 +111,7 @@ void main() {
     Future<List<(int, int)>> foldsOf(String text) async {
       final controller = CodeForgeController()..text = text;
       await pumpEditor(tester, controller);
-      await tester.pump(const Duration(milliseconds: 400));
-      await settle(tester);
+      await settleFolds(tester);
       final folds = <(int, int)>[];
       for (var line = 0; line < lines.length; line++) {
         controller.toggleFold(line);
@@ -142,11 +141,11 @@ void main() {
   testWidgets('an indentation fold holds past the per-line folding limit', (
     tester,
   ) async {
+    delayEditorFolds(const Duration(milliseconds: 500));
     final text = '${_document(1700)}\nrules:\n  - MATCH,DIRECT';
     final controller = CodeForgeController()..text = text;
     await pumpEditor(tester, controller);
-    await tester.pump(const Duration(milliseconds: 400));
-    await settle(tester);
+    await settleFolds(tester);
 
     controller.toggleFold(0);
     await settle(tester);
@@ -161,8 +160,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     controller.replaceRange(0, 0, '#\n#\n');
     await settle(tester);
-    await tester.pump(const Duration(milliseconds: 400));
-    await settle(tester);
+    await settleFolds(tester);
 
     controller.toggleFold(0);
     await settle(tester);

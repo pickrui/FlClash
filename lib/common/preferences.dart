@@ -103,7 +103,18 @@ class Preferences {
       hex.substring(16, 20),
       hex.substring(20),
     ].join('-');
-    return await store?.setString('oix_device_id', id) == true ? id : null;
+    var persisted = false;
+    try {
+      persisted = await store?.setString('oix_device_id', id) == true;
+      return persisted ? id : null;
+    } finally {
+      // setString updates the preferences cache even when its write fails.
+      if (!persisted) {
+        try {
+          await store?.remove('oix_device_id');
+        } catch (_) {}
+      }
+    }
   });
 
   Future<BootRecord?> getBootRecord() async {

@@ -9,6 +9,7 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 import '../helpers/preferences.dart';
 import '../support/cloud_api_adapter.dart';
@@ -16,6 +17,36 @@ import '../support/cloud_api_adapter.dart';
 final _uuidV4 = RegExp(
   r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
 );
+
+class _DeviceStore extends InMemorySharedPreferencesStore {
+  _DeviceStore({required this.throwOnFailure, required this.cleanupFails})
+    : super.empty();
+
+  final bool throwOnFailure;
+  final bool cleanupFails;
+  bool failing = true;
+  int writes = 0;
+
+  @override
+  Future<bool> remove(String key) async {
+    if (failing && cleanupFails && key == 'flutter.oix_device_id') {
+      throw ArgumentError('cleanup unavailable');
+    }
+    return super.remove(key);
+  }
+
+  @override
+  Future<bool> setValue(String valueType, String key, Object value) async {
+    if (key == 'flutter.oix_device_id') {
+      writes++;
+      if (failing) {
+        if (throwOnFailure) throw StateError('storage unavailable');
+        return false;
+      }
+    }
+    return super.setValue(valueType, key, value);
+  }
+}
 
 void main() {
   setUpAll(() async {
@@ -43,6 +74,53 @@ void main() {
       expect(store.getString('oix_device_id'), replaced);
     },
   );
+
+  for (final throwOnFailure in [false, true]) {
+    for (final cleanupFails in [false, true]) {
+      test(
+        'an unpersisted device ID is not reused (throws=$throwOnFailure, cleanupFails=$cleanupFails)',
+        () async {
+          final platform = _DeviceStore(
+            throwOnFailure: throwOnFailure,
+            cleanupFails: cleanupFails,
+          );
+          SharedPreferences.resetStatic();
+          SharedPreferencesStorePlatform.instance = platform;
+          await preferences.rebind();
+          addTearDown(() => mockPreferences());
+
+          for (var attempt = 0; attempt < 2; attempt++) {
+            if (throwOnFailure) {
+              await expectLater(
+                preferences.getOixDeviceId(),
+                throwsA(
+                  isA<StateError>().having(
+                    (error) => error.message,
+                    'message',
+                    'storage unavailable',
+                  ),
+                ),
+              );
+            } else {
+              expect(await preferences.getOixDeviceId(), isNull);
+            }
+          }
+          expect(platform.writes, 2);
+          expect(
+            (await platform.getAll()).containsKey('flutter.oix_device_id'),
+            isFalse,
+          );
+
+          platform.failing = false;
+          final id = await preferences.getOixDeviceId();
+          expect(id, matches(_uuidV4));
+          expect((await platform.getAll())['flutter.oix_device_id'], id);
+          expect(await preferences.getOixDeviceId(), id);
+          expect(platform.writes, 3);
+        },
+      );
+    }
+  }
 
   test('signed-in and anonymous panel requests carry the identifier', () async {
     const deviceId = '3f2b8c1e-9a4d-4e7b-8c21-5d6f0a9b1c3e';
