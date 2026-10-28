@@ -173,6 +173,7 @@ _Group _$GroupFromJson(Map<String, dynamic> json) => _Group(
   fixed: json['fixed'] as String?,
   hidden: json['hidden'] as bool?,
   testUrl: json['testUrl'] as String?,
+  dialerProxy: json['dialerProxy'] as String? ?? '',
   icon: json['icon'] as String? ?? '',
   name: json['name'] as String,
 );
@@ -187,6 +188,7 @@ Map<String, dynamic> _$GroupToJson(_Group instance) => <String, dynamic>{
   'fixed': instance.fixed,
   'hidden': instance.hidden,
   'testUrl': instance.testUrl,
+  'dialerProxy': instance.dialerProxy,
   'icon': instance.icon,
   'name': instance.name,
 };

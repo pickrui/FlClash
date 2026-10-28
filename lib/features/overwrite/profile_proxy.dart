@@ -97,6 +97,9 @@ String? findProxyChainRenameConflict(
   final conflictName = findProxyChainConflictName(
     nextProxyChains,
     existingRelations: existingRelations,
+    groupMembers: nextProxyChains.any((chain) => chain.enable)
+        ? proxyChainGroupDependencies(rawConfig)
+        : const {},
   );
   if (conflictName != null) {
     return conflictName;
@@ -114,28 +117,30 @@ Map<String, String> _rawDialerRelations(
   Map rawConfig,
   Set<String> overriddenNames,
 ) {
-  final proxies = rawConfig['proxies'];
-  if (proxies is! List) {
-    return const {};
-  }
   return {
-    for (final proxy in proxies.whereType<Map>())
-      if (proxy['name'] case final String name)
-        if (proxy['dialer-proxy'] case final String dialer)
-          if (name.isNotEmpty &&
-              dialer.isNotEmpty &&
-              !overriddenNames.contains(name))
-            name: dialer,
+    for (final key in ['proxies', 'proxy-groups'])
+      if (rawConfig[key] case final List proxies)
+        for (final proxy in proxies.whereType<Map>())
+          if (proxy['name'] case final String name)
+            if (proxy['dialer-proxy'] case final String dialer)
+              if (name.isNotEmpty &&
+                  dialer.isNotEmpty &&
+                  !overriddenNames.contains(name))
+                name: dialer,
   };
 }
 
-/// Removing X from [A, B, X] can leave a duplicate of another chain [A, B].
+/// Removing a hop can collapse two scoped identities onto one incompatible
+/// derived name; shortened chains are enabled again only when they still fit.
 List<ProxyChain> _removeProxiesFromChains(
   List<ProxyChain> proxyChains,
   Set<String> removedNames,
+  Map rawConfig,
 ) {
   final remaining = proxyChains.copyAndRemoveProxies(removedNames);
-  if (findProxyChainConflictName(remaining) == null) {
+  final groupMembers = proxyChainGroupDependencies(rawConfig);
+  if (findProxyChainConflictName(remaining, groupMembers: groupMembers) ==
+      null) {
     return remaining;
   }
   bool shortened(int index) =>
@@ -147,16 +152,14 @@ List<ProxyChain> _removeProxiesFromChains(
   for (final (index, chain) in remaining.indexed) {
     if (!shortened(index) || !chain.enable) continue;
     final candidate = [...next]..[index] = chain;
-    if (findProxyChainConflictName(candidate) == null) next = candidate;
+    if (findProxyChainConflictName(candidate, groupMembers: groupMembers) ==
+        null) {
+      next = candidate;
+    }
   }
   return next;
 }
 
-/// A custom node drops `dialer-proxy`, so removing one that overrides a
-/// subscription node brings the subscription node's dialer back into the
-/// chain check; the chains through it are disabled when that conflicts.
-/// The build checks chains only while one is enabled, so a conflict left
-/// without an enabled chain is not reported.
 ({List<ProxyChain> proxyChains, String? conflictName})
 _disableChainsConflictingWithRestoredDialers(
   Map rawConfig,
@@ -174,10 +177,19 @@ _disableChainsConflictingWithRestoredDialers(
     overriddenNames(removedProfileProxyIds),
   );
   final restoredNames = after.keys.where((name) => !before.containsKey(name));
+  final groupMembers = proxyChainGroupDependencies(rawConfig);
   if (restoredNames.isEmpty ||
-      findProxyChainConflictName(proxyChains, existingRelations: before) !=
+      findProxyChainConflictName(
+            proxyChains,
+            existingRelations: before,
+            groupMembers: groupMembers,
+          ) !=
           null ||
-      findProxyChainConflictName(proxyChains, existingRelations: after) ==
+      findProxyChainConflictName(
+            proxyChains,
+            existingRelations: after,
+            groupMembers: groupMembers,
+          ) ==
           null) {
     return (proxyChains: proxyChains, conflictName: null);
   }
@@ -188,7 +200,11 @@ _disableChainsConflictingWithRestoredDialers(
   return (
     proxyChains: nextProxyChains,
     conflictName: nextProxyChains.any((chain) => chain.enable)
-        ? findProxyChainConflictName(nextProxyChains, existingRelations: after)
+        ? findProxyChainConflictName(
+            nextProxyChains,
+            existingRelations: after,
+            groupMembers: groupMembers,
+          )
         : null,
   );
 }
@@ -610,6 +626,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     final remainingProxyChains = _removeProxiesFromChains(
       profile.proxyChains,
       deletedNames,
+      rawConfig,
     );
     final (
       :proxyChains,
@@ -849,6 +866,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           final remaining = _removeProxiesFromChains(
             profile.proxyChains,
             removedNames,
+            raw,
           );
           final (
             :proxyChains,

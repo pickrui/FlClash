@@ -2611,11 +2611,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Entrée"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Sortie"),
-    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
-      "Les groupes peuvent servir d’entrée ou de sortie. Les relais doivent être des nœuds fixes.",
-    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Choisissez des nœuds ou groupes pour l’entrée et la sortie. Le groupe de sortie doit contenir des nœuds indépendants et les relais des nœuds fixes. Sélectionnez la sortie après enregistrement. Le test d’entrée mesure l’entrée, celui du groupe de sortie toute la chaîne.",
+      "Ordonnez les sauts de l’entrée à la sortie. Chaque saut peut être un nœud ou un groupe. Les proxys d’un groupe utilisent le saut précédent ; les groupes imbriqués et DIRECT/REJECT restent inchangés. Après l’enregistrement, sélectionnez « Nœud (via saut précédent) » pour une sortie de nœud, ou le groupe de sortie. Les latences de l’éditeur sont des références par saut ; testez le groupe de sortie pour mesurer le trajet effectif.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "Une chaîne nécessite une entrée et une sortie",
@@ -2636,12 +2633,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Chaînes associées mises à jour",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Chaîne enregistrée et appliquée. Sélectionnez le nœud ou groupe de sortie.",
+      "Chaîne enregistrée et appliquée. Pour une sortie de nœud, sélectionnez le groupe généré « Nœud (via saut précédent) » ; sinon, sélectionnez le groupe de sortie.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Chaîne de proxies",
     ),
     "proxyChainUnavailableNodeTip": m90,
+    "proxyChainUnsupportedGroupTip": MessageLookupByLibrary.simpleMessage(
+      "Seuls les groupes select, url-test, fallback et load-balance peuvent être utilisés dans une chaîne.",
+    ),
     "proxyChainUriNodeSupportedFormats": MessageLookupByLibrary.simpleMessage(
       "Formats pris en charge : ss://, ssr://, vmess://, vless://, trojan://, anytls://, hysteria:// / hy://, hysteria2:// / hy2://, tuic://, wireguard:// / wg://, http(s)://, socks(5)://",
     ),

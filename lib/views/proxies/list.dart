@@ -371,6 +371,7 @@ class _GroupSliverState extends ConsumerState<_GroupSliver>
     }
     return ProxyCard(
       testUrl: group.testUrl,
+      dialerProxy: group.dialerProxy,
       type: widget.cardType,
       groupType: group.type,
       key: ValueKey('$groupName.${proxy.name}'),
@@ -663,12 +664,7 @@ class ListHeader extends ConsumerWidget {
               child: Row(
                 children: [
                   _GroupIcon(src: group.icon, name: groupName),
-                  Flexible(
-                    child: _GroupSummary(
-                      groupName: groupName,
-                      isFixed: group.fixed?.isNotEmpty == true,
-                    ),
-                  ),
+                  Flexible(child: _GroupSummary(group: group)),
                 ],
               ),
             ),
@@ -806,10 +802,9 @@ class _GroupIcon extends ConsumerWidget {
 }
 
 class _GroupSummary extends StatelessWidget {
-  const _GroupSummary({required this.groupName, required this.isFixed});
+  const _GroupSummary({required this.group});
 
-  final String groupName;
-  final bool isFixed;
+  final Group group;
 
   @override
   Widget build(BuildContext context) {
@@ -821,13 +816,13 @@ class _GroupSummary extends StatelessWidget {
           children: [
             Flexible(
               child: EmojiText(
-                groupName,
+                group.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyle.callout.of(context, emphasized: true),
               ),
             ),
-            if (isFixed)
+            if (group.fixed?.isNotEmpty == true)
               Padding(
                 padding: const EdgeInsets.only(left: 4),
                 child: GlyphIcon(
@@ -842,27 +837,27 @@ class _GroupSummary extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 2),
-        Flexible(flex: 1, child: _SelectedProxyName(groupName: groupName)),
+        Flexible(flex: 1, child: _SelectedProxyName(group: group)),
       ],
     );
   }
 }
 
 class _SelectedProxyName extends ConsumerWidget {
-  const _SelectedProxyName({required this.groupName});
+  const _SelectedProxyName({required this.group});
 
-  final String groupName;
+  final Group group;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final proxyName = ref
-        .watch(getSelectedProxyNameProvider(groupName))
+        .watch(getSelectedProxyNameProvider(group.name))
         .takeFirstValid([]);
     if (proxyName.isEmpty) {
       return const SizedBox.shrink();
     }
     return EmojiText(
-      proxyName,
+      group.displayNameFor(proxyName),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: AppTextStyle.caption1.of(context, emphasized: true).toLight,

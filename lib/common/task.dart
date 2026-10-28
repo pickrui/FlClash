@@ -843,15 +843,8 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
             .where((name) => name.isNotEmpty)
             .toSet()
       : <String>{};
-  final scope = ProxyChainNameScope(
-    targetNames: proxyMap.keys.toSet(),
-    dialerNames: {...proxyMap.keys, ...groupNames},
-    groupNames: groupNames,
-  );
-  final applicableProxyChains = enabledProxyChains.where((chain) {
-    return scope.isValid(chain.normalizedProxies);
-  }).toList();
-  if (applicableProxyChains.length != enabledProxyChains.length) {
+  final scope = ProxyChainNameScope({...proxyMap.keys, ...groupNames});
+  if (enabledProxyChains.any((chain) => !scope.isValid(chain.proxies))) {
     throw const FormatException('proxy chain references an unavailable node');
   }
   final groups = <String, Map>{
@@ -865,15 +858,20 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
         if (dialer.isNotEmpty) entry.key: dialer,
   };
   final conflict = findProxyChainConflictName(
-    applicableProxyChains,
+    enabledProxyChains,
     existingRelations: existingRelations,
     groupMembers: proxyChainGroupDependencies(rawConfig),
   );
   if (conflict != null) {
     throw FormatException('proxy chain conflict: $conflict');
   }
+  final dialerTargets = {
+    ...existingRelations.keys.where(groups.containsKey),
+    for (final chain in enabledProxyChains)
+      ...chain.normalizedProxies.skip(1).where(groupNames.contains),
+  };
   final pending = [
-    for (final chain in applicableProxyChains) ...chain.normalizedProxies,
+    for (final chain in enabledProxyChains) ...chain.normalizedProxies,
   ];
   final visited = <String>{};
   while (pending.isNotEmpty) {
@@ -885,17 +883,118 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
     if ((group['empty-fallback'] ?? '') == '') {
       group['empty-fallback'] = 'REJECT';
     }
+    // A landing group derives only its concrete members. Nested groups keep
+    // their own fallback and routing semantics.
+    if (dialerTargets.contains(name)) continue;
     if (group['proxies'] case final List members) {
       pending.addAll(members.whereType<String>());
     }
   }
-  for (final chain in applicableProxyChains) {
+  final nextGroups = proxyGroups is List ? List.of(proxyGroups) : <Object>[];
+  final originalNames = {...proxyMap.keys, ...groups.keys};
+  final derivedGroups = <String, Map>{};
+  final selectableDerivedGroups = <String, String>{};
+  for (final chain in enabledProxyChains) {
     final chainProxies = chain.normalizedProxies;
+    var dialerProxy = chainProxies.first;
     for (var i = 1; i < chainProxies.length; i++) {
       final proxyName = chainProxies[i];
-      final dialerProxy = chainProxies[i - 1];
-      (proxyMap[proxyName] ?? groups[proxyName])!['dialer-proxy'] = dialerProxy;
+      final group = groups[proxyName];
+      if (group != null) {
+        group['dialer-proxy'] = dialerProxy;
+        dialerProxy = proxyName;
+        continue;
+      }
+      final derivedName = proxyChainDerivedName(proxyName, chainProxies[i - 1]);
+      final existing = derivedGroups[derivedName];
+      if (existing != null) {
+        final members = existing['proxies'];
+        if (existing['dialer-proxy'] != dialerProxy ||
+            (members as List).single != proxyName) {
+          throw FormatException('proxy chain conflict: $derivedName');
+        }
+        if (i == chainProxies.length - 1) {
+          existing['hidden'] = false;
+          selectableDerivedGroups[derivedName] = proxyName;
+        }
+        dialerProxy = derivedName;
+        continue;
+      }
+      if (originalNames.contains(derivedName)) {
+        throw FormatException('proxy chain conflict: $derivedName');
+      }
+      final derived = <String, Object>{
+        'name': derivedName,
+        'type': 'select',
+        'proxies': [proxyName],
+        'dialer-proxy': dialerProxy,
+        'default-selected': proxyName,
+        'empty-fallback': 'REJECT',
+        'hidden': i != chainProxies.length - 1,
+      };
+      derivedGroups[derivedName] = derived;
+      groups[derivedName] = derived;
+      nextGroups.add(derived);
+      if (i == chainProxies.length - 1) {
+        selectableDerivedGroups[derivedName] = proxyName;
+      }
+      dialerProxy = derivedName;
     }
+  }
+  rawConfig['proxy-groups'] = nextGroups;
+  final protectedGroups = <String>{};
+  final protectedPending = [
+    for (final chain in enabledProxyChains) ...chain.normalizedProxies,
+  ];
+  while (protectedPending.isNotEmpty) {
+    final name = protectedPending.removeLast();
+    if (!protectedGroups.add(name)) continue;
+    final definition = groups[name] ?? proxyMap[name];
+    if (definition == null) continue;
+    if (definition['dialer-proxy'] case final String dialer) {
+      protectedPending.add(dialer);
+    }
+    // Alias insertion must not create a route back into any entry dependency,
+    // including filtered members whose effective set only the Core can resolve.
+    if (definition['proxies'] case final List members) {
+      protectedPending.addAll(members.whereType<String>());
+    }
+    if (definition['include-all'] == true ||
+        definition['include-all-proxies'] == true) {
+      protectedPending.addAll(proxyMap.keys);
+    }
+    if (definition['empty-fallback'] case final String fallback) {
+      protectedPending.add(fallback);
+    }
+  }
+  if (proxyGroups is List && selectableDerivedGroups.isNotEmpty) {
+    for (final group in proxyGroups.whereType<Map>()) {
+      if (group['type'] != 'select' ||
+          protectedGroups.contains(group['name']) ||
+          group['proxies'] is! List) {
+        continue;
+      }
+      final members = List.of(group['proxies'] as List);
+      for (final entry in selectableDerivedGroups.entries) {
+        if (members.contains(entry.value) && !members.contains(entry.key)) {
+          members.add(entry.key);
+        }
+      }
+      group['proxies'] = members;
+    }
+  }
+  final finalRelations = <String, String>{
+    for (final entry in {...proxyMap, ...groups}.entries)
+      if (entry.value['dialer-proxy'] case final String dialer)
+        if (dialer.isNotEmpty) entry.key: dialer,
+  };
+  final finalConflict = findProxyChainConflictName(
+    const [],
+    existingRelations: finalRelations,
+    groupMembers: proxyChainGroupDependencies(rawConfig),
+  );
+  if (finalConflict != null) {
+    throw FormatException('proxy chain conflict: $finalConflict');
   }
 }
 

@@ -8,6 +8,27 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('group via labels only decorate derived concrete members', () {
+    final group = Group.fromJson({
+      'name': 'Landing',
+      'type': 'select',
+      'dialerProxy': 'Entry',
+      'all': [
+        {'name': 'Node', 'type': 'Shadowsocks'},
+        {'name': 'Nested', 'type': 'Selector'},
+        {'name': 'DIRECT', 'type': 'Direct'},
+        {'name': 'REJECT', 'type': 'RejectDrop'},
+      ],
+    });
+
+    expect(group.dialerProxy, 'Entry');
+    expect(group.displayNameFor('Node'), 'Node (via Entry)');
+    expect(group.displayNameFor('Nested'), 'Nested');
+    expect(group.displayNameFor('DIRECT'), 'DIRECT');
+    expect(group.displayNameFor('REJECT'), 'REJECT');
+    expect(group.displayNameFor('Missing'), 'Missing');
+  });
+
   group('exit IP information', () {
     test('keeps organization and ASN from each detailed response shape', () {
       final responses = [

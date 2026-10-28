@@ -15,6 +15,65 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tray/tray.dart' as native;
 
 void main() {
+  test('nested scoped probes share card, pending and tray identities', () {
+    const scopedUrl = 'https://parent.test/check#flclash-chain-parent';
+    const group = Group(
+      name: 'Landing',
+      type: GroupType.Selector,
+      now: 'Nested',
+      dialerProxy: 'Entry',
+      testUrl: scopedUrl,
+      all: [
+        Proxy(name: 'Nested', type: 'Selector'),
+        Proxy(name: 'leaf', type: 'Shadowsocks'),
+      ],
+    );
+    const nested = Group(
+      name: 'Nested',
+      type: GroupType.Selector,
+      hidden: true,
+      now: 'leaf',
+      testUrl: 'https://nested.test/check',
+      all: [Proxy(name: 'leaf', type: 'Shadowsocks')],
+    );
+    final container = ProviderContainer(
+      overrides: [
+        groupsProvider.overrideWithBuild((_, _) => [group, nested]),
+        selectedMapProvider.overrideWith((_) => {}),
+      ],
+    );
+    addTearDown(container.dispose);
+    final subscription = container.listen(trayDelaysProvider, (_, _) {});
+    addTearDown(subscription.close);
+    container.read(delayDataSourceProvider.notifier).setDelays([
+      const Delay(name: 'Nested', url: scopedUrl, value: 42),
+      const Delay(name: 'leaf', url: scopedUrl, value: 150),
+      const Delay(name: 'leaf', url: 'https://nested.test/check', value: 7),
+    ]);
+    expect(
+      container.read(getDelayProvider(proxyName: 'Nested', testUrl: scopedUrl)),
+      42,
+    );
+    expect(container.read(trayDelaysProvider), {
+      'Landing': {'Nested': 42, 'leaf': 150},
+    });
+    container.read(pendingDelayTestsProvider.notifier).queue([
+      (name: 'Nested', url: scopedUrl),
+    ], generation: 0);
+    expect(
+      container.read(
+        getDelayTestPhaseProvider(proxyName: 'Nested', testUrl: scopedUrl),
+      ),
+      DelayTestPhase.queued,
+    );
+    expect(
+      container.read(
+        getDelayTestPhaseProvider(proxyName: 'leaf', testUrl: scopedUrl),
+      ),
+      isNull,
+    );
+  });
+
   test(
     'tray delays follow nested selections, group URLs and the direct probe URL',
     () {

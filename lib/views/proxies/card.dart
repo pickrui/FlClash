@@ -57,6 +57,7 @@ class ProxyCard extends StatelessWidget {
   final GroupType groupType;
   final ProxyCardType type;
   final String? testUrl;
+  final String dialerProxy;
 
   const ProxyCard({
     super.key,
@@ -65,6 +66,7 @@ class ProxyCard extends StatelessWidget {
     required this.proxy,
     required this.groupType,
     required this.type,
+    this.dialerProxy = '',
   });
 
   Measure get measure => globalState.measure;
@@ -132,7 +134,7 @@ class ProxyCard extends StatelessWidget {
     return SizedBox(
       height: measure.textHeight(AppTextStyle.subheadline) * maxLines,
       child: EmojiText(
-        proxy.name,
+        proxy.displayNameVia(dialerProxy),
         maxLines: maxLines,
         overflow: TextOverflow.ellipsis,
         style: AppTextStyle.subheadline.of(context),

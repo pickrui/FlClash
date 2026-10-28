@@ -17,14 +17,21 @@ class _ProxySelectionResolver {
   }
 
   final Map<String, Group> groups = {};
-  final Map<String, SelectedProxyState> _resolved = {};
+  final Map<(String, String?), SelectedProxyState> _resolved = {};
 
-  SelectedProxyState resolve(String name) => _resolved.putIfAbsent(
-    name,
-    () => resolveState(SelectedProxyState(proxyName: name)),
-  );
+  SelectedProxyState resolve(String name, {String? delayUrl}) =>
+      _resolved.putIfAbsent(
+        (name, delayUrl),
+        () => resolveState(
+          SelectedProxyState(proxyName: name, testUrl: delayUrl),
+          forDelay: delayUrl != null,
+        ),
+      );
 
-  SelectedProxyState resolveState(SelectedProxyState state) {
+  SelectedProxyState resolveState(
+    SelectedProxyState state, {
+    bool forDelay = false,
+  }) {
     final visited = <String>{};
     while (state.proxyName.isNotEmpty) {
       if (!visited.add(state.proxyName)) {
@@ -32,6 +39,13 @@ class _ProxySelectionResolver {
       }
       final group = groups[state.proxyName];
       state = state.copyWith(group: true);
+      // Scoped probes address a direct member, including an unchanged nested group.
+      if (forDelay &&
+          Uri.tryParse(state.testUrl ?? '')?.fragment
+                  .startsWith('flclash-chain-') ==
+              true) {
+        return state;
+      }
       if (group == null) return state;
       final selectedName = group.realNow;
       if (selectedName.isEmpty) return state;
@@ -57,7 +71,7 @@ class _ProxySelectionResolver {
   }
 
   DelayTestTarget? delayTarget(String name, String defaultTestUrl) {
-    final state = resolve(name);
+    final state = resolve(name, delayUrl: defaultTestUrl);
     if (state.proxyName.isEmpty) return null;
     return (
       name: state.proxyName,
@@ -69,7 +83,7 @@ class _ProxySelectionResolver {
   }
 
   DelayState delayState(String name, String testUrl, DelayMap delayMap) {
-    final state = resolve(name);
+    final state = resolve(name, delayUrl: testUrl);
     final url = getDelayTestUrl(
       proxyName: state.proxyName,
       testUrl: state.testUrl.takeFirstValid([testUrl]),
@@ -89,12 +103,11 @@ SelectedProxyState computeRealSelectedProxyState(
 }
 
 DelayTestTarget? computeDelayTestTarget({
-  required Proxy proxy,
+  required String proxyName,
   required List<Group> groups,
   required String defaultTestUrl,
 }) {
-  return _ProxySelectionResolver(groups)
-      .delayTarget(proxy.name, defaultTestUrl);
+  return _ProxySelectionResolver(groups).delayTarget(proxyName, defaultTestUrl);
 }
 
 List<DelayTestTarget> computeDelayTestTargets({
@@ -113,8 +126,6 @@ List<DelayTestTarget> computeDelayTestTargets({
   return targets.toList();
 }
 
-/// Delay lookups that share one resolver, for callers walking many proxies;
-/// resolved selections do not depend on the test URL.
 DelayState Function(String proxyName, String testUrl) proxyDelayLookup({
   required List<Group> groups,
   required DelayMap delayMap,

@@ -2073,11 +2073,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("入口"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("出口"),
-    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
-      "グループは入口または出口に使用できます。中継は固定ノードにしてください",
-    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "入口と出口にはノードまたはグループを選択できます。出口グループには独立したノードを、中継には固定ノードを使用してください。保存後は出口を選択して使用します。入口の測定は入口のみ、出口グループの測定はチェーン全体が対象です",
+      "入口から出口の順に並べます。各ホップにノードまたはポリシーグループを使用できます。グループ内のプロキシは直前のホップを経由し、ネストしたグループと DIRECT/REJECT は変更されません。保存後、出口がノードなら「ノード (via 直前のホップ)」グループを、それ以外は出口グループを選択します。編集画面の遅延は各ホップの参考値です。実際の経路は出口グループでテストしてください",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "チェーンには入口と出口が必要です",
@@ -2094,10 +2091,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "関連するプロキシチェーンを更新しました",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "チェーンを保存して適用しました。出口ノードまたはグループを選択してください",
+      "チェーンを保存して適用しました。出口がノードの場合は生成された「ノード (via 直前のホップ)」グループを、それ以外は出口グループを選択してください",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("プロキシチェーン"),
     "proxyChainUnavailableNodeTip": m90,
+    "proxyChainUnsupportedGroupTip": MessageLookupByLibrary.simpleMessage(
+      "チェーンで使用できるのは select、url-test、fallback、load-balance グループのみです",
+    ),
     "proxyChainUriNodeSupportedFormats": MessageLookupByLibrary.simpleMessage(
       "対応形式：ss://、ssr://、vmess://、vless://、trojan://、anytls://、hysteria:// / hy://、hysteria2:// / hy2://、tuic://、wireguard:// / wg://、http(s)://、socks(5)://",
     ),

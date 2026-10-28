@@ -138,7 +138,7 @@ class _SelectedName extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final name = ref.watch(getSelectedProxyNameProvider(group.name)) ?? '';
     return EmojiText(
-      name.isEmpty ? '—' : name,
+      name.isEmpty ? '—' : group.displayNameFor(name),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: DashboardText.label(context),

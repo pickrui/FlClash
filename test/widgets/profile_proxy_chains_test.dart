@@ -28,11 +28,14 @@ class _SetupAction extends SetupAction {
   final Map<String, dynamic> rawConfig;
   final Map<String, dynamic> chainConfig;
   Object? chainConfigError;
+  Object? validationError;
+  final validatedChains = <List<ProxyChain>>[];
   var rawLoads = 0;
   var chainLoads = 0;
   var applies = 0;
   var autoApplies = 0;
   Completer<Map<String, dynamic>>? pendingRaw;
+  Completer<void>? pendingValidation;
 
   _SetupAction({this.rawConfig = const {}, this.chainConfig = const {}});
 
@@ -51,6 +54,16 @@ class _SetupAction extends SetupAction {
     final error = chainConfigError;
     if (error != null) throw error;
     return chainConfig;
+  }
+
+  @override
+  Future<void> validateProxyChains(
+    int profileId,
+    List<ProxyChain> chains,
+  ) async {
+    validatedChains.add(chains);
+    if (validationError case final error?) throw error;
+    await pendingValidation?.future;
   }
 
   @override
@@ -428,7 +441,7 @@ void main() {
     };
     for (final MapEntry(key: action, value: perform) in actions.entries) {
       testWidgets(
-        '$action disables chains the restored dialer conflicts with',
+        '$action keeps a chain when the restored source dialer differs',
         (tester) async {
           final raw = rawConfig('Y');
           final setupAction = _SetupAction(rawConfig: raw);
@@ -440,11 +453,10 @@ void main() {
 
           await perform(tester);
 
-          expect(messages, [_l10n.proxyChainRelatedChainsUpdated]);
+          expect(messages, isEmpty);
           final next = profiles.state.single;
           expect(next.matchTarget, 'HK');
-          expect(next.proxyChains.single.enable, isFalse);
-          expect(next.proxyChains.single.proxies, ['X', 'HK']);
+          expect(next.proxyChains.single, profile.proxyChains.single);
           expect(setupAction.applies, 1);
           await expectBuilds(tester, raw, next);
         },
@@ -467,7 +479,7 @@ void main() {
       });
 
       testWidgets(
-        '$action is refused when a chain avoiding it closes a cycle',
+        '$action keeps a scoped chain through restored source dialers',
         (tester) async {
           final raw = <String, dynamic>{
             'proxies': [
@@ -498,34 +510,52 @@ void main() {
 
           await perform(tester);
 
-          expect(messages, [_l10n.proxyChainConflictTip('Y')]);
+          expect(messages, isEmpty);
           final next = profiles.state.single;
-          expect(next, cycleProfile);
-          expect(setupAction.applies, 0);
+          expect(next.proxyChains.single, cycleProfile.proxyChains.single);
+          expect(setupAction.applies, 1);
           await expectBuilds(tester, raw, next);
         },
       );
 
-      testWidgets('$action is kept when no enabled chain is left to conflict', (
-        tester,
-      ) async {
-        final raw = rawConfig('Y');
-        (raw['proxies'] as List)[2] = {
-          'name': 'Y',
-          'type': 'ss',
-          'dialer-proxy': 'HK',
-        };
-        final setupAction = _SetupAction(rawConfig: raw);
-        final (profiles, messages) = await _pump(tester, setupAction, profile);
+      testWidgets(
+        '$action disables a chain when the restored dialer closes a group cycle',
+        (tester) async {
+          final raw = <String, dynamic>{
+            'proxies': [
+              {'name': 'HK', 'type': 'ss', 'dialer-proxy': 'Landing'},
+              {'name': 'X', 'type': 'ss'},
+            ],
+            'proxy-groups': [
+              {
+                'name': 'Landing',
+                'type': 'select',
+                'proxies': ['X'],
+              },
+            ],
+            'rules': ['MATCH,Landing'],
+          };
+          final cycleProfile = profile.copyWith(
+            proxyChains: const [
+              ProxyChain(id: 20, name: 'Chain', proxies: ['HK', 'Landing']),
+            ],
+          );
+          final setupAction = _SetupAction(rawConfig: raw);
+          final (profiles, messages) = await _pump(
+            tester,
+            setupAction,
+            cycleProfile,
+          );
 
-        await perform(tester);
+          await perform(tester);
 
-        expect(messages, [_l10n.proxyChainRelatedChainsUpdated]);
-        final next = profiles.state.single;
-        expect(next.proxyChains.single.enable, isFalse);
-        expect(setupAction.applies, 1);
-        await expectBuilds(tester, raw, next);
-      });
+          expect(messages, [_l10n.proxyChainRelatedChainsUpdated]);
+          final next = profiles.state.single;
+          expect(next.proxyChains.single.enable, isFalse);
+          expect(setupAction.applies, 1);
+          await expectBuilds(tester, raw, next);
+        },
+      );
     }
   });
 
@@ -660,8 +690,9 @@ void main() {
     );
   }
 
-  testWidgets('deleting a node disables only the chain it shortens into a '
-      'duplicate', (tester) async {
+  testWidgets('deleting a node keeps reusable scoped chain identities', (
+    tester,
+  ) async {
     final setupAction = _SetupAction(
       rawConfig: {
         'proxies': [
@@ -688,7 +719,7 @@ void main() {
 
     expect(messages, [_l10n.proxyChainRelatedChainsUpdated]);
     final chains = profiles.state.single.proxyChains;
-    expect(chains.map((chain) => chain.enable), [true, false, true]);
+    expect(chains.map((chain) => chain.enable), [true, true, true]);
     expect(chains.map((chain) => chain.proxies), [
       ['A', 'B'],
       ['A', 'B'],
@@ -798,98 +829,193 @@ void main() {
     ]);
   });
 
-  testWidgets(
-    'groups can be picked at both endpoints but cannot be moved into the middle',
-    (tester) async {
-      ProxyChain? result;
-      final messages = <String>[];
-      await _pump(
-        tester,
-        _SetupAction(),
-        _baseProfile,
-        child: Builder(
-          builder: (context) => TextButton(
-            onPressed: () async {
-              result = await Navigator.of(context).push<ProxyChain>(
-                MaterialPageRoute(
-                  builder: (_) => _Status(
-                    messages: messages,
-                    child: ProxyChainEditView(
-                      profileId: 1,
-                      rawConfig: {
-                        'proxies': [
-                          for (final name in [
-                            'A',
-                            'B',
-                            'Relay',
-                            'Exit1',
-                            'Exit2',
-                          ])
-                            {'name': name, 'type': 'ss'},
-                        ],
-                        'proxy-groups': [
-                          {
-                            'name': 'Entry',
-                            'type': 'select',
-                            'proxies': ['A', 'B'],
-                          },
-                          {
-                            'name': 'Landing',
-                            'type': 'url-test',
-                            'proxies': ['Exit1', 'Exit2'],
-                          },
-                        ],
-                      },
-                    ),
+  testWidgets('groups can be picked as intermediate hops', (tester) async {
+    ProxyChain? result;
+    final messages = <String>[];
+    await _pump(
+      tester,
+      _SetupAction(),
+      _baseProfile,
+      child: Builder(
+        builder: (context) => TextButton(
+          onPressed: () async {
+            result = await Navigator.of(context).push<ProxyChain>(
+              MaterialPageRoute(
+                builder: (_) => _Status(
+                  messages: messages,
+                  child: ProxyChainEditView(
+                    profileId: 1,
+                    rawConfig: {
+                      'proxies': [
+                        for (final name in [
+                          'A',
+                          'B',
+                          'Relay',
+                          'Exit1',
+                          'Exit2',
+                        ])
+                          {'name': name, 'type': 'ss'},
+                      ],
+                      'proxy-groups': [
+                        {
+                          'name': 'Entry',
+                          'type': 'select',
+                          'proxies': ['A', 'B'],
+                        },
+                        {
+                          'name': 'Landing',
+                          'type': 'url-test',
+                          'proxies': ['Exit1', 'Exit2'],
+                        },
+                      ],
+                    },
                   ),
                 ),
-              );
-            },
-            child: const Text('open'),
-          ),
+              ),
+            );
+          },
+          child: const Text('open'),
         ),
-      );
-      await tester.tap(find.text('open'));
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    Future<void> pick(String name) async {
+      final row = find.byKey(ValueKey('proxy-chain-candidate-$name'));
+      final scrollable = find
+          .descendant(
+            of: find.byType(CustomScrollView),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      tester.state<ScrollableState>(scrollable).position.jumpTo(0);
       await tester.pumpAndSettle();
-      Future<void> pick(String name) async {
-        final row = find.byKey(ValueKey('proxy-chain-candidate-$name'));
-        final scrollable = find
-            .descendant(
-              of: find.byType(CustomScrollView),
-              matching: find.byType(Scrollable),
-            )
-            .first;
-        tester.state<ScrollableState>(scrollable).position.jumpTo(0);
-        await tester.pumpAndSettle();
-        await tester.scrollUntilVisible(row, 200, scrollable: scrollable);
-        await Scrollable.ensureVisible(tester.element(row), alignment: 0.5);
-        await tester.pumpAndSettle();
-        await tester.tap(row);
-        await tester.pumpAndSettle();
-      }
+      await tester.scrollUntilVisible(row, 200, scrollable: scrollable);
+      await Scrollable.ensureVisible(tester.element(row), alignment: 0.5);
+      await tester.pumpAndSettle();
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+    }
 
-      await pick('Entry');
-      expect(
-        find.byKey(const ValueKey('proxy-chain-candidate-Landing')),
-        findsOneWidget,
-      );
-      await pick('A');
-      expect(messages, [_l10n.proxyChainConflictTip('A')]);
-      await pick('Relay');
-      await pick('Landing');
-      final list = tester.widget<SliverReorderableList>(
-        find.byType(SliverReorderableList),
-      );
-      list.onReorderItem!(0, 1);
-      await tester.pumpAndSettle();
-      expect(messages.last, _l10n.proxyChainGroupEndpointsOnly);
-      await tester.tap(find.byTooltip(_l10n.save));
-      await tester.pumpAndSettle();
-      expect(result?.proxies, ['Entry', 'Relay', 'Landing']);
-    },
-  );
+    await pick('Entry');
+    expect(
+      find.byKey(const ValueKey('proxy-chain-candidate-Landing')),
+      findsOneWidget,
+    );
+    await pick('Landing');
+    await pick('Relay');
+    await tester.tap(find.byTooltip(_l10n.save));
+    await tester.pumpAndSettle();
+    expect(messages, isEmpty);
+    expect(result?.proxies, ['Entry', 'Landing', 'Relay']);
+  });
 
-  testWidgets('reenabling a saved group chain checks refreshed membership', (
+  for (final operation in ['save', 'enable']) {
+    for (final scenario in ['Core rejection', 'concurrent chain update']) {
+      testWidgets('$scenario blocks chain $operation until retry', (
+        tester,
+      ) async {
+        final action = _SetupAction(
+          chainConfig: {
+            'proxies': [
+              for (final name in ['A', 'Exit']) {'name': name, 'type': 'ss'},
+            ],
+            'proxy-groups': [
+              {
+                'name': 'Entry',
+                'type': 'select',
+                'proxies': ['A'],
+              },
+            ],
+          },
+        );
+        if (scenario == 'Core rejection') {
+          action.validationError = const FormatException(
+            'unsupported provider member',
+          );
+        } else {
+          action.pendingValidation = Completer<void>();
+        }
+        final (profiles, messages) = await _pump(
+          tester,
+          action,
+          _baseProfile.copyWith(
+            proxyChains: const [
+              ProxyChain(
+                id: 20,
+                name: 'Chain',
+                enable: false,
+                proxies: ['Entry', 'Exit'],
+              ),
+            ],
+          ),
+        );
+        if (operation == 'save') {
+          await tester.tap(
+            find.descendant(
+              of: _tile('Chain'),
+              matching: find.byTooltip(_l10n.more),
+            ),
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(find.text(_l10n.edit));
+          await tester.pumpAndSettle();
+        }
+        Future<void> submit() async {
+          await tester.tap(
+            operation == 'save'
+                ? find.byTooltip(_l10n.save)
+                : _switchOf('Chain'),
+          );
+          await tester.pump();
+          if (action.pendingValidation case final pending?) {
+            profiles.updateProfile(
+              1,
+              (profile) => profile.copyWith(
+                proxyChains: [
+                  ...profile.proxyChains,
+                  const ProxyChain(
+                    id: 21,
+                    name: 'Added',
+                    proxies: ['A', 'Exit'],
+                  ),
+                ],
+              ),
+            );
+            pending.complete();
+            action.pendingValidation = null;
+          }
+          await tester.pumpAndSettle();
+        }
+
+        await submit();
+        expect(profiles.state.single.proxyChains.first.enable, isFalse);
+        expect(action.applies, 0);
+        expect(action.validatedChains.single.single.enable, isTrue);
+        expect(
+          messages.single,
+          scenario == 'Core rejection'
+              ? contains('unsupported provider member')
+              : _l10n.routingChanged,
+        );
+        if (scenario == 'concurrent chain update') {
+          expect(profiles.state.single.proxyChains.last.id, 21);
+        }
+        if (operation == 'save') {
+          expect(find.byType(ProxyChainEditView), findsOneWidget);
+        }
+
+        action.validationError = null;
+        await submit();
+        expect(profiles.state.single.proxyChains.first.enable, isTrue);
+        expect(action.applies, 1);
+        expect(action.validatedChains, hasLength(2));
+        expect(find.byType(ProxyChainEditView), findsNothing);
+      });
+    }
+  }
+
+  testWidgets('reenabling a saved chain keeps raw entry members scoped', (
     tester,
   ) async {
     final action = _SetupAction(
@@ -922,10 +1048,60 @@ void main() {
     );
     await tester.tap(_switchOf('Chain'));
     await tester.pumpAndSettle();
-    expect(profiles.state.single.proxyChains.single.enable, isFalse);
-    expect(messages, [_l10n.proxyChainConflictTip('Exit')]);
-    expect(action.applies, 0);
+    expect(profiles.state.single.proxyChains.single.enable, isTrue);
+    expect(messages, isEmpty);
+    expect(action.applies, 1);
   });
+
+  for (final removed in [false, true]) {
+    testWidgets(
+      'chain editor rejects a concurrently ${removed ? 'removed' : 'updated'} chain',
+      (tester) async {
+        const original = ProxyChain(
+          id: 20,
+          name: 'Chain',
+          proxies: ['A', 'Exit'],
+        );
+        final action = _SetupAction(
+          chainConfig: {
+            'proxies': [
+              for (final name in ['A', 'Exit']) {'name': name, 'type': 'ss'},
+            ],
+          },
+        );
+        final (profiles, messages) = await _pump(
+          tester,
+          action,
+          _baseProfile.copyWith(proxyChains: [original]),
+        );
+        await tester.tap(
+          find.descendant(
+            of: _tile('Chain'),
+            matching: find.byTooltip(_l10n.more),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(_l10n.edit));
+        await tester.pumpAndSettle();
+        final next = removed
+            ? <ProxyChain>[]
+            : [original.copyWith(name: 'Updated')];
+        profiles.updateProfile(
+          1,
+          (profile) => profile.copyWith(proxyChains: next),
+        );
+
+        await tester.tap(find.byTooltip(_l10n.save));
+        await tester.pumpAndSettle();
+
+        expect(profiles.state.single.proxyChains, next);
+        expect(action.validatedChains, isEmpty);
+        expect(action.applies, 0);
+        expect(messages, [_l10n.routingChanged]);
+        expect(find.byType(ProxyChainEditView), findsOneWidget);
+      },
+    );
+  }
 
   testWidgets('a refused save keeps the chain editor open', (tester) async {
     final checked = <List<String>>[];
@@ -1062,7 +1238,7 @@ void main() {
       ),
     );
 
-    test('rejects a cycle restored outside the renamed chains', () async {
+    test('keeps restored source dialers outside scoped identities', () async {
       final raw = rawConfig([
         {'name': 'HK', 'type': 'ss', 'dialer-proxy': 'Y'},
         {'name': 'Z', 'type': 'ss', 'dialer-proxy': 'HK'},
@@ -1072,35 +1248,52 @@ void main() {
 
       expect(await build(raw, profile), isNotNull);
       expect(next.proxyChains, profile.proxyChains);
-      expect(conflict(raw, profile, next), 'Y');
-      await expectLater(
-        build(raw, next),
-        throwsA(
-          isA<FormatException>().having(
-            (error) => error.message,
-            'message',
-            'proxy chain conflict: Y',
-          ),
-        ),
-      );
+      expect(conflict(raw, profile, next), isNull);
+      expect(await build(raw, next), isNotNull);
     });
 
-    test('checks renamed chains against existing dialers', () async {
+    test('rejects a group cycle caused by restoring a source dialer', () async {
       final raw = rawConfig([
-        {'name': 'Z', 'type': 'ss', 'dialer-proxy': 'New'},
-        {'name': 'New', 'type': 'ss'},
+        {'name': 'HK', 'type': 'ss', 'dialer-proxy': 'Landing'},
+        {'name': 'Z', 'type': 'ss', 'dialer-proxy': 'HK'},
+        {'name': 'Y', 'type': 'ss'},
       ]);
+      (raw['proxy-groups'] as List).add({
+        'name': 'Landing',
+        'type': 'select',
+        'proxies': ['Y'],
+      });
       final current = profile.copyWith(
         proxyChains: const [
-          ProxyChain(id: 20, proxies: ['Z', 'HK']),
+          ProxyChain(id: 20, proxies: ['Z', 'Landing']),
         ],
       );
       final next = rename(current, 'New');
 
       expect(await build(raw, current), isNotNull);
-      expect(conflict(raw, current, next), 'New');
+      expect(conflict(raw, current, next), isNotNull);
       await expectLater(build(raw, next), throwsFormatException);
     });
+
+    test(
+      'keeps renamed derived targets distinct from source dialers',
+      () async {
+        final raw = rawConfig([
+          {'name': 'Z', 'type': 'ss', 'dialer-proxy': 'New'},
+          {'name': 'New', 'type': 'ss'},
+        ]);
+        final current = profile.copyWith(
+          proxyChains: const [
+            ProxyChain(id: 20, proxies: ['Z', 'HK']),
+          ],
+        );
+        final next = rename(current, 'New');
+
+        expect(await build(raw, current), isNotNull);
+        expect(conflict(raw, current, next), isNull);
+        expect(await build(raw, next), isNotNull);
+      },
+    );
 
     test(
       'drops the destination subscription dialer after overriding it',
@@ -1145,7 +1338,8 @@ void main() {
           next.profileProxies.last.copyWith(enable: false),
         ],
       );
-      expect(conflict(raw, current, disabled), 'Y');
+      expect(conflict(raw, current, disabled), isNull);
+      expect(await build(raw, disabled), isNotNull);
     });
 
     test('ignores subscription-only cycles without an enabled chain', () async {

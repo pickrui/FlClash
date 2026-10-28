@@ -99,9 +99,10 @@ func (group *nodeGroup) revision(request nodePageRequest, groups map[string]*nod
 		hash.WriteString(group.now)
 		hash.WriteByte(1)
 		for _, member := range group.members {
-			resolveSelection(member, groups, func(nested *nodeGroup) {
+			resolveSelection(member, groups, func(nested *nodeGroup) bool {
 				hash.WriteString(nested.now)
 				hash.WriteByte(0)
+				return true
 			})
 		}
 	}
@@ -219,16 +220,15 @@ func handleGetProxyGroupCounts(request nodePageRequest) map[string]int {
 }
 
 // resolveSelection follows the selections of nested groups from proxy to the
-// node they currently use; it reports false for a cycle.
-func resolveSelection(proxy C.Proxy, groups map[string]*nodeGroup, visit func(*nodeGroup)) (C.Proxy, bool) {
+// node they currently use or until visit stops descent; it reports false for a cycle.
+func resolveSelection(proxy C.Proxy, groups map[string]*nodeGroup, visit func(*nodeGroup) bool) (C.Proxy, bool) {
 	for range len(groups) + 1 {
 		group := groups[proxy.Name()]
 		if group == nil || proxy.Type().String() != group.data["type"] {
 			return proxy, true
 		}
 		group.load()
-		visit(group)
-		if group.selected == nil {
+		if !visit(group) || group.selected == nil {
 			return proxy, true
 		}
 		proxy = group.selected
@@ -242,10 +242,14 @@ type nodeDelay struct {
 }
 
 func resolveNodeDelay(proxy C.Proxy, testURL string, request nodePageRequest, groups map[string]*nodeGroup) nodeDelay {
-	leaf, ok := resolveSelection(proxy, groups, func(group *nodeGroup) {
+	leaf, ok := resolveSelection(proxy, groups, func(group *nodeGroup) bool {
+		if outboundgroup.IsDialerTestURL(testURL) {
+			return false
+		}
 		if url := group.testURL(); url != "" && group.selected != nil {
 			testURL = url
 		}
+		return true
 	})
 	if !ok {
 		return nodeDelay{}

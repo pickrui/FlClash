@@ -173,7 +173,7 @@ class Tray {
         for (final proxy in group.all) {
           subMenuItems.add(
             native.TrayMenuCheckbox(
-              label: proxy.name,
+              label: proxy.displayNameVia(group.dialerProxy),
               detail: delayText(trayState.delays[group.name]?[proxy.name]),
               checked: selectedName == proxy.name,
               onSelected: () {

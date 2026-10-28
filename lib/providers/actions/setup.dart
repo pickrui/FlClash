@@ -99,6 +99,11 @@ class SetupAction extends _$SetupAction {
   Future<Map<String, dynamic>> getProxyChainProfileConfig(int profileId) =>
       _controller.getProxyChainProfileConfig(profileId);
 
+  Future<void> validateProxyChains(
+    int profileId,
+    List<ProxyChain> proxyChains,
+  ) => _controller.validateProxyChains(profileId, proxyChains);
+
   Future<Map> getProfileWithId(
     int profileId, {
     void Function(ScriptConfigChanges changes)? onScriptChanges,
@@ -759,6 +764,14 @@ extension SetupControllerExt on AppController {
     );
   }
 
+  Future<void> validateProxyChains(
+    int profileId,
+    List<ProxyChain> proxyChains,
+  ) async {
+    final setupState = await _ref.readSetupState(profileId);
+    await _validateSetupConfig(setupState.copyWith(proxyChains: proxyChains));
+  }
+
   Future<Map> getProfileWithId(
     int profileId, {
     void Function(ScriptConfigChanges changes)? onScriptChanges,
@@ -802,9 +815,9 @@ extension SetupControllerExt on AppController {
   }
 
   Future<void> _validateConfigYaml(String yaml) async {
-    final validationMessage = await coreController.validateConfigWithBytes(
-      base64Encode(utf8.encode(yaml)),
-    );
+    final validationMessage = await _ref
+        .read(coreHandlerProvider)
+        .validateConfigWithBytes(base64Encode(utf8.encode(yaml)));
     if (validationMessage.isNotEmpty) {
       throw CandidateConfigValidationException(validationMessage);
     }

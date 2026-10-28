@@ -306,6 +306,7 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
           }
           return ProxyCard(
             testUrl: group.testUrl,
+            dialerProxy: group.dialerProxy,
             groupType: group.type,
             type: widget.cardType,
             proxy: proxy,

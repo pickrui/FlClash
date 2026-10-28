@@ -1826,11 +1826,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainEmpty": MessageLookupByLibrary.simpleMessage("暂无代理链节点"),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("入口"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("出口"),
-    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
-      "策略组可用于入口或出口，中继必须为固定节点",
-    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "按顺序选择入口和出口，可使用节点或策略组；出口组使用独立节点成员，中继使用固定节点；保存后选择出口使用。入口组测速仅反映入口，出口组测速经过完整链路",
+      "按入口到出口顺序排列，任意一跳均可使用节点或策略组；组内具体代理经前一跳拨号，嵌套组及 DIRECT/REJECT 保持原样；保存后，节点出口请选择“节点 (via 前一跳)”派生组，否则选择出口组；编辑器中的延迟仅供各跳参考，实际链路请在出口组中测速",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "链式代理至少需要入口和出口",
@@ -1845,10 +1842,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "相关链式代理已更新",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "链式代理已保存并应用，请选择出口节点或策略组使用",
+      "链式代理已保存并应用；节点出口请选择生成的“节点 (via 前一跳)”派生组，否则选择出口组",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("代理链"),
     "proxyChainUnavailableNodeTip": m90,
+    "proxyChainUnsupportedGroupTip": MessageLookupByLibrary.simpleMessage(
+      "链式代理仅支持 select、url-test、fallback 和 load-balance 策略组",
+    ),
     "proxyChainUriNodeSupportedFormats": MessageLookupByLibrary.simpleMessage(
       "支持格式：ss://、ssr://、vmess://、vless://、trojan://、anytls://、hysteria:// / hy://、hysteria2:// / hy2://、tuic://、wireguard:// / wg://、http(s)://、socks(5)://",
     ),

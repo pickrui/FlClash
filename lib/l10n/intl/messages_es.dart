@@ -2600,11 +2600,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Entrada"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Salida"),
-    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
-      "Los grupos pueden ser la entrada o la salida. Los saltos intermedios deben ser nodos fijos.",
-    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Elija nodos o grupos para la entrada y la salida. El grupo de salida requiere nodos independientes y los saltos intermedios nodos fijos. Seleccione la salida tras guardar. La prueba de entrada mide solo la entrada; la del grupo de salida mide toda la cadena.",
+      "Ordene los saltos de entrada a salida. Cada salto puede ser un nodo o un grupo. Los proxies del grupo usan el salto anterior; los grupos anidados y DIRECT/REJECT no cambian. Tras guardar, seleccione «Nodo (via salto anterior)» si la salida es un nodo, o el grupo de salida. Las latencias del editor son referencias por salto; pruebe el grupo de salida para medir la ruta efectiva.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "Una cadena necesita una entrada y una salida",
@@ -2623,12 +2620,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Cadenas relacionadas actualizadas",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Cadena guardada y aplicada. Seleccione el nodo o grupo de salida.",
+      "Cadena guardada y aplicada. Para una salida de nodo, seleccione el grupo generado «Nodo (via salto anterior)»; en caso contrario, seleccione el grupo de salida.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Cadena de proxies",
     ),
     "proxyChainUnavailableNodeTip": m90,
+    "proxyChainUnsupportedGroupTip": MessageLookupByLibrary.simpleMessage(
+      "Solo se admiten grupos select, url-test, fallback y load-balance en una cadena.",
+    ),
     "proxyChainUriNodeSupportedFormats": MessageLookupByLibrary.simpleMessage(
       "Formatos compatibles: ss://, ssr://, vmess://, vless://, trojan://, anytls://, hysteria:// / hy://, hysteria2:// / hy2://, tuic://, wireguard:// / wg://, http(s)://, socks(5)://",
     ),

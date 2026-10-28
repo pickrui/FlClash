@@ -262,9 +262,73 @@ void main() {
   });
 
   group('computeDelayTestTargets', () {
+    for (final nestedUrl in [null, 'https://nested.test/check']) {
+      test(
+        'keeps a nested scoped member identity (nested URL: $nestedUrl)',
+        () {
+          const scopedUrl = 'https://parent.test/check#flclash-chain-parent';
+          final groups = [
+            const Group(
+              name: 'Landing',
+              type: GroupType.Selector,
+              now: 'Nested',
+              dialerProxy: 'Entry',
+              testUrl: scopedUrl,
+              all: [
+                Proxy(name: 'Nested', type: 'Selector'),
+                Proxy(name: 'leaf', type: 'Shadowsocks'),
+              ],
+            ),
+            Group(
+              name: 'Nested',
+              type: GroupType.Selector,
+              now: 'leaf',
+              testUrl: nestedUrl,
+              all: const [Proxy(name: 'leaf', type: 'Shadowsocks')],
+            ),
+          ];
+          for (final (name, url) in [
+            ('Landing', 'https://default.test/check'),
+            ('Nested', scopedUrl),
+          ]) {
+            expect(
+              computeDelayTestTarget(
+                proxyName: name,
+                groups: groups,
+                defaultTestUrl: url,
+              ),
+              (name: 'Nested', url: scopedUrl),
+            );
+          }
+          expect(
+            computeDelayTestTargets(
+              proxies: groups.first.all,
+              groups: groups,
+              defaultTestUrl: scopedUrl,
+            ),
+            [(name: 'Nested', url: scopedUrl), (name: 'leaf', url: scopedUrl)],
+          );
+          final delayOf = proxyDelayLookup(
+            groups: groups,
+            delayMap: {
+              scopedUrl: {'Nested': 42, 'leaf': 150},
+              ?nestedUrl: {'leaf': 7},
+            },
+          );
+          expect(delayOf('Nested', scopedUrl).delay, 42);
+          expect(delayOf('Landing', 'https://default.test/check').delay, 42);
+          expect(delayOf('leaf', scopedUrl).delay, 150);
+          expect(
+            computeRealSelectedProxyState('Landing', groups: groups).proxyName,
+            'leaf',
+          );
+        },
+      );
+    }
+
     test('resolves a single URLTest target for an explicit card test', () {
       final target = computeDelayTestTarget(
-        proxy: const Proxy(name: 'auto', type: 'URLTest'),
+        proxyName: 'auto',
         groups: const [
           Group(
             name: 'auto',
@@ -410,7 +474,7 @@ void main() {
 
     test('uses the dedicated DIRECT test URL', () {
       final target = computeDelayTestTarget(
-        proxy: const Proxy(name: 'DIRECT', type: 'Direct'),
+        proxyName: 'DIRECT',
         groups: const [],
         defaultTestUrl: 'https://example.com/generate_204',
       );

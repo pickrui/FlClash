@@ -327,6 +327,17 @@ abstract class Proxy with _$Proxy {
   factory Proxy.fromJson(Map<String, Object?> json) => _$ProxyFromJson(json);
 }
 
+extension ProxyExt on Proxy {
+  String displayNameVia(String dialerProxy) {
+    if (dialerProxy.isEmpty) return name;
+    if (GroupTypeExtension.valueList.contains(type) ||
+        const {'Direct', 'Reject', 'RejectDrop'}.contains(type)) {
+      return name;
+    }
+    return '$name (via $dialerProxy)';
+  }
+}
+
 @freezed
 abstract class Group with _$Group {
   const factory Group({
@@ -339,6 +350,7 @@ abstract class Group with _$Group {
     String? fixed,
     bool? hidden,
     String? testUrl,
+    @Default('') String dialerProxy,
     @Default('') String icon,
     required String name,
   }) = _Group;
@@ -357,6 +369,11 @@ extension GroupsExt on List<Group> {
 
 extension GroupExt on Group {
   String get realNow => now ?? '';
+
+  String displayNameFor(String proxyName) {
+    final proxy = all.firstWhereOrNull((item) => item.name == proxyName);
+    return proxy?.displayNameVia(dialerProxy) ?? proxyName;
+  }
 }
 
 @freezed

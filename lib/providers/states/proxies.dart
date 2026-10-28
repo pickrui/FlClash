@@ -154,16 +154,16 @@ String realTestUrl(Ref ref, [String? testUrl]) {
 
 @riverpod
 int? getDelay(Ref ref, {required String proxyName, String? testUrl}) {
-  final currentTestUrl = ref.watch(realTestUrlProvider(testUrl));
-  final proxyState = ref.watch(realSelectedProxyStateProvider(proxyName));
-  final delayTestUrl = getDelayTestUrl(
-    proxyName: proxyState.proxyName,
-    testUrl: proxyState.testUrl.takeFirstValid([currentTestUrl]),
+  final target = computeDelayTestTarget(
+    proxyName: proxyName,
+    groups: ref.watch(groupsProvider),
+    defaultTestUrl: ref.watch(realTestUrlProvider(testUrl)),
   );
+  if (target == null) return null;
   final delay = ref.watch(
     delayDataSourceProvider.select((state) {
-      final delayMap = state[delayTestUrl];
-      return delayMap?[proxyState.proxyName];
+      final delayMap = state[target.url];
+      return delayMap?[target.name];
     }),
   );
 
@@ -176,18 +176,13 @@ DelayTestPhase? getDelayTestPhase(
   required String proxyName,
   String? testUrl,
 }) {
-  final proxyState = ref.watch(realSelectedProxyStateProvider(proxyName));
-  final url = getDelayTestUrl(
-    proxyName: proxyState.proxyName,
-    testUrl: proxyState.testUrl.takeFirstValid([
-      ref.watch(realTestUrlProvider(testUrl)),
-    ]),
+  final target = computeDelayTestTarget(
+    proxyName: proxyName,
+    groups: ref.watch(groupsProvider),
+    defaultTestUrl: ref.watch(realTestUrlProvider(testUrl)),
   );
-  return ref.watch(
-    pendingDelayTestsProvider.select(
-      (state) => state[(name: proxyState.proxyName, url: url)],
-    ),
-  );
+  if (target == null) return null;
+  return ref.watch(pendingDelayTestsProvider.select((state) => state[target]));
 }
 
 @riverpod

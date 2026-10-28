@@ -188,6 +188,47 @@ func TestNodePagesHideTimeoutKeepsGroupsAndSearchesFirst(t *testing.T) {
 	}
 }
 
+func TestNodePagesKeepNestedMembersInTheirDialerScope(t *testing.T) {
+	installNodeConfig(t, `proxies:
+  - {name: Entry, type: http, server: 127.0.0.1, port: 1080}
+  - {name: Leaf, type: http, server: 127.0.0.1, port: 1081}
+  - {name: Other, type: http, server: 127.0.0.1, port: 1082}
+proxy-groups:
+  - {name: Nested, type: select, proxies: [Leaf], url: 'https://nested.test/check'}
+  - {name: Landing, type: select, proxies: [Nested, Leaf, Other], dialer-proxy: Entry}
+  - {name: Outer, type: select, proxies: [Landing, Other]}
+rules: ['MATCH,Outer']
+`)
+	_, groups := nodeGroupsLocked()
+	scope := groups["Landing"].testURL()
+	proxies := tunnel.ProxiesSnapshot()
+	if proxyForDelay("Nested", scope) != proxies["Nested"] || proxyForDelay("Leaf", scope) == proxies["Leaf"] {
+		t.Fatal("nested and derived direct members did not retain distinct identities")
+	}
+	request := nodePageRequest{
+		Group: "Landing", Sort: "delay", TestURL: "https://default.test/check",
+		Delays: map[string]map[string]int{
+			scope:                        {"Nested": 7, "Other": 20, "Leaf": -1},
+			"https://nested.test/check":  {"Leaf": 90},
+			"https://default.test/check": {"Other": 20, "Leaf": 1},
+		},
+	}
+	page := handleGetProxyPage(request)
+	if page.Items[0].Name != "Nested" || page.Items[1].Name != "Other" {
+		t.Fatalf("scoped sorting used the nested leaf's unrelated history: %v", page.Items)
+	}
+	request.HideTimeout = true
+	page = handleGetProxyPage(request)
+	if page.Total != 2 || page.Items[0].Name != "Nested" || page.Items[1].Name != "Other" {
+		t.Fatalf("timeout visibility mixed source and derived histories: %v", page.Items)
+	}
+	request.Group, request.HideTimeout = "Outer", false
+	page = handleGetProxyPage(request)
+	if page.Items[0].Name != "Landing" {
+		t.Fatalf("outer selection did not stop at the landing scope's direct member: %v", page.Items)
+	}
+}
+
 func TestNodePagesConfigReplacementInvalidatesRevision(t *testing.T) {
 	installNodePageFixture(t)
 	old := handleGetProxyPage(nodePageRequest{Group: "Paged"})

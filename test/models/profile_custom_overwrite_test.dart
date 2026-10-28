@@ -645,13 +645,68 @@ void main() {
     );
   });
 
-  test('proxy chain conflict includes existing dialer-proxy relations', () {
+  test('proxy chain scopes concrete targets away from source dialers', () {
     expect(
       findProxyChainConflictName(
         const [
           ProxyChain(id: 1, proxies: ['A', 'B']),
         ],
-        existingRelations: const {'A': 'B'},
+        existingRelations: const {'B': 'Original'},
+      ),
+      isNull,
+    );
+    expect(
+      const ProxyChain(
+        id: 1,
+        proxies: ['A', 'B', 'C'],
+      ).scopedDialerProxyRelations(const {}),
+      {'B (via A)': 'A', 'C (via B)': 'B (via A)'},
+    );
+  });
+
+  test('proxy chain rejects incompatible scoped and group dialers', () {
+    expect(
+      findProxyChainConflictName(const [
+        ProxyChain(id: 1, proxies: ['A', 'B', 'C']),
+        ProxyChain(id: 2, proxies: ['X', 'B', 'C']),
+      ]),
+      'C (via B)',
+    );
+    expect(
+      findProxyChainConflictName(
+        const [
+          ProxyChain(id: 1, proxies: ['A', 'Landing']),
+        ],
+        existingRelations: const {'Landing': 'Other'},
+        groupMembers: const {'Landing': []},
+      ),
+      'Landing',
+    );
+  });
+
+  test('group dialer overrides concrete member dialer relations', () {
+    expect(
+      findProxyChainConflictName(
+        const [
+          ProxyChain(id: 1, proxies: ['Entry', 'Landing']),
+        ],
+        existingRelations: const {'Exit': 'Landing'},
+        groupMembers: const {
+          'Landing': ['Exit'],
+        },
+      ),
+      isNull,
+    );
+    expect(
+      findProxyChainConflictName(
+        const [
+          ProxyChain(id: 1, proxies: ['Entry', 'Landing']),
+        ],
+        existingRelations: const {'Exit': 'Landing'},
+        groupMembers: const {
+          'Landing': ['Nested'],
+          'Nested': ['Exit'],
+        },
       ),
       isNotNull,
     );

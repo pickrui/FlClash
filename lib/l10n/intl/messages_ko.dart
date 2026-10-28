@@ -2037,11 +2037,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainEmpty": MessageLookupByLibrary.simpleMessage("프록시 체인에 노드가 없습니다"),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("진입"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("출구"),
-    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
-      "정책 그룹은 진입점이나 출구에 사용할 수 있습니다. 중계에는 고정 노드를 사용하세요.",
-    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "진입점과 출구로 노드 또는 그룹을 선택하세요. 출구 그룹에는 독립 노드, 중계에는 고정 노드가 필요합니다. 저장 후 출구를 선택하세요. 진입점 검사는 진입점만, 출구 그룹 검사는 전체 체인을 측정합니다.",
+      "진입점부터 출구까지 순서대로 배치하세요. 모든 호프에 노드나 정책 그룹을 사용할 수 있습니다. 그룹의 프록시 멤버는 이전 호프를 사용하며 중첩 그룹과 DIRECT/REJECT는 그대로 유지됩니다. 저장 후 출구가 노드이면 ‘노드 (via 이전 호프)’ 그룹을, 아니면 출구 그룹을 선택하세요. 편집기의 지연은 각 호프의 참고값입니다. 실제 경로는 출구 그룹에서 검사하세요.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "체인에는 진입점과 출구가 필요합니다",
@@ -2058,10 +2055,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "관련 프록시 체인을 업데이트했습니다",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "체인을 저장하고 적용했습니다. 출구 노드 또는 그룹을 선택하세요.",
+      "체인을 저장하고 적용했습니다. 노드 출구는 생성된 ‘노드 (via 이전 호프)’ 그룹을, 그 외에는 출구 그룹을 선택하세요.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("프록시 체인"),
     "proxyChainUnavailableNodeTip": m90,
+    "proxyChainUnsupportedGroupTip": MessageLookupByLibrary.simpleMessage(
+      "체인에는 select, url-test, fallback, load-balance 그룹만 사용할 수 있습니다.",
+    ),
     "proxyChainUriNodeSupportedFormats": MessageLookupByLibrary.simpleMessage(
       "지원 형식: ss://, ssr://, vmess://, vless://, trojan://, anytls://, hysteria:// / hy://, hysteria2:// / hy2://, tuic://, wireguard:// / wg://, http(s)://, socks(5)://",
     ),

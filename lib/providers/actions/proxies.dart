@@ -365,7 +365,7 @@ extension ProxiesControllerExt on AppController {
   /// Tests one node; a node already pending in a joined run is left alone.
   Future<void> proxyDelayTest(Proxy proxy, [String? testUrl]) async {
     final target = computeDelayTestTarget(
-      proxy: proxy,
+      proxyName: proxy.name,
       groups: groups,
       defaultTestUrl: getRealTestUrl(testUrl),
     );

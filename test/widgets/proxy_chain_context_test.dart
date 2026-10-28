@@ -31,8 +31,6 @@ void main() {
       context.sections.expand((section) => section.proxies),
       contains('Override Node'),
     );
-    expect(context.nameScope.targetNames, contains('Override Node'));
-    expect(context.nameScope.dialerNames, contains('Override Group'));
     expect(context.existingRelations, isEmpty);
     expect(context.sections.first.proxies, ['Override Group']);
     expect(
@@ -49,7 +47,7 @@ void main() {
         'Override Group',
         'Override Node',
       ]),
-      isFalse,
+      isTrue,
     );
   });
 
@@ -81,8 +79,8 @@ void main() {
         .toSet();
     expect(candidates, contains('Node A'));
     expect(candidates, isNot(contains('Airport')));
-    expect(context.nameScope.targetNames, {'Node A'});
-    expect(context.nameScope.dialerNames, {'Node A', 'Proxy'});
+    expect(context.nameScope.isValid(['Proxy', 'Node A']), isTrue);
+    expect(context.nameScope.isValid(['Proxy', 'Airport']), isFalse);
   });
 
   test('candidate sections do not depend on proxy-group order', () {
@@ -108,7 +106,7 @@ void main() {
           'proxy-groups': groups,
         },
       );
-      expect(context.nameScope.dialerNames, {'A', 'Proxy', 'Auto'});
+      expect(context.nameScope.isValid(['A', 'Proxy', 'Auto']), isTrue);
       return context.sections.expand((section) => section.proxies).toSet();
     }
 

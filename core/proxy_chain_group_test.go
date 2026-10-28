@@ -289,8 +289,18 @@ func TestProxyChainPolicyGroupsDialing(t *testing.T) {
 	entrySource.version++
 	landingSource.members = []C.Proxy{route.proxies["Entry"]}
 	landingSource.version++
-	if _, err := route.proxies["Landing"].DialContext(ctx, metadata); err == nil {
-		t.Fatal("unsupported new provider member bypassed the chain")
+	echo(dial(route.proxies["Landing"]), "nested-group-passes-through")
+	if countB.Load() != 7 {
+		t.Fatal("nested landing group did not retain its own route")
+	}
+	unsupported, err := adapter.ParseProxy(map[string]any{"name": "Rematch", "type": "rematch", "target-rematch-name": "target"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	landingSource.members = []C.Proxy{unsupported}
+	landingSource.version++
+	if _, err := route.proxies["Landing"].DialContext(ctx, metadata); err == nil || !strings.Contains(err.Error(), "does not support dialer-proxy") {
+		t.Fatalf("unsupported new provider member bypassed the chain: %v", err)
 	}
 	landingSource.members = nil
 	landingSource.version++
@@ -308,9 +318,156 @@ func TestProxyChainPolicyGroupsDialing(t *testing.T) {
 	if _, err := route.proxies["Landing"].DialContext(ctx, metadata); err == nil || !strings.Contains(err.Error(), "not found") {
 		t.Fatalf("missing entry: %v", err)
 	}
-	if countA.Load() != 1 || countB.Load() != 6 || countExitC.Load() != 3 {
+	if countA.Load() != 1 || countB.Load() != 7 || countExitC.Load() != 3 {
 		t.Fatal("invalid configuration opened a direct connection")
 	}
 	landing.(interface{ CloseDialerProviders() }).CloseDialerProviders()
 	echo(first, "original-still-connected")
+}
+
+func TestProxyChainScopedConcreteHopDoesNotRewriteSource(t *testing.T) {
+	target := chainGroupListener(t, func(conn net.Conn) { _, _ = io.Copy(conn, conn) })
+	probe := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Fragment != "" {
+			t.Error("latency scope reached the server")
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer probe.Close()
+	original, originalCount := chainGroupHTTPProxy(t)
+	entry, entryCount := chainGroupHTTPProxy(t)
+	middle, middleCount := chainGroupHTTPProxy(t)
+	exit, exitCount := chainGroupHTTPProxy(t)
+	route := &chainGroupTunnel{proxies: map[string]C.Proxy{}}
+	for name, listener := range map[string]net.Listener{
+		"Original": original,
+		"Entry":    entry,
+		"Exit":     exit,
+	} {
+		host, port, _ := net.SplitHostPort(listener.Addr().String())
+		number, _ := strconv.Atoi(port)
+		proxy, err := adapter.ParseProxy(map[string]any{
+			"name": name, "type": "http", "server": host, "port": number,
+		}, adapter.WithTunnelForAPI(route))
+		if err != nil {
+			t.Fatal(err)
+		}
+		route.proxies[name] = proxy
+	}
+	middleHost, middlePort, _ := net.SplitHostPort(middle.Addr().String())
+	middleNumber, _ := strconv.Atoi(middlePort)
+	middleSource, err := adapter.ParseProxy(map[string]any{
+		"name": "Middle", "type": "http", "server": middleHost, "port": middleNumber, "dialer-proxy": "Original",
+	}, adapter.WithTunnelForAPI(route))
+	if err != nil {
+		t.Fatal(err)
+	}
+	route.proxies["Middle"] = middleSource
+	blocked, err := adapter.ParseProxy(map[string]any{"name": "Block", "type": "reject"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	route.proxies["Block"] = blocked
+	providers := map[string]P.ProxyProvider{}
+
+	groupA, err := outboundgroup.ParseProxyGroup(map[string]any{
+		"name": "Group A", "type": "select", "proxies": []string{"Middle"}, "empty-fallback": "Block",
+	}, route.proxies, providers, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = groupA.Close() })
+	route.proxies["Group A"] = adapter.NewProxy(groupA)
+	derivedName := "Middle (via Entry)"
+	derived, err := outboundgroup.ParseProxyGroup(map[string]any{
+		"name": derivedName, "type": "select", "proxies": []string{"Middle"}, "dialer-proxy": "Entry",
+		"empty-fallback": "Block", "hidden": true, "url": probe.URL,
+	}, route.proxies, providers, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = derived.Close() })
+	route.proxies[derivedName] = adapter.NewProxy(derived)
+	groupB, err := outboundgroup.ParseProxyGroup(map[string]any{
+		"name": "Group B", "type": "select", "proxies": []string{"Exit"}, "dialer-proxy": derivedName,
+		"empty-fallback": "Block", "url": probe.URL,
+	}, route.proxies, providers, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = groupB.Close() })
+	route.proxies["Group B"] = adapter.NewProxy(groupB)
+
+	groupAMember := groupA.(*outboundgroup.Selector).Proxies()[0]
+	derivedMember := derived.(*outboundgroup.Selector).Proxies()[0]
+	groupBMember := groupB.(*outboundgroup.Selector).Proxies()[0]
+	if groupAMember != middleSource || middleSource.ProxyInfo().DialerProxy != "Original" {
+		t.Fatal("unscoped group did not retain the source proxy and its original dialer")
+	}
+	if derivedMember == middleSource || derivedMember.ProxyInfo().DialerProxy != "Entry" {
+		t.Fatal("scoped middle hop did not create an independent entry-derived proxy")
+	}
+	if groupBMember == route.proxies["Exit"] || groupBMember.ProxyInfo().DialerProxy != derivedName {
+		t.Fatal("landing group did not create an independent derived exit proxy")
+	}
+
+	address := netip.MustParseAddrPort(target.Addr().String())
+	metadata := &C.Metadata{NetWork: C.TCP, DstIP: address.Addr(), DstPort: address.Port()}
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+	dialAndEcho := func(name, message string) {
+		t.Helper()
+		conn, err := route.proxies[name].DialContext(ctx, metadata)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer conn.Close()
+		_ = conn.SetDeadline(time.Now().Add(5 * time.Second))
+		if _, err := io.WriteString(conn, message); err != nil {
+			t.Fatal(err)
+		}
+		data := make([]byte, len(message))
+		if _, err := io.ReadFull(conn, data); err != nil {
+			t.Fatal(err)
+		}
+		if string(data) != message {
+			t.Fatalf("echo = %q, want %q", data, message)
+		}
+	}
+	dialAndEcho("Group A", "source-route")
+	if originalCount.Load() != 1 || entryCount.Load() != 0 || middleCount.Load() != 1 || exitCount.Load() != 0 {
+		t.Fatalf("source route counts original=%d entry=%d middle=%d exit=%d", originalCount.Load(), entryCount.Load(), middleCount.Load(), exitCount.Load())
+	}
+	dialAndEcho("Group B", "scoped-route")
+	if originalCount.Load() != 1 || entryCount.Load() != 1 || middleCount.Load() != 2 || exitCount.Load() != 1 {
+		t.Fatalf("scoped route counts original=%d entry=%d middle=%d exit=%d", originalCount.Load(), entryCount.Load(), middleCount.Load(), exitCount.Load())
+	}
+
+	previousProxies, previousProviders := tunnel.ProxiesSnapshot(), tunnel.Providers()
+	tunnel.UpdateProxies(route.proxies, nil)
+	defer tunnel.UpdateProxies(previousProxies, previousProviders)
+	derivedScope := derived.(interface{ DialerTestURL() string }).DialerTestURL()
+	groupBScope := groupB.(interface{ DialerTestURL() string }).DialerTestURL()
+	if derivedScope == groupBScope || proxyForDelay("Middle", derivedScope) != derivedMember || proxyForDelay("Exit", groupBScope) != groupBMember {
+		t.Fatal("derived latency scopes did not resolve to independent members")
+	}
+	if _, err := derivedMember.URLTest(ctx, derivedScope, nil); err != nil {
+		t.Fatal(err)
+	}
+	if len(derivedMember.DelayHistory()) != 1 || len(groupBMember.DelayHistory()) != 0 {
+		t.Fatal("middle latency history leaked into the derived exit")
+	}
+	if _, err := groupBMember.URLTest(ctx, groupBScope, nil); err != nil {
+		t.Fatal(err)
+	}
+	if len(derivedMember.DelayHistory()) != 1 || len(groupBMember.DelayHistory()) != 1 {
+		t.Fatal("derived latency histories were not stored independently")
+	}
+	if len(middleSource.DelayHistory()) != 0 || len(middleSource.ExtraDelayHistories()) != 0 ||
+		len(route.proxies["Exit"].DelayHistory()) != 0 || len(route.proxies["Exit"].ExtraDelayHistories()) != 0 {
+		t.Fatal("derived latency history leaked into source proxies")
+	}
+	if originalCount.Load() != 1 || entryCount.Load() != 3 || middleCount.Load() != 4 || exitCount.Load() != 2 {
+		t.Fatalf("latency route counts original=%d entry=%d middle=%d exit=%d", originalCount.Load(), entryCount.Load(), middleCount.Load(), exitCount.Load())
+	}
 }

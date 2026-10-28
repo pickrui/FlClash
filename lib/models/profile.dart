@@ -227,38 +227,21 @@ List<String> normalizeProxyChainProxies(Iterable<String> proxies) {
       .toList();
 }
 
-class ProxyChainNameScope {
-  final Set<String> targetNames;
-  final Set<String> dialerNames;
-  final Set<String> groupNames;
+String proxyChainDerivedName(String proxyName, String dialerProxy) =>
+    '$proxyName (via $dialerProxy)';
 
-  const ProxyChainNameScope({
-    required this.targetNames,
-    required this.dialerNames,
-    this.groupNames = const {},
-  });
+class ProxyChainNameScope {
+  final Set<String> names;
+
+  const ProxyChainNameScope(this.names);
 
   bool isValid(Iterable<String> proxies) {
     return getInvalidName(proxies) == null;
   }
 
   String? getInvalidName(Iterable<String> proxies) {
-    final names = normalizeProxyChainProxies(proxies);
-    for (var i = 0; i < names.length; i++) {
-      final name = names[i];
-      final isEntry = i == 0;
-      final isExit = i == names.length - 1;
-      if (isEntry) {
-        if (!dialerNames.contains(name)) {
-          return name;
-        }
-        continue;
-      }
-      if (!targetNames.contains(name) &&
-          !(isExit && groupNames.contains(name))) {
-        return name;
-      }
-      if (!isExit && !dialerNames.contains(name)) {
+    for (final name in normalizeProxyChainProxies(proxies)) {
+      if (!names.contains(name)) {
         return name;
       }
     }
@@ -409,11 +392,18 @@ extension ProxyChainExt on ProxyChain {
     return proxies.length >= 2 ? proxies.last : null;
   }
 
-  Map<String, String> get dialerProxyRelations {
+  Map<String, String> scopedDialerProxyRelations(Set<String> groupNames) {
     final proxies = normalizedProxies;
     final relations = <String, String>{};
+    if (proxies.isEmpty) return relations;
+    var dialerProxy = proxies.first;
     for (var i = 1; i < proxies.length; i++) {
-      relations[proxies[i]] = proxies[i - 1];
+      final proxyName = proxies[i];
+      final target = groupNames.contains(proxyName)
+          ? proxyName
+          : proxyChainDerivedName(proxyName, proxies[i - 1]);
+      relations[target] = dialerProxy;
+      dialerProxy = target;
     }
     return relations;
   }
@@ -507,33 +497,21 @@ extension ProxyChainsExt on List<ProxyChain> {
   }
 
   ({bool hasDisabledConflicts, List<ProxyChain> proxyChains})
-  copyAndPutResolvingTargetConflicts(ProxyChain proxyChain) {
+  copyAndPutResolvingTargetConflicts(
+    ProxyChain proxyChain, {
+    Map<String, List<String>> groupMembers = const {},
+  }) {
     final nextProxyChain = proxyChain.copyWith(enable: true);
-    final nextRelations = nextProxyChain.dialerProxyRelations;
-    final nextEntryProxyName = nextProxyChain.entryProxyName;
-    final nextExitProxyName = nextProxyChain.exitProxyName;
     var hasDisabledConflicts = false;
     final nextList = map((chain) {
       if (chain.id == nextProxyChain.id || !chain.isValid) {
         return chain;
       }
-      final chainEntryProxyName = chain.entryProxyName;
-      final chainRelations = chain.dialerProxyRelations;
-      final hasExitConflict =
-          nextExitProxyName != null && chain.exitProxyName == nextExitProxyName;
-      final hasEntryConflict =
-          (nextEntryProxyName != null &&
-              chainRelations.containsKey(nextEntryProxyName)) ||
-          (chainEntryProxyName != null &&
-              nextRelations.containsKey(chainEntryProxyName));
-      final hasConflict =
-          hasExitConflict ||
-          hasEntryConflict ||
-          chainRelations.entries.any((entry) {
-            final dialer = nextRelations[entry.key];
-            return dialer != null && dialer != entry.value;
-          });
-      if (!hasConflict) {
+      if (findProxyChainConflictName([
+            chain,
+            nextProxyChain,
+          ], groupMembers: groupMembers) ==
+          null) {
         return chain;
       }
       hasDisabledConflicts = true;
@@ -546,76 +524,16 @@ extension ProxyChainsExt on List<ProxyChain> {
   }
 }
 
-String? _findProxyChainCycleName(
-  Map<String, String> targetDialerMap,
-  String target,
-) {
-  final seen = <String>{};
-  var current = target;
-  while (true) {
-    if (!seen.add(current)) {
-      return current;
-    }
-    final dialer = targetDialerMap[current];
-    if (dialer == null) {
-      return null;
-    }
-    current = dialer;
-  }
-}
-
-String? _findProxyChainDuplicateExitName(Iterable<ProxyChain> proxyChains) {
-  final exitNames = <String>{};
-  for (final proxyChain in proxyChains.where((item) => item.isValid)) {
-    final exitProxyName = proxyChain.exitProxyName;
-    if (exitProxyName == null) {
-      continue;
-    }
-    if (!exitNames.add(exitProxyName)) {
-      return exitProxyName;
-    }
-  }
-  return null;
-}
-
-String? _findProxyChainEntryTargetName(Iterable<ProxyChain> proxyChains) {
-  final targetNames = <String>{};
-  final entries = <String>[];
-  for (final proxyChain in proxyChains.where((item) => item.isValid)) {
-    targetNames.addAll(proxyChain.dialerProxyRelations.keys);
-    final entryProxyName = proxyChain.entryProxyName;
-    if (entryProxyName != null) {
-      entries.add(entryProxyName);
-    }
-  }
-  for (final entry in entries) {
-    if (targetNames.contains(entry)) {
-      return entry;
-    }
-  }
-  return null;
-}
-
 String? findProxyChainConflictName(
   Iterable<ProxyChain> proxyChains, {
   Map<String, String> existingRelations = const {},
   Map<String, List<String>> groupMembers = const {},
 }) {
-  final duplicateExitName = _findProxyChainDuplicateExitName(proxyChains);
-  if (duplicateExitName != null) {
-    return duplicateExitName;
-  }
-  final entryTargetName = _findProxyChainEntryTargetName(proxyChains);
-  if (entryTargetName != null) {
-    return entryTargetName;
-  }
   final targetDialerMap = Map<String, String>.from(existingRelations);
-  for (final target in targetDialerMap.keys) {
-    final cycleName = _findProxyChainCycleName(targetDialerMap, target);
-    if (cycleName != null) return cycleName;
-  }
+  final groupNames = groupMembers.keys.toSet();
   for (final proxyChain in proxyChains.where((item) => item.isValid)) {
-    for (final entry in proxyChain.dialerProxyRelations.entries) {
+    for (final entry
+        in proxyChain.scopedDialerProxyRelations(groupNames).entries) {
       final target = entry.key;
       final dialer = entry.value;
       final existingDialer = targetDialerMap[target];
@@ -623,18 +541,16 @@ String? findProxyChainConflictName(
         return target;
       }
       targetDialerMap[target] = dialer;
-      final cycleName = _findProxyChainCycleName(targetDialerMap, target);
-      if (cycleName != null) {
-        return cycleName;
-      }
     }
   }
-  if (groupMembers.isEmpty) return null;
   return _findProxyChainGroupCycleName({
     for (final name in {...targetDialerMap.keys, ...groupMembers.keys})
       name: [
         if (targetDialerMap[name] case final String dialer) dialer,
-        ...?groupMembers[name],
+        if (groupMembers[name] case final members?)
+          ...targetDialerMap.containsKey(name)
+              ? members.where(groupMembers.containsKey)
+              : members,
       ],
   });
 }

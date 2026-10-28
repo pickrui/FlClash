@@ -2446,11 +2446,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Entry"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Exit"),
-    "proxyChainGroupEndpointsOnly": MessageLookupByLibrary.simpleMessage(
-      "Policy groups can be used at the entry or exit. Relay hops must be fixed nodes.",
-    ),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Choose an entry and exit using nodes or policy groups. Exit groups require standalone node members; relay hops use fixed nodes. Select the exit to use the chain. Entry tests measure the entry; exit group tests measure the full chain.",
+      "Choose hops from entry to exit. Nodes or policy groups can occupy any hop. Concrete group members use the preceding hop; nested groups and DIRECT/REJECT stay unchanged. After saving, select the generated ‘Node (via previous hop)’ group for a node exit, or the exit group. Delays in this editor are per-hop references; test the exit group to measure the effective route.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "A proxy chain needs an entry and an exit",
@@ -2469,12 +2466,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Related proxy chains updated",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Proxy chain saved and applied. Select the exit node or group to use it.",
+      "Proxy chain saved and applied. For a node exit, select its generated ‘Node (via previous hop)’ group; otherwise select the exit group.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Proxy chain",
     ),
     "proxyChainUnavailableNodeTip": m90,
+    "proxyChainUnsupportedGroupTip": MessageLookupByLibrary.simpleMessage(
+      "Only select, url-test, fallback, and load-balance groups can be used in a chain.",
+    ),
     "proxyChainUriNodeSupportedFormats": MessageLookupByLibrary.simpleMessage(
       "Supported formats: ss://, ssr://, vmess://, vless://, trojan://, anytls://, hysteria:// / hy://, hysteria2:// / hy2://, tuic://, wireguard:// / wg://, http(s)://, socks(5)://",
     ),
