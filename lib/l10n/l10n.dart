@@ -12643,6 +12643,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Drag cards to reorder; touch and hold first on touchscreens`
+  String get dashboardReorderHint {
+    return Intl.message(
+      'Drag cards to reorder; touch and hold first on touchscreens',
+      name: 'dashboardReorderHint',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Done`
   String get done {
     return Intl.message('Done', name: 'done', desc: '', args: []);

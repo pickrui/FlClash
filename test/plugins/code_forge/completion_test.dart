@@ -101,6 +101,28 @@ void main() {
     expect(find.textContaining('suggest '), findsNothing);
   });
 
+  testWidgets('read-only transition prevents accepting an open completion', (
+    tester,
+  ) async {
+    final (controller, popups) = await pumpWords(tester);
+    await typeText(tester, controller, 'al');
+    await settle(tester, 8);
+    final accept = popups.last.onAccept;
+    final before = controller.text;
+
+    await pumpEditor(
+      tester,
+      controller,
+      readOnly: true,
+      enableLocalSuggestions: true,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(controller.text, before);
+
+    accept(0);
+    expect(controller.text, before);
+  });
+
   testWidgets('arrow keys move the highlight that Enter accepts', (
     tester,
   ) async {

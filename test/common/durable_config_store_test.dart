@@ -89,6 +89,33 @@ void main() {
     expect(await File(path).exists(), isTrue);
   });
 
+  test('a corrupt header MAC recovers from the valid old config', () async {
+    final directory = await Directory.systemTemp.createTemp('config_store_');
+    addTearDown(() => directory.delete(recursive: true));
+    final path = p.join(directory.path, 'config.age');
+    await store.write(path, {'version': 1});
+    final original = await File(path).readAsBytes();
+    await store.write(path, {'version': 2});
+    final lines = const LineSplitter().convert(await File(path).readAsString());
+    final binary = base64Decode(lines.sublist(1, lines.length - 1).join());
+    final mac = latin1.decode(binary).indexOf('\n--- ') + 5;
+    binary[mac] = binary[mac] == 65 ? 66 : 65;
+    final encoded = base64Encode(binary);
+    await File(path).writeAsString(
+      [
+        lines.first,
+        ...RegExp('.{1,64}').allMatches(encoded).map((m) => m.group(0)!),
+        lines.last,
+        '',
+      ].join('\n'),
+    );
+    await File('$path.old').writeAsBytes(original);
+
+    expect(await store.read(path), {'version': 1});
+    expect(await File(path).readAsBytes(), original);
+    expect(await File('$path.old').exists(), isFalse);
+  });
+
   test('an unreadable temporary file beside a target is not dropped', () async {
     final directory = await Directory.systemTemp.createTemp('config_store_');
     addTearDown(() => directory.delete(recursive: true));

@@ -88,6 +88,7 @@ extension CodeForgeControllerCompletion on CodeForgeController {
   /// Inserts the suggestion at [index], or the highlighted one, in place of
   /// the prefix it was matched against and closes the popup.
   void acceptSuggestion([int? index]) {
+    if (readOnly) return;
     final suggestions = suggestionsNotifier.value;
     if (suggestions == null || suggestions.isEmpty) return;
     final selected = (index ?? selectedSuggestionNotifier.value ?? 0).clamp(

@@ -13,6 +13,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -191,6 +192,15 @@ class _DashboardEditorState extends ConsumerState<DashboardEditor>
         padding: widget.padding,
         sliver: SliverMainAxisGroup(
           slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+                child: Text(
+                  appLocalizations.dashboardReorderHint,
+                  style: context.listCaptionStyle,
+                ),
+              ),
+            ),
             SliverReorderableList(
               itemCount: cards.length,
               itemBuilder: (_, index) {
@@ -435,7 +445,20 @@ class _EditableCard extends StatelessWidget {
     final content = Stack(
       fit: StackFit.passthrough,
       children: [
-        ReorderableDelayedDragStartListener(index: index, child: card),
+        Listener(
+          onPointerDown: (event) {
+            final recognizer = event.kind == PointerDeviceKind.mouse
+                ? ImmediateMultiDragGestureRecognizer(debugOwner: this)
+                : DelayedMultiDragGestureRecognizer(debugOwner: this);
+            SliverReorderableList.of(context).startItemDragReorder(
+              index: index,
+              event: event,
+              recognizer: recognizer
+                ..gestureSettings = MediaQuery.maybeGestureSettingsOf(context),
+            );
+          },
+          child: MouseRegion(cursor: SystemMouseCursors.grab, child: card),
+        ),
         if (onRemove != null)
           PositionedDirectional(
             top: 0,

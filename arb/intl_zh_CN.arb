@@ -1500,6 +1500,7 @@
   "connectionStatsDesc": "实时连接、最近请求、DNS 查询",
   "currentOutboundDesc": "含启动键，不可移除",
   "dashboardAddableSection": "可添加",
+  "dashboardReorderHint": "拖动卡片调整顺序，触屏操作请先长按",
   "done": "完成",
   "editDashboard": "编辑仪表盘",
   "groupCount": "{count} 个",

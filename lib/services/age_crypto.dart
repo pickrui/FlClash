@@ -8,6 +8,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:cryptography/helpers.dart' show constantTimeBytesEquality;
 
 class AgeIdentity {
   final SimpleKeyPair keyPair;
@@ -69,6 +70,9 @@ class AgeCrypto {
       ),
     );
     final sharedBytes = await shared.extractBytes();
+    if (constantTimeBytesEquality.equals(sharedBytes, Uint8List(32))) {
+      throw const FormatException('invalid age recipient shared secret');
+    }
 
     final salt = Uint8List(ephemeralShare.length + recipientPublicKey.length);
     salt.setAll(0, ephemeralShare);
@@ -178,6 +182,9 @@ class AgeCrypto {
       ),
     );
     final sharedBytes = await shared.extractBytes();
+    if (constantTimeBytesEquality.equals(sharedBytes, Uint8List(32))) {
+      throw const FormatException('invalid age ephemeral shared secret');
+    }
 
     final salt = Uint8List(
       header.ephemeralShare.length + identity.publicKeyBytes.length,
@@ -200,6 +207,19 @@ class AgeCrypto {
       ),
       secretKey: SecretKey(wrapKeyBytes),
     );
+
+    final macKey = await _hkdf.deriveKey(
+      secretKey: SecretKey(fileKey),
+      nonce: Uint8List(32),
+      info: utf8.encode('header'),
+    );
+    final mac = await Hmac.sha256().calculateMac(
+      header.authenticatedBytes,
+      secretKey: macKey,
+    );
+    if (mac != Mac(header.mac)) {
+      throw const FormatException('age header MAC mismatch');
+    }
 
     return _decryptPayload(header.payload, fileKey);
   }
@@ -308,6 +328,15 @@ class AgeCrypto {
     while (macLineEnd < binary.length && binary[macLineEnd] != newline) {
       macLineEnd++;
     }
+    final macLine = ascii.decode(binary.sublist(macLineStart, macLineEnd));
+    if (!macLine.startsWith('--- ')) {
+      throw const FormatException('invalid age header MAC line');
+    }
+    final encodedMac = macLine.substring(4);
+    final mac = _b64RawDecode(encodedMac);
+    if (mac.length != 32 || _b64RawEncode(mac) != encodedMac) {
+      throw const FormatException('invalid age header MAC');
+    }
     final payload = Uint8List.fromList(binary.sublist(macLineEnd + 1));
 
     if (lines.isEmpty || ascii.decode(lines.first) != 'age-encryption.org/v1') {
@@ -352,6 +381,8 @@ class AgeCrypto {
       Uint8List.fromList(ephemeralShare),
       Uint8List.fromList(wrappedKey),
       payload,
+      Uint8List.sublistView(binary, 0, macLineStart + 3),
+      mac,
     );
   }
 
@@ -484,6 +515,14 @@ class _AgeHeader {
   final Uint8List ephemeralShare;
   final Uint8List wrappedKey;
   final Uint8List payload;
+  final Uint8List authenticatedBytes;
+  final Uint8List mac;
 
-  _AgeHeader(this.ephemeralShare, this.wrappedKey, this.payload);
+  _AgeHeader(
+    this.ephemeralShare,
+    this.wrappedKey,
+    this.payload,
+    this.authenticatedBytes,
+    this.mac,
+  );
 }

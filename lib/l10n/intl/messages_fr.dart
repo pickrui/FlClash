@@ -1065,6 +1065,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage(
       "Disponibles à l’ajout",
     ),
+    "dashboardReorderHint": MessageLookupByLibrary.simpleMessage(
+      "Faites glisser les cartes pour les réordonner ; sur écran tactile, maintenez d’abord le doigt appuyé",
+    ),
     "dataChangedSave": MessageLookupByLibrary.simpleMessage(
       "Des modifications ont été détectées. Les enregistrer ?",
     ),

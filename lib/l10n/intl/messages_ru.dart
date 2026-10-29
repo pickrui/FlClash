@@ -1043,6 +1043,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage(
       "Можно добавить",
     ),
+    "dashboardReorderHint": MessageLookupByLibrary.simpleMessage(
+      "Перетаскивайте карточки для изменения порядка; на сенсорном экране сначала нажмите и удерживайте",
+    ),
     "dataChangedSave": MessageLookupByLibrary.simpleMessage(
       "Обнаружены изменения данных. Сохранить их?",
     ),

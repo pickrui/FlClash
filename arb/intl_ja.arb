@@ -1500,6 +1500,7 @@
   "connectionStatsDesc": "ライブ接続、最近のリクエスト、DNS クエリ",
   "currentOutboundDesc": "起動ボタンがあるため削除できません",
   "dashboardAddableSection": "追加できるカード",
+  "dashboardReorderHint": "カードをドラッグして並べ替えます。タッチ操作では先に長押ししてください",
   "done": "完了",
   "editDashboard": "ダッシュボードを編集",
   "groupCount": "{count} 個",

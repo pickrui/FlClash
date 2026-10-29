@@ -110,6 +110,10 @@ void main() {
     await pumpEditor(tester);
 
     expect(find.byType(DashboardEditor), findsOneWidget);
+    expect(
+      find.text('Drag cards to reorder; touch and hold first on touchscreens'),
+      findsOneWidget,
+    );
     final current = top(tester, find.byType(CurrentOutboundCard));
     final groups = top(tester, find.byType(ProxyGroupsCard));
     final speed = top(tester, find.byType(NetworkSpeedCard));
@@ -254,40 +258,97 @@ void main() {
     await teardown(tester);
   });
 
-  testWidgets('a card held and dragged saves the new order and keeps its '
-      'state', (tester) async {
-    seed(const [
-      DashboardWidget.currentOutbound,
-      DashboardWidget.networkSpeed,
-      DashboardWidget.memoryInfo,
-    ]);
-    await pumpEditor(tester);
-    final memory = tester.state(find.byType(MemoryInfo));
-    final card = find.byType(MemoryInfo);
-    final rise =
-        top(tester, card) - top(tester, find.byType(NetworkSpeedCard)) - 10;
+  for (final kind in [PointerDeviceKind.touch, PointerDeviceKind.mouse]) {
+    testWidgets('an Android card dragged by ${kind.name} saves the new order '
+        'and keeps its state', (tester) async {
+      seed(const [
+        DashboardWidget.currentOutbound,
+        DashboardWidget.networkSpeed,
+        DashboardWidget.memoryInfo,
+      ]);
+      await pumpEditor(tester);
+      final memory = tester.state(find.byType(MemoryInfo));
+      final card = find.byType(MemoryInfo);
+      final rise =
+          top(tester, card) - top(tester, find.byType(NetworkSpeedCard)) - 10;
 
-    final gesture = await tester.startGesture(tester.getCenter(card));
-    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
-    for (var step = 0; step < 4; step++) {
-      await gesture.moveBy(Offset(0, -rise / 4));
-      await tester.pump(const Duration(milliseconds: 100));
-    }
-    expect(find.byType(MemoryInfo), findsOneWidget);
-    expect(tester.state(find.byType(MemoryInfo)), same(memory));
-    await gesture.up();
-    await settle(tester);
+      final gesture = await tester.startGesture(
+        tester.getCenter(card),
+        kind: kind,
+      );
+      if (kind == PointerDeviceKind.touch) {
+        await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
+      }
+      for (var step = 0; step < 4; step++) {
+        await gesture.moveBy(Offset(0, -rise / 4));
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byType(MemoryInfo), findsOneWidget);
+      expect(tester.state(find.byType(MemoryInfo)), same(memory));
+      await gesture.up();
+      await settle(tester);
 
-    expect(saved(), const [
-      DashboardWidget.currentOutbound,
-      DashboardWidget.memoryInfo,
-      DashboardWidget.networkSpeed,
-    ]);
-    expect(tester.state(find.byType(MemoryInfo)), same(memory));
-    expect(tester.takeException(), isNull);
+      expect(saved(), const [
+        DashboardWidget.currentOutbound,
+        DashboardWidget.memoryInfo,
+        DashboardWidget.networkSpeed,
+      ]);
+      expect(tester.state(find.byType(MemoryInfo)), same(memory));
+      expect(tester.takeException(), isNull);
 
-    await teardown(tester);
-  });
+      await tester.tap(find.byTooltip('Done'));
+      await settle(tester);
+      expect(
+        find.text(
+          'Drag cards to reorder; touch and hold first on touchscreens',
+        ),
+        findsNothing,
+      );
+      await edit(tester);
+      expect(
+        top(tester, card),
+        lessThan(top(tester, find.byType(NetworkSpeedCard))),
+      );
+      expect(tester.state(card), same(memory));
+
+      await teardown(tester);
+    });
+
+    testWidgets(
+      '${kind.name} dragging near the edge scrolls to reorder cards',
+      (tester) async {
+        await pumpEditor(tester, size: const Size(412, 700));
+        final position = positionOf(tester);
+        final order = saved();
+        final card = find.byType(CurrentOutboundCard);
+        final gesture = await tester.startGesture(
+          tester.getCenter(card),
+          kind: kind,
+        );
+        if (kind == PointerDeviceKind.touch) {
+          await tester.pump(
+            kLongPressTimeout + const Duration(milliseconds: 50),
+          );
+        }
+        await gesture.moveBy(const Offset(0, 30));
+        await tester.pump();
+        await gesture.moveTo(const Offset(206, 680));
+        await settle(tester);
+
+        expect(position.pixels, greaterThan(0));
+        await gesture.up();
+        await settle(tester);
+        expect(
+          saved().indexOf(DashboardWidget.currentOutbound),
+          greaterThan(0),
+        );
+        expect(saved(), unorderedEquals(order));
+        expect(tester.takeException(), isNull);
+
+        await teardown(tester);
+      },
+    );
+  }
 
   testWidgets('a short press neither drags nor opens a card', (tester) async {
     seed(const [
@@ -297,12 +358,7 @@ void main() {
     ]);
     await pumpEditor(tester);
 
-    await tester.tap(
-      find.ancestor(
-        of: find.byType(MemoryInfo),
-        matching: find.byType(ReorderableDelayedDragStartListener),
-      ),
-    );
+    await tester.tapAt(tester.getCenter(find.byType(MemoryInfo)));
     await settle(tester);
 
     expect(find.byType(MemoryDetailSheet), findsNothing);
@@ -357,12 +413,13 @@ void main() {
     await teardown(tester);
   });
 
-  testWidgets('the scroll end holds still while the cards are edited', (
+  testWidgets('touch scrolling keeps the card order and scroll extent', (
     tester,
   ) async {
     await pumpEditor(tester, size: const Size(412, 700));
     final position = positionOf(tester);
     final end = position.maxScrollExtent;
+    final order = saved();
     expect(end, greaterThan(0));
 
     final gesture = await tester.startGesture(const Offset(200, 500));
@@ -374,12 +431,13 @@ void main() {
     await gesture.up();
     await tester.pump(const Duration(seconds: 2));
     expect(position.pixels, end);
+    expect(saved(), order);
 
     await teardown(tester);
   });
 
   testWidgets('a narrow desktop window edits its cards in the card column, '
-      'held and dragged with a mouse too', (tester) async {
+      'dragged immediately with a mouse too', (tester) async {
     seed(const [
       DashboardWidget.currentOutbound,
       DashboardWidget.networkTakeover,
@@ -404,7 +462,6 @@ void main() {
       tester.getCenter(card),
       kind: PointerDeviceKind.mouse,
     );
-    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
     for (var step = 0; step < 4; step++) {
       await gesture.moveBy(Offset(0, -rise / 4));
       await tester.pump(const Duration(milliseconds: 100));

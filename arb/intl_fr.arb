@@ -1500,6 +1500,7 @@
   "connectionStatsDesc": "Connexions en direct, requêtes récentes et requêtes DNS",
   "currentOutboundDesc": "Contient le bouton de démarrage et ne peut pas être retiré",
   "dashboardAddableSection": "Disponibles à l’ajout",
+  "dashboardReorderHint": "Faites glisser les cartes pour les réordonner ; sur écran tactile, maintenez d’abord le doigt appuyé",
   "done": "Terminé",
   "editDashboard": "Modifier le tableau de bord",
   "groupCount": "{count, plural, one{{count} groupe} other{{count} groupes}}",

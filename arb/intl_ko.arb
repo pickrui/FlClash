@@ -1500,6 +1500,7 @@
   "connectionStatsDesc": "실시간 연결, 최근 요청, DNS 쿼리",
   "currentOutboundDesc": "시작 버튼이 있어 제거할 수 없습니다",
   "dashboardAddableSection": "추가 가능",
+  "dashboardReorderHint": "카드를 드래그하여 순서를 변경하세요. 터치스크린에서는 먼저 길게 누르세요",
   "done": "완료",
   "editDashboard": "대시보드 편집",
   "groupCount": "{count, plural, other{그룹 {count}개}}",

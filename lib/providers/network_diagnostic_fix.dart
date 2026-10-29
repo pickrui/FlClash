@@ -10,6 +10,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 typedef NetworkDiagnosticFixHandler = Future<void> Function(DiagnosticFix fix);
 
+final networkDiagnosticSystemProxyProvider = Provider<SystemProxyController>(
+  (ref) => systemProxyController,
+);
+
 /// Performs a [DiagnosticFix]. Tests override this to observe which fix the
 /// page requested without driving the real core.
 final networkDiagnosticFixHandlerProvider =
@@ -45,10 +49,14 @@ Future<void> applyNetworkDiagnosticFix(Ref ref, DiagnosticFix fix) async {
       await ref.read(coreActionProvider.notifier).restartCore(true);
     case DiagnosticFix.applySystemProxy:
       final proxyState = ref.read(proxyStateProvider);
-      final result = await startSystemProxy(
-        proxyState.port,
-        proxyState.bassDomain,
-      );
+      if (!proxyState.isStart ||
+          !proxyState.systemProxy ||
+          proxyState.port <= 0) {
+        return;
+      }
+      final result = await ref
+          .read(networkDiagnosticSystemProxyProvider)
+          .start(proxyState.port, proxyState.bassDomain);
       if (result != SystemProxyStartResult.success) {
         throw StateError('system proxy ${result.name}');
       }

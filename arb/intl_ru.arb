@@ -1500,6 +1500,7 @@
   "connectionStatsDesc": "Подключения, запросы и DNS-запросы",
   "currentOutboundDesc": "Содержит кнопку запуска, удалить нельзя",
   "dashboardAddableSection": "Можно добавить",
+  "dashboardReorderHint": "Перетаскивайте карточки для изменения порядка; на сенсорном экране сначала нажмите и удерживайте",
   "done": "Готово",
   "editDashboard": "Изменить панель",
   "groupCount": "Групп: {count}",

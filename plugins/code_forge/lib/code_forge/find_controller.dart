@@ -357,6 +357,7 @@ class FindController extends ChangeNotifier {
   }
 
   void replace() {
+    if (_codeController.readOnly) return;
     _codeController.commitComposition();
     if (_currentMatchIndex < 0 || _currentMatchIndex >= matchCount) return;
 
@@ -374,14 +375,16 @@ class FindController extends ChangeNotifier {
   /// A long text is rewritten off the UI isolate, and left alone if it
   /// changes meanwhile.
   Future<void> replaceAll() async {
+    if (_codeController.readOnly) return;
     _codeController.commitComposition();
     if (_matches.isEmpty) return;
     final pattern = _pattern(_lastQuery);
+    final caseSensitive = _caseSensitive;
     final replacement = replaceInputController.text;
     if (_codeController.length < backgroundTextLength) {
       _codeController.replaceText(
         _codeController.text.replaceAll(
-          _regExp(pattern, _caseSensitive),
+          _regExp(pattern, caseSensitive),
           replacement,
         ),
       );
@@ -393,11 +396,13 @@ class FindController extends ChangeNotifier {
     final replaced = await _replaceOffIsolate(
       bytes,
       pattern,
-      _caseSensitive,
+      caseSensitive,
       replacement,
     );
     final document = await CodeForgeDocument.fromUtf8(replaced);
-    if (!_disposed && version == _codeController.contentVersion) {
+    if (!_disposed &&
+        !_codeController.readOnly &&
+        version == _codeController.contentVersion) {
       _codeController.replaceDocument(document);
       _reperformSearch();
     }

@@ -1500,6 +1500,7 @@
   "connectionStatsDesc": "Conexiones activas, solicitudes recientes y consultas DNS",
   "currentOutboundDesc": "Contiene el botón de inicio y no se puede quitar",
   "dashboardAddableSection": "Disponibles para añadir",
+  "dashboardReorderHint": "Arrastra las tarjetas para reordenarlas; en pantallas táctiles, mantén pulsado primero",
   "done": "Hecho",
   "editDashboard": "Editar panel",
   "groupCount": "{count, plural, =1{1 grupo} other{{count} grupos}}",

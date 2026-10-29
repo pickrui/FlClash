@@ -855,6 +855,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dark": MessageLookupByLibrary.simpleMessage("다크"),
     "dashboard": MessageLookupByLibrary.simpleMessage("대시보드"),
     "dashboardAddableSection": MessageLookupByLibrary.simpleMessage("추가 가능"),
+    "dashboardReorderHint": MessageLookupByLibrary.simpleMessage(
+      "카드를 드래그하여 순서를 변경하세요. 터치스크린에서는 먼저 길게 누르세요",
+    ),
     "dataChangedSave": MessageLookupByLibrary.simpleMessage(
       "변경된 데이터가 있습니다. 저장하시겠습니까?",
     ),

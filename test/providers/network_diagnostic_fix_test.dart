@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/proxy.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -120,6 +121,71 @@ void main() {
   test('enabling the system proxy sets it rather than toggling', () async {
     await apply(container(), DiagnosticFix.enableSystemProxy);
     expect(_calls, ['updateSystemProxy:true']);
+  });
+  test('stale system proxy repair cannot re-enable a disabled proxy', () async {
+    const active = ProxyState(
+      isStart: true,
+      systemProxy: true,
+      bassDomain: ['localhost'],
+      port: 7890,
+    );
+    for (final current in [
+      active.copyWith(systemProxy: false),
+      active.copyWith(isStart: false),
+      active.copyWith(port: 0),
+    ]) {
+      final writes = <int>[];
+      final controller = SystemProxyController(
+        startProxy: (port, _) async {
+          writes.add(port);
+          return true;
+        },
+        stopProxy: () async => true,
+        readinessChecker: (_) async => true,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          proxyStateProvider.overrideWith((ref) => current),
+          networkDiagnosticSystemProxyProvider.overrideWithValue(controller),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await apply(container, DiagnosticFix.applySystemProxy);
+
+      expect(writes, isEmpty, reason: current.toString());
+    }
+  });
+  test('system proxy repair uses the current running proxy settings', () async {
+    final writes = <(int, List<String>)>[];
+    final controller = SystemProxyController(
+      startProxy: (port, bypass) async {
+        writes.add((port, bypass));
+        return true;
+      },
+      stopProxy: () async => true,
+      readinessChecker: (_) async => true,
+    );
+    final container = ProviderContainer(
+      overrides: [
+        proxyStateProvider.overrideWith(
+          (ref) => const ProxyState(
+            isStart: true,
+            systemProxy: true,
+            bassDomain: ['localhost', '*.example.test'],
+            port: 17890,
+          ),
+        ),
+        networkDiagnosticSystemProxyProvider.overrideWithValue(controller),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await apply(container, DiagnosticFix.applySystemProxy);
+
+    expect(writes, hasLength(1));
+    expect(writes.single.$1, 17890);
+    expect(writes.single.$2, ['localhost', '*.example.test']);
   });
   test('retesting without groups is a safe no-op', () async {
     await apply(container(isStart: true), DiagnosticFix.retestProxies);

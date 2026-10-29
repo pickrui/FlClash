@@ -8,6 +8,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2
 	github.com/gofrs/uuid/v5 v5.5.1
 	github.com/klauspost/compress v1.20.1
+	github.com/metacubex/age v0.0.0-20260603010618-28d156b4ea78
 	github.com/metacubex/chi v0.1.1
 	github.com/metacubex/http v0.1.8
 	github.com/metacubex/mihomo v0.0.0-00010101000000-000000000000
@@ -62,7 +63,6 @@ require (
 	github.com/klauspost/reedsolomon v1.14.2 // indirect
 	github.com/mdlayher/netlink v1.11.2 // indirect
 	github.com/mdlayher/socket v0.7.0 // indirect
-	github.com/metacubex/age v0.0.0-20260603010618-28d156b4ea78 // indirect
 	github.com/metacubex/amneziawg-go v0.0.0-20260908071407-0c1c6f40ecd7 // indirect
 	github.com/metacubex/ascon v0.1.0 // indirect
 	github.com/metacubex/bart v0.29.0 // indirect
@@ -146,18 +146,6 @@ require (
 	golang.org/x/tools v0.50.0 // indirect
 )
 
-// Keep the Restls diagnostic race fix in Android and desktop builds.
-replace github.com/metacubex/restls-client-go => ./Clash.Meta/third_party/restls-client-go
-
-// Own queued smux payloads after cancelled writes (see smux README.oix.md).
-replace github.com/metacubex/smux => ./Clash.Meta/third_party/smux
-
-// Serialize h2mux session closure (see sing-mux README.oix.md).
-replace github.com/metacubex/sing-mux => ./Clash.Meta/third_party/sing-mux
-
-// Publish Shadowsocks 2022 request salt before fast replies can arrive.
-replace github.com/metacubex/sing-shadowsocks2 => ./Clash.Meta/third_party/sing-shadowsocks2
-
 // Retain the mips low-memory TCP storage policy (see mipstack README.oix.md).
 replace github.com/metacubex/mipstack => ./Clash.Meta/third_party/mipstack
 
@@ -166,9 +154,6 @@ replace github.com/metacubex/sing-tun => ./Clash.Meta/third_party/sing-tun
 
 // Release the watcher when adding a path fails (see fswatch README.oix.md).
 replace github.com/metacubex/fswatch => ./Clash.Meta/third_party/fswatch
-
-// Bound HTTP/2 SETTINGS I/O without expiring already received frames.
-replace github.com/metacubex/http => ./Clash.Meta/third_party/http
 
 tool (
 	golang.org/x/mobile/cmd/gobind

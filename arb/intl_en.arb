@@ -1500,6 +1500,7 @@
   "connectionStatsDesc": "Live connections, recent requests and DNS queries",
   "currentOutboundDesc": "Holds the start button and can't be removed",
   "dashboardAddableSection": "Available to add",
+  "dashboardReorderHint": "Drag cards to reorder; touch and hold first on touchscreens",
   "done": "Done",
   "editDashboard": "Edit dashboard",
   "groupCount": "{count, plural, =1{1 group} other{{count} groups}}",
