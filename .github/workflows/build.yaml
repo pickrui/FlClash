@@ -182,6 +182,7 @@ jobs:
         run: |
           go test -race tun_callbacks.go tun_callbacks_test.go
           go test -race -count=1 -tags "$GO_TAGS" -run '^(TestReclaim|TestUnprivilegedOwnershipRecovery|TestElevatedSpill)' .
+          go test -race -count=1 -tags "$GO_TAGS" github.com/metacubex/mihomo/adapter/inbound
 
   android-core-test:
     name: Android core
