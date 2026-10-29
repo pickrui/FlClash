@@ -178,6 +178,28 @@ class BoughtRecord {
   }
 }
 
+class BoughtPage {
+  final List<BoughtRecord> records;
+  final int? nextBeforeId;
+
+  const BoughtPage({required this.records, this.nextBeforeId});
+
+  factory BoughtPage.fromJson(Map<dynamic, dynamic> json) {
+    final history = json['history'];
+    int? nextBeforeId;
+    if (history is Map && history['has_more'] == true) {
+      nextBeforeId = _tryAsInt(history['next_before_id']);
+      if (nextBeforeId == null || nextBeforeId <= 0) {
+        throw const FormatException('Invalid purchase history cursor');
+      }
+    }
+    return BoughtPage(
+      records: decodeBoughtRecords(json['boughts']),
+      nextBeforeId: nextBeforeId,
+    );
+  }
+}
+
 /// 购买类操作的报价：提前续费与升级/更换在提交前必须先取得，
 /// 服务端按 `authorized_price` 校验报价未变化。
 class ShopQuote {

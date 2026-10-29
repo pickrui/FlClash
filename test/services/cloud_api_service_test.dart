@@ -340,7 +340,7 @@ void main() {
           'ret': 200,
           'data': {'boughts': []},
         });
-        expect(await currentRequest, isEmpty);
+        expect((await currentRequest).records, isEmpty);
       },
     );
   }
@@ -743,7 +743,7 @@ void main() {
 
   test('a late losing domain response is drained', () async {
     final inner = _RacingAdapter();
-    expect(await _domainService(inner).fetchBought(), isEmpty);
+    expect((await _domainService(inner).fetchBought()).records, isEmpty);
     await inner.losingResponseDrained.future.timeout(
       const Duration(seconds: 1),
     );
@@ -948,7 +948,7 @@ void main() {
               ? failure.value()
               : _boughtResponse();
         });
-        expect(await _domainService(inner).fetchBought(), isEmpty);
+        expect((await _domainService(inner).fetchBought()).records, isEmpty);
         expect(inner.hosts, ['primary.test', 'spare.test']);
       },
     );
@@ -983,7 +983,7 @@ void main() {
         },
       );
     });
-    expect(await _domainService(inner).fetchBought(), isEmpty);
+    expect((await _domainService(inner).fetchBought()).records, isEmpty);
   });
 
   test('cancelled login failover does not dispatch another domain', () async {
@@ -1045,7 +1045,10 @@ void main() {
           );
         });
         expect(
-          await _domainService(inner, maxResponseBytes: 64).fetchBought(),
+          (await _domainService(
+            inner,
+            maxResponseBytes: 64,
+          ).fetchBought()).records,
           isEmpty,
         );
         await streamCancelled.future.timeout(const Duration(seconds: 1));
@@ -1099,7 +1102,7 @@ void main() {
             ? ResponseBody(responseBody.stream, 200)
             : _boughtResponse();
       });
-      expect(await _domainService(inner).fetchBought(), isEmpty);
+      expect((await _domainService(inner).fetchBought()).records, isEmpty);
       await streamCancelled.future.timeout(const Duration(seconds: 1));
       await responseBody.close();
     },
@@ -1127,7 +1130,7 @@ void main() {
         'ret': 200,
         'data': {'boughts': []},
       });
-      expect(await result, isEmpty);
+      expect((await result).records, isEmpty);
       expect(proxy.options.cancelToken?.isCancelled, isTrue);
       direct.respond({'ret': 401}, statusCode: 401);
       await pumpEventQueue();
@@ -1158,7 +1161,7 @@ void main() {
           'ret': 200,
           'data': {'boughts': []},
         });
-        expect(await result, isEmpty);
+        expect((await result).records, isEmpty);
         expect(adapter.requestCount, 2);
       },
     );
@@ -1285,7 +1288,7 @@ void main() {
         'ret': 200,
         'data': {'boughts': []},
       });
-      expect(await result, isEmpty);
+      expect((await result).records, isEmpty);
       expect(adapter.requestCount, 2);
       expect(direct.options.cancelToken?.isCancelled, isTrue);
     },
@@ -1314,7 +1317,7 @@ void main() {
       'ret': 200,
       'data': {'boughts': []},
     });
-    expect(await result, isEmpty);
+    expect((await result).records, isEmpty);
     expect(adapter.requestCount, 2);
   });
 
@@ -1873,7 +1876,7 @@ void main() {
           'ret': 200,
           'data': {'boughts': []},
         });
-        expect(await currentRead, isEmpty);
+        expect((await currentRead).records, isEmpty);
       },
     );
   }

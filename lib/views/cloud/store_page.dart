@@ -244,6 +244,22 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
             actions: _buildBoughtActions(bought, state),
           ),
         ),
+      if (state.historyError case final error?)
+        CloudErrorBanner(
+          message: error,
+          onRetry: _busy || state.isLoading || state.isLoadingMore
+              ? null
+              : () => _reportFailures(_store.loadMore),
+        ),
+      if (state.nextBeforeId != null)
+        TonalButton(
+          onPressed: _busy || state.isLoading || state.isLoadingMore
+              ? null
+              : () => _reportFailures(_store.loadMore),
+          label: state.isLoadingMore
+              ? appLocalizations.loading
+              : appLocalizations.more,
+        ),
     ];
   }
 

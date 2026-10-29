@@ -1739,18 +1739,26 @@ class CloudApiService implements CloudNodeFilterApi {
     return decodeStorePlans(dto.data!['shops']);
   }
 
-  Future<List<BoughtRecord>> fetchBought() async {
+  Future<BoughtPage> fetchBought({int? beforeId}) async {
     final res = await _syncRead(
-      (token, options) =>
-          _client.post('/shop/bought', cancelToken: token, options: options),
+      (token, options) => _client.post(
+        '/shop/bought',
+        data: beforeId == null
+            ? null
+            : FormData.fromMap({'before_id': beforeId}),
+        cancelToken: token,
+        options: options,
+      ),
       validate: (response) =>
-          decodeBoughtRecords(_requireReadData(response.data)['boughts']),
+          BoughtPage.fromJson(_requireReadData(response.data)),
     );
-    final dto = CloudApiResponse<Map<dynamic, dynamic>>.fromJson(res.data);
-    if (!dto.isSuccess || dto.data == null) {
-      throw CloudApiException(dto.msg ?? appLocalizations.fetchOrdersFailed);
+    final page = BoughtPage.fromJson(_requireReadData(res.data));
+    if (beforeId != null &&
+        page.nextBeforeId != null &&
+        page.nextBeforeId! >= beforeId) {
+      throw const FormatException('Invalid purchase history cursor');
     }
-    return decodeBoughtRecords(dto.data!['boughts']);
+    return page;
   }
 
   Future<List<PaymentMethodOption>> fetchPaymentMethods() async {

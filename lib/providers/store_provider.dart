@@ -14,6 +14,9 @@ class StoreState {
   final List<BoughtRecord> bought;
   final List<PaymentMethodOption> paymentMethods;
   final String? error;
+  final bool isLoadingMore;
+  final int? nextBeforeId;
+  final String? historyError;
 
   const StoreState({
     this.isLoading = false,
@@ -21,6 +24,9 @@ class StoreState {
     this.bought = const [],
     this.paymentMethods = const [],
     this.error,
+    this.isLoadingMore = false,
+    this.nextBeforeId,
+    this.historyError,
   });
 
   StoreState copyWith({
@@ -30,6 +36,11 @@ class StoreState {
     List<PaymentMethodOption>? paymentMethods,
     String? error,
     bool clearError = false,
+    bool? isLoadingMore,
+    int? nextBeforeId,
+    bool clearNextBeforeId = false,
+    String? historyError,
+    bool clearHistoryError = false,
   }) {
     return StoreState(
       isLoading: isLoading ?? this.isLoading,
@@ -37,6 +48,13 @@ class StoreState {
       bought: bought ?? this.bought,
       paymentMethods: paymentMethods ?? this.paymentMethods,
       error: clearError ? null : (error ?? this.error),
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      nextBeforeId: clearNextBeforeId
+          ? null
+          : (nextBeforeId ?? this.nextBeforeId),
+      historyError: clearHistoryError
+          ? null
+          : (historyError ?? this.historyError),
     );
   }
 }
@@ -54,16 +72,23 @@ class StoreNotifier extends Notifier<StoreState> {
 
   Future<void> load() async {
     final revision = ++_loadRevision;
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(
+      isLoading: true,
+      isLoadingMore: false,
+      clearError: true,
+      clearHistoryError: true,
+    );
     try {
       final plans = await apiService.fetchPlans();
       if (!ref.mounted || revision != _loadRevision) return;
-      final bought = await apiService.fetchBought();
+      final page = await apiService.fetchBought();
       if (!ref.mounted || revision != _loadRevision) return;
       state = state.copyWith(
         isLoading: false,
         plans: plans,
-        bought: bought,
+        bought: page.records,
+        nextBeforeId: page.nextBeforeId,
+        clearNextBeforeId: page.nextBeforeId == null,
         clearError: true,
       );
     } catch (e) {
@@ -77,6 +102,43 @@ class StoreNotifier extends Notifier<StoreState> {
         error: CloudApiException.clean(e),
       );
       if (CloudApiException.isUnauthorized(e)) rethrow;
+    }
+  }
+
+  Future<void> loadMore() async {
+    final beforeId = state.nextBeforeId;
+    if (beforeId == null || state.isLoading || state.isLoadingMore) return;
+    final revision = _loadRevision;
+    state = state.copyWith(isLoadingMore: true, clearHistoryError: true);
+    try {
+      final page = await apiService.fetchBought(beforeId: beforeId);
+      if (!ref.mounted || revision != _loadRevision) return;
+      bool isCurrentOrPending(BoughtRecord record) =>
+          record.isActive ||
+          (record.status == 0 && (record.durationMinutes ?? 0) > 0);
+      final records = {
+        for (final record in page.records.where(isCurrentOrPending))
+          record.id: record,
+        for (final record in state.bought.where(
+          (record) => !isCurrentOrPending(record),
+        ))
+          record.id: record,
+      };
+      for (final record in page.records) {
+        records[record.id] = record;
+      }
+      state = state.copyWith(
+        isLoadingMore: false,
+        bought: records.values.toList(),
+        nextBeforeId: page.nextBeforeId,
+        clearNextBeforeId: page.nextBeforeId == null,
+      );
+    } catch (e) {
+      if (!ref.mounted || revision != _loadRevision) return;
+      state = state.copyWith(isLoadingMore: false);
+      if (CloudApiException.isHandledUnauthorized(e)) return;
+      if (CloudApiException.isUnauthorized(e)) rethrow;
+      state = state.copyWith(historyError: CloudApiException.clean(e));
     }
   }
 
