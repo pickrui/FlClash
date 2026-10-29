@@ -64,12 +64,7 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
   void initState() {
     super.initState();
     _detection = ref.read(networkDetectionProvider.notifier);
-  }
-
-  @override
-  void startPolling() {
-    _detection.setProbeActive(this, canPoll);
-    super.startPolling();
+    _detection.setProbeActive(this, false);
   }
 
   @override
@@ -83,25 +78,25 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
 
   @override
   Future<void> poll(PollGuard isCurrent) async {
-    if (safeModeBuild ||
-        !ref.read(initProvider) ||
-        ref.read(coreStatusProvider) != CoreStatus.connected) {
-      return;
-    }
-    final Map<String, dynamic> route;
     try {
-      route = await ref
+      if (safeModeBuild ||
+          !ref.read(initProvider) ||
+          ref.read(coreStatusProvider) != CoreStatus.connected) {
+        return;
+      }
+      final route = await ref
           .read(coreHandlerProvider)
           .getProbeRoute(hosts: request.ipProbeHosts);
+      if (isCurrent()) _detection.updateRoute(route);
     } catch (error) {
       commonPrint.log(
         'Probe route failed: $error',
         logLevel: coreFailureLogLevel(error),
       );
-      return;
+    } finally {
+      // Resume queued IP checks after observing the current route.
+      if (isCurrent()) _detection.setProbeActive(this, true);
     }
-    if (!isCurrent()) return;
-    ref.read(networkDetectionProvider.notifier).updateRoute(route);
   }
 
   void _refresh() => ref.read(networkDetectionProvider.notifier).startCheck();
