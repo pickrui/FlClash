@@ -9,6 +9,10 @@ package core
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net"
+	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -161,5 +165,64 @@ func TestApplyConfigRechecksLifecycleUnderRunLock(t *testing.T) {
 		if err := <-result; err == nil || !strings.Contains(err.Error(), "not initialized") {
 			t.Errorf("terminating=%v: queued apply parsed a config after shutdown: %v", terminating, err)
 		}
+	}
+}
+
+func TestPortForwardsRunOnlyWhileTheProxyRuns(t *testing.T) {
+	const childEnv = "FLCLASH_TEST_PORT_FORWARD_CHILD"
+	if os.Getenv(childEnv) != "1" {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+		command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestPortForwardsRunOnlyWhileTheProxyRuns$", "-test.count=1")
+		command.Env = append(os.Environ(), childEnv+"=1")
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("isolated port forwards: %v\n%s", err, output)
+		}
+		return
+	}
+	setValidationTestHome(t)
+	resetSuspendTestState(t)
+	isRunning = false
+	t.Cleanup(func() {
+		handleStopListener()
+		closeCurrentProviders()
+	})
+	probe, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	address := probe.Addr().String()
+	probe.Close()
+	// Binding probes the port without a connection the tunnel would handle.
+	listening := func() bool {
+		probe, err := net.Listen("tcp", address)
+		if err == nil {
+			probe.Close()
+		}
+		return err != nil
+	}
+	raw := fmt.Sprintf(`mixed-port: 0
+mode: rule
+log-level: silent
+tunnels:
+  - {network: [tcp], address: %s, target: 192.0.2.1:53, proxy: DIRECT}
+rules:
+  - MATCH,DIRECT
+`, address)
+	if err := applyConfig(&SetupParams{RawConfig: raw, TestURL: defaultTestURL, SelectedMap: map[string]string{}}); err != nil {
+		t.Fatal(err)
+	}
+	if listening() {
+		t.Fatal("a port forward listens while the proxy is stopped")
+	}
+	if !handleStartListener() {
+		t.Fatal("listeners did not start")
+	}
+	if !listening() {
+		t.Fatal("the port forward did not start with the proxy")
+	}
+	handleStopListener()
+	if listening() {
+		t.Fatal("the port forward outlived the proxy")
 	}
 }
