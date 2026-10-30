@@ -61,7 +61,10 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     },
   );
 
-  CoreController get _core => widget.core ?? ref.read(coreHandlerProvider);
+  // Read while mounted: a page dropped by a layout change cancels its
+  // subscription from dispose, where ref is gone.
+  late final CoreController _core =
+      widget.core ?? ref.read(coreHandlerProvider);
 
   @override
   void initState() {

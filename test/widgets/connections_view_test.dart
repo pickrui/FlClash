@@ -15,6 +15,7 @@ import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/connection/connections.dart';
 import 'package:fl_clash/views/connection/item.dart';
@@ -486,6 +487,29 @@ void main() {
     expect(tester.takeException(), null);
 
     await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a view dropped while subscribed cancels through the provider', (
+    tester,
+  ) async {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    final stream = _StreamCore(() => const []);
+    final scoped = ProviderContainer(
+      overrides: [coreHandlerProvider.overrideWithValue(stream.core)],
+    );
+    addTearDown(scoped.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: scoped,
+        child: const _TestApp(child: ConnectionsView()),
+      ),
+    );
+    await tester.pump();
+    expect(stream.starts, 1);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(tester.takeException(), null);
+    expect(stream.stops, 1);
   });
 
   testWidgets('ConnectionsView unsubscribes while the app is paused', (
