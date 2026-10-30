@@ -71,6 +71,12 @@ TEST(ProxyRestoreDecision, RestoresOnlyOwnedState) {
   EXPECT_FALSE(internal::HasOwnedField(false, false, false));
 }
 
+TEST(ProxyRestoreDecision, RestoreSkipsOnlyUnreadableRasEntries) {
+  EXPECT_TRUE(internal::SkipsUnreadableTarget(true, false));
+  EXPECT_FALSE(internal::SkipsUnreadableTarget(true, true));
+  EXPECT_FALSE(internal::SkipsUnreadableTarget(false, false));
+}
+
 TEST(ProxyPlugin, StartProxyRejectsInvalidArguments) {
   ProxyPlugin plugin;
   std::string error_code;

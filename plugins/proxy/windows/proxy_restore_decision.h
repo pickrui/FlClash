@@ -19,6 +19,12 @@ inline bool HasOwnedField(
   return owns_flags || owns_server || owns_bypass;
 }
 
+// Restore may leave out a RAS entry it cannot list or read, never the default
+// connection.
+inline bool SkipsUnreadableTarget(bool skip_unreadable, bool is_default) {
+  return skip_unreadable && !is_default;
+}
+
 inline bool ShouldRestoreOwnedField(
     bool matches_before,
     bool matches_applied,

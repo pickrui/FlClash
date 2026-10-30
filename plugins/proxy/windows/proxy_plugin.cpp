@@ -643,18 +643,30 @@ bool CaptureConnectionState(
   return success;
 }
 
-bool CaptureConnectionStates(std::vector<ConnectionProxyState>& states)
+// Restore leaves out an unreadable RAS entry as it does a deleted one.
+bool CaptureConnectionStates(
+    std::vector<ConnectionProxyState>& states,
+    bool skipUnreadable = false)
 {
   std::vector<ConnectionTarget> targets;
   if (!GetConnectionTargets(targets))
   {
-    return false;
+    if (!skipUnreadable)
+    {
+      return false;
+    }
+    targets.assign(1, ConnectionTarget{true, {}});
   }
   for (auto& target : targets)
   {
+    const bool isDefault = target.isDefault;
     ConnectionProxyState state = {};
     if (!CaptureConnectionState(std::move(target), state))
     {
+      if (proxy::internal::SkipsUnreadableTarget(skipUnreadable, isDefault))
+      {
+        continue;
+      }
       return false;
     }
     states.push_back(std::move(state));
@@ -818,7 +830,7 @@ bool RestoreOwnedProxyState()
     return true;
   }
   std::vector<ConnectionProxyState> currentStates;
-  if (!CaptureConnectionStates(currentStates))
+  if (!CaptureConnectionStates(currentStates, true))
   {
     return false;
   }
