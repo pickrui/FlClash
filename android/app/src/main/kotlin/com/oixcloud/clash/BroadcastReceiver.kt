@@ -8,20 +8,31 @@ package com.oixcloud.clash
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.oixcloud.clash.common.BroadcastAction
 import com.oixcloud.clash.common.BroadcastLease
 import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.common.QuickAction
 import com.oixcloud.clash.common.action
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 
 class BroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent?.action != BroadcastAction.SERVICE_CREATED.action &&
-            intent?.action != BroadcastAction.SERVICE_DESTROYED.action &&
-            intent?.action != BroadcastAction.VPN_START_REQUESTED.action
+        val action = intent?.action
+        val quickAction = if (action == BroadcastAction.QUICK_ACTION_REQUESTED.action) {
+            QuickAction.entries.firstOrNull {
+                it.name == intent.getStringExtra(TempActivity.EXTRA_QUICK_ACTION)
+            } ?: return
+        } else {
+            null
+        }
+        if (quickAction == null &&
+            action != BroadcastAction.SERVICE_CREATED.action &&
+            action != BroadcastAction.SERVICE_DESTROYED.action &&
+            action != BroadcastAction.VPN_START_REQUESTED.action
         ) return
 
         // Creation is announced before VPN establishment succeeds. Treat these
@@ -29,15 +40,15 @@ class BroadcastReceiver : BroadcastReceiver() {
         val pending = goAsync()
         val lease = BroadcastLease { pending.finish() }
         val timeout = Runnable {
-            lease.release { GlobalState.log("Service state broadcast timed out") }
+            lease.release { GlobalState.log("Broadcast hold timed out") }
         }
-        mainHandler.postDelayed(timeout, BROADCAST_TIMEOUT_MILLIS)
+        mainHandler.postDelayed(timeout, leaseTimeoutMillis(action, Build.VERSION.SDK_INT))
         GlobalState.launch {
             try {
-                if (intent?.action == BroadcastAction.VPN_START_REQUESTED.action) {
-                    State.handleSystemVpnStart()
-                } else {
-                    State.handleSyncState()
+                when {
+                    quickAction != null -> TempActivity.runQuickAction(quickAction)
+                    action == BroadcastAction.VPN_START_REQUESTED.action -> State.handleSystemVpnStart()
+                    else -> State.handleSyncState()
                 }
                 State.servicePlugin?.handleStateChanged()
             } catch (error: CancellationException) {
@@ -51,8 +62,22 @@ class BroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    private companion object {
-        const val BROADCAST_TIMEOUT_MILLIS = 9_000L
-        val mainHandler = Handler(Looper.getMainLooper())
+    companion object {
+        private const val STATE_TIMEOUT_MILLIS = 9_000L
+
+        // Android 14 freezes an idle process after ~10 s; stay inside the 60 s limit.
+        private const val START_TIMEOUT_MILLIS = 40_000L
+
+        fun leaseTimeoutMillis(action: String?, sdkInt: Int): Long {
+            val starts = action == BroadcastAction.VPN_START_REQUESTED.action ||
+                action == BroadcastAction.QUICK_ACTION_REQUESTED.action
+            return if (starts && sdkInt >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                START_TIMEOUT_MILLIS
+            } else {
+                STATE_TIMEOUT_MILLIS
+            }
+        }
+
+        private val mainHandler = Handler(Looper.getMainLooper())
     }
 }

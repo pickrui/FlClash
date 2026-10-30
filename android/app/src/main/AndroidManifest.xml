@@ -132,6 +132,7 @@
                 <action android:name="${applicationId}.intent.action.SERVICE_CREATED" />
                 <action android:name="${applicationId}.intent.action.SERVICE_DESTROYED" />
                 <action android:name="${applicationId}.intent.action.VPN_START_REQUESTED" />
+                <action android:name="${applicationId}.intent.action.QUICK_ACTION_REQUESTED" />
             </intent-filter>
         </receiver>
 

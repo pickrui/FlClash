@@ -64,4 +64,31 @@ void main() {
       expect(_opens(manifest, Uri.parse(link)), isFalse, reason: link);
     }
   });
+
+  test('the service broadcast receiver accepts every broadcast action', () {
+    final enums = File(
+      'android/common/src/main/java/com/oixcloud/clash/common/Enums.kt',
+    ).readAsStringSync();
+    final actions = RegExp(r'enum class BroadcastAction \{([^}]*)\}')
+        .firstMatch(enums)!
+        .group(1)!
+        .split(',')
+        .map((name) => name.trim())
+        .where((name) => name.isNotEmpty)
+        .toList();
+    final receiver = RegExp(
+      r'<receiver\s[^>]*android:name="\.BroadcastReceiver".*?</receiver>',
+      dotAll: true,
+    ).firstMatch(manifest)!.group(0)!;
+    final accepted = _attributes(receiver, 'name').toSet();
+
+    expect(actions, isNotEmpty);
+    for (final action in actions) {
+      expect(
+        accepted,
+        contains('\${applicationId}.intent.action.$action'),
+        reason: '$action broadcasts would never reach the receiver',
+      );
+    }
+  });
 }

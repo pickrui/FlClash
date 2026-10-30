@@ -8,8 +8,10 @@ package com.oixcloud.clash
 import android.app.Activity
 import android.content.Intent
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import androidx.core.content.pm.ShortcutManagerCompat
+import com.oixcloud.clash.common.BroadcastAction
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.QuickAction
 import com.oixcloud.clash.common.action
@@ -21,7 +23,25 @@ import kotlinx.coroutines.launch
 class TempActivity : Activity() {
     companion object {
         const val REQUEST_VPN_PERMISSION = "requestVpnPermission"
+        const val EXTRA_QUICK_ACTION = "quickAction"
         private const val VPN_PERMISSION_REQUEST = 1
+
+        // A stop releasing a start that waits for consent must not queue behind it.
+        fun routesThroughReceiver(action: QuickAction, sdkInt: Int, startWaiting: Boolean) =
+            sdkInt >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                (action == QuickAction.START || !startWaiting)
+
+        suspend fun runQuickAction(action: QuickAction) {
+            try {
+                State.handleQuickAction(action)
+            } catch (error: TimeoutCancellationException) {
+                GlobalState.application.showToast(error.message ?: "VPN operation timed out")
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                GlobalState.application.showToast(error.message ?: "VPN operation failed")
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,16 +89,15 @@ class TempActivity : Activity() {
     }
 
     private fun dispatch(action: QuickAction) {
-        GlobalState.launch {
-            try {
-                State.handleQuickAction(action)
-            } catch (error: TimeoutCancellationException) {
-                GlobalState.application.showToast(error.message ?: "VPN operation timed out")
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                GlobalState.application.showToast(error.message ?: "VPN operation failed")
-            }
+        if (routesThroughReceiver(action, Build.VERSION.SDK_INT, State.isStartWaiting)) {
+            sendBroadcast(
+                Intent(BroadcastAction.QUICK_ACTION_REQUESTED.action)
+                    .setPackage(packageName)
+                    .putExtra(EXTRA_QUICK_ACTION, action.name),
+                GlobalState.RECEIVE_BROADCASTS_PERMISSIONS,
+            )
+        } else {
+            GlobalState.launch { runQuickAction(action) }
         }
         // The application scope owns the operation. Finish before onResume so
         // the launcher never presents a window while VPN setup/stop is pending.

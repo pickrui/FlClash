@@ -18,6 +18,7 @@ enum class BroadcastAction {
     SERVICE_CREATED,
     SERVICE_DESTROYED,
     VPN_START_REQUESTED,
+    QUICK_ACTION_REQUESTED,
 }
 
 enum class AccessControlMode {

@@ -11,7 +11,10 @@ import android.content.ComponentName
 import android.content.Intent
 import android.os.Looper
 import android.service.quicksettings.Tile
+import com.oixcloud.clash.common.BroadcastAction
 import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.common.QuickAction
+import com.oixcloud.clash.common.action
 import com.oixcloud.clash.service.ICallbackInterface
 import com.oixcloud.clash.service.IEventInterface
 import com.oixcloud.clash.service.IRemoteInterface
@@ -60,6 +63,47 @@ class TempActivityTest {
         assertEquals("test.VPN_CONSENT", consent.intent.action)
         shadowOf(activity).receiveResult(consent.intent, Activity.RESULT_CANCELED, null)
         assertTrue(activity.isFinishing)
+    }
+
+    @Test
+    @Config(sdk = [34], manifest = Config.NONE, application = Application::class)
+    fun aShortcutOnAndroid14HandsItsActionToTheReceiver() {
+        val app = RuntimeEnvironment.getApplication()
+        GlobalState.init(app)
+        val intent = Intent(app, TempActivity::class.java).setAction(QuickAction.START.action)
+        val controller = Robolectric.buildActivity(TempActivity::class.java, intent)
+        controller.get().setTheme(android.R.style.Theme_NoDisplay)
+
+        controller.setup()
+
+        assertTrue(controller.get().isFinishing)
+        val broadcast = shadowOf(app).broadcastIntents.single {
+            it.action == BroadcastAction.QUICK_ACTION_REQUESTED.action
+        }
+        assertEquals(app.packageName, broadcast.`package`)
+        assertEquals(QuickAction.START.name, broadcast.getStringExtra(TempActivity.EXTRA_QUICK_ACTION))
+    }
+
+    @Test
+    fun aStopReleasingAWaitingStartDoesNotQueueBehindIt() {
+        assertTrue(TempActivity.routesThroughReceiver(QuickAction.START, 34, startWaiting = true))
+        assertTrue(TempActivity.routesThroughReceiver(QuickAction.STOP, 34, startWaiting = false))
+        assertFalse(TempActivity.routesThroughReceiver(QuickAction.STOP, 34, startWaiting = true))
+        assertFalse(TempActivity.routesThroughReceiver(QuickAction.TOGGLE, 34, startWaiting = true))
+        assertFalse(TempActivity.routesThroughReceiver(QuickAction.START, 33, startWaiting = false))
+    }
+
+    @Test
+    fun onlyStartsOnAndroid14HoldTheBroadcastForLong() {
+        GlobalState.init(RuntimeEnvironment.getApplication())
+        val start = BroadcastAction.VPN_START_REQUESTED.action
+        val shortcut = BroadcastAction.QUICK_ACTION_REQUESTED.action
+        val state = BroadcastAction.SERVICE_CREATED.action
+
+        assertEquals(40_000L, BroadcastReceiver.leaseTimeoutMillis(start, 34))
+        assertEquals(40_000L, BroadcastReceiver.leaseTimeoutMillis(shortcut, 34))
+        assertEquals(9_000L, BroadcastReceiver.leaseTimeoutMillis(state, 34))
+        assertEquals(9_000L, BroadcastReceiver.leaseTimeoutMillis(start, 33))
     }
 
     @Test

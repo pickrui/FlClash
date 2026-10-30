@@ -41,6 +41,9 @@ object State {
     @Volatile
     var runTime: Long = 0
     private val startPreparation = StartPreparation()
+
+    val isStartWaiting: Boolean
+        get() = startPreparation.isWaiting
     private val serviceRunTime = ServiceRunTimeTracker()
 
     @Volatile
