@@ -211,7 +211,9 @@ class ResourceUpdates {
     _autoUpdating = true;
     try {
       final interval = Duration(
-        hours: ref.read(patchClashConfigProvider).geoUpdateInterval,
+        hours: normalizeGeoUpdateInterval(
+          ref.read(patchClashConfigProvider).geoUpdateInterval,
+        ),
       );
       bool due(DateTime? date) =>
           date == null || date.add(interval).isBefore(DateTime.now());

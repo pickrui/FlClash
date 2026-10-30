@@ -36,6 +36,7 @@ void main() {
   late Completer<List<int>> response;
   late Completer<void> requested;
   late int downloads;
+  late int geoUpdateInterval;
   const item = ClashProvider(
     id: 1,
     kind: ProviderKind.rule,
@@ -55,13 +56,17 @@ void main() {
     response = Completer<List<int>>();
     requested = Completer<void>();
     downloads = 0;
+    geoUpdateInterval = defaultGeoUpdateInterval;
     container = ProviderContainer(
       overrides: [
         iconSetsProvider.overrideWithBuild((_, _) => Stream.value([])),
         scriptsProvider.overrideWithBuild((_, _) => Stream.value([])),
         clashProvidersProvider.overrideWith((_) => Stream.value([item])),
         patchClashConfigProvider.overrideWithBuild(
-          (_, _) => const ClashConfig(geoAutoUpdate: true),
+          (_, _) => ClashConfig(
+            geoAutoUpdate: true,
+            geoUpdateInterval: geoUpdateInterval,
+          ),
         ),
         setupActionProvider.overrideWith(_NoGeoUpdates.new),
         resourcesProvider.overrideWith(
@@ -99,20 +104,26 @@ void main() {
     expect(container.exists(scriptsProvider), isFalse);
   });
 
-  test('automatic updates back off a failing resource', () async {
-    final service = container.read(resourcesProvider);
-    final updating = service.autoUpdate();
-    await requested.future.timeout(const Duration(seconds: 2));
-    response.completeError(const SocketException('fixture outage'));
-    await updating;
-    await service.autoUpdate();
-    expect(downloads, 1);
-    await expectLater(
-      service.updateProvider(item),
-      throwsA(isA<SocketException>()),
+  for (final interval in [defaultGeoUpdateInterval, 0]) {
+    test(
+      'automatic updates back off a failing resource ($interval h)',
+      () async {
+        geoUpdateInterval = interval;
+        final service = container.read(resourcesProvider);
+        final updating = service.autoUpdate();
+        await requested.future.timeout(const Duration(seconds: 2));
+        response.completeError(const SocketException('fixture outage'));
+        await updating;
+        await service.autoUpdate();
+        expect(downloads, 1);
+        await expectLater(
+          service.updateProvider(item),
+          throwsA(isA<SocketException>()),
+        );
+        expect(downloads, 2);
+      },
     );
-    expect(downloads, 2);
-  });
+  }
 
   test('library errors propagate and release the temporary listener', () async {
     final failure = StateError('fixture library failure');
