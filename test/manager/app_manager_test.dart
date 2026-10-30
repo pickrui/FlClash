@@ -148,6 +148,27 @@ void main() {
     },
   );
 
+  testWidgets('an unfocused return from the background counts as visible', (
+    tester,
+  ) async {
+    await withManager(
+      tester,
+      check: () async {
+        runZonedGuarded(
+          () =>
+              binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden),
+          (_, _) {},
+        );
+        await tester.pump();
+        expect(globalState.isUiVisible, isFalse);
+
+        binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        await tester.pump();
+        expect(globalState.isUiVisible, isTrue);
+      },
+    );
+  });
+
   for (final desktop in [true, false]) {
     for (final state in [AppLifecycleState.hidden, AppLifecycleState.paused]) {
       var runs = 0;

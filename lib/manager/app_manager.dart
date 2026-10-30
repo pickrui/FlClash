@@ -45,6 +45,7 @@ class AppStateManager extends ConsumerStatefulWidget {
 class _AppStateManagerState extends ConsumerState<AppStateManager>
     with WidgetsBindingObserver {
   bool _isBackground = false;
+  bool _leftForBackground = false;
   late final _appUpdates = AppUpdateScheduler(
     checkForUpdates: () =>
         ref.read(updateActionProvider.notifier).checkUpdate(),
@@ -61,17 +62,21 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     ),
   );
 
+  // Android is inactive while still on screen; hidden follows when it leaves.
   bool _isBackgroundState(AppLifecycleState? state) =>
-      state == AppLifecycleState.paused ||
-      state == AppLifecycleState.hidden ||
-      (state == AppLifecycleState.inactive && !system.isDesktop);
+      state == AppLifecycleState.paused || state == AppLifecycleState.hidden;
 
   // Desktop refreshes subscriptions while hidden or minimized, like upstream.
   bool get _profileUpdatesPaused =>
       _isBackground && !(widget.updateProfilesInBackground ?? system.isDesktop);
 
   void _startProfileUpdates() {
-    if (!mounted || _profileUpdatesPaused || !ref.read(initProvider)) return;
+    if (safeModeBuild ||
+        !mounted ||
+        _profileUpdatesPaused ||
+        !ref.read(initProvider)) {
+      return;
+    }
     unawaited(
       _profileUpdates.start([
         widget.autoUpdateProfiles ?? appController.autoUpdateProfiles,
@@ -85,6 +90,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _isBackground = _isBackgroundState(WidgetsBinding.instance.lifecycleState);
+    _leftForBackground = _isBackground;
     globalState.setUpdateVisibility(appVisible: !_isBackground);
     if (system.isMacOS) {
       ref.listenManual(
@@ -180,13 +186,19 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     if (_isBackgroundState(state)) {
       if (!_isBackground) {
         _isBackground = true;
+        _leftForBackground = true;
         if (_profileUpdatesPaused) _profileUpdates.stop();
         globalState.setUpdateVisibility(appVisible: false);
         await appController.savePreferences();
       }
+    } else if (_isBackground && state == AppLifecycleState.inactive) {
+      _isBackground = false;
+      _startProfileUpdates();
+      globalState.setUpdateVisibility(appVisible: true);
     }
     if (state == AppLifecycleState.resumed) {
-      final wasBackground = _isBackground;
+      final wasBackground = _leftForBackground;
+      _leftForBackground = false;
       _isBackground = false;
       _startProfileUpdates();
       globalState.setUpdateVisibility(appVisible: true);
