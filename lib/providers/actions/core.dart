@@ -198,9 +198,11 @@ extension CoreControllerExt on AppController {
     if (profile == null) {
       return Future.value();
     }
+    // Under the core lifecycle lock, a question nobody can see would hold it.
     return _runWithCertificateRetry(
       profile.prepareMissingSnapshot,
       handleCloudUnauthorized: profile.isoixCloudProfile,
+      prompt: () => globalState.isUiVisible,
     );
   }
 

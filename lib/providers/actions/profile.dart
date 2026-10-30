@@ -282,7 +282,7 @@ extension ProfilesControllerExt on AppController {
       final newProfile = await _updateProfileWithCertificateRetry(
         profile,
         preserveCurrentState: preserveCurrentState,
-        prompt: promptCertificate,
+        prompt: () => promptCertificate,
       );
       succeeded = true;
       await applyProfileAfterRefresh(
@@ -310,7 +310,7 @@ extension ProfilesControllerExt on AppController {
   Future<Profile> _updateProfileWithCertificateRetry(
     Profile profile, {
     bool preserveCurrentState = true,
-    bool prompt = true,
+    bool Function() prompt = _promptAlways,
   }) {
     Future<Profile> update() async {
       if (profile.isoixCloudProfile) {
@@ -350,10 +350,11 @@ extension ProfilesControllerExt on AppController {
     );
   }
 
+  /// [prompt] is asked once the action fails, when the answer is current.
   Future<T> _runWithCertificateRetry<T>(
     Future<T> Function() action, {
     bool handleCloudUnauthorized = false,
-    bool prompt = true,
+    bool Function() prompt = _promptAlways,
   }) async {
     try {
       return await action();
@@ -361,7 +362,7 @@ extension ProfilesControllerExt on AppController {
       await _throwHandledCloudUnauthorized(error, handleCloudUnauthorized);
       final cloudApiService = CloudApiService();
       final shouldRetry =
-          prompt && await cloudApiService.confirmInsecureTlsRetry(error);
+          prompt() && await cloudApiService.confirmInsecureTlsRetry(error);
       if (!shouldRetry) {
         Error.throwWithStackTrace(error, stackTrace);
       }
@@ -601,3 +602,5 @@ extension ProfilesControllerExt on AppController {
     }, profileId: profileId);
   }
 }
+
+bool _promptAlways() => true;

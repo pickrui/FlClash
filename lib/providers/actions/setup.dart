@@ -335,7 +335,10 @@ extension SetupControllerExt on AppController {
         profile != null &&
         profile.isoixCloudProfile &&
         existingPath == null) {
-      profile = await _updateProfileWithCertificateRetry(profile);
+      profile = await _updateProfileWithCertificateRetry(
+        profile,
+        prompt: () => globalState.isUiVisible,
+      );
       existingPath = await profile.getExistingFilePath();
     }
 
