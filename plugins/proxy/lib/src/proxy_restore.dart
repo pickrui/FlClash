@@ -451,7 +451,10 @@ extension _RestoreProxy on Proxy {
             .toSet()
             .toList();
         if (presentServices.isNotEmpty) {
-          final captured = await _captureMacosRestoreCommands(presentServices);
+          final captured = await _captureMacosRestoreCommands(
+            presentServices,
+            skipUnrepresentable: true,
+          );
           if (captured == null) return null;
           current.addAll(_commandStateMap(captured));
         }

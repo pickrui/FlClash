@@ -1143,6 +1143,26 @@ USB 10/100/1000 LAN
       expect(service['socksfirewallproxy.enabled'], 'on');
     });
 
+    test('stop restores the rest once one service holds a state start refuses',
+        () async {
+      final networksetup = _FakeNetworkSetup(['Wi-Fi', 'Ethernet']);
+      final original = networksetup.snapshot();
+      final proxy = Proxy(processRunner: networksetup.run);
+
+      expect(await proxy.startMacosProxyForTest(7890, const []), true);
+      networksetup.services['Ethernet']!
+        ..['autoproxy'] = 'on'
+        ..['autoproxyurl'] = '';
+      expect(await proxy.restoreProxyForTest(), true);
+
+      expect(networksetup.snapshot()['Wi-Fi'], original['Wi-Fi']);
+      expect(networksetup.snapshot()['Ethernet'], {
+        ...original['Ethernet']!,
+        'autoproxy': 'on',
+        'autoproxyurl': '',
+      });
+    });
+
     test('a failed endpoint restore keeps its state for the next stop',
         () async {
       final networksetup = _FakeNetworkSetup(['Wi-Fi']);

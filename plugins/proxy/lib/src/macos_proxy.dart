@@ -63,9 +63,11 @@ extension _MacosProxy on Proxy {
     return _parseMacosNetworkServices(result.stdout.toString());
   }
 
+  /// [skipUnrepresentable] leaves out settings stop cannot own instead of failing.
   Future<List<ProxyCommand>?> _captureMacosRestoreCommands(
-    List<String> services,
-  ) async {
+    List<String> services, {
+    bool skipUnrepresentable = false,
+  }) async {
     final commands = <ProxyCommand>[];
     const proxyTypes = [
       ('-getwebproxy', '-setwebproxy', '-setwebproxystate'),
@@ -98,8 +100,12 @@ extension _MacosProxy on Proxy {
       final autoProxyState = autoProxyOutput == null
           ? null
           : _parseMacosAutoProxyState(autoProxyOutput);
-      if (autoProxyState == null ||
-          (autoProxyState.enabled && autoProxyState.url.isEmpty)) {
+      if (autoProxyState == null) {
+        return null;
+      }
+      final autoProxyRepresentable =
+          !autoProxyState.enabled || autoProxyState.url.isNotEmpty;
+      if (!autoProxyRepresentable && !skipUnrepresentable) {
         return null;
       }
       for (final (getCommand, setCommand, stateCommand) in proxyTypes) {
@@ -108,7 +114,12 @@ extension _MacosProxy on Proxy {
           service,
         ]);
         final state = output == null ? null : _parseMacosProxyState(output);
-        if (state == null || state.authenticated) {
+        if (state == null) {
+          return null;
+        }
+        if (state.authenticated ||
+            (state.enabled && int.tryParse(state.port) == null)) {
+          if (skipUnrepresentable) continue;
           return null;
         }
         if (int.tryParse(state.port) != null) {
@@ -144,13 +155,15 @@ extension _MacosProxy on Proxy {
           _parseMacosProxyBypassDomains(bypassOutput),
         ),
       );
-      commands.add(
-        ProxyCommand('/usr/sbin/networksetup', [
-          '-setautoproxystate',
-          service,
-          if (autoProxyState.enabled) 'on' else 'off',
-        ]),
-      );
+      if (autoProxyRepresentable) {
+        commands.add(
+          ProxyCommand('/usr/sbin/networksetup', [
+            '-setautoproxystate',
+            service,
+            if (autoProxyState.enabled) 'on' else 'off',
+          ]),
+        );
+      }
       commands.add(
         ProxyCommand('/usr/sbin/networksetup', [
           '-setproxyautodiscovery',
