@@ -10,13 +10,16 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
+	"weak"
 
 	"github.com/metacubex/mihomo/component/geodata"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/config"
+	"github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/tunnel"
 )
 
@@ -88,6 +91,31 @@ func TestProbeStampLeavesTunnelProxiesUntouched(t *testing.T) {
 	apply()
 	if nextEpoch, next := routeStamp(); nextEpoch == epoch && next == picks {
 		t.Fatal("new provider nodes left the route stamp unchanged")
+	}
+}
+
+type retiredProvider struct {
+	provider.ProxyProvider
+}
+
+func (*retiredProvider) Version() uint32 { return 1 }
+
+func (*retiredProvider) VehicleType() provider.VehicleType { return provider.Compatible }
+
+func TestRetiredProvidersLeaveTheRouteStamp(t *testing.T) {
+	previousProxies, previousProviders := tunnel.Proxies(), tunnel.Providers()
+	t.Cleanup(func() { tunnel.UpdateProxies(previousProxies, previousProviders) })
+	retired := &retiredProvider{}
+	reference := weak.Make(retired)
+	tunnel.UpdateProxies(previousProxies, map[string]provider.ProxyProvider{"retired": retired})
+	routeStamp()
+	retireCurrentProviders()
+	tunnel.UpdateProxies(previousProxies, previousProviders)
+	retired = nil
+	runtime.GC()
+	runtime.GC()
+	if reference.Value() != nil {
+		t.Fatal("the route stamp kept a retired provider alive")
 	}
 }
 

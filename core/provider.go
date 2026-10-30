@@ -78,6 +78,9 @@ func sideUpdateExternalProvider(p cp.Provider, data []byte) error {
 }
 
 func retireCurrentProviders() {
+	// The route stamp holds providers by reference so their addresses are
+	// never reused while compared; it lets go of them with the config.
+	probeProviders, probeRuleSets = nil, nil
 	resetProviderFileRevisions()
 	externalProviders := getExternalProvidersRaw()
 	for _, provider := range tunnel.ProvidersSnapshot() {
