@@ -12,6 +12,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/views/dashboard/dashboard.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/widgets/widgets.dart';
@@ -234,4 +235,43 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 2));
   });
+
+  testWidgets('a counter on a page off screen holds its updates', (
+    tester,
+  ) async {
+    final counter = container.read(_counter.notifier);
+    Future<void> pumpCount({required bool active}) => tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageActivityScope(
+            isActive: active,
+            child: ThrottledCount(
+              provider: _counter,
+              builder: (_, count) => Text('count $count'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await pumpCount(active: false);
+
+    counter.value = 3;
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('count 0'), findsOneWidget);
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    await pumpCount(active: true);
+    expect(find.text('count 3'), findsOneWidget);
+  });
+}
+
+final _counter = NotifierProvider<_Counter, int>(_Counter.new);
+
+class _Counter extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  set value(int next) => state = next;
 }

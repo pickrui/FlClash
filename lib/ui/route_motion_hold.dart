@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:flutter/foundation.dart';
@@ -58,16 +59,24 @@ class _RouteMotion {
 bool isRouteMoving(BuildContext context) => _RouteMotion(context).isMoving;
 
 /// Holds list refreshes while the page's route is pushed, popped, covered,
-/// uncovered or dragged back, and replays the latest one once it settles.
+/// uncovered or dragged back, or while the page is kept alive off screen, and
+/// replays the latest one once it settles.
 mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
   ModalRoute<Object?>? _route;
   _RouteMotion? _motion;
   VoidCallback? _heldUpdate;
   VoidCallback? _frameUpdate;
+  bool _pageActive = true;
+
+  bool get _holding => !_pageActive || (_motion?.isMoving ?? false);
 
   // Frames stop while the window is hidden, so producers that tick meanwhile
   // must not queue one post-frame callback each.
   void updateAfterFrameWhenRouteSettled(VoidCallback update) {
+    if (!_pageActive) {
+      _heldUpdate = update;
+      return;
+    }
     final scheduled = _frameUpdate != null;
     _frameUpdate = update;
     if (scheduled) return;
@@ -80,7 +89,7 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
   }
 
   void updateWhenRouteSettled(VoidCallback update) {
-    if (_motion?.isMoving ?? false) {
+    if (_holding) {
       _heldUpdate = update;
       return;
     }
@@ -91,6 +100,11 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final pageActive = PageActivityScope.isActiveOf(context);
+    if (pageActive && !_pageActive && _heldUpdate != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _releaseHeld());
+    }
+    _pageActive = pageActive;
     final route = ModalRoute.of(context);
     if (_motion != null && identical(route, _route)) {
       return;
@@ -117,7 +131,7 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
 
   void _releaseHeld() {
     final update = _heldUpdate;
-    if (update == null || !mounted || (_motion?.isMoving ?? false)) {
+    if (update == null || !mounted || _holding) {
       return;
     }
     _heldUpdate = null;

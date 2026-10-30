@@ -202,17 +202,31 @@ class _ThrottledCountState extends ConsumerState<ThrottledCount> {
   late var _latest = _count;
   Timer? _repaint;
   var _active = true;
+  var _pageActive = true;
 
   @override
   void initState() {
     super.initState();
     ref.listenManual(widget.provider, (_, next) {
       _latest = next;
-      if (!_active) {
+      if (!_active || !_pageActive) {
         return;
       }
       _repaint ??= Timer(_repaintThrottle, _showLatest);
     });
+  }
+
+  // Manual listeners keep firing while a kept-alive page is off screen.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _pageActive = PageActivityScope.isActiveOf(context);
+    if (_pageActive) {
+      _count = _latest;
+    } else {
+      _repaint?.cancel();
+      _repaint = null;
+    }
   }
 
   void _showLatest() {
