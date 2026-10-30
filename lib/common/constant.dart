@@ -75,6 +75,8 @@ const delayTestTimeoutDuration = Duration(
 );
 const delayTestGuardDuration = Duration(seconds: 30);
 
+const coreShutdownTimeout = Duration(seconds: 20);
+
 /// Probes one test run sends at once.
 const defaultDelayTestConcurrency = 50;
 const defaultAndroidDelayTestConcurrency = 16;

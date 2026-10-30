@@ -129,8 +129,14 @@ mixin CoreInterface {
   Future<bool> clearDnsState();
 }
 
+const _noShutdownResponse = CoreMethodException(
+  code: 'empty_result',
+  message: 'Core returned no response for shutdown',
+);
+
 abstract class CoreHandlerInterface with CoreInterface {
   bool _logStreamRequested = false;
+  Future<void> _logStreamRequest = Future.value();
 
   Future<T?> _invokeMethod<T>({
     required CoreMethod method,
@@ -160,8 +166,13 @@ abstract class CoreHandlerInterface with CoreInterface {
   Future<T> _invokeRequiredMethod<T>({
     required CoreMethod method,
     Object? arguments,
+    Duration? timeout,
   }) async {
-    final result = await _invokeMethod<T>(method: method, arguments: arguments);
+    final result = await _invokeMethod<T>(
+      method: method,
+      arguments: arguments,
+      timeout: timeout,
+    );
     if (result == null && !isConnected) {
       throw CoreMethodException(
         code: 'transport_disconnected',
@@ -177,9 +188,10 @@ abstract class CoreHandlerInterface with CoreInterface {
     return result;
   }
 
-  Future<bool> shutdownCore() async {
-    return _invokeRequiredMethod<bool>(method: CoreMethod.shutdown);
-  }
+  Future<bool> shutdownCore() => _invokeRequiredMethod<bool>(
+    method: CoreMethod.shutdown,
+    timeout: coreShutdownTimeout,
+  ).timeout(coreShutdownTimeout, onTimeout: () => throw _noShutdownResponse);
 
   @override
   Future<bool> init(InitParams params) async {
@@ -581,15 +593,22 @@ abstract class CoreHandlerInterface with CoreInterface {
   }
 
   @override
-  Future<void> startLog() {
-    _logStreamRequested = true;
-    return _invokeMethod<Object?>(method: CoreMethod.startLog);
-  }
+  Future<void> startLog() => _requestLogStream(true);
 
   @override
-  Future<void> stopLog() {
-    _logStreamRequested = false;
-    return _invokeMethod<Object?>(method: CoreMethod.stopLog);
+  Future<void> stopLog() => _requestLogStream(false);
+
+  // The Core serves calls concurrently; a stop sent mid-start would land first.
+  Future<void> _requestLogStream(bool enabled) {
+    _logStreamRequested = enabled;
+    final request = _logStreamRequest.then((_) {
+      if (_logStreamRequested != enabled) return null;
+      return _invokeMethod<Object?>(
+        method: enabled ? CoreMethod.startLog : CoreMethod.stopLog,
+      );
+    });
+    _logStreamRequest = request.then<void>((_) {}, onError: (_) {});
+    return request;
   }
 
   @override

@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/constant.dart';
+
 import 'package:fl_clash/core/desktop/lifecycle.dart';
 import 'package:fl_clash/core/desktop/model.dart';
 import 'package:fl_clash/core/desktop/rpc_client.dart';
@@ -171,6 +173,38 @@ void main() {
     });
   }
 
+  testWidgets('a shutdown kept waiting stops the process at the bound', (
+    tester,
+  ) async {
+    when(() => lifecycle.state).thenReturn(
+      DesktopCoreRunning(
+        DesktopCoreSession(
+          sessionId: 'test-session',
+          lease: _MockProcessLease(),
+          connectionGeneration: 1,
+        ),
+      ),
+    );
+    when(
+      () => rpcClient.invoke<bool>(
+        method: CoreMethod.shutdown,
+        arguments: null,
+        timeout: coreShutdownTimeout,
+      ),
+    ).thenAnswer((_) => Completer<bool?>().future);
+
+    Object? failure;
+    unawaited(
+      service
+          .shutdown(true)
+          .then<void>((_) {}, onError: (Object error) => failure = error),
+    );
+    await tester.pump(coreShutdownTimeout + const Duration(seconds: 1));
+
+    expect(failure, isA<CoreMethodException>());
+    verify(() => lifecycle.stop()).called(1);
+  });
+
   test('missing shutdown response still stops the owned process', () async {
     when(() => lifecycle.state).thenReturn(
       DesktopCoreRunning(
@@ -185,7 +219,7 @@ void main() {
       () => rpcClient.invoke<bool>(
         method: CoreMethod.shutdown,
         arguments: null,
-        timeout: null,
+        timeout: coreShutdownTimeout,
       ),
     ).thenAnswer((_) async => null);
 
