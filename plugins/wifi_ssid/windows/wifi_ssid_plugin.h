@@ -13,7 +13,10 @@
 #include <flutter/standard_method_codec.h>
 
 #include <memory>
+#include <mutex>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace wifi_ssid {
 
@@ -29,6 +32,26 @@ class WifiSsidPlugin : public flutter::Plugin {
   WifiSsidPlugin &operator=(const WifiSsidPlugin &) = delete;
 
  private:
+  struct SsidLookup {
+    bool failed = false;
+    std::string error_message;
+    int error_code = 0;
+    std::string ssid;
+  };
+
+  struct SsidLookupSlot {
+    std::mutex mutex;
+    std::optional<SsidLookup> lookup;
+  };
+
+  static SsidLookup ReadSsid();
+
+  void StartSsidLookup();
+
+  void TakeFinishedSsidLookup();
+
+  void CompleteSsidRequests(const SsidLookup &lookup);
+
   void HandleMethodCall(
       const flutter::MethodCall<flutter::EncodableValue> &method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
@@ -48,6 +71,13 @@ class WifiSsidPlugin : public flutter::Plugin {
   int window_proc_id_ = -1;
   std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>
       pending_permission_request_;
+  std::vector<std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>>
+      pending_ssid_requests_;
+  std::shared_ptr<SsidLookupSlot> ssid_lookup_ =
+      std::make_shared<SsidLookupSlot>();
+  // How many queued requests, from the front, the running lookup answers.
+  size_t ssid_lookup_requests_ = 0;
+  bool ssid_lookup_running_ = false;
 };
 
 }  // namespace wifi_ssid

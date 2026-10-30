@@ -14,8 +14,11 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Security.Authorization.AppCapabilityAccess.h>
 
+#include <cstddef>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <utility>
 
 namespace wifi_ssid {
@@ -33,7 +36,8 @@ constexpr int kPermissionDenied = 1;
 constexpr int kPermissionPermanentlyDenied = 2;
 // From Windows 11 24H2 the WLAN API withholds the SSID without location consent.
 constexpr DWORD kLocationGatedBuild = 26100;
-constexpr UINT kPermissionRequestDone = WM_APP + 0x5753;
+constexpr UINT kPermissionRequestDone = WM_APP + 0x753;
+constexpr UINT kSsidLookupDone = WM_APP + 0x754;
 constexpr char kChannelName[] = "wifi_ssid";
 constexpr char kGetSsidMethod[] = "getSsid";
 constexpr char kCheckPermissionMethod[] = "checkPermission";
@@ -231,6 +235,10 @@ void WifiSsidPlugin::FinishPermissionRequest() {
 
 std::optional<LRESULT> WifiSsidPlugin::HandleWindowProc(HWND, UINT message,
                                                         WPARAM, LPARAM) {
+  if (message == kSsidLookupDone) {
+    TakeFinishedSsidLookup();
+    return 0;
+  }
   if (message != kPermissionRequestDone) {
     return std::nullopt;
   }
@@ -238,12 +246,83 @@ std::optional<LRESULT> WifiSsidPlugin::HandleWindowProc(HWND, UINT message,
   return 0;
 }
 
+// WLAN calls can hang while the service recovers, after sleep for example, so
+// the lookup runs off the platform thread and answers through the window.
 void WifiSsidPlugin::GetSsid(
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+  pending_ssid_requests_.push_back(std::move(result));
+  if (ssid_lookup_running_) {
+    // Picks up a finished lookup whose window message never arrived.
+    TakeFinishedSsidLookup();
+    return;
+  }
+  StartSsidLookup();
+}
+
+void WifiSsidPlugin::StartSsidLookup() {
+  ssid_lookup_requests_ = pending_ssid_requests_.size();
+  HWND window = GetAncestor(registrar_->GetView()->GetNativeWindow(), GA_ROOT);
+  if (window == nullptr) {
+    CompleteSsidRequests(ReadSsid());
+    return;
+  }
+  ssid_lookup_running_ = true;
+  std::thread([window, slot = ssid_lookup_] {
+    SsidLookup lookup = ReadSsid();
+    {
+      std::lock_guard<std::mutex> lock(slot->mutex);
+      slot->lookup = std::move(lookup);
+    }
+    PostMessageW(window, kSsidLookupDone, 0, 0);
+  }).detach();
+}
+
+void WifiSsidPlugin::TakeFinishedSsidLookup() {
+  std::optional<SsidLookup> lookup;
+  {
+    std::lock_guard<std::mutex> lock(ssid_lookup_->mutex);
+    lookup.swap(ssid_lookup_->lookup);
+  }
+  if (!lookup) {
+    return;
+  }
+  ssid_lookup_running_ = false;
+  CompleteSsidRequests(*lookup);
+  // Requests made while it ran may follow a network change; look again.
+  if (!pending_ssid_requests_.empty()) {
+    StartSsidLookup();
+  }
+}
+
+void WifiSsidPlugin::CompleteSsidRequests(const SsidLookup &lookup) {
+  const size_t count = ssid_lookup_requests_ < pending_ssid_requests_.size()
+                           ? ssid_lookup_requests_
+                           : pending_ssid_requests_.size();
+  std::vector<std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>>
+      answered;
+  for (size_t i = 0; i < count; ++i) {
+    answered.push_back(std::move(pending_ssid_requests_[i]));
+  }
+  pending_ssid_requests_.erase(
+      pending_ssid_requests_.begin(),
+      pending_ssid_requests_.begin() + static_cast<std::ptrdiff_t>(count));
+  ssid_lookup_requests_ = 0;
+  for (auto &request : answered) {
+    if (lookup.failed) {
+      request->Error("WLAN_ERROR", lookup.error_message,
+                     flutter::EncodableValue(lookup.error_code));
+    } else if (lookup.ssid.empty()) {
+      request->Success(flutter::EncodableValue());
+    } else {
+      request->Success(flutter::EncodableValue(lookup.ssid));
+    }
+  }
+}
+
+WifiSsidPlugin::SsidLookup WifiSsidPlugin::ReadSsid() {
   const WlanApi &wlan = GetWlanApi();
   if (!wlan.available()) {
-    result->Success(flutter::EncodableValue());
-    return;
+    return {};
   }
 
   HANDLE client_handle = nullptr;
@@ -251,26 +330,21 @@ void WifiSsidPlugin::GetSsid(
   DWORD result_code = wlan.open_handle(WLAN_API_VERSION_2_0, nullptr,
                                        &current_version, &client_handle);
   if (result_code == ERROR_ACCESS_DENIED) {
-    result->Success(flutter::EncodableValue());
-    return;
+    return {};
   }
   if (result_code != ERROR_SUCCESS) {
-    result->Error("WLAN_ERROR", "Failed to open WLAN handle",
-                  flutter::EncodableValue(static_cast<int>(result_code)));
-    return;
+    return {true, "Failed to open WLAN handle", static_cast<int>(result_code)};
   }
   ScopedWlanHandle client(client_handle);
 
   PWLAN_INTERFACE_INFO_LIST interface_list = nullptr;
   result_code = wlan.enum_interfaces(client.get(), nullptr, &interface_list);
   if (result_code == ERROR_ACCESS_DENIED) {
-    result->Success(flutter::EncodableValue());
-    return;
+    return {};
   }
   if (result_code != ERROR_SUCCESS) {
-    result->Error("WLAN_ERROR", "Failed to enumerate WLAN interfaces",
-                  flutter::EncodableValue(static_cast<int>(result_code)));
-    return;
+    return {true, "Failed to enumerate WLAN interfaces",
+            static_cast<int>(result_code)};
   }
   ScopedInterfaceList interfaces(interface_list);
 
@@ -309,12 +383,10 @@ void WifiSsidPlugin::GetSsid(
     break;
   }
 
-  if (access_denied || ssid.empty()) {
-    result->Success(flutter::EncodableValue());
-    return;
+  if (access_denied) {
+    return {};
   }
-
-  result->Success(flutter::EncodableValue(ssid));
+  return {false, {}, 0, ssid};
 }
 
 }  // namespace wifi_ssid
