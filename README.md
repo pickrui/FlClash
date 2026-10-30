@@ -96,6 +96,9 @@ From a computer, the same works over adb:
 adb shell am start -a com.oixcloud.clash.action.TOGGLE
 ```
 
+These actions need no permission, so any app installed on the device can send them, including STOP, which turns the
+proxy off without asking.
+
 ## Docker
 
 The Docker image runs FlClash in a lightweight, browser-accessible single-app

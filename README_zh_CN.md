@@ -90,6 +90,8 @@ com.oixcloud.clash.action.TOGGLE
 adb shell am start -a com.oixcloud.clash.action.TOGGLE
 ```
 
+这些 Action 不需要任何权限，设备上安装的任何应用都可以调用，包括用 STOP 在不经确认的情况下关闭代理。
+
 ## Docker
 
 Docker 镜像通过轻量的单应用浏览器界面运行 FlClash，支持 Linux `amd64`
