@@ -19,6 +19,8 @@ var (
 	// Selector writes and proxySnapshot use this lock. The fixed order is
 	// runLock -> selectionLock; proxy changes must never wait for runLock.
 	selectionLock sync.Mutex
+	// Orders proxy changes, whose fallback probes run outside selectionLock.
+	changeProxyLock sync.Mutex
 )
 
 func patchSelectGroup(mapping map[string]string) {
@@ -100,26 +102,43 @@ func handleChangeProxy(params *ChangeProxyParams) string {
 	if params.GroupName == nil || params.ProxyName == nil {
 		return "Missing group-name or proxy-name"
 	}
-	selectionLock.Lock()
-	defer selectionLock.Unlock()
-	groupName := *params.GroupName
+	changeProxyLock.Lock()
+	defer changeProxyLock.Unlock()
 	proxyName := *params.ProxyName
-	group := proxySnapshot[groupName]
-	if group == nil {
-		return "Not found group"
+	fallback, message := changeProxyLocked(*params.GroupName, proxyName)
+	if fallback == nil {
+		return message
 	}
-	adapterProxy, ok := group.(*adapter.Proxy)
-	if !ok {
-		return "Group is not adapter proxy"
-	}
-	selector, ok := adapterProxy.ProxyAdapter.(outboundgroup.SelectAble)
-	if !ok {
-		return "Group is not selectable"
-	}
-	if proxyName == "" {
-		selector.ForceSet(proxyName)
-	} else if err := selector.Set(proxyName); err != nil {
+	if err := fallback.Set(proxyName); err != nil {
 		return err.Error()
 	}
 	return ""
+}
+
+func changeProxyLocked(groupName, proxyName string) (*outboundgroup.Fallback, string) {
+	selectionLock.Lock()
+	defer selectionLock.Unlock()
+	group := proxySnapshot[groupName]
+	if group == nil {
+		return nil, "Not found group"
+	}
+	adapterProxy, ok := group.(*adapter.Proxy)
+	if !ok {
+		return nil, "Group is not adapter proxy"
+	}
+	selector, ok := adapterProxy.ProxyAdapter.(outboundgroup.SelectAble)
+	if !ok {
+		return nil, "Group is not selectable"
+	}
+	if proxyName == "" {
+		selector.ForceSet(proxyName)
+		return nil, ""
+	}
+	if fallback, ok := selector.(*outboundgroup.Fallback); ok {
+		return fallback, ""
+	}
+	if err := selector.Set(proxyName); err != nil {
+		return nil, err.Error()
+	}
+	return nil, ""
 }

@@ -7,7 +7,13 @@
 package core
 
 import (
+	"bufio"
+	"context"
+	"fmt"
+	"net"
+	"net/http"
 	"slices"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -117,6 +123,184 @@ func TestHandleChangeProxyDoesNotWaitForConfigApply(t *testing.T) {
 		}
 	case <-time.After(time.Second):
 		t.Fatal("proxy selection waited for the whole config apply")
+	}
+}
+
+func TestFallbackProbeDoesNotHoldSelectionLock(t *testing.T) {
+	setValidationTestHome(t)
+	previousNames := slices.Clone(config.GetProxyNameList())
+	selectionLock.Lock()
+	previousSnapshot := proxySnapshot
+	selectionLock.Unlock()
+	t.Cleanup(func() {
+		config.SetProxyNameList(previousNames)
+		publishProxySnapshot(previousSnapshot)
+	})
+
+	stall, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stall.Close()
+	go func() {
+		for {
+			conn, err := stall.Accept()
+			if err != nil {
+				return
+			}
+			time.AfterFunc(2*time.Second, func() { _ = conn.Close() })
+		}
+	}()
+	const testURL = "http://192.0.2.1/generate_204"
+	raw, err := config.UnmarshalRawConfig([]byte(fmt.Sprintf(`proxies:
+  - {name: stall, type: http, server: 127.0.0.1, port: %d}
+proxy-groups:
+  - {name: Auto, type: fallback, proxies: [stall], url: '%s', lazy: true}
+rules: ['MATCH,Auto']
+`, stall.Addr().(*net.TCPAddr).Port, testURL)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := config.ParseRawConfig(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer closeParsedProviders(parsed)
+	expired, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	node := parsed.Proxies["stall"]
+	_, _ = node.URLTest(expired, testURL, nil)
+	if node.AliveForTestUrl(testURL) {
+		t.Fatal("the stalled node is still alive")
+	}
+	publishProxySnapshot(parsed.Proxies)
+
+	groupName, proxyName := "Auto", "stall"
+	answered := make(chan string, 1)
+	go func() {
+		answered <- handleChangeProxy(&ChangeProxyParams{GroupName: &groupName, ProxyName: &proxyName})
+	}()
+	time.Sleep(200 * time.Millisecond)
+	locked := make(chan struct{})
+	go func() {
+		selectionLock.Lock()
+		selectionLock.Unlock()
+		close(locked)
+	}()
+	select {
+	case <-locked:
+	case <-time.After(time.Second):
+		t.Error("the fallback probe held the selection lock")
+	}
+	if message := <-answered; message != "" {
+		t.Fatalf("change proxy = %q", message)
+	}
+}
+
+// slowFallback publishes a fallback group whose "slow" member is marked dead
+// and answers its next probe after a second.
+func slowFallback(t *testing.T) (*config.Config, func(string) <-chan string) {
+	t.Helper()
+	setValidationTestHome(t)
+	previousNames := slices.Clone(config.GetProxyNameList())
+	selectionLock.Lock()
+	previousSnapshot := proxySnapshot
+	selectionLock.Unlock()
+	t.Cleanup(func() {
+		config.SetProxyNameList(previousNames)
+		publishProxySnapshot(previousSnapshot)
+	})
+	server, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { server.Close() })
+	var answering atomic.Bool
+	go func() {
+		for {
+			conn, err := server.Accept()
+			if err != nil {
+				return
+			}
+			go func() {
+				defer conn.Close()
+				if !answering.Load() {
+					return
+				}
+				time.Sleep(time.Second)
+				reader := bufio.NewReader(conn)
+				if _, err := http.ReadRequest(reader); err != nil {
+					return
+				}
+				conn.Write([]byte("HTTP/1.1 200 Connection established\r\n\r\n"))
+				if _, err := http.ReadRequest(reader); err != nil {
+					return
+				}
+				conn.Write([]byte("HTTP/1.1 204 No Content\r\n\r\n"))
+			}()
+		}
+	}()
+	const testURL = "http://192.0.2.1/generate_204"
+	raw, err := config.UnmarshalRawConfig([]byte(fmt.Sprintf(`proxies:
+  - {name: other, type: http, server: 127.0.0.1, port: 1}
+  - {name: slow, type: http, server: 127.0.0.1, port: %d}
+proxy-groups:
+  - {name: Auto, type: fallback, proxies: [other, slow], url: '%s', lazy: true}
+rules: ['MATCH,Auto']
+`, server.Addr().(*net.TCPAddr).Port, testURL)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := config.ParseRawConfig(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { closeParsedProviders(parsed) })
+	_, _ = parsed.Proxies["slow"].URLTest(context.Background(), testURL, nil)
+	if parsed.Proxies["slow"].AliveForTestUrl(testURL) {
+		t.Fatal("the slow node is still alive")
+	}
+	answering.Store(true)
+	publishProxySnapshot(parsed.Proxies)
+	change := func(name string) <-chan string {
+		answered := make(chan string, 1)
+		go func() {
+			group := "Auto"
+			answered <- handleChangeProxy(&ChangeProxyParams{GroupName: &group, ProxyName: &name})
+		}()
+		return answered
+	}
+	return parsed, change
+}
+
+func TestFallbackSelectionSurvivesAReadDuringItsProbe(t *testing.T) {
+	parsed, change := slowFallback(t)
+	answered := change("slow")
+	time.Sleep(200 * time.Millisecond)
+	selectionLock.Lock()
+	_ = parsed.Proxies["Auto"].Adapter().(interface{ Now() string }).Now()
+	selectionLock.Unlock()
+	if message := <-answered; message != "" {
+		t.Fatalf("change proxy = %q", message)
+	}
+	if now := parsed.Proxies["Auto"].Adapter().(interface{ Now() string }).Now(); now != "slow" {
+		t.Fatalf("a read during the probe dropped the selection: now = %q", now)
+	}
+}
+
+func TestFallbackChangesFinishInRequestOrder(t *testing.T) {
+	parsed, change := slowFallback(t)
+	first := change("slow")
+	time.Sleep(200 * time.Millisecond)
+	second := change("other")
+	select {
+	case <-second:
+		t.Fatal("a later change finished before the earlier one")
+	case <-first:
+	}
+	<-second
+	if now := parsed.Proxies["Auto"].Adapter().(interface{ Now() string }).Now(); now != "other" {
+		t.Fatalf("now = %q, want the last requested node", now)
 	}
 }
 
