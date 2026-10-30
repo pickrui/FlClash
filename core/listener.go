@@ -12,6 +12,7 @@ import (
 	"github.com/metacubex/mihomo/adapter/inbound"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/constant/features"
+	"github.com/metacubex/mihomo/dns"
 	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/tunnel"
 )
@@ -27,6 +28,8 @@ func updateListeners() {
 	general := currentConfig.General
 	listener.PatchInboundListeners(listeners, tunnel.Tunnel, true)
 	listener.PatchTunnel(currentConfig.Tunnels, tunnel.Tunnel)
+
+	updateDNSListener()
 
 	listener.SetAllowLan(general.AllowLan)
 	inbound.SetSkipAuthPrefixes(general.SkipAuthPrefixes)
@@ -49,6 +52,22 @@ func updateListeners() {
 	reconcileIdleSuspendLocked()
 }
 
+func updateDNSListener() {
+	config := currentConfig.DNS
+	if config == nil || !config.Enable {
+		return
+	}
+	lc := inbound.NewListenConfig()
+	lc.SetRouteMark(config.ListenRoutingMark)
+	dns.ReCreateServer(config.Listen, lc, resolver.DefaultService.Load())
+}
+
+// The DNS listener is an inbound too and only runs while the proxy does.
+func stopInbounds() {
+	listener.StopListener()
+	dns.ReCreateServer("", nil, nil)
+}
+
 // networkExcluded is guarded by runLock and never changes user run intent.
 var networkExcluded bool
 
@@ -57,7 +76,7 @@ func handleSetNetworkExcluded(excluded bool) bool {
 	defer runLock.Unlock()
 	networkExcluded = excluded
 	if excluded {
-		listener.StopListener()
+		stopInbounds()
 	} else {
 		updateListeners()
 	}
@@ -70,7 +89,7 @@ func handleStartListener() bool {
 	defer runLock.Unlock()
 	if !isInit.Load() || exiting.Load() || (!features.Android && currentConfig == nil) {
 		isRunning = false
-		listener.StopListener()
+		stopInbounds()
 		return false
 	}
 	isRunning = true
@@ -78,7 +97,7 @@ func handleStartListener() bool {
 	resolver.ResetConnection()
 	if !mixedPortBoundLocked() {
 		isRunning = false
-		listener.StopListener()
+		stopInbounds()
 		return false
 	}
 	probeRouteRevision.Add(1)
@@ -98,7 +117,7 @@ func handleStopListener() bool {
 	runLock.Lock()
 	defer runLock.Unlock()
 	isRunning = false
-	listener.StopListener()
+	stopInbounds()
 	resolver.ResetConnection()
 	return true
 }
