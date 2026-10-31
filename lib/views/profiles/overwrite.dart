@@ -502,11 +502,24 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
   }
 
   Future<void> _handleAddOrUpdate([Rule? rule]) async {
+    final commonAction = context.commonAction;
+    final setupAction = context.setupAction;
+    final profile = ref.read(profileProvider(widget.profileId));
+    if (profile == null) return;
+    final raw = await commonAction.safeRun(
+      () => setupAction.getRawProfileConfig(widget.profileId),
+    );
+    if (!mounted || raw == null) return;
     final res = await showOverwriteSheet<Rule>(
       context: context,
       builder: (_) => AddedRuleForm(
         rule: rule,
-        targets: tailscaleRoutingTargets(ref.read(tailscaleNetworksProvider)),
+        targets: customRoutingTargets(
+          profile,
+          raw,
+          tailscaleNetworks: ref.read(tailscaleNetworksProvider),
+        ),
+        groupNames: routingGroupTypes(profile, raw).keys.toSet(),
       ),
     );
     if (!mounted || res == null) {

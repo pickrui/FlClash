@@ -88,6 +88,16 @@ void main() {
     );
   });
 
+  test('standard destinations leave out personal groups the config drops', () {
+    final targets = customRoutingTargets(
+      profile.copyWith(overwriteType: OverwriteType.standard),
+      rawConfig,
+    );
+
+    expect(targets, contains('Subscription group'));
+    expect(targets, isNot(contains('Personal automatic')));
+  });
+
   test('a proxy chain is offered by name and by its derived node exit', () {
     final chained = profile.copyWith(
       proxyChains: const [

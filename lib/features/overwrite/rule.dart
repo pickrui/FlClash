@@ -21,6 +21,7 @@ import 'package:fl_clash/ui/switch.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'overwrite_sheet.dart';
+import 'routing_target_picker.dart';
 
 import 'package:collection/collection.dart';
 
@@ -171,7 +172,15 @@ class AddedRuleForm extends StatefulWidget {
 
   final List<String> targets;
 
-  const AddedRuleForm({super.key, this.rule, this.targets = const []});
+  /// Profile rules can name hundreds of outbounds, so they get a search.
+  final Set<String>? groupNames;
+
+  const AddedRuleForm({
+    super.key,
+    this.rule,
+    this.targets = const [],
+    this.groupNames,
+  });
 
   @override
   State<AddedRuleForm> createState() => _AddedRuleFormState();
@@ -334,6 +343,26 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
     setState(() => onChanged(selected));
   }
 
+  Future<void> _chooseTarget(String title) async {
+    FocusScope.of(context).unfocus();
+    final selected = await showOverwriteSheet<String>(
+      context: context,
+      builder: (_) => RoutingTargetPicker(
+        title: title,
+        options: _targetItems,
+        value: _ruleTarget,
+        groupNames: widget.groupNames,
+      ),
+    );
+    if (selected == null ||
+        selected.isEmpty ||
+        !mounted ||
+        ModalRoute.of(context)?.isCurrent == false) {
+      return;
+    }
+    setState(() => _ruleTarget = selected);
+  }
+
   Widget _choice({
     required Key key,
     required String title,
@@ -420,13 +449,15 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
                 title: l.ruleTarget,
                 value: _ruleTarget,
                 invalid: issue?.field == _RuleField.target,
-                onPressed: () => _choose<String>(
-                  title: l.ruleTarget,
-                  options: _targetItems,
-                  value: _ruleTarget,
-                  label: (target) => target,
-                  onChanged: (target) => _ruleTarget = target,
-                ),
+                onPressed: () => widget.groupNames == null
+                    ? _choose<String>(
+                        title: l.ruleTarget,
+                        options: _targetItems,
+                        value: _ruleTarget,
+                        label: (target) => target,
+                        onChanged: (target) => _ruleTarget = target,
+                      )
+                    : _chooseTarget(l.ruleTarget),
               ),
             ],
           ),

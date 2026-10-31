@@ -22,8 +22,14 @@ Iterable<String> _rawNames(Map<String, dynamic> raw, String key) =>
           .where((name) => name.trim().isNotEmpty)
     : const [];
 
+/// Standard and script overwrites leave personal groups out of the config.
+bool _appliesCustomGroups(Profile profile) =>
+    profile.overwriteType == OverwriteType.custom ||
+    profile.overwriteType == OverwriteType.merge;
+
 Set<String> _routingGroups(Profile profile, Map<String, dynamic> raw) => {
-  ...profile.customProxyGroups.map((group) => group.name),
+  if (_appliesCustomGroups(profile))
+    ...profile.customProxyGroups.map((group) => group.name),
   if (profile.overwriteType != OverwriteType.custom)
     ..._rawNames(raw, 'proxy-groups'),
 };
@@ -72,7 +78,8 @@ Map<String, String> routingGroupTypes(
     for (final group in (raw['proxy-groups'] as List).whereType<Map>())
       if (group['name'] is String)
         group['name'] as String: group['type']?.toString() ?? '',
-  for (final group in profile.customProxyGroups) group.name: group.type.name,
+  if (_appliesCustomGroups(profile))
+    for (final group in profile.customProxyGroups) group.name: group.type.name,
 };
 
 Map<String, String> routingProviderSources(
