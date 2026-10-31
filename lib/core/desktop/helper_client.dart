@@ -22,6 +22,59 @@ import 'process_probe.dart';
 
 enum HelperReadiness { ready, notReady, manifestMissing }
 
+typedef TimedHelperReadinessProbe = Future<HelperReadiness> Function(
+  Duration? timeout,
+  bool logFailure,
+);
+
+/// A service manager may report the install before the socket is bound.
+Future<bool> waitForHelperReady(
+  TimedHelperReadinessProbe probe,
+  Duration timeout,
+) async {
+  final deadline = Stopwatch()..start();
+  while (deadline.elapsed < timeout) {
+    if (await probe(timeout - deadline.elapsed, false) ==
+        HelperReadiness.ready) {
+      return true;
+    }
+    if (deadline.elapsed + const Duration(milliseconds: 250) >= timeout) {
+      break;
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+  }
+  return false;
+}
+
+/// Where a root service installed through launchd or systemd listens and keeps
+/// its verified copies; the Windows Helper uses loopback HTTP instead.
+final class UnixHelperLocation {
+  final String socketPath;
+  final String installRoot;
+  final CoreProcessOwner owner;
+
+  const UnixHelperLocation({
+    required this.socketPath,
+    required this.installRoot,
+    required this.owner,
+  });
+
+  static const linux = UnixHelperLocation(
+    socketPath: '/run/flclash-oixcloud/helper.sock',
+    installRoot: '/usr/local/libexec/flclash-oixcloud',
+    owner: CoreProcessOwner.linuxHelper,
+  );
+
+  static const macos = UnixHelperLocation(
+    socketPath: '/var/run/$packageName/helper.sock',
+    installRoot: '/Library/PrivilegedHelperTools/$packageName',
+    owner: CoreProcessOwner.macosHelper,
+  );
+
+  String installedPath(String sha256) =>
+      '$installRoot/$sha256/$appHelperService';
+}
+
 final class HelperStartResponse {
   final String sessionId;
   final int pid;
@@ -61,7 +114,7 @@ final class HelperClient {
   static const stopTimeout = Duration(seconds: 6);
   final Dio _dio;
   final String Function()? _expectedHelperPath;
-  final bool isLinux;
+  final UnixHelperLocation? unix;
   final Future<String> Function() _readCoreSha256;
   final String? _baseUrl;
   final int? Function() _readHelperPort;
@@ -72,22 +125,17 @@ final class HelperClient {
     this._expectedHelperPath,
     Future<String> Function()? readCoreSha256,
     this._baseUrl,
-    String? socketPath,
-    this.isLinux = false,
+    this.unix,
     int? Function()? readHelperPort,
-  }) : _dio =
-           dio ??
-           _createLoopbackDio(
-             socketPath: isLinux ? socketPath ?? linuxHelperSocketPath : null,
-           ),
+  }) : _dio = dio ?? _createLoopbackDio(socketPath: unix?.socketPath),
        _readHelperPort = readHelperPort ?? _readPublishedHelperPort,
        _readCoreSha256 = readCoreSha256 ?? _readBundledCoreSha256;
 
+  bool get isUnix => unix != null;
+
   String get baseUrl =>
       _baseUrl ??
-      (isLinux
-          ? 'http://flclash-helper'
-          : 'http://$localhost:${_helperPort()}');
+      (isUnix ? 'http://flclash-helper' : 'http://$localhost:${_helperPort()}');
 
   /// Helpers installed before the port was published listen on [helperPort].
   int _helperPort() {
@@ -207,10 +255,9 @@ final class HelperClient {
     }
     final expected =
         _expectedHelperPath?.call() ??
-        (isLinux
-            ? linuxHelperInstalledPath(_coreSha256Cache!)
-            : _defaultHelperPath());
-    final matches = p.Context(style: isLinux ? p.Style.posix : p.Style.windows)
+        unix?.installedPath(_coreSha256Cache!) ??
+        _defaultHelperPath();
+    final matches = p.Context(style: isUnix ? p.Style.posix : p.Style.windows)
         .equals(helperPath.trim(), expected);
     if (!matches) {
       _logPingFailure('helper executable path mismatch', logFailure);
@@ -502,14 +549,14 @@ typedef HelperReadinessProbe = Future<HelperReadiness> Function();
 
 final class HelperLauncherResolver implements DesktopCoreLauncherResolver {
   final bool isWindows;
-  final bool isLinux;
+  final bool isUnix;
   final CoreProcessLauncher directLauncher;
   final CoreProcessLauncher helperLauncher;
   final HelperReadinessProbe helperReady;
 
   const HelperLauncherResolver({
     required this.isWindows,
-    this.isLinux = false,
+    this.isUnix = false,
     required this.directLauncher,
     required this.helperLauncher,
     required this.helperReady,
@@ -517,7 +564,7 @@ final class HelperLauncherResolver implements DesktopCoreLauncherResolver {
 
   @override
   Future<CoreProcessLauncher> resolve() async {
-    if (!isWindows && !isLinux) return directLauncher;
+    if (!isWindows && !isUnix) return directLauncher;
     final readiness = await helperReady();
     if (readiness == HelperReadiness.ready) {
       return FallbackCoreLauncher(
@@ -548,9 +595,8 @@ final class HelperCoreLease implements CoreProcessLease {
   });
 
   @override
-  CoreProcessOwner get owner => _client.isLinux
-      ? CoreProcessOwner.linuxHelper
-      : CoreProcessOwner.windowsHelper;
+  CoreProcessOwner get owner =>
+      _client.unix?.owner ?? CoreProcessOwner.windowsHelper;
 
   @override
   Future<CoreProcessStopResult> stop(Duration timeout) {
@@ -580,7 +626,7 @@ final class HelperCoreLease implements CoreProcessLease {
     } on HelperException catch (error) {
       final canConfirmRootExit =
           error.code == 'sessionMismatch' ||
-          (_client.isLinux && error.code == 'transportError');
+          (_client.isUnix && error.code == 'transportError');
       if (!canConfirmRootExit || await _livenessProbe(pid)) {
         rethrow;
       }
@@ -600,8 +646,6 @@ final class HelperCoreLease implements CoreProcessLease {
 
 final windowsHelperClient = HelperClient();
 
-const linuxHelperSocketPath = '/run/flclash-oixcloud/helper.sock';
-const linuxHelperInstallRoot = '/usr/local/libexec/flclash-oixcloud';
-String linuxHelperInstalledPath(String sha256) =>
-    '$linuxHelperInstallRoot/$sha256/$appHelperService';
-final linuxHelperClient = HelperClient(isLinux: true);
+final unixHelperClient = HelperClient(
+  unix: Platform.isMacOS ? UnixHelperLocation.macos : UnixHelperLocation.linux,
+);

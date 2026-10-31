@@ -62,6 +62,7 @@ class RustBuilder {
       'RUSTC': (rustc.stdout as String).trim(),
       'CORE_SHA256': coreSha256,
       'CORE_NAME': '${config.coreName}${target.executableExtension}',
+      if (target.goos == 'darwin') 'MACOSX_DEPLOYMENT_TARGET': '13.0',
     };
 
     final srcPath = p.join(

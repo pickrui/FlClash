@@ -7,15 +7,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:fl_clash/common/path.dart';
+import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:path/path.dart' as p;
 
 import 'helper_client.dart';
-
-typedef LinuxHelperReadinessProbe = Future<HelperReadiness> Function(
-  Duration? timeout,
-  bool logFailure,
-);
 
 typedef LinuxProcessRunner = Future<ProcessResult> Function(
   String executable,
@@ -120,7 +116,7 @@ class LinuxElevation {
 class LinuxHelperInstaller {
   LinuxHelperInstaller({
     HelperClient? client,
-    LinuxHelperReadinessProbe? probeReadiness,
+    TimedHelperReadinessProbe? probeReadiness,
     String? executable,
     Future<ProcessResult> Function(String, List<String>)? runProcess,
     LinuxInputProcessRunner? runWithInput,
@@ -133,7 +129,7 @@ class LinuxHelperInstaller {
        _stagingParent = stagingParent ?? (() => appPath.homeDirPath),
        _readiness =
            probeReadiness ??
-           ((timeout, logFailure) => (client ?? linuxHelperClient).readiness(
+           ((timeout, logFailure) => (client ?? unixHelperClient).readiness(
              timeout: timeout,
              logFailure: logFailure,
            )),
@@ -146,7 +142,7 @@ class LinuxHelperInstaller {
        _hasSystemd =
            hasSystemd ?? (() => Directory('/run/systemd/system').existsSync());
 
-  final LinuxHelperReadinessProbe _readiness;
+  final TimedHelperReadinessProbe _readiness;
   final Duration readinessTimeout;
   final String executable;
   final LinuxElevation _elevation;
@@ -175,17 +171,8 @@ class LinuxHelperInstaller {
         case LinuxElevationResult.success:
           break;
       }
-      final deadline = Stopwatch()..start();
-      final timeout = readinessTimeout;
-      while (deadline.elapsed < timeout) {
-        if (await _readiness(timeout - deadline.elapsed, false) ==
-            HelperReadiness.ready) {
-          return AuthorizeCode.success;
-        }
-        if (deadline.elapsed + const Duration(milliseconds: 250) >= timeout) {
-          break;
-        }
-        await Future<void>.delayed(const Duration(milliseconds: 250));
+      if (await waitForHelperReady(_readiness, readinessTimeout)) {
+        return AuthorizeCode.success;
       }
     } on ProcessException {
       return AuthorizeCode.helperInstallFailed;
@@ -228,5 +215,84 @@ class LinuxHelperInstaller {
     } finally {
       await stage.delete(recursive: true).catchError((_) => stage);
     }
+  }
+}
+
+/// App Management stops even root from changing a signed bundle, so TUN runs
+/// the Core through a launchd service outside it.
+class MacOSHelperInstaller {
+  MacOSHelperInstaller({
+    TimedHelperReadinessProbe? probeReadiness,
+    String? executable,
+    Future<ProcessResult> Function(String, List<String>)? runProcess,
+    this.readinessTimeout = const Duration(seconds: 10),
+  }) : _readiness =
+           probeReadiness ??
+           ((timeout, logFailure) => unixHelperClient.readiness(
+             timeout: timeout,
+             logFailure: logFailure,
+           )),
+       executable = executable ?? appPath.helperPath,
+       _run = runProcess ?? Process.run;
+
+  final TimedHelperReadinessProbe _readiness;
+  final Duration readinessTimeout;
+  final String executable;
+  final Future<ProcessResult> Function(String, List<String>) _run;
+
+  bool get available => File(executable).existsSync();
+
+  static String elevationScript(String helper, String uid) {
+    final shell =
+        "'${helper.replaceAll("'", "'\\''")}' install --owner-uid $uid";
+    final escaped = shell.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+    return 'do shell script "$escaped" with administrator privileges';
+  }
+
+  Future<AuthorizeCode> install() async {
+    if (!available) return AuthorizeCode.helperInstallFailed;
+    final ready = await _readiness(null, true);
+    if (ready == HelperReadiness.ready) return AuthorizeCode.none;
+    if (ready == HelperReadiness.manifestMissing) {
+      return AuthorizeCode.helperInstallFailed;
+    }
+    try {
+      if (!await _isInAdminGroup()) return AuthorizeCode.adminAccountRequired;
+      final uid = await _currentUid();
+      if (uid == null) return AuthorizeCode.helperInstallFailed;
+      final result = await _run('osascript', [
+        '-e',
+        elevationScript(executable, uid),
+      ]);
+      if (result.exitCode != 0) {
+        final error = result.stderr.toString().trim();
+        // -128 is the dismissed authorization dialog.
+        if (error.contains('(-128)')) return AuthorizeCode.error;
+        commonPrint.log(
+          'Helper install failed: $error',
+          logLevel: LogLevel.warning,
+        );
+        return AuthorizeCode.helperInstallFailed;
+      }
+    } on ProcessException {
+      return AuthorizeCode.helperInstallFailed;
+    }
+    return await waitForHelperReady(_readiness, readinessTimeout)
+        ? AuthorizeCode.success
+        : AuthorizeCode.helperInstallFailed;
+  }
+
+  Future<bool> _isInAdminGroup() async {
+    final result = await _run('id', ['-Gn']);
+    return result.exitCode == 0 &&
+        result.stdout.toString().trim().split(RegExp(r'\s+')).contains('admin');
+  }
+
+  Future<String?> _currentUid() async {
+    final result = await _run('id', ['-u']);
+    final uid = result.stdout.toString().trim();
+    return result.exitCode == 0 && RegExp(r'^[1-9]\d*$').hasMatch(uid)
+        ? uid
+        : null;
   }
 }

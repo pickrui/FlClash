@@ -39,8 +39,6 @@ class Target {
     throw BuildException('No $platform Core target for GOARCH $goarch');
   }
 
-  bool get hasHelper => goos == 'linux' || goos == 'windows';
-
   String get executableExtension => goos == 'windows' ? '.exe' : '';
 
   String get platformDir => goos == 'darwin' ? 'macos' : goos;
@@ -54,6 +52,7 @@ class Target {
     return switch (goos) {
       'windows' => '$arch-pc-windows-msvc',
       'linux' => '$arch-unknown-linux-gnu',
+      'darwin' => '$arch-apple-darwin',
       _ => throw BuildException('No Rust target for $this'),
     };
   }

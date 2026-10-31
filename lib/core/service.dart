@@ -35,12 +35,12 @@ class CoreService extends CoreHandlerInterface {
   factory CoreService._create() {
     final address = system.isWindows ? windowsPipeName : unixSocketPath;
     final directLauncher = DirectCoreLauncher();
-    final helper = system.isLinux ? linuxHelperClient : windowsHelperClient;
+    final helper = system.isWindows ? windowsHelperClient : unixHelperClient;
     final lifecycle = DesktopCoreLifecycle(
       transportFactory: () => IpcCoreTransport(address: address),
       launcherResolver: HelperLauncherResolver(
         isWindows: system.isWindows && !safeModeBuild,
-        isLinux: system.isLinux && !safeModeBuild,
+        isUnix: (system.isLinux || system.isMacOS) && !safeModeBuild,
         directLauncher: directLauncher,
         helperLauncher: HelperLauncher(helper),
         helperReady: () => helper.readiness(),

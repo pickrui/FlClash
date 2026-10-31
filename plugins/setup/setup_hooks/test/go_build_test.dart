@@ -117,12 +117,11 @@ void main() {
       );
       final first = await buildPlatform(request);
       expect(first.rebuilt, isTrue);
-      expect(File(first.outputs.single).existsSync(), isTrue);
-      final buildInfo = Process.runSync('go', [
-        'version',
-        '-m',
-        first.outputs.single,
-      ]);
+      final coreOutput = first.outputs.singleWhere(
+        (output) => p.basename(output) == 'FlClashCore',
+      );
+      expect(File(coreOutput).existsSync(), isTrue);
+      final buildInfo = Process.runSync('go', ['version', '-m', coreOutput]);
       expect(buildInfo.exitCode, 0, reason: buildInfo.stderr.toString());
       expect(buildInfo.stdout, contains('go1.27.3'));
       expect(first.inputs, contains(core.path));
@@ -134,7 +133,7 @@ void main() {
       final changed = await buildPlatform(request);
       expect(changed.rebuilt, isTrue);
       expect(changed.inputs, contains(added.path));
-      File(changed.outputs.single).deleteSync();
+      File(coreOutput).deleteSync();
       expect((await buildPlatform(request)).rebuilt, isTrue);
     },
     skip: !goAvailable,

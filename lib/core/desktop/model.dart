@@ -6,7 +6,7 @@
 import 'dart:async';
 import 'dart:math';
 
-enum CoreProcessOwner { direct, windowsHelper, linuxHelper }
+enum CoreProcessOwner { direct, windowsHelper, linuxHelper, macosHelper }
 
 enum CoreLifecycleOutcome { applied, coalesced, superseded }
 

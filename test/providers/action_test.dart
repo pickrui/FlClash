@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/core/desktop/helper_client.dart';
 import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -82,16 +83,29 @@ void main() {
       (tester) async {
         await AppLocalizations.load(const Locale('en'));
         final previous = system.runProcess;
+        final previousReadiness = system.macOSHelperReadiness;
+        final helperDir = Directory.systemTemp.createTempSync('flclash-helper');
+        system.macOSHelperPath = '${helperDir.path}/FlClashHelperService';
+        File(system.macOSHelperPath!).writeAsStringSync('');
         final entered = Completer<void>();
         final authorization = Completer<ProcessResult>();
+        // A slow Helper check or install prompt answers after TUN moved on.
+        system.macOSHelperReadiness = (_, _) async {
+          if (failed) return HelperReadiness.notReady;
+          entered.complete();
+          await authorization.future;
+          return HelperReadiness.ready;
+        };
         system.runProcess = (executable, arguments) async {
-          if (executable == 'stat' && failed) {
-            return ProcessResult(1, 0, 'user:staff -rwxr-xr-x', '');
-          }
           if (executable == 'id') {
-            return ProcessResult(1, 0, 'user staff admin', '');
+            return ProcessResult(
+              1,
+              0,
+              arguments.contains('-u') ? '501' : 'user staff admin',
+              '',
+            );
           }
-          expectSync(executable, failed ? 'osascript' : 'stat');
+          expectSync(executable, 'osascript');
           entered.complete();
           return authorization.future;
         };
@@ -100,6 +114,9 @@ void main() {
         container.listen(realTunEnableProvider, (_, _) {});
         addTearDown(() {
           system.runProcess = previous;
+          system.macOSHelperReadiness = previousReadiness;
+          system.macOSHelperPath = null;
+          helperDir.deleteSync(recursive: true);
           debouncer.cancel(FunctionTag.updateConfig);
           container.dispose();
         });
@@ -128,7 +145,7 @@ void main() {
           await controller.updateConfigDebounce();
         }
         authorization.complete(
-          ProcessResult(1, failed ? 1 : 0, 'root:admin -rwsr-x---', ''),
+          ProcessResult(1, failed ? 1 : 0, '', failed ? '(-128)' : ''),
         );
         await tester.pump();
         debouncer.cancel(FunctionTag.updateConfig);

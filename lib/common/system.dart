@@ -11,7 +11,7 @@ import 'package:ffi/ffi.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/macos_dns.dart';
 import 'package:fl_clash/core/desktop/helper_client.dart';
-import 'package:fl_clash/core/desktop/linux_helper.dart';
+import 'package:fl_clash/core/desktop/unix_helper.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -79,6 +79,13 @@ class System {
   @visibleForTesting
   Future<ProcessResult> Function(String, List<String>) runProcess = Process.run;
 
+  @visibleForTesting
+  TimedHelperReadinessProbe macOSHelperReadiness = (timeout, logFailure) =>
+      unixHelperClient.readiness(timeout: timeout, logFailure: logFailure);
+
+  @visibleForTesting
+  String? macOSHelperPath;
+
   /// Execute for others would let any local account run the Core as root, so
   /// a Core that older versions left that way is authorized again.
   @visibleForTesting
@@ -93,12 +100,6 @@ class System {
         mode[3] == 's' &&
         mode[9] != 'x' &&
         mode[9] != 't';
-  }
-
-  @visibleForTesting
-  static String macOSElevationShell(String corePath) {
-    final path = corePath.replaceAll("'", "'\\''");
-    return "chown root:admin '$path' && chmod 4750 '$path'";
   }
 
   @visibleForTesting
@@ -117,14 +118,10 @@ class System {
     if (system.isWindows) {
       return await windowsHelperClient.readiness() == HelperReadiness.ready;
     } else if (system.isMacOS) {
-      final result = await runProcess('stat', ['-f', '%Su:%Sg %Sp', corePath]);
-      return isPrivilegedStatOutput(
-        result.stdout.toString(),
-        ownerPrefix: 'root:admin',
-      );
+      return await macOSHelperReadiness(null, false) == HelperReadiness.ready;
     } else if (Platform.isLinux) {
       if (LinuxHelperInstaller().available) {
-        return await linuxHelperClient.readiness(logFailure: false) ==
+        return await unixHelperClient.readiness(logFailure: false) ==
             HelperReadiness.ready;
       }
       final result = await runProcess('stat', ['-c', '%U:%G %A', corePath]);
@@ -151,21 +148,11 @@ class System {
     }
 
     if (system.isMacOS) {
-      if (!await _isInAdminGroup()) {
-        return AuthorizeCode.adminAccountRequired;
-      }
-      final appleScriptString = macOSElevationShell(corePath)
-          .replaceAll('\\', '\\\\')
-          .replaceAll('"', '\\"');
-      final arguments = [
-        '-e',
-        'do shell script "$appleScriptString" with administrator privileges',
-      ];
-      final result = await runProcess('osascript', arguments);
-      if (result.exitCode != 0) {
-        return AuthorizeCode.error;
-      }
-      return AuthorizeCode.success;
+      return MacOSHelperInstaller(
+        runProcess: runProcess,
+        probeReadiness: macOSHelperReadiness,
+        executable: macOSHelperPath,
+      ).install();
     } else if (Platform.isLinux) {
       final installer = LinuxHelperInstaller(askPassword: _askAdminPassword);
       if (installer.available) return installer.install();
@@ -188,20 +175,6 @@ class System {
   Future<String?> _askAdminPassword() async {
     await window?.show();
     return requestAdminPassword?.call();
-  }
-
-  Future<bool> _isInAdminGroup() async {
-    try {
-      final result = await runProcess('id', ['-Gn']);
-      return result.exitCode == 0 &&
-          result.stdout
-              .toString()
-              .trim()
-              .split(RegExp(r'\s+'))
-              .contains('admin');
-    } on ProcessException {
-      return false;
-    }
   }
 
   Future<String?> _primaryGroupId() async {

@@ -30,6 +30,8 @@
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		F5131FDD2EF0F1A500A1748D /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = F5131FDC2EF0F1A500A1748D /* LaunchAtLogin */; };
 		F51BB7CB2EF0267400E05D67 /* FlClashCore in Copy Core */ = {isa = PBXBuildFile; fileRef = F51BB7CA2EF0267400E05D67 /* FlClashCore */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F51BB7CF2EF0269000E05D67 /* FlClashHelperService in Copy Core */ = {isa = PBXBuildFile; fileRef = F51BB7CE2EF0269000E05D67 /* FlClashHelperService */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F51BB7D12EF0269000E05D67 /* manifest.json in Copy Core Manifest */ = {isa = PBXBuildFile; fileRef = F51BB7D02EF0269000E05D67 /* manifest.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,8 +69,20 @@
 			dstSubfolderSpec = 6;
 			files = (
 				F51BB7CB2EF0267400E05D67 /* FlClashCore in Copy Core */,
+				F51BB7CF2EF0269000E05D67 /* FlClashHelperService in Copy Core */,
 			);
 			name = "Copy Core";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F51BB7D22EF0269000E05D67 /* Copy Core Manifest */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				F51BB7D12EF0269000E05D67 /* manifest.json in Copy Core Manifest */,
+			);
+			name = "Copy Core Manifest";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -94,6 +108,8 @@
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		F51BB7CA2EF0267400E05D67 /* FlClashCore */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlClashCore; sourceTree = BUILT_PRODUCTS_DIR; };
+		F51BB7CE2EF0269000E05D67 /* FlClashHelperService */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlClashHelperService; sourceTree = BUILT_PRODUCTS_DIR; };
+		F51BB7D02EF0269000E05D67 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,6 +155,8 @@
 			isa = PBXGroup;
 			children = (
 				F51BB7CA2EF0267400E05D67 /* FlClashCore */,
+				F51BB7CE2EF0269000E05D67 /* FlClashHelperService */,
+				F51BB7D02EF0269000E05D67 /* manifest.json */,
 				33FAB671232836740065AC1E /* Runner */,
 				33CEB47122A05771004F2AC0 /* Flutter */,
 				331C80D6294CF71000263BE5 /* RunnerTests */,
@@ -231,6 +249,8 @@
 				3399D490228B24CF009A79C7 /* ShellScript */,
 				F51BB7CC2EF0268000E05D67 /* Stage Core */,
 				F51BB7C92EF0265000E05D67 /* Copy Core */,
+				F51BB7D22EF0269000E05D67 /* Copy Core Manifest */,
+				F51BB7D32EF0269000E05D67 /* Pin Core Hash */,
 				F51BB7CD2EF0268000E05D67 /* Verify macOS Compatibility */,
 			);
 			buildRules = (
@@ -374,10 +394,31 @@
 			);
 			outputPaths = (
 				"$(BUILT_PRODUCTS_DIR)/FlClashCore",
+				"$(BUILT_PRODUCTS_DIR)/FlClashHelperService",
+				"$(BUILT_PRODUCTS_DIR)/manifest.json",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "core=\"$SRCROOT/../libclash/macos/FlClashCore\"\nif [ ! -f \"$core\" ]; then\n  echo \"error: $core is missing; the setup build hook produced no Core\"\n  exit 1\nfi\nslices=\"$(lipo -archs \"$core\")\"\nfor arch in $ARCHS; do\n  case \" $slices \" in\n    *\" $arch \"*) ;;\n    *) echo \"error: $core has no $arch slice (has: $slices)\"; exit 1 ;;\n  esac\ndone\nif ! cmp -s \"$core\" \"$BUILT_PRODUCTS_DIR/FlClashCore\"; then\n  cp -f \"$core\" \"$BUILT_PRODUCTS_DIR/FlClashCore\"\nfi\n";
+			shellScript = "source_dir=\"$SRCROOT/../libclash/macos\"\nfor name in FlClashCore FlClashHelperService manifest.json; do\n  if [ ! -f \"$source_dir/$name\" ]; then\n    echo \"error: $source_dir/$name is missing; the setup build hook produced no Core\"\n    exit 1\n  fi\ndone\nfor name in FlClashCore FlClashHelperService; do\n  slices=\"$(lipo -archs \"$source_dir/$name\")\"\n  for arch in $ARCHS; do\n    case \" $slices \" in\n      *\" $arch \"*) ;;\n      *) echo \"error: $source_dir/$name has no $arch slice (has: $slices)\"; exit 1 ;;\n    esac\n  done\ndone\nfor name in FlClashCore FlClashHelperService manifest.json; do\n  if ! cmp -s \"$source_dir/$name\" \"$BUILT_PRODUCTS_DIR/$name\"; then\n    cp -f \"$source_dir/$name\" \"$BUILT_PRODUCTS_DIR/$name\"\n  fi\ndone\n";
+		};
+		F51BB7D32EF0269000E05D67 /* Pin Core Hash */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Pin Core Hash";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Copying signs the Core again, so the Helper must pin the Core it ships with.\nmacos=\"$TARGET_BUILD_DIR/$EXECUTABLE_FOLDER_PATH\"\nhelper=\"$macos/FlClashHelperService\"\nmanifest=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/manifest.json\"\npython3 - \"$macos/FlClashCore\" \"$helper\" \"$manifest\" <<'PY' || exit 1\nimport hashlib, json, sys\ncore, helper, manifest = sys.argv[1:]\nold = json.load(open(manifest))[\"coreSha256\"].encode()\nnew = hashlib.sha256(open(core, \"rb\").read()).hexdigest().encode()\ndata = open(helper, \"rb\").read()\nif old == new:\n    sys.exit(0)\nif data.count(old) != 1:\n    sys.exit(f\"error: {helper} embeds the Core SHA256 {data.count(old)} times\")\nopen(helper, \"wb\").write(data.replace(old, new))\njson.dump({\"coreSha256\": new.decode()}, open(manifest, \"w\"))\nPY\nif [ \"${CODE_SIGNING_ALLOWED:-YES}\" = YES ] && [ -n \"${EXPANDED_CODE_SIGN_IDENTITY:-}\" ]; then\n  codesign --force --sign \"$EXPANDED_CODE_SIGN_IDENTITY\" $OTHER_CODE_SIGN_FLAGS \\\n    --identifier FlClashHelperService \"$helper\"\nfi\n";
 		};
 		F51BB7CD2EF0268000E05D67 /* Verify macOS Compatibility */ = {
 			isa = PBXShellScriptBuildPhase;

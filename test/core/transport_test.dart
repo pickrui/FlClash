@@ -7,19 +7,15 @@ import 'package:fl_clash/common/constant.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('Linux socket addresses remain compatible with installed Helpers', () {
+  test('socket addresses remain compatible with installed Helpers', () {
     for (var attempt = 0; attempt < 16; attempt++) {
       expect(
-        createUnixSocketPath(isLinux: true, safeMode: false),
+        createUnixSocketPath(safeMode: false),
         matches(RegExp(r'^/tmp/FlClashSocket_\d{1,10}\.sock$')),
       );
     }
     expect(
-      createUnixSocketPath(isLinux: false, safeMode: false),
-      matches(RegExp(r'^/tmp/FlClashSocket_[0-9a-f]{32}\.sock$')),
-    );
-    expect(
-      createUnixSocketPath(isLinux: true, safeMode: true),
+      createUnixSocketPath(safeMode: true),
       matches(RegExp(r'/fc_[0-9a-f]{16}\.sock$')),
     );
   });

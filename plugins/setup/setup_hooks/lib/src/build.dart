@@ -62,10 +62,8 @@ Future<BuildReport> buildPlatform(BuildRequest request) {
     key: target.platformDir,
     outputs: [
       p.join(outDir, '${config.coreName}${target.executableExtension}'),
-      if (target.hasHelper) ...[
-        p.join(outDir, '${config.helperName}${target.executableExtension}'),
-        p.join(outDir, coreManifestName),
-      ],
+      p.join(outDir, '${config.helperName}${target.executableExtension}'),
+      p.join(outDir, coreManifestName),
     ],
     build: () => _buildPlatform(request),
   );
@@ -98,11 +96,6 @@ Future<BuildReport> _buildPlatform(BuildRequest request) async {
     notice: notice,
     harnessInputs: harnessInputs,
   ).build(target);
-  if (!target.hasHelper) {
-    _log.info('Done in ${stopwatch.elapsed}: ${core.primaryOutput}');
-    return _report([core], sourceRoot: p.join(rootDir, config.coreDir));
-  }
-
   final coreSha256 = await calcSha256(core.primaryOutput);
   final helper = !request.includeHelper
       ? null

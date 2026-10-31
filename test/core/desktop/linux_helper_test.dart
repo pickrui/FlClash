@@ -8,7 +8,8 @@ import 'dart:io';
 
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/core/desktop/helper_client.dart';
-import 'package:fl_clash/core/desktop/linux_helper.dart';
+import 'package:fl_clash/core/desktop/unix_helper.dart';
+import 'package:fl_clash/core/desktop/model.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,13 +28,18 @@ void main() {
       final dir = Directory.systemTemp.createTempSync('flclash-helper-');
       addTearDown(() => dir.deleteSync(recursive: true));
       final socket = '${dir.path}/helper.sock';
+      final location = UnixHelperLocation(
+        socketPath: socket,
+        installRoot: UnixHelperLocation.linux.installRoot,
+        owner: CoreProcessOwner.linuxHelper,
+      );
       final server = await HttpServer.bind(
         InternetAddress(socket, type: InternetAddressType.unix),
         0,
       );
       addTearDown(() => server.close(force: true));
       var wrongPath = false;
-      final coreAddress = createUnixSocketPath(isLinux: true, safeMode: false);
+      final coreAddress = createUnixSocketPath(safeMode: false);
       final requests = <String>[];
       server.listen((request) async {
         requests.add(request.uri.path);
@@ -45,8 +51,8 @@ void main() {
           expect(request.uri.queryParameters['coreSha256'], sha);
           request.response.write(
             wrongPath
-                ? linuxHelperInstalledPath(sha).toUpperCase()
-                : linuxHelperInstalledPath(sha),
+                ? location.installedPath(sha).toUpperCase()
+                : location.installedPath(sha),
           );
         } else {
           final body = jsonDecode(await utf8.decoder.bind(request).join());
@@ -66,8 +72,7 @@ void main() {
         await request.response.close();
       });
       final client = HelperClient(
-        isLinux: true,
-        socketPath: socket,
+        unix: location,
         readCoreSha256: () async => sha,
       );
       expect(await client.readiness(), HelperReadiness.ready);

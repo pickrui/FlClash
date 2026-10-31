@@ -28,7 +28,12 @@ final class CoreManifest {
     }
   }
 
+  /// A signed bundle keeps data out of Contents/MacOS, beside the executables.
   static String _defaultPath() {
-    return p.join(p.dirname(Platform.resolvedExecutable), coreManifestName);
+    final executableDir = p.dirname(Platform.resolvedExecutable);
+    if (Platform.isMacOS) {
+      return p.join(p.dirname(executableDir), 'Resources', coreManifestName);
+    }
+    return p.join(executableDir, coreManifestName);
   }
 }

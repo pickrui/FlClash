@@ -6,8 +6,7 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/system.dart';
-import 'package:fl_clash/core/desktop/linux_helper.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/core/desktop/unix_helper.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -85,14 +84,6 @@ void main() {
   });
 
   group('elevation commands', () {
-    test('macOS hands the Core to the admin group only', () {
-      expect(
-        System.macOSElevationShell("/Apps/Fl Clash's/core"),
-        "chown root:admin '/Apps/Fl Clash'\\''s/core' && "
-        "chmod 4750 '/Apps/Fl Clash'\\''s/core'",
-      );
-    });
-
     test('Linux hands the Core to the requesting user group', () {
       final command = System.linuxElevationCommand(
         '/opt/Fl Clash/core',
@@ -101,63 +92,10 @@ void main() {
       expect(command.first, '/bin/sh');
       expect(command[2], contains(r'chown "root:$2" "$1"'));
       expect(command[2], contains(r'chmod 4750 "$1"'));
+      expect(command[2], isNot(contains('+s')));
       expect(command.sublist(4), ['/opt/Fl Clash/core', '1000']);
     });
-
-    test('neither leaves execute to others', () {
-      final commands = [
-        System.macOSElevationShell('/core'),
-        System.linuxElevationCommand('/core', '20').join(' '),
-      ];
-      for (final command in commands) {
-        expect(command, isNot(contains('+s')));
-        expect(command, contains('chmod 4750'));
-      }
-    });
   });
-
-  group('macOS Core authorization', () {
-    late Future<ProcessResult> Function(String, List<String>) original;
-    final calls = <String, List<String>>{};
-    final outputs = <String, String>{};
-
-    setUp(() {
-      original = system.runProcess;
-      calls.clear();
-      outputs.clear();
-      system.runProcess = (executable, arguments) async {
-        calls[executable] = arguments;
-        return ProcessResult(1, 0, outputs[executable] ?? '', '');
-      };
-    });
-
-    tearDown(() => system.runProcess = original);
-
-    test(
-      'does not trust a Core older versions left executable by all',
-      () async {
-        outputs['stat'] = 'root:admin -rwsr-sr-x';
-        expect(await system.checkIsAdmin(), isFalse);
-        outputs['stat'] = 'root:admin -rwsr-x---';
-        expect(await system.checkIsAdmin(), isTrue);
-      },
-    );
-
-    test('refuses an account outside the admin group before asking', () async {
-      outputs['stat'] = 'root:admin -rwsr-sr-x';
-      outputs['id'] = 'alice staff everyone';
-      expect(await system.authorizeCore(), AuthorizeCode.adminAccountRequired);
-      expect(calls.containsKey('osascript'), isFalse);
-    });
-
-    test('elevates the Core to 4750 for an admin account', () async {
-      outputs['stat'] = 'alice:staff -rwxr-xr-x';
-      outputs['id'] = 'alice staff admin';
-      expect(await system.authorizeCore(), AuthorizeCode.success);
-      expect(calls['osascript']!.last, contains('chmod 4750'));
-      expect(calls['osascript']!.last, isNot(contains('+sx')));
-    });
-  }, skip: Platform.isMacOS ? false : 'macOS only');
 
   group('LinuxElevation', () {
     ProcessResult exit(int code) => ProcessResult(1, code, '', '');

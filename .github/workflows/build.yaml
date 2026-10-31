@@ -431,6 +431,10 @@ jobs:
           echo "Available Developer ID signing identities:"
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
+      - name: Test macOS Helper
+        if: matrix.platform == 'macos'
+        run: cargo test --locked --manifest-path services/helper/Cargo.toml
+
       - name: Install Android script binding dependencies
         if: matrix.platform == 'android'
         run: sudo apt-get update && sudo apt-get install -y libclang-dev

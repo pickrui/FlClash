@@ -23,7 +23,7 @@ const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const packageName = 'com.oixcloud.clash';
 const releaseRepository = 'pickrui/FlClash';
-final unixSocketPath = createUnixSocketPath(isLinux: Platform.isLinux);
+final unixSocketPath = createUnixSocketPath();
 final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${_randomPipeId()}';
 const helperPort = 47890;
 const helperPortKey =
@@ -36,18 +36,12 @@ const minTextScale = 0.8;
 
 const watchExecution = false;
 
-String createUnixSocketPath({
-  required bool isLinux,
-  bool safeMode = safeModeBuild,
-}) {
+String createUnixSocketPath({bool safeMode = safeModeBuild}) {
   if (safeMode) {
     return '${Directory.systemTemp.path}/fc_${_randomPipeId().substring(0, 16)}.sock';
   }
-  // Installed Linux Helpers accept at most ten decimal digits.
-  final id = isLinux
-      ? Random.secure().nextInt(1 << 32).toString()
-      : _randomPipeId();
-  return '/tmp/FlClashSocket_$id.sock';
+  // Installed Helpers accept at most ten decimal digits.
+  return '/tmp/FlClashSocket_${Random.secure().nextInt(1 << 32)}.sock';
 }
 
 String _randomPipeId() {

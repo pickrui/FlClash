@@ -94,7 +94,7 @@ void main() {
     var reads = 0;
     final client = HelperClient(
       dio: Dio(),
-      isLinux: true,
+      unix: UnixHelperLocation.linux,
       readHelperPort: () {
         reads++;
         return 51234;
@@ -263,7 +263,7 @@ void main() {
           'reason': 'notRunning',
         });
       }),
-      isLinux: true,
+      unix: UnixHelperLocation.linux,
     );
     var probes = 0;
     final launcher = HelperLauncher(
@@ -309,7 +309,7 @@ void main() {
             type: DioExceptionType.connectionError,
           );
         }),
-        isLinux: true,
+        unix: UnixHelperLocation.linux,
       );
       final launcher = HelperLauncher(
         client,
@@ -968,7 +968,7 @@ HelperClient _client(
   String Function()? expectedHelperPath,
   Future<String> Function()? readCoreSha256,
   int? Function()? readHelperPort,
-  bool isLinux = false,
+  UnixHelperLocation? unix,
 }) {
   final dio = Dio()..httpClientAdapter = adapter;
   return HelperClient(
@@ -976,7 +976,7 @@ HelperClient _client(
     expectedHelperPath: expectedHelperPath ?? () => r'C:\Helper.exe',
     readCoreSha256: readCoreSha256 ?? () async => _coreSha256,
     readHelperPort: readHelperPort,
-    isLinux: isLinux,
+    unix: unix,
   );
 }
 
