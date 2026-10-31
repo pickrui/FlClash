@@ -72,6 +72,25 @@ void main() {
     },
   );
 
+  test('rules may target the group a proxy chain derives for its exit', () {
+    final exit = proxyChainDerivedName('Exit', 'Entry');
+    final result = inspectCustomRouting(
+      profile.copyWith(
+        proxyChains: const [
+          ProxyChain(id: 1, proxies: ['Entry', 'Exit']),
+        ],
+        customRules: [Rule(id: 1, value: 'DOMAIN,example.test,$exit')],
+      ),
+      raw: {
+        'proxies': [
+          {'name': 'Entry'},
+          {'name': 'Exit'},
+        ],
+      },
+    );
+    expect(result.rules, isEmpty);
+  });
+
   test('provider names are occupied only for personal merged groups', () {
     final candidate = profile.copyWith(
       customProxyGroups: const [

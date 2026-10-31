@@ -25,10 +25,14 @@ List<String> customRoutingTargets(
             .whereType<String>()
             .where((name) => name.trim().isNotEmpty)
       : const [];
-  return <String>{
-    ...RuleTarget.ruleTargetNames,
+  final groups = {
     ...profile.customProxyGroups.map((group) => group.name),
     if (profile.overwriteType != OverwriteType.custom) ...names('proxy-groups'),
+  };
+  return <String>{
+    ...RuleTarget.ruleTargetNames,
+    ...groups,
+    ...proxyChainRoutingTargets(profile.proxyChains, groups),
     ...profile.profileProxies
         .where((node) => node.isValid)
         .map((node) => node.name),
@@ -40,14 +44,21 @@ List<String> customRoutingTargets(
 Map<String, String> routingGroupTypes(
   Profile profile,
   Map<String, dynamic> raw,
-) => {
-  if (profile.overwriteType != OverwriteType.custom &&
-      raw['proxy-groups'] is List)
-    for (final group in (raw['proxy-groups'] as List).whereType<Map>())
-      if (group['name'] is String)
-        group['name'] as String: group['type']?.toString() ?? '',
-  for (final group in profile.customProxyGroups) group.name: group.type.name,
-};
+) {
+  final types = {
+    if (profile.overwriteType != OverwriteType.custom &&
+        raw['proxy-groups'] is List)
+      for (final group in (raw['proxy-groups'] as List).whereType<Map>())
+        if (group['name'] is String)
+          group['name'] as String: group['type']?.toString() ?? '',
+    for (final group in profile.customProxyGroups) group.name: group.type.name,
+  };
+  final chains = proxyChainRoutingTargets(
+    profile.proxyChains,
+    types.keys.toSet(),
+  );
+  return {for (final name in chains) name: 'select', ...types};
+}
 
 Map<String, String> routingProviderSources(
   Profile profile,

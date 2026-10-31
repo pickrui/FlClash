@@ -58,11 +58,12 @@ RoutingIssues inspectCustomRouting(
         .map((proxy) => proxy.name),
   };
   final providers = keys('proxy-providers');
+  final allGroups = {...rawGroups, ...groups.map((group) => group.name)};
   final targets = {
     ...RuleTarget.ruleTargets,
-    ...rawGroups,
+    ...allGroups,
     ...proxies,
-    ...groups.map((group) => group.name),
+    ...proxyChainRoutingTargets(profile.proxyChains, allGroups),
     ...additionalTargets,
   };
   final fallbackTargets = {

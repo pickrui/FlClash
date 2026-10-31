@@ -230,6 +230,23 @@ List<String> normalizeProxyChainProxies(Iterable<String> proxies) {
 String proxyChainDerivedName(String proxyName, String dialerProxy) =>
     '$proxyName (via $dialerProxy)';
 
+/// Outbounds that exist only once [chains] are applied, which rules may name.
+/// A policy-group exit keeps its own name and adds nothing.
+Set<String> proxyChainRoutingTargets(
+  Iterable<ProxyChain> chains,
+  Set<String> groupNames,
+) {
+  final targets = <String>{};
+  for (final chain in chains.where((chain) => chain.isValid)) {
+    final proxies = chain.normalizedProxies;
+    final exit = proxies.last;
+    if (groupNames.contains(exit)) continue;
+    final name = proxyChainDerivedName(exit, proxies[proxies.length - 2]);
+    if (!name.contains(',')) targets.add(name);
+  }
+  return targets;
+}
+
 class ProxyChainNameScope {
   final Set<String> names;
 

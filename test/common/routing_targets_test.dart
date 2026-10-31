@@ -88,6 +88,36 @@ void main() {
     );
   });
 
+  test('a proxy chain to a node offers the group it derives for the exit', () {
+    final chained = profile.copyWith(
+      proxyChains: const [
+        ProxyChain(
+          id: 1,
+          proxies: ['Subscription group', 'Personal node', 'Subscription node'],
+        ),
+        ProxyChain(id: 2, proxies: ['Subscription node', 'Personal automatic']),
+        ProxyChain(
+          id: 3,
+          enable: false,
+          proxies: ['Subscription group', 'Personal node'],
+        ),
+        ProxyChain(id: 4, proxies: ['Subscription node']),
+        ProxyChain(id: 5, proxies: ['Subscription group', 'Odd,node']),
+      ],
+    );
+    final exit = proxyChainDerivedName('Subscription node', 'Personal node');
+    final targets = customRoutingTargets(chained, rawConfig);
+    final types = routingGroupTypes(chained, rawConfig);
+
+    expect(targets, contains(exit));
+    expect(types[exit], 'select');
+    expect(
+      targets,
+      hasLength(customRoutingTargets(profile, rawConfig).length + 1),
+    );
+    expect(types, hasLength(routingGroupTypes(profile, rawConfig).length + 1));
+  });
+
   test('malformed subscription entries do not become destination choices', () {
     final targets = customRoutingTargets(profile, {
       'proxy-groups': [
