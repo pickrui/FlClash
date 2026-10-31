@@ -12,7 +12,6 @@ use anyhow::{bail, Context, Result};
 use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::io::ErrorKind;
-use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
@@ -130,23 +129,6 @@ fn ensure_unit_is_free_for(owner: Owner) -> Result<()> {
     }
 }
 
-fn write_unit(contents: &[u8]) -> Result<()> {
-    let temporary = format!("{UNIT_PATH}.{}", std::process::id());
-    let mut options = fs::OpenOptions::new();
-    let file = options.write(true).create_new(true).open(&temporary)?;
-    use std::io::Write;
-    let result = (|| -> Result<()> {
-        let mut file = file;
-        file.write_all(contents)?;
-        file.set_permissions(fs::Permissions::from_mode(0o644))?;
-        file.sync_all()?;
-        fs::rename(&temporary, UNIT_PATH)?;
-        Ok(())
-    })();
-    let _ = fs::remove_file(temporary);
-    result
-}
-
 fn install_service() -> Result<()> {
     ensure_root()?;
     ensure_installer_umask();
@@ -157,7 +139,10 @@ fn install_service() -> Result<()> {
     let _lock = unix::lock_installations(root)?;
     let installed = unix::stage_installation(root, &executable)?;
     let previous = fs::read(UNIT_PATH).ok();
-    write_unit(unit_contents(&installed.executable, owner).as_bytes())?;
+    unix::write_root_file(
+        UNIT_PATH,
+        unit_contents(&installed.executable, owner).as_bytes(),
+    )?;
     let activation = (|| {
         run_systemctl(&["daemon-reload"])?;
         run_systemctl(&["enable", SERVICE_NAME])?;
@@ -166,7 +151,9 @@ fn install_service() -> Result<()> {
     if let Err(error) = activation {
         drop(installed);
         if let Some(contents) = previous {
-            write_unit(&contents)?;
+            if let Err(restore) = unix::write_root_file(UNIT_PATH, &contents) {
+                eprintln!("could not restore the previous Helper unit: {restore:#}");
+            }
             silence_systemctl(&["daemon-reload"]);
             silence_systemctl(&["restart", SERVICE_NAME]);
         } else {

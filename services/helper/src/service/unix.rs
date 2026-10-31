@@ -145,6 +145,26 @@ pub(super) fn secure_directory(path: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Replaces a root-read service definition atomically with mode 0644.
+pub(super) fn write_root_file(path: &str, contents: &[u8]) -> Result<()> {
+    use std::io::Write;
+    let temporary = format!("{path}.{}", std::process::id());
+    let mut file = fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&temporary)
+        .with_context(|| format!("create {temporary}"))?;
+    let result = (|| -> Result<()> {
+        file.write_all(contents)?;
+        file.set_permissions(fs::Permissions::from_mode(0o644))?;
+        file.sync_all()?;
+        fs::rename(&temporary, path)?;
+        Ok(())
+    })();
+    let _ = fs::remove_file(temporary);
+    result.with_context(|| format!("write {path}"))
+}
+
 pub(super) fn prepare_installation_directory(path: &Path) -> Result<()> {
     secure_directory(
         path.parent()

@@ -131,41 +131,31 @@ fn ensure_plist_is_free_for(owner: Owner) -> Result<()> {
     }
 }
 
-fn write_plist(contents: &[u8]) -> Result<()> {
-    let temporary = format!("{PLIST_PATH}.{}", std::process::id());
-    let file = fs::OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(&temporary)?;
-    use std::io::Write;
-    let result = (|| -> Result<()> {
-        let mut file = file;
-        file.write_all(contents)?;
-        file.set_permissions(fs::Permissions::from_mode(0o644))?;
-        file.sync_all()?;
-        fs::rename(&temporary, PLIST_PATH)?;
-        Ok(())
-    })();
-    let _ = fs::remove_file(temporary);
-    result
-}
-
 fn install_service(owner_uid: u32) -> Result<()> {
     ensure_root()?;
     ensure_installer_umask();
     let executable = std::env::current_exe().context("resolve helper executable path")?;
     let owner = owner_for_uid(owner_uid)?;
-    ensure_plist_is_free_for(owner)?;
     let root = Path::new(INSTALL_ROOT);
     let _lock = unix::lock_installations(root)?;
+    ensure_plist_is_free_for(owner)?;
     let installed = unix::stage_installation(root, &executable)?;
     let previous = fs::read(PLIST_PATH).ok();
-    write_plist(plist_contents(&installed.executable, owner).as_bytes())?;
+    unix::write_root_file(
+        PLIST_PATH,
+        plist_contents(&installed.executable, owner).as_bytes(),
+    )?;
     if let Err(error) = reload_service() {
         drop(installed);
         if let Some(contents) = previous {
-            write_plist(&contents)?;
-            let _ = reload_service();
+            match unix::write_root_file(PLIST_PATH, &contents) {
+                Ok(()) => {
+                    let _ = reload_service();
+                }
+                Err(restore) => {
+                    eprintln!("could not restore the previous Helper plist: {restore:#}")
+                }
+            }
         } else {
             silence_launchctl(&["bootout", &service_target()]);
             let _ = fs::remove_file(PLIST_PATH);
@@ -183,21 +173,23 @@ fn install_service(owner_uid: u32) -> Result<()> {
 fn uninstall_service(owner_uid: u32) -> Result<()> {
     ensure_root()?;
     ensure_installer_umask();
-    ensure_plist_is_free_for(owner_for_uid(owner_uid)?)?;
+    let owner = owner_for_uid(owner_uid)?;
+    let root = Path::new(INSTALL_ROOT);
+    let lock = match fs::symlink_metadata(root) {
+        Ok(_) => Some(unix::lock_installations(root)?),
+        Err(error) if error.kind() == ErrorKind::NotFound => None,
+        Err(error) => return Err(error.into()),
+    };
+    ensure_plist_is_free_for(owner)?;
     silence_launchctl(&["bootout", &service_target()]);
     match fs::remove_file(PLIST_PATH) {
         Ok(()) => {}
         Err(error) if error.kind() == ErrorKind::NotFound => {}
         Err(error) => return Err(error).with_context(|| format!("remove {PLIST_PATH}")),
     }
-    let root = Path::new(INSTALL_ROOT);
-    match fs::symlink_metadata(root) {
-        Ok(_) => {
-            unix::secure_directory(root)?;
-            fs::remove_dir_all(root)?;
-        }
-        Err(error) if error.kind() == ErrorKind::NotFound => {}
-        Err(error) => return Err(error.into()),
+    if lock.is_some() {
+        unix::secure_directory(root)?;
+        fs::remove_dir_all(root)?;
     }
     Ok(())
 }
