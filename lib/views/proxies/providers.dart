@@ -372,40 +372,9 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
     );
   }
 
-  bool get _previewable => switch (_file) {
-    ProviderFileType.text => true,
-    ProviderFileType.ruleSet => provider.type == 'Rule',
-    ProviderFileType.binary => false,
-  };
+  bool get _previewable => isProviderPreviewable(provider, _file);
 
-  void _preview() {
-    final source = provider;
-    final path = source.path;
-    if (path == null || path.isEmpty) return;
-    final isRuleSet = _file == ProviderFileType.ruleSet;
-    final profileId = ref.read(currentProfileIdProvider);
-    final core = ref.read(coreHandlerProvider);
-    final container = ProviderScope.containerOf(context);
-    BaseNavigator.push<void>(
-      context,
-      EditorPage(
-        title: source.name,
-        schema: EditorSchema.provider,
-        load: () async {
-          if (container.read(currentProfileIdProvider) != profileId ||
-              !container.read(providersProvider).contains(source)) {
-            throw appLocalizations.providerChanged;
-          }
-          if (isRuleSet) {
-            return CodeForgeDocument.fromText(
-              await core.dumpRuleSet(source.name, path),
-            );
-          }
-          return _openText(path);
-        },
-      ),
-    );
-  }
+  void _preview() => openProviderPreview(context, provider, _file);
 
   void _subscriptionInfo() {
     globalState.showCommonDialog<void>(
@@ -542,6 +511,47 @@ class _TrafficMeter extends StatelessWidget {
       ],
     );
   }
+}
+
+bool isProviderPreviewable(ExternalProvider provider, ProviderFileType file) =>
+    switch (file) {
+      ProviderFileType.text => true,
+      ProviderFileType.ruleSet => provider.type == 'Rule',
+      ProviderFileType.binary => false,
+    };
+
+/// Rule-set binaries are decoded by the Core; text providers open from disk.
+void openProviderPreview(
+  BuildContext context,
+  ExternalProvider source,
+  ProviderFileType file,
+) {
+  final path = source.path;
+  if (path == null || path.isEmpty || !isProviderPreviewable(source, file)) {
+    return;
+  }
+  final container = ProviderScope.containerOf(context);
+  final profileId = container.read(currentProfileIdProvider);
+  final core = container.read(coreHandlerProvider);
+  BaseNavigator.push<void>(
+    context,
+    EditorPage(
+      title: source.name,
+      schema: EditorSchema.provider,
+      load: () async {
+        if (container.read(currentProfileIdProvider) != profileId ||
+            !container.read(providersProvider).contains(source)) {
+          throw appLocalizations.providerChanged;
+        }
+        if (file == ProviderFileType.ruleSet) {
+          return CodeForgeDocument.fromText(
+            await core.dumpRuleSet(source.name, path),
+          );
+        }
+        return _openText(path);
+      },
+    ),
+  );
 }
 
 Future<CodeForgeDocument> _openText(String path) async {

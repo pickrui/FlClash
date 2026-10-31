@@ -9,6 +9,7 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/widgets/profile_detail.dart';
 import 'package:fl_clash/views/dashboard/widgets/profiles.dart';
+import 'package:fl_clash/widgets/widgets.dart' show ListItem;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -327,6 +328,39 @@ void main() {
     );
     expect(find.textContaining('years'), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('only rule providers open a preview from the detail sheet', (
+    tester,
+  ) async {
+    setUpProfiles(
+      [_profile(1)],
+      overrides: [
+        providersProvider.overrideWithBuild(
+          (_, _) => [
+            _provider('nodes', 'Proxy', 5),
+            _provider('lists', 'Rule', 100),
+          ],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(locale: Locale('en'), child: ProfileDetailSheet()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    ListItem row(String name) => tester.widget<ListItem>(
+      find
+          .ancestor(
+            of: find.textContaining(name, findRichText: true),
+            matching: find.byType(ListItem),
+          )
+          .first,
+    );
+    expect(row('lists').onTap, isNotNull);
+    expect(row('nodes').onTap, isNull);
   });
 
   test('counts provider proxies but not provider rules', () {

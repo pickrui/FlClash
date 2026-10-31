@@ -8,12 +8,14 @@ import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/providers/provider_file.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/pages/editor.dart';
+import 'package:fl_clash/views/proxies/providers.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -275,6 +277,16 @@ class _ProviderRow extends StatelessWidget {
 
   final ExternalProvider provider;
 
+  Future<void> _preview(BuildContext context) async {
+    final file = await probeProviderFile(provider.path);
+    if (!context.mounted) return;
+    if (isProviderPreviewable(provider, file)) {
+      openProviderPreview(context, provider, file);
+    } else {
+      context.showNotifier(context.appLocalizations.nonTextProviderFile);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
@@ -283,6 +295,8 @@ class _ProviderRow extends StatelessWidget {
       _ => appLocalizations.rulesCount(provider.count),
     };
     return ListItem(
+      // Proxy provider files can carry node credentials; only rule sets open.
+      onTap: provider.type == 'Rule' ? () => _preview(context) : null,
       title: EmojiText(
         provider.name,
         maxLines: 1,
