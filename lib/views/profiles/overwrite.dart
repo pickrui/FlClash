@@ -502,14 +502,11 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
   }
 
   Future<void> _handleAddOrUpdate([Rule? rule]) async {
-    final commonAction = context.commonAction;
-    final setupAction = context.setupAction;
     final profile = ref.read(profileProvider(widget.profileId));
     if (profile == null) return;
-    final raw = await commonAction.safeRun(
-      () => setupAction.getRawProfileConfig(widget.profileId),
-    );
-    if (!mounted || raw == null) return;
+    final raw =
+        ref.read(routingSourceProvider(widget.profileId)).asData?.value ??
+        const <String, dynamic>{};
     final res = await showOverwriteSheet<Rule>(
       context: context,
       builder: (_) => AddedRuleForm(
@@ -568,8 +565,15 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
     ref.read(selectedItemsProvider(_key).notifier).value = {};
   }
 
-  Widget _buildRuleItem(List<Rule> rules, int index, Set<dynamic> selected) {
+  Widget _buildRuleItem(
+    List<Rule> rules,
+    int index,
+    Set<dynamic> selected,
+    Set<String>? targets,
+  ) {
     final rule = rules[index];
+    final parsed = ParsedRule.parseString(rule.value);
+    final target = parsed.ruleTarget;
     return ItemPositionProvider(
       position: ItemPosition.get(index, rules.length),
       child: Container(
@@ -580,6 +584,12 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
           rule: rule,
           onSelected: () => _handleSelected(rule.id),
           onEdit: _handleAddOrUpdate,
+          missingTarget:
+              targets != null &&
+              target != null &&
+              parsed.ruleAction != RuleAction.SUB_RULE &&
+              target.toUpperCase() != RuleTarget.MATCH.value &&
+              !targets.contains(target),
         ),
       ),
     );
@@ -596,16 +606,16 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
     final raw = source.isLoading || source.hasError
         ? null
         : source.asData?.value;
+    final targets = profile != null && raw != null
+        ? customRoutingTargets(
+            profile,
+            raw,
+            tailscaleNetworks: ref.watch(tailscaleNetworksProvider),
+          ).toSet()
+        : null;
     final target = profile?.matchTarget;
     final invalidTarget =
-        profile != null &&
-        raw != null &&
-        target != null &&
-        !customRoutingTargets(
-          profile,
-          raw,
-          tailscaleNetworks: ref.watch(tailscaleNetworksProvider),
-        ).contains(target);
+        targets != null && target != null && !targets.contains(target);
     final targetText = Text(
       target ?? appLocalizations.followProfile,
       maxLines: 1,
@@ -674,10 +684,15 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
               itemBuilder: (_, index) => ReorderableDelayedDragStartListener(
                 key: ObjectKey(addedRules[index]),
                 index: index,
-                child: _buildRuleItem(addedRules, index, selectedRules),
+                child: _buildRuleItem(
+                  addedRules,
+                  index,
+                  selectedRules,
+                  targets,
+                ),
               ),
               proxyDecorator: (_, index, animation) => commonProxyDecorator(
-                _buildRuleItem(addedRules, index, selectedRules),
+                _buildRuleItem(addedRules, index, selectedRules, targets),
                 index,
                 animation,
               ),

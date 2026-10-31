@@ -31,6 +31,7 @@ class RuleItem extends StatelessWidget {
   final Rule rule;
   final void Function() onSelected;
   final void Function(Rule rule) onEdit;
+  final bool missingTarget;
 
   const RuleItem({
     super.key,
@@ -39,6 +40,7 @@ class RuleItem extends StatelessWidget {
     required this.onSelected,
     required this.onEdit,
     this.isEditing = false,
+    this.missingTarget = false,
   });
 
   @override
@@ -47,17 +49,22 @@ class RuleItem extends StatelessWidget {
     return SelectedDecorationListItem(
       isSelected: isSelected,
       isEditing: isEditing,
-      invalid: error != null,
+      invalid: error != null || missingTarget,
       onSelected: onSelected,
       onPressed: () => onEdit(rule),
-      title: RuleSummary(rule: rule),
+      title: RuleSummary(rule: rule, missingTarget: missingTarget),
     );
   }
 }
 
 class RuleSummary extends StatelessWidget {
-  const RuleSummary({super.key, required this.rule});
+  const RuleSummary({
+    super.key,
+    required this.rule,
+    this.missingTarget = false,
+  });
   final Rule rule;
+  final bool missingTarget;
   @override
   Widget build(BuildContext context) {
     if (!RuleAction.values.any(
@@ -72,6 +79,7 @@ class RuleSummary extends StatelessWidget {
     final error = parsed.payloadError?.getMessage(context);
     final target = parsed.subRule ?? parsed.ruleTarget;
     final color = switch (target?.toUpperCase()) {
+      _ when missingTarget => context.colorScheme.error,
       'DIRECT' => context.colorScheme.success,
       'REJECT' || 'REJECT-DROP' => context.colorScheme.warning,
       _ => context.colorScheme.tertiary,
@@ -116,7 +124,9 @@ class RuleSummary extends StatelessWidget {
                 maxWidth: constraints.maxWidth * 0.45,
               ),
               child: Tooltip(
-                message: target,
+                message: missingTarget
+                    ? '$target\n${context.appLocalizations.outboundUnavailable}'
+                    : target,
                 child: Text(
                   target,
                   maxLines: 1,

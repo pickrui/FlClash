@@ -86,6 +86,7 @@ Future<void> _pumpPage(
   List<Override> overrides, {
   int? scriptId,
   SetupAction? setup,
+  Map<String, dynamic> source = const {},
 }) async {
   const size = Size(800, 1400);
   await tester.binding.setSurfaceSize(size);
@@ -106,7 +107,7 @@ Future<void> _pumpPage(
         ),
         setupActionProvider.overrideWith(() => setup ?? _SetupAction()),
         viewSizeProvider.overrideWithBuild((_, _) => size),
-        routingSourceProvider(1).overrideWith((_) async => {}),
+        routingSourceProvider(1).overrideWith((_) async => source),
         ...overrides,
       ],
       child: const OverwriteView(profileId: 1),
@@ -316,6 +317,45 @@ void main() {
     );
     expect(checkIn('beta'), findsOneWidget);
     expect(checkIn('alpha'), findsNothing);
+  });
+
+  testWidgets('added rules flag targets the profile no longer has', (
+    tester,
+  ) async {
+    await _pumpPage(
+      tester,
+      OverwriteType.standard,
+      [
+        profileAddedRulesProvider(1).overrideWithBuild(
+          (_, _) => Stream.value([
+            for (final (id, target) in [
+              (1, 'Proxy'),
+              (2, 'Removed'),
+              (3, 'match'),
+              (4, 'DIRECT'),
+            ])
+              Rule(id: id, value: 'DOMAIN,$id.test,$target'),
+          ]),
+        ),
+      ],
+      source: {
+        'proxy-groups': [
+          {
+            'name': 'Proxy',
+            'type': 'select',
+            'proxies': ['DIRECT'],
+          },
+        ],
+      },
+    );
+    await tester.pumpAndSettle();
+    expect(
+      {
+        for (final item in tester.widgetList<RuleItem>(find.byType(RuleItem)))
+          item.rule.id: item.missingTarget,
+      },
+      {1: false, 2: true, 3: false, 4: false},
+    );
   });
 
   testWidgets('added rules hold back the back gesture only while selected', (
