@@ -43,7 +43,8 @@ class CoreService extends CoreHandlerInterface {
         isUnix: (system.isLinux || system.isMacOS) && !safeModeBuild,
         directLauncher: directLauncher,
         helperLauncher: HelperLauncher(helper),
-        helperReady: () => helper.readiness(),
+        // A Unix Helper exists only after TUN was authorized once.
+        helperReady: () => helper.readiness(logFailure: system.isWindows),
       ),
       verifyPeerPid: system.isWindows,
     );
