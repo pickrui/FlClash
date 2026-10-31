@@ -529,6 +529,14 @@ jobs:
           find ./dist -name "*.exe" -type f -exec sh -c 'mv "$1" "${1%.exe}-setup.exe"' _ {} \;
           find ./dist -name "*.appimage" -type f -exec sh -c 'mv "$1" "${1%.appimage}.AppImage"' _ {} \;
 
+      - name: Test macOS Helper installation
+        if: matrix.platform == 'macos'
+        env:
+          FLCLASH_HELPER_TEST_VM: '1'
+        run: |
+          app=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)
+          sh tool/test_macos_helper.sh "$app"
+
       - name: Verify final Android APK version and native libraries
         if: matrix.platform == 'android'
         env:
