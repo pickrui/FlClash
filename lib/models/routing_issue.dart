@@ -66,7 +66,12 @@ RoutingIssues inspectCustomRouting(
     ...proxyChainRoutingTargets(
       profile.proxyChains,
       groupNames: allGroups,
-      outbounds: {...RuleTarget.ruleTargets, ...allGroups, ...proxies},
+      outbounds: {
+        ...RuleTarget.ruleTargets,
+        ...allGroups,
+        ...proxies,
+        ...additionalTargets,
+      },
     ),
     ...additionalTargets,
   };

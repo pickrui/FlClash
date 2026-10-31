@@ -398,7 +398,11 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     // insertion of personal nodes above only applies to subscription groups.
     _mergeCustomProxyGroups(rawConfig, customProxyGroups);
   }
-  _applyProxyChains(rawConfig, proxyChains);
+  _applyProxyChains(
+    rawConfig,
+    proxyChains,
+    reserved: tailscaleRoutingTargets(data.tailscaleNetworks),
+  );
   final tailnetRules = _applyTailscaleNetworks(
     rawConfig,
     data.tailscaleNetworks,
@@ -812,7 +816,11 @@ void _appendProfileProxyNamesToSelectorGroups(
   rawConfig['proxy-groups'] = nextGroups;
 }
 
-void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
+void _applyProxyChains(
+  Map rawConfig,
+  List<ProxyChain> proxyChains, {
+  Iterable<String> reserved = const [],
+}) {
   if (proxyChains.isEmpty) {
     return;
   }
@@ -946,6 +954,7 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
     ...RuleTarget.ruleTargets,
     ...proxyMap.keys,
     ...groups.keys,
+    ...reserved,
   });
   for (final (:name, :chain) in aliases) {
     final alias = <String, Object>{

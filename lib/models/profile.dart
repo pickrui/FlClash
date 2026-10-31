@@ -238,7 +238,8 @@ String proxyChainExitTarget(ProxyChain chain, Set<String> groupNames) {
       : proxyChainDerivedName(exit, proxies[proxies.length - 2]);
 }
 
-/// Skips names already taken in [taken] and commas, which rules cannot parse.
+/// Skips names already taken in [taken], commas, which rules cannot parse, and
+/// MATCH, which added rules treat as a placeholder in any case.
 List<({String name, ProxyChain chain})> proxyChainAliases(
   Iterable<ProxyChain> chains,
   Set<String> taken,
@@ -247,7 +248,9 @@ List<({String name, ProxyChain chain})> proxyChainAliases(
   final aliases = <({String name, ProxyChain chain})>[];
   for (final chain in chains.where((chain) => chain.isValid)) {
     final name = chain.label;
-    if (!name.contains(',') && names.add(name)) {
+    if (!name.contains(',') &&
+        name.toUpperCase() != RuleTarget.MATCH.value &&
+        names.add(name)) {
       aliases.add((name: name, chain: chain));
     }
   }

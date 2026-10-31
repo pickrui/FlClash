@@ -449,8 +449,15 @@ class _ProfileProxyChainsContentState
           }
           // The chain becomes a group under its label, which must stay unique.
           final label = next.label;
+          if (label.contains(',')) {
+            context.showNotifier(appLocalizations.providerNameInvalid);
+            return false;
+          }
           if (RuleTarget.ruleTargets.contains(label) ||
+              label.toUpperCase() == RuleTarget.MATCH.value ||
               rawContext.nodeInfoMap.containsKey(label) ||
+              tailscaleRoutingTargets(ref.read(tailscaleNetworksProvider))
+                  .contains(label) ||
               profile.proxyChains.any(
                 (chain) => chain.id != next.id && chain.label == label,
               )) {

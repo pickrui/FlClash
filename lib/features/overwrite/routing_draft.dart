@@ -35,7 +35,11 @@ Set<String> _routingGroups(Profile profile, Map<String, dynamic> raw) => {
 };
 
 /// The outbounds a chain adds, judged against what the config already names.
-Set<String> _routingChainTargets(Profile profile, Map<String, dynamic> raw) {
+Set<String> _routingChainTargets(
+  Profile profile,
+  Map<String, dynamic> raw, {
+  Iterable<TailscaleNetwork> tailscaleNetworks = const [],
+}) {
   final groups = _routingGroups(profile, raw);
   return proxyChainRoutingTargets(
     profile.proxyChains,
@@ -47,6 +51,7 @@ Set<String> _routingChainTargets(Profile profile, Map<String, dynamic> raw) {
           .where((node) => node.isValid)
           .map((node) => node.name),
       ..._rawNames(raw, 'proxies'),
+      ...tailscaleRoutingTargets(tailscaleNetworks),
     },
   );
 }
@@ -59,7 +64,7 @@ List<String> customRoutingTargets(
   return <String>{
     ...RuleTarget.ruleTargetNames,
     ..._routingGroups(profile, raw),
-    ..._routingChainTargets(profile, raw),
+    ..._routingChainTargets(profile, raw, tailscaleNetworks: tailscaleNetworks),
     ...profile.profileProxies
         .where((node) => node.isValid)
         .map((node) => node.name),

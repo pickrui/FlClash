@@ -21,6 +21,7 @@ void main() {
     Map<String, Map<String, dynamic>> nodeOptions = const {},
     bool enabled = true,
     String name = '',
+    List<TailscaleNetwork> tailscaleNetworks = const [],
   }) => makeRealProfileTask(
     overlayState(
       rawConfig: {
@@ -50,6 +51,7 @@ void main() {
         ProxyChain(id: 1, enable: enabled, name: name, proxies: hops),
       ],
       profileProxies: personalNodes,
+      tailscaleNetworks: tailscaleNetworks,
     ),
   );
 
@@ -218,6 +220,18 @@ void main() {
       expect(groups[chain.label]['proxies'], [
         proxyChainExitTarget(chain, {'Entry'}),
       ]);
+    }
+  });
+
+  test('names that rules reserve never become chain groups', () async {
+    const home = TailscaleNetwork(id: 'home', name: 'Home', stateId: 'home');
+    for (final name in ['match', 'Home']) {
+      final config = await generate(name: name, tailscaleNetworks: [home]);
+      List<Object?> names(String key) => [
+        for (final item in config[key] as List) item['name'],
+      ];
+      expect(names('proxy-groups'), isNot(contains(name)), reason: name);
+      expect(names('proxies'), contains('Home'), reason: name);
     }
   });
 
