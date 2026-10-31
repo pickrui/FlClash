@@ -13,6 +13,13 @@ fn main() {
     let core_name = std::env::var("CORE_NAME").unwrap_or_else(|_| default_name.to_string());
     println!("cargo:rustc-env=CORE_SHA256={}", core_sha256);
     println!("cargo:rustc-env=CORE_NAME={}", core_name);
+    println!("cargo:rustc-check-cfg=cfg(unix_helper)");
+    if matches!(
+        std::env::var("CARGO_CFG_TARGET_OS").as_deref(),
+        Ok("linux" | "macos")
+    ) {
+        println!("cargo:rustc-cfg=unix_helper");
+    }
     println!("cargo:rerun-if-env-changed=CORE_SHA256");
     println!("cargo:rerun-if-env-changed=CORE_NAME");
 }

@@ -12,7 +12,7 @@ use std::collections::VecDeque;
 use std::convert::Infallible;
 use std::fs::{File, OpenOptions};
 #[cfg(all(
-    not(target_os = "linux"),
+    not(unix_helper),
     not(all(feature = "windows-service", target_os = "windows"))
 ))]
 use std::future::pending;
@@ -42,9 +42,9 @@ use windows_sys::Win32::Foundation::HANDLE;
 #[cfg(windows)]
 use windows_sys::Win32::Storage::FileSystem::FILE_SHARE_READ;
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(unix_helper))]
 pub(super) const LISTEN_PORT: u16 = 47890;
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(unix_helper))]
 const CORE_PIPE_PREFIX: &str = r"\\.\pipe\FlClashCore_";
 const PROTOCOL_VERSION_HEADER: &str = "x-flclash-helper-protocol";
 #[cfg(windows)]
@@ -54,7 +54,7 @@ const PROTOCOL_VERSION: &str = "6";
 const EXPECTED_CORE_SHA256: &str = env!("CORE_SHA256");
 const LOG_CAPACITY: usize = 100;
 const MAX_REQUEST_BYTES: u64 = 4096;
-#[cfg(target_os = "linux")]
+#[cfg(unix_helper)]
 const HELPER_AUTHORITY: &str = "flclash-helper";
 // Leave time for Core cleanup within the Windows service stop deadline.
 const HTTP_DRAIN_TIMEOUT: Duration = Duration::from_secs(5);
@@ -176,7 +176,7 @@ impl ManagedCore {
         if let Some(kind) = self.termination_error {
             return Err(Error::from(kind));
         }
-        #[cfg(target_os = "linux")]
+        #[cfg(unix_helper)]
         {
             // Let the owned child remove its TUN routes before falling back to
             // the existing forced termination path. The PID is still unreaped.
@@ -249,7 +249,7 @@ impl VerifiedCore {
         })
     }
 
-    #[cfg(not(any(target_os = "linux", windows)))]
+    #[cfg(not(any(unix_helper, windows)))]
     fn spawn(&self, address: &str) -> Result<CoreChild, Error> {
         Command::new(&self.path)
             .current_dir(&self.directory)
@@ -261,10 +261,10 @@ impl VerifiedCore {
     fn spawn(&self, address: &str) -> Result<CoreChild, Error> {
         CoreChild::spawn(&self.path, &self.directory, &[address.into()])
     }
-    #[cfg(target_os = "linux")]
+    #[cfg(unix_helper)]
     fn spawn(&self, address: &str) -> Result<Child, Error> {
         use std::os::unix::process::CommandExt;
-        let (uid, gid) = super::linux::core_owner()?;
+        let (uid, gid) = super::unix::core_owner()?;
         let mut command = Command::new(&self.path);
         command
             .current_dir(&self.directory)
@@ -273,7 +273,12 @@ impl VerifiedCore {
         // Only async-signal-safe credential operations run between fork/exec.
         unsafe {
             command.pre_exec(move || {
-                if libc::setresgid(gid, 0, 0) != 0 || libc::setresuid(uid, 0, 0) != 0 {
+                #[cfg(target_os = "linux")]
+                let failed = libc::setresgid(gid, 0, 0) != 0 || libc::setresuid(uid, 0, 0) != 0;
+                // macOS has no setres*id; root's setre*id also leaves the saved IDs at 0.
+                #[cfg(target_os = "macos")]
+                let failed = libc::setregid(gid, 0) != 0 || libc::setreuid(uid, 0) != 0;
+                if failed {
                     return Err(Error::last_os_error());
                 }
                 Ok(())
@@ -332,7 +337,7 @@ fn open_verified_core(path: &Path, expected_sha256: &str) -> Result<File, Error>
     Ok(core_file)
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(unix_helper))]
 fn is_allowed_core_pipe(address: &str) -> bool {
     let Some(suffix) = address.strip_prefix(CORE_PIPE_PREFIX) else {
         return false;
@@ -340,13 +345,13 @@ fn is_allowed_core_pipe(address: &str) -> bool {
     is_valid_session_id(suffix)
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(unix_helper)]
 fn is_allowed_core_pipe(address: &str) -> bool {
-    is_allowed_linux_core_pipe(address)
+    is_allowed_unix_core_pipe(address)
 }
 
-#[cfg(any(target_os = "linux", test))]
-fn is_allowed_linux_core_pipe(address: &str) -> bool {
+#[cfg(any(unix_helper, test))]
+fn is_allowed_unix_core_pipe(address: &str) -> bool {
     let Some(id) = address
         .strip_prefix("/tmp/FlClashSocket_")
         .and_then(|s| s.strip_suffix(".sock"))
@@ -475,8 +480,8 @@ fn start(start_params: StartParams) -> warp::reply::Response {
             StatusCode::BAD_REQUEST,
         );
     }
-    #[cfg(target_os = "linux")]
-    if let Err(error) = super::linux::ensure_owner_socket(&start_params.address) {
+    #[cfg(unix_helper)]
+    if let Err(error) = super::unix::ensure_owner_socket(&start_params.address) {
         return error_response("invalidRequest", error.to_string(), StatusCode::BAD_REQUEST);
     }
     launch(start_params)
@@ -701,19 +706,19 @@ struct UntrustedRequest;
 
 impl warp::reject::Reject for UntrustedRequest {}
 
-#[cfg(target_os = "linux")]
+#[cfg(unix_helper)]
 fn is_native_host(host: &str) -> bool {
     host == HELPER_AUTHORITY
 }
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(not(unix_helper))]
 fn is_native_host(host: &str) -> bool {
     is_loopback_authority(host)
 }
 
 /// The Windows service listens on whichever port the system assigned, so only
 /// the address is fixed; a name could be one rebound to loopback.
-#[cfg(any(not(target_os = "linux"), test))]
+#[cfg(any(not(unix_helper), test))]
 fn is_loopback_authority(host: &str) -> bool {
     host.strip_prefix("127.0.0.1:").is_some_and(|port| {
         port.bytes().all(|byte| byte.is_ascii_digit())
@@ -887,17 +892,14 @@ pub(super) async fn finish_shutdown(
 }
 
 #[cfg(all(
-    not(target_os = "linux"),
+    not(unix_helper),
     not(all(feature = "windows-service", target_os = "windows"))
 ))]
 pub async fn run_service() -> anyhow::Result<()> {
     run_service_until(pending(), || Ok(())).await
 }
 
-#[cfg(not(any(
-    all(feature = "windows-service", target_os = "windows"),
-    target_os = "linux"
-)))]
+#[cfg(not(any(all(feature = "windows-service", target_os = "windows"), unix_helper)))]
 async fn run_service_until<F, S>(shutdown: F, on_started: S) -> anyhow::Result<()>
 where
     F: Future<Output = ()> + Send + 'static,
@@ -913,12 +915,12 @@ where
     finish_shutdown(server, stopping).await
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(unix_helper)]
 pub(super) fn verify_installation_core(path: &Path) -> Result<File, Error> {
     open_verified_core(path, EXPECTED_CORE_SHA256)
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(unix_helper)]
 pub(super) fn expected_core_sha256() -> &'static str {
     EXPECTED_CORE_SHA256
 }
@@ -940,15 +942,15 @@ mod tests {
             .unwrap_or_else(|error| error.into_inner())
     }
 
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(unix_helper))]
     const TEST_CORE_ADDRESS: &str = r"\\.\pipe\FlClashCore_0123456789abcdef0123456789abcdef";
-    #[cfg(target_os = "linux")]
+    #[cfg(unix_helper)]
     const TEST_CORE_ADDRESS: &str = "/tmp/FlClashSocket_4821.sock";
 
     fn helper_request() -> warp::test::RequestBuilder {
         warp::test::request().header(
             "host",
-            if cfg!(target_os = "linux") {
+            if cfg!(unix_helper) {
                 "flclash-helper"
             } else {
                 "127.0.0.1:47890"
@@ -1065,7 +1067,7 @@ mod tests {
                 session_id: "0123456789abcdef0123456789abcdef".to_string(),
             })
             .unwrap();
-            let host = if cfg!(target_os = "linux") {
+            let host = if cfg!(unix_helper) {
                 "flclash-helper".to_string()
             } else {
                 address.to_string()
@@ -1379,7 +1381,7 @@ mod tests {
         assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(unix_helper)]
     #[test]
     fn shutdown_preserves_core_sigterm_cleanup_before_reaping() {
         let mut child = Command::new("sh")
@@ -1397,7 +1399,7 @@ mod tests {
         assert!(managed.child.wait().unwrap().success());
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(unix_helper)]
     #[test]
     fn core_ignoring_sigterm_is_killed_and_reaped_within_shutdown_budget() {
         use std::os::unix::process::ExitStatusExt;
@@ -1904,7 +1906,7 @@ mod tests {
         assert_eq!(response.status(), StatusCode::FORBIDDEN);
     }
 
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(unix_helper))]
     #[tokio::test]
     async fn native_requests_reach_the_helper_on_any_loopback_port() {
         for host in ["127.0.0.1:47890", "127.0.0.1:51234", "127.0.0.1:1"] {
@@ -2146,7 +2148,7 @@ mod tests {
         assert_eq!(body["code"], "coreVerificationFailed");
     }
 
-    #[cfg(target_os = "linux")]
+    #[cfg(unix_helper)]
     #[tokio::test]
     #[allow(clippy::await_holding_lock)]
     async fn a_start_refused_for_its_socket_leaves_the_running_core_owned() {
@@ -2405,9 +2407,9 @@ mod tests {
     }
 
     #[test]
-    fn linux_core_pipe_accepts_the_legacy_decimal_namespace() {
+    fn unix_core_pipe_accepts_only_the_decimal_namespace() {
         for id in ["0", "123", "4294967295", "9999999999"] {
-            assert!(is_allowed_linux_core_pipe(&format!(
+            assert!(is_allowed_unix_core_pipe(&format!(
                 "/tmp/FlClashSocket_{id}.sock"
             )));
         }
@@ -2418,15 +2420,15 @@ mod tests {
             "0123456789abcdef0123456789abcdef",
             "../123",
         ] {
-            assert!(!is_allowed_linux_core_pipe(&format!(
+            assert!(!is_allowed_unix_core_pipe(&format!(
                 "/tmp/FlClashSocket_{id}.sock"
             )));
         }
-        assert!(!is_allowed_linux_core_pipe("/tmp/Other_123.sock"));
+        assert!(!is_allowed_unix_core_pipe("/tmp/Other_123.sock"));
     }
 
     #[test]
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(unix_helper))]
     fn only_accepts_random_core_pipe_namespace() {
         assert!(is_allowed_core_pipe(
             r"\\.\pipe\FlClashCore_0123456789abcdef0123456789abcdef"
