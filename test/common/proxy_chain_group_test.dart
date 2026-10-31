@@ -191,6 +191,27 @@ void main() {
     expect(config['rules'], ['MATCH,Exit']);
   });
 
+  test('every chain rule target is a visible group of the config', () async {
+    for (final hops in [
+      ['Entry', 'Exit'],
+      ['A', 'Relay', 'Exit'],
+      ['Relay', 'Entry'],
+    ]) {
+      final config = await generate(hops: hops);
+      final groups = {
+        for (final g in config['proxy-groups'] as List) g['name']: g,
+      };
+      final targets = proxyChainRoutingTargets(
+        [ProxyChain(id: 1, enable: true, proxies: hops)],
+        {'Entry'},
+      );
+      expect(targets, hasLength(hops.last == 'Entry' ? 0 : 1));
+      for (final target in targets) {
+        expect(groups[target]?['hidden'], isFalse, reason: '$hops');
+      }
+    }
+  });
+
   test('provider entries keep their source and block when empty', () async {
     final config = await generate(
       members: [],
