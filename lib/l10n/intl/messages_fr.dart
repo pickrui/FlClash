@@ -2615,7 +2615,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Entrée"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Sortie"),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Ordonnez les sauts de l’entrée à la sortie. Chaque saut peut être un nœud ou un groupe. Les proxys d’un groupe utilisent le saut précédent ; les groupes imbriqués et DIRECT/REJECT restent inchangés. Après l’enregistrement, sélectionnez « Nœud (via saut précédent) » pour une sortie de nœud, ou le groupe de sortie. Les latences de l’éditeur sont des références par saut ; testez le groupe de sortie pour mesurer le trajet effectif.",
+      "Ordonnez les sauts de l’entrée à la sortie. Chaque saut peut être un nœud ou un groupe. Les proxys d’un groupe utilisent le saut précédent ; les groupes imbriqués et DIRECT/REJECT restent inchangés. Après l’enregistrement, la chaîne apparaît sous son nom comme groupe de stratégie dans la liste des proxys et les cibles des règles. Les latences de l’éditeur sont des références par saut ; testez le groupe de la chaîne pour mesurer le trajet effectif.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "Une chaîne nécessite une entrée et une sortie",
@@ -2636,7 +2636,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Chaînes associées mises à jour",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Chaîne enregistrée et appliquée. Pour une sortie de nœud, sélectionnez le groupe généré « Nœud (via saut précédent) » ; sinon, sélectionnez le groupe de sortie.",
+      "Chaîne enregistrée et appliquée. Sélectionnez-la par son nom dans les règles ou dans la liste des proxys.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Chaîne de proxies",

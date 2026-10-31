@@ -891,6 +891,7 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
     }
   }
   final nextGroups = proxyGroups is List ? List.of(proxyGroups) : <Object>[];
+  final configGroupNames = groups.keys.toSet();
   final originalNames = {...proxyMap.keys, ...groups.keys};
   final derivedGroups = <String, Map>{};
   final selectableDerivedGroups = <String, String>{};
@@ -940,6 +941,20 @@ void _applyProxyChains(Map rawConfig, List<ProxyChain> proxyChains) {
       }
       dialerProxy = derivedName;
     }
+  }
+  final aliases = proxyChainAliases(enabledProxyChains, {
+    ...RuleTarget.ruleTargets,
+    ...proxyMap.keys,
+    ...groups.keys,
+  });
+  for (final (:name, :chain) in aliases) {
+    final alias = <String, Object>{
+      'name': name,
+      'type': 'select',
+      'proxies': [proxyChainExitTarget(chain, configGroupNames)],
+    };
+    groups[name] = alias;
+    nextGroups.add(alias);
   }
   rawConfig['proxy-groups'] = nextGroups;
   final protectedGroups = <String>{};

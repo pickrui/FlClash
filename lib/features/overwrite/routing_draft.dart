@@ -13,30 +13,51 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+Iterable<String> _rawNames(Map<String, dynamic> raw, String key) =>
+    raw[key] is List
+    ? (raw[key] as List)
+          .whereType<Map>()
+          .map((item) => item['name'])
+          .whereType<String>()
+          .where((name) => name.trim().isNotEmpty)
+    : const [];
+
+Set<String> _routingGroups(Profile profile, Map<String, dynamic> raw) => {
+  ...profile.customProxyGroups.map((group) => group.name),
+  if (profile.overwriteType != OverwriteType.custom)
+    ..._rawNames(raw, 'proxy-groups'),
+};
+
+/// The outbounds a chain adds, judged against what the config already names.
+Set<String> _routingChainTargets(Profile profile, Map<String, dynamic> raw) {
+  final groups = _routingGroups(profile, raw);
+  return proxyChainRoutingTargets(
+    profile.proxyChains,
+    groupNames: groups,
+    outbounds: {
+      ...RuleTarget.ruleTargetNames,
+      ...groups,
+      ...profile.profileProxies
+          .where((node) => node.isValid)
+          .map((node) => node.name),
+      ..._rawNames(raw, 'proxies'),
+    },
+  );
+}
+
 List<String> customRoutingTargets(
   Profile profile,
   Map<String, dynamic> raw, {
   Iterable<TailscaleNetwork> tailscaleNetworks = const [],
 }) {
-  Iterable<String> names(String key) => raw[key] is List
-      ? (raw[key] as List)
-            .whereType<Map>()
-            .map((item) => item['name'])
-            .whereType<String>()
-            .where((name) => name.trim().isNotEmpty)
-      : const [];
-  final groups = {
-    ...profile.customProxyGroups.map((group) => group.name),
-    if (profile.overwriteType != OverwriteType.custom) ...names('proxy-groups'),
-  };
   return <String>{
     ...RuleTarget.ruleTargetNames,
-    ...groups,
-    ...proxyChainRoutingTargets(profile.proxyChains, groups),
+    ..._routingGroups(profile, raw),
+    ..._routingChainTargets(profile, raw),
     ...profile.profileProxies
         .where((node) => node.isValid)
         .map((node) => node.name),
-    ...names('proxies'),
+    ..._rawNames(raw, 'proxies'),
     ...tailscaleRoutingTargets(tailscaleNetworks),
   }.toList();
 }
@@ -44,21 +65,15 @@ List<String> customRoutingTargets(
 Map<String, String> routingGroupTypes(
   Profile profile,
   Map<String, dynamic> raw,
-) {
-  final types = {
-    if (profile.overwriteType != OverwriteType.custom &&
-        raw['proxy-groups'] is List)
-      for (final group in (raw['proxy-groups'] as List).whereType<Map>())
-        if (group['name'] is String)
-          group['name'] as String: group['type']?.toString() ?? '',
-    for (final group in profile.customProxyGroups) group.name: group.type.name,
-  };
-  final chains = proxyChainRoutingTargets(
-    profile.proxyChains,
-    types.keys.toSet(),
-  );
-  return {for (final name in chains) name: 'select', ...types};
-}
+) => {
+  for (final name in _routingChainTargets(profile, raw)) name: 'select',
+  if (profile.overwriteType != OverwriteType.custom &&
+      raw['proxy-groups'] is List)
+    for (final group in (raw['proxy-groups'] as List).whereType<Map>())
+      if (group['name'] is String)
+        group['name'] as String: group['type']?.toString() ?? '',
+  for (final group in profile.customProxyGroups) group.name: group.type.name,
+};
 
 Map<String, String> routingProviderSources(
   Profile profile,

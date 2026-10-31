@@ -20,6 +20,7 @@ void main() {
     List<ProfileProxy> personalNodes = const [],
     Map<String, Map<String, dynamic>> nodeOptions = const {},
     bool enabled = true,
+    String name = '',
   }) => makeRealProfileTask(
     overlayState(
       rawConfig: {
@@ -45,7 +46,9 @@ void main() {
         'rules': ['MATCH,Exit'],
       },
     ).copyWith(
-      proxyChains: [ProxyChain(id: 1, enable: enabled, proxies: hops)],
+      proxyChains: [
+        ProxyChain(id: 1, enable: enabled, name: name, proxies: hops),
+      ],
       profileProxies: personalNodes,
     ),
   );
@@ -192,23 +195,29 @@ void main() {
   });
 
   test('every chain rule target is a visible group of the config', () async {
-    for (final hops in [
-      ['Entry', 'Exit'],
-      ['A', 'Relay', 'Exit'],
-      ['Relay', 'Entry'],
+    for (final (name, hops) in [
+      ('', ['Entry', 'Exit']),
+      ('Relay chain', ['A', 'Relay', 'Exit']),
+      ('Through Entry', ['Relay', 'Entry']),
     ]) {
-      final config = await generate(hops: hops);
+      final chain = ProxyChain(id: 1, name: name, proxies: hops);
+      final config = await generate(hops: hops, name: name);
       final groups = {
         for (final g in config['proxy-groups'] as List) g['name']: g,
       };
       final targets = proxyChainRoutingTargets(
-        [ProxyChain(id: 1, enable: true, proxies: hops)],
-        {'Entry'},
+        [chain],
+        groupNames: {'Entry'},
+        outbounds: {'Entry', 'A', 'B', 'Relay', 'Exit'},
       );
-      expect(targets, hasLength(hops.last == 'Entry' ? 0 : 1));
+      expect(targets, contains(chain.label));
       for (final target in targets) {
-        expect(groups[target]?['hidden'], isFalse, reason: '$hops');
+        expect(groups[target], isNotNull, reason: '$hops: $target');
+        expect(groups[target]['hidden'], isNot(true), reason: '$hops');
       }
+      expect(groups[chain.label]['proxies'], [
+        proxyChainExitTarget(chain, {'Entry'}),
+      ]);
     }
   });
 

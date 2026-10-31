@@ -3043,10 +3043,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Choose hops from entry to exit. Nodes or policy groups can occupy any hop. Concrete group members use the preceding hop; nested groups and DIRECT/REJECT stay unchanged. After saving, select the generated ‘Node (via previous hop)’ group for a node exit, or the exit group. Delays in this editor are per-hop references; test the exit group to measure the effective route.`
+  /// `Choose hops from entry to exit. Nodes or policy groups can occupy any hop. Concrete group members use the preceding hop; nested groups and DIRECT/REJECT stay unchanged. After saving, the chain appears under its name as a policy group in the proxy list and rule targets. Delays in this editor are per-hop references; test the chain's group to measure the effective route.`
   String get proxyChainInstruction {
     return Intl.message(
-      'Choose hops from entry to exit. Nodes or policy groups can occupy any hop. Concrete group members use the preceding hop; nested groups and DIRECT/REJECT stay unchanged. After saving, select the generated ‘Node (via previous hop)’ group for a node exit, or the exit group. Delays in this editor are per-hop references; test the exit group to measure the effective route.',
+      'Choose hops from entry to exit. Nodes or policy groups can occupy any hop. Concrete group members use the preceding hop; nested groups and DIRECT/REJECT stay unchanged. After saving, the chain appears under its name as a policy group in the proxy list and rule targets. Delays in this editor are per-hop references; test the chain\'s group to measure the effective route.',
       name: 'proxyChainInstruction',
       desc: '',
       args: [],
@@ -3148,10 +3148,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Proxy chain saved and applied. For a node exit, select its generated ‘Node (via previous hop)’ group; otherwise select the exit group.`
+  /// `Proxy chain saved and applied. Select it by its name in rules or in the proxy list.`
   String get proxyChainSavedAndApplied {
     return Intl.message(
-      'Proxy chain saved and applied. For a node exit, select its generated ‘Node (via previous hop)’ group; otherwise select the exit group.',
+      'Proxy chain saved and applied. Select it by its name in rules or in the proxy list.',
       name: 'proxyChainSavedAndApplied',
       desc: '',
       args: [],

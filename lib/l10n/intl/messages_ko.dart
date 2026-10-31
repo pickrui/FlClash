@@ -2041,7 +2041,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("진입"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("출구"),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "진입점부터 출구까지 순서대로 배치하세요. 모든 호프에 노드나 정책 그룹을 사용할 수 있습니다. 그룹의 프록시 멤버는 이전 호프를 사용하며 중첩 그룹과 DIRECT/REJECT는 그대로 유지됩니다. 저장 후 출구가 노드이면 ‘노드 (via 이전 호프)’ 그룹을, 아니면 출구 그룹을 선택하세요. 편집기의 지연은 각 호프의 참고값입니다. 실제 경로는 출구 그룹에서 검사하세요.",
+      "진입점부터 출구까지 순서대로 배치하세요. 모든 호프에 노드나 정책 그룹을 사용할 수 있습니다. 그룹의 프록시 멤버는 이전 호프를 사용하며 중첩 그룹과 DIRECT/REJECT는 그대로 유지됩니다. 저장하면 체인이 이름 그대로 정책 그룹으로 프록시 목록과 규칙 대상에 표시됩니다. 편집기의 지연은 각 호프의 참고값입니다. 실제 경로는 체인 그룹에서 검사하세요.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "체인에는 진입점과 출구가 필요합니다",
@@ -2058,7 +2058,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "관련 프록시 체인을 업데이트했습니다",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "체인을 저장하고 적용했습니다. 노드 출구는 생성된 ‘노드 (via 이전 호프)’ 그룹을, 그 외에는 출구 그룹을 선택하세요.",
+      "체인을 저장하고 적용했습니다. 규칙이나 프록시 목록에서 체인 이름을 선택하세요.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("프록시 체인"),
     "proxyChainUnavailableNodeTip": m90,

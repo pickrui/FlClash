@@ -88,14 +88,19 @@ void main() {
     );
   });
 
-  test('a proxy chain to a node offers the group it derives for the exit', () {
+  test('a proxy chain is offered by name and by its derived node exit', () {
     final chained = profile.copyWith(
       proxyChains: const [
         ProxyChain(
           id: 1,
+          name: 'Japan relay',
           proxies: ['Subscription group', 'Personal node', 'Subscription node'],
         ),
-        ProxyChain(id: 2, proxies: ['Subscription node', 'Personal automatic']),
+        ProxyChain(
+          id: 2,
+          name: 'Subscription node',
+          proxies: ['Subscription node', 'Personal automatic'],
+        ),
         ProxyChain(
           id: 3,
           enable: false,
@@ -106,16 +111,17 @@ void main() {
       ],
     );
     final exit = proxyChainDerivedName('Subscription node', 'Personal node');
-    final targets = customRoutingTargets(chained, rawConfig);
     final types = routingGroupTypes(chained, rawConfig);
 
-    expect(targets, contains(exit));
-    expect(types[exit], 'select');
     expect(
-      targets,
-      hasLength(customRoutingTargets(profile, rawConfig).length + 1),
+      customRoutingTargets(
+        chained,
+        rawConfig,
+      ).toSet().difference(customRoutingTargets(profile, rawConfig).toSet()),
+      {exit, 'Japan relay'},
     );
-    expect(types, hasLength(routingGroupTypes(profile, rawConfig).length + 1));
+    expect(types[exit], 'select');
+    expect(types['Japan relay'], 'select');
   });
 
   test('malformed subscription entries do not become destination choices', () {

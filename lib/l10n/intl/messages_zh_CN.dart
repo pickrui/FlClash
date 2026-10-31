@@ -1830,7 +1830,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("入口"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("出口"),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "按入口到出口顺序排列，任意一跳均可使用节点或策略组；组内具体代理经前一跳拨号，嵌套组及 DIRECT/REJECT 保持原样；保存后，节点出口请选择“节点 (via 前一跳)”派生组，否则选择出口组；编辑器中的延迟仅供各跳参考，实际链路请在出口组中测速",
+      "按入口到出口顺序排列，任意一跳均可使用节点或策略组；组内具体代理经前一跳拨号，嵌套组及 DIRECT/REJECT 保持原样；保存后，链式代理会以其名称作为策略组出现在代理列表和规则策略中；编辑器中的延迟仅供各跳参考，实际链路请在链式代理的策略组中测速",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "链式代理至少需要入口和出口",
@@ -1845,7 +1845,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "相关链式代理已更新",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "链式代理已保存并应用；节点出口请选择生成的“节点 (via 前一跳)”派生组，否则选择出口组",
+      "链式代理已保存并应用，可在规则策略或代理列表中按名称选择",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("代理链"),
     "proxyChainUnavailableNodeTip": m90,

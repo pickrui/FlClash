@@ -6,8 +6,8 @@
 import 'dart:async';
 
 import 'package:fl_clash/ui/typography.dart';
-import 'package:fl_clash/ui/item_position.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/features/overwrite/profile_proxy.dart';
 import 'package:fl_clash/models/models.dart';
@@ -445,6 +445,16 @@ class _ProfileProxyChainsContentState
               (proxyChain != null &&
                   !profile.proxyChains.contains(proxyChain))) {
             context.showNotifier(appLocalizations.routingChanged);
+            return false;
+          }
+          // The chain becomes a group under its label, which must stay unique.
+          final label = next.label;
+          if (RuleTarget.ruleTargets.contains(label) ||
+              rawContext.nodeInfoMap.containsKey(label) ||
+              profile.proxyChains.any(
+                (chain) => chain.id != next.id && chain.label == label,
+              )) {
+            context.showNotifier(appLocalizations.existsTip(label));
             return false;
           }
           final candidate = profile.proxyChains

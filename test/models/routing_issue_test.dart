@@ -72,14 +72,17 @@ void main() {
     },
   );
 
-  test('rules may target the group a proxy chain derives for its exit', () {
+  test('rules may target a proxy chain by name or by its derived exit', () {
     final exit = proxyChainDerivedName('Exit', 'Entry');
     final result = inspectCustomRouting(
       profile.copyWith(
         proxyChains: const [
-          ProxyChain(id: 1, proxies: ['Entry', 'Exit']),
+          ProxyChain(id: 1, name: 'Relay', proxies: ['Entry', 'Exit']),
         ],
-        customRules: [Rule(id: 1, value: 'DOMAIN,example.test,$exit')],
+        customRules: [
+          Rule(id: 1, value: 'DOMAIN,example.test,$exit'),
+          const Rule(id: 2, value: 'DOMAIN,example.org,Relay'),
+        ],
       ),
       raw: {
         'proxies': [

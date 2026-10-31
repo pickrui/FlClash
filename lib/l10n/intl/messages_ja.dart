@@ -2077,7 +2077,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("入口"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("出口"),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "入口から出口の順に並べます。各ホップにノードまたはポリシーグループを使用できます。グループ内のプロキシは直前のホップを経由し、ネストしたグループと DIRECT/REJECT は変更されません。保存後、出口がノードなら「ノード (via 直前のホップ)」グループを、それ以外は出口グループを選択します。編集画面の遅延は各ホップの参考値です。実際の経路は出口グループでテストしてください",
+      "入口から出口の順に並べます。各ホップにノードまたはポリシーグループを使用できます。グループ内のプロキシは直前のホップを経由し、ネストしたグループと DIRECT/REJECT は変更されません。保存すると、チェーンはその名前のポリシーグループとしてプロキシ一覧とルールのターゲットに表示されます。編集画面の遅延は各ホップの参考値です。実際の経路はチェーンのグループでテストしてください",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "チェーンには入口と出口が必要です",
@@ -2094,7 +2094,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "関連するプロキシチェーンを更新しました",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "チェーンを保存して適用しました。出口がノードの場合は生成された「ノード (via 直前のホップ)」グループを、それ以外は出口グループを選択してください",
+      "チェーンを保存して適用しました。ルールやプロキシ一覧でチェーン名を選択してください",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage("プロキシチェーン"),
     "proxyChainUnavailableNodeTip": m90,

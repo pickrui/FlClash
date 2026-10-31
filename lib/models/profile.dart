@@ -230,21 +230,48 @@ List<String> normalizeProxyChainProxies(Iterable<String> proxies) {
 String proxyChainDerivedName(String proxyName, String dialerProxy) =>
     '$proxyName (via $dialerProxy)';
 
-/// Outbounds that exist only once [chains] are applied, which rules may name.
-/// A policy-group exit keeps its own name and adds nothing.
-Set<String> proxyChainRoutingTargets(
+String proxyChainExitTarget(ProxyChain chain, Set<String> groupNames) {
+  final proxies = chain.normalizedProxies;
+  final exit = proxies.last;
+  return groupNames.contains(exit)
+      ? exit
+      : proxyChainDerivedName(exit, proxies[proxies.length - 2]);
+}
+
+/// Skips names already taken in [taken] and commas, which rules cannot parse.
+List<({String name, ProxyChain chain})> proxyChainAliases(
   Iterable<ProxyChain> chains,
-  Set<String> groupNames,
+  Set<String> taken,
 ) {
-  final targets = <String>{};
+  final names = {...taken};
+  final aliases = <({String name, ProxyChain chain})>[];
   for (final chain in chains.where((chain) => chain.isValid)) {
-    final proxies = chain.normalizedProxies;
-    final exit = proxies.last;
-    if (groupNames.contains(exit)) continue;
-    final name = proxyChainDerivedName(exit, proxies[proxies.length - 2]);
-    if (!name.contains(',')) targets.add(name);
+    final name = chain.label;
+    if (!name.contains(',') && names.add(name)) {
+      aliases.add((name: name, chain: chain));
+    }
   }
-  return targets;
+  return aliases;
+}
+
+/// Outbounds that exist only once [chains] are applied, which rules may name.
+Set<String> proxyChainRoutingTargets(
+  Iterable<ProxyChain> chains, {
+  required Set<String> groupNames,
+  required Set<String> outbounds,
+}) {
+  final valid = chains.where((chain) => chain.isValid).toList();
+  final derived = {
+    for (final chain in valid)
+      if (proxyChainExitTarget(chain, groupNames) case final target
+          when !groupNames.contains(target) && !target.contains(','))
+        target,
+  };
+  final taken = {...outbounds, ...groupNames, ...derived};
+  return {
+    ...derived,
+    for (final alias in proxyChainAliases(valid, taken)) alias.name,
+  };
 }
 
 class ProxyChainNameScope {

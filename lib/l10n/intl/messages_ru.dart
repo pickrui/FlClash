@@ -2558,7 +2558,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Вход"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Выход"),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Расположите переходы от входа к выходу. На любом переходе можно использовать узел или группу. Прокси группы используют предыдущий переход; вложенные группы и DIRECT/REJECT не изменяются. После сохранения выберите «Узел (via предыдущий переход)» для выхода-узла либо выходную группу. Задержки в редакторе показаны для отдельных переходов; проверяйте выходную группу для измерения фактического маршрута.",
+      "Расположите переходы от входа к выходу. На любом переходе можно использовать узел или группу. Прокси группы используют предыдущий переход; вложенные группы и DIRECT/REJECT не изменяются. После сохранения цепочка появится под своим именем как группа политик в списке прокси и в целях правил. Задержки в редакторе показаны для отдельных переходов; проверяйте группу цепочки для измерения фактического маршрута.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "Для цепочки нужны вход и выход",
@@ -2577,7 +2577,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Связанные цепочки прокси обновлены",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Цепочка сохранена и применена. Для выхода-узла выберите созданную группу «Узел (via предыдущий переход)»; иначе выберите выходную группу.",
+      "Цепочка сохранена и применена. Выберите её по имени в правилах или в списке прокси.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Цепочка прокси",

@@ -63,7 +63,11 @@ RoutingIssues inspectCustomRouting(
     ...RuleTarget.ruleTargets,
     ...allGroups,
     ...proxies,
-    ...proxyChainRoutingTargets(profile.proxyChains, allGroups),
+    ...proxyChainRoutingTargets(
+      profile.proxyChains,
+      groupNames: allGroups,
+      outbounds: {...RuleTarget.ruleTargets, ...allGroups, ...proxies},
+    ),
     ...additionalTargets,
   };
   final fallbackTargets = {

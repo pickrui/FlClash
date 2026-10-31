@@ -2604,7 +2604,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyChainEntry": MessageLookupByLibrary.simpleMessage("Entrada"),
     "proxyChainExit": MessageLookupByLibrary.simpleMessage("Salida"),
     "proxyChainInstruction": MessageLookupByLibrary.simpleMessage(
-      "Ordene los saltos de entrada a salida. Cada salto puede ser un nodo o un grupo. Los proxies del grupo usan el salto anterior; los grupos anidados y DIRECT/REJECT no cambian. Tras guardar, seleccione «Nodo (via salto anterior)» si la salida es un nodo, o el grupo de salida. Las latencias del editor son referencias por salto; pruebe el grupo de salida para medir la ruta efectiva.",
+      "Ordene los saltos de entrada a salida. Cada salto puede ser un nodo o un grupo. Los proxies del grupo usan el salto anterior; los grupos anidados y DIRECT/REJECT no cambian. Tras guardar, la cadena aparece con su nombre como grupo de políticas en la lista de proxies y en los destinos de reglas. Las latencias del editor son referencias por salto; pruebe el grupo de la cadena para medir la ruta efectiva.",
     ),
     "proxyChainMinimumNodes": MessageLookupByLibrary.simpleMessage(
       "Una cadena necesita una entrada y una salida",
@@ -2623,7 +2623,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Cadenas relacionadas actualizadas",
     ),
     "proxyChainSavedAndApplied": MessageLookupByLibrary.simpleMessage(
-      "Cadena guardada y aplicada. Para una salida de nodo, seleccione el grupo generado «Nodo (via salto anterior)»; en caso contrario, seleccione el grupo de salida.",
+      "Cadena guardada y aplicada. Selecciónela por su nombre en las reglas o en la lista de proxies.",
     ),
     "proxyChainSelectedNodes": MessageLookupByLibrary.simpleMessage(
       "Cadena de proxies",
