@@ -877,7 +877,6 @@ class _FontFamilyItem extends ConsumerWidget {
           child: ViewScope.isMobileOf(context)
               ? OpenContainer<void>(
                   closedShape: AppShape.lg,
-                  closedColor: cardColor,
                   closedBuilder: (_, open) => card(open),
                   openBuilder: (_, _) => const FontFamilyView(),
                 )

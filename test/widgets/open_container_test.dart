@@ -12,15 +12,21 @@ Widget _app({
   required CloseContainerBuilder closedBuilder,
   required OpenContainerBuilder<void> openBuilder,
   GlobalKey<NavigatorState>? navigatorKey,
+  bool reduceMotion = false,
 }) {
   return MaterialApp(
     navigatorKey: navigatorKey,
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(disableAnimations: reduceMotion),
+      child: child!,
+    ),
     home: Scaffold(
       body: Center(
         child: SizedBox(
           width: 160,
           height: 80,
           child: OpenContainer<void>(
+            transition: OpenContainerTransition.zoom,
             closedBuilder: closedBuilder,
             openBuilder: openBuilder,
           ),
@@ -106,9 +112,10 @@ void main() {
 
     await tester.tap(find.text('Tile'));
     await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 20));
-    await tester.tap(find.text('Page'), warnIfMissed: false);
+    await tester.tap(
+      find.text('Page', skipOffstage: false),
+      warnIfMissed: false,
+    );
     expect(taps, 0);
 
     await tester.pumpAndSettle();
@@ -143,6 +150,98 @@ void main() {
     expect(find.text('Page'), findsNothing);
     expect(find.text('Tile'), findsOneWidget);
     expect(tester.getSize(find.text('Tile')), isNot(Size.zero));
+    expect(tester.takeException(), isNull);
+  });
+  for (final release in [false, true]) {
+    testWidgets('removing a zoom during a drag releases ownership ($release)', (
+      tester,
+    ) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        _app(
+          navigatorKey: navigatorKey,
+          closedBuilder: (_, open) =>
+              TextButton(onPressed: open, child: const Text('Tile')),
+          openBuilder: (_, _) =>
+              const Scaffold(body: Center(child: Text('Page'))),
+        ),
+      );
+      await tester.tap(find.text('Tile'));
+      await tester.pumpAndSettle();
+      final route = ModalRoute.of(tester.element(find.text('Page')))!;
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('Page')),
+      );
+      await gesture.moveBy(const Offset(40, 0));
+      await gesture.moveBy(const Offset(80, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+      if (release) await gesture.up();
+      final navigator = navigatorKey.currentState!;
+      expect(navigator.userGestureInProgress, isTrue);
+      navigator.removeRoute(route);
+      await tester.pumpAndSettle();
+      if (!release) await gesture.cancel();
+      expect(navigator.userGestureInProgress, isFalse);
+      expect(find.text('Tile'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+  testWidgets('a zoom respects a pop veto added during the drag', (
+    tester,
+  ) async {
+    final canPop = ValueNotifier(true);
+    addTearDown(canPop.dispose);
+    await tester.pumpWidget(
+      _app(
+        closedBuilder: (_, open) =>
+            TextButton(onPressed: open, child: const Text('Tile')),
+        openBuilder: (_, _) => ValueListenableBuilder(
+          valueListenable: canPop,
+          builder: (_, value, child) => PopScope(canPop: value, child: child!),
+          child: const Scaffold(body: Center(child: Text('Page'))),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Tile'));
+    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text('Page')),
+    );
+    await gesture.moveBy(const Offset(40, 0));
+    await gesture.moveBy(const Offset(240, 0));
+    await tester.pump(const Duration(milliseconds: 50));
+    canPop.value = false;
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.text('Page'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('reduced motion settles a canceled zoom drag immediately', (
+    tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      _app(
+        navigatorKey: navigatorKey,
+        reduceMotion: true,
+        closedBuilder: (_, open) =>
+            TextButton(onPressed: open, child: const Text('Tile')),
+        openBuilder: (_, _) =>
+            const Scaffold(body: Center(child: Text('Page'))),
+      ),
+    );
+    await tester.tap(find.text('Tile'));
+    await tester.pumpAndSettle();
+    await tester.timedDrag(
+      find.text('Page'),
+      const Offset(100, 0),
+      const Duration(seconds: 1),
+    );
+    await tester.pump();
+    expect(navigatorKey.currentState!.userGestureInProgress, isFalse);
+    expect(find.text('Page'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
