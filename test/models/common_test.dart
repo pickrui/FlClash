@@ -228,7 +228,7 @@ void main() {
     },
   );
 
-  test('log search preserves exact level filters after cached queries', () {
+  test('log search combines terms and refreshes cached payloads', () {
     const log = Log(
       payload: 'DNS lookup',
       logLevel: LogLevel.warning,
@@ -236,8 +236,6 @@ void main() {
     );
     const state = LogsState(logs: [log]);
     expect(state.copyWith(query: 'dns WARNING').list, [log]);
-    expect(state.copyWith(keywords: ['warn']).list, isEmpty);
-    expect(state.copyWith(keywords: ['warning', 'info']).list, isEmpty);
     expect(state.copyWith(query: '  \t ').isSearching, isFalse);
     final updated = log.copyWith(payload: 'connected');
     expect(state.copyWith(logs: [updated], query: 'dns').list, isEmpty);

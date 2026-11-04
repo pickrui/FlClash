@@ -9,11 +9,13 @@ import 'package:fl_clash/views/logs.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/test_app.dart';
+
 void main() {
   Future<void> pumpLog(WidgetTester tester, String payload) =>
       tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
+        TestApp(
+          child: Scaffold(
             body: LogItem(
               log: Log(
                 payload: payload,
@@ -25,15 +27,16 @@ void main() {
         ),
       );
 
-  testWidgets('unrecognized logs retain their complete selectable text', (
+  testWidgets('tagged logs separate the source from the selectable message', (
     tester,
   ) async {
     const raw = '[DNS] example.test --> 192.0.2.1\nextra details';
     await pumpLog(tester, raw);
     expect(
       tester.widget<SelectableText>(find.byType(SelectableText)).data,
-      raw,
+      'example.test --> 192.0.2.1\nextra details',
     );
+    expect(find.text('DNS'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

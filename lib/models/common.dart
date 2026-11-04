@@ -209,7 +209,6 @@ abstract class Log with _$Log {
 abstract class LogsState with _$LogsState {
   const factory LogsState({
     @Default([]) List<Log> logs,
-    @Default([]) List<String> keywords,
     @Default('') String query,
     @Default(true) bool autoScrollToEnd,
   }) = _LogsState;
@@ -218,15 +217,12 @@ abstract class LogsState with _$LogsState {
 final _logSearchTexts = Expando<String>();
 
 extension LogsStateExt on LogsState {
-  bool get isSearching => keywords.isNotEmpty || SearchQuery(query).isNotEmpty;
+  bool get isSearching => SearchQuery(query).isNotEmpty;
 
   List<Log> get list {
     final search = SearchQuery(query);
-    if (keywords.isEmpty && search.isEmpty) return logs;
+    if (search.isEmpty) return logs;
     return logs
-        .where(
-          (log) => keywords.every((keyword) => keyword == log.logLevel.name),
-        )
         .whereMatches(
           search,
           (log) => [log.payload, log.logLevel.name],

@@ -80,7 +80,7 @@ void main() {
     Log log(LogLevel level, String payload) =>
         Log(logLevel: level, payload: payload, dateTime: '2024-01-01');
 
-    test('returns all logs when no keywords and empty query', () {
+    test('returns all logs when the query is empty', () {
       final state = LogsState(
         logs: [
           log(LogLevel.info, 'test message'),
@@ -90,13 +90,10 @@ void main() {
       expect(state.list.length, 2);
     });
 
-    test('filters by keyword matching log level', () {
+    test('search matches the log level as well as its payload', () {
       final state = LogsState(
-        logs: [
-          log(LogLevel.info, 'info msg'),
-          log(LogLevel.error, 'error msg'),
-        ],
-        keywords: ['error'],
+        logs: [log(LogLevel.info, 'info msg'), log(LogLevel.error, 'message')],
+        query: 'error',
       );
       expect(state.list.length, 1);
       expect(state.list[0].logLevel, LogLevel.error);

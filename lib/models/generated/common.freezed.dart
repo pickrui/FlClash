@@ -1503,7 +1503,7 @@ as String,
 /// @nodoc
 mixin _$LogsState {
 
- List<Log> get logs; List<String> get keywords; String get query; bool get autoScrollToEnd;
+ List<Log> get logs; String get query; bool get autoScrollToEnd;
 /// Create a copy of LogsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1515,20 +1515,20 @@ $LogsStateCopyWith<LogsState> get copyWith => _$LogsStateCopyWithImpl<LogsState>
 @override
 bool operator ==(Object other) {
   final _this = this as LogsState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LogsState&&const DeepCollectionEquality().equals(other.logs, _this.logs)&&const DeepCollectionEquality().equals(other.keywords, _this.keywords)&&(identical(other.query, _this.query) || other.query == _this.query)&&(identical(other.autoScrollToEnd, _this.autoScrollToEnd) || other.autoScrollToEnd == _this.autoScrollToEnd));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LogsState&&const DeepCollectionEquality().equals(other.logs, _this.logs)&&(identical(other.query, _this.query) || other.query == _this.query)&&(identical(other.autoScrollToEnd, _this.autoScrollToEnd) || other.autoScrollToEnd == _this.autoScrollToEnd));
 }
 
 
 @override
 int get hashCode {
   final _this = this as LogsState;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.logs),const DeepCollectionEquality().hash(_this.keywords),_this.query,_this.autoScrollToEnd);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.logs),_this.query,_this.autoScrollToEnd);
 }
 
 @override
 String toString() {
   final _this = this as LogsState;
-  return 'LogsState(logs: ${_this.logs}, keywords: ${_this.keywords}, query: ${_this.query}, autoScrollToEnd: ${_this.autoScrollToEnd})';
+  return 'LogsState(logs: ${_this.logs}, query: ${_this.query}, autoScrollToEnd: ${_this.autoScrollToEnd})';
 }
 
 
@@ -1539,7 +1539,7 @@ abstract mixin class $LogsStateCopyWith<$Res>  {
   factory $LogsStateCopyWith(LogsState value, $Res Function(LogsState) _then) = _$LogsStateCopyWithImpl;
 @useResult
 $Res call({
- List<Log> logs, List<String> keywords, String query, bool autoScrollToEnd
+ List<Log> logs, String query, bool autoScrollToEnd
 });
 
 
@@ -1556,11 +1556,10 @@ class _$LogsStateCopyWithImpl<$Res>
 
 /// Create a copy of LogsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? logs = null,Object? keywords = null,Object? query = null,Object? autoScrollToEnd = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? logs = null,Object? query = null,Object? autoScrollToEnd = null,}) {
   return _then(LogsState(
 logs: null == logs ? _self.logs : logs // ignore: cast_nullable_to_non_nullable
-as List<Log>,keywords: null == keywords ? _self.keywords : keywords // ignore: cast_nullable_to_non_nullable
-as List<String>,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
+as List<Log>,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String,autoScrollToEnd: null == autoScrollToEnd ? _self.autoScrollToEnd : autoScrollToEnd // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
@@ -1647,10 +1646,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Log> logs,  List<String> keywords,  String query,  bool autoScrollToEnd)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Log> logs,  String query,  bool autoScrollToEnd)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LogsState() when $default != null:
-return $default(_that.logs,_that.keywords,_that.query,_that.autoScrollToEnd);case _:
+return $default(_that.logs,_that.query,_that.autoScrollToEnd);case _:
   return orElse();
 
 }
@@ -1668,10 +1667,10 @@ return $default(_that.logs,_that.keywords,_that.query,_that.autoScrollToEnd);cas
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Log> logs,  List<String> keywords,  String query,  bool autoScrollToEnd)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Log> logs,  String query,  bool autoScrollToEnd)  $default,) {final _that = this;
 switch (_that) {
 case _LogsState():
-return $default(_that.logs,_that.keywords,_that.query,_that.autoScrollToEnd);case _:
+return $default(_that.logs,_that.query,_that.autoScrollToEnd);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1688,10 +1687,10 @@ return $default(_that.logs,_that.keywords,_that.query,_that.autoScrollToEnd);cas
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Log> logs,  List<String> keywords,  String query,  bool autoScrollToEnd)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Log> logs,  String query,  bool autoScrollToEnd)?  $default,) {final _that = this;
 switch (_that) {
 case _LogsState() when $default != null:
-return $default(_that.logs,_that.keywords,_that.query,_that.autoScrollToEnd);case _:
+return $default(_that.logs,_that.query,_that.autoScrollToEnd);case _:
   return null;
 
 }
@@ -1703,7 +1702,7 @@ return $default(_that.logs,_that.keywords,_that.query,_that.autoScrollToEnd);cas
 
 
 class _LogsState implements LogsState {
-  const _LogsState({ List<Log> logs = const [],  List<String> keywords = const [], this.query = '', this.autoScrollToEnd = true}): _logs = logs,_keywords = keywords;
+  const _LogsState({ List<Log> logs = const [], this.query = '', this.autoScrollToEnd = true}): _logs = logs;
   
 
  final  List<Log> _logs;
@@ -1711,13 +1710,6 @@ class _LogsState implements LogsState {
   if (_logs is EqualUnmodifiableListView) return _logs;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_logs);
-}
-
- final  List<String> _keywords;
-@override@JsonKey() List<String> get keywords {
-  if (_keywords is EqualUnmodifiableListView) return _keywords;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_keywords);
 }
 
 @override@JsonKey() final  String query;
@@ -1733,18 +1725,18 @@ _$LogsStateCopyWith<_LogsState> get copyWith => __$LogsStateCopyWithImpl<_LogsSt
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LogsState&&const DeepCollectionEquality().equals(other.logs, _logs)&&const DeepCollectionEquality().equals(other.keywords, _keywords)&&(identical(other.query, query) || other.query == query)&&(identical(other.autoScrollToEnd, autoScrollToEnd) || other.autoScrollToEnd == autoScrollToEnd));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LogsState&&const DeepCollectionEquality().equals(other.logs, _logs)&&(identical(other.query, query) || other.query == query)&&(identical(other.autoScrollToEnd, autoScrollToEnd) || other.autoScrollToEnd == autoScrollToEnd));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_logs),const DeepCollectionEquality().hash(_keywords),query,autoScrollToEnd);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_logs),query,autoScrollToEnd);
 }
 
 @override
 String toString() {
-    return 'LogsState(logs: $logs, keywords: $keywords, query: $query, autoScrollToEnd: $autoScrollToEnd)';
+    return 'LogsState(logs: $logs, query: $query, autoScrollToEnd: $autoScrollToEnd)';
 }
 
 
@@ -1755,7 +1747,7 @@ abstract mixin class _$LogsStateCopyWith<$Res> implements $LogsStateCopyWith<$Re
   factory _$LogsStateCopyWith(_LogsState value, $Res Function(_LogsState) _then) = __$LogsStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<Log> logs, List<String> keywords, String query, bool autoScrollToEnd
+ List<Log> logs, String query, bool autoScrollToEnd
 });
 
 
@@ -1772,11 +1764,10 @@ class __$LogsStateCopyWithImpl<$Res>
 
 /// Create a copy of LogsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? logs = null,Object? keywords = null,Object? query = null,Object? autoScrollToEnd = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? logs = null,Object? query = null,Object? autoScrollToEnd = null,}) {
   return _then(_LogsState(
 logs: null == logs ? _self._logs : logs // ignore: cast_nullable_to_non_nullable
-as List<Log>,keywords: null == keywords ? _self._keywords : keywords // ignore: cast_nullable_to_non_nullable
-as List<String>,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
+as List<Log>,query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String,autoScrollToEnd: null == autoScrollToEnd ? _self.autoScrollToEnd : autoScrollToEnd // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
