@@ -286,6 +286,39 @@ void main() {
   );
 
   testWidgets(
+    'preloaded metadata renders immediately and refreshes after an update',
+    (tester) async {
+      var reads = 0;
+      await tester.pumpWidget(
+        TestApp(
+          wrapInProviderScope: true,
+          child: ResourceFileInfoBuilder(
+            source: 'fixture',
+            updatingKey: 'fixture',
+            preloaded: const {'fixture': FileInfo(size: 1)},
+            load: () async {
+              reads++;
+              return const FileInfo(size: 2);
+            },
+            builder: (_, info, pending) => Text('${info?.size}:$pending'),
+          ),
+        ),
+      );
+      expect(find.text('1:false'), findsOneWidget);
+      expect(reads, 0);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ResourceFileInfoBuilder)),
+      );
+      container.read(isUpdatingProvider('fixture').notifier).value = true;
+      await tester.pump();
+      container.read(isUpdatingProvider('fixture').notifier).value = false;
+      await tester.pumpAndSettle();
+      expect(reads, 1);
+      expect(find.text('2:false'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'resource metadata discards an old path while its replacement loads',
     (tester) async {
       final source = ValueNotifier(1);

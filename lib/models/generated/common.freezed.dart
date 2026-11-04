@@ -2352,7 +2352,7 @@ as int,
 /// @nodoc
 mixin _$FileInfo {
 
- int get size; DateTime get lastModified;
+ int get size; DateTime? get lastModified;
 /// Create a copy of FileInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2388,7 +2388,7 @@ abstract mixin class $FileInfoCopyWith<$Res>  {
   factory $FileInfoCopyWith(FileInfo value, $Res Function(FileInfo) _then) = _$FileInfoCopyWithImpl;
 @useResult
 $Res call({
- int size, DateTime lastModified
+ int size, DateTime? lastModified
 });
 
 
@@ -2405,11 +2405,11 @@ class _$FileInfoCopyWithImpl<$Res>
 
 /// Create a copy of FileInfo
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? size = null,Object? lastModified = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? size = null,Object? lastModified = freezed,}) {
   return _then(FileInfo(
 size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
-as int,lastModified: null == lastModified ? _self.lastModified : lastModified // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as int,lastModified: freezed == lastModified ? _self.lastModified : lastModified // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 
@@ -2494,7 +2494,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int size,  DateTime lastModified)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int size,  DateTime? lastModified)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FileInfo() when $default != null:
 return $default(_that.size,_that.lastModified);case _:
@@ -2515,7 +2515,7 @@ return $default(_that.size,_that.lastModified);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int size,  DateTime lastModified)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int size,  DateTime? lastModified)  $default,) {final _that = this;
 switch (_that) {
 case _FileInfo():
 return $default(_that.size,_that.lastModified);case _:
@@ -2535,7 +2535,7 @@ return $default(_that.size,_that.lastModified);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int size,  DateTime lastModified)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int size,  DateTime? lastModified)?  $default,) {final _that = this;
 switch (_that) {
 case _FileInfo() when $default != null:
 return $default(_that.size,_that.lastModified);case _:
@@ -2550,11 +2550,11 @@ return $default(_that.size,_that.lastModified);case _:
 
 
 class _FileInfo implements FileInfo {
-  const _FileInfo({required this.size, required this.lastModified});
+  const _FileInfo({required this.size, this.lastModified});
   
 
 @override final  int size;
-@override final  DateTime lastModified;
+@override final  DateTime? lastModified;
 
 /// Create a copy of FileInfo
 /// with the given fields replaced by the non-null parameter values.
@@ -2588,7 +2588,7 @@ abstract mixin class _$FileInfoCopyWith<$Res> implements $FileInfoCopyWith<$Res>
   factory _$FileInfoCopyWith(_FileInfo value, $Res Function(_FileInfo) _then) = __$FileInfoCopyWithImpl;
 @override @useResult
 $Res call({
- int size, DateTime lastModified
+ int size, DateTime? lastModified
 });
 
 
@@ -2605,11 +2605,11 @@ class __$FileInfoCopyWithImpl<$Res>
 
 /// Create a copy of FileInfo
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? size = null,Object? lastModified = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? size = null,Object? lastModified = freezed,}) {
   return _then(_FileInfo(
 size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
-as int,lastModified: null == lastModified ? _self.lastModified : lastModified // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as int,lastModified: freezed == lastModified ? _self.lastModified : lastModified // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 

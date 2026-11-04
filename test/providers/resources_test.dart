@@ -17,6 +17,8 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/icon_sets.dart';
 import 'package:fl_clash/common/path.dart';
+import 'package:fl_clash/common/geo_recovery.dart';
+import 'package:path/path.dart' as p;
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -289,6 +291,44 @@ void main() {
       },
     );
   }
+  test(
+    'batch metadata uses local cache paths and retains per-file retry',
+    () async {
+      final script = Script(
+        id: 12,
+        label: 'Fixture',
+        lastUpdateTime: DateTime(2026),
+      );
+      final providerFile = File(await item.resourcePath);
+      await providerFile.parent.create(recursive: true);
+      await providerFile.writeAsBytes(valid);
+      final scriptFile = File(await script.path);
+      await scriptFile.parent.create(recursive: true);
+      await scriptFile.writeAsString('fixture');
+      await scriptFile.setLastModified(DateTime.utc(1970));
+      final home = await appPath.homeDirPath;
+      await Directory(p.join(home, geoFileName(GeoResource.MMDB))).create();
+
+      final infos = await loadResourceFileInfos(
+        providers: [item],
+        scripts: [script],
+      );
+      expect(infos[item.updatingKey]!.size, valid.length);
+      expect(infos[script.updatingKey]!.size, 7);
+      expect(infos[script.updatingKey]!.lastModified, isNull);
+      expect(infos.containsKey(GeoResource.GEOIP.updatingKey), isTrue);
+      expect(infos[GeoResource.GEOIP.updatingKey], isNull);
+      expect(infos.containsKey(GeoResource.MMDB.updatingKey), isFalse);
+      expect(
+        await resourceFileInfo(await script.path),
+        infos[script.updatingKey],
+      );
+      await expectLater(
+        resourceFileInfo(p.join(home, geoFileName(GeoResource.MMDB))),
+        throwsA(isA<FileSystemException>()),
+      );
+    },
+  );
 }
 
 class _NoGeoUpdates extends SetupAction {

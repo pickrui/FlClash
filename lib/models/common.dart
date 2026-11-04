@@ -290,13 +290,13 @@ abstract class DAVProps with _$DAVProps {
 
 @freezed
 abstract class FileInfo with _$FileInfo {
-  const factory FileInfo({required int size, required DateTime lastModified}) =
+  const factory FileInfo({required int size, DateTime? lastModified}) =
       _FileInfo;
 }
 
 extension FileInfoExt on FileInfo {
   String get desc =>
-      '${size.traffic.show}  ·  ${lastModified.lastUpdateTimeDesc}';
+      '${size.traffic.show}  ·  ${lastModified?.lastUpdateTimeDesc ?? appLocalizations.unknown}';
 }
 
 @freezed

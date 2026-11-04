@@ -177,10 +177,11 @@ class AppPath {
     return join(path, 'scripts');
   }
 
-  Future<String> getScriptPath(String fileName) async {
-    final path = await scriptsDirPath;
-    return join(path, '$fileName.js');
-  }
+  Future<String> getScriptPath(String fileName) async =>
+      scriptPathIn(await scriptsDirPath, fileName);
+
+  static String scriptPathIn(String scriptsDir, String fileName) =>
+      join(scriptsDir, '$fileName.js');
 
   Future<String> getProvidersRootPath() async {
     final directory = await profilesPath;

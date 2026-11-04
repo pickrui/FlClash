@@ -5,6 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
+
+import 'package:fl_clash/common/geo_recovery.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/network_error.dart';
@@ -25,13 +28,10 @@ import 'script_library.dart';
 
 extension ResourceProviderInfo on ClashProvider {
   String get updatingKey => 'library_provider_$id';
-  Future<String> get resourcePath async => p.join(
-    await appPath.profilesPath,
-    'providers',
-    'app',
-    kind.name,
-    cacheKey,
-  );
+  Future<String> get resourcePath async =>
+      resourcePathIn(await appPath.profilesPath);
+  String resourcePathIn(String profilesPath) =>
+      p.join(profilesPath, 'providers', 'app', kind.name, cacheKey);
   Future<FileInfo?> get fileInfo async => resourceFileInfo(await resourcePath);
 }
 
@@ -40,16 +40,51 @@ extension ResourceScriptInfo on Script {
   Future<FileInfo?> get fileInfo async => resourceFileInfo(await path);
 }
 
-Future<FileInfo?> resourceFileInfo(String path) async {
-  try {
-    final file = File(path);
-    return FileInfo(
-      size: await file.length(),
-      lastModified: await file.lastModified(),
-    );
-  } on PathNotFoundException {
-    return null;
+Future<FileInfo?> resourceFileInfo(String path) async =>
+    _fileInfo(await File(path).stat(), path);
+
+FileInfo? _fileInfo(FileStat stat, String path) {
+  if (stat.type == FileSystemEntityType.notFound) return null;
+  if (stat.type != FileSystemEntityType.file) {
+    throw FileSystemException('Resource path is not a regular file', path);
   }
+  return FileInfo(
+    size: stat.size,
+    lastModified: stat.modified.year > 1970 ? stat.modified : null,
+  );
+}
+
+Future<Map<String, FileInfo?>> loadResourceFileInfos({
+  required List<ClashProvider> providers,
+  required List<Script> scripts,
+}) async {
+  final homeDir = await appPath.homeDirPath;
+  final profilesDir = await appPath.profilesPath;
+  final scriptsDir = await appPath.scriptsDirPath;
+  return Isolate.run(() {
+    final infos = <String, FileInfo?>{};
+    void read(String key, String path) {
+      try {
+        infos[key] = _fileInfo(File(path).statSync(), path);
+      } on FileSystemException {
+        // Leave failures to the row's normal read and retry UI.
+      }
+    }
+
+    for (final type in GeoResource.values) {
+      read(type.updatingKey, p.join(homeDir, geoFileName(type)));
+    }
+    for (final provider in providers) {
+      read(provider.updatingKey, provider.resourcePathIn(profilesDir));
+    }
+    for (final script in scripts) {
+      read(
+        script.updatingKey,
+        AppPath.scriptPathIn(scriptsDir, script.id.toString()),
+      );
+    }
+    return infos;
+  });
 }
 
 final resourcesProvider = Provider((ref) => ResourceUpdates(ref));

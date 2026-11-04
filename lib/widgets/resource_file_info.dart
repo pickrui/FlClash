@@ -14,6 +14,7 @@ import 'package:material_ui/material_ui.dart';
 class ResourceFileInfoBuilder extends ConsumerStatefulWidget {
   final Object source;
   final String updatingKey;
+  final Map<String, FileInfo?> preloaded;
   final Future<FileInfo?> Function() load;
   final Widget Function(BuildContext context, FileInfo? fileInfo, bool pending)
   builder;
@@ -22,6 +23,7 @@ class ResourceFileInfoBuilder extends ConsumerStatefulWidget {
     super.key,
     required this.source,
     required this.updatingKey,
+    this.preloaded = const {},
     required this.load,
     required this.builder,
   });
@@ -33,12 +35,14 @@ class ResourceFileInfoBuilder extends ConsumerStatefulWidget {
 
 class _ResourceFileInfoBuilderState
     extends ConsumerState<ResourceFileInfoBuilder> {
-  late Future<FileInfo?> _fileInfoFuture;
+  Future<FileInfo?>? _fileInfoFuture;
 
   @override
   void initState() {
     super.initState();
-    _fileInfoFuture = Future<FileInfo?>.sync(widget.load);
+    if (!widget.preloaded.containsKey(widget.updatingKey)) {
+      _fileInfoFuture = Future<FileInfo?>.sync(widget.load);
+    }
   }
 
   @override
@@ -62,6 +66,9 @@ class _ResourceFileInfoBuilderState
     return FutureBuilder<FileInfo?>(
       key: ValueKey((widget.source, widget.updatingKey)),
       future: _fileInfoFuture,
+      initialData: _fileInfoFuture == null
+          ? widget.preloaded[widget.updatingKey]
+          : null,
       builder: (context, snapshot) => snapshot.hasError
           ? ListTile(
               title: Text(AppLocalizations.of(context).geoFileReadFailed),
@@ -75,7 +82,8 @@ class _ResourceFileInfoBuilderState
           : widget.builder(
               context,
               snapshot.data,
-              snapshot.connectionState != ConnectionState.done &&
+              _fileInfoFuture != null &&
+                  snapshot.connectionState != ConnectionState.done &&
                   !snapshot.hasData,
             ),
     );
