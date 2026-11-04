@@ -1667,5 +1667,8 @@
   "addedToLocalProxies": "{name}을(를) 사용자 지정 노드에 추가했습니다",
   "alreadyInLocalProxies": "{name}은(는) 이미 사용자 지정 노드에 있습니다",
   "generalOverrideDesc": "여기에 추가한 항목은 모든 프로필의 해당 설정을 대체합니다. 추가하지 않은 항목은 프로필 자체 설정을 유지하며, 프로필에 없으면 코어 기본값을 사용합니다.",
-  "groupBy": "분류"
+  "groupBy": "분류",
+  "copyHost": "호스트 복사",
+  "copyDestination": "대상 주소 복사",
+  "closeConnection": "연결 닫기"
 }

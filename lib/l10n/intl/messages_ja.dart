@@ -563,6 +563,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "close": MessageLookupByLibrary.simpleMessage("閉じる"),
     "closeAllConnections": MessageLookupByLibrary.simpleMessage("すべての接続を閉じる"),
+    "closeConnection": MessageLookupByLibrary.simpleMessage("接続を閉じる"),
     "closeCurrentGroupConnections": MessageLookupByLibrary.simpleMessage(
       "現在のプロキシグループのみ",
     ),
@@ -817,7 +818,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "グローバル追加ルールを制御",
     ),
     "copy": MessageLookupByLibrary.simpleMessage("コピー"),
+    "copyDestination": MessageLookupByLibrary.simpleMessage("宛先をコピー"),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage("環境変数をコピー"),
+    "copyHost": MessageLookupByLibrary.simpleMessage("ホストをコピー"),
     "copyLink": MessageLookupByLibrary.simpleMessage("リンクをコピー"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("コピー成功"),
     "core": MessageLookupByLibrary.simpleMessage("コア"),

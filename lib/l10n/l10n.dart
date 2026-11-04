@@ -14053,6 +14053,31 @@ class AppLocalizations {
   String get groupBy {
     return Intl.message('Group by', name: 'groupBy', desc: '', args: []);
   }
+
+  /// `Copy host`
+  String get copyHost {
+    return Intl.message('Copy host', name: 'copyHost', desc: '', args: []);
+  }
+
+  /// `Copy destination`
+  String get copyDestination {
+    return Intl.message(
+      'Copy destination',
+      name: 'copyDestination',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close connection`
+  String get closeConnection {
+    return Intl.message(
+      'Close connection',
+      name: 'closeConnection',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

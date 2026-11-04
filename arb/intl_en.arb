@@ -1667,5 +1667,8 @@
   "addedToLocalProxies": "Added {name} to custom nodes",
   "alreadyInLocalProxies": "{name} is already in custom nodes",
   "generalOverrideDesc": "Entries added here replace the setting of every profile; anything not added keeps the profile's own setting, or the core default when the profile has none.",
-  "groupBy": "Group by"
+  "groupBy": "Group by",
+  "copyHost": "Copy host",
+  "copyDestination": "Copy destination",
+  "closeConnection": "Close connection"
 }

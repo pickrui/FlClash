@@ -12,6 +12,10 @@ import 'package:fl_clash/ui/table_layout.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/models/record_filter.dart';
+import 'package:fl_clash/widgets/record_filter.dart';
+import 'package:fl_clash/ui/context_menu.dart';
 
 import 'item.dart';
 
@@ -170,6 +174,7 @@ class TrackerInfoTableRow extends StatelessWidget {
   final RecordTable<TrackerInfo> table;
   final bool striped;
   final String detailTitle;
+  final ValueChanged<TrackerInfo>? onClose;
 
   const TrackerInfoTableRow({
     super.key,
@@ -177,15 +182,19 @@ class TrackerInfoTableRow extends StatelessWidget {
     required this.table,
     required this.striped,
     required this.detailTitle,
+    this.onClose,
   });
 
   @override
   Widget build(BuildContext context) {
-    return RecordTableRow(
-      table: table,
-      striped: striped,
-      onTap: () => showTrackerInfoDetail(context, trackerInfo, detailTitle),
-      cells: table.cellsOf(context, trackerInfo),
+    return ContextMenuRegion(
+      menuItems: trackerInfoMenuItems(context, trackerInfo, onClose: onClose),
+      child: RecordTableRow(
+        table: table,
+        striped: striped,
+        onTap: () => showTrackerInfoDetail(context, trackerInfo, detailTitle),
+        cells: table.cellsOf(context, trackerInfo),
+      ),
     );
   }
 }
@@ -205,7 +214,13 @@ class _ExitChip extends StatelessWidget {
       label: exit,
       color: context.raisedSurfaceLevel.colorOf(colorScheme),
       foregroundColor: colorScheme.onSurfaceVariant,
-      onPressed: () => context.commonScaffoldState?.addKeyword(exit),
+      onPressed: () {
+        context.commonScaffoldState?.addKeyword(exit);
+        RecordFilterScope.add(
+          context,
+          RecordFilter(RecordFacetKind.proxy, exit),
+        );
+      },
     );
   }
 }

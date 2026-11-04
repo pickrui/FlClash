@@ -1667,5 +1667,8 @@
   "addedToLocalProxies": "{name} をカスタムノードに追加しました",
   "alreadyInLocalProxies": "{name} はすでにカスタムノードにあります",
   "generalOverrideDesc": "ここで追加した項目は、すべてのプロファイルの該当設定を上書きします。追加していない項目はプロファイル自身の設定のままで、プロファイルにない場合はコアの既定値を使います",
-  "groupBy": "分類"
+  "groupBy": "分類",
+  "copyHost": "ホストをコピー",
+  "copyDestination": "宛先をコピー",
+  "closeConnection": "接続を閉じる"
 }

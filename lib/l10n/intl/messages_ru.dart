@@ -685,6 +685,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "closeAllConnections": MessageLookupByLibrary.simpleMessage(
       "Закрыть все соединения",
     ),
+    "closeConnection": MessageLookupByLibrary.simpleMessage(
+      "Закрыть соединение",
+    ),
     "closeCurrentGroupConnections": MessageLookupByLibrary.simpleMessage(
       "Только текущая группа прокси",
     ),
@@ -971,9 +974,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Управление глобальными добавленными правилами",
     ),
     "copy": MessageLookupByLibrary.simpleMessage("Копировать"),
+    "copyDestination": MessageLookupByLibrary.simpleMessage(
+      "Копировать адрес назначения",
+    ),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage(
       "Копирование переменных окружения",
     ),
+    "copyHost": MessageLookupByLibrary.simpleMessage("Копировать хост"),
     "copyLink": MessageLookupByLibrary.simpleMessage("Копировать ссылку"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Копирование успешно"),
     "core": MessageLookupByLibrary.simpleMessage("Ядро"),

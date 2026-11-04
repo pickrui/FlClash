@@ -166,6 +166,8 @@ extension TrackerInfoExt on TrackerInfo {
     return process.trim();
   }
 
+  String get ruleText => rulePayload.isNotEmpty ? '$rule($rulePayload)' : rule;
+
   List<String> get searchFields => [
     metadata.network,
     metadata.host,

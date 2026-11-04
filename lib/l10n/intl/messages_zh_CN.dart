@@ -526,6 +526,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "close": MessageLookupByLibrary.simpleMessage("关闭"),
     "closeAllConnections": MessageLookupByLibrary.simpleMessage("关闭所有连接"),
+    "closeConnection": MessageLookupByLibrary.simpleMessage("关闭连接"),
     "closeCurrentGroupConnections": MessageLookupByLibrary.simpleMessage(
       "仅当前策略组",
     ),
@@ -722,7 +723,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "content": MessageLookupByLibrary.simpleMessage("内容"),
     "controlGlobalAddedRules": MessageLookupByLibrary.simpleMessage("控制全局附加规则"),
     "copy": MessageLookupByLibrary.simpleMessage("复制"),
+    "copyDestination": MessageLookupByLibrary.simpleMessage("复制目标地址"),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage("复制环境变量"),
+    "copyHost": MessageLookupByLibrary.simpleMessage("复制主机"),
     "copyLink": MessageLookupByLibrary.simpleMessage("复制链接"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("复制成功"),
     "core": MessageLookupByLibrary.simpleMessage("内核"),

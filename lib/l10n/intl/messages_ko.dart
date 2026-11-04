@@ -561,6 +561,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "close": MessageLookupByLibrary.simpleMessage("닫기"),
     "closeAllConnections": MessageLookupByLibrary.simpleMessage("모든 연결 닫기"),
+    "closeConnection": MessageLookupByLibrary.simpleMessage("연결 닫기"),
     "closeCurrentGroupConnections": MessageLookupByLibrary.simpleMessage(
       "현재 프록시 그룹만",
     ),
@@ -793,7 +794,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "전역 추가 규칙 관리",
     ),
     "copy": MessageLookupByLibrary.simpleMessage("복사"),
+    "copyDestination": MessageLookupByLibrary.simpleMessage("대상 주소 복사"),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage("환경 변수 복사"),
+    "copyHost": MessageLookupByLibrary.simpleMessage("호스트 복사"),
     "copyLink": MessageLookupByLibrary.simpleMessage("링크 복사"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("복사했습니다"),
     "core": MessageLookupByLibrary.simpleMessage("코어"),

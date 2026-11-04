@@ -15,15 +15,10 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-String _ruleText(TrackerInfo trackerInfo) {
-  final rule = trackerInfo.rule;
-  final rulePayload = trackerInfo.rulePayload;
-  if (rulePayload.isNotEmpty) {
-    return '$rule($rulePayload)';
-  }
-  return rule;
-}
+import 'package:flutter/services.dart';
+import 'package:fl_clash/models/record_filter.dart';
+import 'package:fl_clash/widgets/record_filter.dart';
+import 'package:fl_clash/ui/context_menu.dart';
 
 String _endpointText(String ip, String port) {
   if (ip.isEmpty) {
@@ -53,12 +48,53 @@ void showTrackerInfoDetail(
   );
 }
 
+List<CommonPopupMenuItem> trackerInfoMenuItems(
+  BuildContext context,
+  TrackerInfo trackerInfo, {
+  ValueChanged<TrackerInfo>? onClose,
+}) {
+  final appLocalizations = context.appLocalizations;
+  final metadata = trackerInfo.metadata;
+  final destination = _endpointText(
+    metadata.destinationIP,
+    metadata.destinationPort,
+  );
+  Future<void> copy(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (context.mounted) context.showNotifier(appLocalizations.copySuccess);
+  }
+
+  return [
+    if (metadata.host.isNotEmpty)
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.copy,
+        label: appLocalizations.copyHost,
+        onPressed: () => copy(metadata.host),
+      ),
+    if (destination.isNotEmpty)
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.copy,
+        label: appLocalizations.copyDestination,
+        onPressed: () => copy(destination),
+      ),
+    if (onClose != null)
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.block,
+        label: appLocalizations.closeConnection,
+        section: const CommonPopupMenuSection(),
+        onPressed: () => onClose(trackerInfo),
+      ),
+  ];
+}
+
 class TrackerInfoItem extends ConsumerWidget {
   final TrackerInfo trackerInfo;
   final bool isLive;
   final Function(String)? onClickKeyword;
   final Widget? trailing;
   final String detailTitle;
+  final ValueChanged<TrackerInfo>? onClose;
+  final ValueGetter<TrackerInfo>? latest;
 
   const TrackerInfoItem({
     super.key,
@@ -67,6 +103,8 @@ class TrackerInfoItem extends ConsumerWidget {
     this.onClickKeyword,
     this.trailing,
     required this.detailTitle,
+    this.onClose,
+    this.latest,
   });
 
   @override
@@ -74,13 +112,20 @@ class TrackerInfoItem extends ConsumerWidget {
     final showIcon =
         ref.watch(effectiveFindProcessModeProvider) == FindProcessMode.always &&
         system.isAndroid;
-    return RecordListItem(
-      onTap: () => showTrackerInfoDetail(context, trackerInfo, detailTitle),
-      header: _buildHeader(context),
-      body: _TrackerInfoBody(
-        trackerInfo: trackerInfo,
-        showIcon: showIcon,
-        onClickKeyword: onClickKeyword,
+    return ContextMenuRegion(
+      menuItems: trackerInfoMenuItems(context, trackerInfo, onClose: onClose),
+      child: RecordListItem(
+        onTap: () => showTrackerInfoDetail(
+          context,
+          latest?.call() ?? trackerInfo,
+          detailTitle,
+        ),
+        header: _buildHeader(context),
+        body: _TrackerInfoBody(
+          trackerInfo: trackerInfo,
+          showIcon: showIcon,
+          onClickKeyword: onClickKeyword,
+        ),
       ),
     );
   }
@@ -141,7 +186,7 @@ class _TrackerInfoBody extends StatelessWidget {
     this.onClickKeyword,
   });
 
-  Widget _buildTitle(RecordTextStyles styles) {
+  Widget _buildTitle(BuildContext context, RecordTextStyles styles) {
     final metadata = trackerInfo.metadata;
     final title = Text.rich(
       TextSpan(
@@ -166,7 +211,13 @@ class _TrackerInfoBody extends StatelessWidget {
       spacing: 8,
       children: [
         GestureDetector(
-          onTap: () => onClickKeyword?.call(process),
+          onTap: () {
+            onClickKeyword?.call(process);
+            RecordFilterScope.add(
+              context,
+              RecordFilter(RecordFacetKind.app, process),
+            );
+          },
           child: PackageIcon(packageName: process, size: 24),
         ),
         Flexible(child: title),
@@ -179,7 +230,7 @@ class _TrackerInfoBody extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final styles = RecordTextStyles.of(context);
     final metadata = trackerInfo.metadata;
-    final rule = _ruleText(trackerInfo);
+    final rule = trackerInfo.ruleText;
     final source = [
       trackerInfo.progressText,
       _endpointText(metadata.sourceIP, metadata.sourcePort),
@@ -188,7 +239,7 @@ class _TrackerInfoBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 4,
       children: [
-        _buildTitle(styles),
+        _buildTitle(context, styles),
         Wrap(
           spacing: 6,
           runSpacing: 4,
@@ -206,7 +257,13 @@ class _TrackerInfoBody extends StatelessWidget {
                       label: chain,
                       color: context.raisedSurfaceLevel.colorOf(colorScheme),
                       foregroundColor: colorScheme.onSurfaceVariant,
-                      onPressed: () => onClickKeyword?.call(chain),
+                      onPressed: () {
+                        onClickKeyword?.call(chain);
+                        RecordFilterScope.add(
+                          context,
+                          RecordFilter(RecordFacetKind.proxy, chain),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -274,7 +331,7 @@ class TrackerInfoDetailView extends StatelessWidget {
             (appLocalizations.creationTime, trackerInfo.start.showFull),
             (appLocalizations.networkType, metadata.network),
             (appLocalizations.process, trackerInfo.progressText),
-            (appLocalizations.rule, _ruleText(trackerInfo)),
+            (appLocalizations.rule, trackerInfo.ruleText),
             (appLocalizations.upload, trackerInfo.upload.traffic.show),
             (appLocalizations.download, trackerInfo.download.traffic.show),
           ]),

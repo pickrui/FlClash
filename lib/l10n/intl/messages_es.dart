@@ -703,6 +703,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "closeAllConnections": MessageLookupByLibrary.simpleMessage(
       "Cerrar todas las conexiones",
     ),
+    "closeConnection": MessageLookupByLibrary.simpleMessage("Cerrar conexión"),
     "closeCurrentGroupConnections": MessageLookupByLibrary.simpleMessage(
       "Solo el grupo de proxies actual",
     ),
@@ -987,9 +988,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Controlar las reglas añadidas globales",
     ),
     "copy": MessageLookupByLibrary.simpleMessage("Copiar"),
+    "copyDestination": MessageLookupByLibrary.simpleMessage("Copiar destino"),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage(
       "Copiar variables de entorno",
     ),
+    "copyHost": MessageLookupByLibrary.simpleMessage("Copiar host"),
     "copyLink": MessageLookupByLibrary.simpleMessage("Copiar enlace"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("Copiado"),
     "core": MessageLookupByLibrary.simpleMessage("Núcleo"),
