@@ -78,20 +78,17 @@ class _DecorationListItemState extends State<DecorationListItem> {
         onPressed: proxyDecorator ? null : widget.onPressed,
         child: LayoutBuilder(
           builder: (_, constraints) {
-            final tile = ListTile(
+            final tile = ListRow(
               leading: widget.leading == null
                   ? null
                   : IgnorePointer(ignoring: sorting, child: widget.leading),
-              contentPadding:
+              padding:
                   widget.contentPadding ??
                   const EdgeInsets.only(right: 16, left: 16),
               title: _ListRowSeparatorStart(child: widget.title),
               subtitle: widget.subtitle,
-              titleTextStyle: context.listTitleStyle,
-              subtitleTextStyle: context.listSubtitleStyle,
               minVerticalPadding:
                   widget.minVerticalPadding ?? listRowVerticalPadding,
-              minTileHeight: listRowMinHeight,
               horizontalTitleGap: widget.horizontalTitleGap,
               trailing: sortable == null
                   ? widget.trailing

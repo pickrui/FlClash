@@ -15,7 +15,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/config/general.dart';
 import 'package:fl_clash/views/config/network.dart' hide Ipv6Item;
-import 'package:fl_clash/ui/list.dart';
+import 'package:prism_ui/list.dart' show ListHeader;
 import 'package:fl_clash/ui/null_status.dart';
 import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -10,31 +10,10 @@ import 'package:fl_clash/ui/l10n.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter/services.dart';
+import 'package:prism_ui/checkbox.dart' as prism;
 import 'package:material_ui/material_ui.dart';
 
-class CommonCheckBox extends StatelessWidget {
-  final bool? value;
-  final ValueChanged<bool?>? onChanged;
-  final bool isCircle;
-
-  const CommonCheckBox({
-    required this.value,
-    required this.onChanged,
-    this.isCircle = false,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Checkbox(
-      materialTapTargetSize: MaterialTapTargetSize.padded,
-      visualDensity: VisualDensity.standard,
-      shape: isCircle ? AppShape.circle : null,
-      value: value,
-      onChanged: onChanged,
-    );
-  }
-}
+typedef CommonCheckBox = prism.Checkbox;
 
 /// Single-line while hidden: Flutter cannot obscure more than one line.
 class SecretTextFormField extends StatefulWidget {

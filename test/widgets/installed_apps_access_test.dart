@@ -20,6 +20,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fl_clash/ui/input.dart';
 
 import '../helpers/test_app.dart';
 import '../support/installed_apps_fake.dart';
@@ -116,7 +117,7 @@ void main() {
         final container = await openAccess(tester, api, asRoute: true);
         final route = ModalRoute.of(tester.element(find.byType(AccessView)))!;
         final navigator = route.navigator!;
-        await tester.tap(find.byType(Checkbox).first);
+        await tester.tap(find.byType(CommonCheckBox).first);
         await tester.pumpAndSettle();
         expect(container.read(accessControlStateProvider).rejectList, [
           'fixture.app',
@@ -211,7 +212,7 @@ void main() {
       final api = InstalledAppsFake()
         ..packages = [installedPackage('fixture.app')];
       final container = await openAccess(tester, api, asRoute: true);
-      await tester.tap(find.byType(Checkbox).first);
+      await tester.tap(find.byType(CommonCheckBox).first);
       await tester.pumpAndSettle();
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
@@ -539,7 +540,7 @@ void main() {
       expect(find.text('system.app'), findsNothing);
       api.changes.add(null);
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(Checkbox).first);
+      await tester.tap(find.byType(CommonCheckBox).first);
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip(AppLocalizations.current.save));
       await tester.pumpAndSettle();

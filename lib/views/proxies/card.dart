@@ -219,7 +219,7 @@ class ProxyCard extends StatelessWidget {
                     children: [
                       Expanded(child: proxyNameText),
                       if (pinned)
-                        SelectionBadge.preferred(inUse: inUse)
+                        SelectionBadge(glyph: AppGlyphs.pin, tonal: !inUse)
                       else if (inUse)
                         const SelectionBadge(),
                     ],
