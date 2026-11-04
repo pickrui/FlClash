@@ -42,6 +42,26 @@ import 'sortable.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
+class ScaffoldKeyword {
+  const ScaffoldKeyword({
+    required this.key,
+    required this.label,
+    this.onDeleted,
+    this.onPressed,
+    this.selected = false,
+    this.startsSection = false,
+  });
+
+  final Object key;
+  final String label;
+  final VoidCallback? onDeleted;
+
+  final VoidCallback? onPressed;
+  final bool selected;
+
+  final bool startsSection;
+}
+
 typedef AppBarSearchStateBuilder = AppBarSearchState? Function(
   AppBarSearchState? state,
 );
@@ -76,6 +96,7 @@ class CommonScaffold extends StatefulWidget {
   /// group and any after them stand alone.
   final List<IconButtonData> selectionActions;
   final OnKeywordsUpdateCallback? onKeywordsUpdate;
+  final ValueListenable<List<ScaffoldKeyword>>? keywords;
   final bool? resizeToAvoidBottomInset;
   final VoidCallback? backAction;
 
@@ -101,6 +122,7 @@ class CommonScaffold extends StatefulWidget {
     this.menuItems = const [],
     this.confirmationAction,
     this.onKeywordsUpdate,
+    this.keywords,
     this.resizeToAvoidBottomInset,
     this.canSort = false,
   });
@@ -923,9 +945,19 @@ class CommonScaffoldState extends State<CommonScaffold>
     final body = SafeArea(
       top: !barFloats,
       bottom: false,
-      child: ValueListenableBuilder(
-        valueListenable: _keywordsNotifier,
-        builder: (context, keywords, _) {
+      child: ListenableBuilder(
+        listenable: widget.keywords ?? _keywordsNotifier,
+        builder: (context, _) {
+          final keywords =
+              widget.keywords?.value ??
+              [
+                for (final keyword in _keywordsNotifier.value)
+                  ScaffoldKeyword(
+                    key: keyword,
+                    label: keyword,
+                    onDeleted: () => _deleteKeyword(keyword),
+                  ),
+              ];
           final hasKeywords = keywords.isNotEmpty;
           final barInset = MediaQuery.paddingOf(context).top;
           final overlap = barFloats
@@ -941,10 +973,7 @@ class CommonScaffoldState extends State<CommonScaffold>
               if (hasKeywords)
                 Padding(
                   padding: EdgeInsets.only(top: overlap + 4, bottom: 16),
-                  child: _KeywordStrip(
-                    keywords: keywords,
-                    onDeleted: _deleteKeyword,
-                  ),
+                  child: _KeywordStrip(keywords: keywords),
                 ),
               Flexible(
                 fit: hugsContent ? FlexFit.loose : FlexFit.tight,
@@ -1883,12 +1912,12 @@ class AppBarClearance extends StatelessWidget {
 }
 
 class _KeywordStrip extends StatelessWidget {
-  const _KeywordStrip({required this.keywords, required this.onDeleted});
+  const _KeywordStrip({required this.keywords});
 
-  final List<String> keywords;
-  final ValueChanged<String> onDeleted;
+  final List<ScaffoldKeyword> keywords;
 
   static const _inset = 16.0;
+  static const _sectionGap = 20.0;
 
   @override
   Widget build(BuildContext context) {
@@ -1899,17 +1928,21 @@ class _KeywordStrip extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: _inset),
           itemCount: keywords.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 8),
+          separatorBuilder: (_, index) => SizedBox(
+            width: keywords[index + 1].startsSection ? _sectionGap : 8,
+          ),
           itemBuilder: (_, index) {
             final keyword = keywords[index];
             return ConstrainedBox(
-              key: ValueKey(keyword),
+              key: ValueKey(keyword.key),
               constraints: BoxConstraints(
                 maxWidth: math.max(0, width - 2 * _inset),
               ),
               child: CommonChip(
-                label: keyword,
-                onDeleted: () => onDeleted(keyword),
+                label: keyword.label,
+                onDeleted: keyword.onDeleted,
+                onPressed: keyword.onPressed,
+                selected: keyword.selected,
               ),
             );
           },
