@@ -2757,7 +2757,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "requestHeaders": MessageLookupByLibrary.simpleMessage("Заголовки запроса"),
     "requests": MessageLookupByLibrary.simpleMessage("Запросы"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
-      "Просмотр последних записей запросов",
+      "Просмотр недавних запросов и активных соединений",
     ),
     "required": MessageLookupByLibrary.simpleMessage("Обязательно"),
     "resendCodeIn": m101,

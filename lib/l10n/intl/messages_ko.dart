@@ -2199,7 +2199,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "request": MessageLookupByLibrary.simpleMessage("요청"),
     "requestHeaders": MessageLookupByLibrary.simpleMessage("요청 헤더"),
     "requests": MessageLookupByLibrary.simpleMessage("요청"),
-    "requestsDesc": MessageLookupByLibrary.simpleMessage("최근 요청 기록 보기"),
+    "requestsDesc": MessageLookupByLibrary.simpleMessage("최근 요청과 활성 연결 보기"),
     "required": MessageLookupByLibrary.simpleMessage("필수"),
     "resendCodeIn": m101,
     "reset": MessageLookupByLibrary.simpleMessage("초기화"),

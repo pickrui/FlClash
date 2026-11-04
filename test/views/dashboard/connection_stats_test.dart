@@ -12,6 +12,8 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
 import 'package:fl_clash/views/connection/requests.dart';
+import 'package:fl_clash/views/connection/item.dart';
+import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/views/dashboard/widgets/connection_stats.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -189,8 +191,8 @@ void main() {
     final page = container.read(currentPageLabelProvider);
 
     for (final (label, view) in [
-      ('Connections', RequestsView),
-      ('Requests', RequestsView),
+      ('Live connections', RequestsView),
+      ('Recent requests', RequestsView),
       ('DNS queries', DnsQueriesView),
     ]) {
       await tester.tap(_stat(label));
@@ -200,7 +202,7 @@ void main() {
       if (view == RequestsView) {
         expect(
           tester.widget<RequestsView>(find.byType(view)).initialFeed,
-          label == 'Connections' ? RequestFeed.live : RequestFeed.recent,
+          label == 'Live connections' ? RequestFeed.live : RequestFeed.recent,
         );
       }
       expect(container.read(currentPageLabelProvider), page);
@@ -212,6 +214,32 @@ void main() {
 
     await teardownCard(tester);
   });
+
+  testWidgets(
+    'request details return to their list within the dashboard sheet',
+    (tester) async {
+      container.read(requestsProvider.notifier).addRequest(_request(0));
+      await pumpCard(tester);
+      final page = container.read(currentPageLabelProvider);
+      await tester.tap(_stat('Recent requests'));
+      await tester.pumpAndSettle();
+      expect(find.byType(NestedPagedSheet), findsOneWidget);
+      await tester.tap(
+        find.textContaining('host-0.test', findRichText: true).first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(TrackerInfoDetailView), findsOneWidget);
+      expect(container.read(currentPageLabelProvider), page);
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TrackerInfoDetailView), findsNothing);
+      expect(find.byType(RequestsView), findsOneWidget);
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+      expect(find.byType(RequestsView), findsNothing);
+      await teardownCard(tester);
+    },
+  );
 
   testWidgets('the connection count stops behind a pushed page and while '
       'paused', (tester) async {

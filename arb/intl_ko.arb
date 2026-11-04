@@ -150,7 +150,7 @@
   "geodataLoader": "Geo 저메모리 모드",
   "geodataLoaderDesc": "메모리 사용량이 적은 Geo 로더 사용",
   "requests": "요청",
-  "requestsDesc": "최근 요청 기록 보기",
+  "requestsDesc": "최근 요청과 활성 연결 보기",
   "findProcessMode": "프로세스 찾기",
   "init": "초기화",
   "infiniteTime": "무기한",

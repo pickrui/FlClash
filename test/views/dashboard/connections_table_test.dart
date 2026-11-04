@@ -20,6 +20,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/prism_list.dart';
 
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
@@ -111,7 +112,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(ConnectionsTableCard),
-        matching: find.text('Requests'),
+        matching: find.text('Recent requests'),
       ),
     );
     await tester.pump(const Duration(milliseconds: 400));
@@ -224,8 +225,8 @@ void main() {
     expect(find.text('TCP 130'), findsOneWidget);
     expect(find.text('UDP 20'), findsOneWidget);
     expect(find.text('host-149.test'), findsOneWidget);
-    final list = tester.widget<ListView>(find.byType(ListView));
-    expect(list.childrenDelegate.estimatedChildCount, 100);
+    final list = tester.widget<PrismListView>(find.byType(PrismListView));
+    expect(list.itemCount, 100);
     expect(find.text('host-0.test'), findsNothing);
 
     await tester.tap(find.text('Download'));

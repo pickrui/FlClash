@@ -13,6 +13,8 @@ import 'package:fl_clash/features/connection/connection_feed.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/route_motion_hold.dart';
+import 'package:fl_clash/ui/paged_sheet.dart';
+import 'package:prism_ui/prism_list.dart';
 import 'package:fl_clash/ui/table_layout.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
@@ -66,8 +68,8 @@ enum DashboardFeed {
   dns;
 
   String labelOf(BuildContext context) => switch (this) {
-    connections => context.appLocalizations.connections,
-    requests => context.appLocalizations.requests,
+    connections => context.appLocalizations.liveConnections,
+    requests => context.appLocalizations.recentRequests,
     dns => context.appLocalizations.dnsQueries,
   };
 }
@@ -75,18 +77,22 @@ enum DashboardFeed {
 void openDashboardFeed(BuildContext context, DashboardFeed feed) {
   showSnapSheet(
     context,
-    initialScrollOffset: feed == DashboardFeed.requests ? double.maxFinite : 0,
-    builder: (_, controller) => switch (feed) {
-      DashboardFeed.connections => RequestsView(
-        initialFeed: RequestFeed.live,
-        scrollController: controller,
-      ),
-      DashboardFeed.requests => RequestsView(
-        scrollController: controller,
-        initialFeed: RequestFeed.recent,
-      ),
-      DashboardFeed.dns => DnsQueriesView(scrollController: controller),
-    },
+    initialScrollOffset: feed == DashboardFeed.connections
+        ? 0
+        : double.maxFinite,
+    builder: (_, controller) => NestedPagedSheet(
+      builder: (_) => switch (feed) {
+        DashboardFeed.connections => RequestsView(
+          initialFeed: RequestFeed.live,
+          scrollController: controller,
+        ),
+        DashboardFeed.requests => RequestsView(
+          scrollController: controller,
+          initialFeed: RequestFeed.recent,
+        ),
+        DashboardFeed.dns => DnsQueriesView(scrollController: controller),
+      },
+    ),
   );
 }
 
@@ -574,7 +580,7 @@ class _TableState<T> extends ConsumerState<_Table<T>>
           color: DashboardColors.of(context).tone,
           shape: shape,
         );
-        final body = ListView.builder(
+        final body = PrismListView(
           padding: const EdgeInsets.only(top: 2),
           itemExtent: rowHeight,
           itemCount: items.length,

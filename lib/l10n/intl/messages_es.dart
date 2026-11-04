@@ -2807,7 +2807,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "requests": MessageLookupByLibrary.simpleMessage("Solicitudes"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
-      "Ver solicitudes recientes",
+      "Ver solicitudes recientes y conexiones activas",
     ),
     "required": MessageLookupByLibrary.simpleMessage("Obligatorio"),
     "resendCodeIn": m101,

@@ -1976,7 +1976,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "request": MessageLookupByLibrary.simpleMessage("请求"),
     "requestHeaders": MessageLookupByLibrary.simpleMessage("请求头"),
     "requests": MessageLookupByLibrary.simpleMessage("请求"),
-    "requestsDesc": MessageLookupByLibrary.simpleMessage("查看最近请求记录"),
+    "requestsDesc": MessageLookupByLibrary.simpleMessage("查看最近请求与实时连接"),
     "required": MessageLookupByLibrary.simpleMessage("必填"),
     "resendCodeIn": m101,
     "reset": MessageLookupByLibrary.simpleMessage("重置"),

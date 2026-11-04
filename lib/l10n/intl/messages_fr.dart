@@ -2820,7 +2820,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "requests": MessageLookupByLibrary.simpleMessage("Requêtes"),
     "requestsDesc": MessageLookupByLibrary.simpleMessage(
-      "Consulter les requêtes récentes",
+      "Voir les requêtes récentes et les connexions actives",
     ),
     "required": MessageLookupByLibrary.simpleMessage("Obligatoire"),
     "resendCodeIn": m101,

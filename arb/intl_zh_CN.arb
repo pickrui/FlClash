@@ -150,7 +150,7 @@
   "geodataLoader": "Geo低内存模式",
   "geodataLoaderDesc": "开启将使用Geo低内存加载器",
   "requests": "请求",
-  "requestsDesc": "查看最近请求记录",
+  "requestsDesc": "查看最近请求与实时连接",
   "findProcessMode": "查找进程",
   "init": "初始化",
   "infiniteTime": "长期有效",

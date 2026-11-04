@@ -2237,7 +2237,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "request": MessageLookupByLibrary.simpleMessage("リクエスト"),
     "requestHeaders": MessageLookupByLibrary.simpleMessage("リクエストヘッダー"),
     "requests": MessageLookupByLibrary.simpleMessage("リクエスト"),
-    "requestsDesc": MessageLookupByLibrary.simpleMessage("最近のリクエスト記録を表示"),
+    "requestsDesc": MessageLookupByLibrary.simpleMessage("最近のリクエストと接続中の通信を表示"),
     "required": MessageLookupByLibrary.simpleMessage("必須"),
     "resendCodeIn": m101,
     "reset": MessageLookupByLibrary.simpleMessage("リセット"),

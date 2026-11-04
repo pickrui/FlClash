@@ -150,7 +150,7 @@
   "geodataLoader": "Modo geo de poca memoria",
   "geodataLoaderDesc": "Usar el cargador Geo de bajo consumo de memoria",
   "requests": "Solicitudes",
-  "requestsDesc": "Ver solicitudes recientes",
+  "requestsDesc": "Ver solicitudes recientes y conexiones activas",
   "findProcessMode": "Buscar proceso",
   "init": "Inicio",
   "infiniteTime": "Sin caducidad",

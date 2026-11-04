@@ -1176,10 +1176,10 @@ class AppLocalizations {
     return Intl.message('Requests', name: 'requests', desc: '', args: []);
   }
 
-  /// `View recently request records`
+  /// `View recent requests and live connections`
   String get requestsDesc {
     return Intl.message(
-      'View recently request records',
+      'View recent requests and live connections',
       name: 'requestsDesc',
       desc: '',
       args: [],
