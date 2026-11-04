@@ -39,7 +39,7 @@ class DnsQuerySearch {
       _texts = Expando<String>();
     }
     final query = SearchQuery(search);
-    final result = queries.reversed
+    final result = queries
         .where((item) {
           final included = switch (filter) {
             DnsQueryFilter.all => true,

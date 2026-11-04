@@ -12,6 +12,8 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/record_filter.dart';
 import 'package:fl_clash/widgets/record_filter.dart';
 import 'package:fl_clash/ui/view_scope.dart';
+import 'package:fl_clash/ui/scroll_behavior.dart';
+import 'package:fl_clash/widgets/record_feed_list.dart';
 import 'package:fl_clash/features/connection/dns_query_filter.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
@@ -141,10 +143,15 @@ class DnsQueriesView extends ConsumerStatefulWidget {
 class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
     with RouteMotionHoldMixin<DnsQueriesView> {
   late final ScrollController _scrollController =
-      widget.scrollController ?? sheetScrollController(context);
+      widget.scrollController ??
+      sheetScrollController(context, initialScrollOffset: double.maxFinite);
   Timer? _refreshTimer;
   List<DnsQuery> _queries = [];
   bool _paused = false;
+  bool _autoScrollToEnd = true;
+  late final _physics = FollowEndScrollPhysics(
+    isFollowing: () => _autoScrollToEnd,
+  );
   bool _resettingDns = false;
   String _search = '';
   final _querySearch = DnsQuerySearch();
@@ -184,7 +191,12 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
         _refreshTimer = null;
         updateWhenRouteSettled(() {
           if (mounted && !_paused) {
-            setState(() => _queries = ref.read(dnsQueriesProvider).list);
+            final buffer = ref.read(dnsQueriesProvider);
+            setState(
+              () => _queries = _autoScrollToEnd
+                  ? buffer.list
+                  : buffer.retainTrimmedHead(_queries),
+            );
             _filters.offer(_queries);
           }
         });
@@ -343,6 +355,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
         onPressed: () => setState(() {
           _paused = !_paused;
           if (!_paused) {
+            _autoScrollToEnd = true;
             _queries = ref.read(dnsQueriesProvider).list;
             _filters.offer(_queries);
           }
@@ -383,35 +396,55 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
     return RecordTableFrame<DnsQuery>(
       tableId: 'dns',
       items: queries,
+      reverse: true,
       columnsOf: (width) => _columns(context, width),
-      builder: (context, table, queries) => FloatingScrollbar(
-        controller: _scrollController,
-        hintBuilder: (fraction) {
-          final index = (fraction * (queries.length - 1)).round();
-          return queries[index].time.showFull;
-        },
-        child: ListView.separated(
+      builder: (context, table, queries) => Align(
+        alignment: Alignment.topCenter,
+        child: FloatingScrollbar(
           controller: _scrollController,
-          padding: EdgeInsets.only(
-            top: context.contentTopPadding,
-            bottom: 16 + context.bottomInset,
+          hintBuilder: (fraction) =>
+              queries[(fraction * (queries.length - 1)).round()].time.showFull,
+          child: ScrollToEndBox(
+            controller: _scrollController,
+            enable: _autoScrollToEnd,
+            onCancelToEnd: () => setState(() => _autoScrollToEnd = false),
+            onResumeToEnd: () {
+              setState(() {
+                _autoScrollToEnd = true;
+                if (!_paused) _queries = ref.read(dnsQueriesProvider).list;
+              });
+              _filters.offer(_queries);
+            },
+            child: RecordFeedList<DnsQuery>(
+              controller: _scrollController,
+              reverse: true,
+              shrinkWrap: true,
+              physics: _physics,
+              padding: EdgeInsets.only(
+                top: context.contentTopPadding,
+                bottom: 16 + context.bottomInset,
+              ),
+              items: queries,
+              keyOf: ObjectKey.new,
+              gap: table == null ? recordListGap : 0,
+              estimatedItemExtent:
+                  table?.rowHeight ?? recordListEstimatedExtent,
+              itemBuilder: (query, striped, _) => MemoBuilder(
+                inputs: [
+                  query,
+                  if (table != null) ...[table, striped],
+                ],
+                builder: (context) => table == null
+                    ? _buildItem(context, query)
+                    : RecordTableRow(
+                        table: table,
+                        striped: striped,
+                        onTap: () => _showDnsQueryDetail(context, query),
+                        cells: table.cellsOf(context, query),
+                      ),
+              ),
+            ),
           ),
-          itemCount: queries.length,
-          separatorBuilder: (_, _) => table == null
-              ? const SizedBox(height: recordListGap)
-              : const SizedBox.shrink(),
-          itemBuilder: (context, index) {
-            final query = queries[index];
-            if (table == null) {
-              return _buildItem(context, query);
-            }
-            return RecordTableRow(
-              table: table,
-              striped: index.isOdd,
-              onTap: () => _showDnsQueryDetail(context, query),
-              cells: table.cellsOf(context, query),
-            );
-          },
         ),
       ),
     );

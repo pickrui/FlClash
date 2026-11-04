@@ -14,6 +14,7 @@ import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/record_table.dart';
+import 'package:fl_clash/widgets/record_feed_list.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
@@ -24,6 +25,11 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/test_app.dart';
+
+class _SmallDnsQueries extends DnsQueries {
+  @override
+  FixedList<DnsQuery> build() => FixedList(2);
+}
 
 class _DnsCoreHandler extends Mock implements CoreHandlerInterface {}
 
@@ -89,7 +95,7 @@ void main() {
         },
       );
       final all = query();
-      expect(all, [failed, cached]);
+      expect(all, [cached, failed]);
       expect(labelsRead, 0);
       expect(identical(query(), all), isTrue);
       expect(query(filter: DnsQueryFilter.failed), [failed]);
@@ -104,6 +110,57 @@ void main() {
       expect(query(filter: DnsQueryFilter.cached), isEmpty);
       rows = [];
       expect(query(), isEmpty);
+    },
+  );
+
+  testWidgets(
+    'browsing DNS history retains trimmed rows until following resumes',
+    (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          dnsQueriesProvider.overrideWith(_SmallDnsQueries.new),
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(dnsQueriesProvider.notifier);
+      final first = DnsQuery(
+        domain: 'first.test',
+        type: 'A',
+        time: DateTime.utc(2026),
+      );
+      notifier.addQuery(first);
+      notifier.addQuery(first.copyWith(domain: 'second.test'));
+      await _pumpDnsQueries(tester, container);
+      tester
+          .widget<ScrollToEndBox>(find.byType(ScrollToEndBox))
+          .onCancelToEnd!();
+      notifier.addQuery(first.copyWith(domain: 'third.test'));
+      await tester.pump(commonDuration);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<RecordFeedList<DnsQuery>>(
+              find.byType(RecordFeedList<DnsQuery>),
+            )
+            .items
+            .map((query) => query.domain),
+        ['first.test', 'second.test', 'third.test'],
+      );
+      expect(container.read(dnsQueriesProvider).length, 2);
+      tester
+          .widget<ScrollToEndBox>(find.byType(ScrollToEndBox))
+          .onResumeToEnd!();
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<RecordFeedList<DnsQuery>>(
+              find.byType(RecordFeedList<DnsQuery>),
+            )
+            .items
+            .map((query) => query.domain),
+        ['second.test', 'third.test'],
+      );
     },
   );
 
@@ -293,6 +350,13 @@ void main() {
       await tester.tap(find.byTooltip('More'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Pause updates'));
+      await tester.pumpAndSettle();
+      tester
+          .widget<ScrollToEndBox>(find.byType(ScrollToEndBox))
+          .onCancelToEnd!();
+      tester
+          .widget<ScrollToEndBox>(find.byType(ScrollToEndBox))
+          .onResumeToEnd!();
       await tester.pumpAndSettle();
       notifier.addQuery(
         cached.copyWith(
