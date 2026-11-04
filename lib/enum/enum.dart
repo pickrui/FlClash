@@ -105,6 +105,21 @@ enum ViewMode { mobile, laptop, desktop }
 
 enum LogLevel { debug, info, warning, error, silent }
 
+enum RecordFacetKind {
+  network,
+  rule,
+  mitm,
+  app,
+  proxy,
+  level,
+  type,
+  initiator,
+  cache,
+  rcode,
+}
+
+enum RecordGrouping { app, host, rule, exit }
+
 extension LogLevelExt on LogLevel {
   Color? get color {
     return switch (this) {
