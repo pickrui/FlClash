@@ -6,6 +6,9 @@
 // ignore_for_file: constant_identifier_names
 
 import 'dart:io';
+
+export 'package:prism_ui/motion.dart' show fadeTabDuration, fadeTabCurve;
+
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -165,6 +168,3 @@ const main = (config) => {
 
 const backupDatabaseName = 'database.sqlite';
 const configJsonName = 'config.json';
-
-const fadeTabDuration = Duration(milliseconds: 220);
-const fadeTabCurve = Curves.easeInOut;
