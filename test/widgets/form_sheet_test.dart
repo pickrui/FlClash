@@ -113,4 +113,21 @@ void main() {
     expect(asked, 1);
     expect(find.byType(_Form), findsOneWidget);
   });
+  testWidgets('a form consumes safe-area and keyboard insets once', (
+    tester,
+  ) async {
+    tester.view.padding = const FakeViewPadding(top: 24, bottom: 20);
+    tester.view.viewPadding = const FakeViewPadding(top: 24, bottom: 20);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 250);
+    addTearDown(tester.view.reset);
+    await _open(tester, const Size(1200, 800));
+    final data = MediaQuery.of(tester.element(find.byType(TextField)));
+    expect(data.padding, EdgeInsets.zero);
+    expect(data.viewInsets, EdgeInsets.zero);
+    final card = find
+        .ancestor(of: find.byType(_Form), matching: find.byType(Material))
+        .first;
+    expect(tester.getBottomRight(card).dy, lessThanOrEqualTo(800 - 250 - 40));
+    expect(tester.getTopLeft(card).dy, greaterThanOrEqualTo(24 + 40));
+  });
 }

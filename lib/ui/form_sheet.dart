@@ -8,7 +8,10 @@ import 'dart:async';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
-import 'package:fl_clash/ui/shape.dart';
+import 'package:prism_ui/form_sheet.dart' show formSheetShape;
+import 'package:prism_ui/surface.dart' show Surface;
+
+export 'package:prism_ui/form_sheet.dart' show formSheetShape;
 import 'package:fl_clash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -112,20 +115,25 @@ class _FormSheet extends StatelessWidget {
               ),
               child: SizedBox(
                 width: double.infinity,
-                child: Material(
+                child: Surface(
                   color:
                       backgroundColor ??
                       SurfaceLevel.page.colorOf(theme.colorScheme),
-                  shape: theme.dialogTheme.shape ?? AppShape.xxl,
+                  shape: formSheetShape,
                   clipBehavior: Clip.antiAlias,
-                  child: MediaQuery.removeViewInsets(
-                    context: context,
-                    removeBottom: true,
-                    child: SheetProvider(
-                      type: SheetType.formSheet,
-                      child: SheetDismissScope(
-                        handler: dismissHandler,
-                        child: Builder(builder: builder),
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: Builder(
+                      builder: (context) => MediaQuery.removeViewInsets(
+                        context: context,
+                        removeBottom: true,
+                        child: SheetProvider(
+                          type: SheetType.formSheet,
+                          child: SheetDismissScope(
+                            handler: dismissHandler,
+                            child: Builder(builder: builder),
+                          ),
+                        ),
                       ),
                     ),
                   ),

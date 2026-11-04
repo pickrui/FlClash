@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/ui/inherited.dart';
+import 'package:fl_clash/ui/form_sheet.dart' show formSheetShape;
 import 'package:fl_clash/ui/sheet_header.dart';
 import 'package:prism_ui/sheet.dart'
     show SheetCornersScope, bottomSheetRadiusOf;
@@ -46,8 +47,7 @@ class PagedSheetRoute<T> extends PageRoute<T>
     return switch (SheetProvider.of(context)?.type) {
       SheetType.bottomSheet =>
         SheetCornersScope.maybeOf(context) ?? bottomSheetRadiusOf(context),
-      SheetType.formSheet => switch (Theme.of(context).dialogTheme.shape ??
-          AppShape.xxl) {
+      SheetType.formSheet => switch (formSheetShape) {
         RoundedSuperellipseBorder(:final borderRadius) => borderRadius.resolve(
           Directionality.of(context),
         ),

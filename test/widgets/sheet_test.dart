@@ -15,6 +15,7 @@ import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/surface.dart' show Surface;
 
 import '../helpers/test_app.dart';
 
@@ -116,13 +117,17 @@ Future<ValueNotifier<ThemeMode>> _openFromPage(
   return mode;
 }
 
-Color? _sheetColor(WidgetTester tester) => tester
-    .widget<Material>(
-      find
-          .ancestor(of: find.text('sheet'), matching: find.byType(Material))
-          .first,
-    )
-    .color;
+Color? _sheetColor(WidgetTester tester) {
+  Color? color;
+  tester.element(find.text('sheet')).visitAncestorElements((element) {
+    color = switch (element.widget) {
+      Surface(:final color) || Material(:final color) => color,
+      _ => null,
+    };
+    return color == null;
+  });
+  return color;
+}
 
 void main() {
   final dark = _theme(Brightness.dark);
