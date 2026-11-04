@@ -234,12 +234,24 @@ void main() {
         await tester.tap(find.widgetWithText(TextButton, 'Delete'));
         await tester.pumpAndSettle();
         expect(find.text('first'), findsNothing);
-        await tester.tap(find.byTooltip('Reset'));
+        if (find.byTooltip('Reset').evaluate().isEmpty) {
+          await tester.tap(find.byTooltip('More'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Reset').last);
+        } else {
+          await tester.tap(find.byTooltip('Reset'));
+        }
         await tester.pumpAndSettle();
         await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
         expect(find.text('first'), findsNothing);
-        await tester.tap(find.byTooltip('Reset'));
+        if (find.byTooltip('Reset').evaluate().isEmpty) {
+          await tester.tap(find.byTooltip('More'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Reset').last);
+        } else {
+          await tester.tap(find.byTooltip('Reset'));
+        }
         await tester.pumpAndSettle();
         await tester.tap(find.widgetWithText(TextButton, 'Reset'));
         await tester.pumpAndSettle();

@@ -25,7 +25,7 @@ import 'package:material_ui/material_ui.dart';
 import 'overwrite_sheet.dart';
 import 'proxy_fields.dart';
 import 'share_links.dart';
-import 'quick_edit.dart';
+import '../form/quick_edit.dart';
 
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
@@ -779,7 +779,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           appLocalizations.shareLinkNodesPreserved(unsupported),
         );
       }
-      await showCustomQuickEdit(
+      await showQuickEdit(
         context,
         title: appLocalizations.proxies,
         content: links.where((link) => link.isNotEmpty).join('\n'),

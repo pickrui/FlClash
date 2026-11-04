@@ -13,7 +13,7 @@ import 'package:fl_clash/features/overwrite/routing_issue.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/features/editor/clash_schema.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
-import 'package:fl_clash/features/overwrite/quick_edit.dart';
+import 'package:fl_clash/features/form/quick_edit.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -495,7 +495,7 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
   Future<void> _quickEdit() {
     final previous =
         ref.read(profileProvider(profileId))?.customRules ?? const <Rule>[];
-    return showCustomQuickEdit(
+    return showQuickEdit(
       context,
       title: appLocalizations.rule,
       content: previous.isEmpty

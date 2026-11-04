@@ -368,10 +368,19 @@ class _ListInputPageState extends _EditViewState<ListInputPage, String> {
   Object popResult(List<String> entries) => entries;
 
   @override
-  Future<List<String>?> Function(List<String>)? get editAll =>
-      widget.onEditAll == null
-      ? null
-      : (entries) => widget.onEditAll!(context, entries);
+  Future<List<String>?> Function(List<String>) get editAll => (entries) async {
+    if (widget.onEditAll case final edit?) return edit(context, entries);
+    List<String>? edited;
+    await showListQuickEdit(
+      context,
+      title: widget.title,
+      items: entries,
+      itemMaxLength: widget.itemMaxLength,
+      itemValidator: widget.itemValidator,
+      onChanged: (next) => edited = next,
+    );
+    return edited;
+  };
 
   String get _valueLabel => widget.valueLabel ?? context.appLocalizations.value;
 
@@ -523,13 +532,24 @@ class _MapInputPageState
   @override
   Future<List<MapEntry<String, String>>?> Function(
     List<MapEntry<String, String>>,
-  )?
-  get editAll => widget.onEditAll == null
-      ? null
-      : (entries) async => (await widget.onEditAll!(
-          context,
-          Map.fromEntries(entries),
-        ))?.entries.toList();
+  )
+  get editAll => (entries) async {
+    if (widget.onEditAll case final edit?) {
+      return (await edit(context, Map.fromEntries(entries)))?.entries.toList();
+    }
+    List<MapEntry<String, String>>? edited;
+    await showMapQuickEdit(
+      context,
+      title: widget.title,
+      entries: entries,
+      keyMaxLength: widget.keyMaxLength,
+      valueMaxLength: widget.valueMaxLength,
+      ignoreKeyCase: widget.ignoreKeyCase,
+      reservedKeys: widget.reservedKeys,
+      onChanged: (next) => edited = next,
+    );
+    return edited;
+  };
 
   @override
   Future<List<MapEntry<String, String>>?> showEntryDialog(

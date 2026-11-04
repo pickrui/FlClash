@@ -30,7 +30,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'overwrite_sheet.dart';
-import 'quick_edit.dart';
+import '../form/quick_edit.dart';
 
 String customProxyGroupTypeLabel(GroupType type) => switch (type) {
   GroupType.Selector => appLocalizations.groupTypeSelect,
@@ -739,7 +739,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
 
   Future<void> _handleQuickEdit() {
     final draft = _draft();
-    return showCustomQuickEdit(
+    return showQuickEdit(
       context,
       title: draft.name.isEmpty ? appLocalizations.quickEdit : draft.name,
       content: writeYaml(draft.toJson()),
