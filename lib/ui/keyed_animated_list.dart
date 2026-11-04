@@ -5,7 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/prism_list.dart';
 
 const _defaultDuration = Duration(milliseconds: 300);
 
@@ -23,6 +24,8 @@ class KeyedAnimatedList<T> extends StatefulWidget {
   final ScrollController? controller;
   final EdgeInsetsGeometry? padding;
   final Duration duration;
+  final double estimatedItemExtent;
+  final ScrollCacheExtent? scrollCacheExtent;
 
   const KeyedAnimatedList({
     super.key,
@@ -33,6 +36,8 @@ class KeyedAnimatedList<T> extends StatefulWidget {
     this.controller,
     this.padding,
     this.duration = _defaultDuration,
+    this.estimatedItemExtent = SliverPrismList.defaultEstimatedItemExtent,
+    this.scrollCacheExtent,
   });
 
   @override
@@ -183,20 +188,13 @@ class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>>
         child: ExcludeFocus(child: ExcludeSemantics(child: row)),
       );
     }
-    if (animation != null) {
-      row = SizeTransition(
-        sizeFactor: animation,
-        alignment: Alignment.topCenter,
-        child: FadeTransition(opacity: animation, child: row),
-      );
-    }
     return _SlideOnMove(
       key: ValueKey(entry.key),
       generation: _generation,
       duration: MediaQuery.disableAnimationsOf(context)
           ? Duration.zero
           : widget.duration,
-      child: row,
+      child: _RowPresence(animation: animation, child: row),
     );
   }
 
@@ -205,14 +203,42 @@ class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>>
     final indexByKey = {
       for (final (index, entry) in _entries.indexed) entry.key: index,
     };
-    return ListView.builder(
+    return PrismListView(
       controller: widget.controller,
       padding: widget.padding,
       itemCount: _entries.length,
+      estimatedItemExtent: widget.estimatedItemExtent,
+      scrollCacheExtent: widget.scrollCacheExtent,
       addRepaintBoundaries: false,
       findChildIndexCallback: (key) =>
           key is ValueKey<Object> ? indexByKey[key.value] : null,
       itemBuilder: _buildRow,
+    );
+  }
+}
+
+class _RowPresence extends StatelessWidget {
+  final Animation<double>? animation;
+  final Widget child;
+
+  const _RowPresence({required this.animation, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final animation = this.animation;
+    final shown = animation ?? kAlwaysCompleteAnimation;
+    return AnimatedBuilder(
+      animation: shown,
+      builder: (_, child) => ClipRect(
+        // A settled row's focus ring reaches past its bounds.
+        clipBehavior: animation == null ? Clip.none : Clip.hardEdge,
+        child: Align(
+          alignment: Alignment.topCenter,
+          heightFactor: shown.value.clamp(0.0, 1.0),
+          child: child,
+        ),
+      ),
+      child: FadeTransition(opacity: shown, child: child),
     );
   }
 }
