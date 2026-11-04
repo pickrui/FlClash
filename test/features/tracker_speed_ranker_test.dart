@@ -127,4 +127,20 @@ void main() {
       1000,
     );
   });
+  test('reuses unchanged rows and releases removed or reset entries', () {
+    final ranker = TrackerSpeedRanker();
+    final first = ranker.rank([_tracker('a')], t0).single;
+    expect(ranker.rank([_tracker('a')], at(1)).single, same(first));
+    final changed = ranker.rank([
+      _tracker('a').copyWith(rule: 'DOMAIN', rulePayload: 'example.com'),
+    ], at(2)).single;
+    expect(changed, isNot(same(first)));
+    expect(changed.rule, 'DOMAIN');
+    expect(changed.rulePayload, 'example.com');
+    ranker.rank([], at(3));
+    final restored = ranker.rank([_tracker('a')], at(4)).single;
+    expect(restored, isNot(same(first)));
+    ranker.reset();
+    expect(ranker.rank([_tracker('a')], at(5)).single, isNot(same(restored)));
+  });
 }
