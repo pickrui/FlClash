@@ -18,6 +18,8 @@ import 'package:flutter/services.dart';
 import 'package:material_color_utilities/material_color_utilities.dart'
     show Hct;
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
+import 'package:prism_ui/card_surface.dart' as prism;
 
 import 'liquid_glass.dart';
 
@@ -758,7 +760,15 @@ class ElasticButton extends StatelessWidget {
                   FilledButtonTheme.of(context).style,
                 ),
               ),
-              child: child,
+              child: prism.ButtonTheme.merge(
+                data: const prism.ButtonThemeData(
+                  icon: prism.ButtonStyle(pressLook: prism.PressLook.none),
+                  text: prism.ButtonStyle(pressLook: prism.PressLook.none),
+                  filled: prism.ButtonStyle(pressLook: prism.PressLook.none),
+                  outlined: prism.ButtonStyle(pressLook: prism.PressLook.none),
+                ),
+                child: child,
+              ),
             ),
           ),
         ),

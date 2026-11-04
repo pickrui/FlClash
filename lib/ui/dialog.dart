@@ -20,6 +20,9 @@ import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/ui/l10n.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
+import 'package:prism_ui/card_surface.dart' as prism;
+import 'package:prism_ui/theme_data.dart' as prism;
 
 const double _actionGap = 8;
 const double _actionInset = 16;
@@ -807,7 +810,42 @@ class _AlertAction extends StatelessWidget {
               side: focusRingStyle(colorScheme, standsOff: isDefault).side,
             ),
       ),
-      child: child,
+      child: prism.ButtonTheme(
+        data: prism.ButtonTheme.of(context).copyWith(
+          text: prism.ButtonStyle(
+            foregroundColor: WidgetStateProperty<Color?>.fromMap({
+              WidgetState.disabled: colorScheme.onSurface.withValues(
+                alpha: 0.38,
+              ),
+              WidgetState.any: foreground,
+            }),
+            backgroundColor: WidgetStateProperty<Color?>.fromMap({
+              WidgetState.disabled: fill,
+              WidgetState.pressed: background.withValues(
+                alpha: background.a * pressedShare,
+              ),
+              WidgetState.any: background,
+            }),
+            overlayColor: WidgetStateProperty<Color?>.fromMap({
+              WidgetState.focused: foreground.withValues(alpha: 0.1),
+              WidgetState.pressed: Colors.transparent,
+              WidgetState.hovered: foreground.withValues(alpha: 0.08),
+            }),
+            textStyle: isDefault
+                ? AppTextStyle.body.of(context, emphasized: true)
+                : AppTextStyle.body
+                      .of(context)
+                      .copyWith(fontWeight: FontWeight.w500),
+            minimumSize: const Size(0, _actionHeight),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            visualDensity: prism.VisualDensity.standard,
+            tapTargetSize: prism.TapTargetSize.shrinkWrap,
+            pressLook: prism.PressLook.none,
+            ringStandsOff: isDefault,
+          ),
+        ),
+        child: child,
+      ),
     );
   }
 }

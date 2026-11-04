@@ -7,6 +7,7 @@ import 'package:fl_clash/ui/color.dart';
 import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/theme.dart' as prism;
 
 class CommonMinFilledButtonTheme extends StatelessWidget {
   final Widget child;
@@ -23,7 +24,7 @@ class CommonMinFilledButtonTheme extends StatelessWidget {
           visualDensity: VisualDensity.compact,
         ).merge(FilledButtonTheme.of(context).style),
       ),
-      child: child,
+      child: prism.MinFilledButtonTheme(child: child),
     );
   }
 }
@@ -44,7 +45,7 @@ class CommonMinIconButtonTheme extends StatelessWidget {
           iconSize: 20.ap(context),
         ).merge(IconButtonTheme.of(context).style),
       ),
-      child: child,
+      child: prism.MinIconButtonTheme(child: child),
     );
   }
 }
