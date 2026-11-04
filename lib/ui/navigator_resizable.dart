@@ -36,8 +36,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-const Curve _sizeCurve = Curves.easeInOutCubic;
-
 /// Sizes itself to the content of the current route of the [Navigator] below
 /// it, and follows the routes' transitions from one size to the next.
 class NavigatorResizable extends StatefulWidget {
@@ -232,9 +230,10 @@ class _RouteSizes extends ChangeNotifier implements ValueListenable<Size> {
     }
     final from = value;
     _interpolate(
-      _LazySizeTween(start: () => from, end: () => _contentSizes[route])
-          .chain(CurveTween(curve: _sizeCurve))
-          .animate(_TransitionProgress(route)),
+      _LazySizeTween(
+        start: () => from,
+        end: () => _contentSizes[route],
+      ).animate(_TransitionProgress(route)),
     );
 
     void handleStatus(AnimationStatus status) {
@@ -299,11 +298,8 @@ class _RouteSizes extends ChangeNotifier implements ValueListenable<Size> {
     final progress = animation.value;
     final from = value;
     final Animatable<Size?> tween = progress == 1
-        ? _LazySizeTween(
-            start: () => _contentSizes[route],
-            end: () => from,
-          ).chain(CurveTween(curve: _sizeCurve))
-        // Popped mid-transition: run linearly from where the size is now.
+        ? _LazySizeTween(start: () => _contentSizes[route], end: () => from)
+        // Popped mid-transition: run from where the size is now.
         : _LazySizeTween(
             start: () => _contentSizes[route],
             end: () => _lerpEndSize(_contentSizes[route]!, from, progress),
