@@ -20,6 +20,8 @@ import 'snap_sheet.dart';
 
 export 'inherited.dart' show SheetType;
 
+export 'package:prism_ui/sheet.dart' show stackedSheetPeek, stackedSheetScale;
+
 @immutable
 class SheetProps {
   final Color? backgroundColor;
@@ -44,11 +46,6 @@ class ExtendProps {
 }
 
 typedef SheetBuilder = Widget Function(BuildContext context, SheetType type);
-
-const stackedSheetPeek = 14.0;
-
-/// Flutter's Cupertino sheet measured this on iOS 18.
-const stackedSheetScale = 1 - 0.0835;
 
 Future<T?> showSheet<T>({
   required BuildContext context,

@@ -8,7 +8,10 @@ import 'dart:math' as math;
 
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';
-import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/deferred_push.dart';
+import 'package:prism_ui/surface.dart' show Surface;
+import 'package:prism_ui/sheet.dart'
+    show SheetCornersScope, floatingSheetRadius, sheetFloatInset;
 import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -111,7 +114,11 @@ class SnapSheetController {
   }
 }
 
-class SnapSheetRoute<T> extends PopupRoute<T> with SheetCoverRouteMixin<T> {
+const _stackedScrimShare = 0.6;
+const _keyboardUnfloat = 120.0;
+
+class SnapSheetRoute<T> extends PopupRoute<T>
+    with SheetCoverRouteMixin<T>, DeferredPushRouteMixin<T> {
   SnapSheetRoute({
     required this.builder,
     required this.sheetBarrierColor,
@@ -135,21 +142,35 @@ class SnapSheetRoute<T> extends PopupRoute<T> with SheetCoverRouteMixin<T> {
   final String barrierLabel;
 
   @override
-  Color? get barrierColor => sheetBarrierColor;
+  Color? get barrierColor => _below == null
+      ? sheetBarrierColor
+      : sheetBarrierColor.withValues(
+          alpha: sheetBarrierColor.a * _stackedScrimShare,
+        );
 
   @override
   bool get barrierDismissible => true;
 
   final _dismissHandler = ValueNotifier<SheetDismissHandler?>(null);
 
-  final _coveringSheet = ValueNotifier<SnapSheetRoute<dynamic>?>(null);
+  final _coverReach = ValueNotifier(0.0);
+
+  SnapSheetRoute<dynamic>? _below;
 
   double _closingVelocity = 0;
 
   @override
   void didChangeNext(Route<dynamic>? nextRoute) {
     super.didChangeNext(nextRoute);
-    _coveringSheet.value = nextRoute is SnapSheetRoute ? nextRoute : null;
+    if (nextRoute is! SnapSheetRoute) {
+      _coverReach.value = 0;
+    }
+  }
+
+  @override
+  void didChangePrevious(Route<dynamic>? previousRoute) {
+    super.didChangePrevious(previousRoute);
+    _below = previousRoute is SnapSheetRoute ? previousRoute : null;
   }
 
   Future<void>? _pendingDismiss;
@@ -240,7 +261,7 @@ class SnapSheetRoute<T> extends PopupRoute<T> with SheetCoverRouteMixin<T> {
   @override
   void dispose() {
     _dismissHandler.dispose();
-    _coveringSheet.dispose();
+    _coverReach.dispose();
     super.dispose();
   }
 
@@ -416,7 +437,11 @@ class _SheetModel extends ChangeNotifier {
   bool _liftFollows = false;
 
   double _available = 0;
+  double _width = 0;
   double _keyboard = 0;
+
+  final corners = ValueNotifier(BorderRadius.zero);
+  bool _cornersPending = false;
 
   /// Infinite while the content fills the height it was laid out within.
   double _fitHeight = double.infinity;
@@ -481,6 +506,31 @@ class _SheetModel extends ChangeNotifier {
 
   bool get isSettling => _activity is _Settling;
 
+  double get reach {
+    final shortest = detents.first * _available;
+    final tallest = detents.last * _available;
+    final height = this.height;
+    if (tallest - shortest < precisionErrorTolerance) {
+      return height >= tallest - precisionErrorTolerance ? 1 : 0;
+    }
+    return clampDouble((height - shortest) / (tallest - shortest), 0, 1);
+  }
+
+  double get float =>
+      (1 - reach) * (1 - clampDouble(_keyboard / _keyboardUnfloat, 0, 1));
+
+  double scaleAt(double float) =>
+      _width > 0 ? 1 - 2 * sheetFloatInset * float / _width : 1;
+
+  double slackFor(double height) {
+    final float = 1 - reach;
+    final scale = scaleAt(float);
+    return math.max(
+      (height * (1 - scale) - sheetFloatInset * float) / scale,
+      0,
+    );
+  }
+
   bool get isOpen {
     final stops = _stops;
     final height = switch (_activity) {
@@ -492,8 +542,9 @@ class _SheetModel extends ChangeNotifier {
 
   /// A sheet at rest measures its content up to its detent, which finds the
   /// content however it changes; a moving one lays it out at what it shows.
-  double beginLayout(double available, double keyboard) {
+  double beginLayout(double available, double width, double keyboard) {
     _available = available;
+    _width = width;
     _keyboard = keyboard;
     final stops = _stops;
     final height = _heightIn(stops);
@@ -584,9 +635,24 @@ class _SheetModel extends ChangeNotifier {
     _activity = _Settling(activity.stop, offset, launch.velocity, launch.ratio);
   }
 
-  void endLayout() {
+  void endLayout(BorderRadius? display) {
     _syncLift();
     _syncOpen();
+    _syncCorners(display);
+  }
+
+  void _syncCorners(BorderRadius? display) {
+    if (_cornersPending ||
+        floatingSheetRadius(display, float) == corners.value) {
+      return;
+    }
+    _cornersPending = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _cornersPending = false;
+      if (!_disposed) {
+        corners.value = floatingSheetRadius(display, float);
+      }
+    });
   }
 
   void _syncLift() {
@@ -639,9 +705,25 @@ class _SheetModel extends ChangeNotifier {
     }
   }
 
+  double? _fingerScale;
+
+  void fingerDown() => _fingerScale = scaleAt(float);
+
   /// Returns how much of [delta], positive to grow, the sheet took: what is
   /// left past the tallest detent goes to the content, or [stretches] it.
   double dragBy(double delta, {bool stretches = false}) {
+    final pixels = delta * (_fingerScale ?? scaleAt(float));
+    final rest = pixels - _dragBy(pixels, stretches: stretches);
+    return delta - rest / scaleAt(float);
+  }
+
+  double toContent(double delta) =>
+      delta * (_fingerScale ?? scaleAt(float)) / scaleAt(float);
+
+  void dragEnd(double velocity) =>
+      _dragEnd(velocity * (_fingerScale ?? scaleAt(float)));
+
+  double _dragBy(double delta, {required bool stretches}) {
     // A drag the pop caught mid-gesture would hold the route from leaving.
     if (_closing) {
       return delta;
@@ -684,7 +766,7 @@ class _SheetModel extends ChangeNotifier {
     return delta - rest;
   }
 
-  void dragEnd(double velocity) {
+  void _dragEnd(double velocity) {
     final activity = _activity;
     if (activity is! _Holding || !activity.dragged) {
       return;
@@ -853,6 +935,7 @@ class _SheetModel extends ChangeNotifier {
     settling.dispose();
     open.dispose();
     lift.dispose();
+    corners.dispose();
     super.dispose();
   }
 }
@@ -930,7 +1013,10 @@ class _SnapSheetState extends State<_SnapSheet>
     final route = widget.route;
     final sheetColor = SurfaceLevel.page.colorOf(context.colorScheme);
     final theme = Theme.of(context);
-    Widget content = route.builder(context, _scrollController);
+    Widget content = Material(
+      type: MaterialType.transparency,
+      child: route.builder(context, _scrollController),
+    );
     if (route.fitsContent) {
       content = PrimaryScrollController(
         controller: _scrollController,
@@ -939,6 +1025,8 @@ class _SnapSheetState extends State<_SnapSheet>
       );
     }
     final sheet = Listener(
+      onPointerDown: (_) => _model.fingerDown(),
+      onPointerPanZoomStart: (_) => _model.fingerDown(),
       onPointerSignal: _handlePointerSignal,
       child: GestureDetector(
         onVerticalDragUpdate: (details) =>
@@ -946,17 +1034,17 @@ class _SnapSheetState extends State<_SnapSheet>
         onVerticalDragEnd: (details) =>
             _model.dragEnd(-(details.primaryVelocity ?? 0)),
         onVerticalDragCancel: () => _model.dragEnd(0),
-        child: ClipRSuperellipse(
-          borderRadius: AppRadius.top(AppCorner.xxl),
-          child: Theme(
-            data: theme.copyWith(scaffoldBackgroundColor: sheetColor),
-            child: Material(
-              color: sheetColor,
-              child: _SheetContent(
-                model: _model,
-                child: _WithoutKeyboard(
-                  child: SheetProvider(
-                    type: SheetType.bottomSheet,
+        child: Theme(
+          data: theme.copyWith(scaffoldBackgroundColor: sheetColor),
+          child: Surface(
+            color: sheetColor,
+            child: _SheetContent(
+              model: _model,
+              child: _WithoutKeyboard(
+                child: SheetProvider(
+                  type: SheetType.bottomSheet,
+                  child: SheetCornersScope(
+                    corners: _model.corners,
                     child: SheetOverhangScope(
                       overhang: _model.lift,
                       fitsContent: route.fitsContent,
@@ -1014,9 +1102,10 @@ class _KeyboardViewport extends StatelessWidget {
     return _SheetViewport(
       model: model,
       keyboard: MediaQuery.viewInsetsOf(context).bottom,
+      display: MediaQuery.displayCornerRadiiOf(context),
       presentation: route.animation!,
       cover: route.secondaryAnimation!,
-      covering: route._coveringSheet,
+      coverReach: route._coverReach,
       child: child,
     );
   }
@@ -1028,26 +1117,29 @@ class _SheetViewport extends SingleChildRenderObjectWidget {
   const _SheetViewport({
     required this.model,
     required this.keyboard,
+    required this.display,
     required this.presentation,
     required this.cover,
-    required this.covering,
+    required this.coverReach,
     required super.child,
   });
 
   final _SheetModel model;
   final double keyboard;
+  final BorderRadius? display;
   final Animation<double> presentation;
   final Animation<double> cover;
-  final ValueListenable<SnapSheetRoute<dynamic>?> covering;
+  final ValueListenable<double> coverReach;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderSheetViewport(
       model: model,
       keyboard: keyboard,
+      display: display,
       presentation: presentation,
       cover: cover,
-      covering: covering,
+      coverReach: coverReach,
     );
   }
 
@@ -1059,9 +1151,10 @@ class _SheetViewport extends SingleChildRenderObjectWidget {
     renderObject
       ..model = model
       ..keyboard = keyboard
+      ..display = display
       ..presentation = presentation
       ..cover = cover
-      ..covering = covering;
+      ..coverReach = coverReach;
   }
 }
 
@@ -1070,19 +1163,23 @@ class _RenderSheetViewport extends RenderBox
   _RenderSheetViewport({
     required this._model,
     required this._keyboard,
+    required this._display,
     required this._presentation,
     required this._cover,
-    required this._covering,
+    required this._coverReach,
   });
 
   _SheetModel _model;
   double _keyboard;
   Animation<double> _presentation;
   Animation<double> _cover;
-  ValueListenable<SnapSheetRoute<dynamic>?> _covering;
+  ValueListenable<double> _coverReach;
 
   final _layer = LayerHandle<TransformLayer>();
+  final _clipLayer = LayerHandle<ClipRSuperellipseLayer>();
   double _shown = 0;
+
+  bool _risen = false;
 
   set model(_SheetModel value) {
     if (identical(value, _model)) {
@@ -1101,6 +1198,15 @@ class _RenderSheetViewport extends RenderBox
       return;
     }
     _keyboard = value;
+    markNeedsLayout();
+  }
+
+  BorderRadius? _display;
+  set display(BorderRadius? value) {
+    if (value == _display) {
+      return;
+    }
+    _display = value;
     markNeedsLayout();
   }
 
@@ -1128,15 +1234,15 @@ class _RenderSheetViewport extends RenderBox
     markNeedsPaint();
   }
 
-  set covering(ValueListenable<SnapSheetRoute<dynamic>?> value) {
-    if (identical(value, _covering)) {
+  set coverReach(ValueListenable<double> value) {
+    if (identical(value, _coverReach)) {
       return;
     }
     if (attached) {
-      _covering.removeListener(markNeedsPaint);
+      _coverReach.removeListener(markNeedsPaint);
       value.addListener(markNeedsPaint);
     }
-    _covering = value;
+    _coverReach = value;
     markNeedsPaint();
   }
 
@@ -1146,7 +1252,7 @@ class _RenderSheetViewport extends RenderBox
     _model.addListener(markNeedsLayout);
     _presentation.addListener(markNeedsPaint);
     _cover.addListener(markNeedsPaint);
-    _covering.addListener(markNeedsPaint);
+    _coverReach.addListener(markNeedsPaint);
   }
 
   @override
@@ -1154,13 +1260,14 @@ class _RenderSheetViewport extends RenderBox
     _model.removeListener(markNeedsLayout);
     _presentation.removeListener(markNeedsPaint);
     _cover.removeListener(markNeedsPaint);
-    _covering.removeListener(markNeedsPaint);
+    _coverReach.removeListener(markNeedsPaint);
     super.detach();
   }
 
   @override
   void dispose() {
     _layer.layer = null;
+    _clipLayer.layer = null;
     super.dispose();
   }
 
@@ -1172,12 +1279,13 @@ class _RenderSheetViewport extends RenderBox
 
   @override
   void performLayout() {
-    var limit = _model.beginLayout(size.height, _keyboard);
+    var limit = _model.beginLayout(size.height, size.width, _keyboard);
     final content = _model._content;
     // The limit reaches the content outside its constraints, which may not
     // have changed.
     if (content != null &&
-        (content._limit != limit || _model._measureRoom != null)) {
+        (content._room != limit + _model.slackFor(limit) ||
+            _model._measureRoom != null)) {
       invokeLayoutCallback<BoxConstraints>((_) => content.markNeedsLayout());
     }
     var height = _model.height;
@@ -1196,7 +1304,8 @@ class _RenderSheetViewport extends RenderBox
         _layoutSheet(height);
       }
     }
-    _model.endLayout();
+    _model.endLayout(_display);
+    _model.route._below?._coverReach.value = _model.reach;
   }
 
   /// Never tight, so a change in the content's height reaches this layout.
@@ -1212,10 +1321,16 @@ class _RenderSheetViewport extends RenderBox
     );
   }
 
-  Matrix4 get _transform {
+  ({Matrix4 transform, double foot, double float}) get _placement {
+    if (_presentation.value >= 1) {
+      _risen = true;
+    }
+    final float = _risen
+        ? _model.float
+        : _model.float * clampDouble(_presentation.value, 0, 1);
     final sheet = math.max(_shown, _model.minHeight) + _keyboard;
-    final cover = _covering.value == null ? 0.0 : _cover.value;
-    final scale = 1 - (1 - stackedSheetScale) * cover;
+    final cover = _cover.value * _coverReach.value * _model.reach;
+    final scale = (1 - (1 - stackedSheetScale) * cover) * _model.scaleAt(float);
     final below = math.max(_model.minHeight - _shown, 0.0);
     final top =
         size.height -
@@ -1223,24 +1338,43 @@ class _RenderSheetViewport extends RenderBox
         below +
         (1 - _presentation.value) * sheet -
         stackedSheetPeek * cover;
-    return Matrix4.diagonal3Values(scale, scale, 1)
-      ..setTranslationRaw(size.width / 2 * (1 - scale), top, 0);
+    return (
+      transform: Matrix4.diagonal3Values(scale, scale, 1)
+        ..setTranslationRaw(size.width / 2 * (1 - scale), top, 0),
+      foot: math.max(
+        (sheet - below + stackedSheetPeek * cover - sheetFloatInset * float) /
+            scale,
+        0,
+      ),
+      float: float,
+    );
   }
+
+  Matrix4 get _transform => _placement.transform;
 
   @override
   void paint(PaintingContext context, Offset offset) {
     final child = this.child;
     if (child == null) {
       _layer.layer = null;
+      _clipLayer.layer = null;
       return;
     }
-    _layer.layer = context.pushTransform(
-      needsCompositing,
+    final (:transform, :foot, :float) = _placement;
+    _layer.layer = context.pushTransform(needsCompositing, offset, transform, (
+      context,
       offset,
-      _transform,
-      (context, offset) => context.paintChild(child, offset),
-      oldLayer: _layer.layer,
-    );
+    ) {
+      final card = Offset.zero & Size(size.width, foot);
+      _clipLayer.layer = context.pushClipRSuperellipse(
+        needsCompositing,
+        offset,
+        card,
+        floatingSheetRadius(_display, float).toRSuperellipse(card),
+        (context, offset) => context.paintChild(child, offset),
+        oldLayer: _clipLayer.layer,
+      );
+    }, oldLayer: _layer.layer);
   }
 
   @override
@@ -1250,10 +1384,12 @@ class _RenderSheetViewport extends RenderBox
     if (child == null || !child.hasSize) {
       return false;
     }
+    final (:transform, :foot, float: _) = _placement;
     return result.addWithPaintTransform(
-      transform: _transform,
+      transform: transform,
       position: position,
-      hitTest: (result, position) => child.hitTest(result, position: position),
+      hitTest: (result, position) =>
+          position.dy <= foot && child.hitTest(result, position: position),
     );
   }
 
@@ -1287,7 +1423,7 @@ class _RenderSheetContent extends RenderProxyBox {
   _RenderSheetContent(this._model);
 
   _SheetModel _model;
-  double? _limit;
+  double? _room;
 
   _SheetModel get model => _model;
 
@@ -1327,26 +1463,27 @@ class _RenderSheetContent extends RenderProxyBox {
   @override
   void performLayout() {
     final width = constraints.maxWidth;
-    final limit = _limit = model._contentLimit;
+    final limit = model._contentLimit;
+    final room = _room = limit + model.slackFor(limit);
     final child = this.child;
     if (child != null) {
-      final room = model._measureRoom;
-      if (room != null) {
+      final measureRoom = model._measureRoom;
+      if (measureRoom != null) {
         model._measureRoom = null;
         child.layout(
-          BoxConstraints(minWidth: width, maxWidth: width, maxHeight: room),
+          BoxConstraints(
+            minWidth: width,
+            maxWidth: width,
+            maxHeight: measureRoom,
+          ),
           parentUsesSize: true,
         );
-        model._measured(child.size.height, room);
+        model._measured(child.size.height, measureRoom);
       }
       child.layout(
         model.fitsContent
-            ? BoxConstraints(minWidth: width, maxWidth: width, maxHeight: limit)
-            : BoxConstraints(
-                maxWidth: width,
-                minHeight: limit,
-                maxHeight: limit,
-              ),
+            ? BoxConstraints(minWidth: width, maxWidth: width, maxHeight: room)
+            : BoxConstraints(maxWidth: width, minHeight: room, maxHeight: room),
         parentUsesSize: true,
       );
       model.contentHeight = child.size.height;
@@ -1381,7 +1518,7 @@ class _SheetScrollController extends ScrollController
 }
 
 class _SheetScrollPosition extends ScrollPositionWithSingleContext
-    with ScrubbableScrollPosition {
+    with ScrubbableScrollPosition, InitialPixelsInRange {
   _SheetScrollPosition({
     required this.model,
     required super.physics,
@@ -1506,17 +1643,32 @@ class _SheetContentDrag implements Drag {
 
   _SheetModel get _sheet => _position.model;
 
+  DragUpdateDetails _inContent(DragUpdateDetails details) {
+    final delta = details.primaryDelta;
+    if (delta == null || _sheet.toContent(delta) == delta) {
+      return details;
+    }
+    final moved = _sheet.toContent(delta);
+    return DragUpdateDetails(
+      sourceTimeStamp: details.sourceTimeStamp,
+      delta: Offset(0, moved),
+      primaryDelta: moved,
+      globalPosition: details.globalPosition,
+      localPosition: details.localPosition,
+    );
+  }
+
   @override
   void update(DragUpdateDetails details) {
     final delta = details.primaryDelta ?? 0;
     if (delta == 0 || _position.isScrubbing) {
-      _content.update(details);
+      _content.update(_inContent(details));
       return;
     }
     final grow = -delta;
     if (grow > 0) {
       if (!_sheetHeld && (_position._contentScrolled || _sheet.isOpen)) {
-        _content.update(details);
+        _content.update(_inContent(details));
         return;
       }
       _sheetHeld = true;
@@ -1536,7 +1688,7 @@ class _SheetContentDrag implements Drag {
       return;
     }
     if (!_sheetHeld && (!startedAtEdge || _position._contentScrolled)) {
-      _content.update(details);
+      _content.update(_inContent(details));
       return;
     }
     _sheetHeld = true;
@@ -1546,7 +1698,19 @@ class _SheetContentDrag implements Drag {
   @override
   void end(DragEndDetails details) {
     if (!_sheetHeld) {
-      _content.end(details);
+      final velocity = details.primaryVelocity;
+      _content.end(
+        velocity == null
+            ? details
+            : DragEndDetails(
+                velocity: Velocity(
+                  pixelsPerSecond: Offset(0, _sheet.toContent(velocity)),
+                ),
+                primaryVelocity: _sheet.toContent(velocity),
+                globalPosition: details.globalPosition,
+                localPosition: details.localPosition,
+              ),
+      );
       _sheet.dragEnd(0);
       return;
     }

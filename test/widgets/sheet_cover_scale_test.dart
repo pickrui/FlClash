@@ -15,6 +15,7 @@ import '../helpers/test_app.dart';
 
 const _view = Size(400, 900);
 const _stackedWidth = 400 * stackedSheetScale;
+const _tallest = SheetProps(detents: [0.9]);
 
 Widget _page(String name, int rows, {VoidCallback? onNext}) {
   return CommonScaffold(
@@ -70,11 +71,15 @@ void main() {
     await openSheet(tester, (context) {
       sheetContext = context;
       return _page('A', 8);
-    }, props: const SheetProps());
+    }, props: _tallest);
     final rest = _rectOf(tester, 'A');
 
     unawaited(
-      showSheet<void>(context: sheetContext, builder: (_, _) => _page('B', 2)),
+      showSheet<void>(
+        context: sheetContext,
+        props: _tallest,
+        builder: (_, _) => _page('B', 2),
+      ),
     );
     await tester.pumpAndSettle();
     final covered = _rectOf(tester, 'A');
@@ -103,10 +108,14 @@ void main() {
     await openSheet(tester, (context) {
       sheetContext = context;
       return _page('A', 20);
-    }, props: const SheetProps());
+    }, props: _tallest);
     final rest = _rectOf(tester, 'A');
     unawaited(
-      showSheet<void>(context: sheetContext, builder: (_, _) => _page('B', 20)),
+      showSheet<void>(
+        context: sheetContext,
+        props: _tallest,
+        builder: (_, _) => _page('B', 20),
+      ),
     );
     await tester.pumpAndSettle();
     expect(_rectOf(tester, 'A').width, closeTo(_stackedWidth, 0.1));
@@ -132,5 +141,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('B')), findsNothing);
     expect(_rectOf(tester, 'A'), rest);
+  });
+  testWidgets('a sheet stays as it is behind a sheet short of its tallest '
+      'detent', (tester) async {
+    late BuildContext sheetContext;
+    await openSheet(tester, (context) {
+      sheetContext = context;
+      return _page('A', 20);
+    }, props: _tallest);
+    final rest = _rectOf(tester, 'A');
+
+    unawaited(
+      showSheet<void>(context: sheetContext, builder: (_, _) => _page('B', 20)),
+    );
+    await tester.pumpAndSettle();
+    expect(_rectOf(tester, 'A'), rest);
+    expect(_rectOf(tester, 'B').top, greaterThan(rest.top));
   });
 }

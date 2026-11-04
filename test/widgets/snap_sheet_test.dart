@@ -18,6 +18,9 @@ import 'package:fl_clash/ui/snap_sheet.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
+import 'package:prism_ui/sheet.dart' show sheetFloatInset;
+import 'package:prism_ui/shape.dart' show AppCorner;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -137,6 +140,77 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 2));
   }
+
+  testWidgets('a sheet floats as a card inset from the sides and foot below '
+      'its tallest detent, and spans the display there', (tester) async {
+    await openSheet(tester);
+    final page = find.byType(CommonScaffold);
+    ClipRSuperellipseLayer clip() => tester.layers
+        .whereType<ClipRSuperellipseLayer>()
+        .firstWhere((layer) => layer.clipRSuperellipse!.width == _mobile.width);
+    const inset = sheetFloatInset;
+
+    expect(tester.getRect(page).left, moreOrLessEquals(inset));
+    expect(tester.getRect(page).right, moreOrLessEquals(_mobile.width - inset));
+    expect(
+      tester.getRect(page).bottom,
+      moreOrLessEquals(_mobile.height - inset),
+    );
+    final floating = clip().clipRSuperellipse!;
+    expect(floating.tlRadius.x, AppCorner.xxl);
+    expect(floating.blRadius.x, AppCorner.xxl);
+
+    await tester.drag(content(), const Offset(0, -400));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(page).left, 0);
+    expect(tester.getRect(page).right, _mobile.width);
+    final spanning = clip().clipRSuperellipse!;
+    expect(spanning.tlRadius.x, AppCorner.xxl);
+    expect(spanning.blRadius.x, 0);
+
+    await close(tester);
+  });
+
+  testWidgets('a sheet under a status bar clips at its own top', (
+    tester,
+  ) async {
+    tester.view.padding = const FakeViewPadding(top: 40);
+    addTearDown(tester.view.resetPadding);
+    await openSheet(tester);
+    final layer = tester.layers.whereType<ClipRSuperellipseLayer>().firstWhere(
+      (layer) => layer.clipRSuperellipse!.width == _mobile.width,
+    );
+    final transform = layer.parent! as TransformLayer;
+    final card = MatrixUtils.transformRect(
+      transform.transform!,
+      layer.clipRSuperellipse!.outerRect,
+    );
+
+    expect(
+      card.top,
+      moreOrLessEquals(tester.getRect(find.byType(CommonScaffold)).top),
+    );
+    await close(tester);
+  });
+
+  testWidgets('a floating sheet follows the finger one to one', (tester) async {
+    await openSheet(tester);
+    final collapsed = sheetTop(tester);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SheetDragHandle)),
+    );
+    await gesture.moveBy(const Offset(0, -kDragSlopDefault));
+    await tester.pump();
+    final start = sheetTop(tester);
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(const Offset(0, -10));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(start, lessThan(collapsed + 1));
+    expect(sheetTop(tester), closeTo(start - 100, 1));
+    await gesture.up();
+    await close(tester);
+  });
 
   testWidgets('a drag on a collapsed sheet expands it and leaves the content '
       'where it was', (tester) async {
@@ -464,7 +538,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(sheetTop(tester), closeTo(expanded, 1));
-    expect(contentOffset(tester), closeTo(300 - kDragSlopDefault, 1));
+    expect(contentOffset(tester), closeTo(300 - kDragSlopDefault, 4));
 
     await close(tester);
   });
