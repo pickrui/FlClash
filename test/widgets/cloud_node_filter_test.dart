@@ -15,6 +15,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/cloud/node_filter_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';
@@ -659,7 +660,7 @@ void main() {
       expect(_onPressed(tester, 'Save'), isNull);
 
       api.previewError = null;
-      await tester.tap(find.widgetWithText(TextButton, 'Retry'));
+      await tester.tap(find.widgetWithText(prism.TextButton, 'Retry'));
       await tester.pumpAndSettle();
       expect(api.previews, const [
         NodeFilter(includeLines: ['gia']),

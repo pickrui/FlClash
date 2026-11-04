@@ -14,6 +14,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/ui/qr_code.dart';
@@ -131,17 +132,17 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
     return CommonDialog(
       title: appLocalizations.scanOrTransferPay,
       actions: [
-        TextButton(
+        prism.TextButton(
           onPressed: () => _close(false),
           child: Text(appLocalizations.close),
         ),
         if (isUrl && init.url != null)
-          TextButton(
+          prism.TextButton(
             onPressed: () => globalState.openUrl(init.url!),
             child: Text(appLocalizations.openInBrowser),
           ),
         if (hasPaymentId)
-          TextButton(
+          prism.TextButton(
             onPressed: _checking ? null : () => _check(manual: true),
             child: Text(
               _checking
@@ -221,7 +222,7 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
                         .copyWith(color: colorScheme.onSurface),
                   ),
                 ),
-                IconButton(
+                prism.IconButton(
                   icon: const GlyphIcon(AppGlyphs.copy, size: 20),
                   tooltip: appLocalizations.copy,
                   onPressed: () {

@@ -19,6 +19,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 
 import 'cloud_layout.dart';
 import 'node_filter_widgets.dart';
@@ -513,7 +514,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
               prefixIcon: const GlyphIcon(AppGlyphs.search, size: 20),
               suffixIcon: query.isEmpty
                   ? null
-                  : IconButton(
+                  : prism.IconButton(
                       icon: const GlyphIcon(AppGlyphs.close, size: 18),
                       tooltip: MaterialLocalizations.of(context)
                           .clearButtonTooltip,
@@ -598,7 +599,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                   .copyWith(color: colorScheme.error),
             ),
           ),
-          TextButton.icon(
+          prism.TextButton.icon(
             icon: const GlyphIcon(AppGlyphs.refresh, size: 18),
             label: Text(context.appLocalizations.nodeFilterRetry),
             onPressed: () {

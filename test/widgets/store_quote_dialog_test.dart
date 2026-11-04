@@ -10,6 +10,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/views/cloud/store_quote_dialog.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -93,8 +94,9 @@ Future<List<StoreQuoteChoice?>> _open(
   return results;
 }
 
-VoidCallback? _action(WidgetTester tester, String label) =>
-    tester.widget<TextButton>(find.widgetWithText(TextButton, label)).onPressed;
+VoidCallback? _action(WidgetTester tester, String label) => tester
+    .widget<prism.TextButton>(find.widgetWithText(prism.TextButton, label))
+    .onPressed;
 
 void main() {
   testWidgets('expired quote closes only its own route under a newer dialog', (
@@ -103,7 +105,7 @@ void main() {
     final panel = _Panel();
     final results = await _open(tester, panel);
     final pending = panel.pendingQuote = Completer<StoreQuote>();
-    await tester.tap(find.widgetWithText(TextButton, 'Verify'));
+    await tester.tap(find.widgetWithText(prism.TextButton, 'Verify'));
     await tester.pump();
     final context = tester.element(find.byType(StoreQuoteDialog));
     final navigator = Navigator.of(context);
@@ -149,15 +151,15 @@ void main() {
       find.text('Insufficient balance. Top up before continuing.'),
       findsOneWidget,
     );
-    expect(find.widgetWithText(TextButton, 'Confirm'), findsNothing);
+    expect(find.widgetWithText(prism.TextButton, 'Confirm'), findsNothing);
 
-    await tester.tap(find.widgetWithText(TextButton, 'Recharge'));
+    await tester.tap(find.widgetWithText(prism.TextButton, 'Recharge'));
     await tester.pumpAndSettle();
     expect(panel.recharges, 1);
     expect(panel.quotes, 2);
-    expect(find.widgetWithText(TextButton, 'Recharge'), findsNothing);
+    expect(find.widgetWithText(prism.TextButton, 'Recharge'), findsNothing);
 
-    await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
+    await tester.tap(find.widgetWithText(prism.TextButton, 'Confirm'));
     await tester.pumpAndSettle();
     expect(results.single?.authorizedPrice, 30);
     expect(tester.takeException(), isNull);
@@ -169,7 +171,7 @@ void main() {
     final panel = _Panel()..rechargeSucceeds = false;
     await _open(tester, panel);
 
-    await tester.tap(find.widgetWithText(TextButton, 'Recharge'));
+    await tester.tap(find.widgetWithText(prism.TextButton, 'Recharge'));
     await tester.pumpAndSettle();
     expect(panel.recharges, 1);
     expect(panel.quotes, 1);
@@ -181,7 +183,7 @@ void main() {
   ) async {
     await _open(tester, _Panel(), offerRecharge: false);
 
-    expect(find.widgetWithText(TextButton, 'Recharge'), findsNothing);
+    expect(find.widgetWithText(prism.TextButton, 'Recharge'), findsNothing);
     expect(_action(tester, 'Confirm'), isNull);
   });
 }

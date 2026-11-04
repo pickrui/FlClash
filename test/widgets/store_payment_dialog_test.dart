@@ -12,6 +12,7 @@ import 'package:fl_clash/views/cloud/store_payment_dialog.dart';
 import 'package:fl_clash/ui/qr_code.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 
 import '../helpers/test_app.dart';
 
@@ -106,7 +107,9 @@ void main() {
     await tester.pump();
     expect(
       tester
-          .widget<TextButton>(find.widgetWithText(TextButton, 'Checking...'))
+          .widget<prism.TextButton>(
+            find.widgetWithText(prism.TextButton, 'Checking...'),
+          )
           .onPressed,
       isNull,
     );

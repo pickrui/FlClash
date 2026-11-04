@@ -12,6 +12,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 List<StoreQuoteRow> _renewalRows(bool available, double? price) {
@@ -231,23 +232,23 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
       title: widget.title,
       hasFields: true,
       actions: [
-        TextButton(
+        prism.TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(appLocalizations.cancel),
         ),
-        TextButton(
+        prism.TextButton(
           onPressed: busy ? null : _load,
           child: Text(appLocalizations.verifyCoupon),
         ),
         if (quoted && !quote.sufficientBalance && recharge != null)
-          TextButton(
+          prism.TextButton(
             onPressed: busy ? null : () => _recharge(recharge),
             child: _recharging
                 ? const ActivityIndicator(size: 18)
                 : Text(appLocalizations.recharge),
           )
         else
-          TextButton(
+          prism.TextButton(
             onPressed: quoted && !busy && quote.sufficientBalance
                 ? () => Navigator.of(context).pop(
                     StoreQuoteChoice(
