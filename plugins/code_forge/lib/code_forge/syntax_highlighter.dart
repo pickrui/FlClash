@@ -6,7 +6,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 import 'package:re_highlight/re_highlight.dart';
 
 /// Highlights each line on its own, so a line's spans follow from its text
@@ -138,7 +138,8 @@ class SyntaxHighlighter {
     String? fontFamily,
   ) {
     return ui.TextStyle(
-      color: style?.color ?? editorTheme['root']?.color ?? Colors.black,
+      color:
+          style?.color ?? editorTheme['root']?.color ?? const Color(0xFF000000),
       fontSize: fontSize,
       fontFamily: fontFamily,
       fontFamilyFallback: baseTextStyle?.fontFamilyFallback,
@@ -151,7 +152,10 @@ class SyntaxHighlighter {
     final baseStyle = baseTextStyle ?? editorTheme['root'];
 
     return ui.TextStyle(
-      color: baseStyle?.color ?? editorTheme['root']?.color ?? Colors.black,
+      color:
+          baseStyle?.color ??
+          editorTheme['root']?.color ??
+          const Color(0xFF000000),
       fontSize: fontSize,
       fontFamily: fontFamily,
       fontFamilyFallback: baseTextStyle?.fontFamilyFallback,

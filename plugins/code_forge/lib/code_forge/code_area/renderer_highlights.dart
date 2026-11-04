@@ -447,7 +447,9 @@ extension _RendererHighlights on _CodeFieldRenderer {
     final screenX = _screenX(offset, 0);
 
     final highlightColor =
-        (textStyle?.color ?? editorTheme['root']?.color ?? Colors.yellow)
+        (textStyle?.color ??
+                editorTheme['root']?.color ??
+                const Color(0xFFFFEB3B))
             .withValues(alpha: opacity);
 
     final paint = Paint()
