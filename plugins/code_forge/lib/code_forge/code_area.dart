@@ -203,24 +203,34 @@ class _CodeField extends LeafRenderObjectWidget {
 
 class CodeForgeContextMenuRequest {
   final Offset globalPosition;
-  final bool hasSelection;
+  final TextSelection Function() _selection;
+  final int Function() _length;
+  final Rect? Function() _selectionRect;
 
-  final Rect? selectionRect;
+  bool get hasSelection => !_selection().isCollapsed;
 
-  final bool isAllSelected;
+  bool get isAllSelected {
+    final selection = _selection();
+    return selection.start == 0 && selection.end == _length();
+  }
+
+  /// Where the selection stands on screen in global coordinates: the caret
+  /// when collapsed, the selected span of a single row, or the rows of several;
+  /// null when scrolled out of view.
+  Rect? get selectionRect => _selectionRect();
+
   final bool readOnly;
 
   final VoidCallback copy;
   final VoidCallback cut;
   final VoidCallback paste;
-
   final VoidCallback selectAll;
 
   const CodeForgeContextMenuRequest({
     required this.globalPosition,
-    required this.hasSelection,
-    this.selectionRect,
-    required this.isAllSelected,
+    required this._selection,
+    required this._length,
+    required this._selectionRect,
     required this.readOnly,
     required this.copy,
     required this.cut,

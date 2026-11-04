@@ -18,6 +18,9 @@ import 'package:material_ui/material_ui.dart'
     as legacy
     show InkResponse, Material, MaterialType;
 import 'package:prism_ui/l10n.dart';
+import 'package:prism_ui/popup.dart'
+    as prism
+    show PopupMenuItem, PopupMenuSection;
 import 'package:prism_ui/card_surface.dart';
 import 'package:prism_ui/color.dart';
 import 'package:prism_ui/context.dart';
@@ -1820,40 +1823,8 @@ class _PopupPressRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'popup press';
 }
 
-class CommonPopupMenuItem {
-  const CommonPopupMenuItem({
-    required this.label,
-    this.subtitle,
-    this.glyph,
-    this.onPressed,
-    this.danger = false,
-    this.checked,
-    this.keepsOpen = false,
-    this.section,
-    this.subItems = const [],
-  });
-
-  final String label;
-  final String? subtitle;
-  final Glyph? glyph;
-  final VoidCallback? onPressed;
-  final bool danger;
-  final bool? checked;
-
-  /// iOS's keepsMenuPresented, for one of several choices.
-  final bool keepsOpen;
-
-  /// Sets this item and those after it apart from the items above, as an
-  /// inline section of an iOS menu does.
-  final CommonPopupMenuSection? section;
-  final List<CommonPopupMenuItem> subItems;
-}
-
-class CommonPopupMenuSection {
-  const CommonPopupMenuSection({this.title});
-
-  final String? title;
-}
+typedef CommonPopupMenuItem = prism.PopupMenuItem;
+typedef CommonPopupMenuSection = prism.PopupMenuSection;
 
 const _menuMinWidth = 160.0;
 const _menuMaxWidth = 280.0;

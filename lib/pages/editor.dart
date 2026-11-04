@@ -21,6 +21,11 @@ import 'package:fl_clash/ui/goo.dart';
 import 'package:fl_clash/ui/route_motion_hold.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/text_loupe.dart';
+import 'package:fl_clash/ui/l10n.dart';
+import 'package:fl_clash/ui/prism_theme_bridge.dart';
+import 'package:prism_ui/edit_menu.dart';
+import 'package:prism_ui/text_selection_controls.dart'
+    show textSelectionColorOf;
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
@@ -751,7 +756,7 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
       _editorTheme = _highlightTheme(colorScheme, widget.language);
       _selectionStyle = CodeSelectionStyle(
         cursorColor: colorScheme.primary,
-        selectionColor: colorScheme.primary.opacity30,
+        selectionColor: textSelectionColorOf(colorScheme.asPrism),
         cursorBubbleColor: colorScheme.primary,
       );
     }
@@ -788,66 +793,110 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
     CodeForgeContextMenuRequest request,
   ) {
     final appLocalizations = context.appLocalizations;
-    final items = [
+    final navigator = Navigator.of(context);
+    final navigatorBox = navigator.context.findRenderObject();
+    if (navigatorBox is! RenderBox) {
+      return;
+    }
+    final point = navigatorBox.globalToLocal(request.globalPosition);
+    final controller = widget.controller;
+    late final PopupRoute<void> route;
+    late final ValueNotifier<List<CommonPopupMenuItem>> items;
+    late final ValueNotifier<Rect> anchor;
+    var selection = controller.selection;
+    var selectingAll = false;
+
+    void close() {
+      if (route.isCurrent) navigator.pop();
+    }
+
+    Rect anchorRect() {
+      final rect = request.selectionRect;
+      return rect == null
+          ? point & Size.zero
+          : Rect.fromPoints(
+              navigatorBox.globalToLocal(rect.topLeft),
+              navigatorBox.globalToLocal(rect.bottomRight),
+            );
+    }
+
+    List<CommonPopupMenuItem> menuItems() => [
       if (request.hasSelection && !request.readOnly)
         CommonPopupMenuItem(
           glyph: AppGlyphs.cut,
           label: appLocalizations.cut,
-          onPressed: request.cut,
+          onPressed: () {
+            request.cut();
+            close();
+          },
         ),
       if (request.hasSelection)
         CommonPopupMenuItem(
           glyph: AppGlyphs.copy,
           label: appLocalizations.copy,
-          onPressed: request.copy,
+          onPressed: () {
+            request.copy();
+            close();
+          },
         ),
       if (!request.readOnly)
         CommonPopupMenuItem(
           glyph: AppGlyphs.paste,
           label: appLocalizations.paste,
-          onPressed: request.paste,
+          onPressed: () {
+            request.paste();
+            close();
+          },
         ),
       if (!request.isAllSelected)
         CommonPopupMenuItem(
           glyph: AppGlyphs.selectAll,
           label: appLocalizations.selectAll,
-          onPressed: request.selectAll,
+          onPressed: () {
+            selectingAll = true;
+            request.selectAll();
+            selectingAll = false;
+            selection = controller.selection;
+            if (!route.isCurrent) return;
+            items.value = menuItems();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (route.isActive) anchor.value = anchorRect();
+            });
+          },
         ),
     ];
-    final navigator = Navigator.of(context);
-    final navigatorBox = navigator.context.findRenderObject();
-    if (items.isEmpty || navigatorBox is! RenderBox) {
+
+    items = ValueNotifier(menuItems());
+    if (items.value.isEmpty) {
       return;
     }
-    final point = navigatorBox.globalToLocal(request.globalPosition);
-    final selectionRect = request.selectionRect;
-    final route = CommonPopupRoute<void>(
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      placement: PopupPlacement.belowPoint,
-      modal: false,
-      anchorOf: () => point & Size.zero,
-      avoid: system.isDesktop || selectionRect == null
-          ? null
-          : Rect.fromPoints(
-              navigatorBox.globalToLocal(selectionRect.topLeft),
-              navigatorBox.globalToLocal(selectionRect.bottomRight),
-            ),
-      builder: (_) => CommonPopupMenu(items: items),
-    );
-    final controller = widget.controller;
-    final selection = controller.selection;
+    anchor = ValueNotifier(anchorRect());
+    route = system.isDesktop
+        ? CommonPopupRoute<void>(
+            barrierLabel: UiLocalizations.of(context).close,
+            placement: PopupPlacement.belowPoint,
+            modal: false,
+            anchorOf: () => point & Size.zero,
+            builder: (_) => CommonPopupMenu(items: items.value),
+          )
+        : EditMenuRoute(
+            barrierLabel: UiLocalizations.of(context).close,
+            items: items,
+            selection: anchor,
+          );
     final version = controller.contentVersion;
     final composition = controller.imeComposition;
     final focusNode = controller.focusNode;
     final hadFocus = focusNode?.hasFocus ?? false;
     // Typing or a focus change reaches the editor with no pointer down.
     void closeOnceOutdated() {
+      if (selectingAll) return;
       final outdated =
           controller.selection != selection ||
           controller.contentVersion != version ||
           controller.imeComposition != composition ||
           hadFocus && !focusNode!.hasFocus;
-      if (outdated && route.isCurrent) navigator.pop();
+      if (outdated) close();
     }
 
     controller.addListener(closeOnceOutdated);
@@ -856,6 +905,12 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
       controller.removeListener(closeOnceOutdated);
       focusNode?.removeListener(closeOnceOutdated);
     });
+    unawaited(
+      route.completed.whenComplete(() {
+        items.dispose();
+        anchor.dispose();
+      }),
+    );
   }
 
   @override
@@ -895,11 +950,8 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
         ),
         child: EditorCompletionPopup(details: details, textStyle: _textStyle!),
       ),
-      magnifierBuilder: (context, controller, magnifierInfo) => TextLoupe(
-        controller: controller,
-        magnifierInfo: magnifierInfo,
-        borderColor: context.colorScheme.primary,
-      ),
+      magnifierBuilder: (context, controller, magnifierInfo) =>
+          TextLoupe(controller: controller, magnifierInfo: magnifierInfo),
       textStyle: _textStyle,
       lineWrap: lineWrap,
       lineNumberStyle: _lineNumberStyle,

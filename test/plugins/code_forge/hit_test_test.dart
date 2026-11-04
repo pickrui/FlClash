@@ -513,4 +513,49 @@ void main() {
       editorTopPadding + editorLineHeight * 4,
     );
   });
+  testWidgets(
+    'a held context request follows caret and selected text changes',
+    (tester) async {
+      final controller = CodeForgeController()
+        ..text = 'first line\nsecond line';
+      final requests = <CodeForgeContextMenuRequest>[];
+      await pumpEditor(
+        tester,
+        controller,
+        onContextMenu: (_, request) => requests.add(request),
+      );
+      controller.selection = const TextSelection(
+        baseOffset: 1,
+        extentOffset: 5,
+      );
+      await settle(tester, 2);
+      final origin = tester.getTopLeft(find.byType(CodeForge));
+      await tester.tapAt(
+        origin + const Offset(_textX, editorTopPadding + editorLineHeight / 2),
+        buttons: kSecondaryButton,
+      );
+      await settle(tester, 2);
+      final request = requests.single;
+      expect(request.hasSelection, isTrue);
+      expect(request.isAllSelected, isFalse);
+      final span = request.selectionRect!;
+      expect(span.width, greaterThan(0));
+      expect(
+        span.width,
+        lessThan(tester.getSize(find.byType(CodeForge)).width / 2),
+      );
+
+      controller.selection = const TextSelection.collapsed(offset: 3);
+      await settle(tester, 2);
+      expect(request.hasSelection, isFalse);
+      expect(request.selectionRect!.width, 0);
+      expect(request.selectionRect!.height, editorLineHeight);
+
+      request.selectAll();
+      await settle(tester, 2);
+      expect(request.isAllSelected, isTrue);
+      expect(request.selectionRect!.height, greaterThan(span.height));
+      expect(requests, hasLength(1));
+    },
+  );
 }
