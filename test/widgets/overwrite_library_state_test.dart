@@ -209,7 +209,7 @@ void main() {
                   .overrideWithBuild((_, _) => load<Rule>()),
           ],
         );
-        expect(find.byType(CommonCircleLoading), findsOneWidget);
+        expect(find.byType(ActivityIndicator), findsOneWidget);
         if (!scripts) {
           expect(
             tester
@@ -278,7 +278,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.text('Edit global rules'), findsOneWidget);
-      expect(find.byType(CommonCircleLoading), findsOneWidget);
+      expect(find.byType(ActivityIndicator), findsOneWidget);
       expect(find.byType(RuleStatusItem), findsNothing);
       ready.complete();
       await tester.pumpAndSettle();

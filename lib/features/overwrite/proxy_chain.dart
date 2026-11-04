@@ -782,6 +782,7 @@ class _ProfileProxyChainsContentState
           SliverFillRemaining(
             hasScrollBody: false,
             child: NullStatus(
+              illustration: NullStatusIllustration.data,
               label: appLocalizations.nullTip(appLocalizations.proxyChains),
             ),
           ),
@@ -1041,7 +1042,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
         if (delay == 0) {
           return const SizedBox.square(
             dimension: 14,
-            child: CommonCircleLoading(),
+            child: ActivityIndicator(),
           );
         }
         return Text(

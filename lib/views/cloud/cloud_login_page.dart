@@ -244,7 +244,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 8,
               children: [
-                const CommonCircleLoading(size: 16),
+                const ActivityIndicator(size: 16),
                 Flexible(
                   child: Text(
                     l10n.googleLoginWaiting,

@@ -392,7 +392,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
 
     return IconButton(
       icon: _isCheckingService && _checkPhase != _ServiceCheckPhase.confirming
-          ? CommonCircleLoading(size: TonalButtonSize.bar.icon)
+          ? ActivityIndicator(size: TonalButtonSize.bar.icon)
           : GlyphIcon(glyph, color: color),
       onPressed: _isCheckingService ? null : _checkHealth,
       tooltip: tooltip,
@@ -409,7 +409,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     final notifier = ref.read(cloudAccountProvider.notifier);
     final profile = state.profile;
     if (profile == null) {
-      if (loading) return const Center(child: CommonCircleLoading.page());
+      if (loading) return const Center(child: ActivityIndicator.page());
       return NullStatus(
         illustration: NullStatusIllustration.error,
         label: state.error ?? AppLocalizations.current.noInfo,

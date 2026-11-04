@@ -283,7 +283,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
                                       ? const SizedBox(
                                           width: 12,
                                           height: 12,
-                                          child: CommonCircleLoading(),
+                                          child: ActivityIndicator(),
                                         )
                                       : Container(
                                           decoration: BoxDecoration(

@@ -444,7 +444,7 @@ class _DelayTextState extends ConsumerState<_DelayText> {
                     child: _withFocusRing(context, switch (phase) {
                       DelayTestPhase.running => Tooltip(
                         message: context.appLocalizations.delayTestRunning,
-                        child: CommonCircleLoading(size: size),
+                        child: ActivityIndicator(size: size),
                       ),
                       DelayTestPhase.queued => Tooltip(
                         message: context.appLocalizations.delayTestQueued,

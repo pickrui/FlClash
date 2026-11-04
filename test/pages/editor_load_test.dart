@@ -232,7 +232,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 16));
     expect(transition!.status, AnimationStatus.forward);
     expect(find.byType(CodeForge), findsNothing);
-    expect(find.byType(CommonCircleLoading), findsNothing);
+    expect(find.byType(ActivityIndicator), findsNothing);
 
     await settle(tester, 12);
     expect(find.byType(CodeForge), findsOneWidget);

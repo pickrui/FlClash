@@ -153,7 +153,7 @@ class _BatteryOptimizationItemState
       trailing: started
           ? InfoMessageButton(message: l.batteryOptimizationStatusTip)
           : _loading || _opening
-          ? const CommonCircleLoading(size: 24)
+          ? const ActivityIndicator(size: 24)
           : AuthorizeButton(
               authorized: _allowed,
               label: _failed && !_allowed ? l.retry : null,

@@ -32,7 +32,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.byType(CommonCircleLoading), findsOneWidget);
+      expect(find.byType(ActivityIndicator), findsOneWidget);
       expect(find.text(AppLocalizations.current.noSearchResults), findsNothing);
 
       first.completeError(StateError('fixture database unavailable'));

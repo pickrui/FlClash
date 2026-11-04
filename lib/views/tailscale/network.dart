@@ -478,7 +478,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
                           : tailscaleStatusColor(context, status),
                     ),
                   )
-                : const CommonCircleLoading(size: 18),
+                : const ActivityIndicator(size: 18),
           ),
           if (running) ...[
             if (status.tailnet.isNotEmpty)
@@ -623,7 +623,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
                                 : () => _loadSavedAuthKey(_saved!),
                             child: Text(l.refresh),
                           )
-                        : const CommonCircleLoading(size: 18),
+                        : const ActivityIndicator(size: 18),
                   ),
               ],
             ),
@@ -722,7 +722,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
         Row(
           spacing: 12,
           children: [
-            const CommonCircleLoading(size: 18),
+            const ActivityIndicator(size: 18),
             Expanded(
               child: Text(
                 authUrl != null

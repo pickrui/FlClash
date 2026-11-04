@@ -72,7 +72,7 @@ class _IconHistoryDialogState extends State<IconHistoryDialog> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return Center(
-                    child: CommonCircleLoading.page(
+                    child: ActivityIndicator.page(
                       semanticLabel: context.appLocalizations.loading,
                     ),
                   );

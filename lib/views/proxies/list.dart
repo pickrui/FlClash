@@ -902,7 +902,7 @@ class _GroupActions extends StatelessWidget {
                   tooltip: context.appLocalizations.delayTest,
                   onPressed: isDelayTesting ? null : onDelayTest,
                   icon: isDelayTesting
-                      ? CommonCircleLoading(size: TonalButtonSize.compact.icon)
+                      ? ActivityIndicator(size: TonalButtonSize.compact.icon)
                       : const GlyphIcon(AppGlyphs.bolt),
                 ),
               ],

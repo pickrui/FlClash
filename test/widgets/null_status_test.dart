@@ -19,8 +19,14 @@ Widget _switcher({
     isEmpty: isEmpty,
     loadingStatus: loadingLabel == null
         ? null
-        : NullStatus(label: loadingLabel),
-    nullStatus: const NullStatus(label: 'Nothing here'),
+        : NullStatus(
+            illustration: NullStatusIllustration.data,
+            label: loadingLabel,
+          ),
+    nullStatus: const NullStatus(
+      illustration: NullStatusIllustration.data,
+      label: 'Nothing here',
+    ),
     child: const Text('content', key: ValueKey('content')),
   );
   return MaterialApp(

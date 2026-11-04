@@ -293,7 +293,7 @@ void main() {
           () => files[script.id]!.writeAsString('const fixture = true;'),
         );
         await tester.tap(find.text('Refresh'));
-        await _pumpUntil(tester, find.byType(CommonCircleLoading));
+        await _pumpUntil(tester, find.byType(ActivityIndicator));
         for (var attempt = 0; attempt < 100 && evaluations == 0; attempt++) {
           await tester.runAsync(
             () => Future<void>.delayed(const Duration(milliseconds: 10)),
@@ -303,13 +303,13 @@ void main() {
         await tester.pump();
         expect(evaluations, 1);
         expect(find.byType(ErrorStatus), findsNothing);
-        expect(find.byType(CommonCircleLoading), findsOneWidget);
+        expect(find.byType(ActivityIndicator), findsOneWidget);
         expect(find.byTooltip('Save'), findsNothing);
         evaluation.complete(
           ScriptEvaluation(config: empty ? '{}' : '{"Allow":true}', logs: []),
         );
         await tester.pumpAndSettle();
-        expect(find.byType(CommonCircleLoading), findsNothing);
+        expect(find.byType(ActivityIndicator), findsNothing);
         if (empty) {
           expect(
             find.text(AppLocalizations.current.scriptOptionsEmpty),

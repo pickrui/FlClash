@@ -136,7 +136,7 @@ void main() {
 
     await tester.tap(find.text('Retry'));
     await tester.pump();
-    expect(find.byType(CommonCircleLoading), findsOneWidget);
+    expect(find.byType(ActivityIndicator), findsOneWidget);
     expect(tester.widget<FilledButton>(_retryButton).onPressed, isNull);
     await tester.tap(find.text('Retry'));
     await tester.pump();
@@ -144,7 +144,7 @@ void main() {
 
     pending.complete();
     await tester.pumpAndSettle();
-    expect(find.byType(CommonCircleLoading), findsNothing);
+    expect(find.byType(ActivityIndicator), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

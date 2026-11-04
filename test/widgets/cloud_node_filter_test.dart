@@ -385,7 +385,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       await tester.enterText(field, '');
       await tester.pump();
-      expect(find.byType(CommonCircleLoading), findsNothing);
+      expect(find.byType(ActivityIndicator), findsNothing);
       expect(find.text('Smart Selection · 3 of 4 nodes kept'), findsOneWidget);
 
       api.pendingPreviews.single.complete(

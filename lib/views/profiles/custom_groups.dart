@@ -517,7 +517,10 @@ class _CustomProxyGroupsSectionState
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: NullStatus(label: appLocalizations.proxyGroupEmpty),
+                  child: NullStatus(
+                    illustration: NullStatusIllustration.data,
+                    label: appLocalizations.proxyGroupEmpty,
+                  ),
                 ),
               )
             else

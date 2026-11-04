@@ -737,7 +737,7 @@ class CommonScaffoldState extends State<CommonScaffold>
           TextButton(
             onPressed: confirmation.isLoading ? null : confirmation.onPressed,
             child: confirmation.isLoading
-                ? CommonCircleLoading(size: TonalButtonSize.bar.icon)
+                ? ActivityIndicator(size: TonalButtonSize.bar.icon)
                 : Text(confirmation.tooltip!),
           ),
         ],
@@ -2143,7 +2143,7 @@ class AppBarActionButton extends StatelessWidget {
           : null,
       onPressed: data.isLoading ? null : data.onPressed,
       icon: data.isLoading
-          ? CommonCircleLoading(size: TonalButtonSize.bar.icon)
+          ? ActivityIndicator(size: TonalButtonSize.bar.icon)
           : icon ?? GlyphIcon(data.glyph),
     );
   }

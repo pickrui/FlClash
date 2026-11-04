@@ -258,7 +258,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
         _ when _loadingConfig => [
           const SizedBox(
             height: 180,
-            child: Center(child: CommonCircleLoading.page()),
+            child: Center(child: ActivityIndicator.page()),
           ),
         ],
         _ when _configError != null => [
@@ -446,7 +446,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     if (_sendingCode) {
       return const SizedBox(
         width: 32,
-        child: Center(child: CommonCircleLoading(size: 18)),
+        child: Center(child: ActivityIndicator(size: 18)),
       );
     }
     return TonalButton(

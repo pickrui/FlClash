@@ -134,7 +134,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       body: RefreshIndicator(
         onRefresh: () => _runGuarded(_refresh),
         child: storeState.isLoading && storeState.plans.isEmpty
-            ? const Center(child: CommonCircleLoading.page())
+            ? const Center(child: ActivityIndicator.page())
             : ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(

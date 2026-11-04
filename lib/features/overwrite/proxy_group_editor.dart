@@ -1526,7 +1526,10 @@ class _MemberPickerState extends State<_MemberPicker> {
           builder: (context) => NullStatusSwitcher(
             isEmpty: categories.isEmpty,
             isSearching: _query.isNotEmpty,
-            nullStatus: NullStatus(label: appLocalizations.noData),
+            nullStatus: NullStatus(
+              illustration: NullStatusIllustration.data,
+              label: appLocalizations.noData,
+            ),
             child: CustomScrollView(
               slivers: [
                 SliverPadding(

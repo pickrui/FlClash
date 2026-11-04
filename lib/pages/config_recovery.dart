@@ -291,7 +291,7 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
         textStyle: AppTextStyle.body.of(context, emphasized: true),
       ),
       icon: _isRetrying
-          ? CommonCircleLoading(
+          ? ActivityIndicator(
               size: size.icon * 0.8,
               semanticLabel: localizations.loading,
             )
@@ -315,7 +315,7 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
         size: size,
         child: FilledButton.icon(
           onPressed: null,
-          icon: CommonCircleLoading(size: size.icon * 0.8),
+          icon: ActivityIndicator(size: size.icon * 0.8),
           label: Text(localizations.configRecoveryReset),
         ),
       ),

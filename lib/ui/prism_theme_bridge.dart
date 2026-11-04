@@ -9,6 +9,7 @@ import 'package:prism_ui/measure.dart' as prism;
 import 'package:prism_ui/theme_data.dart' as prism;
 
 import 'surface.dart';
+import 'typography.dart';
 
 // Removed when the application theme switches to PrismApp after its controls.
 class PrismThemeBridge extends StatelessWidget {
@@ -19,14 +20,15 @@ class PrismThemeBridge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = legacy.Theme.of(context);
+    final font = AppTextStyle.subheadline.of(context);
     final elevated = theme.extension<ElevatedColorScheme>()?.colorScheme;
     return prism.Theme(
       data: prism.ThemeData(
         colorScheme: _scheme(theme.colorScheme),
         elevatedColorScheme: elevated == null ? null : _scheme(elevated),
         platform: theme.platform,
-        fontFamily: theme.textTheme.bodyMedium?.fontFamily,
-        fontFamilyFallback: theme.textTheme.bodyMedium?.fontFamilyFallback,
+        fontFamily: font.fontFamily,
+        fontFamilyFallback: font.fontFamilyFallback,
         visualDensity: prism.VisualDensity(
           horizontal: theme.visualDensity.horizontal,
           vertical: theme.visualDensity.vertical,

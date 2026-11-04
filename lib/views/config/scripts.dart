@@ -382,7 +382,7 @@ class _ScriptTrailing extends StatelessWidget {
           children: [...previous, ?current],
         ),
         child: updating
-            ? const CommonCircleLoading(key: ValueKey('loading'), size: 24)
+            ? const ActivityIndicator(key: ValueKey('loading'), size: 24)
             : Text(
                 script.lastUpdateTime.lastUpdateTimeDesc,
                 key: const ValueKey('time'),
@@ -527,7 +527,7 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
         body: _error != null
             ? ErrorStatus(error: _error!, onRetry: () => _load(refresh: true))
             : defaults == null
-            ? const Center(child: CommonCircleLoading.page())
+            ? const Center(child: ActivityIndicator.page())
             : defaults.isEmpty
             ? NullStatus(
                 label: l10n.scriptOptionsEmpty,

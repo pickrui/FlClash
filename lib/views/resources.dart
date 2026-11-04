@@ -342,7 +342,7 @@ class _ResourceItem extends StatelessWidget {
         children: [...previousChildren, ?currentChild],
       ),
       child: isUpdating
-          ? const CommonCircleLoading(key: ValueKey('updating'), size: 24)
+          ? const ActivityIndicator(key: ValueKey('updating'), size: 24)
           : chip == null
           ? const SizedBox.shrink()
           : TonalChip(

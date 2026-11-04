@@ -218,7 +218,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
 
   Widget _buildBody(BuildContext context) {
     if (_loading) {
-      return const Center(child: CommonCircleLoading.page());
+      return const Center(child: ActivityIndicator.page());
     }
     final base = _base;
     if (base == null || _loadError != null) {
@@ -455,7 +455,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
           mainAxisAlignment: MainAxisAlignment.end,
           spacing: 8,
           children: [
-            if (!settled && !failed) const CommonCircleLoading(size: 14),
+            if (!settled && !failed) const ActivityIndicator(size: 14),
             Flexible(
               child: Text(
                 !settled

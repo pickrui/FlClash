@@ -465,7 +465,7 @@ void main() {
     expect(
       find.descendant(
         of: headerOf('G0'),
-        matching: find.byType(CommonCircleLoading),
+        matching: find.byType(ActivityIndicator),
       ),
       findsOneWidget,
     );
@@ -480,7 +480,7 @@ void main() {
     await run;
     await tester.pump();
 
-    expect(find.byType(CommonCircleLoading), findsNothing);
+    expect(find.byType(ActivityIndicator), findsNothing);
   });
 
   group('GroupOffsets', () {

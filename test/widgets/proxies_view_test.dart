@@ -390,17 +390,17 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byType(CommonCircleLoading), findsOneWidget);
+      expect(find.byType(ActivityIndicator), findsOneWidget);
       expect(find.text('Failed'), findsNothing);
       final phases = container.read(pendingDelayTestsProvider.notifier);
       phases.queue([(name: 'Node', url: url)], generation: generation);
       await tester.pumpAndSettle();
       expect(find.byGlyph(AppGlyphs.clock), findsOneWidget);
-      expect(find.byType(CommonCircleLoading), findsNothing);
+      expect(find.byType(ActivityIndicator), findsNothing);
       phases.start((name: 'Node', url: url), generation: generation);
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byGlyph(AppGlyphs.clock), findsNothing);
-      expect(find.byType(CommonCircleLoading), findsOneWidget);
+      expect(find.byType(ActivityIndicator), findsOneWidget);
 
       for (final value in <int?>[null, -1, 6000]) {
         delays.setDelay(
@@ -408,7 +408,7 @@ void main() {
           generation: generation,
         );
         await tester.pumpAndSettle();
-        expect(find.byType(CommonCircleLoading), findsNothing);
+        expect(find.byType(ActivityIndicator), findsNothing);
         expect(
           find.text('Failed'),
           value == -1 ? findsOneWidget : findsNothing,
@@ -1392,7 +1392,7 @@ void main() {
       headerKey++;
       await pumpHeader();
       expect(delayButton().onPressed, isNull);
-      expect(find.byType(CommonCircleLoading), findsOneWidget);
+      expect(find.byType(ActivityIndicator), findsOneWidget);
       profileId = 2;
       container.invalidate(currentProfileIdProvider);
       await tester.pump();

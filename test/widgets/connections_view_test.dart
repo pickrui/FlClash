@@ -632,7 +632,7 @@ void main() {
       expect(
         find.descendant(
           of: closeButtons.first,
-          matching: find.byType(CommonCircleLoading),
+          matching: find.byType(ActivityIndicator),
         ),
         findsOneWidget,
       );
@@ -705,10 +705,10 @@ void main() {
     when(() => handler.closeConnections()).thenAnswer((_) => failed.future);
     await tester.tap(find.byTooltip('Close all connections'));
     await tester.pump();
-    expect(find.byType(CommonCircleLoading), findsOneWidget);
+    expect(find.byType(ActivityIndicator), findsOneWidget);
     failed.completeError(StateError('fixture core disconnected'));
     await tester.pumpAndSettle();
-    expect(find.byType(CommonCircleLoading), findsNothing);
+    expect(find.byType(ActivityIndicator), findsNothing);
     expect(find.byType(TrackerInfoItem), findsOneWidget);
     when(() => handler.closeConnections()).thenAnswer((_) async => true);
     await tester.tap(find.byTooltip('Close all connections'));

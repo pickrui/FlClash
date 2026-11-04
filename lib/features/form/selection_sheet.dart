@@ -311,7 +311,10 @@ class _SelectionSheetState<T> extends ConsumerState<SelectionSheet<T>>
               count == 0 && (widget.emptyLabel != null || _query.isNotEmpty),
           isSearching: _query.isNotEmpty,
           loadingStatus: loadingStatus,
-          nullStatus: NullStatus(label: widget.emptyLabel ?? ''),
+          nullStatus: NullStatus(
+            illustration: NullStatusIllustration.data,
+            label: widget.emptyLabel ?? '',
+          ),
           child: CustomScrollView(
             controller: _controller,
             slivers: [

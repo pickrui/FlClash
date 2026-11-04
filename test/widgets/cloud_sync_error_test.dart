@@ -55,7 +55,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Cloud sync request timed out'), findsOneWidget);
-      expect(find.byType(CommonCircleLoading), findsNothing);
+      expect(find.byType(ActivityIndicator), findsNothing);
       await tester.tap(find.text('Refresh'));
       await tester.pumpAndSettle();
       expect(account.retries, 1);

@@ -236,7 +236,7 @@ class _SyncButton extends ConsumerWidget {
     if (isUpdating) {
       return const SizedBox.square(
         dimension: 32,
-        child: Center(child: CommonCircleLoading(size: 18)),
+        child: Center(child: ActivityIndicator(size: 18)),
       );
     }
     return DashboardIconButton(

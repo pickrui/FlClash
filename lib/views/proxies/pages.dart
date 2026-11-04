@@ -84,7 +84,7 @@ class NodePagePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
     child: pages.errorAt(index) == null
-        ? const SizedBox.square(dimension: 18, child: CommonCircleLoading())
+        ? const SizedBox.square(dimension: 18, child: ActivityIndicator())
         : IconButton(
             tooltip: context.appLocalizations.retry,
             onPressed: () => pages.load(index),

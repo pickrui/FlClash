@@ -275,7 +275,11 @@ void main() {
 
     final fontsIllustration = find.descendant(
       of: find.byType(FontFamilyView),
-      matching: find.byKey(const ValueKey(NullStatusIllustration.fonts)),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is EmptyIllustration &&
+            widget.type == NullStatusIllustration.fonts,
+      ),
     );
 
     String? previewFamilyOf(WidgetTester tester, String text) =>

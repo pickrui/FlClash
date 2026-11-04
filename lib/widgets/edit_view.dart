@@ -263,7 +263,10 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
         ],
         body: NullStatusSwitcher(
           isEmpty: _entries.isEmpty,
-          nullStatus: NullStatus(label: appLocalizations.noData),
+          nullStatus: NullStatus(
+            illustration: NullStatusIllustration.data,
+            label: appLocalizations.noData,
+          ),
           child: ReorderableListView.builder(
             padding: EdgeInsets.only(
               bottom: 16 + context.bottomInset,

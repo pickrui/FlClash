@@ -264,7 +264,7 @@ class _SendFromPhoneDialogState extends State<_SendFromPhoneDialog> {
     if (address == null) {
       return const SizedBox.square(
         dimension: 96,
-        child: Center(child: CommonCircleLoading()),
+        child: Center(child: ActivityIndicator()),
       );
     }
     return Column(

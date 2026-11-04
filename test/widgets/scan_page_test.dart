@@ -416,7 +416,7 @@ void main() {
       await tester.pump();
       expect(action.picks, 1);
       expect(platform.running, isFalse);
-      expect(find.byType(CommonCircleLoading), findsOneWidget);
+      expect(find.byType(ActivityIndicator), findsOneWidget);
       platform.emit(_capture(BarcodeType.url, 'https://camera.example'));
       await tester.pump();
       expect(pops, 0);

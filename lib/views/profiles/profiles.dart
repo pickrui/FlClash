@@ -488,7 +488,7 @@ class ProfileItem extends ConsumerWidget {
         children: [...previousChildren, ?currentChild],
       ),
       child: isUpdating
-          ? const CommonCircleLoading(key: ValueKey('updating'), size: 24)
+          ? const ActivityIndicator(key: ValueKey('updating'), size: 24)
           : LastUpdateTimeText(
               key: const ValueKey('lastUpdate'),
               lastUpdateDate: profile.lastUpdateDate,

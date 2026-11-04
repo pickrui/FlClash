@@ -65,7 +65,7 @@ void main() {
   ) async {
     final pending = Completer<CloudRegisterConfig>();
     await _open(tester, () => pending.future);
-    expect(find.byType(CommonCircleLoading), findsOneWidget);
+    expect(find.byType(ActivityIndicator), findsOneWidget);
     await _cancel(tester);
     pending.complete(_config);
     await tester.pump();

@@ -153,7 +153,7 @@ mixin ProfileRoutingActions<T extends ConsumerStatefulWidget>
             ? const SizedBox(
                 width: 20,
                 height: 20,
-                child: CommonCircleLoading(),
+                child: ActivityIndicator(),
               )
             : const GlyphIcon(AppGlyphs.rules),
       ),
@@ -367,7 +367,7 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
                             const SizedBox(
                               width: 24,
                               height: 24,
-                              child: CommonCircleLoading(),
+                              child: ActivityIndicator(),
                             )
                           else
                             GlyphIcon(_getIcon(type)),
@@ -838,7 +838,7 @@ Widget _librarySliver<T>({
         padding: const EdgeInsets.all(24),
         child: Center(
           child: state.isLoading
-              ? const CommonCircleLoading.page()
+              ? const ActivityIndicator.page()
               : Text(emptyLabel),
         ),
       ),
@@ -938,7 +938,7 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
                     },
             )
           : loading
-          ? const Center(child: CommonCircleLoading.page())
+          ? const Center(child: ActivityIndicator.page())
           : NullStatusSwitcher(
               isEmpty: rules.isEmpty,
               isSearching: _query.isNotEmpty,

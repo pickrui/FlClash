@@ -102,7 +102,7 @@ void main() {
       expect(profiles.profile, _profile);
       expect(profiles.writes, 0);
       expect(_modeCard(tester, OverwriteType.standard).isSelected, isTrue);
-      expect(find.byType(CommonCircleLoading), findsOneWidget);
+      expect(find.byType(ActivityIndicator), findsOneWidget);
       expect(
         tester
             .widget<TextButton>(find.byKey(const Key('edit-custom-routing')))
@@ -121,7 +121,7 @@ void main() {
       expect(profiles.profile, _profile.copyWith(overwriteType: mode));
       expect(profiles.writes, 1);
       expect(_modeCard(tester, mode).isSelected, isTrue);
-      expect(find.byType(CommonCircleLoading), findsNothing);
+      expect(find.byType(ActivityIndicator), findsNothing);
       if (mode == OverwriteType.custom) {
         expect(find.byKey(const Key('edit-custom-routing')), findsNothing);
       } else {

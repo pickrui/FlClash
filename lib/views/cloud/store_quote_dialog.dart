@@ -243,7 +243,7 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
           TextButton(
             onPressed: busy ? null : () => _recharge(recharge),
             child: _recharging
-                ? const CommonCircleLoading(size: 18)
+                ? const ActivityIndicator(size: 18)
                 : Text(appLocalizations.recharge),
           )
         else
@@ -278,7 +278,7 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
             Row(
               spacing: 8,
               children: [
-                const CommonCircleLoading(size: 16),
+                const ActivityIndicator(size: 16),
                 Flexible(child: _note(appLocalizations.calculatingQuote)),
               ],
             )

@@ -158,7 +158,7 @@ class _SsidPermissionItemState extends ConsumerState<SsidPermissionItem>
       title: TooltipLabel(context.appLocalizations.locationPermission),
       subtitle: _ssid == null ? null : Text('SSID: $_ssid'),
       trailing: _requesting || _checking
-          ? const CommonCircleLoading(size: 24)
+          ? const ActivityIndicator(size: 24)
           : AuthorizeButton(
               authorized: granted,
               label: _failed

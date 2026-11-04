@@ -226,6 +226,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
             SliverFillRemaining(
               hasScrollBody: false,
               child: NullStatus(
+                illustration: NullStatusIllustration.data,
                 label: appLocalizations.nullTip(appLocalizations.providers),
               ),
             ),
@@ -470,7 +471,7 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
             children: [...previous, ?current],
           ),
           child: isUpdating
-              ? const CommonCircleLoading(key: ValueKey('loading'), size: 24)
+              ? const ActivityIndicator(key: ValueKey('loading'), size: 24)
               : LastUpdateTimeText(
                   key: const ValueKey('time'),
                   lastUpdateDate: updateAt.microsecondsSinceEpoch > 0

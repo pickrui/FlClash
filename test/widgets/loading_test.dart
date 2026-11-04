@@ -11,20 +11,18 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   Size loadingSize(WidgetTester tester) => tester.getSize(
     find.descendant(
-      of: find.byType(CommonCircleLoading),
+      of: find.byType(ActivityIndicator),
       matching: find.byType(CustomPaint),
     ),
   );
 
-  testWidgets('CommonCircleLoading takes the ambient icon size', (
-    tester,
-  ) async {
+  testWidgets('ActivityIndicator takes the ambient icon size', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
           child: IconTheme(
             data: IconThemeData(size: 20),
-            child: CommonCircleLoading(),
+            child: ActivityIndicator(),
           ),
         ),
       ),
@@ -33,7 +31,7 @@ void main() {
     expect(loadingSize(tester), const Size.square(20));
   });
 
-  testWidgets('CommonCircleLoading takes an explicit or page size', (
+  testWidgets('ActivityIndicator takes an explicit or page size', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -41,28 +39,25 @@ void main() {
         home: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              CommonCircleLoading(size: 16),
-              CommonCircleLoading.page(),
-            ],
+            children: [ActivityIndicator(size: 16), ActivityIndicator.page()],
           ),
         ),
       ),
     );
 
     final sizes = tester
-        .widgetList<CommonCircleLoading>(find.byType(CommonCircleLoading))
+        .widgetList<ActivityIndicator>(find.byType(ActivityIndicator))
         .map((loading) => tester.getSize(find.byWidget(loading)));
-    expect(sizes, [const Size.square(16), const Size.square(48)]);
+    expect(sizes, [const Size.square(16), const Size.square(128)]);
   });
 
-  testWidgets('CommonCircleLoading fills a tight slot', (tester) async {
+  testWidgets('ActivityIndicator fills a tight slot', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
           child: SizedBox.square(
             dimension: 32,
-            child: CommonCircleLoading(size: 24),
+            child: ActivityIndicator(size: 24),
           ),
         ),
       ),
@@ -71,11 +66,9 @@ void main() {
     expect(loadingSize(tester), const Size.square(32));
   });
 
-  testWidgets('CommonCircleLoading keeps turning until disposed', (
-    tester,
-  ) async {
+  testWidgets('ActivityIndicator keeps turning until disposed', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: Center(child: CommonCircleLoading())),
+      const MaterialApp(home: Center(child: ActivityIndicator())),
     );
     await tester.pump(const Duration(milliseconds: 2500));
 
@@ -86,10 +79,10 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, 0);
   });
 
-  testWidgets('CommonCircleLoading exposes an optional label', (tester) async {
+  testWidgets('ActivityIndicator exposes an optional label', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: CommonCircleLoading(semanticLabel: 'Loading profiles'),
+        home: ActivityIndicator(semanticLabel: 'Loading profiles'),
       ),
     );
 

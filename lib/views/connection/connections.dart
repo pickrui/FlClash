@@ -91,7 +91,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
           icon: _closingAll
               ? const SizedBox.square(
                   dimension: 20,
-                  child: CommonCircleLoading(),
+                  child: ActivityIndicator(),
                 )
               : const GlyphIcon(AppGlyphs.clearAll),
         ),
@@ -214,7 +214,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
               icon: closing
                   ? const SizedBox.square(
                       dimension: 18,
-                      child: CommonCircleLoading(),
+                      child: ActivityIndicator(),
                     )
                   : const GlyphIcon(AppGlyphs.block),
               onPressed: _closingAll || closing

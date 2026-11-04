@@ -226,7 +226,10 @@ class _ListEditorPageState<T, K> extends ConsumerState<ListEditorPage<T, K>> {
         isLoading: loadedItems == null,
         isEmpty: items.isEmpty,
         isSearching: isSearching,
-        nullStatus: NullStatus(label: widget.emptyLabel),
+        nullStatus: NullStatus(
+          illustration: NullStatusIllustration.data,
+          label: widget.emptyLabel,
+        ),
         child: Builder(
           builder: (context) {
             final rowAt = _rowsOf(

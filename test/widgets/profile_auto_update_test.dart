@@ -107,7 +107,7 @@ void main() {
         await tester.pump();
         expect(reads, hasLength(1));
         expect(_saveButton(tester).onPressed, isNull);
-        expect(find.byType(CommonCircleLoading), findsOneWidget);
+        expect(find.byType(ActivityIndicator), findsOneWidget);
         expect(find.byType(CommonSwitch), findsNothing);
         if (failFirst) {
           reads.single.completeError(StateError('fixture storage unavailable'));
@@ -174,7 +174,7 @@ void main() {
       );
       for (
         var attempt = 0;
-        attempt < 40 && find.byType(CommonCircleLoading).evaluate().isNotEmpty;
+        attempt < 40 && find.byType(ActivityIndicator).evaluate().isNotEmpty;
         attempt++
       ) {
         await tester.runAsync(

@@ -361,7 +361,7 @@ class _AccessViewState extends ConsumerState<AccessView>
   }) {
     final status = ref.watch(installedAppsProvider);
     if (status.isLoading) {
-      return const Center(child: CommonCircleLoading.page());
+      return const Center(child: ActivityIndicator.page());
     }
     if (status.hasError) {
       return _buildPackageStatus(permission: false);

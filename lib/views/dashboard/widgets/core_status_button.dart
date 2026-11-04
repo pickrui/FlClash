@@ -120,7 +120,7 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
     final iconOnly =
         coreStatus == CoreStatus.connected || ViewScope.isMobileOf(context);
     final icon = switch (coreStatus) {
-      CoreStatus.connecting => CommonCircleLoading(
+      CoreStatus.connecting => ActivityIndicator(
         color: iconOnly ? null : colorScheme.onPrimary,
       ),
       CoreStatus.connected => const GlyphIcon(AppGlyphs.check, fill: 1),
