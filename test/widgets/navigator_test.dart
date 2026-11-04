@@ -6,6 +6,8 @@
 import 'dart:async';
 
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/deferred_push.dart';
+import 'package:fl_clash/ui/null_status.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
@@ -130,10 +132,68 @@ void main() {
     await tester.pump();
     expect(find.text('page', skipOffstage: false), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 150));
-    expect(route.animation!.value, 0);
+    expect(route.animation!.value, closeTo(1 / 60 / 0.2, 0.01));
 
     await tester.pump(const Duration(milliseconds: 100));
-    expect(route.animation!.value, closeTo(0.5, 0.01));
+    expect(route.animation!.value, closeTo(0.5 + 1 / 60 / 0.2, 0.01));
+  });
+
+  testWidgets('the initial content holds the route until ready', (
+    tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final loading = ValueNotifier(true);
+    addTearDown(loading.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        builder: (context, child) => wrapAppScopes(context, child!),
+        home: const SizedBox(),
+      ),
+    );
+    final route = CommonDesktopRoute<void>(
+      builder: (_) => ValueListenableBuilder(
+        valueListenable: loading,
+        builder: (_, loading, _) => NullStatusSwitcher(
+          isLoading: loading,
+          child: const Text('loaded page'),
+        ),
+      ),
+    );
+    unawaited(navigatorKey.currentState!.push(route));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(route.animation!.value, 0);
+    expect(find.text('loaded page'), findsNothing);
+    loading.value = false;
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(route.animation!.value, greaterThan(0));
+    expect(find.text('loaded page'), findsOneWidget);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('initial content cannot hold a route beyond the arrival limit', (
+    tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        builder: (context, child) => wrapAppScopes(context, child!),
+        home: const SizedBox(),
+      ),
+    );
+    final route = CommonDesktopRoute<void>(
+      builder: (_) => const ArrivalHold(ready: false, child: Text('loading')),
+    );
+    unawaited(navigatorKey.currentState!.push(route));
+    await tester.pump();
+    await tester.pump(arrivalHoldLimit);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(route.animation!.value, greaterThan(0));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('a page in a sheet settles with the sheet that carries it', (
