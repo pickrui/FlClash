@@ -21,6 +21,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:prism_ui/sheet.dart' show sheetFloatInset;
 import 'package:prism_ui/shape.dart' show AppCorner;
+import 'package:prism_ui/surface.dart' show Surface;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -970,7 +971,7 @@ void main() {
           find.ancestor(
             of: title,
             matching: find.byWidgetPredicate(
-              (widget) => widget is Material && widget.color == sheet.surface,
+              (widget) => widget is Surface && widget.color == sheet.surface,
             ),
           ),
           findsWidgets,

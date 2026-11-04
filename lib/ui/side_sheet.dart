@@ -14,6 +14,8 @@ import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
+import 'package:prism_ui/l10n.dart';
+import 'package:prism_ui/surface.dart' show Surface;
 
 const Duration _sideSheetEnterDuration = Duration(milliseconds: 300);
 const Duration _sideSheetExitDuration = Duration(milliseconds: 200);
@@ -52,13 +54,16 @@ class _SideSheetState extends State<SideSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return Surface(
       key: _childKey,
       color:
           widget.backgroundColor ??
           SurfaceLevel.page.colorOf(Theme.of(context).colorScheme),
       shape: AppShape.none,
-      child: widget.builder(context),
+      child: Material(
+        type: MaterialType.transparency,
+        child: widget.builder(context),
+      ),
     );
   }
 }
@@ -243,7 +248,7 @@ class _ModalSideSheet<T> extends StatefulWidget {
 }
 
 class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
-  String _getRouteLabel(MaterialLocalizations localizations) {
+  String _getRouteLabel(UiLocalizations localizations) {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -252,7 +257,7 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return localizations.dialogLabel;
+        return localizations.dialog;
     }
   }
 
@@ -263,10 +268,7 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(
-      context,
-    );
+    final localizations = UiLocalizations.of(context);
     final String routeLabel = _getRouteLabel(localizations);
     final width = _widthFor(MediaQuery.sizeOf(context).width);
 
@@ -449,15 +451,14 @@ Future<T?> showModalSideSheet<T>({
   ImageFilter? filter,
 }) {
   assert(debugCheckHasMediaQuery(context));
-  assert(debugCheckHasMaterialLocalizations(context));
 
   final navigator = sheetNavigatorOf(context);
-  final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+  final localizations = UiLocalizations.of(context);
   return navigator.push(
     ModalSideSheetRoute<T>(
       builder: builder,
-      barrierLabel: localizations.scrimLabel,
-      barrierOnTapHint: localizations.scrimOnTapHint(localizations.dialogLabel),
+      barrierLabel: localizations.close,
+      barrierOnTapHint: localizations.close,
       backgroundColor: backgroundColor,
       modalBarrierColor:
           barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,

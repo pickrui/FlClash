@@ -132,8 +132,8 @@ void main() {
     final handle = tester.ensureSemantics();
     late BuildContext hostContext;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
+      TestApp(
+        child: Builder(
           builder: (context) {
             hostContext = context;
             return const Scaffold(body: SizedBox.expand());
@@ -151,7 +151,7 @@ void main() {
 
     SemanticsNode? scrim;
     void visit(SemanticsNode node) {
-      if (node.label == 'Scrim') {
+      if (node.label == 'Close') {
         scrim = node;
       }
       node.visitChildren((child) {

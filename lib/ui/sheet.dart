@@ -12,6 +12,7 @@ import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/l10n.dart';
 
 import 'form_sheet.dart';
 import 'sheet_navigator.dart';
@@ -78,7 +79,7 @@ Future<T?> showFormSheet<T>({
       builder: (sheetContext) => builder(sheetContext, SheetType.formSheet),
       backgroundColor: props.backgroundColor,
       barrierColor: context.colorScheme.modalScrim,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierLabel: UiLocalizations.of(context).close,
     ),
   );
 }
@@ -96,7 +97,7 @@ Future<T?> _showBottomSheet<T>(
       detents: props.detents,
       fitsContent: true,
       sheetBarrierColor: context.colorScheme.modalScrim,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierLabel: UiLocalizations.of(context).close,
     ),
   );
 }
@@ -213,8 +214,7 @@ Future<T?> showSnapSheet<T>(
           initialScrollOffset: initialScrollOffset,
           sheetController: controller,
           sheetBarrierColor: context.colorScheme.modalScrim,
-          barrierLabel: MaterialLocalizations.of(context)
-              .modalBarrierDismissLabel,
+          barrierLabel: UiLocalizations.of(context).close,
         ),
       );
     } else {
