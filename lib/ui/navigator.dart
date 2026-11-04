@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+export 'package:prism_ui/navigator.dart' show RootPage;
+
 import 'package:animations/animations.dart';
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/deferred_push.dart';
@@ -210,20 +212,14 @@ class CommonDesktopRoute<T> extends PageRoute<T>
 }
 
 class CommonRoute<T> extends PageRoute<T>
-    with
-        DragBackRouteMixin<T>,
-        DeferredPushRouteMixin<T>,
-        SharedXPageRouteMixin<T> {
+    with DragBackRouteMixin<T>, DeferredPushRouteMixin<T>, CardRouteMixin<T> {
   final Widget Function(BuildContext context) builder;
 
-  CommonRoute({required this.builder});
+  CommonRoute({required this.builder, super.settings});
 
+  // Paint the first frame off screen before the page begins to move.
   @override
-  bool sharesMotionWith(Route<dynamic>? route) => route is CommonRoute;
-
-  @override
-  Color backdropOf(Color surface, {required bool dragging}) =>
-      dragging ? Colors.transparent : surface;
+  set offstage(bool value) {}
 
   @override
   Widget buildPage(

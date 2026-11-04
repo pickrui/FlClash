@@ -22,6 +22,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -239,7 +240,10 @@ class ApplicationState extends ConsumerState<Application> {
           theme: watchAppTheme(ref, Brightness.light),
           darkTheme: watchAppTheme(ref, Brightness.dark),
           themeAnimationStyle: AnimationStyle.noAnimation,
-          home: KeyboardInsetHold(child: child!),
+          onGenerateRoute: (settings) => HomeRoute<void>(
+            settings: settings,
+            builder: (_) => KeyboardInsetHold(child: child!),
+          ),
         );
       },
       child: const HomePage(),

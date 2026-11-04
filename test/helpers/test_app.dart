@@ -8,6 +8,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
+import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/prism_theme_bridge.dart';
 import 'package:fl_clash/ui/view_scope.dart';
@@ -77,7 +78,10 @@ class TestApp extends StatelessWidget {
         }
         return builder?.call(context, wrapped) ?? wrapped;
       },
-      home: homeBuilder(child),
+      onGenerateRoute: (settings) => HomeRoute<void>(
+        settings: settings,
+        builder: (_) => homeBuilder(child),
+      ),
     );
     return overrides.isNotEmpty || wrapInProviderScope
         ? ProviderScope(overrides: overrides, child: app)

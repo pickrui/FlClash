@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/null_status.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -34,7 +35,8 @@ void main() {
           child: MaterialApp(
             theme: ThemeData().withAppSurfaces,
             builder: (context, child) => wrapAppScopes(context, child!),
-            home: Builder(
+            onGenerateRoute: (settings) => HomeRoute<void>(
+              settings: settings,
               builder: (context) {
                 home = context;
                 return const Scaffold(body: Center(child: Text('home')));
@@ -46,7 +48,7 @@ void main() {
       return home;
     }
 
-    testWidgets('slides in from a quarter of its width', (tester) async {
+    testWidgets('slides in from the full width on its spring', (tester) async {
       final home = await pumpHome(tester);
       unawaited(
         BaseNavigator.push(home, const Scaffold(body: Text('pushed page'))),
@@ -61,16 +63,10 @@ void main() {
           .getSize(find.ancestor(of: page, matching: find.byType(Scaffold)))
           .width;
       expect(progress, inExclusiveRange(0, 1));
-      expect(
-        tester.getTopLeft(page).dx,
-        closeTo(
-          width / 4 * (1 - Curves.easeInOutCubicEmphasized.transform(progress)),
-          0.5,
-        ),
-      );
+      expect(tester.getTopLeft(page).dx, closeTo(width * (1 - progress), 0.5));
     });
 
-    testWidgets('fades without an opacity layer', (tester) async {
+    testWidgets('moves without an opacity layer', (tester) async {
       final home = await pumpHome(tester);
 
       unawaited(
@@ -81,41 +77,28 @@ void main() {
       await expectNoOpacityLayers(tester);
     });
 
-    testWidgets('hands over from the page below without either showing '
-        'through the other', (tester) async {
+    testWidgets('the covered home recedes and returns after pop', (
+      tester,
+    ) async {
       final home = await pumpHome(tester);
-      final ink = await pixelAt(tester, inkPointOf(tester, 'home'));
-      final surface = await pixelAt(
-        tester,
-        tester.getRect(find.text('home')).centerRight + const Offset(20, 0),
+      final homeRect = tester.getRect(find.text('home'));
+      final width = tester.getSize(find.byType(Scaffold)).width;
+      unawaited(BaseNavigator.push(home, const Scaffold(body: Text('next'))));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      final route = ModalRoute.of(tester.element(find.text('next')))!;
+      final progress = route.animation!.value;
+      expect(progress, inExclusiveRange(0, 1));
+      expect(
+        tester.getTopLeft(find.text('home')).dx,
+        closeTo(homeRect.left - width * 0.3 * progress, 0.5),
       );
-
-      unawaited(
-        BaseNavigator.push(
-          home,
-          const Scaffold(
-            body: Align(alignment: Alignment(0, 0.5), child: Text('next')),
-          ),
-        ),
-      );
-      await expectHandOver(
-        tester,
-        ['home', 'next'],
-        ink: ink,
-        surface: surface,
-        floor: 0.25,
-      );
+      await tester.pumpAndSettle();
       expect(find.text('home'), findsNothing);
-
       Navigator.of(tester.element(find.text('next'))).pop();
-      await expectHandOver(
-        tester,
-        ['home', 'next'],
-        ink: ink,
-        surface: surface,
-        floor: 0.25,
-      );
+      await tester.pumpAndSettle();
       expect(find.text('next'), findsNothing);
+      expect(tester.getRect(find.text('home')), homeRect);
     });
   });
 
