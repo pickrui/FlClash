@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/app_glyphs.dart';
-import 'package:fl_clash/ui/icons/glyph_icon.dart';
+import 'package:prism_ui/icons/glyph_icon.dart';
 import 'package:material_ui/material_ui.dart';
 
 class VisibilityToggleButton extends StatelessWidget {

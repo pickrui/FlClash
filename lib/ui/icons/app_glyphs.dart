@@ -6,7 +6,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:fl_clash/ui/icons/glyph.dart';
+import 'package:prism_ui/icons/glyph.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_ui/material_ui.dart';
 
