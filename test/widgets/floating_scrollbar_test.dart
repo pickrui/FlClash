@@ -194,7 +194,7 @@ void main() {
     await gesture.moveBy(const Offset(-110, 0));
     await tester.pump();
     expect(find.byKey(_rateKey), findsOneWidget);
-    expect(tester.widget<Text>(find.byKey(_rateKey)).data, '×1/4');
+    expect(tester.widget<Text>(find.byKey(_rateKey)).data, '0.25×');
 
     await gesture.moveBy(const Offset(0, 40));
     await tester.pump();
