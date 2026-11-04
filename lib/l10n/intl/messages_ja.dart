@@ -1141,6 +1141,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ダイヤラープロキシは NTP サーバーへの接続に使用するアウトバウンドです",
     ),
     "dialerProxyLoopStopped": m28,
+    "dialog": MessageLookupByLibrary.simpleMessage("ダイアログ"),
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
     "directNameserver": MessageLookupByLibrary.simpleMessage("直接接続ネームサーバー"),
     "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(

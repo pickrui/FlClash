@@ -34,6 +34,24 @@ class AppUiLocalizations implements UiLocalizations {
   String get close => _localizations.close;
 
   @override
+  String get copy => _localizations.copy;
+
+  @override
+  String get cut => _localizations.cut;
+
+  @override
+  String get dialog => _localizations.dialog;
+
+  @override
+  String get paste => _localizations.paste;
+
+  @override
+  String get select => _localizations.select;
+
+  @override
+  String get selectAll => _localizations.selectAll;
+
+  @override
   String get hidePassword => _localizations.hidePassword;
 
   @override

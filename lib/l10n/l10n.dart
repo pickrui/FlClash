@@ -2333,6 +2333,11 @@ class AppLocalizations {
     return Intl.message('Memory info', name: 'memoryInfo', desc: '', args: []);
   }
 
+  /// `Dialog`
+  String get dialog {
+    return Intl.message('Dialog', name: 'dialog', desc: '', args: []);
+  }
+
   /// `Cancel`
   String get cancel {
     return Intl.message('Cancel', name: 'cancel', desc: '', args: []);

@@ -300,6 +300,7 @@
   "tunAdminAccountRequired": "开启 TUN 需要本机管理员账户，请使用管理员账户登录后再开启",
   "copyEnvVar": "复制环境变量",
   "memoryInfo": "内存信息",
+  "dialog": "对话框",
   "cancel": "取消",
   "fileIsUpdate": "文件有修改，是否保存修改",
   "profileHasUpdate": "配置文件已经修改,是否关闭自动更新 ",

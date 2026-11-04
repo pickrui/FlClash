@@ -1385,6 +1385,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Le proxy de connexion est la sortie utilisée pour joindre le serveur NTP.",
     ),
     "dialerProxyLoopStopped": m28,
+    "dialog": MessageLookupByLibrary.simpleMessage("Boîte de dialogue"),
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
     "directNameserver": MessageLookupByLibrary.simpleMessage(
       "DNS des connexions directes",

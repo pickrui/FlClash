@@ -1369,6 +1369,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Прокси для подключения — исход, через который идёт обращение к NTP-серверу",
     ),
     "dialerProxyLoopStopped": m28,
+    "dialog": MessageLookupByLibrary.simpleMessage("Диалог"),
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
     "directNameserver": MessageLookupByLibrary.simpleMessage(
       "Сервер имен для прямых соединений",

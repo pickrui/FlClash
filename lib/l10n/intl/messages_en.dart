@@ -1338,6 +1338,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Dialer proxy is the outbound used to reach the NTP server",
     ),
     "dialerProxyLoopStopped": m28,
+    "dialog": MessageLookupByLibrary.simpleMessage("Dialog"),
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
     "directNameserver": MessageLookupByLibrary.simpleMessage(
       "Direct nameserver",

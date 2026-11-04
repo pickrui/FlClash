@@ -1385,6 +1385,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "El proxy de marcación es la salida que se usa para llegar al servidor NTP.",
     ),
     "dialerProxyLoopStopped": m28,
+    "dialog": MessageLookupByLibrary.simpleMessage("Diálogo"),
     "direct": MessageLookupByLibrary.simpleMessage("Directo"),
     "directNameserver": MessageLookupByLibrary.simpleMessage(
       "DNS de conexiones directas",

@@ -1014,6 +1014,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "拨号代理为连接 NTP 服务器使用的出站",
     ),
     "dialerProxyLoopStopped": m28,
+    "dialog": MessageLookupByLibrary.simpleMessage("对话框"),
     "direct": MessageLookupByLibrary.simpleMessage("直连"),
     "directNameserver": MessageLookupByLibrary.simpleMessage("直连域名服务器"),
     "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(

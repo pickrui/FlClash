@@ -300,6 +300,7 @@
   "tunAdminAccountRequired": "TUN nécessite un compte administrateur sur ce Mac. Connectez-vous avec un tel compte pour l’activer.",
   "copyEnvVar": "Copier les variables d’environnement",
   "memoryInfo": "Infos mémoire",
+  "dialog": "Boîte de dialogue",
   "cancel": "Annuler",
   "fileIsUpdate": "Le fichier a été modifié. Enregistrer les modifications ?",
   "profileHasUpdate": "Le profil a été modifié. Désactiver la mise à jour automatique ?",

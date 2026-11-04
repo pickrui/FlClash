@@ -1121,6 +1121,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "다이얼러 프록시는 NTP 서버에 연결할 때 사용하는 아웃바운드입니다.",
     ),
     "dialerProxyLoopStopped": m28,
+    "dialog": MessageLookupByLibrary.simpleMessage("대화상자"),
     "direct": MessageLookupByLibrary.simpleMessage("직접"),
     "directNameserver": MessageLookupByLibrary.simpleMessage("직접 연결 DNS"),
     "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(
