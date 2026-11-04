@@ -15,9 +15,9 @@ import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/connection/connections.dart';
+import 'package:fl_clash/views/connection/requests.dart';
 import 'package:fl_clash/views/connection/item.dart';
 import 'package:fl_clash/views/connection/tracker_info_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -138,7 +138,11 @@ void main() {
         child: _TestApp(
           child: PageActivityScope(
             isActive: active,
-            child: ConnectionsView(core: stream.core, now: now),
+            child: RequestsView(
+              initialFeed: RequestFeed.live,
+              core: stream.core,
+              now: now,
+            ),
           ),
         ),
       ),
@@ -186,6 +190,172 @@ void main() {
     await tester.pump();
     return stream;
   }
+
+  void selectFeed(WidgetTester tester, RequestFeed feed) {
+    final label = feed == RequestFeed.live
+        ? appLocalizations.running
+        : appLocalizations.recentRequests;
+    tester
+        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .titleMenuItems
+        .singleWhere((item) => item.label == label)
+        .onPressed!();
+  }
+
+  testWidgets(
+    'switching feeds releases the live lease and keeps filters and search',
+    (tester) async {
+      container.listen(appSettingProvider, (_, _) {});
+      container.read(requestsProvider.notifier).value = FixedList<TrackerInfo>(
+        10,
+      );
+      container
+          .read(requestsProvider.notifier)
+          .addRequest(tracker('recent', 'recent.alpha.test'));
+      container
+          .read(requestsProvider.notifier)
+          .addRequest(tracker('hidden', 'recent.beta.test', chains: ['other']));
+      final stream = await pumpConnections(
+        tester,
+        () => [
+          tracker('live', 'live.alpha.test'),
+          tracker('other', 'live.beta.test', chains: ['other']),
+        ],
+      );
+      await tester.tap(find.widgetWithText(TonalChip, 'proxy-a').first);
+      await tester.pumpAndSettle();
+      tester
+          .widget<CommonScaffold>(find.byType(CommonScaffold))
+          .searchState!
+          .onSearch('alpha');
+      await tester.pumpAndSettle();
+      selectFeed(tester, RequestFeed.recent);
+      await tester.pumpAndSettle();
+      expect(stream.stops, 1);
+      expect(
+        find.textContaining('recent.alpha.test', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('recent.beta.test', findRichText: true),
+        findsNothing,
+      );
+      expect(container.read(appSettingProvider).requestFeed, RequestFeed.live);
+      selectFeed(tester, RequestFeed.live);
+      await tester.pumpAndSettle();
+      expect(stream.starts, 2);
+      expect(
+        find.textContaining('live.alpha.test', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('live.beta.test', findRichText: true),
+        findsNothing,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'grouped live rows keep close actions disabled until completion',
+    (tester) async {
+      container.listen(appSettingProvider, (_, _) {});
+      container
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(recordGroupings: {'requests': 'host'}),
+          );
+      final stream = await pumpConnections(
+        tester,
+        () => [tracker('a', 'alpha.test')],
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.textContaining('alpha.test', findRichText: true).first,
+      );
+      await tester.pumpAndSettle();
+      final closed = Completer<bool>();
+      when(() => stream.handler.closeConnection('a'))
+          .thenAnswer((_) => closed.future);
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pump();
+      expect(
+        tester
+            .widget<IconButton>(
+              find.byWidgetPredicate(
+                (widget) => widget is IconButton && widget.tooltip == 'Close',
+              ),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(
+        tester
+            .widget<IconButton>(
+              find.byWidgetPredicate(
+                (widget) =>
+                    widget is IconButton &&
+                    widget.tooltip == 'Close all connections',
+              ),
+            )
+            .onPressed,
+        isNull,
+      );
+      closed.complete(true);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<IconButton>(
+              find.byWidgetPredicate(
+                (widget) => widget is IconButton && widget.tooltip == 'Close',
+              ),
+            )
+            .onPressed,
+        isNotNull,
+      );
+      verify(() => stream.handler.closeConnection('a')).called(1);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'the main requests page defaults to live and remembers the selected feed',
+    (tester) async {
+      container.listen(appSettingProvider, (_, _) {});
+      final stream = _StreamCore(() => [tracker('live', 'live.test')]);
+      Future<void> showRequests(Key key) async {
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: _TestApp(
+              child: RequestsView(key: key, core: stream.core),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      await showRequests(const ValueKey(1));
+      expect(stream.starts, 1);
+      expect(
+        tester.widget<CommonScaffold>(find.byType(CommonScaffold)).title,
+        appLocalizations.running,
+      );
+      selectFeed(tester, RequestFeed.recent);
+      await tester.pumpAndSettle();
+      expect(
+        container.read(appSettingProvider).requestFeed,
+        RequestFeed.recent,
+      );
+      await showRequests(const ValueKey(2));
+      expect(stream.starts, 1);
+      expect(
+        tester.widget<CommonScaffold>(find.byType(CommonScaffold)).title,
+        appLocalizations.recentRequests,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   testWidgets(
     'visible connections consume deltas and hidden pages unsubscribe',
@@ -241,7 +411,10 @@ void main() {
             builder: (context) => TextButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => ConnectionsView(core: stream.core),
+                  builder: (_) => RequestsView(
+                    initialFeed: RequestFeed.live,
+                    core: stream.core,
+                  ),
                 ),
               ),
               child: const Text('open'),
@@ -255,7 +428,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pump(const Duration(milliseconds: 50));
 
-    final route = ModalRoute.of(tester.element(find.byType(ConnectionsView)))!;
+    final route = ModalRoute.of(tester.element(find.byType(RequestsView)))!;
     expect(route.animation!.isAnimating, isTrue);
     expect(find.byType(TrackerInfoItem), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
@@ -504,7 +677,9 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: scoped,
-        child: const _TestApp(child: ConnectionsView()),
+        child: const _TestApp(
+          child: RequestsView(initialFeed: RequestFeed.live),
+        ),
       ),
     );
     await tester.pump();
@@ -542,9 +717,7 @@ void main() {
       tester,
       () => buildConnections(++count),
     );
-    final navigator = Navigator.of(
-      tester.element(find.byType(ConnectionsView)),
-    );
+    final navigator = Navigator.of(tester.element(find.byType(RequestsView)));
     expect(find.text('host-0.com:443', findRichText: true), findsOneWidget);
 
     navigator.didStartUserGesture();

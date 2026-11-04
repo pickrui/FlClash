@@ -1670,5 +1670,6 @@
   "groupBy": "분류",
   "copyHost": "호스트 복사",
   "copyDestination": "대상 주소 복사",
-  "closeConnection": "연결 닫기"
+  "closeConnection": "연결 닫기",
+  "recentRequests": "최근 요청"
 }

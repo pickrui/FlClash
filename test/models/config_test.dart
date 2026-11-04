@@ -240,6 +240,18 @@ void main() {
   });
 
   group('AppSettingProps JSON round-trip', () {
+    test(
+      'request feed defaults to live and retains an explicit recent feed',
+      () {
+        expect(AppSettingProps.fromJson({}).requestFeed, RequestFeed.live);
+        const props = AppSettingProps(requestFeed: RequestFeed.recent);
+        expect(
+          roundTrip(props.toJson, AppSettingProps.fromJson).requestFeed,
+          RequestFeed.recent,
+        );
+      },
+    );
+
     test('record grouping preferences persist independently by page', () {
       expect(AppSettingProps.fromJson({}).recordGroupings, isEmpty);
       const props = AppSettingProps(

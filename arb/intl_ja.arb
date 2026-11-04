@@ -1670,5 +1670,6 @@
   "groupBy": "分類",
   "copyHost": "ホストをコピー",
   "copyDestination": "宛先をコピー",
-  "closeConnection": "接続を閉じる"
+  "closeConnection": "接続を閉じる",
+  "recentRequests": "最近のリクエスト"
 }

@@ -14,7 +14,6 @@ Glyph navigationGlyphOf(PageLabel label) => switch (label) {
   PageLabel.dashboard => AppGlyphs.dashboard,
   PageLabel.proxies => AppGlyphs.proxies,
   PageLabel.profiles => AppGlyphs.profiles,
-  PageLabel.connections => AppGlyphs.connections,
   PageLabel.requests => AppGlyphs.requests,
   PageLabel.dnsQueries => AppGlyphs.dns,
   PageLabel.resources => AppGlyphs.resources,

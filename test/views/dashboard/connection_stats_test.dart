@@ -5,11 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/controller.dart';
+import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/views/connection/connections.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
 import 'package:fl_clash/views/connection/requests.dart';
 import 'package:fl_clash/views/dashboard/widgets/connection_stats.dart';
@@ -28,6 +28,17 @@ class _Core implements CoreController {
   Future<int> getConnectionCount() async {
     calls++;
     return count;
+  }
+
+  @override
+  Future<T?> connectionStream<T>(CoreMethod method, String subscription) async {
+    if (method != CoreMethod.startConnections) return null;
+    return {
+      'subscription': subscription,
+      'reset': true,
+      'sequence': 0,
+      'added': [],
+    } as T;
   }
 
   @override
@@ -178,7 +189,7 @@ void main() {
     final page = container.read(currentPageLabelProvider);
 
     for (final (label, view) in [
-      ('Connections', ConnectionsView),
+      ('Connections', RequestsView),
       ('Requests', RequestsView),
       ('DNS queries', DnsQueriesView),
     ]) {
@@ -186,6 +197,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(view), findsOneWidget);
+      if (view == RequestsView) {
+        expect(
+          tester.widget<RequestsView>(find.byType(view)).initialFeed,
+          label == 'Connections' ? RequestFeed.live : RequestFeed.recent,
+        );
+      }
       expect(container.read(currentPageLabelProvider), page);
 
       navigator.currentState!.pop();

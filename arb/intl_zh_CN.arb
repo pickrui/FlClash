@@ -1670,5 +1670,6 @@
   "groupBy": "分类",
   "copyHost": "复制主机",
   "copyDestination": "复制目标地址",
-  "closeConnection": "关闭连接"
+  "closeConnection": "关闭连接",
+  "recentRequests": "最近请求"
 }

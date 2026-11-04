@@ -95,11 +95,6 @@ class Navigation {
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
-        label: PageLabel.connections,
-        builder: (context) => _buildPage(context, PageLabel.connections),
-        modes: [NavigationItemMode.desktop, NavigationItemMode.more],
-      ),
-      NavigationItem(
         label: PageLabel.resources,
         builder: (context) => _buildPage(context, PageLabel.resources),
         modes: [NavigationItemMode.more],

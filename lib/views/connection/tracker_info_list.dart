@@ -20,6 +20,31 @@ import 'package:fl_clash/widgets/record_filter.dart';
 import 'package:fl_clash/widgets/record_feed_list.dart';
 import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/record_table.dart';
+import 'package:fl_clash/ui/keyed_animated_list.dart';
+import 'package:fl_clash/ui/route_motion_hold.dart';
+
+class TrackerInfoListController extends ValueNotifier<TrackerInfosState> {
+  TrackerInfoListController() : super(const TrackerInfosState());
+
+  void search(String query) {
+    value = value.copyWith(query: query);
+  }
+
+  void setTrackerInfos(List<TrackerInfo> trackerInfos) {
+    if (identical(trackerInfos, value.trackerInfos)) {
+      return;
+    }
+    value = value.copyWith(trackerInfos: trackerInfos);
+  }
+
+  void setAutoScrollToEnd(bool autoScrollToEnd) {
+    value = value.copyWith(autoScrollToEnd: autoScrollToEnd);
+  }
+
+  void resumeAutoScrollToEnd(List<TrackerInfo> trackerInfos) {
+    value = value.copyWith(autoScrollToEnd: true, trackerInfos: trackerInfos);
+  }
+}
 
 final trackerInfoFacets = <RecordFacet<TrackerInfo>>[
   RecordFacet(
@@ -118,6 +143,72 @@ List<Object?> _shownInList(TrackerInfo trackerInfo) => [
   trackerInfo.rulePayload,
 ];
 
+class TrackerInfoAnimatedList extends StatelessWidget {
+  final List<TrackerInfo> trackerInfos;
+  final String detailTitle;
+  final RecordTable<TrackerInfo>? table;
+  final ScrollController? controller;
+  final EdgeInsetsGeometry? padding;
+  final ValueChanged<TrackerInfo>? onClose;
+  final Widget Function(TrackerInfo)? actionBuilder;
+
+  const TrackerInfoAnimatedList({
+    super.key,
+    required this.trackerInfos,
+    required this.detailTitle,
+    this.table,
+    this.controller,
+    this.padding,
+    this.onClose,
+    this.actionBuilder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final table = this.table;
+    final positions = table == null
+        ? const <String, int>{}
+        : {
+            for (final (index, trackerInfo) in trackerInfos.indexed)
+              trackerInfo.id: index,
+          };
+    return ArrivalCacheExtentBuilder(
+      builder: (cacheExtent) => KeyedAnimatedList<TrackerInfo>(
+        controller: controller,
+        padding: padding,
+        scrollCacheExtent: cacheExtent,
+        items: trackerInfos,
+        keyOf: (trackerInfo) => trackerInfo.id,
+        estimatedItemExtent: table?.rowHeight ?? recordListEstimatedExtent,
+        separator: table == null ? const SizedBox(height: recordListGap) : null,
+        itemBuilder: (itemContext, trackerInfo) {
+          final striped = positions[trackerInfo.id]?.isOdd ?? false;
+          return MemoBuilder(
+            key: Key(trackerInfo.id),
+            // A live row reads its age off the clock, which moves on its own.
+            inputs: [
+              trackerInfo,
+              actionBuilder,
+              ...table == null
+                  ? [detailTitle, trackerInfo.start.compactLastUpdateTimeDesc]
+                  : [table, striped],
+            ],
+            builder: (_) => _buildTrackerInfoItem(
+              trackerInfo,
+              isLive: true,
+              detailTitle: detailTitle,
+              table: table,
+              striped: striped,
+              onClose: onClose,
+              trailing: actionBuilder?.call(trackerInfo),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class TrackerInfoGroupedList extends ConsumerStatefulWidget {
   final List<RecordGroup<TrackerInfo>> groups;
   final RecordGrouping grouping;
@@ -127,6 +218,7 @@ class TrackerInfoGroupedList extends ConsumerStatefulWidget {
   final ScrollController? controller;
   final EdgeInsetsGeometry? padding;
   final ValueChanged<TrackerInfo>? onClose;
+  final Widget Function(TrackerInfo)? actionBuilder;
 
   const TrackerInfoGroupedList({
     super.key,
@@ -138,6 +230,7 @@ class TrackerInfoGroupedList extends ConsumerStatefulWidget {
     this.controller,
     this.padding,
     this.onClose,
+    this.actionBuilder,
   });
 
   @override
@@ -172,6 +265,7 @@ class _TrackerInfoGroupedListState
       :detailTitle,
       :table,
       :onClose,
+      :actionBuilder,
     ) = widget;
     final showIcon =
         grouping == RecordGrouping.app &&
@@ -195,6 +289,7 @@ class _TrackerInfoGroupedListState
           inputs: [
             ...showsTraffic ? [trackerInfo] : _shownInList(trackerInfo),
             detailTitle,
+            actionBuilder,
             table,
             striped,
             if (isLive && table == null)
@@ -209,6 +304,7 @@ class _TrackerInfoGroupedListState
               striped: striped,
               onClose: onClose,
               latest: () => _latest(trackerInfo),
+              trailing: actionBuilder?.call(trackerInfo),
             );
             return table == null
                 ? Padding(
@@ -255,6 +351,7 @@ Widget _buildTrackerInfoItem(
   required bool striped,
   ValueChanged<TrackerInfo>? onClose,
   ValueGetter<TrackerInfo>? latest,
+  Widget? trailing,
 }) {
   if (table != null) {
     return TrackerInfoTableRow(
@@ -273,5 +370,6 @@ Widget _buildTrackerInfoItem(
     onClose: onClose,
     detailTitle: detailTitle,
     latest: latest,
+    trailing: trailing,
   );
 }

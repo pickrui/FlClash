@@ -68,7 +68,7 @@ Future<ProviderContainer> _pumpRequests(
         builder: (context, child) {
           return wrapAppScopes(context, child!);
         },
-        home: const RequestsView(),
+        home: const RequestsView(initialFeed: RequestFeed.recent),
       ),
     ),
   );
@@ -295,8 +295,8 @@ void main() {
           },
           home: const Row(
             children: [
-              Expanded(child: RequestsView()),
-              Expanded(child: RequestsView()),
+              Expanded(child: RequestsView(initialFeed: RequestFeed.recent)),
+              Expanded(child: RequestsView(initialFeed: RequestFeed.recent)),
             ],
           ),
         ),
@@ -354,7 +354,7 @@ void main() {
           builder: (context, child) {
             return wrapAppScopes(context, child!);
           },
-          home: const RequestsView(),
+          home: const RequestsView(initialFeed: RequestFeed.recent),
         ),
       ),
     );

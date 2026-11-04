@@ -1670,5 +1670,6 @@
   "groupBy": "Agrupar por",
   "copyHost": "Copiar host",
   "copyDestination": "Copiar destino",
-  "closeConnection": "Cerrar conexión"
+  "closeConnection": "Cerrar conexión",
+  "recentRequests": "Solicitudes recientes"
 }

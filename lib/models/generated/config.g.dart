@@ -94,6 +94,9 @@ _AppSettingProps _$AppSettingPropsFromJson(
         (k, e) => MapEntry(k, e as String),
       ) ??
       const {},
+  requestFeed:
+      $enumDecodeNullable(_$RequestFeedEnumMap, json['requestFeed']) ??
+      RequestFeed.live,
 );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -131,6 +134,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'scriptOptions': instance.scriptOptions,
       'tableColumnWidths': instance.tableColumnWidths,
       'recordGroupings': instance.recordGroupings,
+      'requestFeed': _$RequestFeedEnumMap[instance.requestFeed]!,
     };
 
 const _$ConnectionCloseScopeEnumMap = {
@@ -152,6 +156,11 @@ const _$EditorFontSizeEnumMap = {
 const _$RestoreStrategyEnumMap = {
   RestoreStrategy.compatible: 'compatible',
   RestoreStrategy.override: 'override',
+};
+
+const _$RequestFeedEnumMap = {
+  RequestFeed.recent: 'recent',
+  RequestFeed.live: 'live',
 };
 
 const _$DashboardWidgetEnumMap = {

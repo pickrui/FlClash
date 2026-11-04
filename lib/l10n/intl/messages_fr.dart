@@ -2755,6 +2755,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "receivingAddress": MessageLookupByLibrary.simpleMessage(
       "Adresse de réception",
     ),
+    "recentRequests": MessageLookupByLibrary.simpleMessage("Requêtes récentes"),
     "recharge": MessageLookupByLibrary.simpleMessage("Recharger"),
     "rechargeAllowedRange": m98,
     "rechargeAmount": MessageLookupByLibrary.simpleMessage(

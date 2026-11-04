@@ -15,7 +15,6 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/route_motion_hold.dart';
 import 'package:fl_clash/ui/table_layout.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:fl_clash/views/connection/connections.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
 import 'package:fl_clash/views/connection/requests.dart';
 import 'package:fl_clash/views/connection/tracker_info_table.dart';
@@ -78,10 +77,14 @@ void openDashboardFeed(BuildContext context, DashboardFeed feed) {
     context,
     initialScrollOffset: feed == DashboardFeed.requests ? double.maxFinite : 0,
     builder: (_, controller) => switch (feed) {
-      DashboardFeed.connections => ConnectionsView(
+      DashboardFeed.connections => RequestsView(
+        initialFeed: RequestFeed.live,
         scrollController: controller,
       ),
-      DashboardFeed.requests => RequestsView(scrollController: controller),
+      DashboardFeed.requests => RequestsView(
+        scrollController: controller,
+        initialFeed: RequestFeed.recent,
+      ),
       DashboardFeed.dns => DnsQueriesView(scrollController: controller),
     },
   );

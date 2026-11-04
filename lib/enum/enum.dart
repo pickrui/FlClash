@@ -441,7 +441,6 @@ enum PageLabel {
   requests,
   dnsQueries,
   resources,
-  connections,
   oixCloud,
 }
 
@@ -633,6 +632,8 @@ enum LoadingTag {
   iconSets,
   resources,
 }
+
+enum RequestFeed { recent, live }
 
 enum CoreStatus { connecting, connected, disconnected }
 

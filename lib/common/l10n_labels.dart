@@ -17,7 +17,6 @@ extension PageLabelL10n on PageLabel {
       PageLabel.requests => l.requests,
       PageLabel.dnsQueries => l.dnsQueries,
       PageLabel.resources => l.resources,
-      PageLabel.connections => l.connections,
       PageLabel.oixCloud => l.oixCloud,
     };
   }
@@ -27,7 +26,6 @@ extension PageLabelL10n on PageLabel {
     return switch (this) {
       PageLabel.requests => l.requestsDesc,
       PageLabel.dnsQueries => l.dnsQueriesDesc,
-      PageLabel.connections => l.connectionsDesc,
       PageLabel.resources => l.resourcesDesc,
       PageLabel.logs => l.logsDesc,
       PageLabel.dashboard ||

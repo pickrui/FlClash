@@ -1670,5 +1670,6 @@
   "groupBy": "Группировка",
   "copyHost": "Копировать хост",
   "copyDestination": "Копировать адрес назначения",
-  "closeConnection": "Закрыть соединение"
+  "closeConnection": "Закрыть соединение",
+  "recentRequests": "Последние запросы"
 }

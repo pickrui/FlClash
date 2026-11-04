@@ -14078,6 +14078,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Recent requests`
+  String get recentRequests {
+    return Intl.message(
+      'Recent requests',
+      name: 'recentRequests',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

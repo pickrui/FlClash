@@ -1934,6 +1934,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rawOutboundInUse": m97,
     "readFullAnnouncement": MessageLookupByLibrary.simpleMessage("阅读全文"),
     "receivingAddress": MessageLookupByLibrary.simpleMessage("收款地址"),
+    "recentRequests": MessageLookupByLibrary.simpleMessage("最近请求"),
     "recharge": MessageLookupByLibrary.simpleMessage("充值"),
     "rechargeAllowedRange": m98,
     "rechargeAmount": MessageLookupByLibrary.simpleMessage("充值金额（¥）"),

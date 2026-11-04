@@ -2151,6 +2151,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "rawOutboundInUse": m97,
     "readFullAnnouncement": MessageLookupByLibrary.simpleMessage("공지 전체 읽기"),
     "receivingAddress": MessageLookupByLibrary.simpleMessage("수신 주소"),
+    "recentRequests": MessageLookupByLibrary.simpleMessage("최근 요청"),
     "recharge": MessageLookupByLibrary.simpleMessage("충전"),
     "rechargeAllowedRange": m98,
     "rechargeAmount": MessageLookupByLibrary.simpleMessage("충전 금액(¥)"),
