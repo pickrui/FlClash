@@ -8,6 +8,9 @@ import 'dart:async';
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/ui/inherited.dart';
+import 'package:fl_clash/ui/sheet_header.dart';
+import 'package:prism_ui/sheet.dart'
+    show SheetCornersScope, bottomSheetRadiusOf;
 import 'package:fl_clash/ui/navigator_resizable.dart';
 import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/ui/pop_scope.dart';
@@ -25,7 +28,7 @@ class PagedSheetRoute<T> extends PageRoute<T>
         DragBackRouteMixin<T>,
         ResizableNavigatorRouteMixin<T>,
         DeferredPushRouteMixin<T>,
-        SharedXPageRouteMixin<T> {
+        CardRouteMixin<T> {
   PagedSheetRoute({required this.builder});
 
   final WidgetBuilder builder;
@@ -39,24 +42,27 @@ class PagedSheetRoute<T> extends PageRoute<T>
   }
 
   @override
-  bool sharesMotionWith(Route<dynamic>? route) => route is PagedSheetRoute;
-
-  @override
-  Color backdropOf(Color surface, {required bool dragging}) =>
-      dragging ? surface : Colors.transparent;
-
-  @override
-  Color surfaceOf(BuildContext context) => _sheetColorOf(context);
-
-  @override
-  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    return previousRoute is PagedSheetRoute;
+  BorderRadius cardRadiusOf(BuildContext context) {
+    return switch (SheetProvider.of(context)?.type) {
+      SheetType.bottomSheet =>
+        SheetCornersScope.maybeOf(context) ?? bottomSheetRadiusOf(context),
+      SheetType.formSheet => switch (Theme.of(context).dialogTheme.shape ??
+          AppShape.xxl) {
+        RoundedSuperellipseBorder(:final borderRadius) => borderRadius.resolve(
+          Directionality.of(context),
+        ),
+        _ => BorderRadius.zero,
+      },
+      _ => BorderRadius.zero,
+    };
   }
 
   @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    return nextRoute is PagedSheetRoute;
-  }
+  Color settledFillOf(Color surface) => Colors.transparent;
+
+  @override
+  BarItemsMotion computeBarItems() =>
+      (lifted: false, moving: false, shown: true, tracking: null);
 
   @override
   Widget buildPage(
@@ -97,14 +103,34 @@ class PagedSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final type = SheetProvider.of(context)?.type;
+    final pages = NavigatorResizable(child: child);
     return Material(
       animationDuration: Duration.zero,
       color: _sheetColorOf(context),
       shape: type == SheetType.bottomSheet
-          ? AppShape.top(AppCorner.xxl)
+          ? RoundedSuperellipseBorder(
+              borderRadius: bottomSheetRadiusOf(context),
+            )
           : AppShape.none,
       clipBehavior: Clip.antiAlias,
-      child: NavigatorResizable(child: child),
+      child: type == SheetType.bottomSheet
+          ? Stack(
+              children: [
+                pages,
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: IgnorePointer(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: SheetDragHandle(),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : pages,
     );
   }
 }

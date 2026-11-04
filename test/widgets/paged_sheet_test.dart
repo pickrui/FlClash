@@ -43,7 +43,7 @@ Future<NavigatorState> _pumpSheet(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('sheet pages fade without an opacity layer', (tester) async {
+  testWidgets('sheet pages move without an opacity layer', (tester) async {
     final navigator = await _pumpSheet(tester);
 
     unawaited(navigator.push(_page('second', 300)));

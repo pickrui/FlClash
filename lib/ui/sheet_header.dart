@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:fl_clash/ui/inherited.dart';
+import 'package:fl_clash/ui/sheet_navigator.dart';
 
 class SheetDragHandle extends StatelessWidget {
   const SheetDragHandle({super.key});
@@ -55,7 +56,7 @@ class SheetToolBar extends StatelessWidget {
     final bar = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        dragHandle
+        dragHandle && !isSheetPage(context)
             ? const SheetDragHandle()
             : const SizedBox(height: SheetDragHandle.height),
         appBar,
