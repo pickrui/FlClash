@@ -16,6 +16,8 @@ import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:prism_ui/surface.dart' show Surface;
+import 'package:fl_clash/ui/l10n.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -52,9 +54,7 @@ Future<T?> showFloatingDialog<T>({
     _AlertRoute<T>(
       barrierColor: context.colorScheme.alertScrim,
       barrierDismissible: dismissible,
-      barrierLabel: dismissible
-          ? MaterialLocalizations.of(context).modalBarrierDismissLabel
-          : null,
+      barrierLabel: dismissible ? UiLocalizations.of(context).close : null,
       builder: (context) => SurfaceScope(
         level: SurfaceLevel.floatingOf(context.colorScheme),
         child: child,
@@ -379,6 +379,46 @@ class _RenderAlertGlass extends RenderProxyBox {
   }
 }
 
+class _AlertFrame extends StatelessWidget {
+  const _AlertFrame({
+    required this.color,
+    this.insetPadding,
+    required this.child,
+  });
+
+  final Color color;
+  final EdgeInsets? insetPadding;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedPadding(
+      padding:
+          MediaQuery.viewInsetsOf(context) +
+          (insetPadding ??
+              const EdgeInsets.symmetric(horizontal: 40, vertical: 24)),
+      duration: Duration.zero,
+      child: MediaQuery.removeViewInsets(
+        removeLeft: true,
+        removeTop: true,
+        removeRight: true,
+        removeBottom: true,
+        context: context,
+        child: Align(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 280),
+            child: Surface(
+              color: color,
+              shape: AppShape.all(AppCorner.alert),
+              child: Material(type: MaterialType.transparency, child: child),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class CommonDialog extends StatelessWidget {
   final String title;
   final Widget? trailing;
@@ -437,54 +477,86 @@ class CommonDialog extends StatelessWidget {
             child: child ?? const SizedBox.shrink(),
           )
         : child;
-    final dialog = AlertDialog(
-      backgroundColor: glass ? Colors.transparent : backgroundColor,
+    final dialog = _AlertFrame(
+      color: glass
+          ? Colors.transparent
+          : backgroundColor ??
+                SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
       insetPadding: insetPadding,
-      titleTextStyle: hasFields
-          ? AppTextStyle.body.of(context)
-          : AppTextStyle.headline.of(context),
-      contentTextStyle: AppTextStyle.subheadline
-          .of(context)
-          .copyWith(
-            color: colorScheme.onSurfaceVariant.withValues(
-              alpha: colorScheme.brightness == Brightness.dark ? 1 : 0.85,
-            ),
-          ),
-      title: _buildTitle(),
-      actions: actions.isEmpty
-          ? null
-          : [
-              AlertActions(
-                actions: actions,
-                fill: fill,
-                destructive: destructive,
+      child: IntrinsicWidth(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(_textInset, 21, _textInset, 0),
+              child: DefaultTextStyle(
+                style: hasFields
+                    ? AppTextStyle.body.of(context)
+                    : AppTextStyle.headline.of(context),
+                child: Semantics(container: true, child: _buildTitle()),
               ),
-            ],
-      actionsPadding: const EdgeInsets.fromLTRB(
-        _actionInset,
-        0,
-        _actionInset,
-        _actionInset,
-      ),
-      titlePadding: const EdgeInsets.fromLTRB(_textInset, 21, _textInset, 0),
-      contentPadding:
-          padding ??
-          EdgeInsets.fromLTRB(
-            contentInset,
-            hasFields ? 16 : 6,
-            contentInset,
-            20,
-          ),
-      content: Container(
-        constraints: BoxConstraints(
-          maxWidth:
-              maxWidth ??
-              (padding == null
-                  ? _alertWidth - contentInset * 2
-                  : _contentMaxWidth),
+            ),
+            Flexible(
+              child: Padding(
+                padding:
+                    padding ??
+                    EdgeInsets.fromLTRB(
+                      contentInset,
+                      hasFields ? 16 : 6,
+                      contentInset,
+                      20,
+                    ),
+                child: DefaultTextStyle(
+                  style: AppTextStyle.subheadline
+                      .of(context)
+                      .copyWith(
+                        color: colorScheme.onSurfaceVariant.withValues(
+                          alpha: colorScheme.brightness == Brightness.dark
+                              ? 1
+                              : 0.85,
+                        ),
+                      ),
+                  child: Semantics(
+                    container: true,
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth:
+                            maxWidth ??
+                            (padding == null
+                                ? _alertWidth - contentInset * 2
+                                : _contentMaxWidth),
+                      ),
+                      width: double.infinity,
+                      child: overrideScroll
+                          ? content
+                          : SingleChildScrollView(child: content),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (actions.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  _actionInset,
+                  0,
+                  _actionInset,
+                  _actionInset,
+                ),
+                child: OverflowBar(
+                  alignment: MainAxisAlignment.end,
+                  children: [
+                    AlertActions(
+                      actions: actions,
+                      fill: fill,
+                      destructive: destructive,
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
-        width: double.infinity,
-        child: overrideScroll ? content : SingleChildScrollView(child: content),
       ),
     );
     return ElasticPress(

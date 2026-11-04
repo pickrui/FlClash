@@ -278,7 +278,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final scrollables = find.descendant(
-      of: find.byType(AlertDialog),
+      of: find.byType(CommonDialog),
       matching: find.byType(Scrollable),
     );
     expect(scrollables, findsWidgets);
