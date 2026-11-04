@@ -472,7 +472,7 @@ class _MiniScreenPainter extends CustomPainter {
     final bar = geometry.bar;
     final unit = geometry.unit;
     final path = AppShape.full.getOuterPath(bar);
-    final style = LiquidGlassStyle.pill(colorScheme);
+    final style = LiquidGlassStyle.pill(colorScheme.asPrism);
     final blur = unit * 0.4;
     canvas
       ..save()

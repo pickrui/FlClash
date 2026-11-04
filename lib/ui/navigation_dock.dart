@@ -1308,7 +1308,7 @@ class _FloatingNavigationBarState extends State<FloatingNavigationBar>
         LiquidGlassScope.qualityOf(context) == LiquidGlassQuality.ultra;
     final bar = _DockSurface(
       glass: glass,
-      style: LiquidGlassStyle.pill(colorScheme),
+      style: LiquidGlassStyle.pill(colorScheme.asPrism),
       glow: _touchGlow,
       child: Material(
         color: glass
@@ -1541,7 +1541,7 @@ class _GlassLens extends StatelessWidget {
       height: rect.height,
       child: IgnorePointer(
         child: LiquidGlass(
-          style: LiquidGlassStyle.lens(colorScheme).scale(lift),
+          style: LiquidGlassStyle.lens(colorScheme.asPrism).scale(lift),
           shadows: _lensShadows(colorScheme, lift),
         ),
       ),
@@ -1608,8 +1608,9 @@ class _LensContent extends StatelessWidget {
                   width: rect.width,
                   height: rect.height,
                   child: LiquidGlass(
-                    style: LiquidGlassStyle.lensContent(context.colorScheme)
-                        .scale(lift),
+                    style: LiquidGlassStyle.lensContent(
+                      context.colorScheme.asPrism,
+                    ).scale(lift),
                   ),
                 ),
               ],
@@ -1703,7 +1704,8 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
     if (widget.part == _LensPart.inside &&
         LiquidGlassScope.qualityOf(context) == LiquidGlassQuality.standard) {
       // Without a pane of its own the copy takes the light that one adds.
-      final brightness = LiquidGlassStyle.lensContent(colorScheme).brightness;
+      final brightness = LiquidGlassStyle.lensContent(colorScheme.asPrism)
+          .brightness;
       tint = Color.from(
         alpha: tint.a,
         red: math.min(tint.r * brightness, 1),

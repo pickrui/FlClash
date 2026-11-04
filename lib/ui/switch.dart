@@ -250,7 +250,7 @@ class _CommonSwitchState extends State<CommonSwitch>
           rect: _thumbIn(track, rtl),
           child: lens
               ? LiquidGlass(
-                  style: LiquidGlassStyle.lens(colorScheme).scale(lift),
+                  style: LiquidGlassStyle.lens(colorScheme.asPrism).scale(lift),
                   shadows: shadows,
                   child: thumb,
                 )

@@ -428,7 +428,7 @@ class CommonScaffoldState extends State<CommonScaffold>
         top: false,
         right: false,
         child: GooSurface(
-          glass: glass ? LiquidGlassStyle.pill(colorScheme) : null,
+          glass: glass ? LiquidGlassStyle.pill(colorScheme.asPrism) : null,
           color: SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
           shadows: glass ? const [] : dockShadows(colorScheme),
           child: ListenableBuilder(
@@ -709,7 +709,7 @@ class CommonScaffoldState extends State<CommonScaffold>
             )
           : null,
       glass: LiquidGlassScope.of(context)
-          ? LiquidGlassStyle.regular(colorScheme)
+          ? LiquidGlassStyle.regular(colorScheme.asPrism)
           : null,
       color: context.raisedSurfaceLevel.colorOf(colorScheme),
       // The field's own buttons stay off the bar's button fills and glass.

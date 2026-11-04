@@ -338,12 +338,12 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
               sourceImage: sourceImage,
               surfaceColor: SurfaceLevel.floatingOf(colorScheme)
                   .colorOf(colorScheme),
-              shadows: menuShadows(colorScheme),
+              shadows: menuShadows(colorScheme.asPrism),
               glass: glass
                   ? (
-                      from: LiquidGlassStyle.regular(colorScheme),
-                      to: LiquidGlassStyle.menu(colorScheme),
-                      rim: LiquidGlassRim.menu(colorScheme),
+                      from: LiquidGlassStyle.regular(colorScheme.asPrism),
+                      to: LiquidGlassStyle.menu(colorScheme.asPrism),
+                      rim: LiquidGlassRim.menu(colorScheme.asPrism),
                       coarse:
                           LiquidGlassScope.qualityOf(context) ==
                           LiquidGlassQuality.standard,
@@ -2474,9 +2474,9 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     final step = receding ? null : level.step;
     final colorScheme = context.colorScheme;
     final glass = LiquidGlassScope.of(context)
-        ? LiquidGlassStyle.menu(colorScheme)
+        ? LiquidGlassStyle.menu(colorScheme.asPrism)
         : null;
-    final rim = glass == null ? null : LiquidGlassRim.menu(colorScheme);
+    final rim = glass == null ? null : LiquidGlassRim.menu(colorScheme.asPrism);
     final fill = SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme);
     // A card behind a sub menu takes a tap as one outside that sub menu.
     return GestureDetector(
@@ -2518,7 +2518,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
                               top: step.itemTop - level.top,
                               height: step.itemHeight,
                             ),
-                      shadows: menuShadows(colorScheme, shadow),
+                      shadows: menuShadows(colorScheme.asPrism, shadow),
                       fill: fill,
                       dim: colorScheme.surface.withValues(
                         alpha: math.min(0.4, _levelFadeStep * distance),

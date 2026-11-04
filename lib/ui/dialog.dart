@@ -425,7 +425,7 @@ class CommonDialog extends StatelessWidget {
     final contentInset = hasFields ? _actionInset : _textInset;
     final glass = LiquidGlassScope.of(context);
     final colorScheme = context.colorScheme;
-    final fill = glass ? glassFillOf(colorScheme) : null;
+    final fill = glass ? glassFillOf(colorScheme.asPrism) : null;
     final content = hasFields
         ? FilledInputTheme(
             fillColor: fill,
@@ -494,9 +494,9 @@ class CommonDialog extends StatelessWidget {
       panelOf: _surfaceRectIn,
       child: glass
           ? _AlertGlass(
-              style: LiquidGlassStyle.alert(colorScheme),
-              rim: LiquidGlassRim.alert(colorScheme),
-              shadows: menuShadows(colorScheme),
+              style: LiquidGlassStyle.alert(colorScheme.asPrism),
+              rim: LiquidGlassRim.alert(colorScheme.asPrism),
+              shadows: menuShadows(colorScheme.asPrism),
               child: dialog,
             )
           : dialog,

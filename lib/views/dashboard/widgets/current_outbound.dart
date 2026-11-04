@@ -799,7 +799,10 @@ class _StartToggleState extends ConsumerState<_StartToggle>
                     ),
                     child: glass
                         ? LiquidGlass(
-                            style: LiquidGlassStyle.tinted(colorScheme, color),
+                            style: LiquidGlassStyle.tinted(
+                              colorScheme.asPrism,
+                              color,
+                            ),
                             clipper: _MorphClipper(progress),
                             pressed: _pressed,
                             child: child,

@@ -54,7 +54,7 @@ class FloatingFootBar extends StatelessWidget {
             ),
             child: LiquidGlassScope.of(context)
                 ? LiquidGlass(
-                    style: LiquidGlassStyle.pill(colorScheme),
+                    style: LiquidGlassStyle.pill(colorScheme.asPrism),
                     child: content,
                   )
                 : DecoratedBox(

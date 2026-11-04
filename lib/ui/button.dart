@@ -143,7 +143,7 @@ class _TonalButtonGroupState extends State<TonalButtonGroup>
               child: ValueListenableBuilder(
                 valueListenable: _pointer,
                 builder: (_, pointer, child) => LiquidGlass(
-                  style: LiquidGlassStyle.regular(colorScheme),
+                  style: LiquidGlassStyle.regular(colorScheme.asPrism),
                   pressed: pointer != null,
                   child: child,
                 ),
@@ -440,12 +440,12 @@ class TonalButtonTheme extends StatelessWidget {
       if (!paned) {
         return null;
       }
-      final regularGlass = LiquidGlassStyle.regular(colorScheme);
+      final regularGlass = LiquidGlassStyle.regular(colorScheme.asPrism);
       final tintedGlass = LiquidGlassStyle.tinted(
-        colorScheme,
+        colorScheme.asPrism,
         colorScheme.primary,
       );
-      return LiquidGlass.buttonStyle(
+      return liquidGlassButtonStyle(
         (states) => tinted(states) ? tintedGlass : regularGlass,
       );
     }

@@ -96,8 +96,8 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
     final colorScheme = context.colorScheme;
     final glass = TonalButtonTheme.glassOf(context);
     ButtonStyle? tinted(Color? color) => glass && color != null
-        ? LiquidGlass.buttonStyle(
-            (_) => LiquidGlassStyle.tinted(colorScheme, color),
+        ? liquidGlassButtonStyle(
+            (_) => LiquidGlassStyle.tinted(colorScheme.asPrism, color),
           )
         : null;
     final statusColor = switch (coreStatus) {

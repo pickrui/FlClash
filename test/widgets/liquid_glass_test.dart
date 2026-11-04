@@ -94,13 +94,13 @@ void main() {
         brightness: brightness,
       );
       final styles = [
-        LiquidGlassStyle.regular(colorScheme),
-        LiquidGlassStyle.pill(colorScheme),
-        LiquidGlassStyle.menu(colorScheme),
-        LiquidGlassStyle.alert(colorScheme),
-        LiquidGlassStyle.tinted(colorScheme, colorScheme.primary),
-        LiquidGlassStyle.lens(colorScheme),
-        LiquidGlassStyle.lensContent(colorScheme),
+        LiquidGlassStyle.regular(colorScheme.asPrism),
+        LiquidGlassStyle.pill(colorScheme.asPrism),
+        LiquidGlassStyle.menu(colorScheme.asPrism),
+        LiquidGlassStyle.alert(colorScheme.asPrism),
+        LiquidGlassStyle.tinted(colorScheme.asPrism, colorScheme.primary),
+        LiquidGlassStyle.lens(colorScheme.asPrism),
+        LiquidGlassStyle.lensContent(colorScheme.asPrism),
       ];
       for (final style in styles) {
         final bare = style.scale(0);
@@ -128,8 +128,8 @@ void main() {
         }
       }
       for (final rim in [
-        LiquidGlassRim.alert(colorScheme),
-        LiquidGlassRim.menu(colorScheme),
+        LiquidGlassRim.alert(colorScheme.asPrism),
+        LiquidGlassRim.menu(colorScheme.asPrism),
       ]) {
         expect(
           rim.scale(0),
@@ -168,7 +168,7 @@ void main() {
             mainAxisSize: MainAxisSize.min,
             children: [
               pane(keys[0], const []),
-              pane(keys[1], menuShadows(colorScheme, 8)),
+              pane(keys[1], menuShadows(colorScheme.asPrism, 8)),
             ],
           ),
         ),
@@ -201,7 +201,7 @@ void main() {
       MaterialApp(
         home: Center(
           child: FilledButton(
-            style: LiquidGlass.buttonStyle(
+            style: liquidGlassButtonStyle(
               (states) => LiquidGlassStyle(
                 tint: states.contains(WidgetState.pressed)
                     ? Colors.red

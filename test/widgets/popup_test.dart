@@ -2279,7 +2279,7 @@ void main() {
         }),
       );
       return shadow!.shift(
-        -menuShadows(const ColorScheme.light()).single.offset,
+        -menuShadows((const ColorScheme.light()).asPrism).single.offset,
       );
     }
 
