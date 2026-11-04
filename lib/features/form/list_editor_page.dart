@@ -240,7 +240,7 @@ class _ListEditorPageState<T, K> extends ConsumerState<ListEditorPage<T, K>> {
             );
             return CommonScrollBar(
               controller: _scrollController,
-              child: _ArrivalScroll(
+              child: ArrivalCacheExtentBuilder(
                 builder: (cacheExtent) => isSearching
                     ? _buildSearchResults(context, items, rowAt, cacheExtent)
                     : _buildReorderableList(context, items, rowAt, cacheExtent),
@@ -314,25 +314,6 @@ class _ListEditorPageState<T, K> extends ConsumerState<ListEditorPage<T, K>> {
       itemCount: items.length,
     );
   }
-}
-
-class _ArrivalScroll extends StatefulWidget {
-  const _ArrivalScroll({required this.builder});
-
-  final Widget Function(ScrollCacheExtent? cacheExtent) builder;
-
-  @override
-  State<_ArrivalScroll> createState() => _ArrivalScrollState();
-}
-
-class _ArrivalScrollState extends State<_ArrivalScroll>
-    with RouteSettledMixin<_ArrivalScroll> {
-  @override
-  void didSettleRoute() => setState(() {});
-
-  @override
-  Widget build(BuildContext context) =>
-      widget.builder(arrivalScrollCacheExtent(routeSettled));
 }
 
 class ListEditorAddAction extends StatelessWidget {

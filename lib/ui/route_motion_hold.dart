@@ -9,8 +9,15 @@ import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:prism_ui/route_motion_hold.dart' show whenNothingAnimates;
+
+export 'package:prism_ui/route_motion_hold.dart'
+    show
+        ArrivalCacheExtentBuilder,
+        ArrivalCacheExtentMixin,
+        whenNothingAnimates;
 
 class _RouteMotion {
   _RouteMotion(BuildContext context)
@@ -31,6 +38,12 @@ class _RouteMotion {
 
   bool get isMoving =>
       _animations.any((animation) => animation.isAnimating) ||
+      _gestures.any((gesture) => gesture.value);
+
+  bool get isUnderway =>
+      _animations.any(
+        (animation) => animation.isAnimating && animation.value > 0,
+      ) ||
       _gestures.any((gesture) => gesture.value);
 
   void addListener(AnimationStatusListener onStatus, VoidCallback onGesture) {
@@ -67,8 +80,11 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
   VoidCallback? _heldUpdate;
   VoidCallback? _frameUpdate;
   bool _pageActive = true;
+  var _settleRun = 0;
+  var _settling = false;
 
-  bool get _holding => !_pageActive || (_motion?.isMoving ?? false);
+  bool get _holding =>
+      !_pageActive || _settling || (_motion?.isMoving ?? false);
 
   // Frames stop while the window is hidden, so producers that tick meanwhile
   // must not queue one post-frame callback each.
@@ -97,12 +113,29 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
     update();
   }
 
+  void showFirstContent(VoidCallback update) {
+    if (!_pageActive || _settling || (_motion?.isUnderway ?? false)) {
+      _heldUpdate = update;
+      return;
+    }
+    _heldUpdate = null;
+    update();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final pageActive = PageActivityScope.isActiveOf(context);
     if (pageActive && !_pageActive && _heldUpdate != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _releaseHeld());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            !_holding &&
+            SchedulerBinding.instance.transientCallbackCount == 0) {
+          _applyHeld();
+        } else {
+          _releaseHeld();
+        }
+      });
     }
     _pageActive = pageActive;
     final route = ModalRoute.of(context);
@@ -130,8 +163,37 @@ mixin RouteMotionHoldMixin<T extends StatefulWidget> on State<T> {
   void _handleStatus(AnimationStatus _) => _releaseHeld();
 
   void _releaseHeld() {
+    if (!mounted || !_pageActive || (_motion?.isMoving ?? false)) {
+      return;
+    }
+    final scheduler = SchedulerBinding.instance;
+    if (scheduler.schedulerPhase == SchedulerPhase.idle &&
+        scheduler.transientCallbackCount == 0) {
+      _applyHeld();
+      return;
+    }
+    unawaited(_settle());
+  }
+
+  Future<void> _settle() async {
+    final run = ++_settleRun;
+    _settling = true;
+    await SchedulerBinding.instance.endOfFrame;
+    await whenNothingAnimates();
+    if (run != _settleRun || !mounted) {
+      return;
+    }
+    _settling = false;
+    if (_pageActive && !(_motion?.isMoving ?? false)) {
+      _applyHeld();
+    }
+  }
+
+  void _applyHeld() {
+    _settleRun++;
+    _settling = false;
     final update = _heldUpdate;
-    if (update == null || !mounted || _holding) {
+    if (update == null) {
       return;
     }
     _heldUpdate = null;
@@ -167,8 +229,4 @@ mixin RouteSettledMixin<T extends StatefulWidget> on State<T> {
     _routeSettled = true;
     didSettleRoute();
   }
-}
-
-ScrollCacheExtent? arrivalScrollCacheExtent(bool routeSettled) {
-  return routeSettled ? null : const ScrollCacheExtent.pixels(0);
 }

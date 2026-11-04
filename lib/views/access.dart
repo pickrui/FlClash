@@ -40,9 +40,7 @@ class AccessView extends ConsumerStatefulWidget {
 }
 
 class _AccessViewState extends ConsumerState<AccessView>
-    with WidgetsBindingObserver, RouteSettledMixin<AccessView> {
-  @override
-  void didSettleRoute() => setState(() {});
+    with WidgetsBindingObserver, ArrivalCacheExtentMixin<AccessView> {
   final GlobalKey<CommonScaffoldState> _scaffoldKey = GlobalKey();
   late ScrollController _controller;
   List<String>? _pinedList;
@@ -387,7 +385,7 @@ class _AccessViewState extends ConsumerState<AccessView>
               top: context.contentTopPadding,
               bottom: context.bottomInset,
             ),
-            scrollCacheExtent: arrivalScrollCacheExtent(routeSettled),
+            scrollCacheExtent: arrivalCacheExtent,
             itemCount: packages.length,
             itemBuilder: (_, index) {
               final package = packages[index];
