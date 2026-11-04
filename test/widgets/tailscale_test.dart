@@ -18,6 +18,7 @@ import 'package:fl_clash/ui/inherited.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:fl_clash/ui/qr_code.dart';
 
 import '../helpers/fake_tailscale_backend.dart';
@@ -191,7 +192,10 @@ void main() {
   testWidgets('an empty list invites adding a network', (tester) async {
     await _pump(tester, const TailscaleView());
     expect(find.text('Access your tailnet'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Add network'), findsOneWidget);
+    expect(
+      find.widgetWithText(prism.FilledButton, 'Add network'),
+      findsOneWidget,
+    );
     await _unmount(tester);
   });
 
@@ -419,7 +423,7 @@ void main() {
     expect(find.text('flclash-macos.tail1234.ts.net'), findsOneWidget);
     expect(find.text('100.64.0.1'), findsOneWidget);
     // Signed in, the account offers only signing out.
-    expect(find.widgetWithText(FilledButton, 'Log out'), findsOneWidget);
+    expect(find.widgetWithText(prism.FilledButton, 'Log out'), findsOneWidget);
     expect(find.text('Save and log in'), findsNothing);
 
     await tester.tap(find.text('Devices (1)'));

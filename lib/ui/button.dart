@@ -14,6 +14,9 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
+import 'package:prism_ui/card_surface.dart' as prism;
+import 'package:prism_ui/theme_data.dart' as prism;
 
 import 'card.dart';
 import 'goo.dart';
@@ -391,8 +394,8 @@ class TonalButton extends StatelessWidget {
           grouped: true,
           size: size,
           child: glyph == null
-              ? FilledButton(onPressed: onPressed, child: label)
-              : FilledButton.icon(
+              ? prism.FilledButton(onPressed: onPressed, child: label)
+              : prism.FilledButton.icon(
                   onPressed: onPressed,
                   icon: GlyphIcon(glyph, fill: 1),
                   label: label,
@@ -522,7 +525,54 @@ class TonalButtonTheme extends StatelessWidget {
         ),
       ),
     );
-    return _GlassButtons(glass: paned, child: themed);
+    final filledFill = grouped
+        ? fill
+        : filledPane == null
+        ? null
+        : Colors.transparent;
+    return _GlassButtons(
+      glass: paned,
+      child: prism.ButtonTheme(
+        data: prism.ButtonTheme.of(context).copyWith(
+          icon: prism.ButtonStyle.from(
+            backgroundColor: fill,
+            foregroundColor: foreground,
+            disabledBackgroundColor: fill,
+            disabledForegroundColor: disabledForeground,
+            fixedSize: Size.square(size.button),
+            minimumSize: Size.square(size.button),
+            padding: EdgeInsets.zero,
+            iconSize: size.icon,
+            visualDensity: prism.VisualDensity.standard,
+            tapTargetSize: prism.TapTargetSize.shrinkWrap,
+            backgroundBuilder: feedback(
+              iconPane,
+              standsOff: paned,
+            ).backgroundBuilder,
+            pressLook: prism.PressLook.none,
+            ringStandsOff: paned,
+          ),
+          filled: prism.ButtonStyle.from(
+            backgroundColor: filledFill,
+            disabledBackgroundColor: filledFill,
+            foregroundColor: grouped
+                ? foreground
+                : paned
+                ? colorScheme.onPrimary
+                : null,
+            disabledForegroundColor: grouped ? disabledForeground : null,
+            minimumSize: Size.square(size.button),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            visualDensity: prism.VisualDensity.standard,
+            tapTargetSize: prism.TapTargetSize.shrinkWrap,
+            backgroundBuilder: filledFeedback.backgroundBuilder,
+            pressLook: prism.PressLook.none,
+            ringStandsOff: !grouped,
+          ),
+        ),
+        child: themed,
+      ),
+    );
   }
 }
 

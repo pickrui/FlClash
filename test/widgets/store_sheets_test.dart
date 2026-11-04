@@ -8,6 +8,7 @@ import 'package:fl_clash/views/cloud/store_sheets.dart';
 import 'package:fl_clash/views/cloud/store_widgets.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -169,7 +170,7 @@ void main() {
     );
     expect(find.text('Sold out'), findsOneWidget);
     expect(find.text('Unavailable'), findsOneWidget);
-    expect(_filledButton('Buy'), findsOneWidget);
+    expect(find.widgetWithText(prism.FilledButton, 'Buy'), findsOneWidget);
   });
 
   testWidgets('a plan awaiting renewal reads by its auto-renew state', (
