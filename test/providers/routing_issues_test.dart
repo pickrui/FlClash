@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/models/routing_issue.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,6 +50,54 @@ void main() {
           {'name': 'New node'},
         ],
       });
+      await container.pump();
+      expect(container.read(routingIssuesProvider(1)).rules, isEmpty);
+    },
+  );
+  test(
+    'large profiles publish background issues and clear stale source warnings',
+    () async {
+      var source = Completer<Map<String, dynamic>?>();
+      var profile = Profile(
+        id: 1,
+        autoUpdateDuration: Duration.zero,
+        overwriteType: OverwriteType.custom,
+        customRules: List.generate(
+          2000,
+          (index) => Rule(id: index, value: 'MATCH,Missing'),
+        ),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          profileProvider(1).overrideWith((_) => profile),
+          routingSourceProvider(1).overrideWith((_) => source.future),
+        ],
+      );
+      addTearDown(container.dispose);
+      final complete = Completer<RoutingIssues>();
+      final subscription = container.listen(routingIssuesProvider(1), (
+        _,
+        next,
+      ) {
+        if (next.rules.length == 2000 && !complete.isCompleted) {
+          complete.complete(next);
+        }
+      });
+      addTearDown(subscription.close);
+      expect(container.read(routingIssuesProvider(1)).rules, isEmpty);
+      source.complete({});
+      await container.pump();
+      final issues = await complete.future.timeout(const Duration(seconds: 5));
+      expect(issues.rules[1999]!.single.kind, RoutingIssueKind.missingTarget);
+
+      source = Completer<Map<String, dynamic>?>();
+      container.invalidate(routingSourceProvider(1));
+      expect(container.read(routingIssuesProvider(1)).rules, isEmpty);
+      profile = profile.copyWith(
+        customRules: const [Rule(id: 1, value: 'MATCH,DIRECT')],
+      );
+      container.invalidate(profileProvider(1));
+      source.complete({});
       await container.pump();
       expect(container.read(routingIssuesProvider(1)).rules, isEmpty);
     },

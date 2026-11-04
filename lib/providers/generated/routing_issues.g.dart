@@ -86,14 +86,13 @@ final class RoutingSourceFamily extends $Family
   String toString() => r'routingSourceProvider';
 }
 
-@ProviderFor(routingIssues)
-final routingIssuesProvider = RoutingIssuesFamily._();
+@ProviderFor(RoutingIssuesState)
+final routingIssuesProvider = RoutingIssuesStateFamily._();
 
-final class RoutingIssuesProvider
-    extends $FunctionalProvider<RoutingIssues, RoutingIssues, RoutingIssues>
-    with $Provider<RoutingIssues> {
-  RoutingIssuesProvider._({
-    required RoutingIssuesFamily super.from,
+final class RoutingIssuesStateProvider
+    extends $NotifierProvider<RoutingIssuesState, RoutingIssues> {
+  RoutingIssuesStateProvider._({
+    required RoutingIssuesStateFamily super.from,
     required int super.argument,
   }) : super(
          retry: null,
@@ -104,7 +103,7 @@ final class RoutingIssuesProvider
        );
 
   @override
-  String debugGetCreateSourceHash() => _$routingIssuesHash();
+  String debugGetCreateSourceHash() => _$routingIssuesStateHash();
 
   @override
   String toString() {
@@ -115,14 +114,7 @@ final class RoutingIssuesProvider
 
   @$internal
   @override
-  $ProviderElement<RoutingIssues> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  RoutingIssues create(Ref ref) {
-    final argument = this.argument as int;
-    return routingIssues(ref, argument);
-  }
+  RoutingIssuesState create() => RoutingIssuesState();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(RoutingIssues value) {
@@ -134,7 +126,7 @@ final class RoutingIssuesProvider
 
   @override
   bool operator ==(Object other) {
-    return other is RoutingIssuesProvider && other.argument == argument;
+    return other is RoutingIssuesStateProvider && other.argument == argument;
   }
 
   @override
@@ -143,11 +135,19 @@ final class RoutingIssuesProvider
   }
 }
 
-String _$routingIssuesHash() => r'e30f28eceb47bfb2759a8b11596ec4a5f49d8bb3';
+String _$routingIssuesStateHash() =>
+    r'fe83f659ec0774a7023bf4b90d1f9a001c131a0c';
 
-final class RoutingIssuesFamily extends $Family
-    with $FunctionalFamilyOverride<RoutingIssues, int> {
-  RoutingIssuesFamily._()
+final class RoutingIssuesStateFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          RoutingIssuesState,
+          RoutingIssues,
+          RoutingIssues,
+          RoutingIssues,
+          int
+        > {
+  RoutingIssuesStateFamily._()
     : super(
         retry: null,
         name: r'routingIssuesProvider',
@@ -156,9 +156,30 @@ final class RoutingIssuesFamily extends $Family
         isAutoDispose: true,
       );
 
-  RoutingIssuesProvider call(int profileId) =>
-      RoutingIssuesProvider._(argument: profileId, from: this);
+  RoutingIssuesStateProvider call(int profileId) =>
+      RoutingIssuesStateProvider._(argument: profileId, from: this);
 
   @override
   String toString() => r'routingIssuesProvider';
+}
+
+abstract class _$RoutingIssuesState extends $Notifier<RoutingIssues> {
+  late final _$args = ref.$arg as int;
+  int get profileId => _$args;
+
+  RoutingIssues build(int profileId);
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<RoutingIssues, RoutingIssues>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<RoutingIssues, RoutingIssues>,
+              RoutingIssues,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
+  }
 }

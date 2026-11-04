@@ -6,6 +6,10 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:fl_clash/common/print.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:flutter/foundation.dart';
+
 /// Runs at most [concurrency] tasks at once, in the order they were queued.
 class TaskPool {
   TaskPool(this.concurrency) : assert(concurrency > 0);
@@ -91,5 +95,52 @@ extension FutureExt<T> on Future<T> {
       timeout ?? const Duration(minutes: 3),
       onTimeout: onTimeout,
     );
+  }
+}
+
+class LatestCompute<I, O> {
+  final ComputeCallback<I, O> _task;
+  final void Function(O result) _onResult;
+  ({I input})? _pending;
+  var _running = false;
+  var _generation = 0;
+
+  LatestCompute(this._task, this._onResult);
+
+  void run(I input) {
+    _generation++;
+    _pending = (input: input);
+    if (!_running) {
+      unawaited(_drain());
+    }
+  }
+
+  void cancel() {
+    _generation++;
+    _pending = null;
+  }
+
+  Future<void> _drain() async {
+    _running = true;
+    try {
+      while (_pending != null) {
+        final input = _pending!.input;
+        _pending = null;
+        final generation = _generation;
+        try {
+          final result = await compute(_task, input);
+          if (generation == _generation) {
+            _onResult(result);
+          }
+        } catch (e, s) {
+          commonPrint.log(
+            'Background compute failed: $e, $s',
+            logLevel: LogLevel.warning,
+          );
+        }
+      }
+    } finally {
+      _running = false;
+    }
   }
 }
