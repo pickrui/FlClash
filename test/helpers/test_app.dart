@@ -28,6 +28,7 @@ class TestApp extends StatelessWidget {
   final ThemeData? theme;
   final ThemeData? darkTheme;
   final ThemeMode? themeMode;
+  final TransitionBuilder? builder;
 
   const TestApp({
     super.key,
@@ -42,6 +43,7 @@ class TestApp extends StatelessWidget {
     this.theme,
     this.darkTheme,
     this.themeMode,
+    this.builder,
   });
 
   static Widget _identity(Widget child) => child;
@@ -73,7 +75,7 @@ class TestApp extends StatelessWidget {
             child: wrapped,
           );
         }
-        return wrapped;
+        return builder?.call(context, wrapped) ?? wrapped;
       },
       home: homeBuilder(child),
     );

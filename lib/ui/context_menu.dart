@@ -7,7 +7,8 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/l10n.dart';
 
 import 'focus.dart';
 import 'popup.dart';
@@ -108,7 +109,7 @@ class _ContextMenuRegionState extends State<ContextMenuRegion> {
       Offset.zero & box.size,
     );
     final menu = _menu = CommonPopupRoute<void>(
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierLabel: UiLocalizations.of(context).close,
       placement: PopupPlacement.belowPoint,
       elevated: ElevatedSurfaceTheme.isIn(context),
       anchorOf: () => point & Size.zero,
@@ -200,20 +201,32 @@ class _ContextMenuRegionState extends State<ContextMenuRegion> {
       canRequestFocus: false,
       skipTraversal: true,
       onKeyEvent: enabled ? (_, event) => _handleKey(event) : null,
-      child: GestureDetector(
-        onSecondaryTapUp: enabled
-            ? (details) => _open(details.globalPosition)
-            : null,
-        child: GestureDetector(
-          supportedDevices: _touchDevices,
-          onLongPressStart: enabled
-              ? (details) {
-                  Feedback.forLongPress(context);
-                  _open(details.globalPosition, avoid: true);
-                }
-              : null,
-          child: widget.child,
-        ),
+      child: RawGestureDetector(
+        gestures: {
+          if (enabled) ...{
+            TapGestureRecognizer:
+                GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                  () => TapGestureRecognizer(debugOwner: this),
+                  (recognizer) =>
+                      recognizer.onSecondaryTapUp = (details) =>
+                          _open(details.globalPosition),
+                ),
+            LongPressGestureRecognizer:
+                GestureRecognizerFactoryWithHandlers<
+                  LongPressGestureRecognizer
+                >(
+                  () => LongPressGestureRecognizer(
+                    debugOwner: this,
+                    supportedDevices: _touchDevices,
+                  ),
+                  (recognizer) => recognizer.onLongPressStart = (details) {
+                    Feedback.forLongPress(context);
+                    _open(details.globalPosition, avoid: true);
+                  },
+                ),
+          },
+        },
+        child: widget.child,
       ),
     );
   }

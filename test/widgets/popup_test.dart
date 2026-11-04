@@ -15,6 +15,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:prism_ui/divider.dart' as prism;
+import 'package:prism_ui/press_region.dart';
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -64,8 +66,8 @@ void main() {
   Future<PopupOpen> pumpBox(WidgetTester tester) async {
     late PopupOpen open;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      TestApp(
+        child: Scaffold(
           body: Center(
             child: CommonPopupBox(
               targetBuilder: (value) {
@@ -187,8 +189,8 @@ void main() {
   testWidgets('the popup is only built once it opens', (tester) async {
     var builds = 0;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      TestApp(
+        child: Scaffold(
           body: Center(
             child: CommonPopupBox(
               targetBuilder: (_) => const SizedBox(width: 40, height: 40),
@@ -214,8 +216,8 @@ void main() {
     addTearDown(showBox.dispose);
     late PopupOpen open;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      TestApp(
+        child: Scaffold(
           body: Center(
             child: ValueListenableBuilder<bool>(
               valueListenable: showBox,
@@ -257,8 +259,8 @@ void main() {
   ) async {
     late BuildContext context;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
+      TestApp(
+        child: Builder(
           builder: (value) {
             context = value;
             return const SizedBox.expand();
@@ -302,8 +304,8 @@ void main() {
     testWidgets('a point placement $name', (tester) async {
       late BuildContext context;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
+        TestApp(
+          child: Builder(
             builder: (value) {
               context = value;
               return const SizedBox.expand();
@@ -335,8 +337,8 @@ void main() {
       addTearDown(tester.view.resetViewInsets);
       late BuildContext context;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
+        TestApp(
+          child: Builder(
             builder: (value) {
               context = value;
               return const SizedBox.expand();
@@ -368,8 +370,8 @@ void main() {
     addTearDown(focusNode.dispose);
     late BuildContext context;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
+      TestApp(
+        child: Builder(
           builder: (value) {
             context = value;
             return Focus(
@@ -513,8 +515,8 @@ void main() {
   ) async {
     late BuildContext context;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
+      TestApp(
+        child: Builder(
           builder: (value) {
             context = value;
             return const SizedBox.expand();
@@ -659,6 +661,40 @@ void main() {
     );
   });
 
+  testWidgets('an item that keeps the menu open toggles its check in place', (
+    tester,
+  ) async {
+    var toggles = 0;
+    var picked = 0;
+    final open = await pumpMenu(tester, [
+      CommonPopupMenuItem(
+        label: 'many',
+        checked: false,
+        keepsOpen: true,
+        onPressed: () => toggles++,
+      ),
+      CommonPopupMenuItem(label: 'one', onPressed: () => picked++),
+    ]);
+    open();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('many'));
+    await tester.pumpAndSettle();
+    expect(toggles, 1);
+    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.check), findsOneWidget);
+
+    await tester.tap(find.text('many'));
+    await tester.pumpAndSettle();
+    expect(toggles, 2);
+    expect(find.byGlyph(AppGlyphs.check), findsNothing);
+
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    expect(picked, 1);
+    expect(find.byType(CommonPopupMenu), findsNothing);
+  });
+
   testWidgets('only a sub menu carries a divider, under its header', (
     tester,
   ) async {
@@ -671,17 +707,17 @@ void main() {
     ]);
     open();
     await tester.pumpAndSettle();
-    expect(find.byType(Divider), findsNothing);
+    expect(find.byType(prism.Divider), findsNothing);
 
     await tester.tap(find.text('parent'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Divider), findsOneWidget);
+    expect(find.byType(prism.Divider), findsOneWidget);
     final header = find.ancestor(
       of: find.text('parent').last,
-      matching: find.byType(InkWell),
+      matching: find.byType(PressRegion),
     );
-    final divider = find.byType(Divider);
+    final divider = find.byType(prism.Divider);
     expect(tester.getTopLeft(divider).dy, tester.getBottomLeft(header).dy);
     expect(tester.getSize(divider).height, 17);
     expect(
@@ -1558,10 +1594,10 @@ void main() {
     );
     expect(
       tester
-          .widget<InkWell>(
+          .widget<PressRegion>(
             find.ancestor(
               of: find.text('delete'),
-              matching: find.byType(InkWell),
+              matching: find.byType(PressRegion),
             ),
           )
           .hoverColor,
@@ -1573,10 +1609,10 @@ void main() {
     );
     expect(
       tester
-          .widget<InkWell>(
+          .widget<PressRegion>(
             find.ancestor(
               of: find.text('plain'),
-              matching: find.byType(InkWell),
+              matching: find.byType(PressRegion),
             ),
           )
           .hoverColor,
@@ -1735,7 +1771,7 @@ void main() {
     }
 
     Rect rowOf(Finder label) => tester.getRect(
-      find.ancestor(of: label, matching: find.byType(InkWell)).first,
+      find.ancestor(of: label, matching: find.byType(PressRegion)).first,
     );
 
     await tester.tap(find.text('parent'));
@@ -2036,9 +2072,9 @@ void main() {
   ) async {
     late PopupOpen open;
     await tester.pumpWidget(
-      MaterialApp(
+      TestApp(
         builder: (_, child) => LiquidGlassScope(enabled: true, child: child!),
-        home: Scaffold(
+        child: Scaffold(
           body: Center(
             child: CommonPopupBox(
               targetBuilder: (value) {
@@ -2074,13 +2110,13 @@ void main() {
     bool reduceMotion = false,
   }) {
     return tester.pumpWidget(
-      MaterialApp(
+      TestApp(
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context)
               .copyWith(disableAnimations: reduceMotion),
           child: child!,
         ),
-        home: Scaffold(
+        child: Scaffold(
           body: Align(
             alignment: Alignment.topRight,
             child: CommonPopupBox(
@@ -2130,8 +2166,8 @@ void main() {
     addTearDown(shift.dispose);
     late PopupOpen open;
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      TestApp(
+        child: Scaffold(
           body: ValueListenableBuilder<double>(
             valueListenable: shift,
             builder: (_, dx, child) => Padding(
@@ -2190,13 +2226,13 @@ void main() {
       var selected = false;
       const submenu = 'A very long resource subscription information title';
       await tester.pumpWidget(
-        MaterialApp(
+        TestApp(
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context)
                 .copyWith(textScaler: const TextScaler.linear(2)),
             child: child!,
           ),
-          home: Scaffold(
+          child: Scaffold(
             body: Align(
               alignment: Alignment.bottomRight,
               child: CommonPopupBox(
