@@ -10,6 +10,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/font.dart';
+import 'package:fl_clash/ui/prism_theme_bridge.dart';
 import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
@@ -224,7 +225,7 @@ class _LiquidGlassSetting extends ConsumerWidget {
         enabled: mode != LiquidGlassMode.none,
         child: AlertScope(
           presenter: const CommonAlertPresenter(),
-          child: child,
+          child: PrismThemeBridge(child: child),
         ),
       ),
     );

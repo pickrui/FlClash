@@ -9,6 +9,7 @@ import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:fl_clash/ui/dialog.dart';
+import 'package:fl_clash/ui/prism_theme_bridge.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:material_ui/material_ui.dart';
@@ -65,13 +66,14 @@ class TestApp extends StatelessWidget {
         Widget wrapped = MaterialUiCompatibilityBridge(
           child: IconTheme(data: Theme.of(context).iconTheme, child: child!),
         );
+        wrapped = wrapAppScopes(context, wrapped);
         if (textScaler != null) {
           wrapped = MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaler: textScaler),
             child: wrapped,
           );
         }
-        return wrapAppScopes(context, wrapped);
+        return wrapped;
       },
       home: homeBuilder(child),
     );
@@ -97,13 +99,15 @@ Widget wrapAppScopes(
     measure: measure,
     child: AlertScope(
       presenter: const CommonAlertPresenter(),
-      child: hasProviders
-          ? AppViewScope(child: child)
-          : ViewScope(
-              size: size,
-              isMobile: size.width <= maxMobileWidth,
-              child: child,
-            ),
+      child: PrismThemeBridge(
+        child: hasProviders
+            ? AppViewScope(child: child)
+            : ViewScope(
+                size: size,
+                isMobile: size.width <= maxMobileWidth,
+                child: child,
+              ),
+      ),
     ),
   );
 }
