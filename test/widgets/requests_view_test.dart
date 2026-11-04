@@ -9,6 +9,9 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/connection/requests.dart';
+import 'package:fl_clash/views/connection/item.dart';
+import 'package:fl_clash/views/connection/tracker_info_list.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,11 +24,12 @@ TrackerInfo _request(
   String host, {
   List<String> chains = const ['DIRECT'],
   int download = 0,
+  String network = 'tcp',
 }) => TrackerInfo(
   id: id,
   download: download,
   start: DateTime(2026),
-  metadata: Metadata(network: 'tcp', host: host, process: 'curl'),
+  metadata: Metadata(network: network, host: host, process: 'curl'),
   chains: chains,
   rule: 'MATCH',
   rulePayload: '',
@@ -35,17 +39,17 @@ Future<ProviderContainer> _pumpRequests(
   WidgetTester tester,
   List<TrackerInfo> requests, {
   int maxLength = 10,
+  Size size = const Size(1400, 1000),
 }) async {
-  tester.view.physicalSize = const Size(1400, 1000);
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   final container = ProviderContainer(
-    overrides: [
-      viewSizeProvider.overrideWithBuild((_, _) => const Size(1400, 1000)),
-    ],
+    overrides: [viewSizeProvider.overrideWithBuild((_, _) => size)],
   );
   addTearDown(container.dispose);
+  container.listen(appSettingProvider, (_, _) {});
   final notifier = container.read(requestsProvider.notifier);
   notifier.value = FixedList<TrackerInfo>(maxLength);
   requests.forEach(notifier.addRequest);
@@ -73,6 +77,95 @@ Future<ProviderContainer> _pumpRequests(
 }
 
 void main() {
+  testWidgets('network filters combine within a facet and narrow with search', (
+    tester,
+  ) async {
+    await _pumpRequests(tester, [
+      _request('a', 'alpha.test'),
+      _request('b', 'beta.test', network: 'udp'),
+      _request('c', 'gamma.test', network: 'udp'),
+    ]);
+    await tester.tap(find.widgetWithText(CommonChip, 'TCP'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('alpha.test', findRichText: true), findsWidgets);
+    expect(find.textContaining('beta.test', findRichText: true), findsNothing);
+    await tester.tap(find.widgetWithText(CommonChip, 'UDP'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('beta.test', findRichText: true), findsWidgets);
+    tester
+        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .searchState!
+        .onSearch('beta');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('alpha.test', findRichText: true), findsNothing);
+    expect(find.textContaining('beta.test', findRichText: true), findsWidgets);
+    expect(find.textContaining('gamma.test', findRichText: true), findsNothing);
+  });
+
+  testWidgets(
+    'request grouping persists and uses the visible newest-first order',
+    (tester) async {
+      final container = await _pumpRequests(tester, [
+        _request('a', 'alpha.test'),
+        _request('b', 'beta.test', chains: const ['Tokyo']),
+        _request('c', 'gamma.test'),
+      ]);
+      final scaffold = tester.widget<CommonScaffold>(
+        find.byType(CommonScaffold),
+      );
+      final menu = scaffold.menuItems.singleWhere(
+        (item) => item.label == appLocalizations.groupBy,
+      );
+      menu.subItems
+          .singleWhere((item) => item.label == RecordGrouping.exit.label)
+          .onPressed!();
+      await tester.pumpAndSettle();
+      expect(
+        container.read(appSettingProvider).recordGroupings['requests'],
+        'exit',
+      );
+      final grouped = tester.widget<TrackerInfoGroupedList>(
+        find.byType(TrackerInfoGroupedList),
+      );
+      expect(grouped.groups.map((group) => group.key), ['DIRECT', 'Tokyo']);
+      expect(grouped.groups.first.items.map((info) => info.id), ['c', 'a']);
+      expect(find.byType(TrackerInfoItem), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'compact request rows are reused while details show new traffic',
+    (tester) async {
+      final container = await _pumpRequests(tester, [
+        _request('a', 'alpha.test'),
+      ], size: const Size(600, 800));
+      final row = tester.widget<TrackerInfoItem>(find.byType(TrackerInfoItem));
+      container.read(requestsProvider.notifier).updateTraffic({
+        'a': (upload: 460, download: 257835),
+      });
+      await tester.pump(commonDuration);
+      await tester.pumpAndSettle();
+      expect(
+        identical(
+          tester.widget<TrackerInfoItem>(find.byType(TrackerInfoItem)),
+          row,
+        ),
+        isTrue,
+      );
+      await tester.tap(
+        find.textContaining('alpha.test', findRichText: true).first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TrackerInfoDetailView>(find.byType(TrackerInfoDetailView))
+            .trackerInfo
+            .download,
+        257835,
+      );
+    },
+  );
+
   testWidgets(
     'paused requests retain trimmed rows and resume the live buffer',
     (tester) async {

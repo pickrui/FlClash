@@ -271,10 +271,6 @@ class _TrackerInfoBody extends StatelessWidget {
           ],
         ),
         if (source.isNotEmpty) Text(source, style: styles.secondary),
-        Text(
-          Traffic(up: trackerInfo.upload, down: trackerInfo.download).desc,
-          style: styles.secondary,
-        ),
       ],
     );
   }

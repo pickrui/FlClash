@@ -8,14 +8,14 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:super_sliver_list/super_sliver_list.dart';
+import 'package:fl_clash/widgets/record_filter.dart';
+import 'package:fl_clash/ui/view_scope.dart';
 
-import 'item.dart';
+import 'tracker_info_list.dart';
 import 'tracker_info_table.dart';
 
 class RequestsView extends ConsumerStatefulWidget {
@@ -31,6 +31,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
   final _requestsStateNotifier = ValueNotifier<TrackerInfosState>(
     const TrackerInfosState(),
   );
+  late final _filters = trackerInfoFilterController(ref, 'requests');
   List<TrackerInfo> _requests = [];
   late final ScrollController _scrollController;
   late final _physics = FollowEndScrollPhysics(
@@ -40,12 +41,6 @@ class _RequestsViewState extends ConsumerState<RequestsView>
   void _onSearch(String value) {
     _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
       query: value,
-    );
-  }
-
-  void _onKeywordsUpdate(List<String> keywords) {
-    _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
-      keywords: keywords,
     );
   }
 
@@ -59,6 +54,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
     _requestsStateNotifier.value = _requestsStateNotifier.value.copyWith(
       trackerInfos: _requests,
     );
+    _filters.offer(_requests);
     ref.listenManual(requestsProvider.select((state) => state.list), (
       prev,
       next,
@@ -72,6 +68,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
   void dispose() {
     throttler.cancel(this);
     _requestsStateNotifier.dispose();
+    _filters.dispose();
     if (widget.scrollController == null) _scrollController.dispose();
     super.dispose();
   }
@@ -101,37 +98,86 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                   keyOf: (item) => item.id,
                 ),
         );
+        _filters.offer(_requestsStateNotifier.value.trackerInfos);
       });
     }, duration: commonDuration);
   }
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(
-      title: appLocalizations.requests,
-      searchState: AppBarSearchState(onSearch: _onSearch),
-      onKeywordsUpdate: _onKeywordsUpdate,
-      body: ValueListenableBuilder<TrackerInfosState>(
-        valueListenable: _requestsStateNotifier,
-        builder: (context, state, _) {
-          final requests = state.list;
-          return NullStatusSwitcher(
-            isEmpty: requests.isEmpty,
-            isSearching: state.isSearching,
-            nullStatus: NullStatus(
-              label: appLocalizations.nullTip(appLocalizations.requests),
-              illustration: NullStatusIllustration.requests,
-            ),
-            child: RecordTableFrame<TrackerInfo>(
-              tableId: 'requests',
-              items: requests,
-              reverse: true,
-              columnsOf: (width) =>
-                  trackerInfoColumns(context, width: width, isLive: false),
-              builder: (context, table, requests) => Align(
-                alignment: Alignment.topCenter,
-                child: CommonScrollBar(
+    final body = RecordFilterScope(
+      onFilter: _filters.add,
+      child: _buildBody(context),
+    );
+    return ListenableBuilder(
+      listenable: Listenable.merge([_filters, _filters.options]),
+      child: body,
+      builder: (context, body) {
+        final pinned = !ViewScope.isMobileOf(context);
+        return CommonScaffold(
+          title: context.appLocalizations.requests,
+          searchState: AppBarSearchState(onSearch: _onSearch),
+          keywords: _filters.keywordsOf(pinned: pinned),
+          menuItems: _filters.menuItems(context, pinned: pinned),
+          body: body!,
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return ListenableBuilder(
+      listenable: Listenable.merge([_requestsStateNotifier, _filters]),
+      builder: (context, _) {
+        final state = _requestsStateNotifier.value;
+        final requests = _filters.apply(state.list);
+        return NullStatusSwitcher(
+          isEmpty: requests.isEmpty,
+          isSearching: state.isSearching || _filters.isFiltering,
+          nullStatus: NullStatus(
+            label: appLocalizations.nullTip(appLocalizations.requests),
+            illustration: NullStatusIllustration.requests,
+          ),
+          child: RecordTableFrame<TrackerInfo>(
+            tableId: 'requests',
+            items: requests,
+            reverse: true,
+            columnsOf: (width) =>
+                trackerInfoColumns(context, width: width, isLive: false),
+            builder: (context, table, requests) {
+              final padding = EdgeInsets.only(
+                top: context.contentTopPadding,
+                bottom: context.bottomInset + 16,
+              );
+              final detailTitle = appLocalizations.details(
+                appLocalizations.request,
+              );
+              final groups = _filters.groupsOf(requests, reverse: true);
+              if (groups != null) {
+                return FloatingScrollbar(
                   controller: _scrollController,
+                  hintBuilder: (fraction) =>
+                      groups[(fraction * (groups.length - 1)).round()].key,
+                  child: TrackerInfoGroupedList(
+                    groups: groups,
+                    grouping: _filters.value.grouping!,
+                    isLive: false,
+                    detailTitle: detailTitle,
+                    table: table,
+                    controller: _scrollController,
+                    padding: padding,
+                  ),
+                );
+              }
+              return Align(
+                alignment: Alignment.topCenter,
+                child: FloatingScrollbar(
+                  controller: _scrollController,
+                  hintBuilder: (fraction) =>
+                      requests[(fraction * (requests.length - 1)).round()]
+                          .start
+                          .showFull,
                   child: ScrollToEndBox(
                     controller: _scrollController,
                     enable: state.autoScrollToEnd,
@@ -147,53 +193,25 @@ class _RequestsViewState extends ConsumerState<RequestsView>
                             autoScrollToEnd: true,
                             trackerInfos: ref.read(requestsProvider).list,
                           );
+                      _filters.offer(_requestsStateNotifier.value.trackerInfos);
                     },
-                    child: SuperListView.separated(
-                      padding: EdgeInsets.only(
-                        top: context.contentTopPadding,
-                        bottom: context.bottomInset + 16,
-                      ),
+                    child: TrackerInfoList(
+                      trackerInfos: requests,
+                      detailTitle: detailTitle,
+                      table: table,
+                      controller: _scrollController,
+                      padding: padding,
                       reverse: true,
                       shrinkWrap: true,
                       physics: _physics,
-                      controller: _scrollController,
-                      itemCount: requests.length,
-                      extentEstimation:
-                          table?.estimateExtent ?? recordListExtentEstimation,
-                      separatorBuilder: (_, _) => table == null
-                          ? const SizedBox(height: recordListGap)
-                          : const SizedBox.shrink(),
-                      itemBuilder: (_, index) {
-                        final trackerInfo = requests[index];
-                        final detailTitle = appLocalizations.details(
-                          appLocalizations.request,
-                        );
-                        if (table != null) {
-                          return TrackerInfoTableRow(
-                            key: Key(trackerInfo.id),
-                            trackerInfo: trackerInfo,
-                            table: table,
-                            striped: index.isOdd,
-                            detailTitle: detailTitle,
-                          );
-                        }
-                        return TrackerInfoItem(
-                          key: Key(trackerInfo.id),
-                          trackerInfo: trackerInfo,
-                          onClickKeyword: (value) {
-                            context.commonScaffoldState?.addKeyword(value);
-                          },
-                          detailTitle: detailTitle,
-                        );
-                      },
                     ),
                   ),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
