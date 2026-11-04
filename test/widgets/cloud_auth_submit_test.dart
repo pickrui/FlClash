@@ -17,6 +17,7 @@ import 'package:fl_clash/services/cloud_google_login.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -184,8 +185,11 @@ void main() {
           expect(find.byType(CloudLoginPage), findsOneWidget);
           expect(
             tester
-                .widget<FilledButton>(
-                  find.widgetWithText(FilledButton, 'Sign in with Google'),
+                .widget<prism.FilledButton>(
+                  find.widgetWithText(
+                    prism.FilledButton,
+                    'Sign in with Google',
+                  ),
                 )
                 .onPressed,
             isNotNull,

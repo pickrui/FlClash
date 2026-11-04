@@ -18,6 +18,8 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/input_dialog.dart' show VisibilityToggleButton;
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:prism_ui/common_button.dart' as prism;
 
 const _contentMaxWidth = 720.0;
 
@@ -61,7 +63,7 @@ class CloudPrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final compact = size != TonalButtonSize.bar;
-    final style = FilledButton.styleFrom(
+    final style = prism.ButtonStyle.from(
       minimumSize: Size(size.button, size.button),
       padding: EdgeInsets.symmetric(horizontal: compact ? 14 : 20),
       shape: AppShape.full,
@@ -69,12 +71,16 @@ class CloudPrimaryButton extends StatelessWidget {
           ? AppTextStyle.subheadline.of(context, emphasized: true)
           : AppTextStyle.body.of(context, emphasized: true),
       iconSize: size.icon,
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      tapTargetSize: prism.TapTargetSize.shrinkWrap,
     );
     final glyph = this.glyph;
     final Widget button = glyph == null
-        ? FilledButton(onPressed: onPressed, style: style, child: Text(label))
-        : FilledButton.icon(
+        ? prism.FilledButton(
+            onPressed: onPressed,
+            style: style,
+            child: Text(label),
+          )
+        : prism.FilledButton.icon(
             onPressed: onPressed,
             style: style,
             icon: GlyphIcon(glyph, fill: 1),
@@ -115,9 +121,9 @@ class CloudErrorBanner extends StatelessWidget {
                   .copyWith(color: foreground),
             ),
           ),
-          IconButton(
+          prism.IconButton(
             onPressed: onRetry,
-            color: foreground,
+            style: prism.ButtonStyle.from(foregroundColor: foreground),
             tooltip: context.appLocalizations.refresh,
             icon: const GlyphIcon(AppGlyphs.refresh),
           ),

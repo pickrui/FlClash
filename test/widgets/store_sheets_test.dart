@@ -61,7 +61,7 @@ Future<List<T?>> _pumpSheet<T>(WidgetTester tester, Widget sheet) async {
 
 /// The button holding [label], not a card around it that is a button too.
 Finder _filledButton(String label) => find
-    .ancestor(of: find.text(label), matching: find.byType(FilledButton))
+    .ancestor(of: find.text(label), matching: find.byType(prism.FilledButton))
     .first;
 
 void main() {
@@ -102,7 +102,7 @@ void main() {
     );
     await tester.tap(find.text('Alipay'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(FilledButton, 'Buy'), findsNothing);
+    expect(find.widgetWithText(prism.FilledButton, 'Buy'), findsNothing);
     await tester.ensureVisible(_filledButton('Pay'));
     await tester.tap(_filledButton('Pay'));
     await tester.pumpAndSettle();
@@ -118,7 +118,8 @@ void main() {
       tester,
       const StoreRechargeSheet(type: SheetType.page, methods: [_alipay]),
     );
-    FilledButton pay() => tester.widget<FilledButton>(_filledButton('Pay'));
+    prism.FilledButton pay() =>
+        tester.widget<prism.FilledButton>(_filledButton('Pay'));
     expect(pay().onPressed, isNull);
     expect(find.text('Allowed range ¥5 – ¥500'), findsOneWidget);
 

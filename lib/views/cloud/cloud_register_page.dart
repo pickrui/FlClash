@@ -17,6 +17,7 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud_layout.dart';
@@ -425,7 +426,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(l10n.haveAccountAlready, style: context.listCaptionStyle),
-            TextButton(
+            prism.TextButton(
               onPressed: isLoading
                   ? null
                   : () {

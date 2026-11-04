@@ -16,6 +16,7 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud_announcement_card.dart';
@@ -390,7 +391,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       tooltip = _serviceWarning ?? AppLocalizations.current.apiAvailable;
     }
 
-    return IconButton(
+    return prism.IconButton(
       icon: _isCheckingService && _checkPhase != _ServiceCheckPhase.confirming
           ? ActivityIndicator(size: TonalButtonSize.bar.icon)
           : GlyphIcon(glyph, color: color),
