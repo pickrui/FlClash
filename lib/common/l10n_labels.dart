@@ -128,3 +128,33 @@ extension LocaleL10n on Locale {
     };
   }
 }
+
+extension RecordFacetKindL10n on RecordFacetKind {
+  String? get title {
+    final l = appLocalizations;
+    return switch (this) {
+      RecordFacetKind.network => l.protocol,
+      RecordFacetKind.rule => l.rule,
+      RecordFacetKind.level => l.logLevel,
+      RecordFacetKind.mitm ||
+      RecordFacetKind.app ||
+      RecordFacetKind.proxy ||
+      RecordFacetKind.type ||
+      RecordFacetKind.initiator ||
+      RecordFacetKind.cache ||
+      RecordFacetKind.rcode => null,
+    };
+  }
+}
+
+extension RecordGroupingL10n on RecordGrouping {
+  String get label {
+    final l = appLocalizations;
+    return switch (this) {
+      RecordGrouping.app => l.app,
+      RecordGrouping.host => l.host,
+      RecordGrouping.rule => l.rule,
+      RecordGrouping.exit => l.outboundExit,
+    };
+  }
+}

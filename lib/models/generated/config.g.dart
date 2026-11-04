@@ -89,6 +89,11 @@ _AppSettingProps _$AppSettingPropsFromJson(
         ),
       ) ??
       const {},
+  recordGroupings:
+      (json['recordGroupings'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ) ??
+      const {},
 );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -125,6 +130,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'monochromeTrayIcon': instance.monochromeTrayIcon,
       'scriptOptions': instance.scriptOptions,
       'tableColumnWidths': instance.tableColumnWidths,
+      'recordGroupings': instance.recordGroupings,
     };
 
 const _$ConnectionCloseScopeEnumMap = {

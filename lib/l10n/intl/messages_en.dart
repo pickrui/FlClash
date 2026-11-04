@@ -1667,6 +1667,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Complete Google sign-in in your browser",
     ),
     "grid": MessageLookupByLibrary.simpleMessage("Grid"),
+    "groupBy": MessageLookupByLibrary.simpleMessage("Group by"),
     "groupCount": m36,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("groups"),
     "groupCycleError": m37,

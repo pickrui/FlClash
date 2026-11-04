@@ -1666,5 +1666,6 @@
   "addToLocalProxies": "添加到自定义节点",
   "addedToLocalProxies": "已将 {name} 添加到自定义节点",
   "alreadyInLocalProxies": "自定义节点中已有 {name}",
-  "generalOverrideDesc": "添加的项会覆写所有配置的对应设置，未添加的项沿用配置自身的设置，配置未设置时使用内核默认值"
+  "generalOverrideDesc": "添加的项会覆写所有配置的对应设置，未添加的项沿用配置自身的设置，配置未设置时使用内核默认值",
+  "groupBy": "分类"
 }

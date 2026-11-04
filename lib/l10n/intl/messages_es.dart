@@ -1744,6 +1744,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Complete el inicio de sesión con Google en el navegador",
     ),
     "grid": MessageLookupByLibrary.simpleMessage("Cuadrícula"),
+    "groupBy": MessageLookupByLibrary.simpleMessage("Agrupar por"),
     "groupCount": m36,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("grupos"),
     "groupCycleError": m37,

@@ -240,6 +240,17 @@ void main() {
   });
 
   group('AppSettingProps JSON round-trip', () {
+    test('record grouping preferences persist independently by page', () {
+      expect(AppSettingProps.fromJson({}).recordGroupings, isEmpty);
+      const props = AppSettingProps(
+        recordGroupings: {'requests': 'host', 'logs': 'app'},
+      );
+      expect(
+        roundTrip(props.toJson, AppSettingProps.fromJson).recordGroupings,
+        props.recordGroupings,
+      );
+    });
+
     test(
       'expanded sidebar default preserves an existing collapsed preference',
       () {

@@ -1666,5 +1666,6 @@
   "addToLocalProxies": "Añadir a nodos personalizados",
   "addedToLocalProxies": "{name} añadido a nodos personalizados",
   "alreadyInLocalProxies": "{name} ya está en nodos personalizados",
-  "generalOverrideDesc": "Las entradas añadidas aquí sustituyen el ajuste correspondiente de todos los perfiles; lo que no añadas conserva el ajuste del propio perfil, o el valor predeterminado del núcleo si el perfil no lo define."
+  "generalOverrideDesc": "Las entradas añadidas aquí sustituyen el ajuste correspondiente de todos los perfiles; lo que no añadas conserva el ajuste del propio perfil, o el valor predeterminado del núcleo si el perfil no lo define.",
+  "groupBy": "Agrupar por"
 }

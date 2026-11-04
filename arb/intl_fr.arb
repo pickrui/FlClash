@@ -1666,5 +1666,6 @@
   "addToLocalProxies": "Ajouter aux nœuds personnalisés",
   "addedToLocalProxies": "{name} ajouté aux nœuds personnalisés",
   "alreadyInLocalProxies": "{name} est déjà dans les nœuds personnalisés",
-  "generalOverrideDesc": "Les entrées ajoutées ici remplacent le réglage correspondant de tous les profils ; tout ce qui n’est pas ajouté garde le réglage du profil, ou la valeur par défaut du cœur si le profil n’en a pas."
+  "generalOverrideDesc": "Les entrées ajoutées ici remplacent le réglage correspondant de tous les profils ; tout ce qui n’est pas ajouté garde le réglage du profil, ou la valeur par défaut du cœur si le profil n’en a pas.",
+  "groupBy": "Regrouper par"
 }

@@ -1404,6 +1404,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ブラウザで Google ログインを完了してください",
     ),
     "grid": MessageLookupByLibrary.simpleMessage("グリッド"),
+    "groupBy": MessageLookupByLibrary.simpleMessage("分類"),
     "groupCount": m36,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("個"),
     "groupCycleError": m37,

@@ -183,6 +183,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool monochromeTrayIcon,
     @Default({}) Map<String, Map<String, bool>> scriptOptions,
     @Default({}) Map<String, Map<String, double>> tableColumnWidths,
+    @Default({}) Map<String, String> recordGroupings,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>

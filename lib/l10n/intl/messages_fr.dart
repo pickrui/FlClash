@@ -1740,6 +1740,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Terminez la connexion à Google dans votre navigateur",
     ),
     "grid": MessageLookupByLibrary.simpleMessage("Grille"),
+    "groupBy": MessageLookupByLibrary.simpleMessage("Regrouper par"),
     "groupCount": m36,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("groupes"),
     "groupCycleError": m37,

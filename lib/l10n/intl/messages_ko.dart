@@ -1384,6 +1384,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "브라우저에서 Google 로그인을 완료하세요",
     ),
     "grid": MessageLookupByLibrary.simpleMessage("격자"),
+    "groupBy": MessageLookupByLibrary.simpleMessage("분류"),
     "groupCount": m36,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("개"),
     "groupCycleError": m37,

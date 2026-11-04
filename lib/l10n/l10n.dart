@@ -14048,6 +14048,11 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Group by`
+  String get groupBy {
+    return Intl.message('Group by', name: 'groupBy', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

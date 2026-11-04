@@ -1716,6 +1716,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Завершите вход через Google в браузере",
     ),
     "grid": MessageLookupByLibrary.simpleMessage("Сетка"),
+    "groupBy": MessageLookupByLibrary.simpleMessage("Группировка"),
     "groupCount": m36,
     "groupCountUnit": MessageLookupByLibrary.simpleMessage("групп"),
     "groupCycleError": m37,
