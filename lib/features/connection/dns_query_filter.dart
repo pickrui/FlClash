@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/string.dart';
 import 'package:fl_clash/models/common.dart';
-import 'package:flutter/foundation.dart';
 
 enum DnsQueryFilter { all, cached, failed }
 
@@ -14,7 +13,6 @@ class DnsQuerySearch {
   String? _search;
   String? _locale;
   DnsQueryFilter? _filter;
-  List<String> _keywords = const [];
   List<DnsQuery> _result = const [];
   var _tags = Expando<List<String>>();
   var _texts = Expando<String>();
@@ -22,7 +20,6 @@ class DnsQuerySearch {
   List<DnsQuery> filter({
     required List<DnsQuery> queries,
     required String search,
-    required List<String> keywords,
     required DnsQueryFilter filter,
     required String locale,
     required List<String> Function(DnsQuery) tagsOf,
@@ -30,8 +27,7 @@ class DnsQuerySearch {
     if (identical(_source, queries) &&
         _search == search &&
         _filter == filter &&
-        _locale == locale &&
-        listEquals(_keywords, keywords)) {
+        _locale == locale) {
       return _result;
     }
     if (_locale != locale) {
@@ -47,10 +43,8 @@ class DnsQuerySearch {
             DnsQueryFilter.failed => item.isFailed,
           };
           if (!included) return false;
-          if (keywords.isEmpty && query.isEmpty) return true;
-          final tags = _tags[item] ??= tagsOf(item);
-          if (!keywords.every(tags.contains)) return false;
           if (query.isEmpty) return true;
+          final tags = _tags[item] ??= tagsOf(item);
           final text = _texts[item] ??= SearchQuery.textOf([
             ...item.searchFields,
             ...tags,
@@ -62,7 +56,6 @@ class DnsQuerySearch {
     _search = search;
     _filter = filter;
     _locale = locale;
-    _keywords = List.of(keywords);
     return _result = result;
   }
 }

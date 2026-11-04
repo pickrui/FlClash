@@ -205,18 +205,11 @@ void main() {
         'DOMAINsuffix example.com',
         'remote.example special extra-rule',
       ]) {
-        expect(
-          state.copyWith(query: query, keywords: ['proxy', 'browser']).list,
-          [info],
-        );
+        expect(state.copyWith(query: '$query proxy browser').list, [info]);
       }
-      expect(
-        state.copyWith(query: 'example', keywords: ['prox']).list,
-        isEmpty,
-      );
       expect(state.copyWith(query: 'example missing').list, isEmpty);
       expect(state.copyWith(query: '  \t ').isSearching, isFalse);
-      expect(state.copyWith(keywords: ['proxy']).isSearching, isTrue);
+      expect(state.copyWith(query: 'proxy').isSearching, isTrue);
       final updated = info.copyWith(
         metadata: info.metadata.copyWith(host: 'changed.test'),
       );

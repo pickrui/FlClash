@@ -40,8 +40,6 @@ import 'sheet_header.dart';
 import 'sheet_navigator.dart';
 import 'sortable.dart';
 
-typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
-
 class ScaffoldKeyword {
   const ScaffoldKeyword({
     required this.key,
@@ -95,7 +93,6 @@ class CommonScaffold extends StatefulWidget {
   /// Shown searching or not and never folded; the first two share a button
   /// group and any after them stand alone.
   final List<IconButtonData> selectionActions;
-  final OnKeywordsUpdateCallback? onKeywordsUpdate;
   final ValueListenable<List<ScaffoldKeyword>>? keywords;
   final bool? resizeToAvoidBottomInset;
   final VoidCallback? backAction;
@@ -121,7 +118,6 @@ class CommonScaffold extends StatefulWidget {
     this.iconActions = const [],
     this.menuItems = const [],
     this.confirmationAction,
-    this.onKeywordsUpdate,
     this.keywords,
     this.resizeToAvoidBottomInset,
     this.canSort = false,
@@ -135,7 +131,6 @@ class CommonScaffoldState extends State<CommonScaffold>
     with SingleTickerProviderStateMixin {
   late final ValueNotifier<AppBarState> _appBarState;
   final ValueNotifier<bool> _loadingNotifier = ValueNotifier(false);
-  final ValueNotifier<List<String>> _keywordsNotifier = ValueNotifier([]);
   final _textController = TextEditingController();
   final _searchFocusNode = FocusNode();
   late final _searchMotion = _SearchMotion(this);
@@ -174,7 +169,6 @@ class CommonScaffoldState extends State<CommonScaffold>
     super.initState();
     _appBarState = ValueNotifier(AppBarState(searchState: widget.searchState));
     _loadingNotifier.value = widget.isLoading;
-    _keywordsNotifier.addListener(_handleKeywordsChanged);
     _textController.text = widget.searchState?.query ?? '';
     _searchMotion.jumpTo(open: _isSearch);
     _searchCovered.value = _isSearch;
@@ -186,9 +180,6 @@ class CommonScaffoldState extends State<CommonScaffold>
     });
     HardwareKeyboard.instance.addHandler(_handleSearchShortcut);
   }
-
-  void _handleKeywordsChanged() =>
-      widget.onKeywordsUpdate?.call(_keywordsNotifier.value);
 
   Future<void> _updateSearchState(AppBarSearchStateBuilder builder) async {
     _appBarState.value = _appBarState.value.copyWith(
@@ -392,23 +383,7 @@ class CommonScaffoldState extends State<CommonScaffold>
     _searchOrigin.dispose();
     _searchCovered.dispose();
     _loadingNotifier.dispose();
-    _keywordsNotifier.dispose();
     super.dispose();
-  }
-
-  void addKeyword(String keyword) {
-    final isContains = _keywordsNotifier.value.contains(keyword);
-    if (isContains) return;
-    final keywords = List<String>.from(_keywordsNotifier.value)..add(keyword);
-    _keywordsNotifier.value = keywords;
-  }
-
-  void _deleteKeyword(String keyword) {
-    final isContains = _keywordsNotifier.value.contains(keyword);
-    if (!isContains) return;
-    final keywords = List<String>.from(_keywordsNotifier.value)
-      ..remove(keyword);
-    _keywordsNotifier.value = keywords;
   }
 
   Widget _buildDockedSearch(AppBarSearchState searchState) {
@@ -946,18 +921,9 @@ class CommonScaffoldState extends State<CommonScaffold>
       top: !barFloats,
       bottom: false,
       child: ListenableBuilder(
-        listenable: widget.keywords ?? _keywordsNotifier,
+        listenable: Listenable.merge([widget.keywords]),
         builder: (context, _) {
-          final keywords =
-              widget.keywords?.value ??
-              [
-                for (final keyword in _keywordsNotifier.value)
-                  ScaffoldKeyword(
-                    key: keyword,
-                    label: keyword,
-                    onDeleted: () => _deleteKeyword(keyword),
-                  ),
-              ];
+          final keywords = widget.keywords?.value ?? const <ScaffoldKeyword>[];
           final hasKeywords = keywords.isNotEmpty;
           final barInset = MediaQuery.paddingOf(context).top;
           final overlap = barFloats

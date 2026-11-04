@@ -215,7 +215,6 @@ class _ExitChip extends StatelessWidget {
       color: context.raisedSurfaceLevel.colorOf(colorScheme),
       foregroundColor: colorScheme.onSurfaceVariant,
       onPressed: () {
-        context.commonScaffoldState?.addKeyword(exit);
         RecordFilterScope.add(
           context,
           RecordFilter(RecordFacetKind.proxy, exit),

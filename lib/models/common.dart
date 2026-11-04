@@ -238,7 +238,6 @@ extension LogsStateExt on LogsState {
 abstract class TrackerInfosState with _$TrackerInfosState {
   const factory TrackerInfosState({
     @Default([]) List<TrackerInfo> trackerInfos,
-    @Default([]) List<String> keywords,
     @Default('') String query,
     @Default(true) bool autoScrollToEnd,
   }) = _TrackerInfosState;
@@ -247,19 +246,12 @@ abstract class TrackerInfosState with _$TrackerInfosState {
 final _trackerInfoSearchTexts = Expando<String>();
 
 extension TrackerInfosStateExt on TrackerInfosState {
-  bool get isSearching => keywords.isNotEmpty || SearchQuery(query).isNotEmpty;
+  bool get isSearching => SearchQuery(query).isNotEmpty;
 
   List<TrackerInfo> get list {
     final search = SearchQuery(query);
-    if (keywords.isEmpty && search.isEmpty) return trackerInfos;
+    if (search.isEmpty) return trackerInfos;
     return trackerInfos
-        .where(
-          (info) => keywords.every(
-            (keyword) =>
-                info.metadata.process == keyword ||
-                info.chains.contains(keyword),
-          ),
-        )
         .whereMatches(
           search,
           (info) => info.searchFields,

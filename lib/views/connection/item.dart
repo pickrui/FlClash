@@ -90,7 +90,6 @@ List<CommonPopupMenuItem> trackerInfoMenuItems(
 class TrackerInfoItem extends ConsumerWidget {
   final TrackerInfo trackerInfo;
   final bool isLive;
-  final Function(String)? onClickKeyword;
   final Widget? trailing;
   final String detailTitle;
   final ValueChanged<TrackerInfo>? onClose;
@@ -100,7 +99,6 @@ class TrackerInfoItem extends ConsumerWidget {
     super.key,
     required this.trackerInfo,
     this.isLive = false,
-    this.onClickKeyword,
     this.trailing,
     required this.detailTitle,
     this.onClose,
@@ -121,11 +119,7 @@ class TrackerInfoItem extends ConsumerWidget {
           detailTitle,
         ),
         header: _buildHeader(context),
-        body: _TrackerInfoBody(
-          trackerInfo: trackerInfo,
-          showIcon: showIcon,
-          onClickKeyword: onClickKeyword,
-        ),
+        body: _TrackerInfoBody(trackerInfo: trackerInfo, showIcon: showIcon),
       ),
     );
   }
@@ -178,13 +172,8 @@ class TrackerInfoItem extends ConsumerWidget {
 class _TrackerInfoBody extends StatelessWidget {
   final TrackerInfo trackerInfo;
   final bool showIcon;
-  final Function(String)? onClickKeyword;
 
-  const _TrackerInfoBody({
-    required this.trackerInfo,
-    required this.showIcon,
-    this.onClickKeyword,
-  });
+  const _TrackerInfoBody({required this.trackerInfo, required this.showIcon});
 
   Widget _buildTitle(BuildContext context, RecordTextStyles styles) {
     final metadata = trackerInfo.metadata;
@@ -212,7 +201,6 @@ class _TrackerInfoBody extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: () {
-            onClickKeyword?.call(process);
             RecordFilterScope.add(
               context,
               RecordFilter(RecordFacetKind.app, process),
@@ -258,7 +246,6 @@ class _TrackerInfoBody extends StatelessWidget {
                       color: context.raisedSurfaceLevel.colorOf(colorScheme),
                       foregroundColor: colorScheme.onSurfaceVariant,
                       onPressed: () {
-                        onClickKeyword?.call(chain);
                         RecordFilterScope.add(
                           context,
                           RecordFilter(RecordFacetKind.proxy, chain),

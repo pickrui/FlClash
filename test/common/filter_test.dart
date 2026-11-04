@@ -38,10 +38,6 @@ void main() {
       final connections = TrackerInfosState(trackerInfos: [tracker]);
       expect(connections.copyWith(query: 'TCP tokyo EXAMPLE').list, [tracker]);
       expect(connections.copyWith(query: 'tcp missing').list, isEmpty);
-      expect(
-        connections.copyWith(query: 'tcp', keywords: ['unknown']).list,
-        isEmpty,
-      );
     },
   );
 
@@ -200,30 +196,30 @@ void main() {
       }
     });
 
-    test('returns all when no keywords and empty query', () {
+    test('returns all when the query is empty', () {
       final state = TrackerInfosState(trackerInfos: [tracker('1')]);
       expect(state.list.length, 1);
     });
 
-    test('filters by keyword matching chain name', () {
+    test('query matches chain name', () {
       final state = TrackerInfosState(
         trackerInfos: [
           tracker('1', chains: ['proxy-a', 'proxy-b']),
           tracker('2', chains: ['proxy-c']),
         ],
-        keywords: ['proxy-a'],
+        query: 'proxy-a',
       );
       expect(state.list.length, 1);
       expect(state.list[0].id, '1');
     });
 
-    test('filters by keyword matching process', () {
+    test('query matches process', () {
       final state = TrackerInfosState(
         trackerInfos: [
           tracker('1', metadata: meta(process: 'chrome')),
           tracker('2', metadata: meta(process: 'firefox')),
         ],
-        keywords: ['firefox'],
+        query: 'firefox',
       );
       expect(state.list.length, 1);
       expect(state.list[0].id, '2');

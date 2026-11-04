@@ -455,7 +455,6 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
     final searched = _querySearch.filter(
       queries: _queries,
       search: _search,
-      keywords: const [],
       filter: _filter,
       locale: Localizations.localeOf(context).toLanguageTag(),
       tagsOf: (query) => _tagsOf(context.appLocalizations, query),

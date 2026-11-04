@@ -91,51 +91,6 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('keyword chips report every change to the page', (tester) async {
-    final updates = <List<String>>[];
-    final key = GlobalKey<CommonScaffoldState>();
-    await tester.pumpWidget(
-      TestApp(
-        locale: const Locale('en'),
-        wrapInProviderScope: true,
-        child: CommonScaffold(
-          key: key,
-          title: 'Logs',
-          onKeywordsUpdate: updates.add,
-          body: const SizedBox.expand(),
-        ),
-      ),
-    );
-
-    key.currentState!.addKeyword('dns');
-    key.currentState!.addKeyword('dns');
-    key.currentState!.addKeyword('tcp');
-    await tester.pump();
-    expect(updates, [
-      ['dns'],
-      ['dns', 'tcp'],
-    ]);
-
-    await tester.tap(find.widgetWithText(CommonChip, 'dns'));
-    await tester.pump();
-    expect(updates.last, ['tcp']);
-    expect(find.text('dns'), findsNothing);
-
-    await tester.pumpWidget(
-      TestApp(
-        locale: const Locale('en'),
-        wrapInProviderScope: true,
-        child: CommonScaffold(
-          key: key,
-          title: 'Logs',
-          onKeywordsUpdate: updates.add,
-          body: const SizedBox(),
-        ),
-      ),
-    );
-    expect(updates, hasLength(3));
-  });
-
   testWidgets(
     'page-owned filter chips toggle and remove without remounting the body',
     (tester) async {

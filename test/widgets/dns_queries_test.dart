@@ -61,57 +61,52 @@ Future<void> _pumpDnsQueries(
 }
 
 void main() {
-  test(
-    'DNS search cache invalidates for data, filters, keywords and locale',
-    () {
-      final cache = DnsQuerySearch();
-      final cached = DnsQuery(
-        domain: 'one.invalid',
-        type: 'A',
-        time: DateTime.utc(2026),
-        cached: true,
-      );
-      final failed = cached.copyWith(
-        domain: 'two.invalid',
-        cached: false,
-        rcode: 'NXDOMAIN',
-      );
-      var rows = [cached, failed];
-      var labelsRead = 0;
-      List<DnsQuery> query({
-        String search = '',
-        String locale = 'en',
-        List<String> keywords = const [],
-        DnsQueryFilter filter = DnsQueryFilter.all,
-      }) => cache.filter(
-        queries: rows,
-        search: search,
-        locale: locale,
-        keywords: keywords,
-        filter: filter,
-        tagsOf: (q) {
-          labelsRead++;
-          return [q.type, if (q.cached) locale == 'en' ? 'Cached' : '已缓存'];
-        },
-      );
-      final all = query();
-      expect(all, [cached, failed]);
-      expect(labelsRead, 0);
-      expect(identical(query(), all), isTrue);
-      expect(query(filter: DnsQueryFilter.failed), [failed]);
-      expect(query(search: 'cached'), [cached]);
-      expect(labelsRead, 2);
-      expect(query(search: 'one'), [cached]);
-      expect(labelsRead, 2);
-      expect(query(search: 'cached', locale: 'zh-CN'), isEmpty);
-      expect(query(search: '已缓存', locale: 'zh-CN'), [cached]);
-      expect(query(keywords: ['A'], filter: DnsQueryFilter.cached), [cached]);
-      rows = [failed];
-      expect(query(filter: DnsQueryFilter.cached), isEmpty);
-      rows = [];
-      expect(query(), isEmpty);
-    },
-  );
+  test('DNS search cache invalidates for data, filters and locale', () {
+    final cache = DnsQuerySearch();
+    final cached = DnsQuery(
+      domain: 'one.invalid',
+      type: 'A',
+      time: DateTime.utc(2026),
+      cached: true,
+    );
+    final failed = cached.copyWith(
+      domain: 'two.invalid',
+      cached: false,
+      rcode: 'NXDOMAIN',
+    );
+    var rows = [cached, failed];
+    var labelsRead = 0;
+    List<DnsQuery> query({
+      String search = '',
+      String locale = 'en',
+      DnsQueryFilter filter = DnsQueryFilter.all,
+    }) => cache.filter(
+      queries: rows,
+      search: search,
+      locale: locale,
+      filter: filter,
+      tagsOf: (q) {
+        labelsRead++;
+        return [q.type, if (q.cached) locale == 'en' ? 'Cached' : '已缓存'];
+      },
+    );
+    final all = query();
+    expect(all, [cached, failed]);
+    expect(labelsRead, 0);
+    expect(identical(query(), all), isTrue);
+    expect(query(filter: DnsQueryFilter.failed), [failed]);
+    expect(query(search: 'cached'), [cached]);
+    expect(labelsRead, 2);
+    expect(query(search: 'one'), [cached]);
+    expect(labelsRead, 2);
+    expect(query(search: 'cached', locale: 'zh-CN'), isEmpty);
+    expect(query(search: '已缓存', locale: 'zh-CN'), [cached]);
+    expect(query(search: 'A', filter: DnsQueryFilter.cached), [cached]);
+    rows = [failed];
+    expect(query(filter: DnsQueryFilter.cached), isEmpty);
+    rows = [];
+    expect(query(), isEmpty);
+  });
 
   testWidgets(
     'browsing DNS history retains trimmed rows until following resumes',
