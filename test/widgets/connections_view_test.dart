@@ -561,8 +561,7 @@ void main() {
     expect(find.text('host-1.com:443', findRichText: true), findsNothing);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(stream.starts, 2);
     expect(find.text('host-1.com:443', findRichText: true), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
