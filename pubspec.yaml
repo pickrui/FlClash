@@ -22,7 +22,10 @@ dependencies:
   shared_preferences_platform_interface: ^2.4.2
   window:
     path: plugins/window
-  dynamic_color: ^2.1.0
+  dynamic_color:
+    path: plugins/dynamic_color
+  prism_ui:
+    path: plugins/prism_ui
   proxy:
     path: plugins/proxy
   rust_api:
