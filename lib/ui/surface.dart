@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/ui/color.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/surface.dart' as prism;
 
 /// Each surface takes the level one deeper than the one it sits on. Dark mode
 /// only lightens: a darker step inside a lighter surface reads as a hole.
@@ -42,23 +43,13 @@ class SurfaceScope extends StatelessWidget {
   final Widget child;
 
   static SurfaceLevel of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<_SurfaceLevelScope>()?.level ??
-      SurfaceLevel.page;
+      SurfaceLevel.values[prism.SurfaceScope.of(context).index];
 
   @override
-  Widget build(BuildContext context) {
-    return _SurfaceLevelScope(level: level, child: child);
-  }
-}
-
-class _SurfaceLevelScope extends InheritedWidget {
-  const _SurfaceLevelScope({required this.level, required super.child});
-
-  final SurfaceLevel level;
-
-  @override
-  bool updateShouldNotify(_SurfaceLevelScope oldWidget) =>
-      level != oldWidget.level;
+  Widget build(BuildContext context) => prism.SurfaceScope(
+    level: prism.SurfaceLevel.values[level.index],
+    child: child,
+  );
 }
 
 extension SurfaceContext on BuildContext {
@@ -126,7 +117,10 @@ class ElevatedSurfaceTheme extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ElevatedSurfaceScope(
-      child: Theme(data: Theme.of(context).elevated, child: child),
+      child: Theme(
+        data: Theme.of(context).elevated,
+        child: prism.ElevatedSurfaceTheme(child: child),
+      ),
     );
   }
 }
