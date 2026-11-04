@@ -12,6 +12,8 @@ import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/widgets/widgets.dart';
+import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
@@ -105,6 +107,65 @@ void main() {
     },
   );
 
+  testWidgets('DNS facets widen within a kind and narrow across kinds', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+      ],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(dnsQueriesProvider.notifier);
+    final first = DnsQuery(
+      domain: 'first.test',
+      type: 'A',
+      time: DateTime.utc(2026),
+      initiator: 'app',
+      cached: true,
+    );
+    notifier.addQuery(first);
+    notifier.addQuery(
+      first.copyWith(
+        domain: 'second.test',
+        type: 'AAAA',
+        initiator: 'rule',
+        rcode: 'NXDOMAIN',
+      ),
+    );
+    notifier.addQuery(
+      first.copyWith(
+        domain: 'third.test',
+        type: 'AAAA',
+        cached: false,
+        rcode: 'NXDOMAIN',
+      ),
+    );
+    await _pumpDnsQueries(tester, container);
+    Future<void> toggle(String label) async {
+      final chip = find.widgetWithText(CommonChip, label);
+      await tester.ensureVisible(chip);
+      await tester.pumpAndSettle();
+      await tester.tap(chip);
+      await tester.pumpAndSettle();
+    }
+
+    await toggle('A');
+    expect(find.text('first.test'), findsOneWidget);
+    expect(find.text('third.test'), findsNothing);
+    await toggle('AAAA');
+    expect(find.text('third.test'), findsOneWidget);
+    await toggle('Application');
+    expect(find.text('first.test'), findsOneWidget);
+    expect(find.text('second.test'), findsNothing);
+    await toggle('NXDOMAIN');
+    expect(find.text('first.test'), findsNothing);
+    expect(find.text('third.test'), findsOneWidget);
+    await toggle('Cached');
+    expect(find.text('third.test'), findsNothing);
+    expect(find.text(appLocalizations.noSearchResults), findsOneWidget);
+  });
+
   testWidgets('DNS localized search follows language changes while paused', (
     tester,
   ) async {
@@ -124,6 +185,8 @@ void main() {
       ),
     );
     await _pumpDnsQueries(tester, container);
+    await tester.tap(find.widgetWithText(CommonChip, 'Cached'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('More'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Pause updates'));
@@ -135,6 +198,10 @@ void main() {
     expect(find.text('query.example'), findsOneWidget);
     await _pumpDnsQueries(tester, container, locale: const Locale('zh', 'CN'));
     expect(find.text('query.example'), findsNothing);
+    expect(
+      find.widgetWithText(CommonChip, AppLocalizations.current.dnsQueryCached),
+      findsOneWidget,
+    );
     await tester.enterText(
       find.byType(TextField),
       AppLocalizations.current.dnsQueryCached,
@@ -241,7 +308,12 @@ void main() {
       await tester.tap(find.text('Resume updates'));
       await tester.pumpAndSettle();
       expect(find.text('failed.example'), findsOneWidget);
-      await tester.tap(find.text('Cached').first);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SegmentedControl<DnsQueryFilter>),
+          matching: find.text('Cached'),
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text('failed.example'), findsNothing);
       await tester.tap(find.text('cached.example'));
@@ -304,7 +376,10 @@ void main() {
       expect(find.text(label), findsOneWidget);
     }
     final initiator = tester.renderObject<RenderParagraph>(
-      find.text('Application'),
+      find.descendant(
+        of: find.byType(RecordTableRow),
+        matching: find.text('Application'),
+      ),
     );
     expect(initiator.didExceedMaxLines, isFalse);
     expect(find.text('9 ms'), findsOneWidget);

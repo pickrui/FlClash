@@ -105,6 +105,8 @@ class RecordFilterController<T> extends ValueNotifier<RecordFilterState> {
     );
   }
 
+  void refreshLabels() => _updateKeywords();
+
   void _updateKeywords() {
     _keywords.value = [for (final filter in filters) _removable(filter)];
     final options = this.options.value;
