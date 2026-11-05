@@ -1,0 +1,686 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
+import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/common/request.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/app.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:riverpod/riverpod.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  late Directory tempDir;
+  late ProviderContainer container;
+
+  setUpAll(() {
+    tempDir = Directory.systemTemp.createTempSync('flclash_test_paths_');
+    PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+  });
+
+  setUp(() {
+    container = ProviderContainer();
+  });
+
+  tearDown(() {
+    container.dispose();
+  });
+
+  tearDownAll(() {
+    tempDir.deleteSync(recursive: true);
+  });
+
+  group('RealTunEnable provider', () {
+    test('default is false', () {
+      expect(container.read(realTunEnableProvider), false);
+    });
+
+    test('can update to true', () {
+      container.read(realTunEnableProvider.notifier).update((_) => true);
+      expect(container.read(realTunEnableProvider), true);
+    });
+  });
+
+  group('Packages provider', () {
+    test('default is empty list', () {
+      expect(container.read(packagesProvider), isEmpty);
+    });
+
+    test('can update state', () {
+      const pkg = Package(
+        packageName: 'test.app',
+        label: 'Test App',
+        system: false,
+        internet: true,
+        lastUpdateTime: 0,
+      );
+      container.read(packagesProvider.notifier).update((_) => [pkg]);
+      expect(container.read(packagesProvider).length, 1);
+      expect(container.read(packagesProvider).first.packageName, 'test.app');
+    });
+  });
+
+  group('Providers provider', () {
+    test('setProvider replaces provider with matching name', () {
+      final oldProvider = ExternalProvider(
+        name: 'Proxy',
+        type: 'Proxy',
+        count: 1,
+        vehicleType: 'HTTP',
+        updateAt: DateTime(2026),
+      );
+      final newProvider = oldProvider.copyWith(count: 2);
+      container.read(providersProvider.notifier).update((_) => [oldProvider]);
+
+      container.read(providersProvider.notifier).setProvider(newProvider);
+
+      expect(container.read(providersProvider).single.count, 2);
+    });
+
+    test('setProvider ignores null and missing provider names', () {
+      final provider = ExternalProvider(
+        name: 'Proxy',
+        type: 'Proxy',
+        count: 1,
+        vehicleType: 'HTTP',
+        updateAt: DateTime(2026),
+      );
+      container.read(providersProvider.notifier).update((_) => [provider]);
+
+      container.read(providersProvider.notifier).setProvider(null);
+      container
+          .read(providersProvider.notifier)
+          .setProvider(provider.copyWith(name: 'Other', count: 9));
+
+      expect(container.read(providersProvider).single, provider);
+    });
+  });
+
+  group('SystemBrightness provider', () {
+    test('default is dark', () {
+      expect(container.read(systemBrightnessProvider), Brightness.dark);
+    });
+
+    test('can update to light', () {
+      container
+          .read(systemBrightnessProvider.notifier)
+          .update((_) => Brightness.light);
+      expect(container.read(systemBrightnessProvider), Brightness.light);
+    });
+  });
+
+  group('LocalIp provider', () {
+    test('default is null', () {
+      expect(container.read(localIpProvider), null);
+    });
+
+    test('can set IP', () {
+      container.read(localIpProvider.notifier).update((_) => '192.168.1.1');
+      expect(container.read(localIpProvider), '192.168.1.1');
+    });
+  });
+
+  group('RunTime provider', () {
+    test('default is null', () {
+      expect(container.read(runTimeProvider), null);
+    });
+
+    test('can set runtime', () {
+      container.read(runTimeProvider.notifier).update((_) => 3600);
+      expect(container.read(runTimeProvider), 3600);
+    });
+  });
+
+  group('ViewSize provider', () {
+    test('default is zero', () {
+      expect(container.read(viewSizeProvider), Size.zero);
+    });
+
+    test('can update size', () {
+      container
+          .read(viewSizeProvider.notifier)
+          .update((_) => const Size(800, 600));
+      final value = container.read(viewSizeProvider);
+      expect(value.width, 800);
+      expect(value.height, 600);
+    });
+  });
+
+  group('SideWidth provider', () {
+    test('default is 0', () {
+      expect(container.read(sideWidthProvider), 0.0);
+    });
+
+    test('can update side width', () {
+      container.read(sideWidthProvider.notifier).update((_) => 300.0);
+      expect(container.read(sideWidthProvider), 300.0);
+    });
+  });
+
+  group('viewWidth provider (derived)', () {
+    test('derives from viewSize width', () {
+      container
+          .read(viewSizeProvider.notifier)
+          .update((_) => const Size(800, 600));
+      expect(container.read(viewWidthProvider), 800);
+    });
+  });
+
+  group('viewHeight provider (derived)', () {
+    test('derives from viewSize height', () {
+      container
+          .read(viewSizeProvider.notifier)
+          .update((_) => const Size(800, 600));
+      expect(container.read(viewHeightProvider), 600);
+    });
+  });
+
+  group('Init provider', () {
+    test('default is false', () {
+      expect(container.read(initProvider), false);
+    });
+
+    test('can update to true', () {
+      container.read(initProvider.notifier).update((_) => true);
+      expect(container.read(initProvider), true);
+    });
+  });
+
+  group('CurrentPageLabel provider', () {
+    test('default is dashboard', () {
+      expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
+    });
+
+    test('toPage changes page', () {
+      container
+          .read(currentPageLabelProvider.notifier)
+          .toPage(PageLabel.proxies);
+      expect(container.read(currentPageLabelProvider), PageLabel.proxies);
+    });
+
+    test('toProfiles changes page', () {
+      container.read(currentPageLabelProvider.notifier).toProfiles();
+      expect(container.read(currentPageLabelProvider), PageLabel.profiles);
+    });
+  });
+
+  group('SortNum provider', () {
+    test('default is 0', () {
+      expect(container.read(sortNumProvider), 0);
+    });
+
+    test('can update', () {
+      container.read(sortNumProvider.notifier).update((_) => 5);
+      expect(container.read(sortNumProvider), 5);
+    });
+  });
+
+  group('BackBlock provider', () {
+    test('default is false', () {
+      expect(container.read(backBlockProvider), false);
+    });
+
+    test('can update', () {
+      container.read(backBlockProvider.notifier).update((_) => true);
+      expect(container.read(backBlockProvider), true);
+    });
+  });
+
+  group('Version provider', () {
+    test('default is 0', () {
+      expect(container.read(versionProvider), 0);
+    });
+
+    test('can set version', () {
+      container.read(versionProvider.notifier).update((_) => 3);
+      expect(container.read(versionProvider), 3);
+    });
+  });
+
+  group('Groups provider', () {
+    test('default is empty', () {
+      expect(container.read(groupsProvider), isEmpty);
+    });
+
+    test('can set groups', () {
+      final groups = [
+        const Group(name: 'G1', type: GroupType.Selector, now: 'auto'),
+      ];
+      container.read(groupsProvider.notifier).update((_) => groups);
+      expect(container.read(groupsProvider).length, 1);
+      expect(container.read(groupsProvider).first.name, 'G1');
+    });
+  });
+
+  group('TotalTraffic provider', () {
+    test('default is empty Traffic', () {
+      final t = container.read(totalTrafficProvider);
+      expect(t.up, 0);
+      expect(t.down, 0);
+    });
+  });
+
+  group('CheckIpNum provider', () {
+    test('default is 0', () {
+      expect(container.read(checkIpNumProvider), 0);
+    });
+
+    test('increment returns previous value and updates state', () {
+      final value = container.read(checkIpNumProvider.notifier).add();
+
+      expect(value, 0);
+      expect(container.read(checkIpNumProvider), 1);
+    });
+  });
+
+  group('DelayDataSource provider', () {
+    test('sets delay by URL and proxy name', () {
+      container
+          .read(delayDataSourceProvider.notifier)
+          .setDelay(
+            const Delay(name: 'Proxy', url: 'https://test.example', value: 120),
+          );
+
+      expect(container.read(delayDataSourceProvider), {
+        'https://test.example': {'Proxy': 120},
+      });
+    });
+
+    test('keeps the same state instance when delay is unchanged', () {
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      const delay = Delay(
+        name: 'Proxy',
+        url: 'https://test.example',
+        value: 120,
+      );
+      notifier.setDelay(delay);
+      final state = container.read(delayDataSourceProvider);
+
+      notifier.setDelay(delay);
+
+      expect(identical(container.read(delayDataSourceProvider), state), isTrue);
+    });
+
+    test('ignores results from a cleared delay generation', () {
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      final generation = notifier.generation;
+
+      notifier.clear();
+      notifier.setDelay(
+        const Delay(name: 'Proxy', url: 'https://test.example', value: 120),
+        generation: generation,
+      );
+
+      expect(container.read(delayDataSourceProvider), isEmpty);
+    });
+
+    test('a new delay test invalidates results from the previous test', () {
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      final previousGeneration = notifier.begin();
+      final currentGeneration = notifier.begin();
+
+      notifier.setDelay(
+        const Delay(name: 'Old', url: 'https://test.example', value: 120),
+        generation: previousGeneration,
+      );
+      notifier.setDelay(
+        const Delay(name: 'New', url: 'https://test.example', value: 80),
+        generation: currentGeneration,
+      );
+
+      expect(container.read(delayDataSourceProvider), {
+        'https://test.example': {'New': 80},
+      });
+    });
+
+    test('a new delay test removes stale pending values only', () {
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      notifier.setDelays(const [
+        Delay(name: 'Pending', url: 'https://test.example', value: 0),
+        Delay(name: 'Complete', url: 'https://test.example', value: 80),
+        Delay(name: 'Only pending', url: 'https://other.example', value: 0),
+      ]);
+
+      notifier.begin();
+
+      expect(container.read(delayDataSourceProvider), {
+        'https://test.example': {'Complete': 80},
+      });
+    });
+
+    test('background events cannot replace a pending manual probe', () {
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      final generation = notifier.begin();
+      const url = 'https://test.example';
+      notifier.setDelay(
+        const Delay(name: 'Proxy', url: url, value: 0),
+        generation: generation,
+      );
+      notifier.setDelays(const [
+        Delay(name: 'Proxy', url: url, value: -1),
+        Delay(name: 'Other', url: url, value: 30),
+      ]);
+      expect(container.read(delayDataSourceProvider)[url], {
+        'Proxy': 0,
+        'Other': 30,
+      });
+      notifier.setDelay(
+        const Delay(name: 'Proxy', url: url, value: 50),
+        generation: generation,
+      );
+      expect(container.read(delayDataSourceProvider)[url]?['Proxy'], 50);
+      notifier.setDelay(const Delay(name: 'Proxy', url: url, value: 60));
+      expect(container.read(delayDataSourceProvider)[url]?['Proxy'], 60);
+    });
+
+    test('duplicate targets in one update use the last value', () {
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      const url = 'https://test.example';
+      notifier.setDelay(const Delay(name: 'Proxy', url: url, value: 40));
+      final previous = container.read(delayDataSourceProvider);
+      notifier.setDelays(const [
+        Delay(name: 'Proxy', url: url, value: 90),
+        Delay(name: 'Proxy', url: url, value: 40),
+      ]);
+      expect(container.read(delayDataSourceProvider)[url]?['Proxy'], 40);
+      expect(previous[url]?['Proxy'], 40);
+    });
+
+    test('does not mutate the previous nested delay map', () {
+      final notifier = container.read(delayDataSourceProvider.notifier);
+      notifier.setDelay(
+        const Delay(name: 'Proxy A', url: 'https://test.example', value: 120),
+      );
+      final previous = container.read(delayDataSourceProvider);
+
+      notifier.setDelays(const [
+        Delay(name: 'Proxy B', url: 'https://test.example', value: 180),
+        Delay(name: 'Proxy C', url: 'https://other.example', value: 200),
+      ]);
+
+      expect(previous, {
+        'https://test.example': {'Proxy A': 120},
+      });
+      expect(container.read(delayDataSourceProvider), {
+        'https://test.example': {'Proxy A': 120, 'Proxy B': 180},
+        'https://other.example': {'Proxy C': 200},
+      });
+    });
+  });
+
+  group('Loading provider', () {
+    test('stop without start sets loading false immediately', () async {
+      final notifier = container.read(
+        loadingProvider(LoadingTag.profiles).notifier,
+      );
+
+      await notifier.stop();
+
+      expect(container.read(loadingProvider(LoadingTag.profiles)), false);
+    });
+
+    test('stop keeps loading visible for the minimum duration', () async {
+      final notifier = container.read(
+        loadingProvider(LoadingTag.profiles).notifier,
+      );
+
+      notifier.start();
+      await notifier.stop();
+
+      expect(container.read(loadingProvider(LoadingTag.profiles)), true);
+
+      await Future<void>.delayed(const Duration(milliseconds: 1100));
+
+      expect(container.read(loadingProvider(LoadingTag.profiles)), false);
+    });
+  });
+
+  group('CoreStatus provider', () {
+    test('default is disconnected', () {
+      expect(container.read(coreStatusProvider), CoreStatus.disconnected);
+    });
+  });
+
+  group('NetworkDetection provider', () {
+    late HttpClientAdapter originalAdapter;
+
+    setUp(() {
+      originalAdapter = request.dio.httpClientAdapter;
+    });
+
+    tearDown(() {
+      request.dio.httpClientAdapter = originalAdapter;
+    });
+
+    test('all failed sources stop loading and permit a later retry', () async {
+      final adapter = _ControlledIpAdapter();
+      request.dio.httpClientAdapter = adapter;
+      final notifier = container.read(networkDetectionProvider.notifier);
+      container.read(initProvider.notifier).value = true;
+      notifier.startCheck();
+      await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+      for (final pending in adapter.pending) {
+        pending.complete(ResponseBody.fromString('{}', 200));
+      }
+      await pumpEventQueue();
+      expect(container.read(networkDetectionProvider).isLoading, false);
+      expect(container.read(networkDetectionProvider).ipInfo, isNull);
+      adapter.pending.clear();
+      notifier.startCheck();
+      await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+      adapter.succeed('1.1.1.1');
+      await pumpEventQueue();
+      expect(container.read(networkDetectionProvider).ipInfo?.ip, '1.1.1.1');
+    });
+
+    test(
+      'stopping clears the old IP before checking the direct route',
+      () async {
+        final adapter = _ControlledIpAdapter();
+        request.dio.httpClientAdapter = adapter;
+        container.read(initProvider.notifier).value = true;
+        container.read(runTimeProvider.notifier).value = 1;
+        final notifier = container.read(networkDetectionProvider.notifier);
+        notifier.startCheck();
+        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+        adapter.succeed('2.2.2.2');
+        await pumpEventQueue();
+        expect(container.read(networkDetectionProvider).ipInfo?.ip, '2.2.2.2');
+        adapter.pending.clear();
+        container.read(runTimeProvider.notifier).value = null;
+        await container.pump();
+        expect(container.read(networkDetectionProvider).ipInfo, isNull);
+        expect(container.read(networkDetectionProvider).isLoading, true);
+        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+        adapter.succeed('1.1.1.1');
+        await pumpEventQueue();
+        expect(container.read(networkDetectionProvider).ipInfo?.ip, '1.1.1.1');
+        // Another refresh while stopped must not reuse the cached carrier IP.
+        adapter.pending.clear();
+        notifier.startCheck();
+        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+        adapter.succeed('3.3.3.3');
+        await pumpEventQueue();
+        expect(container.read(networkDetectionProvider).ipInfo?.ip, '3.3.3.3');
+        expect(adapter.usedPersistentConnection, false);
+      },
+    );
+
+    test('invalid IP data cannot win over another valid source', () async {
+      final adapter = _ControlledIpAdapter();
+      request.dio.httpClientAdapter = adapter;
+      final checking = request.checkIp();
+      await pumpEventQueue();
+      adapter.succeed('invalid');
+      await pumpEventQueue();
+      adapter.pending[1].complete(
+        ResponseBody.fromString(
+          '{"ip":"1.1.1.1","cc":"US"}',
+          200,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+          },
+        ),
+      );
+      expect((await checking).data?.ip, '1.1.1.1');
+    });
+
+    test('disposing cancels a pending check', () async {
+      final adapter = _ControlledIpAdapter();
+      request.dio.httpClientAdapter = adapter;
+      final owner = ProviderContainer();
+      owner.read(initProvider.notifier).value = true;
+      owner.read(networkDetectionProvider.notifier).startCheck();
+      await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+      owner.dispose();
+      await pumpEventQueue();
+      expect(adapter.cancellations, 7);
+    });
+
+    test(
+      'a stalled request reaches its deadline and cancels all sources',
+      () async {
+        final adapter = _ControlledIpAdapter();
+        request.dio.httpClientAdapter = adapter;
+        final result = await request.checkIp();
+        expect(result.data, isNull);
+        await pumpEventQueue();
+        expect(adapter.cancellations, 7);
+      },
+    );
+
+    test(
+      'ignores a canceled stale check after a newer check succeeds',
+      () async {
+        request.dio.httpClientAdapter = _DelayedCancelIpAdapter();
+        final container = ProviderContainer(
+          overrides: [
+            initProvider.overrideWithBuild((_, _) => true),
+            runTimeProvider.overrideWithBuild((_, _) => 1),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final notifier = container.read(networkDetectionProvider.notifier);
+        notifier.startCheck();
+        await Future.delayed(commonDuration + const Duration(milliseconds: 50));
+
+        notifier.startCheck();
+        await Future.delayed(
+          commonDuration + const Duration(milliseconds: 120),
+        );
+
+        expect(container.read(networkDetectionProvider).ipInfo?.ip, '2.2.2.2');
+        expect(container.read(networkDetectionProvider).isLoading, false);
+
+        await Future.delayed(const Duration(milliseconds: 620));
+
+        expect(container.read(networkDetectionProvider).ipInfo?.ip, '2.2.2.2');
+        expect(container.read(networkDetectionProvider).isLoading, false);
+      },
+    );
+  });
+}
+
+class _DelayedCancelIpAdapter implements HttpClientAdapter {
+  static const _sourceCount = 7;
+
+  int _requestCount = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    _requestCount++;
+    final batch = ((_requestCount - 1) ~/ _sourceCount) + 1;
+    if (batch == 1) {
+      final completer = Completer<ResponseBody>();
+      cancelFuture?.then((_) {
+        Timer(const Duration(milliseconds: 500), () {
+          if (completer.isCompleted) return;
+          completer.completeError(
+            DioException(
+              requestOptions: options,
+              type: DioExceptionType.cancel,
+              error: 'cancelled',
+            ),
+          );
+        });
+      });
+      return completer.future;
+    }
+
+    return Future.delayed(
+      const Duration(milliseconds: 10),
+      () => ResponseBody.fromString(
+        '{"ip":"2.2.2.2","country_code":"US"}',
+        200,
+        headers: {
+          Headers.contentTypeHeader: ['application/json'],
+        },
+      ),
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _FakePathProvider extends PathProviderPlatform {
+  final String path;
+
+  _FakePathProvider(this.path);
+
+  @override
+  Future<String?> getTemporaryPath() async => path;
+
+  @override
+  Future<String?> getApplicationSupportPath() async => path;
+
+  @override
+  Future<String?> getApplicationCachePath() async => path;
+
+  @override
+  Future<String?> getDownloadsPath() async => path;
+}
+
+class _ControlledIpAdapter implements HttpClientAdapter {
+  final pending = <Completer<ResponseBody>>[];
+  int cancellations = 0;
+  bool usedPersistentConnection = false;
+  void succeed(String ip) {
+    pending.first.complete(
+      ResponseBody.fromString(
+        '{"ip":"$ip","country_code":"US"}',
+        200,
+        headers: {
+          Headers.contentTypeHeader: ['application/json'],
+        },
+      ),
+    );
+  }
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    usedPersistentConnection |= options.persistentConnection;
+    final completer = Completer<ResponseBody>();
+    pending.add(completer);
+    cancelFuture?.then((_) => cancellations++);
+    return completer.future;
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
