@@ -10,7 +10,8 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:material_ui/material_ui.dart' hide IconButton, Theme, ThemeData;
+import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:prism_ui/press_surface.dart';
 

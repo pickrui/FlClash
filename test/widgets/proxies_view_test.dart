@@ -33,12 +33,15 @@ import 'package:fl_clash/views/proxies/group_tabs.dart';
 import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, AppBar;
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, AppBar, ThemeData;
+import 'package:prism_ui/theme_data.dart' show ThemeData;
 import 'package:prism_ui/scaffold.dart' show AppBar;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:prism_ui/app.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/node_pages.dart';
@@ -1490,7 +1493,7 @@ class _TestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return PrismApp(
       navigatorKey: globalState.navigatorKey,
       locale: const Locale('en'),
       localizationsDelegates: const [

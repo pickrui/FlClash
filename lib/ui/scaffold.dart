@@ -19,7 +19,8 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, TextButton, ButtonStyle, ButtonTheme;
+    hide IconButton, TextButton, ButtonStyle, ButtonTheme, Theme;
+import 'package:prism_ui/theme_data.dart' show Theme, TapTargetSize;
 import 'package:fl_clash/ui/common_button.dart'
     show IconButton, TextButton, ButtonStyle, ButtonTheme;
 import 'package:flutter/foundation.dart';
@@ -425,9 +426,9 @@ class CommonScaffoldState extends State<CommonScaffold>
         top: false,
         right: false,
         child: GooSurface(
-          glass: glass ? LiquidGlassStyle.pill(colorScheme.asPrism) : null,
+          glass: glass ? LiquidGlassStyle.pill(colorScheme) : null,
           color: SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
-          shadows: glass ? const [] : dockShadows(colorScheme.asPrism),
+          shadows: glass ? const [] : dockShadows(colorScheme),
           child: ListenableBuilder(
             listenable: Listenable.merge([_searchFocusNode, _textController]),
             builder: (context, _) {
@@ -717,7 +718,7 @@ class CommonScaffoldState extends State<CommonScaffold>
             )
           : null,
       glass: LiquidGlassScope.of(context)
-          ? LiquidGlassStyle.regular(colorScheme.asPrism)
+          ? LiquidGlassStyle.regular(colorScheme)
           : null,
       color: context.raisedSurfaceLevel.colorOf(colorScheme),
       // The field's own buttons stay off the bar's button fills and glass.
@@ -2000,7 +2001,7 @@ enum AppBarActionEdge {
 
 /// Only the touch platforms ask for the 48 dp target that pads the container out.
 double _tapPaddingOf(BuildContext context) =>
-    Theme.of(context).materialTapTargetSize == MaterialTapTargetSize.padded
+    Theme.of(context).tapTargetSize == TapTargetSize.padded
     ? _iconButtonTapPadding
     : 0;
 
@@ -2023,27 +2024,6 @@ class _ActionEdgeGap extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: edge.spaceOf(context, ViewScope.isMobileOf(context)),
-    );
-  }
-}
-
-class AppBarInsetScope extends StatelessWidget {
-  const AppBarInsetScope({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final compact = _isCompactBar(context, ViewScope.isMobileOf(context));
-    return Theme(
-      data: theme.copyWith(
-        appBarTheme: theme.appBarTheme.copyWith(
-          leadingWidth: appBarLeadingWidth(compact),
-          toolbarHeight: pageToolbarHeight,
-        ),
-      ),
-      child: child,
     );
   }
 }

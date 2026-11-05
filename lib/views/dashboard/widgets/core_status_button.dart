@@ -16,7 +16,8 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, FilledButton, ButtonStyle;
+    hide IconButton, FilledButton, ButtonStyle, Tooltip;
+import 'package:prism_ui/tooltip.dart' show Tooltip;
 import 'package:prism_ui/card_surface.dart' show PressLook;
 import 'package:fl_clash/ui/common_button.dart'
     show IconButton, FilledButton, ButtonStyle;
@@ -100,7 +101,7 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
     final glass = TonalButtonTheme.glassOf(context);
     ButtonStyle? tinted(Color? color) => glass && color != null
         ? liquidGlassButtonStyle(
-            (_) => LiquidGlassStyle.tinted(colorScheme.asPrism, color),
+            (_) => LiquidGlassStyle.tinted(colorScheme, color),
           )
         : null;
     final statusColor = switch (coreStatus) {

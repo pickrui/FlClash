@@ -6,7 +6,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/common/common.dart';
@@ -18,7 +17,8 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, ButtonStyle, ButtonTheme, ButtonThemeData;
+    hide IconButton, ButtonStyle, ButtonTheme, ButtonThemeData, Divider;
+import 'package:prism_ui/divider.dart' show Divider;
 import 'package:prism_ui/theme_data.dart' as prism;
 import 'package:prism_ui/card_surface.dart' show PressLook;
 import 'package:fl_clash/ui/common_button.dart'

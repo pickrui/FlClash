@@ -26,7 +26,8 @@ import 'package:fl_clash/views/network_diagnostics.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Tooltip;
+import 'package:prism_ui/tooltip.dart' show Tooltip;
 
 import 'card.dart';
 
@@ -808,10 +809,7 @@ class _StartToggleState extends ConsumerState<_StartToggle>
                     ),
                     child: glass
                         ? LiquidGlass(
-                            style: LiquidGlassStyle.tinted(
-                              colorScheme.asPrism,
-                              color,
-                            ),
+                            style: LiquidGlassStyle.tinted(colorScheme, color),
                             clipper: _MorphClipper(progress),
                             pressed: _pressed,
                             child: child,

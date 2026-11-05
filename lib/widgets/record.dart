@@ -7,7 +7,8 @@ import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:prism_ui/theme_data.dart' show Theme;
 
 import 'package:fl_clash/ui/chip.dart';
 import 'package:fl_clash/ui/list.dart' show DecorationListItem;

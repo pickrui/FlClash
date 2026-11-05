@@ -18,7 +18,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/common/app_localizations.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:prism_ui/theme_data.dart' show Theme;
 
 import '../../helpers/glyph_finders.dart';
 import '../../helpers/test_app.dart';

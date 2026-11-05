@@ -13,7 +13,9 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kPressTimeout;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, TextButton, Theme, ThemeData, ColorScheme;
+import 'package:prism_ui/theme_data.dart' show Theme, ThemeData, ColorScheme;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prism_ui/divider.dart' as prism;
@@ -162,9 +164,9 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         theme: ThemeData(
-          extensions: const [
-            ElevatedColorScheme(ColorScheme.dark(surfaceContainerHigh: lifted)),
-          ],
+          elevatedColorScheme: const ColorScheme.dark(
+            surfaceContainerHigh: lifted,
+          ),
         ),
         homeBuilder: (child) => Scaffold(body: Center(child: child)),
         child: ElevatedSurfaceTheme(
@@ -2316,7 +2318,7 @@ void main() {
         }),
       );
       return shadow!.shift(
-        -menuShadows((const ColorScheme.light()).asPrism).single.offset,
+        -menuShadows((const ColorScheme.light())).single.offset,
       );
     }
 

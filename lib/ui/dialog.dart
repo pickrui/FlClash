@@ -16,7 +16,6 @@ import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/foundation.dart' show listEquals;
-import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/ui/l10n.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
@@ -477,7 +476,7 @@ class CommonDialog extends StatelessWidget {
     final contentInset = hasFields ? _actionInset : _textInset;
     final glass = LiquidGlassScope.of(context);
     final colorScheme = context.colorScheme;
-    final fill = glass ? glassFillOf(colorScheme.asPrism) : null;
+    final fill = glass ? glassFillOf(colorScheme) : null;
     final content = hasFields
         ? FilledInputTheme(
             fillColor: fill,
@@ -578,9 +577,9 @@ class CommonDialog extends StatelessWidget {
       panelOf: _surfaceRectIn,
       child: glass
           ? _AlertGlass(
-              style: LiquidGlassStyle.alert(colorScheme.asPrism),
-              rim: LiquidGlassRim.alert(colorScheme.asPrism),
-              shadows: menuShadows(colorScheme.asPrism),
+              style: LiquidGlassStyle.alert(colorScheme),
+              rim: LiquidGlassRim.alert(colorScheme),
+              shadows: menuShadows(colorScheme),
               child: dialog,
             )
           : dialog,

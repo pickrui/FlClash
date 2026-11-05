@@ -10,7 +10,8 @@ import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/view_scope.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme, ColorScheme;
+import 'package:prism_ui/theme_data.dart' show Theme, ColorScheme;
 
 extension UiBuildContextExtension on BuildContext {
   ColorScheme get colorScheme => Theme.of(this).colorScheme;

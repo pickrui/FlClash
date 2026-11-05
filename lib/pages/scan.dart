@@ -23,9 +23,13 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, ButtonStyle;
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, ButtonStyle, Theme, ThemeData;
+import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:prism_ui/scaffold.dart' as prism;
+import 'package:prism_ui/surface.dart' show Surface;
 
 const _systemUiOverlayStyle = SystemUiOverlayStyle(
   statusBarColor: Colors.transparent,
@@ -301,126 +305,116 @@ class _ScanPageState extends ConsumerState<ScanPage>
     final glass = LiquidGlassScope.of(context);
     return Theme(
       data: theme,
-      // `Theme` inserts no `IconTheme`, so the app's light one would color
-      // the icons here.
-      child: IconTheme(
-        data: theme.iconTheme,
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: _systemUiOverlayStyle,
-          sized: false,
-          child: ValueListenableBuilder<MobileScannerState>(
-            valueListenable: controller,
-            builder: (context, state, child) => CommonPopScope(
-              onPop: state.isRunning || state.isStarting ? _handlePop : null,
-              child: child!,
-            ),
-            child: Scaffold(
-              body: LayoutBuilder(
-                builder: (context, constraints) {
-                  final hintStyle = AppTextStyle.subheadline.of(context);
-                  final layout = _ScanLayout(
-                    size: constraints.biggest,
-                    padding: MediaQuery.paddingOf(context),
-                    hintHeight:
-                        MediaQuery.textScalerOf(context)
-                            .scale(hintStyle.fontSize!) *
-                        hintStyle.height! *
-                        _hintMaxLines,
-                  );
-                  return Stack(
-                    children: [
-                      Positioned.fill(
-                        child: MobileScanner(
-                          controller: controller,
-                          scanWindow: layout.scanWindow,
-                          errorBuilder: (_, _) => const SizedBox.shrink(),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: _systemUiOverlayStyle,
+        sized: false,
+        child: ValueListenableBuilder<MobileScannerState>(
+          valueListenable: controller,
+          builder: (context, state, child) => CommonPopScope(
+            onPop: state.isRunning || state.isStarting ? _handlePop : null,
+            child: child!,
+          ),
+          child: Surface(
+            color: theme.scaffoldBackgroundColor,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final hintStyle = AppTextStyle.subheadline.of(context);
+                final layout = _ScanLayout(
+                  size: constraints.biggest,
+                  padding: MediaQuery.paddingOf(context),
+                  hintHeight:
+                      MediaQuery.textScalerOf(context)
+                          .scale(hintStyle.fontSize!) *
+                      hintStyle.height! *
+                      _hintMaxLines,
+                );
+                return Stack(
+                  children: [
+                    Positioned.fill(
+                      child: MobileScanner(
+                        controller: controller,
+                        scanWindow: layout.scanWindow,
+                        errorBuilder: (_, _) => const SizedBox.shrink(),
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: ValueListenableBuilder<MobileScannerState>(
+                        valueListenable: controller,
+                        builder: (context, state, _) => AnimatedOpacity(
+                          opacity:
+                              state.isRunning ||
+                                  state.error != null ||
+                                  _holdsLastFrame
+                              ? 0
+                              : 1,
+                          duration: _disableAnimations || !state.isRunning
+                              ? Duration.zero
+                              : _previewRevealDuration,
+                          curve: _previewRevealAwaitingFirstFrame,
+                          child: const ColoredBox(color: Colors.black),
                         ),
                       ),
-                      Positioned.fill(
-                        child: ValueListenableBuilder<MobileScannerState>(
-                          valueListenable: controller,
-                          builder: (context, state, _) => AnimatedOpacity(
-                            opacity:
-                                state.isRunning ||
-                                    state.error != null ||
-                                    _holdsLastFrame
-                                ? 0
-                                : 1,
-                            duration: _disableAnimations || !state.isRunning
-                                ? Duration.zero
-                                : _previewRevealDuration,
-                            curve: _previewRevealAwaitingFirstFrame,
-                            child: const ColoredBox(color: Colors.black),
-                          ),
-                        ),
+                    ),
+                    Positioned.fill(
+                      child: ValueListenableBuilder<MobileScannerState>(
+                        valueListenable: controller,
+                        builder: (context, state, _) {
+                          final error = state.error;
+                          if (error != null) {
+                            return _ScannerError(
+                              errorCode: error.errorCode,
+                              onRetry: _start,
+                              onOpenSettings: () => app?.openAppSettings(),
+                            );
+                          }
+                          return _buildScanFrame(theme, layout, hintStyle);
+                        },
                       ),
-                      Positioned.fill(
-                        child: ValueListenableBuilder<MobileScannerState>(
-                          valueListenable: controller,
-                          builder: (context, state, _) {
-                            final error = state.error;
-                            if (error != null) {
-                              return _ScannerError(
-                                errorCode: error.errorCode,
-                                onRetry: _start,
-                                onOpenSettings: () => app?.openAppSettings(),
-                              );
-                            }
-                            return _buildScanFrame(theme, layout, hintStyle);
-                          },
-                        ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: TonalButtonTheme(
-                          glass: glass,
-                          child: AppBarInsetScope(
-                            child: AppBar(
-                              backgroundColor: Colors.transparent,
-                              surfaceTintColor: Colors.transparent,
-                              automaticallyImplyLeading: false,
-                              leading: Center(
-                                child: ElasticPress(
-                                  child: AppBarActionButton(
-                                    data: IconButtonData(
-                                      glyph: AppGlyphs.close,
-                                      tooltip: appLocalizations.close,
-                                      onPressed: _leave,
-                                    ),
-                                  ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: TonalButtonTheme(
+                        glass: glass,
+                        child: prism.AppBar(
+                          systemOverlayStyle: _systemUiOverlayStyle,
+                          leading: Center(
+                            child: ElasticPress(
+                              child: AppBarActionButton(
+                                data: IconButtonData(
+                                  glyph: AppGlyphs.close,
+                                  tooltip: appLocalizations.close,
+                                  onPressed: _leave,
                                 ),
                               ),
-                              actions: genActions([
-                                ElasticPress(
-                                  child: AppBarActionButton(
-                                    data: IconButtonData(
-                                      glyph: AppGlyphs.photos,
-                                      tooltip: appLocalizations.pickFromAlbum,
-                                      isLoading: _pickingImage,
-                                      onPressed: _pickingImage
-                                          ? null
-                                          : _pickImage,
-                                    ),
-                                  ),
-                                ),
-                              ], edge: AppBarActionEdge.container),
                             ),
                           ),
+                          actions: genActions([
+                            ElasticPress(
+                              child: AppBarActionButton(
+                                data: IconButtonData(
+                                  glyph: AppGlyphs.photos,
+                                  tooltip: appLocalizations.pickFromAlbum,
+                                  isLoading: _pickingImage,
+                                  onPressed: _pickingImage ? null : _pickImage,
+                                ),
+                              ),
+                            ),
+                          ], edge: AppBarActionEdge.container),
                         ),
                       ),
-                      Positioned.fromRect(
-                        rect: layout.torch,
-                        child: TonalButtonTheme(
-                          glass: glass,
-                          child: _TorchButton(controller: controller),
-                        ),
+                    ),
+                    Positioned.fromRect(
+                      rect: layout.torch,
+                      child: TonalButtonTheme(
+                        glass: glass,
+                        child: _TorchButton(controller: controller),
                       ),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),

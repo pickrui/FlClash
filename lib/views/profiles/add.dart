@@ -20,7 +20,8 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/pages/scan.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart' hide TextButton, SelectableText;
+import 'package:prism_ui/selectable_text.dart' show SelectableText;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import 'custom_profile.dart';

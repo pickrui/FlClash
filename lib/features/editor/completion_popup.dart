@@ -6,7 +6,6 @@
 import 'dart:math' as math;
 
 import 'package:prism_ui/press_region.dart';
-import 'package:prism_ui/surface.dart' show Surface;
 import 'package:code_forge/code_forge.dart' show CodeForgeSuggestionDetails;
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';

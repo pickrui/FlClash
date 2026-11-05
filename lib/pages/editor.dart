@@ -22,14 +22,20 @@ import 'package:fl_clash/ui/route_motion_hold.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/text_loupe.dart';
 import 'package:fl_clash/ui/l10n.dart';
-import 'package:fl_clash/ui/prism_theme_bridge.dart';
 import 'package:prism_ui/edit_menu.dart';
 import 'package:prism_ui/text_selection_controls.dart'
     show textSelectionColorOf;
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, InputDecoration, IconButton, FilledButton, ButtonStyle;
+    hide
+        TextField,
+        InputDecoration,
+        IconButton,
+        FilledButton,
+        ButtonStyle,
+        ColorScheme;
+import 'package:prism_ui/theme_data.dart' show ColorScheme;
 import 'package:prism_ui/card_surface.dart' show PressLook;
 import 'package:prism_ui/theme_data.dart' as prism;
 import 'package:fl_clash/ui/common_button.dart'
@@ -782,7 +788,7 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
       _editorTheme = _highlightTheme(colorScheme, widget.language);
       _selectionStyle = CodeSelectionStyle(
         cursorColor: colorScheme.primary,
-        selectionColor: textSelectionColorOf(colorScheme.asPrism),
+        selectionColor: textSelectionColorOf(colorScheme),
         cursorBubbleColor: colorScheme.primary,
       );
     }

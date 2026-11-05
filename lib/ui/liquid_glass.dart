@@ -10,8 +10,6 @@ import 'package:prism_ui/liquid_glass.dart';
 
 export 'package:prism_ui/liquid_glass.dart';
 
-export 'prism_theme_bridge.dart' show PrismColorSchemeBridge;
-
 ButtonStyle liquidGlassButtonStyle(
   LiquidGlassStyle Function(Set<WidgetState> states) styleOf,
 ) => ButtonStyle(

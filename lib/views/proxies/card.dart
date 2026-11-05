@@ -14,7 +14,9 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme, Tooltip;
+import 'package:prism_ui/tooltip.dart' show Tooltip;
+import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void selectGroupProxy(

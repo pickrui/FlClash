@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'package:prism_ui/surface.dart' show Surface;
 import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -19,7 +18,8 @@ import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const _actionMinDuration = Duration(seconds: 6);

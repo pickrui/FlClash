@@ -8,11 +8,13 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
+import 'package:fl_clash/ui/emoji.dart';
 import 'package:fl_clash/ui/dialog.dart';
-import 'package:fl_clash/ui/prism_theme_bridge.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:fl_clash/providers/action.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme, ThemeData, ThemeMode;
+import 'package:prism_ui/theme_data.dart' show ThemeData, ThemeMode;
+import 'package:prism_ui/app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -50,12 +52,14 @@ class TestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final app = MaterialApp(
+    final app = PrismApp(
       navigatorKey: includeNavigatorKey ? globalState.navigatorKey : null,
       locale: locale,
       theme: theme,
       darkTheme: darkTheme,
-      themeMode: themeMode,
+      themeMode: themeMode ?? ThemeMode.system,
+      textScale: textScaler?.scale(1),
+      emojiFont: (family: FontFamily.twEmoji.value, pattern: emojiPattern),
       localizationsDelegates: const [
         AppLocalizations.delegate,
         AppUiLocalizations.delegate,
@@ -63,18 +67,11 @@ class TestApp extends StatelessWidget {
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
-        if (setTheme) {}
-        // ignore: deprecated_member_use
-        Widget wrapped = MaterialUiCompatibilityBridge(
-          child: IconTheme(data: Theme.of(context).iconTheme, child: child!),
+        final wrapped = wrapAppScopes(
+          context,
+          child!,
+          textScaleFactor: textScaler?.scale(1) ?? 1,
         );
-        wrapped = wrapAppScopes(context, wrapped);
-        if (textScaler != null) {
-          wrapped = MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaler: textScaler),
-            child: wrapped,
-          );
-        }
         return builder?.call(context, wrapped) ?? wrapped;
       },
       home: homeBuilder(child),
@@ -101,15 +98,13 @@ Widget wrapAppScopes(
     measure: measure,
     child: AlertScope(
       presenter: const CommonAlertPresenter(),
-      child: PrismThemeBridge(
-        child: hasProviders
-            ? AppViewScope(child: child)
-            : ViewScope(
-                size: size,
-                isMobile: size.width <= maxMobileWidth,
-                child: child,
-              ),
-      ),
+      child: hasProviders
+          ? AppViewScope(child: child)
+          : ViewScope(
+              size: size,
+              isMobile: size.width <= maxMobileWidth,
+              child: child,
+            ),
     ),
   );
 }

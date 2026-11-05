@@ -12,10 +12,10 @@ import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:flutter/rendering.dart';
 import 'package:prism_ui/l10n.dart';
-import 'package:prism_ui/surface.dart' show Surface;
 
 const Duration _sideSheetEnterDuration = Duration(milliseconds: 300);
 const Duration _sideSheetExitDuration = Duration(milliseconds: 200);
@@ -457,8 +457,7 @@ Future<T?> showModalSideSheet<T>({
       barrierLabel: localizations.close,
       barrierOnTapHint: localizations.close,
       backgroundColor: backgroundColor,
-      modalBarrierColor:
-          barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
+      modalBarrierColor: barrierColor,
       aside: aside,
       filter: filter,
     ),

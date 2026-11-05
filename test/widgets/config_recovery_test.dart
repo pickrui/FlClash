@@ -10,7 +10,9 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/config_recovery.dart';
 import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/ui/loading.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton, FilledButton;
+import 'package:material_ui/material_ui.dart'
+    hide TextButton, FilledButton, SelectableText;
+import 'package:prism_ui/selectable_text.dart' show SelectableText;
 import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
 

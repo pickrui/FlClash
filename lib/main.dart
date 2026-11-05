@@ -27,6 +27,7 @@ import 'package:fl_clash/views/cloud/store_page.dart';
 import 'package:fl_clash/views/tailscale/tailscale.dart';
 import 'package:fl_clash/views/tools.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:rust_api/rust_api.dart';
@@ -156,7 +157,7 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
           } catch (_) {}
         }
         runApp(
-          MaterialApp(
+          PrismApp(
             debugShowCheckedModeBanner: false,
             localizationsDelegates: const [
               AppLocalizations.delegate,

@@ -10,7 +10,9 @@ import 'package:fl_clash/views/network_diagnostic_proxy_guide.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/app.dart';
+import 'package:material_ui/material_ui.dart' hide ThemeData;
+import 'package:prism_ui/theme_data.dart' show ThemeData;
 
 Future<void> _pump(
   WidgetTester tester, {
@@ -27,7 +29,7 @@ Future<void> _pump(
           openSettings ?? (_) async => fail('unexpected host settings launch'),
         ),
       ],
-      child: MaterialApp(
+      child: PrismApp(
         theme: ThemeData(platform: platform),
         locale: locale,
         localizationsDelegates: const [

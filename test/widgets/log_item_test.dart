@@ -6,7 +6,8 @@
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/logs.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide SelectableText;
+import 'package:prism_ui/selectable_text.dart' show SelectableText;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';

@@ -20,7 +20,8 @@ import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, TextButton, ButtonStyle;
+    hide IconButton, TextButton, ButtonStyle, Tooltip;
+import 'package:prism_ui/tooltip.dart' show Tooltip;
 import 'package:fl_clash/ui/common_button.dart'
     show IconButton, TextButton, ButtonStyle;
 

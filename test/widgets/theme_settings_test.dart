@@ -24,7 +24,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, Slider;
+import 'package:prism_ui/app.dart';
+import 'package:material_ui/material_ui.dart' hide TextField, Slider, ThemeData;
+import 'package:prism_ui/theme_data.dart' show ThemeData;
 import 'package:prism_ui/slider.dart' show Slider;
 import 'package:prism_ui/text_field.dart' show TextField;
 
@@ -104,7 +106,7 @@ void main() {
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     tester.platformDispatcher.textScaleFactorTestValue = 1.3;
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
         home: Builder(
           builder: (context) => Text('${systemTextScaleOf(context)}'),
         ),
@@ -494,7 +496,7 @@ Future<ProviderContainer> _pump(
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: c,
-      child: MaterialApp(
+      child: PrismApp(
         navigatorKey: globalState.navigatorKey,
         locale: locale,
         supportedLocales: AppLocalizations.delegate.supportedLocales,

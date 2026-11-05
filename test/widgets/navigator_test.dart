@@ -11,10 +11,11 @@ import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/null_status.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
-import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/app.dart';
+import 'package:material_ui/material_ui.dart' hide ThemeData;
+import 'package:prism_ui/theme_data.dart' show ThemeData;
 
 import '../helpers/hand_over.dart';
 import '../helpers/test_app.dart';
@@ -32,8 +33,9 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
-            theme: ThemeData().withAppSurfaces,
+          child: PrismApp(
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            theme: ThemeData(),
             builder: (context, child) => wrapAppScopes(context, child!),
             onGenerateRoute: (settings) => HomeRoute<void>(
               settings: settings,
@@ -107,7 +109,11 @@ void main() {
   ) async {
     final navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      MaterialApp(navigatorKey: navigatorKey, home: const SizedBox()),
+      PrismApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        navigatorKey: navigatorKey,
+        home: const SizedBox(),
+      ),
     );
     final route = CommonDesktopRoute<void>(builder: (_) => const Text('page'));
     unawaited(navigatorKey.currentState!.push(route));
@@ -128,7 +134,8 @@ void main() {
     final loading = ValueNotifier(true);
     addTearDown(loading.dispose);
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         navigatorKey: navigatorKey,
         builder: (context, child) => wrapAppScopes(context, child!),
         home: const SizedBox(),
@@ -162,7 +169,8 @@ void main() {
   ) async {
     final navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         navigatorKey: navigatorKey,
         builder: (context, child) => wrapAppScopes(context, child!),
         home: const SizedBox(),
@@ -184,7 +192,8 @@ void main() {
   ) async {
     late BuildContext host;
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         home: Builder(
           builder: (context) {
             host = context;
@@ -201,7 +210,7 @@ void main() {
           height: 300,
           child: SheetPagesNavigator(
             onGenerateInitialRoutes: (_, _) => [
-              MaterialPageRoute<void>(
+              CommonRoute<void>(
                 builder: (context) {
                   page = context;
                   return const Text('page');
@@ -231,7 +240,8 @@ void main() {
   ) async {
     late BuildContext page;
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         home: Builder(
           builder: (context) {
             page = context;
@@ -242,9 +252,7 @@ void main() {
     );
     unawaited(
       Navigator.of(page).push(
-        MaterialPageRoute<void>(
-          builder: (_) => const Scaffold(body: Text('top')),
-        ),
+        CommonRoute<void>(builder: (_) => const Scaffold(body: Text('top'))),
       ),
     );
     await tester.pumpAndSettle();
@@ -266,7 +274,8 @@ void main() {
     final key = GlobalKey<NavigatorState>();
     late BuildContext rootContext;
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         navigatorKey: key,
         home: Builder(
           builder: (context) {
@@ -304,7 +313,8 @@ void main() {
   ) async {
     final key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         navigatorKey: key,
         home: const Scaffold(body: Text('Home')),
       ),
@@ -345,11 +355,12 @@ void main() {
     final root = GlobalKey<NavigatorState>();
     final nested = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         navigatorKey: root,
         home: Navigator(
           key: nested,
-          onGenerateRoute: (_) => MaterialPageRoute<void>(
+          onGenerateRoute: (_) => CommonRoute<void>(
             builder: (_) => const Scaffold(body: Text('Nested home')),
           ),
         ),

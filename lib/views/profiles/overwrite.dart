@@ -26,7 +26,8 @@ import 'package:fl_clash/views/config/rules.dart';
 import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, TextButton, FilledButton;
+    hide IconButton, TextButton, FilledButton, Tooltip;
+import 'package:prism_ui/tooltip.dart' show Tooltip;
 import 'package:fl_clash/ui/common_button.dart'
     show IconButton, TextButton, FilledButton;
 import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';

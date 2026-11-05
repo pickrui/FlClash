@@ -9,6 +9,8 @@ import 'dart:io';
 
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/surface.dart' show SurfaceLevel;
 
 export 'package:fl_clash/common/update_download_task.dart'
     show UpdateDownloadAction;
@@ -27,6 +29,83 @@ import 'package:prism_ui/theme_data.dart' as prism;
 import 'package:fl_clash/ui/common_button.dart'
     show IconButton, TextButton, FilledButton, OutlinedButton, ButtonStyle;
 import 'package:url_launcher/url_launcher.dart';
+
+class AppUpdateTheme extends StatelessWidget {
+  const AppUpdateTheme({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = prism.Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Theme(
+      data: ThemeData(
+        colorScheme: ColorScheme(
+          brightness: scheme.brightness,
+          primary: scheme.primary,
+          onPrimary: scheme.onPrimary,
+          primaryContainer: scheme.primaryContainer,
+          onPrimaryContainer: scheme.onPrimaryContainer,
+          primaryFixed: scheme.primaryFixed,
+          primaryFixedDim: scheme.primaryFixedDim,
+          onPrimaryFixed: scheme.onPrimaryFixed,
+          onPrimaryFixedVariant: scheme.onPrimaryFixedVariant,
+          secondary: scheme.secondary,
+          onSecondary: scheme.onSecondary,
+          secondaryContainer: scheme.secondaryContainer,
+          onSecondaryContainer: scheme.onSecondaryContainer,
+          secondaryFixed: scheme.secondaryFixed,
+          secondaryFixedDim: scheme.secondaryFixedDim,
+          onSecondaryFixed: scheme.onSecondaryFixed,
+          onSecondaryFixedVariant: scheme.onSecondaryFixedVariant,
+          tertiary: scheme.tertiary,
+          onTertiary: scheme.onTertiary,
+          tertiaryContainer: scheme.tertiaryContainer,
+          onTertiaryContainer: scheme.onTertiaryContainer,
+          tertiaryFixed: scheme.tertiaryFixed,
+          tertiaryFixedDim: scheme.tertiaryFixedDim,
+          onTertiaryFixed: scheme.onTertiaryFixed,
+          onTertiaryFixedVariant: scheme.onTertiaryFixedVariant,
+          error: scheme.error,
+          onError: scheme.onError,
+          errorContainer: scheme.errorContainer,
+          onErrorContainer: scheme.onErrorContainer,
+          surface: scheme.surface,
+          onSurface: scheme.onSurface,
+          surfaceDim: scheme.surfaceDim,
+          surfaceBright: scheme.surfaceBright,
+          surfaceContainerLowest: scheme.surfaceContainerLowest,
+          surfaceContainerLow: scheme.surfaceContainerLow,
+          surfaceContainer: scheme.surfaceContainer,
+          surfaceContainerHigh: scheme.surfaceContainerHigh,
+          surfaceContainerHighest: scheme.surfaceContainerHighest,
+          onSurfaceVariant: scheme.onSurfaceVariant,
+          outline: scheme.outline,
+          outlineVariant: scheme.outlineVariant,
+          shadow: scheme.shadow,
+          scrim: scheme.scrim,
+          inverseSurface: scheme.inverseSurface,
+          onInverseSurface: scheme.onInverseSurface,
+          inversePrimary: scheme.inversePrimary,
+          surfaceTint: scheme.surfaceTint,
+        ),
+        platform: theme.platform,
+        fontFamily: theme.fontFamily,
+        fontFamilyFallback: theme.fontFamilyFallback,
+        scaffoldBackgroundColor: theme.scaffoldBackgroundColor,
+        cardTheme: CardThemeData(
+          shape: AppShape.md,
+          color: SurfaceLevel.card.colorOf(scheme),
+        ),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          borderRadius: AppRadius.full,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
 
 const _updateNoticeDuration = Duration(seconds: 10);
 

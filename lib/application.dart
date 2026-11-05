@@ -5,9 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/views/network_diagnostics.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
-import 'package:fl_clash/ui/theme_cross_fade.dart';
+import 'package:prism_ui/app.dart';
+import 'package:fl_clash/ui/liquid_glass.dart';
+import 'package:fl_clash/ui/emoji.dart';
 import 'package:fl_clash/ui/keyboard_inset_hold.dart';
-import 'package:fl_clash/ui/focus.dart';
 
 import 'dart:async';
 
@@ -23,7 +24,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/page_transition.dart';
-import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/views/views.dart';
@@ -34,7 +34,7 @@ import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/state.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -98,17 +98,19 @@ class ApplicationState extends ConsumerState<Application> {
         (context, info, task, loadNotes, download, install) =>
             BaseNavigator.push<UpdateDownloadAction>(
               context,
-              AppUpdatePage(
-                info: info,
-                task: task,
-                loadReleaseNotes: loadNotes,
-                onDownload: download,
-                onInstall: install,
-                appliesInPlace: (file) =>
-                    appController.desktopUpdateInstaller?.appliesInPlace(
-                      file,
-                    ) ??
-                    false,
+              AppUpdateTheme(
+                child: AppUpdatePage(
+                  info: info,
+                  task: task,
+                  loadReleaseNotes: loadNotes,
+                  onDownload: download,
+                  onInstall: install,
+                  appliesInPlace: (file) =>
+                      appController.desktopUpdateInstaller?.appliesInPlace(
+                        file,
+                      ) ??
+                      false,
+                ),
               ),
             );
     navigation.cloudLoginPresenter = (context) async {
@@ -187,7 +189,7 @@ class ApplicationState extends ConsumerState<Application> {
 
   Widget _buildApp({required Widget child}) {
     return StatusManager(
-      updateNotice: const AppUpdateAvailableNotice(),
+      updateNotice: const AppUpdateTheme(child: AppUpdateAvailableNotice()),
       child: ThemeManager(child: child),
     );
   }
@@ -200,46 +202,26 @@ class ApplicationState extends ConsumerState<Application> {
           appSettingProvider.select((state) => state.locale),
         );
         final themeProps = ref.watch(themeSettingProvider);
-        return MaterialApp(
+        return PrismApp(
           debugShowCheckedModeBanner: false,
           navigatorKey: globalState.navigatorKey,
+          onNavigationNotification: (_) => true,
           localizationsDelegates: const [
             AppLocalizations.delegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
           builder: (context, child) {
-            return ThemeCrossFade(
-              // Keep legacy package widgets themed while preserving modern icon colors.
-              // ignore: deprecated_member_use
-              child: MaterialUiCompatibilityBridge(
-                child: IconTheme(
-                  data: Theme.of(context).iconTheme,
-                  child: LocaleManager(
-                    child: AppEnvManager(
-                      child: _buildApp(
-                        child: _buildPlatformState(
-                          child: _buildState(
-                            child: _buildPlatformApp(
-                              child: RemoteFocusAdapter(
-                                enabled:
-                                    system.isTV ||
-                                    MediaQuery.navigationModeOf(context) ==
-                                        NavigationMode.directional,
-                                floatingKeyboard: app?.floatingKeyboard,
-                                child: child!,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+            return LocaleManager(
+              child: AppEnvManager(
+                child: _buildApp(
+                  child: _buildPlatformState(
+                    child: _buildState(child: _buildPlatformApp(child: child!)),
                   ),
                 ),
               ),
             );
           },
-          scrollBehavior: const BaseScrollBehavior(),
           title: safeModeBuild
               ? appLocalizations.safeModeAppTitle(appName)
               : appName,
@@ -248,7 +230,22 @@ class ApplicationState extends ConsumerState<Application> {
           themeMode: themeProps.themeMode,
           theme: watchAppTheme(ref, Brightness.light),
           darkTheme: watchAppTheme(ref, Brightness.dark),
-          themeAnimationStyle: AnimationStyle.noAnimation,
+          textScale: themeProps.textScale.enable
+              ? themeProps.textScale.scale
+              : null,
+          minTextScale: minTextScale,
+          maxTextScale: maxTextScale,
+          liquidGlass: switch (themeProps.liquidGlass) {
+            LiquidGlassMode.none => null,
+            LiquidGlassMode.standard => LiquidGlassQuality.standard,
+            LiquidGlassMode.ultra => LiquidGlassQuality.ultra,
+          },
+          emojiFont: (family: FontFamily.twEmoji.value, pattern: emojiPattern),
+          remoteFocus:
+              system.isTV ||
+              MediaQuery.maybeNavigationModeOf(context) ==
+                  NavigationMode.directional,
+          floatingKeyboard: app?.floatingKeyboard,
           onGenerateRoute: (settings) => HomeRoute<void>(
             settings: settings,
             builder: (_) => KeyboardInsetHold(child: child!),

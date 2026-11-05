@@ -11,13 +11,14 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/error.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:prism_ui/app.dart';
 
 void main() {
   testWidgets('startup errors remain visible before localizations are loaded', (
     tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
         home: InitErrorScreen(
           error: StateError('early startup failure'),
           stack: StackTrace.empty,
@@ -32,7 +33,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
         locale: const Locale('zh', 'CN'),
         localizationsDelegates: const [
           AppLocalizations.delegate,

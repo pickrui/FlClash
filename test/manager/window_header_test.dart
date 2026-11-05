@@ -14,7 +14,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, ButtonTheme;
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, ButtonTheme, Theme;
+import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonTheme;
 import 'package:prism_ui/card_surface.dart' show PressLook;
 import 'package:prism_ui/press_surface.dart';

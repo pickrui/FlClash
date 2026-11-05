@@ -158,7 +158,7 @@ void main() {
           updateActionProvider.overrideWith(() => action),
         ],
         child: const StatusManager(
-          updateNotice: AppUpdateAvailableNotice(),
+          updateNotice: AppUpdateTheme(child: AppUpdateAvailableNotice()),
           child: Scaffold(),
         ),
       ),
@@ -206,7 +206,7 @@ void main() {
           updateActionProvider.overrideWith(() => action),
         ],
         child: const StatusManager(
-          updateNotice: AppUpdateAvailableNotice(),
+          updateNotice: AppUpdateTheme(child: AppUpdateAvailableNotice()),
           child: Scaffold(),
         ),
       ),
@@ -232,7 +232,7 @@ void main() {
           updateActionProvider.overrideWith(() => action),
         ],
         child: const StatusManager(
-          updateNotice: AppUpdateAvailableNotice(),
+          updateNotice: AppUpdateTheme(child: AppUpdateAvailableNotice()),
           child: Scaffold(),
         ),
       ),
@@ -499,15 +499,17 @@ Future<void> _openDetails(
             onPressed: () async => onResult(
               await Navigator.of(context).push<UpdateDownloadAction>(
                 MaterialPageRoute(
-                  builder: (_) => AppUpdatePage(
-                    info: release,
-                    task: task,
-                    loadReleaseNotes:
-                        loadReleaseNotes ??
-                        () async =>
-                            throw StateError('cached notes fetched again'),
-                    onDownload: onDownload ?? () async {},
-                    onInstall: () async {},
+                  builder: (_) => AppUpdateTheme(
+                    child: AppUpdatePage(
+                      info: release,
+                      task: task,
+                      loadReleaseNotes:
+                          loadReleaseNotes ??
+                          () async =>
+                              throw StateError('cached notes fetched again'),
+                      onDownload: onDownload ?? () async {},
+                      onInstall: () async {},
+                    ),
                   ),
                 ),
               ),

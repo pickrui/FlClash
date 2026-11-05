@@ -12,11 +12,14 @@ import 'package:fl_clash/common/cloud_panel_time.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/cloud/purchased_plan_details.dart';
-import 'package:material_ui/material_ui.dart' hide LinearProgressIndicator;
+import 'package:material_ui/material_ui.dart'
+    hide LinearProgressIndicator, ThemeData;
+import 'package:prism_ui/theme_data.dart' show ThemeData;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:prism_ui/app.dart';
 
 void main() {
   BoughtRecord record(int status) => BoughtRecord.fromJson({
@@ -97,7 +100,7 @@ void main() {
   ) async {
     for (final status in [2, -1]) {
       await tester.pumpWidget(
-        MaterialApp(
+        PrismApp(
           locale: const Locale('en'),
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -150,7 +153,7 @@ void main() {
       }
       final key = GlobalKey();
       await tester.pumpWidget(
-        MaterialApp(
+        PrismApp(
           locale: const Locale('zh', 'CN'),
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -160,7 +163,7 @@ void main() {
           supportedLocales: AppLocalizations.delegate.supportedLocales,
           theme: ThemeData(
             brightness: Brightness.dark,
-            useMaterial3: true,
+
             fontFamily: fontPath == null ? null : 'PurchasedPlanTest',
           ),
           home: MediaQuery(

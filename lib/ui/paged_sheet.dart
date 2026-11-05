@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/ui/inherited.dart';
@@ -20,7 +19,8 @@ import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide ColorScheme;
+import 'package:prism_ui/theme_data.dart' show ColorScheme;
 
 Color _sheetColorOf(BuildContext context) =>
     SurfaceLevel.page.colorOf(ColorScheme.of(context));

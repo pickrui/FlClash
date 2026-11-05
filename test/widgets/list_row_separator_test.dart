@@ -9,7 +9,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:prism_ui/theme_data.dart' show Theme;
 
 import '../helpers/test_app.dart';
 
@@ -49,7 +50,8 @@ void main() {
   }
 
   PaintPattern separator(WidgetTester tester, Finder row, {Rect? rect}) {
-    final color = Theme.of(tester.element(row)).colorScheme.outlineVariant;
+    final color = Theme.of(tester.element(row)).colorScheme.onSurface
+        .withValues(alpha: 0.14);
     return paints..something(
       (method, arguments) =>
           method == #drawRect &&

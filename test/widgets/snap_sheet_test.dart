@@ -21,8 +21,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:prism_ui/sheet.dart' show sheetFloatInset;
 import 'package:prism_ui/shape.dart' show AppCorner;
-import 'package:prism_ui/surface.dart' show Surface;
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart' hide TextButton, Theme, ThemeData;
+import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -941,10 +941,7 @@ void main() {
         SurfaceLevel.block.colorOf(sheet),
         SurfaceLevel.inset.colorOf(page),
       );
-      final theme = ThemeData(
-        colorScheme: page,
-        extensions: [ElevatedColorScheme(sheet)],
-      ).withAppSurfaces;
+      final theme = ThemeData(colorScheme: page, elevatedColorScheme: sheet);
       await tester.pumpWidget(
         TestApp(
           wrapInProviderScope: true,

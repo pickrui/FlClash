@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/common/app_update_scheduler.dart';
 import 'package:fl_clash/common/common.dart';
@@ -23,7 +22,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/widgets/icon.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Divider;
+import 'package:prism_ui/divider.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {

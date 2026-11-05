@@ -6,7 +6,9 @@
 import 'package:fl_clash/ui/open_container.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:prism_ui/app.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton, Theme;
+import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 Widget _app({
@@ -15,7 +17,7 @@ Widget _app({
   GlobalKey<NavigatorState>? navigatorKey,
   bool reduceMotion = false,
 }) {
-  return MaterialApp(
+  return PrismApp(
     navigatorKey: navigatorKey,
     builder: (context, child) => MediaQuery(
       data: MediaQuery.of(context).copyWith(disableAnimations: reduceMotion),

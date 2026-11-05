@@ -10,7 +10,9 @@ import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide FilledButton;
+import 'package:prism_ui/app.dart';
+import 'package:material_ui/material_ui.dart' hide FilledButton, ColorScheme;
+import 'package:prism_ui/theme_data.dart' show ColorScheme;
 import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 
 void main() {
@@ -95,13 +97,13 @@ void main() {
         brightness: brightness,
       );
       final styles = [
-        LiquidGlassStyle.regular(colorScheme.asPrism),
-        LiquidGlassStyle.pill(colorScheme.asPrism),
-        LiquidGlassStyle.menu(colorScheme.asPrism),
-        LiquidGlassStyle.alert(colorScheme.asPrism),
-        LiquidGlassStyle.tinted(colorScheme.asPrism, colorScheme.primary),
-        LiquidGlassStyle.lens(colorScheme.asPrism),
-        LiquidGlassStyle.lensContent(colorScheme.asPrism),
+        LiquidGlassStyle.regular(colorScheme),
+        LiquidGlassStyle.pill(colorScheme),
+        LiquidGlassStyle.menu(colorScheme),
+        LiquidGlassStyle.alert(colorScheme),
+        LiquidGlassStyle.tinted(colorScheme, colorScheme.primary),
+        LiquidGlassStyle.lens(colorScheme),
+        LiquidGlassStyle.lensContent(colorScheme),
       ];
       for (final style in styles) {
         final bare = style.scale(0);
@@ -129,8 +131,8 @@ void main() {
         }
       }
       for (final rim in [
-        LiquidGlassRim.alert(colorScheme.asPrism),
-        LiquidGlassRim.menu(colorScheme.asPrism),
+        LiquidGlassRim.alert(colorScheme),
+        LiquidGlassRim.menu(colorScheme),
       ]) {
         expect(
           rim.scale(0),
@@ -163,13 +165,13 @@ void main() {
       ),
     );
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
         home: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               pane(keys[0], const []),
-              pane(keys[1], menuShadows(colorScheme.asPrism, 8)),
+              pane(keys[1], menuShadows(colorScheme, 8)),
             ],
           ),
         ),
@@ -199,7 +201,7 @@ void main() {
   testWidgets('a glass button draws a pane in place of its fill and lights '
       'it while pressed', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
         home: Center(
           child: FilledButton(
             style: liquidGlassButtonStyle(
@@ -238,7 +240,7 @@ void main() {
   testWidgets('a pane shaped by a clipper keeps to its path', (tester) async {
     final key = GlobalKey();
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
         home: Center(
           child: RepaintBoundary(
             key: key,
@@ -274,7 +276,7 @@ void main() {
   ) async {
     final key = GlobalKey();
     await tester.pumpWidget(
-      MaterialApp(
+      PrismApp(
         home: Center(
           child: RepaintBoundary(
             key: key,

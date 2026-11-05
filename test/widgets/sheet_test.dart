@@ -14,9 +14,12 @@ import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, TextButton;
+import 'package:prism_ui/app.dart';
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, TextButton, ThemeData, ThemeMode, ColorScheme;
+import 'package:prism_ui/theme_data.dart'
+    show ThemeData, ThemeMode, ColorScheme;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
-import 'package:prism_ui/surface.dart' show Surface;
 
 import '../helpers/test_app.dart';
 
@@ -66,11 +69,10 @@ ThemeData _theme(Brightness brightness) {
   );
   return ThemeData(
     colorScheme: colorScheme,
-    extensions: [
-      if (brightness == Brightness.dark)
-        ElevatedColorScheme(colorScheme.elevated),
-    ],
-  ).withAppSurfaces;
+    elevatedColorScheme: brightness == Brightness.dark
+        ? colorScheme.elevated
+        : null,
+  );
 }
 
 Future<ValueNotifier<ThemeMode>> _openFromPage(
@@ -89,7 +91,7 @@ Future<ValueNotifier<ThemeMode>> _openFromPage(
       overrides: [viewSizeProvider.overrideWithBuild((_, _) => size)],
       child: ValueListenableBuilder(
         valueListenable: mode,
-        builder: (_, themeMode, _) => MaterialApp(
+        builder: (_, themeMode, _) => PrismApp(
           theme: _theme(Brightness.light),
           darkTheme: _theme(Brightness.dark),
           themeMode: themeMode,
@@ -132,9 +134,7 @@ Color? _sheetColor(WidgetTester tester) {
 
 void main() {
   final dark = _theme(Brightness.dark);
-  final darkColor = SurfaceLevel.page.colorOf(
-    dark.extension<ElevatedColorScheme>()!.colorScheme,
-  );
+  final darkColor = SurfaceLevel.page.colorOf(dark.elevatedColorScheme!);
   for (final (kind, size, open) in [
     (
       'bottom sheet',

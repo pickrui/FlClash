@@ -24,7 +24,7 @@ class _ListRowSeparator extends SingleChildRenderObjectWidget {
   });
 
   Color _color(BuildContext context) =>
-      DividerTheme.of(context).color ?? context.colorScheme.outlineVariant;
+      context.colorScheme.onSurface.withValues(alpha: 0.14);
 
   @override
   _RenderListRowSeparator createRenderObject(BuildContext context) =>

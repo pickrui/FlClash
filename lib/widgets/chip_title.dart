@@ -11,7 +11,8 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/chip.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Tooltip;
+import 'package:prism_ui/tooltip.dart' show Tooltip;
 
 class ExpireChip extends StatelessWidget {
   final DateTime expire;

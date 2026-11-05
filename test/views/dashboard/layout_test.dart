@@ -16,7 +16,8 @@ import 'package:fl_clash/views/dashboard/widgets/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide ThemeData, ThemeMode;
+import 'package:prism_ui/theme_data.dart' show ThemeData, ThemeMode;
 
 import '../../helpers/glyph_finders.dart';
 import '../../helpers/test_app.dart';
@@ -83,8 +84,8 @@ void main() {
         container: container,
         child: TestApp(
           locale: const Locale('en'),
-          theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
+          theme: ThemeData(brightness: Brightness.light),
+          darkTheme: ThemeData(brightness: Brightness.dark),
           themeMode: themeMode,
           child: DashboardView(platform: platform),
         ),

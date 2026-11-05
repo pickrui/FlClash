@@ -14,7 +14,8 @@ import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide ThemeMode, ColorScheme;
+import 'package:prism_ui/theme_data.dart' show ThemeMode, ColorScheme;
 
 class PreviewChoice<T> {
   const PreviewChoice({
@@ -472,7 +473,7 @@ class _MiniScreenPainter extends CustomPainter {
     final bar = geometry.bar;
     final unit = geometry.unit;
     final path = AppShape.full.getOuterPath(bar);
-    final style = LiquidGlassStyle.pill(colorScheme.asPrism);
+    final style = LiquidGlassStyle.pill(colorScheme);
     final blur = unit * 0.4;
     canvas
       ..save()

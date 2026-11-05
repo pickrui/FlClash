@@ -9,7 +9,6 @@ import 'dart:math' as math;
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/ui/deferred_push.dart';
-import 'package:prism_ui/surface.dart' show Surface;
 import 'package:prism_ui/sheet.dart'
     show SheetCornersScope, floatingSheetRadius, sheetFloatInset;
 import 'package:fl_clash/ui/surface.dart';
@@ -18,7 +17,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:prism_ui/theme_data.dart' show Theme;
 
 import 'inherited.dart';
 import 'sheet.dart';

@@ -7,8 +7,10 @@ import 'dart:math';
 
 import 'package:fl_clash/ui/color.dart';
 import 'package:material_color_utilities/hct/hct.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide ColorScheme;
+import 'package:prism_ui/theme_data.dart' show ColorScheme;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart' as material_ui;
 
 Hct _hct(Color color) => Hct.fromInt(color.toARGB32());
 
@@ -59,7 +61,7 @@ void main() {
             brightness: brightness,
             style: style,
           );
-          final material = ColorScheme.fromSeed(
+          final material = material_ui.ColorScheme.fromSeed(
             seedColor: seed,
             brightness: brightness,
             dynamicSchemeVariant: _materialVariants[style]!,

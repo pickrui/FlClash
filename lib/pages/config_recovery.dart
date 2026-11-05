@@ -9,6 +9,7 @@ import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/ui/button.dart';
+import 'package:prism_ui/selectable_text.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/loading.dart';
@@ -16,7 +17,8 @@ import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextButton, FilledButton, ButtonStyle;
+    hide TextButton, FilledButton, ButtonStyle, Theme, SelectableText;
+import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:fl_clash/ui/common_button.dart'
     show TextButton, FilledButton, ButtonStyle;
 
@@ -178,9 +180,9 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
     final localizations = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     const level = SurfaceLevel.card;
-    return Scaffold(
-      backgroundColor: SurfaceLevel.page.colorOf(colorScheme),
-      body: SafeArea(
+    return Surface(
+      color: SurfaceLevel.page.colorOf(colorScheme),
+      child: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(32),

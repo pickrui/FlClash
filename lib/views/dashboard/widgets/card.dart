@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:prism_ui/press_region.dart';
-import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';

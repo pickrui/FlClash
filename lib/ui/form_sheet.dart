@@ -9,11 +9,11 @@ import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:prism_ui/form_sheet.dart' show formSheetShape;
-import 'package:prism_ui/surface.dart' show Surface;
 
 export 'package:prism_ui/form_sheet.dart' show formSheetShape;
 import 'package:fl_clash/ui/surface.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:prism_ui/theme_data.dart' show Theme;
 
 const double _width = 440;
 const double _maxHeight = 720;

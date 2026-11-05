@@ -15,7 +15,8 @@ import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Tooltip;
+import 'package:prism_ui/tooltip.dart' show Tooltip;
 
 import 'card.dart';
 import 'connections_table.dart';

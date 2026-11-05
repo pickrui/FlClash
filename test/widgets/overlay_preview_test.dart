@@ -6,7 +6,6 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/app_localizations.dart';
-import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
 import 'package:fl_clash/features/form/form_row.dart';
@@ -14,11 +13,13 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart' hide TextButton, ThemeData;
+import 'package:prism_ui/theme_data.dart' show ThemeData;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:prism_ui/app.dart';
 
 import '../helpers/test_app.dart';
 
@@ -143,10 +144,10 @@ Future<void> _open(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [viewSizeProvider.overrideWithBuild((_, _) => size)],
-      child: MaterialApp(
+      child: PrismApp(
         key: UniqueKey(),
         locale: locale,
-        theme: ThemeData().withAppShapes,
+        theme: ThemeData(),
         localizationsDelegates: const [
           AppLocalizations.delegate,
           AppUiLocalizations.delegate,
