@@ -10,6 +10,17 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('capture metadata defaults off and survives a JSON round trip', () {
+    expect(Metadata.fromJson({}).mitm, isFalse);
+    expect(Metadata.fromJson({}).mitmRefused, isFalse);
+    const metadata = Metadata(mitm: true, mitmRefused: true);
+    expect(
+      Metadata.fromJson(
+        jsonDecode(jsonEncode(metadata)) as Map<String, dynamic>,
+      ),
+      metadata,
+    );
+  });
   test(
     'node display metadata survives JSON and leaves the wire type unchanged',
     () {

@@ -28,7 +28,13 @@ import 'sortable.dart';
 import 'switch.dart';
 
 export 'package:prism_ui/list.dart'
-    show ListHeader, ListFooter, ListSectionGap, generateGroup, generateSection;
+    show
+        ListHeader,
+        ListFooter,
+        ListSectionGap,
+        generateGroup,
+        generateSection,
+        generateSliverSection;
 
 part 'list_row_separator.dart';
 part 'list_selected.dart';

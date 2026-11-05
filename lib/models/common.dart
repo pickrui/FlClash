@@ -105,6 +105,8 @@ abstract class Metadata with _$Metadata {
     @Default('') String sourceIPASN,
     @Default('') String specialRules,
     @Default('') String specialProxy,
+    @Default(false) bool mitm,
+    @Default(false) bool mitmRefused,
   }) = _Metadata;
 
   factory Metadata.fromJson(Map<String, Object?> json) =>
