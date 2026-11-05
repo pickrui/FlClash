@@ -1094,43 +1094,49 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
           (colorScheme.secondaryContainer, colorScheme.onSecondaryContainer),
         ),
       };
-      return ReorderableDelayedDragStartListener(
+      final position = ItemPosition.get(index, members.length + 1);
+      return MemoBuilder(
         key: keys[index],
-        index: index,
-        child: ItemPositionProvider(
-          position: ItemPosition.get(index, members.length + 1),
-          child: DecorationListItem(
-            invalid: !isValid,
-            contentPadding: const EdgeInsets.only(left: 16),
-            leading: EntryButton.remove(onPressed: () => _removeMember(index)),
-            title: TooltipText(
-              text: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
-            subtitle: chip == null
-                ? null
-                : Padding(
-                    padding: const EdgeInsets.only(top: 4, bottom: 2),
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: TonalChip(
-                            label: chip,
-                            color: chipColors.$1,
-                            foregroundColor: chipColors.$2,
+        inputs: [member, index, position, title, chip, chipColors, isValid],
+        builder: (context) => ReorderableDelayedDragStartListener(
+          index: index,
+          child: ItemPositionProvider(
+            position: position,
+            child: DecorationListItem(
+              invalid: !isValid,
+              contentPadding: const EdgeInsets.only(left: 16),
+              leading: EntryButton.remove(
+                onPressed: () => _removeMember(index),
+              ),
+              title: TooltipText(
+                text: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+              subtitle: chip == null
+                  ? null
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 4, bottom: 2),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: TonalChip(
+                              label: chip,
+                              color: chipColors.$1,
+                              foregroundColor: chipColors.$2,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (!isValid)
-                  InfoMessageButton(
-                    message: appLocalizations.outboundUnavailable,
-                  ),
-                SortHandle(index: index),
-              ],
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!isValid)
+                    InfoMessageButton(
+                      message: context.appLocalizations.outboundUnavailable,
+                    ),
+                  SortHandle(index: index),
+                ],
+              ),
             ),
           ),
         ),
@@ -1568,14 +1574,17 @@ class _MemberPickerState extends State<_MemberPicker> {
   Widget _buildEntry(_Entry entry) {
     final isSelected = _selected.contains(entry.member);
     final subtitle = entry.subtitle;
-    return DecorationListItem(
-      isSelected: isSelected,
-      onPressed: () => _toggle(entry.member),
-      title: TooltipText(
-        text: Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+    return MemoBuilder(
+      inputs: [entry, isSelected],
+      builder: (_) => DecorationListItem(
+        isSelected: isSelected,
+        onPressed: () => _toggle(entry.member),
+        title: TooltipText(
+          text: Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+        subtitle: subtitle == null ? null : TooltipLabel(subtitle, maxLines: 1),
+        trailing: isSelected ? const SelectionCheck() : null,
       ),
-      subtitle: subtitle == null ? null : TooltipLabel(subtitle, maxLines: 1),
-      trailing: isSelected ? const SelectionCheck() : null,
     );
   }
 }

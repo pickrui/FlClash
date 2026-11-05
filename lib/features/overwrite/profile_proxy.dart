@@ -969,33 +969,41 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
             itemCount: profileProxies.length,
             itemBuilder: (_, index) {
               final profileProxy = profileProxies[index];
-              return OverwriteEntryTile(
-                isEditing: selectedProfileProxies.isNotEmpty,
-                isSelected: selectedProfileProxies.contains(profileProxy.id),
-                title: profileProxy.name,
-                subtitle: Text(
-                  ProxyDefinition(profileProxy.proxy).displayType,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyle.footnote
-                      .of(context)
-                      .copyWith(
-                        color: context.colorScheme.onSurfaceVariant.opacity80,
-                      ),
+              final isEditing = selectedProfileProxies.isNotEmpty;
+              final isSelected = selectedProfileProxies.contains(
+                profileProxy.id,
+              );
+              return MemoBuilder(
+                key: ValueKey(profileProxy.id),
+                inputs: [widget, profileProxy, isEditing, isSelected],
+                builder: (context) => OverwriteEntryTile(
+                  isEditing: isEditing,
+                  isSelected: isSelected,
+                  title: profileProxy.name,
+                  subtitle: Text(
+                    ProxyDefinition(profileProxy.proxy).displayType,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyle.footnote
+                        .of(context)
+                        .copyWith(
+                          color: context.colorScheme.onSurfaceVariant.opacity80,
+                        ),
+                  ),
+                  enable: profileProxy.enable,
+                  onSelected: () {
+                    _handleProfileProxySelected(profileProxy.id);
+                  },
+                  onEdit: () {
+                    _handleAddOrUpdateProfileProxy(profileProxy);
+                  },
+                  onDelete: () {
+                    _handleDeleteProfileProxies({profileProxy.id});
+                  },
+                  onToggle: (value) {
+                    _handleProfileProxyToggle(profileProxy, value);
+                  },
                 ),
-                enable: profileProxy.enable,
-                onSelected: () {
-                  _handleProfileProxySelected(profileProxy.id);
-                },
-                onEdit: () {
-                  _handleAddOrUpdateProfileProxy(profileProxy);
-                },
-                onDelete: () {
-                  _handleDeleteProfileProxies({profileProxy.id});
-                },
-                onToggle: (value) {
-                  _handleProfileProxyToggle(profileProxy, value);
-                },
               );
             },
           ),

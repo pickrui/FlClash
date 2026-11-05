@@ -472,20 +472,37 @@ class _CustomProxyGroupsSectionState
     final extent = MeasureScope.of(context).listTwoLineRowHeight;
     Widget itemAt(int index) {
       final (sourceIndex, group) = visible[index];
-      return SortableItem(
+      final position = ItemPosition.get(index, visible.length);
+      final rowIssues = issues[sourceIndex] ?? const <RoutingIssue>[];
+      final isEditing = selected.isNotEmpty;
+      final isSelected = selected.contains(group);
+      return MemoBuilder(
         key: ObjectKey(group),
-        index: index,
-        child: ContextMenuRegion(
-          menuItems: selected.isEmpty && !_deleting ? _menuItems(group) : null,
-          child: ItemPositionProvider(
-            position: ItemPosition.get(index, visible.length),
-            child: _ProxyGroupItem(
-              group: group,
-              issues: issues[sourceIndex] ?? const [],
-              isEditing: selected.isNotEmpty,
-              isSelected: selected.contains(group),
-              onSelected: _deleting ? null : () => _toggleSelected(group),
-              onPressed: () => _edit(context, ref, group),
+        inputs: [
+          widget,
+          appLocalizations,
+          group,
+          rowIssues,
+          index,
+          position,
+          isEditing,
+          isSelected,
+          _deleting,
+        ],
+        builder: (context) => SortableItem(
+          index: index,
+          child: ContextMenuRegion(
+            menuItems: !isEditing && !_deleting ? _menuItems(group) : null,
+            child: ItemPositionProvider(
+              position: position,
+              child: _ProxyGroupItem(
+                group: group,
+                issues: rowIssues,
+                isEditing: isEditing,
+                isSelected: isSelected,
+                onSelected: _deleting ? null : () => _toggleSelected(group),
+                onPressed: () => _edit(context, ref, group),
+              ),
             ),
           ),
         ),
