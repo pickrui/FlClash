@@ -8,6 +8,9 @@ package com.oixcloud.clash.plugins
 import android.Manifest
 import android.app.Activity
 import android.app.ActivityManager
+import android.content.ActivityNotFoundException
+import android.content.ContentUris
+import android.content.ContentValues
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -18,7 +21,10 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.net.VpnService
 import android.os.Build
+import android.provider.MediaStore
 import android.provider.Settings
+import android.security.KeyChain
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
@@ -33,6 +39,7 @@ import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile
 import com.google.gson.Gson
 import com.oixcloud.clash.ChinaPackageMatcher
 import com.oixcloud.clash.ProcessExitRecord
+import com.oixcloud.clash.SystemCaStore
 import com.oixcloud.clash.R
 import com.oixcloud.clash.common.Components
 import com.oixcloud.clash.common.GlobalState
@@ -118,6 +125,40 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         when (call.method) {
             "getLastExitInfo" -> platformCalls.submit(result) { lastExitInfo() }
 
+            "locateCaCertificate" -> platformCalls.submit(result) {
+                SystemCaStore.locate(requireNotNull(call.argument<ByteArray>("der")))
+            }
+
+            "installCaCertificateWithRoot" -> platformCalls.submit(result) {
+                SystemCaStore.install(
+                    GlobalState.application,
+                    requireNotNull(call.argument<ByteArray>("der")),
+                )
+            }
+
+            "hasRootAccess" -> platformCalls.submit(result) {
+                SystemCaStore.hasRootAccess(GlobalState.application)
+            }
+
+            "removeCaCertificateWithRoot" -> platformCalls.submit(result) {
+                SystemCaStore.remove(
+                    GlobalState.application,
+                    requireNotNull(call.argument<ByteArray>("der")),
+                )
+            }
+
+            "installCaCertificate" -> platformCalls.submit(result) {
+                installCaCertificate(
+                    requireNotNull(call.argument<ByteArray>("der")),
+                    requireNotNull(call.argument<String>("name")),
+                    requireNotNull(call.argument<String>("fileName")),
+                )
+            }
+
+            "openCertificateSettings" -> {
+                result.success(openCertificateSettings(call.argument<Boolean>("userCredentials") == true))
+            }
+
             "extractAsset" -> platformCalls.submit(result) {
                 extractAsset(
                     requireNotNull(call.argument<String>("asset")),
@@ -197,6 +238,71 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             else -> {
                 result.notImplemented()
             }
+        }
+    }
+
+    // From Android 11 an app can no longer hand a CA certificate to the
+    // installer; the user picks the saved file under Settings instead.
+    private suspend fun installCaCertificate(der: ByteArray, name: String, fileName: String): String {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            val intent = KeyChain.createInstallIntent().apply {
+                putExtra(KeyChain.EXTRA_CERTIFICATE, der)
+                putExtra(KeyChain.EXTRA_NAME, name)
+            }
+            return if (withContext(Dispatchers.Main) { startSettings(intent) }) "prompted" else "unavailable"
+        }
+        saveToDownloads(der, fileName)
+        return "saved"
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun saveToDownloads(data: ByteArray, fileName: String) {
+        val resolver = GlobalState.application.contentResolver
+        val collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI
+        val existing = resolver.query(
+            collection,
+            arrayOf(MediaStore.MediaColumns._ID),
+            "${MediaStore.MediaColumns.DISPLAY_NAME} = ?",
+            arrayOf(fileName),
+            null,
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) ContentUris.withAppendedId(collection, cursor.getLong(0)) else null
+        }
+        val uri = existing ?: resolver.insert(
+            collection,
+            ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.MediaColumns.MIME_TYPE, "application/x-x509-ca-cert")
+            },
+        ) ?: throw IOException("Unable to create $fileName in Downloads")
+        resolver.openOutputStream(uri, "wt")?.use { it.write(data) }
+            ?: throw IOException("Unable to write $fileName in Downloads")
+    }
+
+    // The list of user certificates is a Settings screen without a public
+    // action on every ROM, so the security screen stands in for it.
+    private fun openCertificateSettings(userCredentials: Boolean): Boolean {
+        val intents = buildList {
+            if (userCredentials) {
+                add(Intent("com.android.settings.TRUSTED_CREDENTIALS_USER"))
+            }
+            add(Intent(Settings.ACTION_SECURITY_SETTINGS))
+            add(Intent(Settings.ACTION_SETTINGS))
+        }
+        return intents.any(::startSettings)
+    }
+
+    private fun startSettings(intent: Intent): Boolean {
+        val context: Context = activityRef?.get() ?: GlobalState.application.also {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        return try {
+            context.startActivity(intent)
+            true
+        } catch (_: ActivityNotFoundException) {
+            false
+        } catch (_: SecurityException) {
+            false
         }
     }
 

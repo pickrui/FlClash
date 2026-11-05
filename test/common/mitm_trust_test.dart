@@ -9,6 +9,11 @@ import 'package:fl_clash/common/mitm_trust.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fl_clash/plugins/app.dart';
+import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flutter/widgets.dart' show Locale;
+import 'package:flutter/services.dart' show PlatformException;
+import 'package:mocktail/mocktail.dart';
 
 const _pem = '''-----BEGIN CERTIFICATE-----
 MIIBxjCCAW2gAwIBAgIUE7mKNCkR6iuATGzZPqCqjJNFbKswCgYIKoZIzj0EAwIw
@@ -37,6 +42,8 @@ final _ca = MitmCertificate(
   notBefore: DateTime.utc(2026, 10, 24),
   notAfter: DateTime.utc(2126, 9, 30),
 );
+
+class _MockApp extends Mock implements App {}
 
 class _Run {
   const _Run(this.executable, this.arguments);
@@ -109,6 +116,130 @@ void main() {
   test('the certificate is hashed from its DER', () {
     expect(mitmSha1Hex(_ca), _sha1);
     expect(mitmSha256Hex(_ca), _sha256);
+  });
+
+  group('Android', () {
+    setUpAll(() => AppLocalizations.load(const Locale('en')));
+
+    void locate(
+      _MockApp app, {
+      bool user = false,
+      bool system = false,
+      bool root = true,
+    }) {
+      when(() => app.locateCaCertificate(any()))
+          .thenAnswer((_) async => (user: user, system: system, root: root));
+    }
+
+    void stubUserInstall(_MockApp app, MitmInstallOutcome? outcome) {
+      when(
+        () => app.installCaCertificate(
+          any(),
+          name: any(named: 'name'),
+          fileName: any(named: 'fileName'),
+        ),
+      ).thenAnswer((_) async => outcome);
+    }
+
+    test('an installer that does not open fails the install', () async {
+      final app = _MockApp();
+      locate(app, root: false);
+      stubUserInstall(app, null);
+
+      await expectLater(
+        AndroidMitmTrustStore(app).install(_ca),
+        throwsA(
+          isA<MitmTrustException>().having(
+            (error) => error.messageFor(AppLocalizations.current),
+            'message',
+            AppLocalizations.current.mitmSystemStoreFailed,
+          ),
+        ),
+      );
+    });
+
+    test('a CA in the system store is trusted by every app', () async {
+      final app = _MockApp();
+      locate(app, system: true);
+
+      final check = await AndroidMitmTrustStore(app).check(_ca, issueLeaf);
+
+      expect(check.trust, MitmTrust.ready);
+      expect(check.systemStore, isTrue);
+      expect(check.rootAvailable, isTrue);
+    });
+
+    test('su installs the CA before the user store is offered', () async {
+      final app = _MockApp();
+      locate(app);
+      when(() => app.installCaCertificateWithRoot(any()))
+          .thenAnswer((_) async => MitmInstallOutcome.installed);
+
+      expect(
+        await AndroidMitmTrustStore(app).install(_ca),
+        MitmInstallOutcome.installed,
+      );
+      verifyNever(
+        () => app.installCaCertificate(
+          any(),
+          name: any(named: 'name'),
+          fileName: any(named: 'fileName'),
+        ),
+      );
+    });
+
+    test(
+      'a root installation error stays an error instead of falling back',
+      () async {
+        final app = _MockApp();
+        locate(app);
+        when(() => app.installCaCertificateWithRoot(any()))
+            .thenThrow(PlatformException(code: 'PLATFORM_ERROR'));
+        await expectLater(
+          AndroidMitmTrustStore(app).install(_ca),
+          throwsA(isA<MitmTrustException>()),
+        );
+        verifyNever(
+          () => app.installCaCertificate(
+            any(),
+            name: any(named: 'name'),
+            fileName: any(named: 'fileName'),
+          ),
+        );
+      },
+    );
+
+    test('a denied su falls back to the user store', () async {
+      final app = _MockApp();
+      locate(app);
+      when(() => app.installCaCertificateWithRoot(any()))
+          .thenAnswer((_) async => null);
+      stubUserInstall(app, MitmInstallOutcome.saved);
+
+      expect(
+        await AndroidMitmTrustStore(app).install(_ca),
+        MitmInstallOutcome.saved,
+      );
+    });
+
+    test('su takes the CA out of the system store', () async {
+      final app = _MockApp();
+      locate(app, system: true);
+      when(() => app.removeCaCertificateWithRoot(any()))
+          .thenAnswer((_) async => true);
+
+      expect(await AndroidMitmTrustStore(app).remove(_ca), isTrue);
+      verify(() => app.removeCaCertificateWithRoot(any())).called(1);
+    });
+
+    test('a CA also in the user store is left for the user', () async {
+      final app = _MockApp();
+      locate(app, user: true, system: true);
+      when(() => app.removeCaCertificateWithRoot(any()))
+          .thenAnswer((_) async => true);
+
+      expect(await AndroidMitmTrustStore(app).remove(_ca), isFalse);
+    });
   });
 
   group('macOS', () {

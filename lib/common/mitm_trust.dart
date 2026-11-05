@@ -18,6 +18,8 @@ import 'package:fl_clash/core/desktop/unix_helper.dart' show LinuxElevation;
 import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:path/path.dart';
+import 'package:fl_clash/plugins/app.dart';
+import 'package:flutter/services.dart' show PlatformException;
 
 const mitmCheckHost = 'mitm-check.oixcloud.invalid';
 
@@ -78,6 +80,9 @@ MitmTrustStore? mitmTrustStoreForPlatform() {
       home: Platform.environment['HOME'] ?? '',
       searchPath: Platform.environment['PATH'] ?? '',
     );
+  }
+  if (system.isAndroid && app != null) {
+    return AndroidMitmTrustStore(app!);
   }
   return null;
 }
@@ -626,5 +631,67 @@ fi
       }
     }
     return removed;
+  }
+}
+
+class AndroidMitmTrustStore implements MitmTrustStore {
+  AndroidMitmTrustStore(this.platform);
+
+  final App platform;
+
+  @override
+  Future<MitmTrustCheck> check(
+    MitmCertificate ca,
+    Future<String> Function() issueLeaf,
+  ) async {
+    final found = await platform.locateCaCertificate(mitmCertificateDer(ca));
+    return MitmTrustCheck(
+      found.user || found.system ? MitmTrust.ready : MitmTrust.notInstalled,
+      systemStore: found.system,
+      rootAvailable: found.root,
+    );
+  }
+
+  /// Tries the system store with su first; a denied su falls back to the
+  /// user store.
+  @override
+  Future<MitmInstallOutcome> install(MitmCertificate ca) async {
+    final der = mitmCertificateDer(ca);
+    if ((await platform.locateCaCertificate(der)).root) {
+      final MitmInstallOutcome? outcome;
+      try {
+        outcome = await platform.installCaCertificateWithRoot(der);
+      } on PlatformException catch (error) {
+        commonPrint.log(
+          'Installing the MITM certificate with root failed: ${error.message}',
+          logLevel: LogLevel.warning,
+        );
+        throw const MitmTrustException();
+      }
+      if (outcome != null) {
+        return outcome;
+      }
+    }
+    final outcome = await platform.installCaCertificate(
+      der,
+      name: ca.subject,
+      fileName: mitmSavedFileName(ca),
+    );
+    if (outcome == null) {
+      throw const MitmTrustException();
+    }
+    return outcome;
+  }
+
+  /// An app cannot remove a user certificate.
+  @override
+  Future<bool> remove(MitmCertificate ca) async {
+    final der = mitmCertificateDer(ca);
+    final found = await platform.locateCaCertificate(der);
+    if (found.system &&
+        (!found.root || !await platform.removeCaCertificateWithRoot(der))) {
+      return false;
+    }
+    return !found.user;
   }
 }

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +28,108 @@ void main() {
         .setMockMethodCallHandler(channel, null);
     App().clearPackageIconCache();
   });
+
+  test(
+    'certificate calls carry DER and settings scope on this app channel',
+    () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            calls.add(call);
+            return switch (call.method) {
+              'locateCaCertificate' => {
+                'user': true,
+                'system': false,
+                'root': true,
+              },
+              'hasRootAccess' || 'openCertificateSettings' => true,
+              'removeCaCertificateWithRoot' => false,
+              _ => null,
+            };
+          });
+      final api = App();
+      expect(await api.locateCaCertificate([1, 2, 3]), (
+        user: true,
+        system: false,
+        root: true,
+      ));
+      expect(await api.hasRootAccess(), isTrue);
+      expect(await api.removeCaCertificateWithRoot([1, 2, 3]), isFalse);
+      expect(await api.openCertificateSettings(userCredentials: true), isTrue);
+      for (final call in calls.where(
+        (call) =>
+            call.method.contains('Certificate') &&
+            call.method != 'openCertificateSettings',
+      )) {
+        expect(call.arguments['der'], isA<Uint8List>());
+        expect(call.arguments['der'], [1, 2, 3]);
+      }
+      expect(calls.last.arguments, {'userCredentials': true});
+    },
+  );
+
+  test(
+    'certificate install distinguishes system and user store outcomes',
+    () async {
+      Object? outcome;
+      MethodCall? called;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            called = call;
+            return outcome;
+          });
+      final api = App();
+      for (final entry in <String?, MitmInstallOutcome?>{
+        'installed': MitmInstallOutcome.installed,
+        'untilReboot': MitmInstallOutcome.untilReboot,
+        'denied': null,
+        null: null,
+      }.entries) {
+        outcome = entry.key;
+        expect(await api.installCaCertificateWithRoot([7]), entry.value);
+        expect(called!.arguments['der'], [7]);
+      }
+      for (final entry in <String?, MitmInstallOutcome?>{
+        'saved': MitmInstallOutcome.saved,
+        'prompted': MitmInstallOutcome.prompted,
+        'unavailable': null,
+        null: null,
+      }.entries) {
+        outcome = entry.key;
+        expect(
+          await api.installCaCertificate(
+            [7],
+            name: 'App CA',
+            fileName: 'ca.crt',
+          ),
+          entry.value,
+        );
+        expect(called!.arguments, {
+          'der': Uint8List.fromList([7]),
+          'name': 'App CA',
+          'fileName': 'ca.crt',
+        });
+      }
+    },
+  );
+
+  test(
+    'certificate platform errors propagate without claiming installation',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (_) async {
+            throw PlatformException(code: 'PLATFORM_ERROR');
+          });
+      await expectLater(
+        App().installCaCertificateWithRoot([7]),
+        throwsA(isA<PlatformException>()),
+      );
+      await expectLater(
+        App().locateCaCertificate([7]),
+        throwsA(isA<PlatformException>()),
+      );
+    },
+  );
 
   test('requests every package icon from Android only once', () async {
     var iconCallCount = 0;
