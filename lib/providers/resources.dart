@@ -224,6 +224,10 @@ class ResourceUpdates {
     final providers = await _loadLibrary(clashProvidersProvider);
     if (!ref.mounted || !shouldContinue()) return failures;
     final scripts = await _loadLibrary(scriptsProvider);
+    if (!ref.mounted || !shouldContinue()) return failures;
+    final modules = mitmFeature
+        ? await _loadLibrary(mitmModulesProvider)
+        : const <MitmModule>[];
     await Future.wait([
       for (final type in GeoResource.values)
         run(type.name, () => updateGeo(type, shouldContinue: shouldContinue)),
@@ -233,6 +237,12 @@ class ResourceUpdates {
         run(item.label, () => updateProvider(item)),
       for (final item in scripts.where((item) => item.url?.isNotEmpty == true))
         run(item.label, () => updateScript(item)),
+      for (final module in modules.where((module) => module.isRemote))
+        run(module.name, () async {
+          await ref
+              .read(mitmModulesActionProvider.notifier)
+              .updateModule(module);
+        }),
     ]);
     return failures;
   }

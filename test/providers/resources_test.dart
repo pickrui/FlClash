@@ -17,6 +17,7 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/icon_sets.dart';
 import 'package:fl_clash/common/path.dart';
+import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:path/path.dart' as p;
 import 'package:fl_clash/database/database.dart';
@@ -94,6 +95,63 @@ void main() {
       await root.delete(recursive: true);
     });
   });
+
+  for (final feature in [false, true]) {
+    test(
+      'bulk updates include only remote modules with feature=$feature',
+      () async {
+        final previousFeature = mitmFeature;
+        final previousLocale = Intl.defaultLocale;
+        addTearDown(() {
+          mitmFeature = previousFeature;
+          Intl.defaultLocale = previousLocale;
+        });
+        mitmFeature = feature;
+        await AppLocalizations.load(const Locale('en'));
+        final modules = [
+          MitmModule(id: 1, name: 'Local', lastUpdateTime: DateTime(2026)),
+          MitmModule(
+            id: 2,
+            name: 'Remote',
+            url: 'https://example.invalid/module',
+            lastUpdateTime: DateTime(2026),
+          ),
+          MitmModule(
+            id: 3,
+            name: 'Broken',
+            url: 'https://example.invalid/broken',
+            lastUpdateTime: DateTime(2026),
+          ),
+        ];
+        final action = _ModuleUpdates();
+        var reads = 0;
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            iconSetsProvider.overrideWithBuild((_, _) => Stream.value([])),
+            scriptsProvider.overrideWithBuild((_, _) => Stream.value([])),
+            clashProvidersProvider.overrideWith((_) => Stream.value([])),
+            mitmModulesProvider.overrideWithBuild((_, _) {
+              reads++;
+              return Stream.value(modules);
+            }),
+            mitmModulesActionProvider.overrideWith(() => action),
+            setupActionProvider.overrideWith(_NoGeoUpdates.new),
+            resourcesProvider.overrideWith(
+              (ref) => ResourceUpdates(ref, store: db),
+            ),
+          ],
+        );
+        final failures = await container
+            .read(resourcesProvider)
+            .updateAll(shouldContinue: () => true);
+        expect(reads, feature ? 1 : 0);
+        expect(action.updated, feature ? [2, 3] : isEmpty);
+        expect(failures, hasLength(feature ? 1 : 0));
+        if (feature) expect(failures.single, contains('Broken'));
+      },
+    );
+  }
 
   test('automatic updates load libraries without page subscriptions', () async {
     final updating = container.read(resourcesProvider).autoUpdate();
@@ -342,4 +400,18 @@ class _NoGeoUpdates extends SetupAction {
     Object? initialError,
     required bool Function() shouldContinue,
   }) async => true;
+}
+
+class _ModuleUpdates extends MitmModulesAction {
+  final updated = <int>[];
+
+  @override
+  void build() {}
+
+  @override
+  Future<MitmModule> updateModule(MitmModule module) async {
+    updated.add(module.id);
+    if (module.id == 3) throw const SocketException('fixture offline');
+    return module;
+  }
 }

@@ -11,6 +11,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -88,6 +89,86 @@ void main() {
           ),
         ),
       ),
+    );
+  }
+
+  for (final feature in [false, true]) {
+    testWidgets(
+      'resource page lists and syncs remote modules with feature=$feature',
+      (tester) async {
+        final previousFeature = mitmFeature;
+        ProviderContainer? previousContainer;
+        try {
+          previousContainer = globalState.container;
+        } catch (_) {}
+        mitmFeature = feature;
+        addTearDown(() {
+          mitmFeature = previousFeature;
+          if (previousContainer != null) {
+            globalState.container = previousContainer;
+          }
+        });
+        await tester.binding.setSurfaceSize(const Size(800, 1400));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final remote = MitmModule(
+          id: 1,
+          name: 'Remote module',
+          url: 'https://example.invalid/module',
+          lastUpdateTime: DateTime(2026),
+        );
+        final local = MitmModule(
+          id: 2,
+          name: 'Local module',
+          lastUpdateTime: DateTime(2026),
+        );
+        final action = _ResourceModuleAction();
+        var reads = 0;
+        final container = ProviderContainer(
+          overrides: [
+            iconSetsProvider.overrideWithBuild((_, _) => Stream.value([])),
+            clashProvidersProvider.overrideWith((_) => Stream.value([])),
+            scriptsProvider.overrideWithBuild((_, _) => Stream.value([])),
+            mitmModulesProvider.overrideWithBuild((_, _) {
+              reads++;
+              return Stream.value([remote, local]);
+            }),
+            mitmModulesActionProvider.overrideWith(() => action),
+          ],
+        );
+        globalState.container = container;
+        try {
+          await tester.pumpWidget(
+            UncontrolledProviderScope(
+              container: container,
+              child: const TestApp(
+                locale: Locale('en'),
+                child: ResourcesView(),
+              ),
+            ),
+          );
+          await pumpUntilFound(
+            tester,
+            find.text(AppLocalizations.current.autoUpdate),
+          );
+          expect(reads, feature ? 1 : 0);
+          expect(
+            find.text('Remote module'),
+            feature ? findsOneWidget : findsNothing,
+          );
+          expect(find.text('Local module'), findsNothing);
+          if (feature) {
+            await tester.longPress(find.text('Remote module'));
+            await tester.pumpAndSettle();
+            await tester.tap(find.text(AppLocalizations.current.sync));
+            await tester.pumpAndSettle();
+            expect(action.updated, [remote.id]);
+          }
+        } finally {
+          await tester.pumpWidget(const SizedBox());
+          container.dispose();
+          await tester.pump();
+        }
+      },
     );
   }
 
@@ -228,4 +309,17 @@ void main() {
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
+}
+
+class _ResourceModuleAction extends MitmModulesAction {
+  final updated = <int>[];
+
+  @override
+  void build() {}
+
+  @override
+  Future<MitmModule> updateModule(MitmModule module) async {
+    updated.add(module.id);
+    return module;
+  }
 }
