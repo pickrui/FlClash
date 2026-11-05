@@ -778,57 +778,64 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets(
-    'closing connections prevents duplicate and overlapping submissions',
-    (tester) async {
-      final stream = await pumpConnections(tester, () => buildConnections(2));
-      final handler = stream.handler;
-      final closeOne = Completer<bool>();
-      final closeAll = Completer<bool>();
-      when(() => handler.closeConnection('0'))
-          .thenAnswer((_) => closeOne.future);
-      when(() => handler.closeConnections()).thenAnswer((_) => closeAll.future);
-      final closeButtons = find.byWidgetPredicate(
-        (widget) => widget is IconButton && widget.tooltip == 'Close',
-      );
-      final allButton = find.byWidgetPredicate(
-        (widget) =>
-            widget is IconButton && widget.tooltip == 'Close all connections',
-      );
-      final close = tester.widget<IconButton>(closeButtons.first).onPressed!;
-      close();
-      close();
-      await tester.pump();
-      verify(() => handler.closeConnection('0')).called(1);
-      expect(tester.widget<IconButton>(closeButtons.first).onPressed, isNull);
-      expect(
-        find.descendant(
-          of: closeButtons.first,
-          matching: find.byType(ActivityIndicator),
-        ),
-        findsOneWidget,
-      );
-      expect(tester.widget<IconButton>(allButton).onPressed, isNull);
-      closeOne.complete(true);
-      await tester.pump();
-      final closeEveryConnection = tester
-          .widget<IconButton>(allButton)
-          .onPressed!;
-      closeEveryConnection();
-      closeEveryConnection();
-      await tester.pump();
-      verify(() => handler.closeConnections()).called(1);
-      expect(tester.widget<IconButton>(allButton).onPressed, isNull);
-      for (final button in tester.widgetList<IconButton>(closeButtons)) {
-        expect(button.onPressed, isNull);
-      }
-      closeAll.complete(true);
-      await tester.pumpAndSettle();
-      expect(tester.widget<IconButton>(allButton).onPressed, isNotNull);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox.shrink());
-    },
-  );
+  for (final size in [const Size(600, 800), const Size(1400, 800)]) {
+    testWidgets(
+      'closing connections prevents duplicate and overlapping submissions at ${size.width}',
+      (tester) async {
+        final stream = await pumpConnections(
+          tester,
+          () => buildConnections(2),
+          size: size,
+        );
+        final handler = stream.handler;
+        final closeOne = Completer<bool>();
+        final closeAll = Completer<bool>();
+        when(() => handler.closeConnection('0'))
+            .thenAnswer((_) => closeOne.future);
+        when(() => handler.closeConnections())
+            .thenAnswer((_) => closeAll.future);
+        final closeButtons = find.byWidgetPredicate(
+          (widget) => widget is IconButton && widget.tooltip == 'Close',
+        );
+        final allButton = find.byWidgetPredicate(
+          (widget) =>
+              widget is IconButton && widget.tooltip == 'Close all connections',
+        );
+        final close = tester.widget<IconButton>(closeButtons.first).onPressed!;
+        close();
+        close();
+        await tester.pump();
+        verify(() => handler.closeConnection('0')).called(1);
+        expect(tester.widget<IconButton>(closeButtons.first).onPressed, isNull);
+        expect(
+          find.descendant(
+            of: closeButtons.first,
+            matching: find.byType(ActivityIndicator),
+          ),
+          findsOneWidget,
+        );
+        expect(tester.widget<IconButton>(allButton).onPressed, isNull);
+        closeOne.complete(true);
+        await tester.pump();
+        final closeEveryConnection = tester
+            .widget<IconButton>(allButton)
+            .onPressed!;
+        closeEveryConnection();
+        closeEveryConnection();
+        await tester.pump();
+        verify(() => handler.closeConnections()).called(1);
+        expect(tester.widget<IconButton>(allButton).onPressed, isNull);
+        for (final button in tester.widgetList<IconButton>(closeButtons)) {
+          expect(button.onPressed, isNull);
+        }
+        closeAll.complete(true);
+        await tester.pumpAndSettle();
+        expect(tester.widget<IconButton>(allButton).onPressed, isNotNull);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
 
   testWidgets('a close finishing after the app pauses stays unsubscribed', (
     tester,

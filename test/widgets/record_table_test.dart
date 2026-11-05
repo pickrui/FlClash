@@ -93,6 +93,55 @@ void main() {
     expect(controller.offset, controller.position.maxScrollExtent);
   });
 
+  testWidgets(
+    'record updates reuse table geometry and column changes invalidate it',
+    (tester) async {
+      final items = ValueNotifier(const [(name: 'first', size: 1)]);
+      final revision = ValueNotifier(0);
+      addTearDown(items.dispose);
+      addTearDown(revision.dispose);
+      tester.view.physicalSize = const Size(900, 600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      RecordTable<_Row>? current;
+      await tester.pumpWidget(
+        TestApp(
+          wrapInProviderScope: true,
+          child: ListenableBuilder(
+            listenable: Listenable.merge([items, revision]),
+            builder: (context, _) => RecordTableFrame<_Row>(
+              tableId: 'memo',
+              items: items.value,
+              columnsKey: revision.value,
+              columnsOf: _columns,
+              builder: (context, table, rows) {
+                current = table;
+                return ListView(
+                  children: [for (final row in rows) Text(row.name)],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      final first = current;
+      expect(first, isNotNull);
+      items.value = const [(name: 'second', size: 2)];
+      await tester.pump();
+      expect(current, same(first));
+      expect(find.text('second'), findsOneWidget);
+      revision.value++;
+      await tester.pump();
+      expect(current, isNot(same(first)));
+      final beforeResize = current;
+      tester.view.physicalSize = const Size(950, 600);
+      await tester.pump();
+      expect(current, isNot(same(beforeResize)));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   test('a bottom-up list sorts with its ties kept in their shown order', () {
     const a = (name: 'a', size: 1);
     const b = (name: 'b', size: 1);

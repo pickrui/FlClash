@@ -525,6 +525,7 @@ class _LiveFeedState extends ConsumerState<_LiveFeed>
           ),
           child: RecordTableFrame<TrackerInfo>(
             tableId: 'connections',
+            columnsKey: widget.actionBuilder,
             items: connections,
             columnsOf: (width) => trackerInfoColumns(
               context,
