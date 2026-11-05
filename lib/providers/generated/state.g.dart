@@ -992,7 +992,7 @@ final class OverlayTopOffsetProvider
   }
 }
 
-String _$overlayTopOffsetHash() => r'b2462f67acbd88b7a881dfe4c6353e68ba49961d';
+String _$overlayTopOffsetHash() => r'5be7e2a65878514bc6ecd6531efc503cb10a9387';
 
 @ProviderFor(currentGroupsState)
 final currentGroupsStateProvider = CurrentGroupsStateProvider._();

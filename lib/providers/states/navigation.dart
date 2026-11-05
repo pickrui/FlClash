@@ -107,5 +107,5 @@ double overlayTopOffset(Ref ref) {
   if ((version <= 10 || !isMobileView) && system.isMacOS || !system.isDesktop) {
     top = 0;
   }
-  return kToolbarHeight + top;
+  return bannerBarClearance + top;
 }

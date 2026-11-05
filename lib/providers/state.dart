@@ -13,7 +13,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/widgets.dart';
-import 'package:material_ui/material_ui.dart' show kToolbarHeight;
 import 'package:prism_ui/theme_data.dart' show ColorScheme, ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

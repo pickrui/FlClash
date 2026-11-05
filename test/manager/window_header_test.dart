@@ -826,7 +826,7 @@ void main() {
         );
         expect(
           container.read(overlayTopOffsetProvider),
-          kToolbarHeight + (shows ? kHeaderHeight : 0),
+          bannerBarClearance + (shows ? kHeaderHeight : 0),
           reason: 'view size $viewSize',
         );
       }
