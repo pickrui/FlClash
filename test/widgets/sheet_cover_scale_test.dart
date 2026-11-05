@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/scaffold.dart';
@@ -26,8 +27,8 @@ Widget _page(String name, int rows, {VoidCallback? onNext}) {
       shrinkWrap: true,
       children: [
         for (var index = 0; index < rows; index++)
-          ListTile(title: Text('$name row $index'), onTap: () {}),
-        if (onNext != null) ListTile(title: const Text('next'), onTap: onNext),
+          ListItem(title: Text('$name row $index'), onTap: () {}),
+        if (onNext != null) ListItem(title: const Text('next'), onTap: onNext),
       ],
     ),
   );

@@ -422,7 +422,7 @@ class _AlertFrame extends StatelessWidget {
             child: Surface(
               color: color,
               shape: AppShape.all(AppCorner.alert),
-              child: Material(type: MaterialType.transparency, child: child),
+              child: Surface.transparent(child: child),
             ),
           ),
         ),

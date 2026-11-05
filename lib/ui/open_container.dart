@@ -16,9 +16,6 @@ import 'package:prism_ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
 import 'package:prism_ui/keyboard_inset_hold.dart';
 import 'package:fl_clash/ui/navigator.dart' show CommonRoute;
-import 'package:material_ui/material_ui.dart'
-    as legacy
-    show Material, MaterialType;
 import 'package:prism_ui/page_transition.dart';
 import 'package:prism_ui/surface.dart';
 import 'package:prism_ui/theme_data.dart';
@@ -68,8 +65,7 @@ class _OpenContainerState<T> extends State<OpenContainer<T?>> {
 
   Route<T> _route() => switch (widget.transition) {
     OpenContainerTransition.push => CommonRoute<T>(
-      builder: (context) => legacy.Material(
-        type: legacy.MaterialType.transparency,
+      builder: (context) => Surface.transparent(
         child: widget.openBuilder(
           context,
           ({T? returnValue}) => Navigator.of(context).pop(returnValue),
@@ -103,8 +99,7 @@ class _OpenContainerState<T> extends State<OpenContainer<T?>> {
           color: Colors.transparent,
           clipBehavior: widget.clipBehavior,
           shape: widget.closedShape,
-          child: legacy.Material(
-            type: legacy.MaterialType.transparency,
+          child: Surface.transparent(
             child: Builder(
               key: _closedBuilderKey,
               builder: (BuildContext context) {
@@ -278,8 +273,7 @@ class _OpenContainerRoute<T> extends ModalRoute<T>
         child: SnapshotWidget(
           controller: _closedSnapshot,
           mode: SnapshotMode.permissive,
-          child: legacy.Material(
-            type: legacy.MaterialType.transparency,
+          child: Surface.transparent(
             child: Builder(
               key: closedBuilderKey,
               builder: (BuildContext context) {
@@ -661,8 +655,7 @@ class _OpenContainerRoute<T> extends ModalRoute<T>
       controller: _openSnapshot,
       mode: SnapshotMode.permissive,
       child: RepaintBoundary(
-        child: legacy.Material(
-          type: legacy.MaterialType.transparency,
+        child: Surface.transparent(
           child: Builder(
             builder: (BuildContext context) {
               return KeyboardInsetHold(

@@ -121,8 +121,7 @@ class _FormSheet extends StatelessWidget {
                       SurfaceLevel.page.colorOf(theme.colorScheme),
                   shape: formSheetShape,
                   clipBehavior: Clip.antiAlias,
-                  child: Material(
-                    type: MaterialType.transparency,
+                  child: Surface.transparent(
                     child: Builder(
                       builder: (context) => MediaQuery.removeViewInsets(
                         context: context,

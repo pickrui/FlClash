@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/common/app_update_scheduler.dart';
 import 'package:fl_clash/common/common.dart';
@@ -327,7 +328,7 @@ class AppSidebarContainer extends ConsumerWidget {
       children: [
         AnimatedVisibility.sidebar(
           visible: !isMobileView,
-          child: Material(
+          child: Surface(
             color: backdropOpacity != null
                 ? context.colorScheme.chromeSurface.withValues(
                     alpha: backdropOpacity,

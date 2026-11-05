@@ -60,10 +60,7 @@ class _SideSheetState extends State<SideSheet> {
           widget.backgroundColor ??
           SurfaceLevel.page.colorOf(Theme.of(context).colorScheme),
       shape: AppShape.none,
-      child: Material(
-        type: MaterialType.transparency,
-        child: widget.builder(context),
-      ),
+      child: Surface.transparent(child: widget.builder(context)),
     );
   }
 }

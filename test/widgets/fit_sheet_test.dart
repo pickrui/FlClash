@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/metrics.dart';
@@ -33,7 +34,7 @@ Widget _list(int rows) {
       shrinkWrap: true,
       children: [
         for (var index = 0; index < rows; index++)
-          ListTile(
+          ListItem(
             title: Text('row $index'),
             minTileHeight: _rowHeight,
             onTap: () {},
@@ -232,7 +233,7 @@ void main() {
   });
 
   double rowBottom(WidgetTester tester, int row) =>
-      tester.getBottomLeft(find.widgetWithText(ListTile, 'row $row')).dy;
+      tester.getBottomLeft(find.widgetWithText(ListItem, 'row $row')).dy;
 
   Future<void> raiseKeyboard(WidgetTester tester, double height) async {
     for (final inset in [height / 4, height / 2, height * 3 / 4, height]) {
@@ -543,8 +544,8 @@ void main() {
             shrinkWrap: true,
             children: [
               for (var index = 0; index < 11; index++)
-                ListTile(title: Text('row $index'), minTileHeight: _rowHeight),
-              ListTile(
+                ListItem(title: Text('row $index'), minTileHeight: _rowHeight),
+              ListItem(
                 title: const Text('next'),
                 minTileHeight: _rowHeight,
                 onTap: () =>

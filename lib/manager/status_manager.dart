@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:prism_ui/surface.dart' show Surface;
 import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -580,9 +581,8 @@ class _MessageCardState extends State<_MessageCard>
           onHorizontalDragCancel: () {
             _release(0);
           },
-          child: Material(
+          child: Surface(
             color: message.level.containerColor(context),
-            surfaceTintColor: Colors.transparent,
             shadowColor: colorScheme.shadow.withValues(alpha: 0.6),
             elevation: 3,
             shape: AppShape.lg,

@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/common/common.dart';
@@ -476,8 +477,8 @@ class WindowHeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final backdropOpacity = this.backdropOpacity;
-    return Material(
-      color: backdropOpacity != null ? Colors.transparent : null,
+    return Surface(
+      color: backdropOpacity != null ? Colors.transparent : colorScheme.surface,
       shape: Border(bottom: Divider.createBorderSide(context)),
       child: SizedBox(
         height: height,

@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
 import 'package:fl_clash/ui/inherited.dart';
@@ -75,10 +76,7 @@ class PagedSheetRoute<T> extends PageRoute<T>
       _sheetScroll ??= createSheetScroll();
     }
     final sheetScroll = _sheetScroll;
-    final page = Material(
-      type: MaterialType.transparency,
-      child: builder(context),
-    );
+    final page = Surface.transparent(child: builder(context));
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
@@ -104,8 +102,7 @@ class PagedSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final type = SheetProvider.of(context)?.type;
     final pages = NavigatorResizable(child: child);
-    return Material(
-      animationDuration: Duration.zero,
+    return Surface(
       color: _sheetColorOf(context),
       shape: type == SheetType.bottomSheet
           ? RoundedSuperellipseBorder(

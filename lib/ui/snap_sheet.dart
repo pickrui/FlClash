@@ -1013,8 +1013,7 @@ class _SnapSheetState extends State<_SnapSheet>
     final route = widget.route;
     final sheetColor = SurfaceLevel.page.colorOf(context.colorScheme);
     final theme = Theme.of(context);
-    Widget content = Material(
-      type: MaterialType.transparency,
+    Widget content = Surface.transparent(
       child: route.builder(context, _scrollController),
     );
     if (route.fitsContent) {
