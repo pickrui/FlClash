@@ -206,7 +206,6 @@ class ApplicationState extends ConsumerState<Application> {
         return PrismApp(
           debugShowCheckedModeBanner: false,
           navigatorKey: globalState.navigatorKey,
-          onNavigationNotification: (_) => true,
           localizationsDelegates: const [
             AppLocalizations.delegate,
             AppUiLocalizations.delegate,
