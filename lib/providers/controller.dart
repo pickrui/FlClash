@@ -6,6 +6,7 @@
 part of 'action.dart';
 
 class AppController {
+  VoidCallback? onCoreInitialized;
   Future<String?> Function()? requestAgeSecretKey;
   DesktopUpdateInstaller? desktopUpdateInstaller;
   final _exitCoordinator = ExitCoordinator();

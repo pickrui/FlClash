@@ -121,6 +121,7 @@ extension CoreControllerExt on AppController {
     if (!await coreController.init(version)) {
       throw _coreDisconnectedMessage;
     }
+    onCoreInitialized?.call();
   }
 
   Future<void> _connectCore() async {

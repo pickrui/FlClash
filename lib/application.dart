@@ -32,6 +32,7 @@ import 'package:fl_clash/manager/manager.dart';
 import 'package:fl_clash/manager/locale_manager.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/state.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -56,6 +57,14 @@ class ApplicationState extends ConsumerState<Application> {
   @override
   void initState() {
     super.initState();
+    appController.onCoreInitialized = () {
+      if (mounted &&
+          !safeModeBuild &&
+          mitmFeature &&
+          ref.read(patchClashConfigProvider).mitm.enable) {
+        unawaited(ref.read(mitmTrustStateProvider.notifier).refresh());
+      }
+    };
     if (system.isDesktop && !safeModeBuild) {
       appController.desktopUpdateInstaller = DesktopUpdater(
         loadScript: (name) => rootBundle.loadString('assets/update/$name'),
@@ -252,6 +261,7 @@ class ApplicationState extends ConsumerState<Application> {
 
   @override
   void dispose() {
+    appController.onCoreInitialized = null;
     linkManager.destroy();
     unawaited(appController.handleExit());
     super.dispose();

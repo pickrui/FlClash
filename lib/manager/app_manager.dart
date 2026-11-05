@@ -16,6 +16,7 @@ import 'package:fl_clash/ui/sidebar.dart';
 import 'package:fl_clash/ui/animated_visibility.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/resources.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/icon_sets.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/widgets/icon.dart';
@@ -81,6 +82,8 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       _profileUpdates.start([
         widget.autoUpdateProfiles ?? appController.autoUpdateProfiles,
         widget.autoUpdateResources ?? ref.read(resourcesProvider).autoUpdate,
+        if (mitmFeature)
+          ref.read(mitmModulesActionProvider.notifier).autoUpdate,
       ]),
     );
   }
@@ -197,6 +200,11 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       globalState.setUpdateVisibility(appVisible: true);
     }
     if (state == AppLifecycleState.resumed) {
+      if (!safeModeBuild &&
+          mitmFeature &&
+          ref.read(patchClashConfigProvider).mitm.enable) {
+        unawaited(ref.read(mitmTrustStateProvider.notifier).refresh());
+      }
       final wasBackground = _leftForBackground;
       _leftForBackground = false;
       _isBackground = false;
