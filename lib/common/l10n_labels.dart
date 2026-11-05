@@ -156,3 +156,17 @@ extension RecordGroupingL10n on RecordGrouping {
     };
   }
 }
+
+extension MitmListL10n on MitmList {
+  String get label {
+    final l = appLocalizations;
+    return switch (this) {
+      MitmList.hostname => l.hostname,
+      MitmList.urlRewrite => l.urlRewrite,
+      MitmList.headerRewrite => l.headerRewrite,
+      MitmList.bodyRewrite => l.bodyRewrite,
+      MitmList.mapLocal => l.mapLocal,
+      MitmList.script => l.script,
+    };
+  }
+}

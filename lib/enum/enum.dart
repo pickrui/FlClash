@@ -630,6 +630,7 @@ enum LoadingTag {
   access,
   proxies,
   iconSets,
+  mitm,
   resources,
 }
 

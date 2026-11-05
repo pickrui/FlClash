@@ -116,6 +116,7 @@ class EditorPage extends ConsumerStatefulWidget {
   final Future<CodeForgeDocument> Function()? load;
   final Language language;
   final bool titleEditable;
+  final String Function(String text)? edit;
 
   /// Return a future to keep the editor busy until the save completes.
   final FutureOr<void> Function(
@@ -141,6 +142,7 @@ class EditorPage extends ConsumerStatefulWidget {
     this.content,
     this.load,
     this.titleEditable = false,
+    this.edit,
     this.onSave,
     this.onPop,
     this.readOnly,
@@ -239,8 +241,24 @@ class _EditorPageState extends ConsumerState<EditorPage>
   }
 
   void _handleReady() {
-    _editor?.controller?.addListener(_syncBarState);
+    final controller = _editor?.controller;
+    controller?.addListener(_syncBarState);
     _syncBarState();
+    final edit = widget.edit;
+    if (controller != null && edit != null) {
+      unawaited(_applyEdit(controller, edit));
+    }
+  }
+
+  Future<void> _applyEdit(
+    CodeForgeController controller,
+    String Function(String text) edit,
+  ) async {
+    final document = await CodeForgeDocument.fromText(edit(controller.text));
+    if (mounted && _editor?.controller == controller) {
+      controller.replaceDocument(document);
+    }
+    document.dispose();
   }
 
   @override

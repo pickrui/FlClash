@@ -66,6 +66,8 @@ bool _bringsNewScripts(
       .isNotEmpty;
 }
 
+String mitmScriptUpdatingKey(String name) => 'mitm_script_$name';
+
 @Riverpod(keepAlive: true)
 class MitmModulesAction extends _$MitmModulesAction {
   var _autoUpdating = false;
@@ -76,6 +78,17 @@ class MitmModulesAction extends _$MitmModulesAction {
   @override
   void build() {
     ref.listen(mitmModulesProvider, (_, _) {});
+  }
+
+  Future<MitmScriptOutput> runScript(String name) {
+    final key = mitmScriptUpdatingKey(name);
+    final subscription = ref.listen(isUpdatingProvider(key), (_, _) {});
+    final updating = ref.read(isUpdatingProvider(key).notifier);
+    updating.value = true;
+    return ref.read(coreHandlerProvider).runMitmScript(name).whenComplete(() {
+      if (ref.mounted) updating.value = false;
+      subscription.close();
+    });
   }
 
   Future<MitmModule> addFromUrl(String url) async {
