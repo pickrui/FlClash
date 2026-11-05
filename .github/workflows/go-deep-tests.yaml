@@ -1,0 +1,126 @@
+name: Deep Go checks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 3 * * 1'
+
+permissions:
+  contents: read
+
+env:
+  GO_VERSION: '1.27.3'
+
+jobs:
+  go-deep-test:
+    name: Integrated mihomo core
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            core/go.sum
+            core/Clash.Meta/go.sum
+            core/Clash.Meta/test/tailscale/fixture/go.sum
+      - name: Validate integrated mihomo core
+        working-directory: core/Clash.Meta
+        run: |
+          go vet -tags "$GO_TAGS" ./...
+          go test -race -tags "$GO_TAGS" -p=2 -parallel=2 -timeout=1200s ./...
+      - name: Check Tailscale against the official test control server
+        working-directory: core/Clash.Meta
+        env:
+          MIHOMO_TAILSCALE_FIXTURE: '1'
+        run: go test -race -count=1 -timeout=300s -tags "$GO_TAGS" -run '^TestTailscaleFixture' ./adapter/outbound/
+
+  go-deep-deps-test:
+    name: Dependency and inbound regressions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            core/go.sum
+            core/Clash.Meta/go.sum
+      - name: Scan the Core for known vulnerabilities
+        working-directory: core
+        env:
+          CGO_ENABLED: '0'
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 -tags "$GO_TAGS" ./...
+      - name: Check mips storage and TUN integration
+        working-directory: core
+        run: |
+          go vet -tags "$GO_TAGS" github.com/metacubex/mipstack github.com/metacubex/sing-tun
+          go test -race -count=1 -timeout=300s -tags "$GO_TAGS" github.com/metacubex/mipstack github.com/metacubex/sing-tun
+          go test -race -count=1 -timeout=300s -tags with_gvisor github.com/metacubex/mipstack github.com/metacubex/sing-tun
+          go test -count=1 -tags with_low_memory -run '^TestLowMemory' github.com/metacubex/mipstack
+      - name: Check retained transport dependency fixes
+        working-directory: core/Clash.Meta
+        run: |
+          go test -race -count=1 -timeout=120s github.com/metacubex/tfo-go
+          go test -race -run '^TestKeyUpdateSpamPostHandshakeTLS13$' github.com/metacubex/tls
+          go test -race -count=1 -parallel=4 -timeout=300s github.com/metacubex/restls-client-go
+          go vet github.com/metacubex/restls-client-go github.com/metacubex/sing-mux github.com/metacubex/smux github.com/metacubex/sing-shadowsocks2/...
+          go test -race -count=1 -timeout=120s github.com/metacubex/sing-shadowsocks2/...
+          go test -race -count=1 -timeout=120s github.com/metacubex/sing-mux
+          go test -race -count=1 -timeout=120s -skip '^(Test8GBTransfer|TestRandomLengthRandomDataTransfer)' github.com/metacubex/smux
+      - name: Check HTTP/2 SETTINGS deadlines and parallel inbound groups
+        working-directory: core/Clash.Meta
+        run: |
+          go vet github.com/metacubex/http/...
+          go test -race -count=1 -timeout=120s -run '^TestHTTP2FirstSettings' github.com/metacubex/http
+          go test -race -count=1 -timeout=300s github.com/metacubex/http
+          go test -race -count=10 -tags "$GO_TAGS" -p=2 -parallel=4 -timeout=300s -run '^(TestResetConnection.*|TestDoQConcurrentConnectionLifetime|TestKcpTunClientClose|TestInboundShadowSocks_KcpTun)$/^(quic|tls|https|autoexpire=.*|cancel_pending_dial|xchacha20-ietf-poly1305)$/^(trie|matcher|Sequential|Concurrent)$' ./dns ./listener/inbound
+          go test -race -count=10 -tags "$GO_TAGS" -parallel=4 -timeout=300s -run '^(TestInboundShadowSocks_KcpTun|TestInboundShadowSocks_JLS|TestInboundSnell_Restls|TestInboundShadowSocks_Basic)$/^(xchacha20-ietf-poly1305|Conn|deoxys-ii-256-128)$/^(aes-256-gcm|Concurrent)$/^Concurrent$' -skip '^TestInboundShadowSocks_Basic$/^xchacha20-ietf-poly1305$' ./listener/inbound
+      - name: Check persistent cache regressions
+        working-directory: core/Clash.Meta
+        run: |
+          go vet -tags "$GO_TAGS" ./component/profile/cachefile ./component/fakeip
+          go test -race -tags "$GO_TAGS" -timeout=180s ./component/profile/cachefile ./component/fakeip
+          go test -short -race -count=1 -timeout=300s github.com/metacubex/bbolt/...
+          TEST_CONCURRENT_CASE_DURATION=3s go test -race -count=1 -timeout=300s -run '^(TestConcurrentGenericReadAndWrite|TestConcurrentRepeatableRead|TestOpen_MultipleGoroutines|TestSimulate_1000op_10p|TestSimulateNoFreeListSync_1000op_10p)$' github.com/metacubex/bbolt
+      - name: Check interface prefix lookup regressions
+        working-directory: core/Clash.Meta
+        run: |
+          go vet -tags "$GO_TAGS" ./component/iface/... ./component/dialer ./listener/sing_tun
+          go test -race -tags "$GO_TAGS" -timeout=180s ./component/iface/... ./component/dialer ./listener/sing_tun
+          go test -race -count=1 -timeout=300s github.com/metacubex/bart/...
+      - name: Check controller routing regressions
+        working-directory: core/Clash.Meta
+        run: |
+          go vet -tags "$GO_TAGS" ./hub/route ./listener/hysteria2_realm
+          go test -race -tags "$GO_TAGS" -timeout=180s ./hub/route ./listener/hysteria2_realm
+          go test -race -count=1 -timeout=180s github.com/metacubex/chi/...
+      - name: Check form decoder dependency regressions
+        run: python3 tool/check_form_dependencies.py
+      - name: Check Mieru dependency regressions
+        run: python3 tool/check_mieru_dependencies.py
+      - name: Check Mieru inbound integration
+        working-directory: core/Clash.Meta
+        run: go test -race -tags "$GO_TAGS" -timeout=180s -run '^(TestNewMieru|TestInboundMieru)$' ./listener/inbound
+      - name: Check QUIC dependency regressions
+        run: python3 tool/check_quic_dependencies.py

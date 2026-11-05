@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The launcher logo's lead colour, so shortcuts read as the same app. -->
+    <color name="shortcut_background">#6666FB</color>
+</resources>

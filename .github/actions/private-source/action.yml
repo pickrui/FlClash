@@ -1,0 +1,18 @@
+name: Prepare private build sources
+description: Restore authorized build inputs
+inputs:
+  source-key:
+    description: Read-only key for the private source repository
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        repository: pickrui/FlClash-private
+        ref: 5bb618c98e6fed6b0daa6596b7ed38108037a938
+        path: .private-build
+        ssh-key: ${{ inputs.source-key }}
+        persist-credentials: false
+    - shell: bash
+      run: python .private-build/prepare.py .
