@@ -148,10 +148,10 @@ CLAUDE.md
 /test/services/config_key_store_test.dart
 /test/support/cloud_api_adapter.dart
 /test/tool/build_command_test.dart
+/lib/providers/cloud_account_provider.dart
 /lib/models/cloud_account.dart
 /lib/models/generated/cloud_account.freezed.dart
 /lib/models/generated/cloud_account.g.dart
-/lib/providers/cloud_account_provider.dart
 /test/common/config_key_recovery_test.dart
 /test/common/config_key_store_test.dart
 /test/models/store_plan_test.dart
