@@ -18,7 +18,8 @@ import 'package:fl_clash/ui/popup.dart';
 import 'package:flutter/gestures.dart' show kSecondaryButton;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:prism_ui/text_field.dart' show TextField;
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';

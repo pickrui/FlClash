@@ -15,7 +15,10 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide TextField, TextFormField, InputDecoration;
+import 'package:prism_ui/text_field.dart'
+    show TextField, TextFormField, InputDecoration;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fl_clash/l10n/l10n.dart';
@@ -174,9 +177,7 @@ class _EntryDialogState<T> extends State<_EntryDialog<T>> {
       onChanged: _handleBatchChanged,
       decoration: InputDecoration(
         hintText: widget.batch!.label,
-        alignLabelWithHint: true,
         helperText: _batchHelperText(appLocalizations),
-        helperMaxLines: 2,
         errorText: _batchErrorText(appLocalizations),
         errorMaxLines: _maxShownIssues + 1,
       ),

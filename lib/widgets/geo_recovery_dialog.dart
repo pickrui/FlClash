@@ -7,7 +7,10 @@ import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/shape.dart' as prism;
+import 'package:material_ui/material_ui.dart'
+    hide TextFormField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextFormField, InputDecoration;
 
 class GeoRecoveryDialog extends StatefulWidget {
   final GeoResource resource;
@@ -151,8 +154,8 @@ class _GeoRecoveryDialogState extends State<GeoRecoveryDialog> {
                 minLines: 2,
                 maxLines: 5,
                 decoration: InputDecoration(
-                  labelText: l.geoDownloadUrl,
-                  border: const OutlineInputBorder(),
+                  hintText: l.geoDownloadUrl,
+                  border: const prism.AppInputBorder(),
                 ),
                 validator: (value) {
                   final uri = Uri.tryParse(value?.trim() ?? '');

@@ -6,7 +6,8 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/input_entries.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 
 class BatchSection<T> extends StatelessWidget {
   final String formatTip;

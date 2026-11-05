@@ -905,10 +905,9 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                     ),
                     keyboardType: TextInputType.url,
                     decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: 'URI',
+                      border: const prism.AppInputBorder(),
+                      hintText: 'URI',
                       helperText: l.proxyChainUriNodeSupportedFormats,
-                      helperMaxLines: 4,
                     ),
                   ),
                 if (_mode == 1) ..._structuredFields(),
@@ -925,8 +924,8 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                         .of(context)
                         .copyWith(fontFamily: 'monospace'),
                     decoration: InputDecoration(
-                      border: const OutlineInputBorder(),
-                      labelText: l.nodeDefinition,
+                      border: const prism.AppInputBorder(),
+                      hintText: l.nodeDefinition,
                     ),
                   ),
                   Align(

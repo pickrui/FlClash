@@ -11,7 +11,8 @@ import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField, TextFormField;
+import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
 
 import '../helpers/test_app.dart';
 

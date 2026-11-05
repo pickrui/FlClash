@@ -28,7 +28,8 @@ import 'package:prism_ui/text_selection_controls.dart'
     show textSelectionColorOf;
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/services.dart';

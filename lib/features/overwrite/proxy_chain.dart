@@ -16,7 +16,9 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/shape.dart' as prism;
+import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 
 import 'overwrite_sheet.dart';
 
@@ -1267,8 +1269,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                           TextInputLimits.groupName,
                         ),
                         decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          labelText: appLocalizations.name,
+                          border: const prism.AppInputBorder(),
+                          hintText: appLocalizations.name,
                         ),
                       ),
                     ],

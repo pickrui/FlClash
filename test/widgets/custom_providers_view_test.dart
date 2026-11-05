@@ -25,7 +25,8 @@ import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:fl_clash/widgets/resource_file_info.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextFormField;
+import 'package:prism_ui/text_field.dart' show TextFormField;
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';

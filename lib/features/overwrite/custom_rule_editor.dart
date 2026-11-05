@@ -11,7 +11,9 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/clash_config.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide TextFormField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextFormField, InputDecoration;
 
 import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/features/form/form_row.dart';

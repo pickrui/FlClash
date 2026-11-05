@@ -20,7 +20,9 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
+import 'package:prism_ui/shape.dart' as prism;
 
 import 'overwrite_sheet.dart';
 import 'proxy_fields.dart';

@@ -7,7 +7,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/cloud/store_sheets.dart';
 import 'package:fl_clash/views/cloud/store_widgets.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 

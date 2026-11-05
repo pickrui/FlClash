@@ -18,7 +18,8 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextFormField;
+import 'package:prism_ui/text_field.dart' show TextFormField;
 
 import '../helpers/test_app.dart';
 

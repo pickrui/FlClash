@@ -16,7 +16,8 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/services/cloud_google_login.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextFormField;
+import 'package:prism_ui/text_field.dart' show TextFormField;
 import 'package:prism_ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 

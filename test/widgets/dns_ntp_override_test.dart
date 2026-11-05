@@ -20,7 +20,8 @@ import 'package:fl_clash/ui/null_status.dart';
 import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField, TextFormField;
+import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
 import 'package:code_forge/code_forge.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart' show Override;
 

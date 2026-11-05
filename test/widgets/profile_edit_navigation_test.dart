@@ -20,7 +20,8 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/profiles/edit.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextFormField;
+import 'package:prism_ui/text_field.dart' show TextFormField;
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/app_paths.dart';

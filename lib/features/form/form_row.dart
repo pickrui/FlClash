@@ -14,7 +14,9 @@ import 'package:fl_clash/ui/text.dart';
 import 'package:fl_clash/ui/theme.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide TextFormField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextFormField, InputDecoration;
 
 class InfoMessageButton extends StatelessWidget {
   final String message;
@@ -195,13 +197,9 @@ class FormRowTextField extends StatelessWidget {
       TextDirection.ltr => 1.0,
       TextDirection.rtl => -1.0,
     };
-    return InputDecorationTheme(
-      data: InputDecorationTheme.of(context)
-          .copyWith(floatingLabelBehavior: FloatingLabelBehavior.never),
-      child: Transform.translate(
-        offset: Offset(_caretMargin * towardEnd, 0),
-        child: _buildField(context),
-      ),
+    return Transform.translate(
+      offset: Offset(_caretMargin * towardEnd, 0),
+      child: _buildField(context),
     );
   }
 

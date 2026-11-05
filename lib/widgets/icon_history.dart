@@ -8,7 +8,8 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/app_glyphs.dart';
 import 'package:prism_ui/icons/glyph_icon.dart';
 import 'package:fl_clash/database/database.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 
 import 'sheet_scaffold.dart';
 import 'icon.dart';

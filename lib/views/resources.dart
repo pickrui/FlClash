@@ -30,7 +30,9 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/resource_file_info.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/shape.dart' as prism;
+import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' hide context;
 
@@ -742,7 +744,7 @@ class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
             maxLines: 5,
             minLines: 1,
             controller: _urlController,
-            decoration: const InputDecoration(border: OutlineInputBorder()),
+            decoration: const InputDecoration(border: prism.AppInputBorder()),
           ),
         ],
       ),

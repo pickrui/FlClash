@@ -14,7 +14,8 @@ import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:material_color_utilities/hct/hct.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 
 import 'package:fl_clash/ui/input.dart';
 import 'package:fl_clash/ui/theme.dart';

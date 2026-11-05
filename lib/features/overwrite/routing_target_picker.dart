@@ -8,7 +8,9 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/shape.dart' as prism;
+import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:fl_clash/widgets/sheet_scaffold.dart';
 
 import 'overwrite_sheet.dart';
@@ -129,8 +131,8 @@ class _RoutingTargetPickerState extends State<RoutingTargetPicker> {
                 key: const Key('custom-rule-option-search'),
                 autofocus: true,
                 decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  labelText: l10n.search,
+                  border: const prism.AppInputBorder(),
+                  hintText: l10n.search,
                   prefixIcon: const GlyphIcon(AppGlyphs.search),
                 ),
                 onChanged: (value) => setState(() => _query = value),

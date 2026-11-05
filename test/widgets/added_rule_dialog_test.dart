@@ -15,7 +15,8 @@ import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField, TextFormField;
+import 'package:prism_ui/text_field.dart' show TextFormField;
 import 'package:prism_ui/text_field.dart' as prism;
 
 import '../helpers/test_app.dart';
