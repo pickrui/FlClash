@@ -23,6 +23,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/common_button.dart' as prism;
 
 import '../helpers/test_app.dart';
 
@@ -213,9 +214,10 @@ void main() {
         if (!scripts) {
           expect(
             tester
-                .widget<IconButton>(
+                .widget<prism.IconButton>(
                   find.byWidgetPredicate(
-                    (widget) => widget is IconButton && widget.tooltip == 'Add',
+                    (widget) =>
+                        widget is prism.IconButton && widget.tooltip == 'Add',
                   ),
                 )
                 .onPressed,
