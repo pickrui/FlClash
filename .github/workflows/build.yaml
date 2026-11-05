@@ -52,9 +52,11 @@ jobs:
 
           FULL_VERSION="${VERSION_NUMBER}+${BUILD_NUMBER}"
           
-          echo "version_number=$VERSION_NUMBER" >> "$GITHUB_OUTPUT"
-          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
-          echo "full_version=$FULL_VERSION" >> "$GITHUB_OUTPUT"
+          {
+            echo "version_number=$VERSION_NUMBER"
+            echo "build_number=$BUILD_NUMBER"
+            echo "full_version=$FULL_VERSION"
+          } >> "$GITHUB_OUTPUT"
           
           echo "Generated version: $FULL_VERSION"
           echo "  Version number: $VERSION_NUMBER"
@@ -381,9 +383,11 @@ jobs:
         if: startsWith(matrix.platform,'android')
         run: |
           echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/local.properties
-          echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/local.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/local.properties
+          {
+            echo "keyAlias=${{ secrets.KEY_ALIAS }}"
+            echo "storePassword=${{ secrets.STORE_PASSWORD }}"
+            echo "keyPassword=${{ secrets.KEY_PASSWORD }}"
+          } >> android/local.properties
 
       - name: Setup Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
@@ -474,7 +478,11 @@ jobs:
           curl -fsSL https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer -o "$RUNNER_TEMP/DeveloperIDG2CA.cer" && security import "$RUNNER_TEMP/DeveloperIDG2CA.cer" -k "$KEYCHAIN_PATH" || true
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >/dev/null
           # Prepend the temp keychain to the search list (keep existing ones)
-          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed s/\"//g)
+          keychains=()
+          while IFS= read -r keychain; do
+            keychains+=("$keychain")
+          done < <(security list-keychains -d user | sed -E 's/^[[:space:]]*"//; s/"[[:space:]]*$//')
+          security list-keychains -d user -s "$KEYCHAIN_PATH" "${keychains[@]}"
           rm -f "$CERT_PATH"
           echo "Available Developer ID signing identities:"
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
@@ -528,14 +536,14 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform == 'macos' && '13.0' || '' }}
         run: |
           set -e
-          BUILD_ARGS="${{ matrix.platform }}"
-          [ -n "${{ matrix.arch }}" ] && BUILD_ARGS="$BUILD_ARGS --arch ${{ matrix.arch }}"
-          BUILD_ARGS="$BUILD_ARGS --out app"
-          [ "${{ env.IS_STABLE }}" == "true" ] && BUILD_ARGS="$BUILD_ARGS --env stable"
+          BUILD_ARGS=("${{ matrix.platform }}")
+          [ -n "${{ matrix.arch }}" ] && BUILD_ARGS+=(--arch "${{ matrix.arch }}")
+          BUILD_ARGS+=(--out app)
+          [ "${{ env.IS_STABLE }}" == "true" ] && BUILD_ARGS+=(--env stable)
           if [ "${{ matrix.platform }}" == "android" ]; then
             build_log="$RUNNER_TEMP/android-build.log"
             set +e
-            dart setup.dart $BUILD_ARGS 2>&1 | tee "$build_log"
+            dart setup.dart "${BUILD_ARGS[@]}" 2>&1 | tee "$build_log"
             build_status=${PIPESTATUS[0]}
             set -e
             if [ "$build_status" -ne 0 ]; then
@@ -549,12 +557,12 @@ jobs:
               refresh_init=$(mktemp "$init_dir/flclash-refresh-XXXXXX.gradle")
               trap 'rm -f "$refresh_init"' EXIT
               printf '%s\n' 'gradle.startParameter.refreshDependencies = true' > "$refresh_init"
-              dart setup.dart $BUILD_ARGS
+              dart setup.dart "${BUILD_ARGS[@]}"
             fi
           elif [ "${{ matrix.platform }}" == "macos" ]; then
             build_log="$RUNNER_TEMP/macos-build.log"
             set +e
-            dart setup.dart $BUILD_ARGS 2>&1 | tee "$build_log"
+            dart setup.dart "${BUILD_ARGS[@]}" 2>&1 | tee "$build_log"
             build_status=${PIPESTATUS[0]}
             set -e
             if [ "$build_status" -ne 0 ]; then
@@ -563,10 +571,10 @@ jobs:
                 exit "$build_status"
               fi
               echo "Retrying macOS build once after the SQLite dependency download was interrupted"
-              dart setup.dart $BUILD_ARGS
+              dart setup.dart "${BUILD_ARGS[@]}"
             fi
           else
-            dart setup.dart $BUILD_ARGS
+            dart setup.dart "${BUILD_ARGS[@]}"
           fi
 
           if [ ! -d ./dist ] || [ -z "$(find ./dist -type f -print -quit)" ]; then
