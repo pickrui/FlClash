@@ -319,7 +319,7 @@ $CoreOptionsCopyWith<$Res> get options {
 /// @nodoc
 mixin _$CoreOptions {
 
-@JsonKey(name: 'test-url') String get testUrl;@JsonKey(name: 'delay-test-timeout') int get delayTestTimeout;
+@JsonKey(name: 'test-url') String get testUrl;@JsonKey(name: 'delay-test-timeout') int get delayTestTimeout;@JsonKey(name: 'mitm-capture') bool get mitmCapture;
 /// Create a copy of CoreOptions
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -333,20 +333,20 @@ $CoreOptionsCopyWith<CoreOptions> get copyWith => _$CoreOptionsCopyWithImpl<Core
 @override
 bool operator ==(Object other) {
   final _this = this as CoreOptions;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoreOptions&&(identical(other.testUrl, _this.testUrl) || other.testUrl == _this.testUrl)&&(identical(other.delayTestTimeout, _this.delayTestTimeout) || other.delayTestTimeout == _this.delayTestTimeout));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CoreOptions&&(identical(other.testUrl, _this.testUrl) || other.testUrl == _this.testUrl)&&(identical(other.delayTestTimeout, _this.delayTestTimeout) || other.delayTestTimeout == _this.delayTestTimeout)&&(identical(other.mitmCapture, _this.mitmCapture) || other.mitmCapture == _this.mitmCapture));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CoreOptions;
-  return Object.hash(runtimeType,_this.testUrl,_this.delayTestTimeout);
+  return Object.hash(runtimeType,_this.testUrl,_this.delayTestTimeout,_this.mitmCapture);
 }
 
 @override
 String toString() {
   final _this = this as CoreOptions;
-  return 'CoreOptions(testUrl: ${_this.testUrl}, delayTestTimeout: ${_this.delayTestTimeout})';
+  return 'CoreOptions(testUrl: ${_this.testUrl}, delayTestTimeout: ${_this.delayTestTimeout}, mitmCapture: ${_this.mitmCapture})';
 }
 
 
@@ -357,7 +357,7 @@ abstract mixin class $CoreOptionsCopyWith<$Res>  {
   factory $CoreOptionsCopyWith(CoreOptions value, $Res Function(CoreOptions) _then) = _$CoreOptionsCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'test-url') String testUrl,@JsonKey(name: 'delay-test-timeout') int delayTestTimeout
+@JsonKey(name: 'test-url') String testUrl,@JsonKey(name: 'delay-test-timeout') int delayTestTimeout,@JsonKey(name: 'mitm-capture') bool mitmCapture
 });
 
 
@@ -374,11 +374,12 @@ class _$CoreOptionsCopyWithImpl<$Res>
 
 /// Create a copy of CoreOptions
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? testUrl = null,Object? delayTestTimeout = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? testUrl = null,Object? delayTestTimeout = null,Object? mitmCapture = null,}) {
   return _then(CoreOptions(
 testUrl: null == testUrl ? _self.testUrl : testUrl // ignore: cast_nullable_to_non_nullable
 as String,delayTestTimeout: null == delayTestTimeout ? _self.delayTestTimeout : delayTestTimeout // ignore: cast_nullable_to_non_nullable
-as int,
+as int,mitmCapture: null == mitmCapture ? _self.mitmCapture : mitmCapture // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -463,10 +464,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: 'delay-test-timeout')  int delayTestTimeout)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: 'delay-test-timeout')  int delayTestTimeout, @JsonKey(name: 'mitm-capture')  bool mitmCapture)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CoreOptions() when $default != null:
-return $default(_that.testUrl,_that.delayTestTimeout);case _:
+return $default(_that.testUrl,_that.delayTestTimeout,_that.mitmCapture);case _:
   return orElse();
 
 }
@@ -484,10 +485,10 @@ return $default(_that.testUrl,_that.delayTestTimeout);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: 'delay-test-timeout')  int delayTestTimeout)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: 'delay-test-timeout')  int delayTestTimeout, @JsonKey(name: 'mitm-capture')  bool mitmCapture)  $default,) {final _that = this;
 switch (_that) {
 case _CoreOptions():
-return $default(_that.testUrl,_that.delayTestTimeout);case _:
+return $default(_that.testUrl,_that.delayTestTimeout,_that.mitmCapture);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -504,10 +505,10 @@ return $default(_that.testUrl,_that.delayTestTimeout);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: 'delay-test-timeout')  int delayTestTimeout)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: 'delay-test-timeout')  int delayTestTimeout, @JsonKey(name: 'mitm-capture')  bool mitmCapture)?  $default,) {final _that = this;
 switch (_that) {
 case _CoreOptions() when $default != null:
-return $default(_that.testUrl,_that.delayTestTimeout);case _:
+return $default(_that.testUrl,_that.delayTestTimeout,_that.mitmCapture);case _:
   return null;
 
 }
@@ -519,11 +520,12 @@ return $default(_that.testUrl,_that.delayTestTimeout);case _:
 @JsonSerializable()
 
 class _CoreOptions implements CoreOptions {
-  const _CoreOptions({@JsonKey(name: 'test-url') required this.testUrl, @JsonKey(name: 'delay-test-timeout') this.delayTestTimeout = defaultDelayTestTimeout});
+  const _CoreOptions({@JsonKey(name: 'test-url') required this.testUrl, @JsonKey(name: 'delay-test-timeout') this.delayTestTimeout = defaultDelayTestTimeout, @JsonKey(name: 'mitm-capture') this.mitmCapture = false});
   factory _CoreOptions.fromJson(Map<String, dynamic> json) => _$CoreOptionsFromJson(json);
 
 @override@JsonKey(name: 'test-url') final  String testUrl;
 @override@JsonKey(name: 'delay-test-timeout') final  int delayTestTimeout;
+@override@JsonKey(name: 'mitm-capture') final  bool mitmCapture;
 
 /// Create a copy of CoreOptions
 /// with the given fields replaced by the non-null parameter values.
@@ -538,18 +540,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoreOptions&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.delayTestTimeout, delayTestTimeout) || other.delayTestTimeout == delayTestTimeout));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CoreOptions&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.delayTestTimeout, delayTestTimeout) || other.delayTestTimeout == delayTestTimeout)&&(identical(other.mitmCapture, mitmCapture) || other.mitmCapture == mitmCapture));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,testUrl,delayTestTimeout);
+    return Object.hash(runtimeType,testUrl,delayTestTimeout,mitmCapture);
 }
 
 @override
 String toString() {
-    return 'CoreOptions(testUrl: $testUrl, delayTestTimeout: $delayTestTimeout)';
+    return 'CoreOptions(testUrl: $testUrl, delayTestTimeout: $delayTestTimeout, mitmCapture: $mitmCapture)';
 }
 
 
@@ -560,7 +562,7 @@ abstract mixin class _$CoreOptionsCopyWith<$Res> implements $CoreOptionsCopyWith
   factory _$CoreOptionsCopyWith(_CoreOptions value, $Res Function(_CoreOptions) _then) = __$CoreOptionsCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'test-url') String testUrl,@JsonKey(name: 'delay-test-timeout') int delayTestTimeout
+@JsonKey(name: 'test-url') String testUrl,@JsonKey(name: 'delay-test-timeout') int delayTestTimeout,@JsonKey(name: 'mitm-capture') bool mitmCapture
 });
 
 
@@ -577,11 +579,12 @@ class __$CoreOptionsCopyWithImpl<$Res>
 
 /// Create a copy of CoreOptions
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? testUrl = null,Object? delayTestTimeout = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? testUrl = null,Object? delayTestTimeout = null,Object? mitmCapture = null,}) {
   return _then(_CoreOptions(
 testUrl: null == testUrl ? _self.testUrl : testUrl // ignore: cast_nullable_to_non_nullable
 as String,delayTestTimeout: null == delayTestTimeout ? _self.delayTestTimeout : delayTestTimeout // ignore: cast_nullable_to_non_nullable
-as int,
+as int,mitmCapture: null == mitmCapture ? _self.mitmCapture : mitmCapture // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

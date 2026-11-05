@@ -25,12 +25,14 @@ _CoreOptions _$CoreOptionsFromJson(Map<String, dynamic> json) => _CoreOptions(
   testUrl: json['test-url'] as String,
   delayTestTimeout:
       (json['delay-test-timeout'] as num?)?.toInt() ?? defaultDelayTestTimeout,
+  mitmCapture: json['mitm-capture'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$CoreOptionsToJson(_CoreOptions instance) =>
     <String, dynamic>{
       'test-url': instance.testUrl,
       'delay-test-timeout': instance.delayTestTimeout,
+      'mitm-capture': instance.mitmCapture,
     };
 
 _MitmCertificate _$MitmCertificateFromJson(Map<String, dynamic> json) =>

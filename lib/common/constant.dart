@@ -18,6 +18,9 @@ import 'package:fl_clash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
 
 const safeModeBuild = bool.fromEnvironment('SAFE_MODE');
+
+// The bundled Core has no MITM; tests may exercise the future app-side path.
+bool mitmFeature = const bool.fromEnvironment('FEATURE_MITM');
 const appName = 'FlClash for oixCloud';
 const appHelperService = 'FlClashHelperService';
 const windowsHelperServiceName = 'FlClashOixCloudHelper';

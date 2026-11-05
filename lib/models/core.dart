@@ -36,6 +36,7 @@ abstract class CoreOptions with _$CoreOptions {
     @Default(defaultDelayTestTimeout)
     @JsonKey(name: 'delay-test-timeout')
     int delayTestTimeout,
+    @Default(false) @JsonKey(name: 'mitm-capture') bool mitmCapture,
   }) = _CoreOptions;
   factory CoreOptions.fromJson(Map<String, Object?> json) =>
       _$CoreOptionsFromJson(json);

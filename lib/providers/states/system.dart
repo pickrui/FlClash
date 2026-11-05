@@ -17,6 +17,9 @@ final effectiveFindProcessModeProvider = Provider<FindProcessMode>((ref) {
 
 @riverpod
 CoreOptions coreOptions(Ref ref) => CoreOptions(
+  mitmCapture:
+      mitmFeature &&
+      ref.watch(patchClashConfigProvider.select((state) => state.mitm.capture)),
   testUrl: ref.watch(realTestUrlProvider()),
   delayTestTimeout: ref.watch(
     appSettingProvider.select((state) => state.delayTestTimeout),
