@@ -13,7 +13,7 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/foundation.dart' show clampDouble, listEquals;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:material_color_utilities/hct/hct.dart';
+import 'package:prism_ui/hct/hct.dart';
 import 'package:prism_ui/slider.dart' show Slider, SliderShape;
 import 'package:material_ui/material_ui.dart'
     hide TextField, InputDecoration, Slider, ThemeData;

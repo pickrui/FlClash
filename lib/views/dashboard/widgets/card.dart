@@ -17,7 +17,7 @@ import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/style.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:material_new_shapes/material_new_shapes.dart';
+import 'package:prism_ui/shapes/shapes.dart';
 import 'package:material_ui/material_ui.dart' hide IconButton, ButtonStyle;
 import 'package:prism_ui/theme_data.dart' as prism;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;

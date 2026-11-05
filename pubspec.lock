@@ -909,21 +909,13 @@ packages:
     source: hosted
     version: "0.12.20"
   material_color_utilities:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: material_color_utilities
       sha256: "9c337007e82b1889149c82ed242ed1cb24a66044e30979c44912381e9be4c48b"
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
-  material_new_shapes:
-    dependency: "direct main"
-    description:
-      name: material_new_shapes
-      sha256: e4bc375205e187e8fb232573387112dd8c0dd45b03af8aa2b3c79eb4b9e3e0dc
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   material_ui:
     dependency: "direct main"
     description:

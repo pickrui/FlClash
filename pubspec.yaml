@@ -65,9 +65,7 @@ dependencies:
   flutter_riverpod: ^3.0.0
   riverpod_annotation: ^4.0.2
   riverpod: ^3.0.0
-  material_color_utilities: ^0.13.0
   material_ui: 1.5.0
-  material_new_shapes: 1.0.0
   flutter_svg: ^2.1.0
   flutter_cache_manager: ^3.4.1
   crypto: ^3.0.3
@@ -81,6 +79,7 @@ dependencies:
   flutter_html: ^3.0.0
   flutter_secure_storage: ^10.0.0
 dev_dependencies:
+  material_color_utilities: ^0.13.0
   flutter_rust_bridge: 2.13.0
   flutter_test:
     sdk: flutter
