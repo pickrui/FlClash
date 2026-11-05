@@ -186,6 +186,35 @@ void _reportReread(Object error, StackTrace stackTrace) {
   );
 }
 
+mixin _SettledWrites<T> on AsyncNotifierMixin<T> {
+  late final _writes = _Writes(_reread);
+  Future<T> Function()? _query;
+
+  Stream<T> _settled(Stream<T> rows, Future<T> Function() query) {
+    _query = query;
+    return rows.where((_) => _writes.admit());
+  }
+
+  void _reread() {
+    _query?.call().then((rows) {
+      if (ref.mounted && _writes.admit()) value = rows;
+    }, onError: _reportReread);
+  }
+
+  Future<void> _queueWrite(
+    FutureOr<void> Function() action, {
+    bool reportOnWait = true,
+  }) {
+    _writes.start();
+    return queueDatabaseWrite(
+      action,
+      onError: () => reloadProviderAfterDatabaseError(ref),
+      reportOnWait: reportOnWait,
+      onFinished: _writes.finish,
+    );
+  }
+}
+
 @riverpod
 Stream<List<Profile>> profilesStream(Ref ref) {
   return database.profilesDao.all().watch();
@@ -338,9 +367,13 @@ class Scripts extends _$Scripts with AsyncNotifierMixin {
 }
 
 @riverpod
-class MitmModules extends _$MitmModules with AsyncNotifierMixin {
+class MitmModules extends _$MitmModules
+    with AsyncNotifierMixin, _SettledWrites {
   @override
-  Stream<List<MitmModule>> build() => database.mitmModulesDao.query().watch();
+  Stream<List<MitmModule>> build() {
+    final query = database.mitmModulesDao.query();
+    return _settled(query.watch(), query.get);
+  }
 
   @override
   List<MitmModule> get value => state.value ?? [];
@@ -351,10 +384,7 @@ class MitmModules extends _$MitmModules with AsyncNotifierMixin {
 
   Future<void> _write(List<MitmModule> next, FutureOr<void> Function() action) {
     value = next;
-    return queueDatabaseWrite(
-      action,
-      onError: () => reloadProviderAfterDatabaseError(ref),
-    );
+    return _queueWrite(action);
   }
 
   Future<void> put(MitmModule module, {bool first = false}) {
@@ -426,10 +456,12 @@ extension on List<Rule> {
 }
 
 @riverpod
-class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
+class GlobalRules extends _$GlobalRules
+    with AsyncNotifierMixin, _SettledWrites {
   @override
   Stream<List<Rule>> build() {
-    return database.rulesDao.allGlobalAddedRules().watch();
+    final query = database.rulesDao.allGlobalAddedRules();
+    return _settled(query.watch(), query.get);
   }
 
   @override
@@ -445,19 +477,15 @@ class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
 
   void delAll(Iterable<int> ruleIds) {
     value = List<Rule>.from(value.where((item) => !ruleIds.contains(item.id)));
-    queueDatabaseWrite(
-      () => database.rulesDao.delRules(ruleIds),
-      onError: () => reloadProviderAfterDatabaseError(ref),
-    );
+    _queueWrite(() => database.rulesDao.delRules(ruleIds));
   }
 
   Future<void> addPresets(Iterable<Rule> rules) {
     final added = value.keyedForPrepend(rules);
     if (added.isEmpty) return Future.value();
     value = [...added, ...value];
-    return queueDatabaseWrite(
+    return _queueWrite(
       () => database.rulesDao.addPresets(added),
-      onError: () => reloadProviderAfterDatabaseError(ref),
       reportOnWait: false,
     );
   }
@@ -465,10 +493,7 @@ class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
   void put(Rule rule) {
     final keyed = value.keyedForPut(rule);
     value = value.copyAndPut(keyed);
-    queueDatabaseWrite(
-      () => database.rulesDao.putGlobalRule(keyed),
-      onError: () => reloadProviderAfterDatabaseError(ref),
-    );
+    _queueWrite(() => database.rulesDao.putGlobalRule(keyed));
   }
 
   void order(int oldIndex, int newIndex) {
@@ -480,18 +505,19 @@ class GlobalRules extends _$GlobalRules with AsyncNotifierMixin {
     final newOrder = indexing.generateKeyBetween(nextOrder, preOrder)!;
     nextItems[newIndex] = item.copyWith(order: newOrder);
     value = nextItems;
-    queueDatabaseWrite(
+    _queueWrite(
       () => database.rulesDao.orderGlobalRule(ruleId: item.id, order: newOrder),
-      onError: () => reloadProviderAfterDatabaseError(ref),
     );
   }
 }
 
 @riverpod
-class ProfileAddedRules extends _$ProfileAddedRules with AsyncNotifierMixin {
+class ProfileAddedRules extends _$ProfileAddedRules
+    with AsyncNotifierMixin, _SettledWrites {
   @override
   Stream<List<Rule>> build(int profileId) {
-    return database.rulesDao.allProfileAddedRules(profileId).watch();
+    final query = database.rulesDao.allProfileAddedRules(profileId);
+    return _settled(query.watch(), query.get);
   }
 
   @override
@@ -509,9 +535,8 @@ class ProfileAddedRules extends _$ProfileAddedRules with AsyncNotifierMixin {
     final added = value.keyedForPrepend(rules);
     if (added.isEmpty) return Future.value();
     value = [...added, ...value];
-    return queueDatabaseWrite(
+    return _queueWrite(
       () => database.rulesDao.addPresets(added, profileId: profileId),
-      onError: () => reloadProviderAfterDatabaseError(ref),
       reportOnWait: false,
     );
   }
@@ -519,18 +544,12 @@ class ProfileAddedRules extends _$ProfileAddedRules with AsyncNotifierMixin {
   void put(Rule rule) {
     final keyed = value.keyedForPut(rule);
     value = value.copyAndPut(keyed);
-    queueDatabaseWrite(
-      () => database.rulesDao.putProfileAddedRule(profileId, keyed),
-      onError: () => reloadProviderAfterDatabaseError(ref),
-    );
+    _queueWrite(() => database.rulesDao.putProfileAddedRule(profileId, keyed));
   }
 
   void delAll(Iterable<int> ruleIds) {
     value = List<Rule>.from(value.where((item) => !ruleIds.contains(item.id)));
-    queueDatabaseWrite(
-      () => database.rulesDao.delRules(ruleIds),
-      onError: () => reloadProviderAfterDatabaseError(ref),
-    );
+    _queueWrite(() => database.rulesDao.delRules(ruleIds));
   }
 
   void order(int oldIndex, int newIndex) {
@@ -542,29 +561,28 @@ class ProfileAddedRules extends _$ProfileAddedRules with AsyncNotifierMixin {
     final newOrder = indexing.generateKeyBetween(nextOrder, preOrder)!;
     nextItems[newIndex] = item.copyWith(order: newOrder);
     value = nextItems;
-    queueDatabaseWrite(
+    _queueWrite(
       () => database.rulesDao.orderProfileAddedRule(
         profileId,
         ruleId: item.id,
         order: newOrder,
       ),
-      onError: () => reloadProviderAfterDatabaseError(ref),
     );
   }
 }
 
 @riverpod
 class ProfileDisabledRuleIds extends _$ProfileDisabledRuleIds
-    with AsyncNotifierMixin {
+    with AsyncNotifierMixin, _SettledWrites {
   @override
   List<int> get value => state.value ?? [];
 
   @override
   Stream<List<int>> build(int profileId) {
-    return database.rulesDao
+    final query = database.rulesDao
         .allProfileDisabledRules(profileId)
-        .map((item) => item.id)
-        .watch();
+        .map((item) => item.id);
+    return _settled(query.watch(), query.get);
   }
 
   void _put(int ruleId) {
@@ -582,17 +600,11 @@ class ProfileDisabledRuleIds extends _$ProfileDisabledRuleIds
     List<int> newList = List.from(value);
     newList = newList.where((item) => item != ruleId).toList();
     value = newList;
-    queueDatabaseWrite(
-      () => database.rulesDao.delDisabledLink(profileId, ruleId),
-      onError: () => reloadProviderAfterDatabaseError(ref),
-    );
+    _queueWrite(() => database.rulesDao.delDisabledLink(profileId, ruleId));
   }
 
   void put(int ruleId) {
     _put(ruleId);
-    queueDatabaseWrite(
-      () => database.rulesDao.putDisabledLink(profileId, ruleId),
-      onError: () => reloadProviderAfterDatabaseError(ref),
-    );
+    _queueWrite(() => database.rulesDao.putDisabledLink(profileId, ruleId));
   }
 }

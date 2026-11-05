@@ -242,7 +242,7 @@ final class MitmModulesProvider
   MitmModules create() => MitmModules();
 }
 
-String _$mitmModulesHash() => r'2470a73dfb2cc8aa25dfbf387b7353680a52b928';
+String _$mitmModulesHash() => r'48ab463b3aa917fb37f3c965c1df88a35beef9fd';
 
 abstract class _$MitmModules extends $StreamNotifier<List<MitmModule>> {
   Stream<List<MitmModule>> build();
@@ -287,7 +287,7 @@ final class GlobalRulesProvider
   GlobalRules create() => GlobalRules();
 }
 
-String _$globalRulesHash() => r'd0a28277c364490536aaff3438a9e6202c408fb7';
+String _$globalRulesHash() => r'63051370e304897313de9b53e994845f03a1c14c';
 
 abstract class _$GlobalRules extends $StreamNotifier<List<Rule>> {
   Stream<List<Rule>> build();
@@ -348,7 +348,7 @@ final class ProfileAddedRulesProvider
   }
 }
 
-String _$profileAddedRulesHash() => r'03026d11d9733259f190bdecc6a64a043568fe75';
+String _$profileAddedRulesHash() => r'0f48fb2d3baed8ded0b04b4034b381e777b2a845';
 
 final class ProfileAddedRulesFamily extends $Family
     with
@@ -439,7 +439,7 @@ final class ProfileDisabledRuleIdsProvider
 }
 
 String _$profileDisabledRuleIdsHash() =>
-    r'43c60d2be7530d3a525cf3adea2166a22adb64ea';
+    r'fed8c899ff9ceeb67ade2086c57f45c4a7fdb941';
 
 final class ProfileDisabledRuleIdsFamily extends $Family
     with

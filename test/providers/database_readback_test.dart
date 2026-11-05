@@ -36,7 +36,7 @@ void main() {
     root = await Directory.systemTemp.createTemp('profile-readback-');
     await useAppPaths(root);
     await reopenDatabase();
-    snapshots = StreamController<List<Profile>>();
+    snapshots = StreamController<List<Profile>>.broadcast();
     releaseWrite = Completer<void>();
     container = ProviderContainer(
       overrides: [profilesStreamProvider.overrideWith((_) => snapshots.stream)],
@@ -95,4 +95,114 @@ void main() {
       ]);
     },
   );
+
+  test(
+    'module snapshots do not undo pending edits and are reconciled',
+    () async {
+      final original = MitmModule(
+        id: 1,
+        name: 'Original',
+        order: 0,
+        lastUpdateTime: DateTime(2026),
+      );
+      final external = MitmModule(
+        id: 2,
+        name: 'Imported',
+        order: 1,
+        lastUpdateTime: DateTime(2026),
+      );
+      await database.mitmModules.put(original.toCompanion());
+      container.listen(mitmModulesProvider, (_, _) {});
+      await container.read(mitmModulesProvider.future);
+      final notifier = container.read(mitmModulesProvider.notifier);
+      unawaited(databaseWriteQueue.add(() => releaseWrite.future));
+      final saving = notifier.put(original.copyWith(name: 'Edited'));
+      final imported = database.mitmModulesDao.query().watch().firstWhere(
+        (rows) => rows.length == 2,
+      );
+      await database.mitmModules.put(external.toCompanion());
+      await imported;
+      await pumpEventQueue();
+      expect(notifier.value.map((row) => row.name), ['Edited']);
+
+      final reconciled = Completer<List<MitmModule>>();
+      container.listen(mitmModulesProvider, (_, next) {
+        final rows = next.value;
+        if (!reconciled.isCompleted &&
+            rows?.length == 2 &&
+            rows!.first.name == 'Edited') {
+          reconciled.complete(rows);
+        }
+      });
+      releaseWrite.complete();
+      await saving;
+      final rows = await reconciled.future.timeout(const Duration(seconds: 2));
+      expect(rows.map((row) => row.name), ['Edited', 'Imported']);
+    },
+  );
+
+  for (final profileId in [null, 1]) {
+    test(
+      '${profileId == null ? 'global' : 'profile'} rule reads wait for queued edits',
+      () async {
+        const original = Rule(id: 1, value: 'DOMAIN,original.test,DIRECT');
+        const external = Rule(id: 2, value: 'DOMAIN,imported.test,DIRECT');
+        final provider = profileId == null
+            ? globalRulesProvider
+            : profileAddedRulesProvider(profileId);
+        final query = profileId == null
+            ? database.rulesDao.allGlobalAddedRules()
+            : database.rulesDao.allProfileAddedRules(profileId);
+        final save = profileId == null
+            ? database.rulesDao.putGlobalRule
+            : (Rule row) =>
+                  database.rulesDao.putProfileAddedRule(profileId, row);
+        await database.putProfile(
+          const Profile(id: 1, autoUpdateDuration: Duration(hours: 1)),
+        );
+        await save(original);
+        container.listen(provider, (_, _) {});
+        await container.read(
+          profileId == null
+              ? globalRulesProvider.future
+              : profileAddedRulesProvider(profileId).future,
+        );
+        unawaited(databaseWriteQueue.add(() => releaseWrite.future));
+        const edited = Rule(id: 1, value: 'DOMAIN,edited.test,DIRECT');
+        if (profileId == null) {
+          container.read(globalRulesProvider.notifier).put(edited);
+        } else {
+          container
+              .read(profileAddedRulesProvider(profileId).notifier)
+              .put(edited);
+        }
+        final imported = query.watch().firstWhere((rows) => rows.length == 2);
+        await save(external);
+        await imported;
+        await pumpEventQueue();
+        expect(container.read(provider).value!.map((row) => row.value), [
+          edited.value,
+        ]);
+
+        final reconciled = Completer<List<Rule>>();
+        container.listen(provider, (_, next) {
+          final rows = next.value;
+          if (!reconciled.isCompleted &&
+              rows?.length == 2 &&
+              rows!.any((row) => row.value == edited.value)) {
+            reconciled.complete(rows);
+          }
+        });
+        releaseWrite.complete();
+        await waitForPendingDatabaseWrites();
+        final rows = await reconciled.future.timeout(
+          const Duration(seconds: 2),
+        );
+        expect(
+          rows.map((row) => row.value),
+          unorderedEquals([edited.value, external.value]),
+        );
+      },
+    );
+  }
 }
