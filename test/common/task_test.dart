@@ -82,6 +82,68 @@ void main() {
     pathProviderDir.deleteSync(recursive: true);
   });
 
+  test('MITM is app owned and SAFE_MODE always disables it', () async {
+    final result = await makeRealProfileTask(
+      _makeRealProfileState(
+        rawConfig: {
+          'mitm': {
+            'enable': true,
+            'hostname': ['*'],
+          },
+        },
+      ),
+    );
+    expect(result['mitm']['enable'], isFalse);
+    expect(result['mitm']['hostname'], isEmpty);
+    expect(
+      safeModeProfile({
+        'mitm': {'enable': true},
+      })['mitm'],
+      {'enable': false},
+    );
+  });
+
+  test(
+    'MITM modules merge after local blocking rules and before profile rules',
+    () async {
+      final result = await makeRealProfileTask(
+        _makeRealProfileState(blockQuic: true, blockWebRtc: true).copyWith(
+          realPatchConfig: const ClashConfig(
+            mitm: Mitm(enable: true, hostname: ['-safe.example.test']),
+          ),
+          mitmModules: const [
+            MitmModuleSource(
+              content: r'''
+[MITM]
+hostname = %INSERT% *.example.test
+[Rule]
+DOMAIN,ads.example.test,REJECT
+[URL Rewrite]
+^https://example.test/old https://example.test/new 302
+''',
+            ),
+            MitmModuleSource(content: '[Rule]\nDOMAIN,other.test,DIRECT'),
+          ],
+        ),
+      );
+      expect(result['mitm']['enable'], isTrue);
+      expect(result['mitm']['hostname'], [
+        '-safe.example.test',
+        '*.example.test',
+      ]);
+      expect(result['mitm']['url-rewrite'], [
+        '^https://example.test/old https://example.test/new 302',
+      ]);
+      expect(result['rules'], [
+        'SNIFF-PROTOCOL,stun,REJECT-DROP',
+        'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
+        'DOMAIN,ads.example.test,REJECT',
+        'DOMAIN,other.test,DIRECT',
+        'MATCH,DIRECT',
+      ]);
+    },
+  );
+
   test('custom UA overrides the profile and survives serialization', () async {
     final patch = ClashConfig.fromJson({
       'global-ua': 'Legacy/1',

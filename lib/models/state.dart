@@ -235,7 +235,17 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default([]) List<TailscaleNetwork> tailscaleNetworks,
     @Default('flclash') String tailscaleHostname,
     @Default(false) bool bypassPrivateRoute,
+    @Default([]) List<MitmModuleSource> mitmModules,
   }) = _MakeRealProfileState;
+}
+
+@freezed
+abstract class MitmModuleSource with _$MitmModuleSource {
+  const factory MitmModuleSource({
+    required String content,
+    @Default({}) Map<String, String> arguments,
+    @Default({}) Map<String, String> resources,
+  }) = _MitmModuleSource;
 }
 
 @freezed
@@ -293,6 +303,8 @@ abstract class SetupState with _$SetupState {
     @Default(GeodataLoader.memconservative) GeodataLoader geodataLoader,
     @Default({}) Set<GeneralOverrideKey> generalOverrideKeys,
     @Default(defaultTestUrl) String testUrl,
+    @Default(defaultMitm) Mitm mitm,
+    @Default([]) List<MitmModuleSource> mitmModules,
   }) = _SetupState;
 }
 
@@ -390,6 +402,13 @@ extension SetupStateExt on SetupState {
           lastSetupState.tunOverride.overrideJson(
             lastSetupState.tunOverrideKeys,
           ),
+        )) {
+      return true;
+    }
+    if (mitm != lastSetupState.mitm ||
+        !const ListEquality<MitmModuleSource>().equals(
+          mitmModules,
+          lastSetupState.mitmModules,
         )) {
       return true;
     }

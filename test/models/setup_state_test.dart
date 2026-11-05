@@ -34,6 +34,34 @@ void main() {
     );
   }
 
+  test('MITM settings and module source changes require setup', () {
+    final previous = buildState().copyWith(
+      mitm: const Mitm(enable: true, hostname: ['example.test']),
+      mitmModules: const [MitmModuleSource(content: '[MITM]')],
+    );
+    expect(previous.copyWith().needSetup(previous), isFalse);
+    for (final next in [
+      previous.copyWith(mitm: const Mitm()),
+      previous.copyWith.mitm(hostname: ['other.test']),
+      previous.copyWith.mitm(captureEntries: 500),
+      previous.copyWith.mitm(trustedFingerprint: 'test-fingerprint'),
+      previous.copyWith(mitmModules: []),
+      previous.copyWith(mitmModules: [const MitmModuleSource(content: 'new')]),
+      previous.copyWith(
+        mitmModules: [
+          const MitmModuleSource(content: '[MITM]', arguments: {'x': 'new'}),
+        ],
+      ),
+      previous.copyWith(
+        mitmModules: [
+          const MitmModuleSource(content: '[MITM]', resources: {'url': 'file'}),
+        ],
+      ),
+    ]) {
+      expect(next.needSetup(previous), isTrue, reason: '$next');
+    }
+  });
+
   test(
     'only a change to what the picked DNS, NTP and TUN keys apply needs setup',
     () {

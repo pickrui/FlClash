@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rust_api/rust_api.dart' show HotKeyModifier;
 
-export 'package:fl_clash/ui/item_position.dart';
+export 'package:prism_ui/item_position.dart';
 export 'package:fl_clash/ui/inherited.dart' show SheetType;
 export 'package:fl_clash/ui/text_style.dart' show FontFamily;
 

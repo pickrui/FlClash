@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/mitm_module.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart';
@@ -59,6 +60,7 @@ Map<String, dynamic> safeModeProfile(Map<String, dynamic> config) => {
   'ss-config': '',
   'vmess-config': '',
   'tuic-server': {'enable': false},
+  'mitm': {'enable': false},
   'iptables': {'enable': false},
 };
 
@@ -352,6 +354,15 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   if (blockWebRtc) {
     _applyWebRtcBlock(rawConfig);
   }
+  final mitm = mergeMitmModules(realPatchConfig.mitm.hostname, [
+    for (final module in data.mitmModules)
+      parseMitmModule(
+        module.content,
+        values: module.arguments,
+        resources: module.resources,
+      ),
+  ]);
+  rawConfig['mitm'] = realPatchConfig.mitm.coreJson(mitm.mitm);
   if (rawConfig['profile'] == null) {
     rawConfig['profile'] = {};
   }
@@ -570,6 +581,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   rawConfig['rules'] = [
     if (blockWebRtc) 'SNIFF-PROTOCOL,stun,REJECT-DROP',
     if (blockQuic) 'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
+    ...mitm.rules,
     ...rules,
   ];
   rawConfig = withProfileProviders(

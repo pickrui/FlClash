@@ -756,6 +756,7 @@ extension SetupControllerExt on AppController {
     }
     final realPatchConfig = patchConfig.copyWith(
       allowLan: system.isDocker || patchConfig.allowLan,
+      mitm: setupState.mitm,
     );
     Map<String, dynamic> rawConfig = configMap;
     if (scriptContent?.isNotEmpty == true) {
@@ -804,6 +805,7 @@ extension SetupControllerExt on AppController {
           proxyChains: proxyChains,
           profileProxies: setupState.profileProxies,
           clashProviders: setupState.clashProviders,
+          mitmModules: setupState.mitmModules,
           customProxyGroups: customProxyGroups,
           customRules: customRules,
           matchTarget: setupState.matchTarget,

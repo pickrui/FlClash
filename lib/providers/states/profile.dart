@@ -89,9 +89,13 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
         geodataLoader: state.geodataLoader,
         generalOverrideKeys: state.generalOverrideKeys,
         testUrl: state.effectiveTestUrl,
+        mitm: mitmFeature ? state.mitm.copyWith(capture: false) : defaultMitm,
       ),
     ),
   );
+  final mitmModules = mitmFeature && setupOnly.mitm.enable
+      ? ref.watch(mitmModulesProvider.future)
+      : null;
   final List<Rule> addedRules = profileId != null
       ? await ref.watch(addedRuleStreamProvider(profileId).future)
       : [];
@@ -170,7 +174,31 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     geodataLoader: setupOnly.geodataLoader,
     generalOverrideKeys: setupOnly.generalOverrideKeys,
     testUrl: setupOnly.testUrl,
+    mitm: setupOnly.mitm,
+    mitmModules: mitmModules == null
+        ? const []
+        : await mitmModuleSources(await mitmModules),
   );
+}
+
+Future<List<MitmModuleSource>> mitmModuleSources(
+  Iterable<MitmModule> modules,
+) async {
+  final directory = await appPath.mitmModulesDirPath;
+  final sources = <MitmModuleSource>[];
+  for (final module in modules) {
+    if (!module.enabled) continue;
+    final file = File(p.join(directory, module.fileName));
+    if (!await file.exists()) continue;
+    sources.add(
+      MitmModuleSource(
+        content: await file.readAsString(),
+        arguments: module.arguments,
+        resources: module.resources,
+      ),
+    );
+  }
+  return sources;
 }
 
 extension SetupStateRead on WidgetRef {
