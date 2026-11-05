@@ -22,6 +22,8 @@ import 'package:fl_clash/views/profiles/custom_profile.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/views/profiles/profiles.dart';
 import 'package:fl_clash/ui/qr_code.dart';
+import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/views/profiles/custom_groups.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:material_ui/material_ui.dart' hide TextFormField, TextButton;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
@@ -577,6 +579,41 @@ void main() {
       },
     );
   }
+
+  testWidgets('custom profile builds groups before its arrival starts', (
+    tester,
+  ) async {
+    final profile = Profile.custom(label: 'Custom').copyWith(id: 9);
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          profilesProvider.overrideWith(() => _Profiles([profile])),
+          profileActionProvider.overrideWith(_CustomProfileAction.new),
+          setupActionProvider.overrideWith(_SetupAction.new),
+          clashProvidersProvider.overrideWith((_) => Stream.value([])),
+        ],
+        child: const SizedBox.shrink(),
+      ),
+    );
+    final navigator = tester.state<NavigatorState>(
+      find.byType(Navigator).first,
+    );
+    final route = CommonRoute<void>(
+      builder: (_) => CustomProfileView(profileId: profile.id),
+    );
+    unawaited(navigator.push(route));
+    await tester.pump();
+    expect(find.byType(CustomProfileView), findsOneWidget);
+    expect(find.byType(CustomProxyGroupsSection), findsNothing);
+    expect(route.animation!.value, 0);
+
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(find.byType(CustomProxyGroupsSection), findsOneWidget);
+    expect(route.animation!.value, 0);
+    await tester.pumpAndSettle();
+    expect(route.animation!.value, 1);
+    expect(tester.takeException(), isNull);
+  });
 
   group('a new custom profile', () {
     final created = Profile.custom(label: 'Unnamed').copyWith(id: 9);

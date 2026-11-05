@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/custom_import.dart';
 import 'package:fl_clash/features/form/error_banner.dart';
@@ -150,6 +151,9 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
     with ProfileRoutingActions<CustomProfileView> {
   late final ProfileAction _profileAction;
   late final String? _initialLabel;
+  late final _groups = CustomProxyGroupsSection(profileId: widget.profileId);
+  var _groupsScheduled = false;
+  var _groupsShown = false;
   var _discardOnDispose = false;
   var _importing = false;
 
@@ -389,65 +393,77 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final profile = ref.watch(profileProvider(widget.profileId));
-    return CommonPopScope(
-      onPop: widget.isNew ? _nameBeforeLeaving : null,
-      child: CommonScaffold(
-        title: profile?.realLabel ?? appLocalizations.customProfile,
-        titleMenuItems: [
-          if (profile != null) ...[
-            CommonPopupMenuItem(
-              glyph: AppGlyphs.textShort,
-              label: appLocalizations.rename,
-              onPressed: () => showRenameProfileDialog(context, ref, profile),
-            ),
-            CommonPopupMenuItem(
-              glyph: AppGlyphs.eye,
-              label: appLocalizations.runtimeConfig,
-              onPressed: previewRouting,
+    _showGroupsNextFrame();
+    return ArrivalHold(
+      ready: _groupsShown,
+      child: CommonPopScope(
+        onPop: widget.isNew ? _nameBeforeLeaving : null,
+        child: CommonScaffold(
+          title: profile?.realLabel ?? appLocalizations.customProfile,
+          titleMenuItems: [
+            if (profile != null) ...[
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.textShort,
+                label: appLocalizations.rename,
+                onPressed: () => showRenameProfileDialog(context, ref, profile),
+              ),
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.eye,
+                label: appLocalizations.runtimeConfig,
+                onPressed: previewRouting,
+              ),
+            ],
+          ],
+          isLoading: previewing || _importing,
+          iconActions: [
+            IconButtonData(
+              glyph: AppGlyphs.rules,
+              tooltip: appLocalizations.checkRouting,
+              isLoading: checking,
+              onPressed: checking ? null : checkAndApplyRouting,
             ),
           ],
-        ],
-        isLoading: previewing || _importing,
-        iconActions: [
-          IconButtonData(
-            glyph: AppGlyphs.rules,
-            tooltip: appLocalizations.checkRouting,
-            isLoading: checking,
-            onPressed: checking ? null : checkAndApplyRouting,
-          ),
-        ],
-        actions: [
-          CommonPopupBox(
-            targetBuilder: (open) => FilledButton(
-              onPressed: profile == null || _importing ? null : () => open(),
-              child: Text(appLocalizations.import),
-            ),
-            popupBuilder: (_) => CommonPopupMenu(
-              items: customImportMenuItems(appLocalizations, _import),
-            ),
-          ),
-        ],
-        body: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: SizedBox(height: context.sectionsTopPadding),
-            ),
-            const RulesRequireRuleModeHint(),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16)
-                  .copyWith(bottom: 24 + context.bottomInset),
-              sliver: SliverMainAxisGroup(
-                slivers: [
-                  SliverToBoxAdapter(child: _Overview(widget.profileId)),
-                  CustomProxyGroupsSection(profileId: widget.profileId),
-                  const SliverToBoxAdapter(child: _Resources()),
-                ],
+          actions: [
+            CommonPopupBox(
+              targetBuilder: (open) => FilledButton(
+                onPressed: profile == null || _importing ? null : () => open(),
+                child: Text(appLocalizations.import),
+              ),
+              popupBuilder: (_) => CommonPopupMenu(
+                items: customImportMenuItems(appLocalizations, _import),
               ),
             ),
           ],
+          body: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: SizedBox(height: context.sectionsTopPadding),
+              ),
+              const RulesRequireRuleModeHint(),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16)
+                    .copyWith(bottom: 24 + context.bottomInset),
+                sliver: SliverMainAxisGroup(
+                  slivers: [
+                    SliverToBoxAdapter(child: _Overview(widget.profileId)),
+                    if (_groupsShown) _groups,
+                    const SliverToBoxAdapter(child: _Resources()),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void _showGroupsNextFrame() {
+    if (_groupsScheduled) return;
+    _groupsScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _groupsShown = true);
+    });
   }
 
   @override
