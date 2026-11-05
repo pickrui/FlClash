@@ -6,6 +6,7 @@
 import 'package:prism_ui/prism_list.dart';
 import 'package:fl_clash/ui/typography.dart';
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
@@ -43,10 +44,11 @@ class AccessView extends ConsumerStatefulWidget {
 }
 
 class _AccessViewState extends ConsumerState<AccessView>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteSettledMixin<AccessView> {
   final GlobalKey<CommonScaffoldState> _scaffoldKey = GlobalKey();
   List<String>? _pinedList;
   bool _isInit = false;
+  bool _loadReady = false;
   AccessControlMode? _lastMode;
 
   bool _requestingPermission = false;
@@ -57,6 +59,9 @@ class _AccessViewState extends ConsumerState<AccessView>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _loadReady =
+        ref.exists(installedAppsProvider) &&
+        ref.read(installedAppsProvider).hasValue;
     final accessControl = ref
         .read(vpnSettingProvider.select((state) => state.accessControlProps))
         .copyWith();
@@ -65,6 +70,15 @@ class _AccessViewState extends ConsumerState<AccessView>
       ref.read(accessControlStateProvider.notifier).value = accessControl;
       _isInit = true;
     });
+  }
+
+  @override
+  void didSettleRoute() => unawaited(_loadAfterArrival());
+
+  Future<void> _loadAfterArrival() async {
+    if (_loadReady) return;
+    await whenNothingAnimates(besides: 1);
+    if (mounted) setState(() => _loadReady = true);
   }
 
   @override
@@ -353,8 +367,10 @@ class _AccessViewState extends ConsumerState<AccessView>
     ];
   }
 
-  Widget _buildContent({required List<Package> packages}) {
-    final status = ref.watch(installedAppsProvider);
+  Widget _buildContent({
+    required List<Package> packages,
+    required AsyncValue<InstalledAppsResult> status,
+  }) {
     if (status.isLoading) {
       return const Center(child: ActivityIndicator.page());
     }
@@ -444,7 +460,9 @@ class _AccessViewState extends ConsumerState<AccessView>
   Widget build(BuildContext context) {
     final isLoading = ref.watch(loadingProvider(LoadingTag.access));
     final query = SearchQuery(ref.watch(queryProvider(QueryTag.access)));
-    final installed = ref.watch(installedAppsProvider);
+    final installed = _loadReady
+        ? ref.watch(installedAppsProvider)
+        : const AsyncLoading<InstalledAppsResult>();
     final packages = installed.value?.packages ?? const <Package>[];
     final installedNames = packages.map((item) => item.packageName).toSet();
     final accessControl = ref.watch(
@@ -524,12 +542,16 @@ class _AccessViewState extends ConsumerState<AccessView>
         iconActions: [?selectAll],
         menuItems: _buildMenuItems(accessControl),
         body: needsAttention
-            ? AppBarClearance(child: _buildContent(packages: viewPackages))
+            ? AppBarClearance(
+                child: _buildContent(packages: viewPackages, status: installed),
+              )
             : FloatingFootBar(
                 bar: _AccessStatus(
                   accessControl: accessControl,
                   installedPackageNames: installedNames,
-                  onAuthorize: installed.value?.permissionGranted == true
+                  onAuthorize:
+                      installed.isLoading ||
+                          installed.value?.permissionGranted == true
                       ? null
                       : _requestPermission,
                   onEnable: () =>
@@ -537,7 +559,10 @@ class _AccessViewState extends ConsumerState<AccessView>
                 ),
                 body: DisabledMask(
                   status: !accessControl.enable,
-                  child: _buildContent(packages: viewPackages),
+                  child: _buildContent(
+                    packages: viewPackages,
+                    status: installed,
+                  ),
                 ),
               ),
       ),

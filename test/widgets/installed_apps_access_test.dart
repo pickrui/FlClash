@@ -22,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/ui/input.dart';
+import 'package:fl_clash/ui/navigator.dart';
 
 import '../helpers/test_app.dart';
 import '../support/installed_apps_fake.dart';
@@ -108,6 +109,34 @@ Future<ProviderContainer> openAccess(
 }
 
 void main() {
+  testWidgets('reads installed apps after the entry motion', (tester) async {
+    final api = InstalledAppsFake()
+      ..packages = [installedPackage('fixture.app')];
+    addTearDown(api.changes.close);
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [installedAppsAppProvider.overrideWithValue(api)],
+        child: const SizedBox(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final navigator = tester.state<NavigatorState>(
+      find.byType(Navigator).first,
+    );
+    final route = CommonRoute<void>(builder: (_) => const AccessView());
+    unawaited(navigator.push(route));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(api.queries, 0);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(route.animation!.isAnimating, isTrue);
+    expect(api.queries, 0);
+    await tester.pumpAndSettle();
+    expect(api.queries, 1);
+    expect(find.text('fixture.app'), findsWidgets);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('selecting another app rebuilds only its row', (tester) async {
     final api = InstalledAppsFake()
       ..packages = [
