@@ -91,7 +91,10 @@ CLAUDE.md
 
 # Private implementation is restored only in authorized builds.
 /.private-build/
-/android/app/src/main/kotlin/com/follow/clash/State.kt
+/android/app/src/main/kotlin/com/oixcloud/clash/State.kt
+/android/app/src/main/kotlin/com/oixcloud/clash/ConfigKeyReader.kt
+/android/app/src/main/kotlin/com/oixcloud/clash/ConfigKeyPolicy.kt
+/android/app/src/test/kotlin/com/oixcloud/clash/ConfigKeyPolicyTest.kt
 /core/action.go
 /core/age.go
 /core/common.go
@@ -145,10 +148,6 @@ CLAUDE.md
 /test/services/config_key_store_test.dart
 /test/support/cloud_api_adapter.dart
 /test/tool/build_command_test.dart
-/android/app/src/main/kotlin/com/oixcloud/clash/ConfigKeyPolicy.kt
-/android/app/src/main/kotlin/com/oixcloud/clash/ConfigKeyReader.kt
-/android/app/src/main/kotlin/com/oixcloud/clash/State.kt
-/android/app/src/test/kotlin/com/oixcloud/clash/ConfigKeyPolicyTest.kt
 /lib/models/cloud_account.dart
 /lib/models/generated/cloud_account.freezed.dart
 /lib/models/generated/cloud_account.g.dart
