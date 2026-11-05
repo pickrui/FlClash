@@ -9,23 +9,43 @@ import 'package:test/test.dart';
 import 'lint_sources.dart';
 
 const _forbiddenImports = <String, String>{
-  'package:cupertino_ui/':
-      'the app is Material only; take widgets-layer types from '
-      'package:flutter/widgets.dart instead',
+  'package:cupertino_ui/': 'use Flutter widgets and prism_ui components',
   'package:flutter/material.dart':
-      'Material comes from package:material_ui/material_ui.dart',
+      'use Flutter widgets and prism_ui components',
   'package:flutter/cupertino.dart':
-      'the app is Material only; take widgets-layer types from '
-      'package:flutter/widgets.dart instead',
+      'use Flutter widgets and prism_ui components',
 };
 
+const _materialBoundaries = {
+  'lib/application.dart': 'show GlobalMaterialLocalizations',
+  'lib/views/cloud/cloud_account_page.dart': 'show RefreshIndicator',
+  'lib/views/cloud/store_page.dart': 'show RefreshIndicator',
+};
+
+final _materialImport = RegExp(
+  r"""(?:import|export)\s+['"]package:material_ui/[^'"]+['"]([^;]*);""",
+);
+
 void main() {
-  test('material_ui is the only design library the project imports', () {
+  test('prism components keep material imports within explicit boundaries', () {
     final offenders = <String>[];
 
     for (final file in dartFiles(includeGenerated: false)) {
-      final relative = p.relative(file.path);
-      final lines = file.readAsLinesSync();
+      final relative = p.relative(file.path).replaceAll(r'\', '/');
+      final source = file.readAsStringSync();
+      if (relative.startsWith('lib/') &&
+          relative != 'lib/widgets/app_update.dart') {
+        for (final match in _materialImport.allMatches(source)) {
+          final suffix = match[1]!.trim().replaceAll(RegExp(r'\s+'), ' ');
+          if (_materialBoundaries[relative] != suffix) {
+            offenders.add(
+              '$relative — Material is limited to the updater, '
+              'its localization delegate and cloud pull-to-refresh',
+            );
+          }
+        }
+      }
+      final lines = source.split('\n');
       for (var i = 0; i < lines.length; i++) {
         final line = lines[i].trimLeft();
         if (!line.startsWith('import ') && !line.startsWith('export ')) {
