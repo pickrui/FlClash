@@ -12,7 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:super_sliver_list/super_sliver_list.dart';
+import 'package:prism_ui/prism_list.dart';
 
 import '../helpers/test_app.dart';
 
@@ -73,11 +73,11 @@ void main() {
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
-        home: SuperListView.separated(
+        home: PrismListView(
           controller: controller,
           itemCount: 200,
-          extentEstimation: recordListExtentEstimation,
-          separatorBuilder: (_, _) => const SizedBox(height: recordListGap),
+          estimatedItemExtent: recordListEstimatedExtent,
+          gap: recordListGap,
           itemBuilder: (_, index) =>
               SizedBox(height: 100, child: Text('$index')),
         ),

@@ -15,6 +15,8 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/table_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/surface.dart' show Surface;
+import 'package:prism_ui/press_surface.dart';
 
 import 'package:fl_clash/ui/inherited.dart';
 
@@ -315,7 +317,7 @@ class _RecordTableHeader<T> extends StatelessWidget {
     );
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _recordTableMargin),
-      child: Material(
+      child: Surface(
         color: context.raisedSurfaceLevel.colorOf(colorScheme),
         shape: AppShape.all(AppCorner.fit(height)),
         clipBehavior: Clip.antiAlias,
@@ -427,8 +429,11 @@ class RecordHeaderCell extends StatelessWidget {
     if (onTap == null) {
       return content;
     }
-    return InkWell(
-      onTap: onTap,
+    return PressSurface(
+      fill: Colors.transparent,
+      shape: AppShape.all(AppCorner.none),
+      childFills: true,
+      onPressed: onTap,
       child: SizedBox.expand(child: content),
     );
   }
@@ -454,38 +459,28 @@ class RecordTableRow extends StatelessWidget {
     final style = AppTextStyle.subheadline.of(context);
     final shape = AppShape.all(AppCorner.fit(table.rowHeight));
     final level = striped ? context.raisedSurfaceLevel : context.surfaceLevel;
-    Widget row = Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: onTap,
-        customBorder: shape,
-        child: DefaultTextStyle(
-          style: style.copyWith(
-            color: colorScheme.onSurface,
-            height: _recordCellLineHeight / style.fontSize!,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          child: TableCells(
-            columns: table.layouts,
-            widths: table.widths,
-            height: table.rowHeight,
-            inset: _recordCellInset,
-            cells: cells,
-          ),
+    final row = PressSurface(
+      fill: striped ? level.colorOf(colorScheme) : Colors.transparent,
+      shape: shape,
+      childFills: true,
+      onPressed: onTap,
+      child: DefaultTextStyle(
+        style: style.copyWith(
+          color: colorScheme.onSurface,
+          height: _recordCellLineHeight / style.fontSize!,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        child: TableCells(
+          columns: table.layouts,
+          widths: table.widths,
+          height: table.rowHeight,
+          inset: _recordCellInset,
+          cells: cells,
         ),
       ),
     );
-    if (striped) {
-      row = DecoratedBox(
-        decoration: ShapeDecoration(
-          color: level.colorOf(colorScheme),
-          shape: shape,
-        ),
-        child: row,
-      );
-    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _recordTableMargin),
       child: SurfaceScope(level: level, child: row),

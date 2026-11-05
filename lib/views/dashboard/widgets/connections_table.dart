@@ -26,6 +26,7 @@ import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/surface.dart' show Surface;
 import 'package:riverpod_annotation/riverpod_annotation.dart'
     show ProviderListenable;
 
@@ -610,8 +611,7 @@ class _TableState<T> extends ConsumerState<_Table<T>>
           children: [
             DecoratedBox(
               decoration: fill,
-              child: Material(
-                type: MaterialType.transparency,
+              child: Surface.transparent(
                 shape: shape,
                 clipBehavior: Clip.antiAlias,
                 child: TableColumnResizer(

@@ -10,7 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'package:fl_clash/ui/chip.dart';
-import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/list.dart' show DecorationListItem;
+import 'package:prism_ui/list_row.dart';
+import 'package:prism_ui/press_surface.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 
@@ -44,15 +46,6 @@ class RecordTextStyles {
 const recordListGap = 8.0;
 const recordListEstimatedExtent = 100.0;
 
-double recordListExtentEstimation(int? index, double crossAxisExtent) {
-  return switch (index) {
-    // SuperSliverList gives every child the null estimate unless it is 0.
-    null => 0,
-    _ when index.isEven => recordListEstimatedExtent,
-    _ => recordListGap,
-  };
-}
-
 class RecordListItem extends StatelessWidget {
   final Widget header;
   final Widget body;
@@ -67,34 +60,25 @@ class RecordListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const shape = AppShape.xl;
     final level = context.raisedSurfaceLevel;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: DecoratedBox(
-        decoration: ShapeDecoration(
-          color: level.colorOf(context.colorScheme),
-          shape: shape,
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: SurfaceScope(
-            level: level,
-            child: ListTileTheme.merge(
-              shape: shape,
-              child: ListItem(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-                minVerticalPadding: 0,
-                minTileHeight: 0,
-                horizontalTitleGap: 12,
-                tileTitleAlignment: ListTileTitleAlignment.top,
-                onTap: onTap,
-                title: header,
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: body,
-                ),
-              ),
+      child: PressSurface(
+        fill: level.colorOf(context.colorScheme),
+        shape: AppShape.xl,
+        onPressed: onTap,
+        child: SurfaceScope(
+          level: level,
+          child: ListRow(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+            minVerticalPadding: 0,
+            minHeight: 0,
+            horizontalTitleGap: 12,
+            alignment: ListRowAlignment.top,
+            title: header,
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: body,
             ),
           ),
         ),
