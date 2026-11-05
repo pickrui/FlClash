@@ -1785,5 +1785,6 @@
   "http2": "HTTP/2",
   "decryptUntrusted": "ローカルで信頼されていなくても復号",
   "invalidOfCount": "{total} 件中 {invalid} 件が無効",
-  "batchLineInputTip": "1 行に 1 項目"
+  "batchLineInputTip": "1 行に 1 項目",
+  "mitmModuleScriptsChanged": "{name} のスクリプトが変更されたためオフにしました"
 }

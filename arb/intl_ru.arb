@@ -1785,5 +1785,6 @@
   "http2": "HTTP/2",
   "decryptUntrusted": "Расшифровывать без локального доверия",
   "invalidOfCount": "Недействительно: {invalid} из {total}",
-  "batchLineInputTip": "По одному элементу в строке"
+  "batchLineInputTip": "По одному элементу в строке",
+  "mitmModuleScriptsChanged": "Скрипты модуля {name} изменились, модуль выключен"
 }

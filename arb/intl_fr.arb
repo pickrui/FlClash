@@ -1785,5 +1785,6 @@
   "http2": "HTTP/2",
   "decryptUntrusted": "Déchiffrer sans confiance locale",
   "invalidOfCount": "{invalid} sur {total} invalides",
-  "batchLineInputTip": "Un élément par ligne"
+  "batchLineInputTip": "Un élément par ligne",
+  "mitmModuleScriptsChanged": "Les scripts de {name} ont changé : le module a été désactivé"
 }

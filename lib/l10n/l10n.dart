@@ -15133,6 +15133,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `{name} changed its scripts and was turned off`
+  String mitmModuleScriptsChanged(Object name) {
+    return Intl.message(
+      '$name changed its scripts and was turned off',
+      name: 'mitmModuleScriptsChanged',
+      desc: '',
+      args: [name],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
