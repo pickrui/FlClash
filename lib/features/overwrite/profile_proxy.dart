@@ -345,18 +345,32 @@ Map<String, Object?> parseProfileProxyDefinition(String source) {
   return proxy;
 }
 
-class CustomProxiesView extends StatelessWidget {
+class CustomProxiesView extends StatefulWidget {
   const CustomProxiesView({super.key});
+
+  @override
+  State<CustomProxiesView> createState() => _CustomProxiesViewState();
+}
+
+class _CustomProxiesViewState extends State<CustomProxiesView> {
+  var _query = '';
 
   @override
   Widget build(BuildContext context) => CommonScaffold(
     title: context.appLocalizations.proxyChainCustomNodes,
-    body: CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(child: SizedBox(height: context.contentTopPadding)),
-        const ProfileProxiesContent(),
-        SliverToBoxAdapter(child: SizedBox(height: context.bottomInset)),
-      ],
+    searchState: AppBarSearchState(
+      onSearch: (query) => setState(() => _query = query),
+    ),
+    body: Builder(
+      builder: (context) => CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.contentTopPadding),
+          ),
+          ProfileProxiesContent(query: _query),
+          SliverToBoxAdapter(child: SizedBox(height: context.bottomInset)),
+        ],
+      ),
     ),
   );
 }
@@ -364,7 +378,9 @@ class CustomProxiesView extends StatelessWidget {
 class ProfileProxiesContent extends ConsumerStatefulWidget {
   final int? profileId;
 
-  const ProfileProxiesContent({super.key, this.profileId});
+  final String query;
+
+  const ProfileProxiesContent({super.key, this.profileId, this.query = ''});
 
   @override
   ConsumerState<ProfileProxiesContent> createState() =>
@@ -373,6 +389,7 @@ class ProfileProxiesContent extends ConsumerStatefulWidget {
 
 class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
   final _profileProxyKey = uniqueId;
+  final _searchTexts = Expando<String>();
   bool _quickEditing = false;
   List<Profile> _preparedProfiles = const [];
 
@@ -556,13 +573,6 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     return false;
   }
 
-  Set<int> _getSelectedProfileProxyIds() {
-    return ref
-        .read(selectedItemsProvider(_profileProxyKey))
-        .whereType<int>()
-        .toSet();
-  }
-
   Future<void> _handleAddOrUpdateProfileProxy([
     ProfileProxy? profileProxy,
   ]) async {
@@ -706,8 +716,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     });
   }
 
-  void _handleSelectAllProfileProxies() {
-    final ids = _profile?.profileProxies.map((item) => item.id).toSet() ?? {};
+  void _handleSelectAllProfileProxies(Set<int> ids) {
     ref.read(selectedItemsProvider(_profileProxyKey).notifier).update((
       selected,
     ) {
@@ -715,17 +724,27 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     });
   }
 
-  Future<void> _handleDeleteProfileProxies([Set<int>? profileProxyIds]) async {
-    final targetProfileProxyIds = profileProxyIds != null
-        ? Set<int>.from(profileProxyIds)
-        : _getSelectedProfileProxyIds();
+  Future<void> _handleReorder(int oldIndex, int newIndex) async {
+    final saved = await _updateProfile((profile) {
+      final nodes = List<ProfileProxy>.of(profile.profileProxies);
+      nodes.insert(newIndex, nodes.removeAt(oldIndex));
+      return profile.copyWith(profileProxies: nodes);
+    });
+    if (saved && mounted) _applyProfileChanges();
+  }
+
+  Future<void> _handleDeleteProfileProxies(
+    Set<int> profileProxyIds, {
+    bool multiple = false,
+  }) async {
+    final targetProfileProxyIds = Set<int>.from(profileProxyIds);
     if (targetProfileProxyIds.isEmpty) {
       return;
     }
     final res = await globalState.showMessage(
       title: appLocalizations.tip,
       message: TextSpan(
-        text: profileProxyIds == null
+        text: multiple
             ? appLocalizations.deleteMultipTip(appLocalizations.proxies)
             : appLocalizations.deleteTip(appLocalizations.proxyChainCustomNode),
       ),
@@ -1093,9 +1112,59 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         ? ref.watch(customProxiesProvider).value ?? <ProfileProxy>[]
         : ref.watch(profileProvider(widget.profileId))?.profileProxies ??
               <ProfileProxy>[];
-    final selectedProfileProxies = ref.watch(
-      selectedItemsProvider(_profileProxyKey),
-    );
+    final query = SearchQuery(widget.query);
+    final visible = profileProxies.whereMatches(query, (node) {
+      final definition = ProxyDefinition(node.proxy);
+      return [definition.name, definition.type, definition.server];
+    }, texts: _searchTexts).toList();
+    final selectedProfileProxies = ref
+        .watch(selectedItemsProvider(_profileProxyKey))
+        .intersection(profileProxies.map((node) => node.id).toSet());
+    final visibleIds = visible.map((node) => node.id).toSet();
+    final visibleSelected = selectedProfileProxies.intersection(visibleIds);
+
+    Widget rowAt(int index) {
+      final profileProxy = visible[index];
+      final isEditing = selectedProfileProxies.isNotEmpty;
+      final isSelected = selectedProfileProxies.contains(profileProxy.id);
+      return MemoBuilder(
+        key: ValueKey(profileProxy.id),
+        inputs: [
+          widget,
+          profileProxy,
+          index,
+          isEditing,
+          isSelected,
+          query.isEmpty,
+        ],
+        builder: (context) {
+          final row = OverwriteEntryTile(
+            isEditing: isEditing,
+            isSelected: isSelected,
+            title: profileProxy.name,
+            subtitle: Text(
+              ProxyDefinition(profileProxy.proxy).displayType,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(
+                    color: context.colorScheme.onSurfaceVariant.opacity80,
+                  ),
+            ),
+            enable: profileProxy.enable,
+            onSelected: () => _handleProfileProxySelected(profileProxy.id),
+            onEdit: () => _handleAddOrUpdateProfileProxy(profileProxy),
+            onDelete: () => _handleDeleteProfileProxies({profileProxy.id}),
+            onToggle: (value) => _handleProfileProxyToggle(profileProxy, value),
+          );
+          return query.isEmpty
+              ? ReorderableDelayedDragStartListener(index: index, child: row)
+              : row;
+        },
+      );
+    }
+
     return SliverMainAxisGroup(
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -1112,7 +1181,12 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
                 CommonMinIconButtonTheme(
                   child: IconButton(
                     tooltip: context.appLocalizations.delete,
-                    onPressed: _handleDeleteProfileProxies,
+                    onPressed: visibleSelected.isEmpty
+                        ? null
+                        : () => _handleDeleteProfileProxies(
+                            visibleSelected.cast<int>(),
+                            multiple: true,
+                          ),
                     icon: const GlyphIcon(AppGlyphs.delete, fill: 1),
                   ),
                 ),
@@ -1121,7 +1195,8 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
               CommonMinFilledButtonTheme(
                 child: selectedProfileProxies.isNotEmpty
                     ? FilledButton(
-                        onPressed: _handleSelectAllProfileProxies,
+                        onPressed: () =>
+                            _handleSelectAllProfileProxies(visibleIds),
                         child: Text(appLocalizations.selectAll),
                       )
                     : FilledButton.icon(
@@ -1135,51 +1210,29 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
             ],
           ),
         ),
-        if (profileProxies.isNotEmpty) ...[
+        if (visible.isNotEmpty) ...[
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
-          SliverPrismList(
-            itemCount: profileProxies.length,
-            itemBuilder: (_, index) {
-              final profileProxy = profileProxies[index];
-              final isEditing = selectedProfileProxies.isNotEmpty;
-              final isSelected = selectedProfileProxies.contains(
-                profileProxy.id,
-              );
-              return MemoBuilder(
-                key: ValueKey(profileProxy.id),
-                inputs: [widget, profileProxy, isEditing, isSelected],
-                builder: (context) => OverwriteEntryTile(
-                  isEditing: isEditing,
-                  isSelected: isSelected,
-                  title: profileProxy.name,
-                  subtitle: Text(
-                    ProxyDefinition(profileProxy.proxy).displayType,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyle.footnote
-                        .of(context)
-                        .copyWith(
-                          color: context.colorScheme.onSurfaceVariant.opacity80,
-                        ),
-                  ),
-                  enable: profileProxy.enable,
-                  onSelected: () {
-                    _handleProfileProxySelected(profileProxy.id);
-                  },
-                  onEdit: () {
-                    _handleAddOrUpdateProfileProxy(profileProxy);
-                  },
-                  onDelete: () {
-                    _handleDeleteProfileProxies({profileProxy.id});
-                  },
-                  onToggle: (value) {
-                    _handleProfileProxyToggle(profileProxy, value);
-                  },
-                ),
-              );
-            },
+          if (query.isEmpty)
+            SliverPrismReorderableList(
+              itemCount: visible.length,
+              itemBuilder: (_, index) => rowAt(index),
+              proxyDecorator: (child, index, animation) =>
+                  commonProxyDecorator(rowAt(index), index, animation),
+              onReorderItem: _handleReorder,
+            )
+          else
+            SliverPrismList(
+              itemCount: visible.length,
+              itemBuilder: (_, index) => rowAt(index),
+            ),
+        ] else if (query.isNotEmpty)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: NullStatus(
+              label: appLocalizations.nullTip(appLocalizations.proxies),
+              illustration: NullStatusIllustration.proxies,
+            ),
           ),
-        ],
       ],
     );
   }

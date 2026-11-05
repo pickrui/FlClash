@@ -17,6 +17,9 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/sortable.dart';
+import 'package:fl_clash/ui/scaffold.dart';
+import 'package:fl_clash/ui/common_button.dart' as buttons;
+import 'package:prism_ui/prism_list.dart';
 import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart'
@@ -82,6 +85,12 @@ class _SetupAction extends SetupAction {
   void autoApplyProfile() {
     autoApplies++;
   }
+}
+
+class _SharedProxies extends CustomProxies {
+  @override
+  Stream<List<ProfileProxy>> build() =>
+      Stream.value(ref.watch(profilesProvider).first.profileProxies);
 }
 
 final class _Core extends Mock implements CoreController {}
@@ -166,6 +175,111 @@ Future<void> _deleteFromMenu(WidgetTester tester, String title) async {
 }
 
 void main() {
+  testWidgets('global node search keeps hidden selections out of deletion', (
+    tester,
+  ) async {
+    const nodes = [
+      ProfileProxy(id: 11, proxy: {'name': 'Alpha', 'type': 'direct'}),
+      ProfileProxy(
+        id: 12,
+        proxy: {'name': 'Beta', 'type': 'socks5', 'server': 'fixture.example'},
+      ),
+      ProfileProxy(id: 13, proxy: {'name': 'Gamma', 'type': 'direct'}),
+    ];
+    final (profiles, messages) = await _pump(
+      tester,
+      _SetupAction(),
+      _baseProfile.copyWith(profileProxies: nodes),
+      child: const CustomProxiesView(),
+      overrides: [customProxiesProvider.overrideWith(_SharedProxies.new)],
+    );
+    expect(find.byType(SliverPrismReorderableList), findsOneWidget);
+    await tester.tap(find.text('Alpha'));
+    await tester.tap(find.text('Beta'));
+    await tester.pumpAndSettle();
+    final search = tester
+        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .searchState!;
+    search.onSearch('SOCKS5 fixture.example');
+    await tester.pumpAndSettle();
+    expect(find.text('Alpha'), findsNothing);
+    expect(find.text('Beta'), findsOneWidget);
+    expect(find.byType(SliverPrismReorderableList), findsNothing);
+    expect(find.byType(ReorderableDelayedDragStartListener), findsNothing);
+    await tester.tap(find.byTooltip(_l10n.delete));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_l10n.confirm));
+    await tester.pumpAndSettle();
+    expect(profiles.state.single.profileProxies.map((n) => n.name), [
+      'Alpha',
+      'Gamma',
+    ]);
+    expect(messages, isEmpty);
+    search.onSearch('Gamma');
+    await tester.pumpAndSettle();
+    final delete = find.byWidgetPredicate(
+      (widget) =>
+          widget is buttons.IconButton && widget.tooltip == _l10n.delete,
+    );
+    expect(tester.widget<buttons.IconButton>(delete).onPressed, isNull);
+    search.onSearch('');
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<OverwriteEntryTile>(_tile('Alpha')).isSelected,
+      isTrue,
+    );
+    expect(
+      tester.widget<OverwriteEntryTile>(_tile('Gamma')).isSelected,
+      isFalse,
+    );
+    expect(find.byType(SliverPrismReorderableList), findsOneWidget);
+  });
+
+  for (final width in [390.0, 1000.0]) {
+    testWidgets('global nodes can be reordered by dragging at width $width', (
+      tester,
+    ) async {
+      final size = Size(width, 850);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final setup = _SetupAction();
+      final (profiles, messages) = await _pump(
+        tester,
+        setup,
+        _baseProfile.copyWith(
+          profileProxies: const [
+            ProfileProxy(id: 11, proxy: {'name': 'Alpha', 'type': 'direct'}),
+            ProfileProxy(id: 12, proxy: {'name': 'Beta', 'type': 'direct'}),
+            ProfileProxy(id: 13, proxy: {'name': 'Gamma', 'type': 'direct'}),
+          ],
+        ),
+        child: const CustomProxiesView(),
+        viewSize: size,
+        overrides: [customProxiesProvider.overrideWith(_SharedProxies.new)],
+      );
+      final from = tester.getCenter(find.text('Alpha'));
+      final to = tester.getBottomLeft(_tile('Gamma')) + const Offset(100, 100);
+      final gesture = await tester.startGesture(
+        from,
+        kind: PointerDeviceKind.touch,
+      );
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+      await gesture.moveTo(to);
+      await tester.pumpAndSettle();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(profiles.state.single.profileProxies.map((n) => n.name), [
+        'Beta',
+        'Gamma',
+        'Alpha',
+      ]);
+      expect(setup.applies, 1);
+      expect(messages, isEmpty);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('a shared node used by another profile cannot be removed', (
     tester,
   ) async {
