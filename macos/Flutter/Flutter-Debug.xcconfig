@@ -1,0 +1,4 @@
+#include "ephemeral/Flutter-Generated.xcconfig"
+
+// Link the engine explicitly when all UI plugins are supplied by SwiftPM.
+OTHER_LDFLAGS = $(inherited) -framework FlutterMacOS
