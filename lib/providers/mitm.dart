@@ -8,12 +8,15 @@ import 'dart:typed_data';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/mitm_body.dart';
+import 'package:fl_clash/common/mitm_trust.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart' show compute, visibleForTesting;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rust_api/rust_api.dart' show transcodeCharset;
 
 import 'app.dart';
+import 'config.dart';
 
 part 'generated/mitm.g.dart';
 
@@ -34,6 +37,115 @@ class MitmCa extends _$MitmCa {
       return;
     }
     state = AsyncData(certificate);
+  }
+}
+
+@Riverpod(keepAlive: true)
+MitmTrustStore? mitmTrustStore(Ref ref) => mitmTrustStoreForPlatform();
+
+@Riverpod(keepAlive: true)
+class MitmTrustState extends _$MitmTrustState {
+  @override
+  Future<MitmTrustCheck> build() async {
+    return _check(await ref.watch(mitmCaProvider.future));
+  }
+
+  Future<MitmTrustCheck> _check(MitmCertificate? ca) async {
+    final store = ref.read(mitmTrustStoreProvider);
+    final MitmTrustCheck check;
+    if (ca == null) {
+      check = const MitmTrustCheck(MitmTrust.notGenerated);
+    } else if (store == null) {
+      check = const MitmTrustCheck(MitmTrust.notInstalled);
+    } else {
+      final core = ref.read(coreHandlerProvider);
+      check = await store.check(
+        ca,
+        () => core.issueMitmCertificate(mitmCheckHost),
+      );
+    }
+    if (ref.mounted) {
+      _record(ca, check);
+    }
+    return check;
+  }
+
+  void _record(MitmCertificate? ca, MitmTrustCheck check) {
+    final trusted = check.trust == MitmTrust.ready ? ca?.fingerprint : null;
+    if (ref.read(patchClashConfigProvider).mitm.trustedFingerprint == trusted) {
+      return;
+    }
+    ref
+        .read(patchClashConfigProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            mitm: state.mitm.copyWith(trustedFingerprint: trusted),
+          ),
+        );
+  }
+
+  Future<void>? _refreshing;
+
+  Future<void> refresh() {
+    if (state.isLoading) {
+      return future.then((_) {}, onError: (_) {});
+    }
+    return _refreshing ??= _refresh().whenComplete(() => _refreshing = null);
+  }
+
+  Future<void> _refresh() async {
+    final next = await AsyncValue.guard(
+      () async => _check(await ref.read(mitmCaProvider.future)),
+    );
+    if (ref.mounted) {
+      state = next;
+    }
+  }
+
+  Future<MitmInstallOutcome?> install() async {
+    final ca = await ref.read(mitmCaProvider.future);
+    final store = ref.read(mitmTrustStoreProvider);
+    if (ca == null || store == null || safeModeBuild) {
+      return null;
+    }
+    final MitmInstallOutcome outcome;
+    try {
+      outcome = await store.install(ca);
+    } finally {
+      if (store is AndroidMitmTrustStore && ref.mounted) {
+        ref.invalidate(rootAccessProvider);
+      }
+    }
+    if (outcome == MitmInstallOutcome.installed ||
+        outcome == MitmInstallOutcome.untilReboot) {
+      await refresh();
+    }
+    return outcome;
+  }
+
+  Future<bool> regenerate() async {
+    final old = await ref.read(mitmCaProvider.future);
+    final store = ref.read(mitmTrustStoreProvider);
+    final trust = state.value?.trust;
+    var removed = true;
+    if (old != null &&
+        store != null &&
+        (trust == MitmTrust.ready || trust == MitmTrust.untrusted)) {
+      try {
+        removed = !safeModeBuild && await store.remove(old);
+      } catch (error) {
+        commonPrint.log(
+          'Removing the old MITM certificate failed: ${compactError(error)}',
+          logLevel: LogLevel.warning,
+        );
+        removed = false;
+      }
+      if (store is AndroidMitmTrustStore && ref.mounted) {
+        ref.invalidate(rootAccessProvider);
+      }
+    }
+    await ref.read(mitmCaProvider.notifier).generate();
+    return removed;
   }
 }
 

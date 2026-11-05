@@ -54,6 +54,92 @@ abstract class _$MitmCa extends $AsyncNotifier<MitmCertificate?> {
   }
 }
 
+@ProviderFor(mitmTrustStore)
+final mitmTrustStoreProvider = MitmTrustStoreProvider._();
+
+final class MitmTrustStoreProvider
+    extends
+        $FunctionalProvider<MitmTrustStore?, MitmTrustStore?, MitmTrustStore?>
+    with $Provider<MitmTrustStore?> {
+  MitmTrustStoreProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mitmTrustStoreProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$mitmTrustStoreHash();
+
+  @$internal
+  @override
+  $ProviderElement<MitmTrustStore?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  MitmTrustStore? create(Ref ref) {
+    return mitmTrustStore(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MitmTrustStore? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MitmTrustStore?>(value),
+    );
+  }
+}
+
+String _$mitmTrustStoreHash() => r'a078a332cb6f2c8fb0599287b2cc820f89c326b7';
+
+@ProviderFor(MitmTrustState)
+final mitmTrustStateProvider = MitmTrustStateProvider._();
+
+final class MitmTrustStateProvider
+    extends $AsyncNotifierProvider<MitmTrustState, MitmTrustCheck> {
+  MitmTrustStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mitmTrustStateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$mitmTrustStateHash();
+
+  @$internal
+  @override
+  MitmTrustState create() => MitmTrustState();
+}
+
+String _$mitmTrustStateHash() => r'f1be56aa172849db6b48c359939cbdc0f3d9c9f2';
+
+abstract class _$MitmTrustState extends $AsyncNotifier<MitmTrustCheck> {
+  FutureOr<MitmTrustCheck> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<MitmTrustCheck>, MitmTrustCheck>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<MitmTrustCheck>, MitmTrustCheck>,
+              AsyncValue<MitmTrustCheck>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// Fetched again while shown, until the connection has closed and none of its
 /// requests is pending.
 

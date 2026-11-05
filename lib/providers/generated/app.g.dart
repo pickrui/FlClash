@@ -102,6 +102,39 @@ final class CoreHandlerProvider
 
 String _$coreHandlerHash() => r'b00cbd733d546e4edd1a0b9b98e9ace46da1eff2';
 
+@ProviderFor(rootAccess)
+final rootAccessProvider = RootAccessProvider._();
+
+final class RootAccessProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  RootAccessProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'rootAccessProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$rootAccessHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    return rootAccess(ref);
+  }
+}
+
+String _$rootAccessHash() => r'59f43852dbede9ebe3301b885d63cd0a3961126d';
+
 @ProviderFor(RealTunEnable)
 final realTunEnableProvider = RealTunEnableProvider._();
 
