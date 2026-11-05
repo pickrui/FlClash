@@ -152,6 +152,7 @@ void main() {
       'JP',
       'HK 2',
       'Relay Out',
+      'direct',
     ]);
     expect(config.proxies.first, containsPair('skip-cert-verify', false));
     expect(
@@ -241,7 +242,7 @@ void main() {
 
     final report = config.report;
     expect(report.subRules, 1);
-    expect(report.proxies, 1);
+    expect(report.proxies, 0);
     expect(report.providers, ['Local', 'Cloud']);
     expect(report.groups, ['Chain']);
     expect(report.dialers, isEmpty);
@@ -338,6 +339,102 @@ proxies:
     );
     expect(named.name, 'Kept 2');
   });
+
+  test(
+    'repeated nodes keep the first dialer and leave distinct names intact',
+    () {
+      final config = _read('''
+proxies:
+  - {name: A, type: ss, server: a.example, port: 443, dialer-proxy: G}
+  - {name: A, type: ss, server: a.example, port: "443", dialer-proxy: H}
+  - {name: A, type: ss, server: b.example}
+  - {name: A 2, type: ss, server: c.example}
+proxy-groups:
+  - {name: G, type: select, proxies: [DIRECT]}
+  - {name: H, type: select, proxies: [DIRECT]}
+  - {name: A 3, type: select, proxies: [A, A 2]}
+rules: ["MATCH,A 3"]
+''');
+      expect(config.proxies.map((proxy) => proxy['name']), ['A', 'A 4', 'A 2']);
+      expect(config.proxyGroups.last.name, 'A 3');
+      expect(config.proxyGroups.last.proxies, ['A', 'A 2']);
+      expect(config.proxyChains, [
+        ['G', 'A'],
+      ]);
+      expect(config.rules, ['MATCH,A 3']);
+    },
+  );
+
+  test(
+    'unnamed nodes use their server and trimmed references follow renames',
+    () {
+      final config = _read('''
+proxies:
+  - {type: ss, server: a.example}
+  - {name: -01, type: ss, server: b.example}
+  - {name: "DIRECT ", type: socks5, server: c.example}
+proxy-groups:
+  - {name: " G ", type: select, proxies: ["DIRECT ", a.example]}
+rules: ["MATCH,G"]
+''');
+      expect(config.proxies.map((proxy) => proxy['name']), [
+        'a.example',
+        'b.example',
+        'DIRECT 2',
+      ]);
+      expect(config.proxyGroups.single.name, 'G');
+      expect(config.proxyGroups.single.proxies, ['DIRECT 2', 'a.example']);
+      final link = withFreeNodeNames([
+        (
+          uri: 'ss://example',
+          proxy: <String, Object?>{
+            'name': '-01',
+            'type': 'ss',
+            'server': 'a.example',
+          },
+        ),
+      ], {}).single;
+      expect(link.proxy['name'], 'a.example');
+      expect(link.uri, isEmpty);
+    },
+  );
+
+  test(
+    'account identity keeps existing options but separates changed keys',
+    () {
+      const existing = ProfileProxy(
+        id: 1,
+        proxy: {
+          'name': 'S',
+          'type': 'snell',
+          'server': 's.example',
+          'port': '443',
+          'psk': 'old',
+        },
+      );
+      final same = importCustomNode(
+        {...existing.proxy, 'port': 443, 'udp': true},
+        existing: [existing],
+        taken: {},
+      );
+      expect(same.name, 'S');
+      expect(same.added, isNull);
+      final changed = importCustomNode(
+        {...existing.proxy, 'psk': 'new'},
+        existing: [existing],
+        taken: {},
+      );
+      expect(changed.name, 'S 2');
+      expect(changed.added?.proxy['psk'], 'new');
+      final renamed = importCustomNode(
+        {...existing.proxy, 'name': 'T', 'udp': true},
+        existing: [existing],
+        taken: {},
+      );
+      expect(renamed.name, 'T');
+      expect(renamed.added, isNotNull);
+    },
+  );
 
   test('only a config with something to import is read', () {
     for (final content in ['', 'just text', '[1, 2]', 'mode: rule', ': :']) {
