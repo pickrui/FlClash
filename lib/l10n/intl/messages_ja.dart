@@ -958,7 +958,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "defaultNameserver": MessageLookupByLibrary.simpleMessage("デフォルトネームサーバー"),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "デフォルトネームサーバーは DNS サーバーのドメインを解決します",
+      "ほかの DNS サーバーのドメイン名を解決します。IP アドレスのみ指定できます。",
     ),
     "defaultSelected": MessageLookupByLibrary.simpleMessage("デフォルトの選択"),
     "defaultText": MessageLookupByLibrary.simpleMessage("デフォルト"),
@@ -1201,6 +1201,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dialog": MessageLookupByLibrary.simpleMessage("ダイアログ"),
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
     "directNameserver": MessageLookupByLibrary.simpleMessage("直接接続ネームサーバー"),
+    "directNameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "直接接続する通信のドメイン名を解決します。",
+    ),
     "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(
       "直接接続ネームサーバーにポリシーを適用",
     ),
@@ -1354,6 +1357,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "failedCount": m32,
     "failedItem": m33,
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IPフィルター"),
+    "fakeipFilterDesc": MessageLookupByLibrary.simpleMessage(
+      "これらのドメインには Fake-IP ではなく実際の IP を返します。whitelist モードでは、これらだけが Fake-IP を使います。",
+    ),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage("Fake-IPフィルターモード"),
     "fakeipFilterModeDesc": MessageLookupByLibrary.simpleMessage(
       "Fake-IP フィルターモードでは、blacklist は一致を除外、whitelist は一致のみ、rule はルールで判定します",
@@ -1363,9 +1369,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "fakeipTtl": MessageLookupByLibrary.simpleMessage("Fake-IP TTL"),
     "fallback": MessageLookupByLibrary.simpleMessage("フォールバック"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage(
-      "フォールバックには通常、海外の DNS を使用します",
+      "フォールバックフィルターが Nameserver の結果を汚染とみなしたときは、こちらの結果を使います。",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("フォールバックフィルター"),
+    "fallbackFilterDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "これらのドメインは、直接 Fallback で解決します。",
+    ),
+    "fallbackFilterGeositeDesc": MessageLookupByLibrary.simpleMessage(
+      "これらの GeoSite カテゴリのドメインは、直接 Fallback で解決します。",
+    ),
+    "fallbackFilterIpcidrDesc": MessageLookupByLibrary.simpleMessage(
+      "Nameserver がこれらの範囲の IP を返したときは、Fallback の結果を使います。",
+    ),
     "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage("フォールバックの遅延クエリ"),
     "fetchOrdersFailed": MessageLookupByLibrary.simpleMessage("購入履歴の取得に失敗しました"),
     "fetchPlansFailed": MessageLookupByLibrary.simpleMessage("プランの取得に失敗しました"),
@@ -1954,11 +1969,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nameserver": MessageLookupByLibrary.simpleMessage("ネームサーバー"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "ネームサーバーはドメインを解決します",
+      "既定で使う DNS サーバーです。例：223.5.5.5、tls://1.1.1.1、https://dns.google/dns-query",
     ),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage("ネームサーバーポリシー"),
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
-      "ネームサーバーポリシーは、一致するドメインに使うネームサーバーを指定します",
+      "一致したドメインは、Nameserver と Fallback より優先してここで指定した DNS サーバーを使います。",
     ),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("ボトムバー"),
     "network": MessageLookupByLibrary.simpleMessage("ネットワーク"),
@@ -2372,15 +2387,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyGroupsCount": m109,
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("プロキシネームサーバー"),
-    "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "プロキシネームサーバーはプロキシノードのドメインを解決します",
-    ),
     "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "プロキシネームサーバーポリシー",
     ),
     "proxyNode": MessageLookupByLibrary.simpleMessage("プロキシノード"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("プロキシポート"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("プロキシプロバイダー"),
+    "proxyServerNameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "プロキシサーバーのドメイン名の解決にのみ使います。",
+    ),
+    "proxyServerNameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "一致したプロキシサーバーのドメイン名は、Proxy Server Nameserver より優先してここで指定した DNS サーバーを使います。",
+    ),
     "proxyType": MessageLookupByLibrary.simpleMessage("ノードの種類"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("キャッシュの削除"),
     "publicKey": MessageLookupByLibrary.simpleMessage("公開鍵"),

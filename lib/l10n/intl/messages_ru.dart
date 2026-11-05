@@ -1139,7 +1139,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сервер имен по умолчанию",
     ),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Сервер имен по умолчанию разрешает домены DNS-серверов",
+      "Разрешает имена других DNS-серверов. Только IP-адреса.",
     ),
     "defaultSelected": MessageLookupByLibrary.simpleMessage(
       "Выбор по умолчанию",
@@ -1446,6 +1446,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "directNameserver": MessageLookupByLibrary.simpleMessage(
       "Сервер имен для прямых соединений",
     ),
+    "directNameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "Разрешает домены прямых соединений.",
+    ),
     "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(
       "Сервер имен для прямых соединений следует политике",
     ),
@@ -1663,6 +1666,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "failedCount": m32,
     "failedItem": m33,
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Фильтр Fake-IP"),
+    "fakeipFilterDesc": MessageLookupByLibrary.simpleMessage(
+      "Эти домены получают реальные IP вместо Fake-IP. В режиме whitelist Fake-IP получают только они.",
+    ),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage(
       "Режим фильтра Fake-IP",
     ),
@@ -1676,9 +1682,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "fakeipTtl": MessageLookupByLibrary.simpleMessage("TTL Fake-IP"),
     "fallback": MessageLookupByLibrary.simpleMessage("Резервный"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage(
-      "Для резервного сервера обычно используют зарубежный DNS",
+      "Используются вместо Nameserver, когда фильтр fallback считает его ответ подменённым.",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Фильтр fallback"),
+    "fallbackFilterDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "Эти домены сразу разрешаются через Fallback.",
+    ),
+    "fallbackFilterGeositeDesc": MessageLookupByLibrary.simpleMessage(
+      "Домены из этих категорий GeoSite сразу разрешаются через Fallback.",
+    ),
+    "fallbackFilterIpcidrDesc": MessageLookupByLibrary.simpleMessage(
+      "Если Nameserver возвращает IP из этих диапазонов, используется ответ Fallback.",
+    ),
     "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage(
       "Отложенный запрос к резервному серверу",
     ),
@@ -2406,13 +2421,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nameserver": MessageLookupByLibrary.simpleMessage("Сервер имен"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Сервер имен разрешает домены",
+      "DNS-серверы по умолчанию, например 223.5.5.5, tls://1.1.1.1 или https://dns.google/dns-query.",
     ),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "Политика сервера имен",
     ),
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
-      "Политика сервера имен задаёт сервер имен для подходящих доменов",
+      "Совпавшие домены используют указанный здесь DNS-сервер вместо Nameserver и Fallback.",
     ),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("Нижняя панель"),
     "network": MessageLookupByLibrary.simpleMessage("Сеть"),
@@ -2918,15 +2933,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyNameserver": MessageLookupByLibrary.simpleMessage(
       "Прокси-сервер имен",
     ),
-    "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Прокси-сервер имен разрешает домены прокси-узлов",
-    ),
     "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "Политика прокси-сервера имен",
     ),
     "proxyNode": MessageLookupByLibrary.simpleMessage("Прокси-узел"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("Порт прокси"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("Провайдеры прокси"),
+    "proxyServerNameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "Используется только для разрешения имён прокси-серверов.",
+    ),
+    "proxyServerNameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "Совпавшие имена прокси-серверов используют указанный здесь DNS-сервер вместо Proxy Server Nameserver.",
+    ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Тип прокси"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Очистить кэш"),
     "publicKey": MessageLookupByLibrary.simpleMessage("Открытый ключ"),

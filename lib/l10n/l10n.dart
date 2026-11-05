@@ -1868,10 +1868,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The default nameserver resolves the domains of DNS servers`
+  /// `Resolves the hostnames of the other DNS servers. Use IP addresses only.`
   String get defaultNameserverDesc {
     return Intl.message(
-      'The default nameserver resolves the domains of DNS servers',
+      'Resolves the hostnames of the other DNS servers. Use IP addresses only.',
       name: 'defaultNameserverDesc',
       desc: '',
       args: [],
@@ -1883,10 +1883,10 @@ class AppLocalizations {
     return Intl.message('Nameserver', name: 'nameserver', desc: '', args: []);
   }
 
-  /// `The nameserver resolves domains`
+  /// `The default DNS servers, such as 223.5.5.5, tls://1.1.1.1 or https://dns.google/dns-query.`
   String get nameserverDesc {
     return Intl.message(
-      'The nameserver resolves domains',
+      'The default DNS servers, such as 223.5.5.5, tls://1.1.1.1 or https://dns.google/dns-query.',
       name: 'nameserverDesc',
       desc: '',
       args: [],
@@ -1918,10 +1918,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Nameserver policy picks the nameserver for matching domains`
+  /// `Matching domains use the DNS server given here instead of Nameserver and Fallback.`
   String get nameserverPolicyDesc {
     return Intl.message(
-      'Nameserver policy picks the nameserver for matching domains',
+      'Matching domains use the DNS server given here instead of Nameserver and Fallback.',
       name: 'nameserverPolicyDesc',
       desc: '',
       args: [],
@@ -1938,25 +1938,15 @@ class AppLocalizations {
     );
   }
 
-  /// `The proxy nameserver resolves the domains of proxy nodes`
-  String get proxyNameserverDesc {
-    return Intl.message(
-      'The proxy nameserver resolves the domains of proxy nodes',
-      name: 'proxyNameserverDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Fallback`
   String get fallback {
     return Intl.message('Fallback', name: 'fallback', desc: '', args: []);
   }
 
-  /// `Fallback usually lists DNS servers abroad`
+  /// `Used instead of Nameserver when the fallback filter treats its answer as polluted.`
   String get fallbackDesc {
     return Intl.message(
-      'Fallback usually lists DNS servers abroad',
+      'Used instead of Nameserver when the fallback filter treats its answer as polluted.',
       name: 'fallbackDesc',
       desc: '',
       args: [],
@@ -15151,6 +15141,76 @@ class AppLocalizations {
       name: 'failedCount',
       desc: '',
       args: [count],
+    );
+  }
+
+  /// `Resolves proxy server hostnames only.`
+  String get proxyServerNameserverDesc {
+    return Intl.message(
+      'Resolves proxy server hostnames only.',
+      name: 'proxyServerNameserverDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Matching proxy server hostnames use the DNS server given here instead of Proxy Server Nameserver.`
+  String get proxyServerNameserverPolicyDesc {
+    return Intl.message(
+      'Matching proxy server hostnames use the DNS server given here instead of Proxy Server Nameserver.',
+      name: 'proxyServerNameserverPolicyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resolves domains for connections that go direct.`
+  String get directNameserverDesc {
+    return Intl.message(
+      'Resolves domains for connections that go direct.',
+      name: 'directNameserverDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These domains get real IPs instead of Fake-IPs. In whitelist mode, only they get Fake-IPs.`
+  String get fakeipFilterDesc {
+    return Intl.message(
+      'These domains get real IPs instead of Fake-IPs. In whitelist mode, only they get Fake-IPs.',
+      name: 'fakeipFilterDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Domains in these GeoSite categories are resolved by Fallback directly.`
+  String get fallbackFilterGeositeDesc {
+    return Intl.message(
+      'Domains in these GeoSite categories are resolved by Fallback directly.',
+      name: 'fallbackFilterGeositeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When Nameserver returns an IP in these ranges, the Fallback answer is used.`
+  String get fallbackFilterIpcidrDesc {
+    return Intl.message(
+      'When Nameserver returns an IP in these ranges, the Fallback answer is used.',
+      name: 'fallbackFilterIpcidrDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These domains are resolved by Fallback directly.`
+  String get fallbackFilterDomainDesc {
+    return Intl.message(
+      'These domains are resolved by Fallback directly.',
+      name: 'fallbackFilterDomainDesc',
+      desc: '',
+      args: [],
     );
   }
 }

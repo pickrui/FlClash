@@ -1160,7 +1160,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Serveur DNS par défaut",
     ),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Résout les noms de domaine des serveurs DNS",
+      "Résout les noms des autres serveurs DNS. Adresses IP uniquement.",
     ),
     "defaultSelected": MessageLookupByLibrary.simpleMessage(
       "Sélection par défaut",
@@ -1461,6 +1461,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "directNameserver": MessageLookupByLibrary.simpleMessage(
       "DNS des connexions directes",
     ),
+    "directNameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "Résout les domaines des connexions directes.",
+    ),
     "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(
       "Appliquer la politique au DNS direct",
     ),
@@ -1678,6 +1681,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "failedCount": m32,
     "failedItem": m33,
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Filtre Fake-IP"),
+    "fakeipFilterDesc": MessageLookupByLibrary.simpleMessage(
+      "Ces domaines reçoivent leur vraie IP au lieu d’une Fake-IP. En mode whitelist, eux seuls reçoivent une Fake-IP.",
+    ),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage(
       "Mode du filtre Fake-IP",
     ),
@@ -1691,9 +1697,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "fakeipTtl": MessageLookupByLibrary.simpleMessage("TTL Fake-IP"),
     "fallback": MessageLookupByLibrary.simpleMessage("DNS de secours"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage(
-      "Liste généralement des serveurs DNS à l’étranger",
+      "Utilisés à la place de Nameserver quand le filtre de repli juge sa réponse polluée.",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Filtre de repli"),
+    "fallbackFilterDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "Ces domaines sont résolus directement par Fallback.",
+    ),
+    "fallbackFilterGeositeDesc": MessageLookupByLibrary.simpleMessage(
+      "Les domaines de ces catégories GeoSite sont résolus directement par Fallback.",
+    ),
+    "fallbackFilterIpcidrDesc": MessageLookupByLibrary.simpleMessage(
+      "Si Nameserver renvoie une IP de ces plages, la réponse de Fallback est utilisée.",
+    ),
     "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage(
       "Requête différée du DNS de secours",
     ),
@@ -2442,13 +2457,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nameserver": MessageLookupByLibrary.simpleMessage("Serveur DNS"),
     "nameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Résout les noms de domaine",
+      "Serveurs DNS utilisés par défaut, par ex. 223.5.5.5, tls://1.1.1.1 ou https://dns.google/dns-query.",
     ),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "Politique des serveurs DNS",
     ),
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
-      "Sélectionner le serveur DNS selon le domaine correspondant",
+      "Les domaines correspondants utilisent le serveur DNS indiqué ici plutôt que Nameserver et Fallback.",
     ),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage(
       "Barre inférieure",
@@ -2980,9 +2995,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyNameserver": MessageLookupByLibrary.simpleMessage(
       "DNS des nœuds proxy",
     ),
-    "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "Résout les noms de domaine des nœuds proxy",
-    ),
     "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "Politique DNS des nœuds proxy",
     ),
@@ -2990,6 +3002,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyPort": MessageLookupByLibrary.simpleMessage("Port du proxy"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage(
       "Fournisseurs de proxys",
+    ),
+    "proxyServerNameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "Sert uniquement à résoudre les noms des serveurs proxy.",
+    ),
+    "proxyServerNameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "Les noms de serveurs proxy correspondants utilisent le serveur DNS indiqué ici plutôt que Proxy Server Nameserver.",
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Type de proxy"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Nettoyer le cache"),

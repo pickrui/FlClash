@@ -850,7 +850,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "decryptUntrusted": MessageLookupByLibrary.simpleMessage("本机未信任时也解密"),
     "defaultNameserver": MessageLookupByLibrary.simpleMessage("默认域名服务器"),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "默认域名服务器用于解析 DNS 服务器的域名",
+      "用于解析其他 DNS 服务器的域名，只能填写 IP 地址",
     ),
     "defaultSelected": MessageLookupByLibrary.simpleMessage("默认选中"),
     "defaultText": MessageLookupByLibrary.simpleMessage("默认"),
@@ -1071,6 +1071,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "dialog": MessageLookupByLibrary.simpleMessage("对话框"),
     "direct": MessageLookupByLibrary.simpleMessage("直连"),
     "directNameserver": MessageLookupByLibrary.simpleMessage("直连域名服务器"),
+    "directNameserverDesc": MessageLookupByLibrary.simpleMessage("用于解析直连连接的域名"),
     "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(
       "直连域名服务器遵循策略",
     ),
@@ -1210,6 +1211,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "failedCount": m32,
     "failedItem": m33,
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IP过滤"),
+    "fakeipFilterDesc": MessageLookupByLibrary.simpleMessage(
+      "这些域名不使用 Fake-IP，返回真实 IP；过滤模式为 whitelist 时则只有它们使用 Fake-IP",
+    ),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage("Fake-IP过滤模式"),
     "fakeipFilterModeDesc": MessageLookupByLibrary.simpleMessage(
       "Fake-IP 过滤模式中，blacklist 排除匹配项，whitelist 仅用于匹配项，rule 按规则匹配",
@@ -1218,8 +1222,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "fakeipRange6": MessageLookupByLibrary.simpleMessage("Fake-IP范围（IPv6）"),
     "fakeipTtl": MessageLookupByLibrary.simpleMessage("Fake-IP TTL"),
     "fallback": MessageLookupByLibrary.simpleMessage("Fallback"),
-    "fallbackDesc": MessageLookupByLibrary.simpleMessage("Fallback 一般使用境外 DNS"),
+    "fallbackDesc": MessageLookupByLibrary.simpleMessage(
+      "Nameserver 的结果被 Fallback 过滤判定为污染时，改用这些服务器的结果",
+    ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Fallback过滤"),
+    "fallbackFilterDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "这些域名直接使用 Fallback 解析",
+    ),
+    "fallbackFilterGeositeDesc": MessageLookupByLibrary.simpleMessage(
+      "属于这些 GeoSite 分类的域名直接使用 Fallback 解析",
+    ),
+    "fallbackFilterIpcidrDesc": MessageLookupByLibrary.simpleMessage(
+      "Nameserver 返回这些网段内的 IP 时，改用 Fallback 的结果",
+    ),
     "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage("Fallback按需查询"),
     "fetchOrdersFailed": MessageLookupByLibrary.simpleMessage("获取购买记录失败"),
     "fetchPlansFailed": MessageLookupByLibrary.simpleMessage("获取套餐失败"),
@@ -1721,10 +1736,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "name": MessageLookupByLibrary.simpleMessage("名称"),
     "nameCustomProfileTip": MessageLookupByLibrary.simpleMessage("为该自定义配置命名"),
     "nameserver": MessageLookupByLibrary.simpleMessage("域名服务器"),
-    "nameserverDesc": MessageLookupByLibrary.simpleMessage("域名服务器用于解析域名"),
+    "nameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "默认使用的 DNS 服务器，如 223.5.5.5、tls://1.1.1.1、https://dns.google/dns-query",
+    ),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage("域名服务器策略"),
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
-      "域名服务器策略为匹配的域名指定域名服务器",
+      "匹配的域名改用此处指定的 DNS 服务器，优先于 Nameserver 和 Fallback",
     ),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("底栏"),
     "network": MessageLookupByLibrary.simpleMessage("网络"),
@@ -2092,13 +2109,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyGroupsCount": m109,
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("代理域名服务器"),
-    "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "代理域名服务器用于解析代理节点的域名",
-    ),
     "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage("代理域名服务器策略"),
     "proxyNode": MessageLookupByLibrary.simpleMessage("代理节点"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("代理端口"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("代理提供者"),
+    "proxyServerNameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "仅用于解析代理服务器的域名",
+    ),
+    "proxyServerNameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配的代理服务器域名改用此处指定的 DNS 服务器，优先于 Proxy Server Nameserver",
+    ),
     "proxyType": MessageLookupByLibrary.simpleMessage("节点类型"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("修剪缓存"),
     "publicKey": MessageLookupByLibrary.simpleMessage("公钥"),

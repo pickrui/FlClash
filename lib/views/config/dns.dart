@@ -61,7 +61,15 @@ extension on DnsOverrideKey {
     DnsOverrideKey.nameserverPolicy => (l) => l.nameserverPolicyDesc,
     DnsOverrideKey.nameserver => (l) => l.nameserverDesc,
     DnsOverrideKey.fallback => (l) => l.fallbackDesc,
-    DnsOverrideKey.proxyServerNameserver => (l) => l.proxyNameserverDesc,
+    DnsOverrideKey.proxyServerNameserver => (l) => l.proxyServerNameserverDesc,
+    DnsOverrideKey.proxyServerNameserverPolicy => (
+      l,
+    ) => l.proxyServerNameserverPolicyDesc,
+    DnsOverrideKey.directNameserver => (l) => l.directNameserverDesc,
+    DnsOverrideKey.fakeIpFilter => (l) => l.fakeipFilterDesc,
+    DnsOverrideKey.fallbackFilterGeosite => (l) => l.fallbackFilterGeositeDesc,
+    DnsOverrideKey.fallbackFilterIpcidr => (l) => l.fallbackFilterIpcidrDesc,
+    DnsOverrideKey.fallbackFilterDomain => (l) => l.fallbackFilterDomainDesc,
     _ => null,
   };
 

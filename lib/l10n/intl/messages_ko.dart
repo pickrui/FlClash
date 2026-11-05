@@ -934,7 +934,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "decryptUntrusted": MessageLookupByLibrary.simpleMessage("로컬 신뢰 없이 복호화"),
     "defaultNameserver": MessageLookupByLibrary.simpleMessage("기본 DNS 서버"),
     "defaultNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "DNS 서버의 도메인 이름을 확인합니다",
+      "다른 DNS 서버의 도메인을 확인합니다. IP 주소만 입력할 수 있습니다.",
     ),
     "defaultSelected": MessageLookupByLibrary.simpleMessage("기본 선택"),
     "defaultText": MessageLookupByLibrary.simpleMessage("기본값"),
@@ -1183,6 +1183,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dialog": MessageLookupByLibrary.simpleMessage("대화상자"),
     "direct": MessageLookupByLibrary.simpleMessage("직접"),
     "directNameserver": MessageLookupByLibrary.simpleMessage("직접 연결 DNS"),
+    "directNameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "직접 연결의 도메인을 확인합니다.",
+    ),
     "directNameserverFollowPolicy": MessageLookupByLibrary.simpleMessage(
       "직접 연결 DNS에 정책 적용",
     ),
@@ -1340,6 +1343,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "failedCount": m32,
     "failedItem": m33,
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IP 필터"),
+    "fakeipFilterDesc": MessageLookupByLibrary.simpleMessage(
+      "이 도메인에는 Fake-IP 대신 실제 IP를 반환합니다. whitelist 모드에서는 이 도메인만 Fake-IP를 사용합니다.",
+    ),
     "fakeipFilterMode": MessageLookupByLibrary.simpleMessage("Fake-IP 필터 모드"),
     "fakeipFilterModeDesc": MessageLookupByLibrary.simpleMessage(
       "Fake-IP 필터 모드에서 블랙리스트는 일치 항목을 제외하고, 화이트리스트는 일치 항목에만 가짜 IP를 사용하며, 규칙은 규칙에 따라 일치시킵니다.",
@@ -1349,9 +1355,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "fakeipTtl": MessageLookupByLibrary.simpleMessage("Fake-IP TTL"),
     "fallback": MessageLookupByLibrary.simpleMessage("보조 DNS"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage(
-      "일반적으로 해외 DNS 서버를 지정합니다",
+      "폴백 필터가 Nameserver 결과를 오염으로 판단하면 이 서버의 결과를 사용합니다.",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("폴백 필터"),
+    "fallbackFilterDomainDesc": MessageLookupByLibrary.simpleMessage(
+      "이 도메인은 바로 Fallback으로 확인합니다.",
+    ),
+    "fallbackFilterGeositeDesc": MessageLookupByLibrary.simpleMessage(
+      "이 GeoSite 분류의 도메인은 바로 Fallback으로 확인합니다.",
+    ),
+    "fallbackFilterIpcidrDesc": MessageLookupByLibrary.simpleMessage(
+      "Nameserver가 이 범위의 IP를 반환하면 Fallback 결과를 사용합니다.",
+    ),
     "fallbackLazyQuery": MessageLookupByLibrary.simpleMessage("보조 DNS 지연 조회"),
     "fetchOrdersFailed": MessageLookupByLibrary.simpleMessage(
       "구매 기록을 불러오지 못했습니다",
@@ -1929,10 +1944,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "이 사용자 지정 프로필의 이름을 입력하세요",
     ),
     "nameserver": MessageLookupByLibrary.simpleMessage("DNS 서버"),
-    "nameserverDesc": MessageLookupByLibrary.simpleMessage("도메인 이름을 확인합니다"),
+    "nameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "기본으로 사용하는 DNS 서버입니다. 예: 223.5.5.5, tls://1.1.1.1, https://dns.google/dns-query",
+    ),
     "nameserverPolicy": MessageLookupByLibrary.simpleMessage("DNS 서버 정책"),
     "nameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
-      "일치하는 도메인에 사용할 DNS 서버를 선택합니다",
+      "일치하는 도메인은 Nameserver와 Fallback 대신 여기서 지정한 DNS 서버를 사용합니다.",
     ),
     "navigationBarStyle": MessageLookupByLibrary.simpleMessage("하단 바"),
     "network": MessageLookupByLibrary.simpleMessage("네트워크"),
@@ -2334,15 +2351,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyGroupsCount": m109,
     "proxyNameserver": MessageLookupByLibrary.simpleMessage("프록시 노드 DNS"),
-    "proxyNameserverDesc": MessageLookupByLibrary.simpleMessage(
-      "프록시 노드의 도메인 이름을 확인합니다",
-    ),
     "proxyNameserverPolicy": MessageLookupByLibrary.simpleMessage(
       "프록시 노드 DNS 정책",
     ),
     "proxyNode": MessageLookupByLibrary.simpleMessage("프록시 노드"),
     "proxyPort": MessageLookupByLibrary.simpleMessage("프록시 포트"),
     "proxyProviders": MessageLookupByLibrary.simpleMessage("프록시 공급자"),
+    "proxyServerNameserverDesc": MessageLookupByLibrary.simpleMessage(
+      "프록시 서버의 도메인 확인에만 사용합니다.",
+    ),
+    "proxyServerNameserverPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "일치하는 프록시 서버 도메인은 Proxy Server Nameserver 대신 여기서 지정한 DNS 서버를 사용합니다.",
+    ),
     "proxyType": MessageLookupByLibrary.simpleMessage("프록시 유형"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("캐시 정리"),
     "publicKey": MessageLookupByLibrary.simpleMessage("공개 키"),
