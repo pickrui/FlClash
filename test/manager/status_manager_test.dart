@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,7 +46,7 @@ void main() {
     );
   }
 
-  for (final (width, visibleCount) in [(390.0, 2), (900.0, 4)]) {
+  for (final (width, visibleCount) in [(390.0, 1), (900.0, 3)]) {
     testWidgets('duplicate notices merge and backlog stays bounded at $width', (
       tester,
     ) async {
@@ -72,7 +71,7 @@ void main() {
       expect(find.text('same'), findsOneWidget);
       collect();
       expect(shown.length, visibleCount);
-      for (var i = 0; i < 6; i++) {
+      for (var i = 0; i < 12; i++) {
         await tester.pump(const Duration(seconds: 3));
         await tester.pumpAndSettle();
         collect();
@@ -87,47 +86,28 @@ void main() {
   }
 
   testWidgets(
-    'error preempts ordinary notice but preserves independent actions',
+    'duplicates update the action and queued errors precede ordinary notices',
     (tester) async {
       await open(tester);
       var first = 0;
       var second = 0;
-      context.showNotifier(
-        'same action',
-        actionState: MessageActionState(
-          actionText: 'First',
-          action: () => first++,
-        ),
-      );
+      context.showNotifier('same action', onTap: () => first++);
       context.showNotifier('ordinary');
       await tester.pumpAndSettle();
       context.showNotifier('failure', level: MessageLevel.error);
-      context.showNotifier(
-        'same action',
-        actionState: MessageActionState(
-          actionText: 'Second',
-          action: () => second++,
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('ordinary'), findsNothing);
-      expect(find.text('failure'), findsOneWidget);
-      expect(find.text('First'), findsOneWidget);
-      expect(find.text('Second'), findsNothing);
-      await tester.pump(const Duration(seconds: 4));
-      expect(find.text('First'), findsOneWidget);
-      await tester.tap(find.text('First'));
-      await tester.pumpAndSettle();
-      expect(first, 1);
-      expect(second, 0);
-      expect(find.text('Second'), findsOneWidget);
-      await tester.tap(find.text('Second'));
-      await tester.pumpAndSettle();
-      expect(second, 1);
-      expect(find.text('same action'), findsNothing);
-      await tester.pump(const Duration(seconds: 6));
+      context.showNotifier('same action', onTap: () => second++);
       await tester.pumpAndSettle();
       expect(find.text('failure'), findsNothing);
+      expect(find.text('same action'), findsOneWidget);
+      await tester.tap(find.text('same action'));
+      await tester.pumpAndSettle();
+      expect(first, 0);
+      expect(second, 1);
+      expect(find.text('failure'), findsOneWidget);
+      expect(find.text('ordinary'), findsNothing);
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pumpAndSettle();
+      expect(find.text('ordinary'), findsOneWidget);
       expect(find.text('Update available'), findsOneWidget);
     },
   );
@@ -142,22 +122,44 @@ void main() {
     final gesture = await tester.startGesture(
       tester.getCenter(find.text('hold')),
     );
-    await gesture.moveBy(const Offset(25, 0));
+    await gesture.moveBy(const Offset(0, 25));
     await tester.pump();
     context.showNotifier('queued failure', level: MessageLevel.error);
     await tester.pump(const Duration(seconds: 10));
     expect(find.text('hold'), findsOneWidget);
-    expect(find.text('other'), findsOneWidget);
+    expect(find.text('other'), findsNothing);
     expect(find.text('queued failure'), findsNothing);
     await gesture.up();
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
     expect(find.text('queued failure'), findsOneWidget);
     await tester.pump(const Duration(seconds: 7));
     await tester.pumpAndSettle();
     expect(find.text('hold'), findsNothing);
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
     expect(find.text('other'), findsNothing);
     expect(find.text('queued failure'), findsNothing);
   });
+
+  for (final width in [390.0, 900.0]) {
+    testWidgets('an update notice stays clear of banners at $width', (
+      tester,
+    ) async {
+      await open(tester, width: width);
+      final before = tester.getTopLeft(find.text('Update available')).dy;
+      context.showNotifier('notification');
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopLeft(find.text('Update available')).dy,
+        greaterThan(tester.getBottomLeft(find.text('notification')).dy),
+      );
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(find.text('Update available')).dy, before);
+    });
+  }
 
   testWidgets('a notice above the navigator shows its tooltip on hover', (
     tester,
@@ -189,8 +191,10 @@ void main() {
     (tester) async {
       await open(tester, reducedMotion: true);
       context.showNotifier('swipe');
+      await tester.pump();
+      expect(tester.hasRunningAnimations, isFalse);
       await tester.pumpAndSettle();
-      await tester.drag(find.text('swipe'), const Offset(300, 0));
+      await tester.drag(find.text('swipe'), const Offset(0, -300));
       await tester.pumpAndSettle();
       expect(find.text('swipe'), findsNothing);
       context.showNotifier('timer');

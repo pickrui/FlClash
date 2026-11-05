@@ -40,25 +40,6 @@ abstract class VM5<A, B, C, D, E> with _$VM5<A, B, C, D, E> {
 }
 
 @freezed
-abstract class CommonMessage with _$CommonMessage {
-  const factory CommonMessage({
-    required String id,
-    required String text,
-    @Default(MessageLevel.info) MessageLevel level,
-    @Default(Duration(seconds: 3)) Duration duration,
-    MessageActionState? actionState,
-  }) = _CommonMessage;
-}
-
-@freezed
-abstract class MessageActionState with _$MessageActionState {
-  const factory MessageActionState({
-    required String actionText,
-    required VoidCallback action,
-  }) = _MessageActionState;
-}
-
-@freezed
 abstract class ProfilesState with _$ProfilesState {
   const factory ProfilesState({
     required List<Profile> profiles,

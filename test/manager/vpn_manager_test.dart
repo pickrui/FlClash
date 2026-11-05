@@ -127,7 +127,7 @@ class _MessagesState extends MessageHostState<_Messages> {
   void message(
     String text, {
     MessageLevel level = MessageLevel.info,
-    MessageActionState? actionState,
+    VoidCallback? onTap,
   }) => widget.notices.add(text);
   @override
   Widget build(BuildContext context) => widget.child;

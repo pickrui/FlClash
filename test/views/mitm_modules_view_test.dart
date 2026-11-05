@@ -120,7 +120,7 @@ class _MessagesState extends MessageHostState<_Messages> {
   void message(
     String text, {
     MessageLevel level = MessageLevel.info,
-    MessageActionState? actionState,
+    VoidCallback? onTap,
   }) {
     widget.onMessage(text);
   }

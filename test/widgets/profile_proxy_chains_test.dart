@@ -100,7 +100,7 @@ class _StatusState extends StatusManagerState {
   void message(
     String text, {
     MessageLevel level = MessageLevel.info,
-    MessageActionState? actionState,
+    VoidCallback? onTap,
   }) {
     (widget as _Status).messages.add(text);
   }

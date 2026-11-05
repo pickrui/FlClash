@@ -100,15 +100,12 @@ Future<void> delayTest(
   if (!failed) return;
   globalState.showNotifier(
     appLocalizations.diagAllFailed,
-    actionState: MessageActionState(
-      actionText: appLocalizations.diagTitle,
-      action: () {
-        final context = globalState.navigatorKey.currentContext;
-        if (context != null && context.mounted) {
-          showNetworkDiagnostics(context);
-        }
-      },
-    ),
+    onTap: () {
+      final context = globalState.navigatorKey.currentContext;
+      if (context != null && context.mounted) {
+        showNetworkDiagnostics(context);
+      }
+    },
   );
 }
 

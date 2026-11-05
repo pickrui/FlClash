@@ -6,6 +6,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:fl_clash/ui/color.dart';
+import 'package:prism_ui/banner.dart' show BannerLevel;
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:material_ui/material_ui.dart';
@@ -17,15 +18,7 @@ export 'package:prism_ui/item_position.dart';
 export 'package:fl_clash/ui/inherited.dart' show SheetType;
 export 'package:fl_clash/ui/text_style.dart' show FontFamily;
 
-enum MessageLevel { info, success, warning, error }
-
-extension MessageLevelDuration on MessageLevel {
-  Duration get duration => switch (this) {
-    MessageLevel.info || MessageLevel.success => const Duration(seconds: 3),
-    MessageLevel.warning => const Duration(seconds: 5),
-    MessageLevel.error => const Duration(seconds: 6),
-  };
-}
+typedef MessageLevel = BannerLevel;
 
 enum DelayTestPhase { queued, running }
 

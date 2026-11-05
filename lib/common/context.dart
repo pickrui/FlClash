@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/state.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -14,7 +13,7 @@ abstract class MessageHostState<T extends StatefulWidget> extends State<T> {
   void message(
     String text, {
     MessageLevel level = MessageLevel.info,
-    MessageActionState? actionState,
+    VoidCallback? onTap,
   });
 }
 
@@ -27,12 +26,12 @@ extension BuildContextExtension on BuildContext {
   void showNotifier(
     String text, {
     MessageLevel level = MessageLevel.info,
-    MessageActionState? actionState,
+    VoidCallback? onTap,
   }) {
     return findAncestorStateOfType<MessageHostState>()?.message(
       text,
       level: level,
-      actionState: actionState,
+      onTap: onTap,
     );
   }
 
