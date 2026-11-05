@@ -110,6 +110,15 @@ mixin CoreInterface {
 
   Future<CoreMemoryStats> getMemoryStats();
 
+  Future<MitmCertificate?> getMitmCertificate();
+  Future<MitmCertificate> generateMitmCertificate();
+  Future<Map<MitmList, Map<int, String>>> validateMitm(MitmRules rules);
+  Future<String> issueMitmCertificate(String host);
+  Future<MitmExchangeList> getMitmExchanges(String connectionId);
+  Future<MitmExchange?> getMitmExchange(int id);
+  Future<MitmBody?> getMitmBody(int id, {required bool response});
+  Future<MitmScriptOutput> runMitmScript(String name);
+
   Future<int> getConnectionCount();
 
   FutureOr<void> resetTraffic();
@@ -266,6 +275,10 @@ abstract class CoreHandlerInterface with CoreInterface {
       method: method,
       arguments: arguments,
     );
+    return _decodeValidationIssues(data, count);
+  }
+
+  Map<int, String> _decodeValidationIssues(List<dynamic> data, int count) {
     final issues = <int, String>{};
     for (final item in data) {
       if (item case {'index': final int index, 'message': final String message}
@@ -279,6 +292,82 @@ abstract class CoreHandlerInterface with CoreInterface {
       }
     }
     return issues;
+  }
+
+  @override
+  Future<MitmCertificate?> getMitmCertificate() async {
+    final data = await _invokeOptionalMethod<Map<String, dynamic>>(
+      method: CoreMethod.mitmCertificate,
+    );
+    return data == null ? null : MitmCertificate.fromJson(data);
+  }
+
+  @override
+  Future<MitmCertificate> generateMitmCertificate() async {
+    final data = await _invokeRequiredMethod<Map<String, dynamic>>(
+      method: CoreMethod.mitmGenerateCertificate,
+    );
+    return MitmCertificate.fromJson(data);
+  }
+
+  @override
+  Future<Map<MitmList, Map<int, String>>> validateMitm(MitmRules rules) async {
+    final data = await _invokeRequiredMethod<Map<String, dynamic>>(
+      method: CoreMethod.mitmValidate,
+      arguments: rules.toJson(),
+    );
+    return {
+      for (final list in MitmList.values)
+        if (data[list.key] case final Object issues)
+          list: _decodeValidationIssues(
+            issues as List<dynamic>,
+            rules.linesOf(list).length,
+          ),
+    };
+  }
+
+  @override
+  Future<String> issueMitmCertificate(String host) =>
+      _invokeRequiredMethod<String>(
+        method: CoreMethod.mitmIssueCertificate,
+        arguments: {'host': host},
+      );
+
+  @override
+  Future<MitmExchangeList> getMitmExchanges(String connectionId) async {
+    final data = await _invokeRequiredMethod<Map<String, dynamic>>(
+      method: CoreMethod.mitmExchanges,
+      arguments: {'id': connectionId},
+    );
+    return MitmExchangeList.fromJson(data);
+  }
+
+  @override
+  Future<MitmExchange?> getMitmExchange(int id) async {
+    final data = await _invokeOptionalMethod<Map<String, dynamic>>(
+      method: CoreMethod.mitmExchange,
+      arguments: {'id': id},
+    );
+    return data == null ? null : MitmExchange.fromJson(data);
+  }
+
+  @override
+  Future<MitmBody?> getMitmBody(int id, {required bool response}) async {
+    final data = await _invokeOptionalMethod<Map<String, dynamic>>(
+      method: CoreMethod.mitmBody,
+      arguments: {'id': id, 'response': response},
+    );
+    return data == null ? null : MitmBody.fromJson(data);
+  }
+
+  @override
+  Future<MitmScriptOutput> runMitmScript(String name) async {
+    final data = await _invokeRequiredMethod<Map<String, dynamic>>(
+      method: CoreMethod.mitmRunScript,
+      arguments: {'name': name},
+      timeout: const Duration(hours: 1, minutes: 1),
+    );
+    return MitmScriptOutput.fromJson(data);
   }
 
   @override

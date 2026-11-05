@@ -71,7 +71,15 @@ enum CoreMethod {
   getTailscaleStatus('tailscale.status'),
   tailscaleLogin('tailscale.login'),
   tailscaleLogout('tailscale.logout'),
-  forgetTailscaleNetwork('tailscale.forget');
+  forgetTailscaleNetwork('tailscale.forget'),
+  mitmCertificate('mitm.certificate'),
+  mitmGenerateCertificate('mitm.generateCertificate'),
+  mitmValidate('mitm.validate'),
+  mitmIssueCertificate('mitm.issueCertificate'),
+  mitmRunScript('mitm.runScript'),
+  mitmExchanges('mitm.exchanges'),
+  mitmExchange('mitm.exchange'),
+  mitmBody('mitm.body');
 
   final String wireName;
 

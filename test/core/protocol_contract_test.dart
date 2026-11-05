@@ -126,9 +126,23 @@ void main() {
     expect(() => CoreMethod.fromWireName('getIsInit'), throwsArgumentError);
   });
 
-  test('Dart methods match the Go protocol and Action is removed', () async {
+  test('Dart methods match Go or the gated future MITM contract', () async {
+    const futureMitm = {
+      CoreMethod.mitmCertificate: 'mitm.certificate',
+      CoreMethod.mitmGenerateCertificate: 'mitm.generateCertificate',
+      CoreMethod.mitmValidate: 'mitm.validate',
+      CoreMethod.mitmIssueCertificate: 'mitm.issueCertificate',
+      CoreMethod.mitmRunScript: 'mitm.runScript',
+      CoreMethod.mitmExchanges: 'mitm.exchanges',
+      CoreMethod.mitmExchange: 'mitm.exchange',
+      CoreMethod.mitmBody: 'mitm.body',
+    };
     final constants = await File('core/constant.go').readAsString();
     for (final method in CoreMethod.values) {
+      if (futureMitm[method] case final wireName?) {
+        expect(method.wireName, wireName);
+        continue;
+      }
       expect(
         constants,
         contains('= "${method.wireName}"'),

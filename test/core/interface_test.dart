@@ -13,6 +13,143 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'MITM certificate and capture queries preserve their wire models',
+    () async {
+      final handler = _FakeCoreHandler();
+      final certificate = MitmCertificate(
+        pem: 'test-certificate',
+        fingerprint: 'AB:CD',
+        subject: 'Test CA',
+        notBefore: DateTime.utc(2026),
+        notAfter: DateTime.utc(2036),
+      );
+      handler.response = jsonDecode(jsonEncode(certificate));
+      expect(await handler.getMitmCertificate(), certificate);
+      expect(handler.methods.last, CoreMethod.mitmCertificate);
+      expect(await handler.generateMitmCertificate(), certificate);
+      expect(handler.methods.last, CoreMethod.mitmGenerateCertificate);
+      handler.response = 'issued-certificate';
+      expect(
+        await handler.issueMitmCertificate('example.com'),
+        'issued-certificate',
+      );
+      expect(handler.arguments, {'host': 'example.com'});
+      final exchange = MitmExchange(
+        id: 7,
+        start: DateTime.utc(2026),
+        responseHeader: {
+          'set-cookie': ['a=1', 'b=2'],
+        },
+      );
+      handler.response = jsonDecode(jsonEncode(exchange));
+      expect(await handler.getMitmExchange(7), exchange);
+      expect(handler.arguments, {'id': 7});
+      const body = MitmBody(data: 'AA==', truncated: true, encoding: 'br');
+      handler.response = body.toJson();
+      expect(await handler.getMitmBody(7, response: true), body);
+      expect(handler.arguments, {'id': 7, 'response': true});
+      final list = MitmExchangeList(
+        capturing: true,
+        closed: true,
+        exchanges: [MitmExchangeSummary(id: 7, start: DateTime.utc(2026))],
+      );
+      handler.response = jsonDecode(jsonEncode(list));
+      expect(await handler.getMitmExchanges('connection'), list);
+      expect(handler.arguments, {'id': 'connection'});
+      handler.response = {
+        'logs': ['output'],
+        'result': 'done',
+        'error': '',
+      };
+      expect(
+        await handler.runMitmScript('task'),
+        const MitmScriptOutput(logs: ['output'], result: 'done'),
+      );
+      expect(handler.arguments, {'name': 'task'});
+      expect(handler.timeout, const Duration(hours: 1, minutes: 1));
+    },
+  );
+
+  test(
+    'MITM optional retention is distinct from missing replies and Core errors',
+    () async {
+      final handler = _FakeCoreHandler();
+      final optional = <Future<Object?> Function()>[
+        handler.getMitmCertificate,
+        () => handler.getMitmExchange(7),
+        () => handler.getMitmBody(7, response: false),
+      ];
+      for (final read in optional) {
+        expect(await read(), isNull);
+      }
+      final required = <CoreMethod, Future<Object?> Function()>{
+        CoreMethod.mitmGenerateCertificate: handler.generateMitmCertificate,
+        CoreMethod.mitmIssueCertificate: () =>
+            handler.issueMitmCertificate('host'),
+        CoreMethod.mitmValidate: () => handler.validateMitm(const MitmRules()),
+        CoreMethod.mitmExchanges: () => handler.getMitmExchanges('connection'),
+        CoreMethod.mitmRunScript: () => handler.runMitmScript('task'),
+      };
+      for (final entry in required.entries) {
+        await expectLater(entry.value(), throwsA(_missingResponse(entry.key)));
+      }
+      handler.failure = const CoreMethodException(
+        code: 'method_not_found',
+        message: 'MITM is not supported',
+      );
+      for (final read in [...optional, ...required.values]) {
+        await expectLater(read(), throwsA(same(handler.failure)));
+      }
+      handler.failure = null;
+      handler.connected = false;
+      for (final read in optional) {
+        await expectLater(
+          read(),
+          throwsA(
+            isA<CoreMethodException>().having(
+              (e) => e.code,
+              'code',
+              'transport_disconnected',
+            ),
+          ),
+        );
+      }
+    },
+  );
+
+  test('MITM validates sparse issues against each submitted list', () async {
+    final handler = _FakeCoreHandler();
+    const rules = MitmRules(hostname: ['a'], urlRewrite: ['first', 'second']);
+    handler.response = {
+      'url-rewrite': [
+        {'index': 1, 'message': 'unknown action'},
+      ],
+    };
+    expect(await handler.validateMitm(rules), {
+      MitmList.urlRewrite: {1: 'unknown action'},
+    });
+    expect(handler.arguments, rules.toJson());
+    for (final issues in [
+      [
+        {'index': -1, 'message': 'bad'},
+      ],
+      [
+        {'index': 1, 'message': 'bad'},
+      ],
+      [
+        {'index': 0, 'message': ''},
+      ],
+      [
+        {'index': 0, 'message': 'bad'},
+        {'index': 0, 'message': 'duplicate'},
+      ],
+    ]) {
+      handler.response = {'hostname': issues};
+      await expectLater(handler.validateMitm(rules), throwsFormatException);
+    }
+  });
+
   test('proxy selection requires and decodes the structured result', () async {
     const params = ChangeProxyParams(groupName: 'Pick', proxyName: 'DIRECT');
     final handler = _FakeCoreHandler();
