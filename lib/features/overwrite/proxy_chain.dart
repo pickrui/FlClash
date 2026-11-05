@@ -17,6 +17,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:prism_ui/shape.dart' as prism;
+import 'package:prism_ui/list_row.dart';
 import 'package:material_ui/material_ui.dart'
     hide TextField, InputDecoration, IconButton, FilledButton, ButtonStyle;
 import 'package:fl_clash/ui/common_button.dart'
@@ -1085,11 +1086,11 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
           CommonCard(
             padding: EdgeInsets.zero,
             radius: 18,
-            child: ListTile(
-              minTileHeight:
+            child: ListRow(
+              minHeight:
                   32 + globalState.measure.textHeight(AppTextStyle.subheadline),
               minVerticalPadding: 12,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               leading: ProxyChainRoleBadge(
                 index: index,
                 totalLength: totalLength,
@@ -1160,8 +1161,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: CommonCard(
         radius: 18,
-        child: ListTile(
-          minTileHeight: 64,
+        child: ListRow(
+          minHeight: 64,
           leading: GlyphIcon(
             isWarning ? AppGlyphs.warning : AppGlyphs.info,
             color: isWarning
@@ -1258,8 +1259,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                       CommonCard(
                         padding: EdgeInsets.zero,
                         radius: 18,
-                        child: ListTile(
-                          minTileHeight: 64,
+                        child: ListRow(
+                          minHeight: 64,
                           leading: GlyphIcon(
                             AppGlyphs.warning,
                             color: context.colorScheme.error,
@@ -1313,8 +1314,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: CommonCard(
                       radius: 18,
-                      child: ListTile(
-                        minTileHeight: 64,
+                      child: ListRow(
+                        minHeight: 64,
                         title: Text(
                           appLocalizations.proxyChainEmpty,
                           style: AppTextStyle.subheadline
@@ -1363,8 +1364,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: CommonCard(
                       radius: 18,
-                      child: ListTile(
-                        minTileHeight: 64,
+                      child: ListRow(
+                        minHeight: 64,
                         title: Text(
                           appLocalizations.nullTip(appLocalizations.proxies),
                           style: AppTextStyle.subheadline

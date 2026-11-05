@@ -25,6 +25,7 @@ import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:prism_ui/list_row.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/test_app.dart';
@@ -963,7 +964,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final handle = find.descendant(
-        of: find.ancestor(of: find.text('A'), matching: find.byType(ListTile)),
+        of: find.ancestor(of: find.text('A'), matching: find.byType(ListRow)),
         matching: find.byType(SortHandle),
       );
       final from = tester.getCenter(handle);
