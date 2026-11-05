@@ -24,7 +24,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide TextField, Slider;
+import 'package:prism_ui/slider.dart' show Slider;
 import 'package:prism_ui/text_field.dart' show TextField;
 
 import '../helpers/test_app.dart';
