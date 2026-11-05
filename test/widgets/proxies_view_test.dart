@@ -33,7 +33,8 @@ import 'package:fl_clash/views/proxies/group_tabs.dart';
 import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:material_ui/material_ui.dart' hide IconButton, AppBar;
+import 'package:prism_ui/scaffold.dart' show AppBar;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';

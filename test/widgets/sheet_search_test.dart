@@ -12,7 +12,9 @@ import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/search_field.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, TextButton, AppBar;
+import 'package:prism_ui/scaffold.dart' show AppBar;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 

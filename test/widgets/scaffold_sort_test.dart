@@ -10,7 +10,8 @@ import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, IconButton, TextButton;
+    hide TextField, IconButton, TextButton, AppBar;
+import 'package:prism_ui/scaffold.dart' show AppBar;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_test/flutter_test.dart';
@@ -59,14 +60,14 @@ Finder _inBar(Finder finder) =>
 
 void _expectIdle(WidgetTester tester) {
   expect(find.text('idle'), findsOneWidget);
-  expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+  expect(find.byTooltip('Back').hitTestable(), findsOneWidget);
   expect(find.byType(TextField), findsOneWidget);
   expect(_inBar(find.text('Add')), findsOneWidget);
 }
 
 void _expectSorting(WidgetTester tester) {
   expect(find.text('sorting'), findsOneWidget);
-  expect(find.byType(BackButton).hitTestable(), findsNothing);
+  expect(find.byTooltip('Back').hitTestable(), findsNothing);
   expect(_inBar(find.byTooltip('Search')), findsNothing);
   expect(_inBar(find.text('Add')), findsNothing);
   final toggle = _inBar(find.widgetWithGlyph(IconButton, AppGlyphs.sort));
@@ -108,6 +109,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('idle'), findsOneWidget);
-    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+    expect(find.byTooltip('Back').hitTestable(), findsOneWidget);
   });
 }

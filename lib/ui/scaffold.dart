@@ -19,12 +19,11 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, TextButton, ButtonStyle;
+    hide IconButton, TextButton, ButtonStyle, ButtonTheme;
 import 'package:fl_clash/ui/common_button.dart'
-    show IconButton, TextButton, ButtonStyle;
+    show IconButton, TextButton, ButtonStyle, ButtonTheme;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'builder.dart';
@@ -39,9 +38,14 @@ import 'motion.dart';
 import 'navigation_dock.dart';
 import 'popup.dart';
 import 'search_field.dart';
-import 'sheet_header.dart';
 import 'sheet_navigator.dart';
 import 'sortable.dart';
+
+import 'package:prism_ui/scaffold.dart' as prism;
+import 'package:prism_ui/bar_item_presence.dart';
+import 'package:prism_ui/press_region.dart';
+
+export 'package:prism_ui/scaffold.dart' show AppBarClearance;
 
 class ScaffoldKeyword {
   const ScaffoldKeyword({
@@ -369,13 +373,6 @@ class CommonScaffoldState extends State<CommonScaffold>
     }
   }
 
-  void _popAppBarLayer() {
-    if (!_isSearch) {
-      return;
-    }
-    Navigator.of(context).pop();
-  }
-
   @override
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_handleSearchShortcut);
@@ -497,21 +494,21 @@ class CommonScaffoldState extends State<CommonScaffold>
   VoidCallback get _closeSheet =>
       SheetProvider.of(context)?.onClose ?? () => context.safeNestedPop();
 
-  Widget _buildSheetPopButton(
-    VoidCallback? backAction, {
+  Widget _buildPopButton({
     required bool useCloseIcon,
+    required VoidCallback onPressed,
   }) {
     final localizations = UiLocalizations.of(context);
     return AppBarActionButton(
       data: useCloseIcon
           ? IconButtonData(
               glyph: AppGlyphs.close,
-              onPressed: backAction ?? _closeSheet,
+              onPressed: onPressed,
               tooltip: localizations.close,
             )
           : IconButtonData(
               glyph: AppGlyphs.backFor(Theme.of(context).platform),
-              onPressed: backAction ?? () => Navigator.of(context).pop(),
+              onPressed: onPressed,
               tooltip: localizations.back,
             ),
     );
@@ -533,7 +530,7 @@ class CommonScaffoldState extends State<CommonScaffold>
             child: AnimatedOpacity(
               opacity: hidden ? 0 : 1,
               duration: context.motionDuration(kThemeAnimationDuration),
-              child: ElasticPress(child: button),
+              child: BarItemPresence(child: ElasticPress(child: button)),
             ),
           ),
         ),
@@ -546,12 +543,19 @@ class CommonScaffoldState extends State<CommonScaffold>
     required _SheetPop? pop,
   }) {
     if (pop != null) {
-      return pop.atFoot
-          ? null
-          : _buildSheetPopButton(backAction, useCloseIcon: pop.useCloseIcon);
+      if (pop.atFoot) {
+        return null;
+      }
+      return _buildPopButton(
+        useCloseIcon: pop.useCloseIcon,
+        onPressed: pop.useCloseIcon
+            ? _closeSheet
+            : backAction ?? () => Navigator.of(context).pop(),
+      );
     }
     if (backAction != null) {
-      return BackButton(
+      return _buildPopButton(
+        useCloseIcon: false,
         onPressed: () {
           if (!mounted) {
             return;
@@ -564,25 +568,29 @@ class CommonScaffoldState extends State<CommonScaffold>
     if (route?.impliesAppBarDismissal != true) {
       return null;
     }
-    return route is PageRoute && route.fullscreenDialog
-        ? const CloseButton()
-        : const BackButton();
+    return _buildPopButton(
+      useCloseIcon: route is PageRoute && route.fullscreenDialog,
+      onPressed: () => Navigator.maybePop(context),
+    );
   }
 
   Widget _buildTitle({required bool compact}) {
-    return widget.titleWidget ??
-        (widget.titleMenuItems.isEmpty
-            ? Text(widget.title!)
-            : CommonPopupBox(
-                placement: PopupPlacement.overAnchorStart,
-                targetBuilder: (open) => _TitleMenuButton(
-                  title: widget.title!,
-                  compact: compact,
-                  onPressed: open,
-                ),
-                popupBuilder: (_) =>
-                    CommonPopupMenu(items: widget.titleMenuItems),
-              ));
+    return BarItemPresence.title(
+      child:
+          widget.titleWidget ??
+          (widget.titleMenuItems.isEmpty
+              ? Text(widget.title!)
+              : CommonPopupBox(
+                  placement: PopupPlacement.overAnchorStart,
+                  targetBuilder: (open) => _TitleMenuButton(
+                    title: widget.title!,
+                    compact: compact,
+                    onPressed: open,
+                  ),
+                  popupBuilder: (_) =>
+                      CommonPopupMenu(items: widget.titleMenuItems),
+                )),
+    );
   }
 
   List<Widget> _buildActions(
@@ -704,7 +712,7 @@ class CommonScaffoldState extends State<CommonScaffold>
               IconButtonData(
                 glyph: AppGlyphs.close,
                 tooltip: UiLocalizations.of(context).cancel,
-                onPressed: _popAppBarLayer,
+                onPressed: _handleExitAppBarLayer,
               ),
             )
           : null,
@@ -713,8 +721,8 @@ class CommonScaffoldState extends State<CommonScaffold>
           : null,
       color: context.raisedSurfaceLevel.colorOf(colorScheme),
       // The field's own buttons stay off the bar's button fills and glass.
-      field: IconButtonTheme(
-        data: IconButtonTheme.of(context),
+      field: ButtonTheme(
+        data: ButtonTheme.of(context),
         child: SearchField(
           autofocus: true,
           controller: _textController,
@@ -765,24 +773,11 @@ class CommonScaffoldState extends State<CommonScaffold>
     );
   }
 
-  Widget _buildFloatingHeader(Widget appBar) {
-    final top = MediaQuery.paddingOf(context).top;
-    return FloatingHeader(
-      backgroundColor:
-          widget.backgroundColor ??
-          SurfaceLevel.page.colorOf(context.colorScheme),
-      fadeStart: top / (top + pageToolbarHeight),
-      overhang: _headerOverhang,
-      child: appBar,
-    );
-  }
-
   PreferredSizeWidget _buildAppBar(VoidCallback? backAction, _SheetForm form) {
     final isCompact = form.isCompact;
     final isMobileView = ViewScope.isMobileOf(context);
     final pushed =
         form.pop == null &&
-        widget.titleWidget == null &&
         isMobileView &&
         ModalRoute.of(context)?.impliesAppBarDismissal == true;
     final compactTitle = isCompact || pushed;
@@ -791,109 +786,87 @@ class CommonScaffoldState extends State<CommonScaffold>
     );
     // Under a sheet the bar drops its actions, so none reads as the sheet's.
     final uncovered = ReverseAnimation(sheetCoverOf(context));
-    return PreferredSize(
-      preferredSize: Size.fromHeight(
-        isCompact ? sheetToolbarHeight : pageToolbarHeight,
-      ),
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        clipBehavior: Clip.none,
-        children: [
-          ListenableBuilder(
-            listenable: Listenable.merge([_appBarState, _searchCovered]),
-            builder: (_, _) {
-              final state = _appBarState.value;
-              final leading = _buildLeading(backAction, pop: form.pop);
-              final barSearch =
-                  state.searchState != null && !form.hasDockedSearch;
-              final covered = barSearch && _searchCovered.value;
-              final hidesBar = covered && _searchFillsBar;
-              Widget underSearch(Widget child, Animation<double> opacity) =>
-                  barSearch
-                  ? _UnderBarSearch(
-                      opacity: opacity,
-                      searching: _isSearch,
-                      child: child,
-                    )
-                  : child;
-              Widget? underField(Widget? child, Animation<double> opacity) =>
-                  child == null || !_searchFillsBar
-                  ? child
-                  : underSearch(child, opacity);
-              final searchLeading =
-                  barSearch && _searchFillsBar && leading != null
-                  ? KeyedSubtree(
-                      key: _searchLeadingKey,
-                      child: _SearchSwell(
-                        motion: _searchMotion,
-                        width: TonalButtonSize.bar.button,
-                        liftOf: (frame) => frame.glassLift,
-                        child: leading,
-                      ),
-                    )
-                  : leading;
-              final appBar = AppBar(
-                clipBehavior: Clip.none,
-                automaticallyImplyLeading: false,
-                animateColor: true,
-                forceMaterialTransparency: true,
-                toolbarHeight: isCompact ? sheetToolbarHeight : null,
-                centerTitle: isCompact,
-                titleTextStyle: compactTitle
-                    ? AppTextStyle.headline.of(context)
-                    : AppTextStyle.pageTitle.of(context),
-                leading: hidesBar
-                    ? null
-                    : underField(searchLeading, _leadingUnderSearch),
-                // The leading slot already trails its button by a margin.
-                titleSpacing: leading == null ? null : 0,
-                title: hidesBar
-                    ? null
-                    : underField(
-                        leading == null || isCompact
-                            ? _buildTitle(compact: compactTitle)
-                            : Padding(
-                                padding: EdgeInsetsDirectional.only(
-                                  end: titleEndInset,
-                                ),
-                                child: _buildTitle(compact: compactTitle),
-                              ),
-                        _titleUnderSearch,
-                      ),
-                actions: [
-                  if (!covered)
-                    for (final action in _buildActions(
-                      state.searchState != null,
-                      widget.primaryAction,
-                      form,
-                    ))
-                      FadeTransition(
-                        opacity: uncovered,
-                        child: underSearch(
-                          action,
-                          action.key == _searchButtonKey
-                              ? _leadUnderSearch
-                              : _actionsUnderSearch,
+    return prism.ScaffoldBar(
+      isCompact: isCompact,
+      backgroundColor: widget.backgroundColor,
+      loading: _loadingNotifier,
+      listenable: Listenable.merge([_appBarState, _searchCovered]),
+      builder: (_) {
+        final searchState = _appBarState.value.searchState;
+        final leading = _buildLeading(backAction, pop: form.pop);
+        final barSearch = searchState != null && !form.hasDockedSearch;
+        final covered = barSearch && _searchCovered.value;
+        final hidesBar = covered && _searchFillsBar;
+        Widget underSearch(Widget child, Animation<double> opacity) => barSearch
+            ? _UnderBarSearch(
+                opacity: opacity,
+                searching: _isSearch,
+                child: child,
+              )
+            : child;
+        Widget? underField(Widget? child, Animation<double> opacity) =>
+            child == null || !_searchFillsBar
+            ? child
+            : underSearch(child, opacity);
+        final searchLeading = barSearch && _searchFillsBar && leading != null
+            ? KeyedSubtree(
+                key: _searchLeadingKey,
+                child: _SearchSwell(
+                  motion: _searchMotion,
+                  width: TonalButtonSize.bar.button,
+                  liftOf: (frame) => frame.glassLift,
+                  child: leading,
+                ),
+              )
+            : leading;
+        final appBar = prism.AppBar(
+          clipBehavior: Clip.none,
+          toolbarHeight: isCompact ? sheetToolbarHeight : null,
+          centerTitle: isCompact,
+          titleTextStyle: compactTitle
+              ? AppTextStyle.headline.of(context)
+              : AppTextStyle.pageTitle.of(context),
+          leading: hidesBar
+              ? null
+              : underField(searchLeading, _leadingUnderSearch),
+          // The leading slot already trails its button by a margin.
+          titleSpacing: leading == null ? null : 0,
+          title: hidesBar
+              ? null
+              : underField(
+                  leading == null || isCompact
+                      ? _buildTitle(compact: compactTitle)
+                      : Padding(
+                          padding: EdgeInsetsDirectional.only(
+                            end: titleEndInset,
+                          ),
+                          child: _buildTitle(compact: compactTitle),
                         ),
-                      ),
-                ],
-              );
-              final bar = _buildAppBarWrap(appBar, barSearch: barSearch);
-              return isCompact
-                  ? bar
-                  : _buildFloatingHeader(_WindowControlsClearance(child: bar));
-            },
-          ),
-          ValueListenableBuilder(
-            valueListenable: _loadingNotifier,
-            builder: (_, value, _) {
-              return value == true
-                  ? const LinearProgressIndicator()
-                  : Container();
-            },
-          ),
-        ],
-      ),
+                  _titleUnderSearch,
+                ),
+          actions: [
+            if (!covered)
+              for (final action in _buildActions(
+                searchState != null,
+                widget.primaryAction,
+                form,
+              ))
+                _presentAction(
+                  FadeTransition(
+                    opacity: uncovered,
+                    child: underSearch(
+                      action,
+                      action.key == _searchButtonKey
+                          ? _leadUnderSearch
+                          : _actionsUnderSearch,
+                    ),
+                  ),
+                  gap: action is SizedBox || action is _ActionEdgeGap,
+                ),
+          ],
+        );
+        return _buildAppBarWrap(appBar, barSearch: barSearch);
+      },
     );
   }
 
@@ -909,142 +882,33 @@ class CommonScaffoldState extends State<CommonScaffold>
       searchInBar: widget.searchInBar,
       hasConfirmationAction: widget.confirmationAction != null,
     );
-    final isCompact = form.isCompact;
     _searchFillsBar = _isCompactBar(context, ViewScope.isMobileOf(context));
     _searchDocked = form.hasDockedSearch;
-    final bottomInset = BottomInsetScope.of(context);
-    // A detent sheet fills the height its detent gives it and clips its own
-    // corners; any other bottom sheet sizes to its content and brings both.
-    final hugsContent = isCompact && !SheetOverhangScope.fillsDetentOf(context);
-    // The page's bar floats over its body, which leaves the bar's height at
-    // its top through MediaQuery padding, as extendBodyBehindAppBar does.
-    final barFloats = !isCompact;
-    final sortableBody = SortModeScope(sorting: _sorting, child: widget.body);
-    final body = SafeArea(
-      top: !barFloats,
-      bottom: false,
-      child: ListenableBuilder(
-        listenable: Listenable.merge([widget.keywords]),
-        builder: (context, _) {
-          final keywords = widget.keywords?.value ?? const <ScaffoldKeyword>[];
-          final hasKeywords = keywords.isNotEmpty;
-          final barInset = MediaQuery.paddingOf(context).top;
-          final overlap = barFloats
-              ? barInset
-              : isCompact
-              ? sheetAppBarHeight
-              : 0.0;
-          // A wrapper toggled with the strip would remount the body.
-          final content = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: hugsContent ? MainAxisSize.min : MainAxisSize.max,
-            children: [
-              if (hasKeywords)
-                Padding(
-                  padding: EdgeInsets.only(top: overlap + 4, bottom: 16),
-                  child: _KeywordStrip(keywords: keywords),
-                ),
-              Flexible(
-                fit: hugsContent ? FlexFit.loose : FlexFit.tight,
-                child: MediaQuery.removePadding(
-                  context: context,
-                  removeTop: hasKeywords,
-                  child: FloatingBarScope(
-                    inset: hasKeywords ? 0 : overlap,
-                    child: sortableBody,
-                  ),
-                ),
-              ),
-            ],
-          );
-          return TopInsetScope(
-            inset: hasKeywords ? 0 : TopInsetScope.of(context),
-            child: FloatingBarScope(
-              inset: overlap,
-              child: overlap > 0
-                  ? _FocusClearOfBar(inset: overlap, child: content)
-                  : content,
-            ),
-          );
-        },
+    final keywords = widget.keywords;
+    final docked = form.dockedSearch;
+    return prism.PrismScaffold(
+      bar: _buildAppBar(backAction, form),
+      body: SizedBox(
+        width: double.infinity,
+        child: SortModeScope(sorting: _sorting, child: widget.body),
       ),
-    );
-    final appBar = _buildAppBar(backAction, form);
-    final content = form.hasDockedSearch
-        ? BottomInsetScope(
-            inset: bottomInset + BottomInsetScope.dockedSearchInset,
-            child: body,
-          )
-        : body;
-    if (!isCompact) {
-      final docked = form.dockedSearch;
-      return AppBarInsetScope(
-        child: Scaffold(
-          appBar: appBar,
-          extendBodyBehindAppBar: barFloats,
-          body: _BodyScope(
-            child: docked == null
-                ? content
-                : Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      content,
-                      if (!_sorting)
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: _buildDockedSearch(docked),
-                        ),
-                    ],
-                  ),
-          ),
-          resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-          backgroundColor: widget.backgroundColor,
-        ),
-      );
-    }
-    final sheetBody = FloatingHeaderBody(
-      backgroundColor:
-          widget.backgroundColor ??
-          SurfaceLevel.page.colorOf(context.colorScheme),
-      header: SheetToolBar(appBar: appBar, dragHandle: form.hasDragHandle),
-      footer: form.dockedSearch == null || _sorting
+      headerListenable: keywords,
+      headerBuilder: keywords == null
           ? null
-          : _buildDockedSearch(form.dockedSearch!),
-      body: content,
-    );
-    final footed = form.pop?.atFoot == true
-        ? Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                fit: hugsContent ? FlexFit.loose : FlexFit.tight,
-                child: sheetBody,
-              ),
-              _buildFootActions(widget.confirmationAction!),
-            ],
-          )
-        : sheetBody;
-    if (!hugsContent) {
-      return AppBarInsetScope(
-        child: Scaffold(
-          body: footed,
-          resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-          backgroundColor: widget.backgroundColor,
-        ),
-      );
-    }
-    final hugging = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [Flexible(child: footed)],
-    );
-    return AppBarInsetScope(
-      child: form.hasDragHandle
-          ? ClipRSuperellipse(
-              borderRadius: AppRadius.top(AppCorner.xxl),
-              child: hugging,
-            )
-          : hugging,
+          : (_) => keywords.value.isEmpty
+                ? null
+                : Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 16),
+                    child: _KeywordStrip(keywords: keywords.value),
+                  ),
+      foot: docked == null ? null : _buildDockedSearch(docked),
+      footHidden: _sorting,
+      footInset: BottomInsetScope.dockedSearchInset,
+      footActions: form.pop?.atFoot == true
+          ? _buildFootActions(widget.confirmationAction!)
+          : null,
+      backgroundColor: widget.backgroundColor,
+      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
     );
   }
 }
@@ -1861,25 +1725,6 @@ class _BarSearch extends StatelessWidget {
   }
 }
 
-/// Holds a body whose top stays put clear of the bar floating over it.
-class AppBarClearance extends StatelessWidget {
-  const AppBarClearance({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: context.appBarInset),
-      child: MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: FloatingBarScope(inset: 0, child: child),
-      ),
-    );
-  }
-}
-
 class _KeywordStrip extends StatelessWidget {
   const _KeywordStrip({required this.keywords});
 
@@ -1921,115 +1766,8 @@ class _KeywordStrip extends StatelessWidget {
   }
 }
 
-/// Keeps rebuilds in the body to its own layer (.agents/architecture.md).
-class _BodyScope extends StatelessWidget {
-  const _BodyScope({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return _BodyBoundary(child: LayoutBuilder(builder: (_, _) => child));
-  }
-}
-
-class _BodyBoundary extends SingleChildRenderObjectWidget {
-  const _BodyBoundary({super.child});
-
-  @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderBodyBoundary();
-}
-
-class _RenderBodyBoundary extends RenderProxyBox {
-  @override
-  bool get isRepaintBoundary => true;
-
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
-
-  @override
-  void performLayout() {
-    child?.layout(constraints);
-  }
-}
-
-/// Flutter reveals a focused control against the viewport alone, which runs
-/// under a floating bar, so keyboard and remote traversal would park it there.
-class _FocusClearOfBar extends StatefulWidget {
-  const _FocusClearOfBar({required this.inset, required this.child});
-
-  final double inset;
-  final Widget child;
-
-  @override
-  State<_FocusClearOfBar> createState() => _FocusClearOfBarState();
-}
-
-class _FocusClearOfBarState extends State<_FocusClearOfBar> {
-  @override
-  void initState() {
-    super.initState();
-    FocusManager.instance.addListener(_handleFocusChange);
-  }
-
-  @override
-  void dispose() {
-    FocusManager.instance.removeListener(_handleFocusChange);
-    super.dispose();
-  }
-
-  void _handleFocusChange() {
-    final manager = FocusManager.instance;
-    final focused = manager.primaryFocus?.context;
-    if (manager.highlightMode != FocusHighlightMode.traditional ||
-        focused == null ||
-        focused.findAncestorStateOfType<_FocusClearOfBarState>() != this) {
-      return;
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) => _reveal(focused));
-  }
-
-  void _reveal(BuildContext focused) {
-    if (!mounted || !focused.mounted) {
-      return;
-    }
-    var scrollable = Scrollable.maybeOf(focused);
-    while (scrollable != null && scrollable.position.axis != Axis.vertical) {
-      scrollable = Scrollable.maybeOf(scrollable.context);
-    }
-    final body = context.findRenderObject();
-    final target = focused.findRenderObject();
-    final viewport = scrollable?.context.findRenderObject();
-    if (scrollable == null ||
-        body is! RenderBox ||
-        target is! RenderBox ||
-        viewport is! RenderBox) {
-      return;
-    }
-    final barBottom = body.localToGlobal(Offset.zero).dy + widget.inset;
-    final covered = barBottom - target.localToGlobal(Offset.zero).dy;
-    if (covered <= 0 || viewport.localToGlobal(Offset.zero).dy >= barBottom) {
-      return;
-    }
-    final position = scrollable.position;
-    final delta = axisDirectionIsReversed(position.axisDirection)
-        ? covered
-        : -covered;
-    position.jumpTo(
-      (position.pixels + delta).clamp(
-        position.minScrollExtent,
-        position.maxScrollExtent,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-}
+Widget _presentAction(Widget action, {required bool gap}) =>
+    gap ? action : BarItemPresence(child: action);
 
 const _maxBarButtons = 3;
 const _maxGroupedActions = 2;
@@ -2112,7 +1850,7 @@ class _OverflowMenuButton extends StatelessWidget {
       targetBuilder: (open) => IconButton(
         tooltip: UiLocalizations.of(context).more,
         onPressed: open,
-        icon: const GlyphIcon(AppGlyphs.more),
+        icon: const BarItemGlyph(child: GlyphIcon(AppGlyphs.more)),
       ),
       popupBuilder: (_) => CommonPopupMenu(items: items),
     );
@@ -2146,7 +1884,7 @@ class AppBarActionButton extends StatelessWidget {
       onPressed: data.isLoading ? null : data.onPressed,
       icon: data.isLoading
           ? ActivityIndicator(size: TonalButtonSize.bar.icon)
-          : icon ?? GlyphIcon(data.glyph),
+          : icon ?? BarItemGlyph(child: GlyphIcon(data.glyph)),
     );
   }
 }
@@ -2160,7 +1898,6 @@ class AppBarActionButton extends StatelessWidget {
 class _SheetForm {
   const _SheetForm({
     required this.isCompact,
-    required this.hasDragHandle,
     required this.dockedSearch,
     required this.pop,
   });
@@ -2184,7 +1921,6 @@ class _SheetForm {
             ModalRoute.of(context)?.impliesAppBarDismissal == true);
     return _SheetForm(
       isCompact: isCompact,
-      hasDragHandle: provider?.type == SheetType.bottomSheet,
       dockedSearch: docksSearch ? searchState : null,
       pop: !isModal
           ? null
@@ -2198,7 +1934,6 @@ class _SheetForm {
   }
 
   final bool isCompact;
-  final bool hasDragHandle;
   final AppBarSearchState? dockedSearch;
   final _SheetPop? pop;
 
@@ -2231,7 +1966,6 @@ class _SheetPop {
 }
 
 const double _barButtonGap = 8;
-const double _headerOverhang = 16;
 const double _iconButtonTapPadding = 4;
 
 /// Where a filled button sits from the app bar edge, leading included: the
@@ -2329,12 +2063,10 @@ class _TitleMenuButton extends StatelessWidget {
   Widget build(BuildContext context) {
     // No ink: the padding it needs would move the title off its place in the
     // bar, and a press turns the title into its menu at once.
-    return InkWell(
+    return PressRegion(
       onTap: onPressed,
-      customBorder: AppShape.sm,
-      hoverColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      splashFactory: NoSplash.splashFactory,
+      shape: AppShape.sm,
+      overlay: PressRegion.focusOverlay,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         spacing: compact ? 2 : 4,
@@ -2347,38 +2079,6 @@ class _TitleMenuButton extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// A route over the home page on the root navigator fills the window, with
-/// neither the window header nor the sidebar keeping it off the buttons.
-class _WindowControlsClearance extends StatelessWidget {
-  const _WindowControlsClearance({required this.child});
-
-  final Widget child;
-
-  static bool _fillsWindow(BuildContext context) {
-    final route = ModalRoute.of(context);
-    return route != null &&
-        route.opaque &&
-        !route.isFirst &&
-        route.navigator == Navigator.maybeOf(context, rootNavigator: true);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final controls = ViewScope.windowControlsOf(context);
-    if (controls.isEmpty || !_fillsWindow(context)) {
-      return child;
-    }
-    final mediaQuery = MediaQuery.of(context);
-    final padding = mediaQuery.padding;
-    return MediaQuery(
-      data: mediaQuery.copyWith(
-        padding: padding.copyWith(left: math.max(padding.left, controls.width)),
-      ),
-      child: child,
     );
   }
 }

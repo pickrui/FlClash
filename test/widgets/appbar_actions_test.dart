@@ -22,14 +22,12 @@ void _noop() {}
 const _mobile = Size(400, 900);
 const _desktop = Size(1200, 900);
 
-Finder _container(Finder button) => find
-    .descendant(
-      of: button,
-      matching: find.byWidgetPredicate(
-        (widget) => widget is Material || widget is PressSurface,
-      ),
-    )
-    .first;
+Finder _container(Finder button) =>
+    find.descendant(of: button, matching: find.byType(PressSurface));
+
+Finder get _backButton => find.byWidgetPredicate(
+  (widget) => widget is IconButton && widget.tooltip == 'Back',
+);
 
 Future<void> _pumpBar(
   WidgetTester tester, {
@@ -81,7 +79,7 @@ void main() {
         ),
       );
       final rect = tester.getRect(find.text(title));
-      final back = tester.getRect(_container(find.byType(BackButton)));
+      final back = tester.getRect(_container(_backButton));
       final action = tester.getRect(
         _container(find.widgetWithGlyph(IconButton, AppGlyphs.sync)),
       );
@@ -121,7 +119,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.getRect(_container(find.byType(BackButton))).left,
+      tester.getRect(_container(_backButton)).left,
       greaterThanOrEqualTo(controls.width),
     );
   });

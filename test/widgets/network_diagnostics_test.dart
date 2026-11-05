@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:prism_ui/loading.dart' show LoadingBar;
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -160,10 +161,13 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Check DNS settings and system time'), findsOneWidget);
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(tester.widget<LoadingBar>(find.byType(LoadingBar)).active, isTrue);
       service.completion.complete();
       await tester.pumpAndSettle();
-      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(
+        tester.widget<LoadingBar>(find.byType(LoadingBar)).active,
+        isFalse,
+      );
       await tester.tap(find.byTooltip(AppLocalizations.current.diagCopy));
       await tester.pump();
       expect(clipboard, contains('[Failed] oixCloud DNS'));
@@ -356,7 +360,7 @@ void main() {
     await tester.pump();
     expect(fixes, [DiagnosticFix.applyTun]);
     expect(find.text(AppLocalizations.current.diagFixing), findsOneWidget);
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(tester.widget<LoadingBar>(find.byType(LoadingBar)).active, isTrue);
     expect(tester.widget<FilledButton>(fixButton()).onPressed, isNull);
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
@@ -392,7 +396,7 @@ void main() {
       debugPrint = originalDebugPrint;
     }
     expect(find.text(AppLocalizations.current.diagUnknown), findsWidgets);
-    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(tester.widget<LoadingBar>(find.byType(LoadingBar)).active, isFalse);
     expect(printed, contains(contains('probe backend missing')));
     expect(tester.takeException(), isNull);
   });

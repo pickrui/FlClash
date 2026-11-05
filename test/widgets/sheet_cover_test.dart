@@ -138,8 +138,8 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     expect(_opacityOf(tester, find.text('Page action')), 0);
-    expect(find.byType(BackButton), findsOneWidget);
-    expect(_opacityOf(tester, find.byType(BackButton)), 1);
+    expect(find.byTooltip('Back'), findsOneWidget);
+    expect(_opacityOf(tester, find.byTooltip('Back')), 1);
   });
 
   testWidgets('a sheet page steps back with the sheet it is on', (
