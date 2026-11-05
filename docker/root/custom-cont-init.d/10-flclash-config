@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+install -d -o abc -g abc /config/.config/labwc
+install -d -o abc -g abc /config/.config/openbox
+install -d -m 700 -o abc -g abc /config/.local/share/keyrings
+install -m 644 -o abc -g abc /defaults/autostart_wayland /config/.config/labwc/autostart
+install -m 644 -o abc -g abc /defaults/autostart /config/.config/openbox/autostart

@@ -1,0 +1,12 @@
+[submodule "core/Clash.Meta"]
+	path = core/Clash.Meta
+	url = https://github.com/pickrui/Clash.Meta.git
+	branch = FlClash
+[submodule "plugins/flutter_distributor"]
+	path = plugins/flutter_distributor
+	url = https://github.com/pickrui/flutter_distributor.git
+	branch = FlClash
+[submodule "plugins/tray_manager"]
+	path = plugins/tray_manager
+	url = https://github.com/pickrui/tray_manager.git
+	branch = main
