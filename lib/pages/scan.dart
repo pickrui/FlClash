@@ -23,8 +23,8 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart'
-    hide IconButton, ButtonStyle, Theme, ThemeData;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show Colors, kThemeAnimationDuration;
 import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;
 import 'package:mobile_scanner/mobile_scanner.dart';

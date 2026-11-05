@@ -9,7 +9,7 @@ import 'request.dart';
 import 'update_download_task.dart';
 
 import 'package:fl_clash/models/models.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 class Navigation {
   static Navigation? _instance;

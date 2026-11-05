@@ -9,8 +9,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:prism_ui/shape.dart' as prism;
-import 'package:material_ui/material_ui.dart'
-    hide TextFormField, InputDecoration, LinearProgressIndicator;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/text_field.dart' show TextFormField, InputDecoration;
 
 class GeoRecoveryDialog extends StatefulWidget {

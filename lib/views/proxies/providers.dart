@@ -29,8 +29,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/chip_title.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart'
-    hide IconButton, TextButton, LinearProgressIndicator;
+import 'package:flutter/widgets.dart';
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

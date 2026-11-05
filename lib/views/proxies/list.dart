@@ -17,7 +17,7 @@ import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, ColorScheme;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/theme_data.dart' show ColorScheme;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';

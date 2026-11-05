@@ -18,7 +18,7 @@ import 'package:fl_clash/ui/text.dart';
 import 'package:fl_clash/ui/inherited.dart' show sheetScrollController;
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/switch.dart';
-import 'package:material_ui/material_ui.dart' hide Tooltip;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/tooltip.dart' show Tooltip;
 
 import 'overwrite_sheet.dart';

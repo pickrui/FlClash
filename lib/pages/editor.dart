@@ -27,14 +27,7 @@ import 'package:prism_ui/text_selection_controls.dart'
     show textSelectionColorOf;
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:material_ui/material_ui.dart'
-    hide
-        TextField,
-        InputDecoration,
-        IconButton,
-        FilledButton,
-        ButtonStyle,
-        ColorScheme;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/theme_data.dart' show ColorScheme;
 import 'package:prism_ui/card_surface.dart' show PressLook;
 import 'package:prism_ui/theme_data.dart' as prism;

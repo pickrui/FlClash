@@ -7,7 +7,7 @@ import 'package:fl_clash/models/config.dart';
 
 import 'window.dart';
 
-import 'package:material_ui/material_ui.dart' show Brightness, Color;
+import 'package:flutter/widgets.dart';
 
 abstract interface class WindowPort {
   Future<WindowProps?> captureNormalGeometry(WindowProps current);

@@ -14,7 +14,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/sheet.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart' show TextInputAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const _credentialMaxLength = 255;

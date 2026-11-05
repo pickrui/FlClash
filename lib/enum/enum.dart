@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/color.dart';
 import 'package:prism_ui/banner.dart' show BannerLevel;
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/common/system.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rust_api/rust_api.dart' show HotKeyModifier;
@@ -116,11 +116,11 @@ enum RecordGrouping { app, host, rule, exit }
 extension LogLevelExt on LogLevel {
   Color? get color {
     return switch (this) {
-      LogLevel.silent => Colors.grey.shade700,
-      LogLevel.debug => Colors.grey.shade400,
+      LogLevel.silent => const Color(0xFF616161),
+      LogLevel.debug => const Color(0xFFBDBDBD),
       LogLevel.info => null,
-      LogLevel.warning => Colors.orangeAccent.darken(),
-      LogLevel.error => Colors.redAccent,
+      LogLevel.warning => const Color(0xFFFFAB40).darken(),
+      LogLevel.error => const Color(0xFFFF5252),
     };
   }
 }

@@ -11,7 +11,7 @@ import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/scroll_behavior.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 const _suggestionInset = 8.0;
 const _suggestionItemGap = 4.0;

@@ -14,7 +14,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/tailscale.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:flutter/widgets.dart';
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import 'network.dart';

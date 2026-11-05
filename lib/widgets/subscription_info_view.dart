@@ -8,7 +8,8 @@ import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:material_ui/material_ui.dart' hide LinearProgressIndicator;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/selectable_text.dart' show SelectionArea;
 
 import 'package:fl_clash/ui/list.dart';
 

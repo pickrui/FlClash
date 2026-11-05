@@ -20,7 +20,7 @@ import 'package:fl_clash/views/dashboard/style.dart';
 import 'package:fl_clash/views/profiles/profiles.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart' hide Tooltip;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/tooltip.dart' show Tooltip;
 
 import 'card.dart';

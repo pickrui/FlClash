@@ -7,7 +7,7 @@ import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:fl_clash/ui/scaffold.dart';
 

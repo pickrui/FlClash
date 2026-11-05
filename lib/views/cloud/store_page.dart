@@ -11,7 +11,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show RefreshIndicator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud_layout.dart';

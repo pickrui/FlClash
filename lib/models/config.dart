@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:material_ui/material_ui.dart' hide ThemeMode;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/theme_data.dart' show ThemeMode;
 import 'package:freezed_annotation/freezed_annotation.dart';
 

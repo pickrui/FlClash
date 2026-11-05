@@ -25,7 +25,7 @@ import 'package:fl_clash/views/dashboard/style.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/surface.dart' show Surface;
 import 'package:riverpod_annotation/riverpod_annotation.dart'
     show ProviderListenable;

@@ -8,7 +8,7 @@ import 'package:prism_ui/press_region.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 /// Asked once, when neither the AppImage runtime nor a package manager can say
 /// how this build was installed. The answer is remembered.

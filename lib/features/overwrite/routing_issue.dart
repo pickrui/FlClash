@@ -7,7 +7,7 @@ import 'package:fl_clash/common/context.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/routing_issue.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 String routingIssueMessage(RoutingIssue issue, AppLocalizations l10n) =>
     switch (issue.kind) {

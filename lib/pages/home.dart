@@ -15,8 +15,8 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:material_ui/material_ui.dart'
-    hide NavigationBar, NavigationDestination;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/tab_view.dart' show kTabScrollDuration;
 import 'package:prism_ui/navigation_bar.dart';
 import 'package:prism_ui/bar_item_presence.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -8,7 +8,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:prism_ui/icons/glyph.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 abstract final class AppGlyphs {
   static const dashboard = Glyph([

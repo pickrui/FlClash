@@ -15,8 +15,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:material_ui/material_ui.dart'
-    hide IconButton, FilledButton, ButtonStyle, Tooltip;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/tooltip.dart' show Tooltip;
 import 'package:prism_ui/card_surface.dart' show PressLook;
 import 'package:fl_clash/ui/common_button.dart'

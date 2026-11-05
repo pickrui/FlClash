@@ -12,7 +12,7 @@ import 'package:fl_clash/views/config/override.dart';
 import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 /// The sniffer's address lists also take mihomo's geoip: and rule-set: items.
 String? validateIpMatcher(String? value, AppLocalizations appLocalizations) {

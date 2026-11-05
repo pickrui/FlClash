@@ -16,8 +16,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:material_ui/material_ui.dart'
-    hide TextField, TextFormField, InputDecoration, IconButton, TextButton;
+import 'package:flutter/widgets.dart';
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:prism_ui/text_field.dart'
     show TextField, TextFormField, InputDecoration;

@@ -15,8 +15,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:prism_ui/hct/hct.dart';
 import 'package:prism_ui/slider.dart' show Slider, SliderShape;
-import 'package:material_ui/material_ui.dart'
-    hide TextField, InputDecoration, Slider, ThemeData;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show Colors;
 import 'package:prism_ui/theme_data.dart' show ThemeData;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 

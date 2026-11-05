@@ -20,7 +20,8 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show MaterialLocalizations;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:fl_clash/ui/common_button.dart' as prism;
 

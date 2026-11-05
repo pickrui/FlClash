@@ -7,7 +7,7 @@ import 'dart:ui';
 
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/inherited.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 class CommonExpandIcon extends StatefulWidget {
   final bool expand;

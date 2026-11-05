@@ -11,7 +11,7 @@ import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/views/config/override.dart';
 import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 export 'ntp.dart';
 

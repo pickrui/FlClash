@@ -22,7 +22,7 @@ import 'package:fl_clash/widgets/proxy_authentication.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart' hide SelectableText;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/selectable_text.dart' show SelectableText;
 
 import 'config/dns.dart';

@@ -16,8 +16,8 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:material_ui/material_ui.dart'
-    hide FilledButton, ButtonStyle, Theme, ThemeData, SelectableText;
+import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;
 import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
 import 'package:fl_clash/ui/common_button.dart' show FilledButton, ButtonStyle;
 import 'package:flutter/services.dart';
@@ -195,10 +195,12 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
                       padding: const EdgeInsets.all(12),
                       decoration: ShapeDecoration(
                         color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.grey[900]
-                            : Colors.grey[200],
+                            ? const Color(0xFF212121)
+                            : const Color(0xFFEEEEEE),
                         shape: AppShape.xl.copyWith(
-                          side: BorderSide(color: Colors.grey.opacity50),
+                          side: BorderSide(
+                            color: const Color(0xFF9E9E9E).opacity50,
+                          ),
                         ),
                       ),
                       child: SelectableText(

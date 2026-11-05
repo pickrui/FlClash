@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 /// Floats [bar] over the foot of [body] as a sheet's docked search floats,
 /// in the dock's fill and shadow or its glass, and lets [body] scroll clear

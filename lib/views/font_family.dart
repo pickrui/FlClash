@@ -14,7 +14,7 @@ import 'package:fl_clash/ui/route_motion_hold.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 sealed class _FontChoice {
   const _FontChoice();

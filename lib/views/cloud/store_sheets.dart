@@ -10,7 +10,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 import 'cloud_layout.dart';
 import 'store_widgets.dart';

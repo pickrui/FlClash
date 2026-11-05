@@ -16,8 +16,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
-import 'package:material_ui/material_ui.dart'
-    hide IconButton, ButtonStyle, ButtonTheme, ButtonThemeData, Divider;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show Colors;
 import 'package:prism_ui/divider.dart' show Divider;
 import 'package:prism_ui/theme_data.dart' as prism;
 import 'package:prism_ui/card_surface.dart' show PressLook;

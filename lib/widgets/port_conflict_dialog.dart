@@ -7,8 +7,8 @@ import 'package:fl_clash/common/input_limits.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:prism_ui/shape.dart' as prism;
-import 'package:material_ui/material_ui.dart'
-    hide TextFormField, InputDecoration;
+import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart' show TextInputAction;
 import 'package:prism_ui/text_field.dart' show TextFormField, InputDecoration;
 
 class PortConflictDialog extends StatefulWidget {

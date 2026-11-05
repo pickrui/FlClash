@@ -6,7 +6,7 @@
 import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 class SettingTextCard extends StatelessWidget {
   final String text;

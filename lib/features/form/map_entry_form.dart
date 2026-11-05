@@ -7,7 +7,8 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/input_entries.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart' show TextInputAction;
 
 import 'batch_section.dart';
 import 'form_page.dart';

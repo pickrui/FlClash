@@ -17,7 +17,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/theme_data.dart' show Theme;
 
 import 'inherited.dart';

@@ -18,8 +18,8 @@ import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/view_scope.dart';
-import 'package:material_ui/material_ui.dart'
-    hide IconButton, TextButton, ButtonStyle, ButtonTheme, Theme;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show kThemeAnimationDuration;
 import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:fl_clash/ui/common_button.dart'
     show IconButton, TextButton, ButtonStyle, ButtonTheme;

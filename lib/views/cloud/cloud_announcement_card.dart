@@ -15,7 +15,8 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/selectable_text.dart' show SelectionArea;
 
 import 'cloud_layout.dart';
 

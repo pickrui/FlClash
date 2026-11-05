@@ -8,7 +8,7 @@ import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 class ErrorBanner extends StatelessWidget {
   final String? message;

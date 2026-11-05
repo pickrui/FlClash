@@ -19,7 +19,8 @@ import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/surface.dart';
-import 'package:material_ui/material_ui.dart' hide ColorScheme;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show Colors;
 import 'package:prism_ui/theme_data.dart' show ColorScheme;
 
 Color _sheetColorOf(BuildContext context) =>

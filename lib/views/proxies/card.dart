@@ -14,7 +14,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide Theme, Tooltip;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/tooltip.dart' show Tooltip;
 import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -259,14 +259,14 @@ class _ProxyTags extends ConsumerWidget {
         nodeName == proxy.name
             ? proxy.displayType
             : '${proxy.displayType}($nodeName)',
-        isDark ? Colors.blue.shade300 : Colors.blue.shade700,
+        isDark ? const Color(0xFF64B5F6) : const Color(0xFF1976D2),
       ),
       if (proxy.trafficRateTag case final rate?)
         (rate, context.colorScheme.onSurfaceVariant),
       if (proxy.http3)
-        ('H/3', isDark ? Colors.teal.shade300 : Colors.teal.shade700),
+        ('H/3', isDark ? const Color(0xFF4DB6AC) : const Color(0xFF00796B)),
       if (proxy.warp)
-        ('WARP', isDark ? Colors.indigo.shade300 : Colors.indigo.shade600),
+        ('WARP', isDark ? const Color(0xFF7986CB) : const Color(0xFF3949AB)),
     ];
     final style = AppTextStyle.caption2.of(context, emphasized: true);
     return LayoutBuilder(

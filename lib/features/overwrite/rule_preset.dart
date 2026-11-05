@@ -16,7 +16,7 @@ import 'package:fl_clash/ui/models.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/ui/selection_mark.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 import 'overwrite_sheet.dart';
 

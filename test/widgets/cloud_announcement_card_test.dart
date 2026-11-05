@@ -9,7 +9,8 @@ import 'package:fl_clash/views/cloud/cloud_announcement_card.dart';
 import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide SelectionArea;
+import 'package:prism_ui/selectable_text.dart' show SelectionArea;
 
 import '../helpers/test_app.dart';
 

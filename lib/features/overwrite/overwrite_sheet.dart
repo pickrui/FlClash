@@ -16,7 +16,8 @@ import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/ui/snap_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show MaterialLocalizations;
 
 Future<T?> showOverwriteSheet<T>({
   required BuildContext context,

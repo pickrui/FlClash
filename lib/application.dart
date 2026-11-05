@@ -34,7 +34,8 @@ import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/state.dart';
-import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

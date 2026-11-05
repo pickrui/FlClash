@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/null_status.dart';
-import 'package:material_ui/material_ui.dart' hide FilledButton;
+import 'package:flutter/widgets.dart';
 import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 
 class ErrorStatus extends StatelessWidget {

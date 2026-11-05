@@ -22,7 +22,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/widgets/icon.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart' hide Divider;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/divider.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

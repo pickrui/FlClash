@@ -14,7 +14,8 @@ import 'package:fl_clash/ui/builder.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/table_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show Colors;
 import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:prism_ui/press_surface.dart';
 

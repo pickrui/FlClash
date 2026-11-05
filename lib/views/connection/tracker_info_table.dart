@@ -12,7 +12,7 @@ import 'package:fl_clash/ui/table_layout.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/record_filter.dart';
 import 'package:fl_clash/widgets/record_filter.dart';

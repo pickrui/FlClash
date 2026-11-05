@@ -5,7 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math' as math;
 
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show Easing;
 
 const _transitionDuration = Duration(milliseconds: 300);
 

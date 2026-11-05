@@ -14,7 +14,7 @@ import 'package:fl_clash/ui/keyboard_inset_hold.dart';
 import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 class BaseNavigator {
   static PageRoute<T> _routeOf<T>(BuildContext context, Widget child) {

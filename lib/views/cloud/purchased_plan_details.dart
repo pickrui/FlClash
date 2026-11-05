@@ -8,8 +8,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/cloud_account.dart';
 import 'package:fl_clash/models/store.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:material_ui/material_ui.dart'
-    hide LinearProgressIndicator, Theme;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:intl/intl.dart';
 

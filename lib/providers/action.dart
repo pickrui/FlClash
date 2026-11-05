@@ -40,7 +40,7 @@ import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
 import 'package:fl_clash/widgets/linux_package_format_dialog.dart';
 import 'package:fl_clash/widgets/port_conflict_dialog.dart';
 import 'package:fl_clash/common/mitm_module.dart';
-import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart' show compute;

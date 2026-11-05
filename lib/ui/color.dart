@@ -5,7 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math';
 
-import 'package:material_ui/material_ui.dart' show Color, HSLColor, Colors;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show Colors;
 import 'package:prism_ui/color_scheme.dart';
 import 'package:prism_ui/color.dart';
 

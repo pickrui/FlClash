@@ -31,8 +31,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/resource_file_info.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:prism_ui/shape.dart' as prism;
-import 'package:material_ui/material_ui.dart'
-    hide TextField, InputDecoration, TextButton;
+import 'package:flutter/widgets.dart';
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:flutter_riverpod/flutter_riverpod.dart';

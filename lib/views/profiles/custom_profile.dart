@@ -34,7 +34,7 @@ import 'package:fl_clash/views/tools.dart' show tailscalePageBuilder;
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart' hide FilledButton;
+import 'package:flutter/widgets.dart';
 import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 
 import 'custom_groups.dart';

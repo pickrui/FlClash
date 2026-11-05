@@ -22,7 +22,7 @@ import 'package:fl_clash/widgets/chip_title.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/ui/navigator.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:flutter/widgets.dart';
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

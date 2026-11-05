@@ -20,8 +20,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:prism_ui/shape.dart' as prism;
 import 'package:prism_ui/list_row.dart';
-import 'package:material_ui/material_ui.dart'
-    hide TextField, InputDecoration, IconButton, FilledButton, ButtonStyle;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show Colors;
 import 'package:fl_clash/ui/common_button.dart'
     show IconButton, FilledButton, ButtonStyle;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
@@ -187,10 +187,10 @@ Color _getProxyChainRoleColor(
   int totalLength,
 ) {
   if (index == 0) {
-    return Colors.green;
+    return const Color(0xFF4CAF50);
   }
   if (index == totalLength - 1 && totalLength > 1) {
-    return Colors.orange;
+    return const Color(0xFFFF9800);
   }
   return context.colorScheme.primary;
 }

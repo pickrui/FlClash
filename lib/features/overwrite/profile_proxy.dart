@@ -22,8 +22,8 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart'
-    hide TextField, InputDecoration, IconButton, TextButton, FilledButton;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/theme_data.dart' show Colors;
 import 'package:fl_clash/ui/common_button.dart'
     show IconButton, TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;

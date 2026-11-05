@@ -13,7 +13,7 @@ import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/sheet_navigator.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 class QuickEditCancelled implements Exception {
   const QuickEditCancelled();

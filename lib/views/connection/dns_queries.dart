@@ -27,7 +27,7 @@ import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 
 extension on DnsQuery {
   bool get hasFailureRcode => rcode.isNotEmpty && rcode != 'NOERROR';

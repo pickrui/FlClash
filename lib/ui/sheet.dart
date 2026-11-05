@@ -11,7 +11,7 @@ import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/view_scope.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/l10n.dart';
 
 import 'form_sheet.dart';

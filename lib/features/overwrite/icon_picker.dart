@@ -19,7 +19,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/route_motion_hold.dart';
-import 'package:material_ui/material_ui.dart' hide Tooltip;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/tooltip.dart' show Tooltip;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

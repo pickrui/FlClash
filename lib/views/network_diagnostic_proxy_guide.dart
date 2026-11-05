@@ -14,8 +14,7 @@ import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart'
-    hide TextButton, Theme, SelectableText;
+import 'package:flutter/widgets.dart';
 import 'package:prism_ui/selectable_text.dart' show SelectableText;
 import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
