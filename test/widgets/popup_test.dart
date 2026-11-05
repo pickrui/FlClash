@@ -47,7 +47,7 @@ void main() {
     final resting = tester.getRect(press);
     Matrix4? transform;
     expect(
-      tester.renderObject<RenderProxyBox>(press).child,
+      tester.renderObject<RenderProxyBox>(press),
       paints..everything((method, arguments) {
         if (method == #transform) {
           transform ??= Matrix4.fromFloat64List(

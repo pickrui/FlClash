@@ -653,7 +653,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       expect(
-        tester.renderObject<RenderProxyBox>(press).child!.debugLayer,
+        tester.renderObject<RenderProxyBox>(press).debugLayer,
         isA<TransformLayer>(),
       );
       await gesture.cancel();
