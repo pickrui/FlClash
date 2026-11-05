@@ -8,15 +8,16 @@ import 'dart:typed_data';
 
 import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 const _destinations = [
-  NavigationDockDestination(icon: Icon(Icons.home), label: 'Home'),
-  NavigationDockDestination(icon: Icon(Icons.cloud), label: 'Cloud'),
-  NavigationDockDestination(icon: Icon(Icons.settings), label: 'Settings'),
+  NavigationDockDestination(glyph: AppGlyphs.dashboard, label: 'Home'),
+  NavigationDockDestination(glyph: AppGlyphs.cloudSync, label: 'Cloud'),
+  NavigationDockDestination(glyph: AppGlyphs.settings, label: 'Settings'),
 ];
 
 final _lens = find.descendant(

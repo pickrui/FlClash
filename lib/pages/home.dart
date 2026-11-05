@@ -15,7 +15,10 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide NavigationBar, NavigationDestination;
+import 'package:prism_ui/navigation_bar.dart';
+import 'package:prism_ui/bar_item_presence.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fl_clash/ui/focus.dart';
@@ -103,24 +106,21 @@ class _HomeShell extends ConsumerWidget {
                   bottom: 0,
                   child: AnimatedVisibility.bottomNavigation(
                     visible: isMobile && floating,
-                    child: _NavigationPadding(
-                      child: NavigationDock(
-                        destinations: [
-                          for (final item in navigationItems)
-                            NavigationDockDestination(
-                              icon: navigationGlyph(
-                                item.label,
-                                selected:
-                                    item.label ==
-                                    navigationItems[state.currentIndex].label,
+                    child: BarItemPresence.held(
+                      child: _NavigationPadding(
+                        child: NavigationDock(
+                          destinations: [
+                            for (final item in navigationItems)
+                              NavigationDockDestination(
+                                glyph: navigationGlyphOf(item.label),
+                                label: item.label.label,
                               ),
-                              label: item.label.label,
-                            ),
-                        ],
-                        selectedIndex: state.currentIndex,
-                        onSelected: (index) {
-                          _handleToPage(navigationItems[index].label, ref);
-                        },
+                          ],
+                          selectedIndex: state.currentIndex,
+                          onSelected: (index) {
+                            _handleToPage(navigationItems[index].label, ref);
+                          },
+                        ),
                       ),
                     ),
                   ),

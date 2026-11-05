@@ -430,7 +430,7 @@ class CommonScaffoldState extends State<CommonScaffold>
         child: GooSurface(
           glass: glass ? LiquidGlassStyle.pill(colorScheme.asPrism) : null,
           color: SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
-          shadows: glass ? const [] : dockShadows(colorScheme),
+          shadows: glass ? const [] : dockShadows(colorScheme.asPrism),
           child: ListenableBuilder(
             listenable: Listenable.merge([_searchFocusNode, _textController]),
             builder: (context, _) {

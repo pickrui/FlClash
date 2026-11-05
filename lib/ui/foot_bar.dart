@@ -61,7 +61,7 @@ class FloatingFootBar extends StatelessWidget {
                     decoration: ShapeDecoration(
                       color: level.colorOf(colorScheme),
                       shape: AppShape.full,
-                      shadows: dockShadows(colorScheme),
+                      shadows: dockShadows(colorScheme.asPrism),
                     ),
                     child: content,
                   ),
