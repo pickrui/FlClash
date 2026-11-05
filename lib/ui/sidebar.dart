@@ -6,15 +6,19 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/l10n.dart';
-import 'package:fl_clash/ui/scroll_behavior.dart';
-import 'package:fl_clash/ui/shape.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/context.dart';
+import 'package:prism_ui/divider.dart';
+import 'package:prism_ui/icons/icons.dart';
+import 'package:prism_ui/l10n.dart';
+import 'package:prism_ui/press_region.dart';
+import 'package:prism_ui/scroll_behavior.dart';
+import 'package:prism_ui/shape.dart';
+import 'package:prism_ui/surface.dart';
+import 'package:prism_ui/theme_data.dart';
+import 'package:prism_ui/tooltip.dart';
+import 'package:prism_ui/typography.dart';
 
 const _compactWidth = 48.0;
 const _expandedWidth = 220.0;
@@ -219,7 +223,7 @@ class _SidebarOverlay extends StatelessWidget {
               },
               child: FocusScope(
                 autofocus: true,
-                child: Material(
+                child: Surface(
                   color: colorScheme.chromeSurface,
                   shape: BorderDirectional(
                     end: Divider.createBorderSide(context),
@@ -320,7 +324,7 @@ class _SidebarPane extends StatelessWidget {
               onTap: onToggle,
               child: SizedBox(
                 width: itemWidth,
-                child: Center(child: GlyphIcon(AppGlyphs.sidebar(progress))),
+                child: Center(child: GlyphIcon(Glyphs.sidebar(progress))),
               ),
             ),
           ),
@@ -408,22 +412,18 @@ class _SidebarButton extends StatelessWidget {
         selected: selected,
         child: FocusRing(
           shape: _itemShape,
-          child: Material(
-            color: selected == true ? colors.selectedFill : Colors.transparent,
+          child: PressRegion(
+            onTap: onTap,
             shape: _itemShape,
-            child: InkWell(
-              onTap: onTap,
-              customBorder: _itemShape,
-              mouseCursor: SystemMouseCursors.basic,
-              splashFactory: NoSplash.splashFactory,
-              overlayColor: colors.overlay,
-              child: Tooltip(
-                message: tooltip,
-                excludeFromSemantics: !tooltipIsLabel,
-                child: IconTheme.merge(
-                  data: IconThemeData(size: _iconSize, color: colors.icon),
-                  child: SizedBox(height: height, child: child),
-                ),
+            fill: selected == true ? colors.selectedFill : null,
+            overlay: colors.overlay,
+            mouseCursor: SystemMouseCursors.basic,
+            child: Tooltip(
+              message: tooltip,
+              excludeFromSemantics: !tooltipIsLabel,
+              child: IconTheme.merge(
+                data: IconThemeData(size: _iconSize, color: colors.icon),
+                child: SizedBox(height: height, child: child),
               ),
             ),
           ),
