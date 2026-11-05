@@ -1,0 +1,317 @@
+name: build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  IS_STABLE: ${{ !contains(github.ref, '-') }}
+  GO_VERSION: '1.25'
+  FLUTTER_CHANNEL: 'stable'
+
+jobs:
+  version:
+    name: Generate Version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      full_version: ${{ steps.version.outputs.full_version }}
+      version_number: ${{ steps.version.outputs.version_number }}
+      build_number: ${{ steps.version.outputs.build_number }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate Version
+        id: version
+        env:
+          TZ: UTC
+        run: |
+          set -e
+          VERSION_NUMBER=$(grep -E "^version:" pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9.]+).*/\1/')
+          
+          UTC_NOW=$(date -u '+%Y-%m-%d %H:%M:%S')
+          BUILD_NUMBER=$(date -u -d "$UTC_NOW 8 hours" '+%Y%m%d%H' 2>/dev/null || date -u -v+8H -j -f '%Y-%m-%d %H:%M:%S' "$UTC_NOW" '+%Y%m%d%H')
+          
+          FULL_VERSION="${VERSION_NUMBER}+${BUILD_NUMBER}"
+          
+          echo "version_number=$VERSION_NUMBER" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
+          
+          echo "Generated version: $FULL_VERSION"
+          echo "  Version number: $VERSION_NUMBER"
+          echo "  Build number: $BUILD_NUMBER"
+
+  build:
+    name: "Build ${{ matrix.name }}"
+    needs: [version]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        include:
+          - platform: android
+            os: ubuntu-latest
+            arch: arm64
+            name: "Android (arm64)"
+          - platform: android
+            os: ubuntu-latest
+            arch: arm
+            name: "Android (arm)"
+          - platform: android
+            os: ubuntu-latest
+            arch: amd64
+            name: "Android (x64)"
+          - platform: windows
+            os: Windows-2022
+            arch: amd64
+            name: "Windows x64"
+          # - platform: windows
+          # os: windows-11-arm
+          # arch: arm64
+          # name: "Windows arm64"
+          - platform: macos
+            os: macos-14
+            arch: amd64
+            name: "macOS Intel x64"
+          - platform: macos
+            os: macos-latest
+            arch: arm64
+            name: "macOS Apple Silicon"
+          - platform: linux
+            os: ubuntu-22.04
+            arch: amd64
+            name: "Linux x64"
+          - platform: linux
+            os: ubuntu-24.04-arm
+            arch: arm64
+            name: "Linux arm64"
+
+    steps:
+      - name: Setup rust
+        if: startsWith(matrix.os, 'windows-11-arm')
+        run: |
+          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile rustup-init.exe
+          .\rustup-init.exe -y --default-toolchain stable
+          $cargoPath = "$env:USERPROFILE\.cargo\bin"
+          Add-Content $env:GITHUB_PATH $cargoPath
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Android Signing
+        if: startsWith(matrix.platform,'android')
+        run: |
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/local.properties
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> android/local.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/local.properties
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            core/go.sum
+
+      - name: Setup Flutter Master
+        if: startsWith(matrix.os, 'windows-11-arm') || startsWith(matrix.os, 'ubuntu-24.04-arm')
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'master'
+          cache: true
+      - name: Setup Flutter
+        if: ${{ !(startsWith(matrix.os, 'windows-11-arm') || startsWith(matrix.os, 'ubuntu-24.04-arm')) }}
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+      #          flutter-version: 3.29.3
+
+      - name: Get Flutter Dependency
+        run: flutter pub get
+
+      - name: Generate Code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Application
+        id: build
+        shell: bash
+        env:
+          FLUTTER_VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
+          FLUTTER_BUILD_NUMBER: ${{ needs.version.outputs.build_number }}
+        run: |
+          set -e
+          echo "Building with version: $FLUTTER_VERSION_NUMBER+$FLUTTER_BUILD_NUMBER"
+          BUILD_ARGS="${{ matrix.platform }}"
+          [ -n "${{ matrix.arch }}" ] && BUILD_ARGS="$BUILD_ARGS --arch ${{ matrix.arch }}"
+          BUILD_ARGS="$BUILD_ARGS --out app"
+          [ "${{ env.IS_STABLE }}" == "true" ] && BUILD_ARGS="$BUILD_ARGS --env stable"
+          dart setup.dart $BUILD_ARGS
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) }}
+          path: ./dist
+          overwrite: true
+
+  changelog:
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        if: ${{ env.IS_STABLE == 'true' }}
+        with:
+          fetch-depth: 0
+          ref: refs/heads/main
+      - name: Generate
+        if: ${{ env.IS_STABLE == 'true' }}
+        run: |
+          tags=($(git tag --merged $(git rev-parse HEAD) --sort=-creatordate))
+          preTag=$(grep -oP '^## \K.*' CHANGELOG.md | head -n 1)
+          currentTag=""
+          for ((i = 0; i <= ${#tags[@]}; i++)); do
+            if (( i < ${#tags[@]} )); then
+              tag=${tags[$i]}
+            else
+              tag=""
+            fi
+            if [ -n "$currentTag" ]; then
+              if [ "$(echo -e "$currentTag\n$preTag" | sort -V | head -n 1)" == "$currentTag" ]; then
+                break
+              fi
+            fi
+            if [ -n "$currentTag" ]; then
+              echo "## $currentTag" >> NEW_CHANGELOG.md
+              echo "" >> NEW_CHANGELOG.md
+              if [ -n "$tag" ]; then
+                git log --pretty=format:"%B" "$tag..$currentTag" | awk 'NF {print "- " $0} !NF {print ""}' >> NEW_CHANGELOG.md
+              else
+                git log --pretty=format:"%B" "$currentTag" | awk 'NF {print "- " $0} !NF {print ""}' >> NEW_CHANGELOG.md
+              fi
+              echo "" >> NEW_CHANGELOG.md
+            fi
+            currentTag=$tag
+          done
+          cat CHANGELOG.md >> NEW_CHANGELOG.md
+          cat NEW_CHANGELOG.md > CHANGELOG.md
+
+      - name: Commit
+        if: ${{ env.IS_STABLE == 'true' }}
+        run: |
+          git add CHANGELOG.md
+          if ! git diff --cached --quiet; then
+            echo "Commit pushing"
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git commit -m "Update changelog"
+            git push
+            if [ $? -eq 0 ]; then
+              echo "Push succeeded"
+            else
+              echo "Push failed"
+              exit 1
+            fi
+          fi
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  upload:
+    permissions: write-all
+    needs: [ version, build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download
+        uses: actions/download-artifact@v4
+        with:
+          path: ./dist/
+          pattern: artifact-*
+          merge-multiple: true
+
+      - name: Generate release.md
+        run: |
+          # Get current tag and previous tag
+          currentTag="${{ github.ref_name }}"
+          prevTag=$(git tag --sort=-version:refname | grep -A 1 "^${currentTag}$" | tail -n 1 || echo "")
+          
+          echo "## What's Changed" > release.md
+          echo "" >> release.md
+          
+          # Generate changelog between current and previous tag
+          if [ -n "$prevTag" ] && [ "$prevTag" != "$currentTag" ]; then
+            echo "Changes since ${prevTag}:" >> release.md
+            echo "" >> release.md
+            git log --pretty=format:"- %s" "${prevTag}..${currentTag}" >> release.md
+          else
+            echo "Initial release" >> release.md
+            echo "" >> release.md
+            git log --pretty=format:"- %s" "${currentTag}" | head -n 20 >> release.md
+          fi
+          
+          echo "" >> release.md
+
+      - name: Patch release.md
+        run: |
+          version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+          sed "s|VERSION|$version|g" ./.github/release_template.md >> release.md
+
+      - name: Release
+        if: ${{ env.IS_STABLE == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./dist/*
+          body_path: './release.md'
+
+      - name: Update Version via Dler Cloud API
+        if: success() && env.IS_STABLE == 'true'
+        continue-on-error: true
+        run: |
+          API_KEY="${{ secrets.DLER_KEY }}"
+          API_URL="https://dler.cloud/api/v1/version/update"
+          FULL_VERSION="${{ needs.version.outputs.full_version }}"
+          
+          if [ -z "$API_KEY" ]; then
+            echo "⚠️  Skipping version update: DLER_KEY secret not configured"
+            exit 0
+          fi
+          
+          if [ -z "$FULL_VERSION" ]; then
+            echo "❌ Error: Version number not available"
+            exit 1
+          fi
+          
+          echo "📦 Updating Dler Cloud version to: $FULL_VERSION"
+          
+          response=$(curl -s -w "\n%{http_code}" -X POST "$API_URL" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode "key=$API_KEY" \
+            --data-urlencode "version=$FULL_VERSION")
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          
+          echo "Response body: $body"
+          
+          if [ "$http_code" = "200" ]; then
+            echo "✅ Version updated successfully on Dler Cloud"
+            echo "   Version: $FULL_VERSION"
+            echo "   API: $API_URL"
+          else
+            echo "❌ Failed to update version"
+            echo "   HTTP Status: $http_code"
+            echo "   Response: $body"
+            exit 1
+          fi
+

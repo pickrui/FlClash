@@ -1,0 +1,19 @@
+display_name: "FlClash for Dler Cloud"
+
+icon: ./assets/images/icon.png
+
+keywords:
+  - FlClash
+  - Clash
+  - ClashMeta
+  - Proxy
+  - Dler Cloud
+
+generic_name: "FlClash for Dler Cloud"
+
+categories:
+  - Network
+
+startup_notify: true
+
+include: []

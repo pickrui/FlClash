@@ -1,0 +1,7 @@
+app_name: 'flclash'
+output: 'dist/'
+# See https://mustache.github.io/mustache.5.html for string template format.
+# Available variables: name, version, build_name, build_number, build_mode, platform, flavor, channel, description, ext, is_installer
+# Removed version number and -setup suffix for cleaner filenames
+# Android APK with split-per-abi will automatically include architecture in filename
+artifact_name: '{{name}}-{{platform}}{{#description}}-{{description}}{{/description}}.{{ext}}'
