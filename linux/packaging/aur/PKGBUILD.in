@@ -1,0 +1,63 @@
+# Maintainer: @MAINTAINER@
+#
+# Rendered by tool/build_aur_package.sh from linux/packaging/aur/PKGBUILD.in.
+# Edit the template, never the rendered file.
+
+pkgname=@PKGNAME@
+pkgver=@PKGVER@
+pkgrel=@PKGREL@
+pkgdesc="A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free (oixCloud build)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/@REPO@"
+license=('GPL-3.0-or-later')
+# One entry per DT_NEEDED soname of the release bundle. libayatana-indicator
+# and ayatana-ido are listed because Arch's libayatana-appindicator 0.6 no
+# longer depends on them while the Ubuntu-built tray plugin still links them,
+# and the executable fails to load without them.
+depends=(
+  'gtk3'
+  'glib2'
+  'gcc-libs'
+  'libsecret'
+  'libayatana-appindicator'
+  'libayatana-indicator'
+  'ayatana-ido'
+  'libdbusmenu-glib'
+)
+optdepends=(
+  'polkit: authorize the privileged helper that TUN mode needs'
+  'xdg-desktop-portal: file dialogs on Wayland'
+)
+provides=("flclash=$pkgver")
+conflicts=('flclash' 'flclash-bin')
+# The bundle ships prebuilt binaries: stripping them breaks the Core hash the
+# Helper verifies before it starts the Core as root.
+options=('!strip' '!debug' '!emptydirs')
+install="$pkgname.install"
+
+_tag=@TAG@
+_deb="$pkgname-$pkgver.deb"
+source_x86_64=("$_deb::$url/releases/download/$_tag/flclash-linux-amd64.deb")
+source_aarch64=("$_deb::$url/releases/download/$_tag/flclash-linux-arm64.deb")
+source=("LICENSE-$pkgver::https://raw.githubusercontent.com/@REPO@/$_tag/LICENSE")
+noextract=("$_deb")
+sha256sums=('@SHA256_LICENSE@')
+sha256sums_x86_64=('@SHA256_X86_64@')
+sha256sums_aarch64=('@SHA256_AARCH64@')
+
+package() {
+  cd "$srcdir"
+  bsdtar -xf "$_deb"
+  bsdtar -xpf data.tar.* -C "$pkgdir"
+
+  # The Debian package relies on a symlink its maintainer script creates.
+  install -d "$pkgdir/usr/bin"
+  ln -s /usr/share/FlClash/FlClash "$pkgdir/usr/bin/FlClash"
+  ln -s /usr/share/FlClash/FlClash "$pkgdir/usr/bin/flclash"
+
+  # Arch always runs systemd, so the Core stays unprivileged and TUN goes
+  # through the Helper unit instead of a setuid Core.
+  chmod u-s "$pkgdir/usr/share/FlClash/FlClashCore"
+
+  install -Dm644 "LICENSE-$pkgver" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
