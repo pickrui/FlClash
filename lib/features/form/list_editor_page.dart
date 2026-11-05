@@ -147,33 +147,45 @@ class _ListEditorPageState<T, K> extends ConsumerState<ListEditorPage<T, K>> {
     required bool reorderable,
   }) {
     final id = widget.idOf(item);
-    final menuItems = selected.isEmpty ? widget.menuItemsOf?.call(item) : null;
-    final child = ItemPositionProvider(
-      position: ItemPosition.get(index, total),
-      child: widget.itemBuilder(
-        context,
-        ref,
+    final position = ItemPosition.get(index, total);
+    final isEditing = selected.isNotEmpty;
+    final isSelected = selected.contains(id);
+    return MemoBuilder(
+      key: ValueKey(id),
+      inputs: [
+        widget,
         item,
         index,
-        selected.isNotEmpty,
-        selected.contains(id),
-        () => _handleToggleSelected(item),
-      ),
+        position,
+        isEditing,
+        isSelected,
+        reorderable,
+      ],
+      builder: (context) {
+        final child = ItemPositionProvider(
+          position: position,
+          child: widget.itemBuilder(
+            context,
+            ref,
+            item,
+            index,
+            isEditing,
+            isSelected,
+            () => _handleToggleSelected(item),
+          ),
+        );
+        if (widget.menuItemsOf == null) {
+          return reorderable
+              ? ReorderableDelayedDragStartListener(index: index, child: child)
+              : child;
+        }
+        final row = ContextMenuRegion(
+          menuItems: isEditing ? null : widget.menuItemsOf!(item),
+          child: child,
+        );
+        return reorderable ? SortableItem(index: index, child: row) : row;
+      },
     );
-    if (widget.menuItemsOf == null) {
-      return reorderable
-          ? ReorderableDelayedDragStartListener(
-              key: ValueKey(id),
-              index: index,
-              child: child,
-            )
-          : KeyedSubtree(key: ValueKey(id), child: child);
-    }
-    final row = ContextMenuRegion(menuItems: menuItems, child: child);
-    if (!reorderable) {
-      return KeyedSubtree(key: ValueKey(id), child: row);
-    }
-    return SortableItem(key: ValueKey(id), index: index, child: row);
   }
 
   @override
