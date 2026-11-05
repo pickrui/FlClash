@@ -1,0 +1,42 @@
+display_name: FlClash
+package_name: FlClash
+maintainer:
+  name: chen08209
+  email: chen08209@gmail.com
+
+priority: optional
+section: x11
+installed_size: 6604
+essential: false
+icon: ./assets/images/icon.png
+
+dependencies:
+  - libayatana-appindicator3-dev
+  - libkeybinder-3.0-dev
+
+keywords:
+  - FlClash
+  - Clash
+  - ClashMeta
+  - Proxy
+
+generic_name: FlClash
+
+categories:
+  - Network
+
+startup_notify: true
+
+postinstall_scripts:
+  - |
+    CORE_PATH="/usr/share/FlClash/FlClashCore"
+    if [ -f "$CORE_PATH" ]; then
+      chown root:root "$CORE_PATH" 2>/dev/null || true
+      chmod u+s "$CORE_PATH" 2>/dev/null || true
+    fi
+postuninstall_scripts:
+  - |
+    CORE_PATH="/usr/share/FlClash/FlClashCore"
+    if [ -f "$CORE_PATH" ]; then
+      chmod u-s "$CORE_PATH" 2>/dev/null || true
+    fi
