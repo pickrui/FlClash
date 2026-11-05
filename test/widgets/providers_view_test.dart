@@ -13,6 +13,7 @@ import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/widgets/subscription_info_view.dart';
 
@@ -262,6 +263,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         locale: const Locale('en'),
+        builder: (_, child) => StatusManager(child: child!),
         overrides: [
           viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
           providersProvider.overrideWithBuild(
@@ -584,6 +586,8 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('transport lost', findRichText: true), findsNothing);
       action.pending['second']!.complete('invalid rules');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppLocalizations.current.failedCount(2)));
       await tester.pumpAndSettle();
       expect(find.text('Bad state: transport lost'), findsOneWidget);
       expect(find.text('invalid rules'), findsOneWidget);

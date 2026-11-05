@@ -175,6 +175,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       TestApp(
+        builder: (_, child) => StatusManager(child: child!),
         overrides: [
           clashProvidersProvider.overrideWith(
             (_) => Stream.value([
@@ -206,15 +207,13 @@ void main() {
           builder: (context) => TextButton(
             onPressed: () => Navigator.of(context).push<void>(
               MaterialPageRoute(
-                builder: (_) => StatusManager(
-                  child: ValueListenableBuilder(
-                    valueListenable: active,
-                    builder: (_, value, child) =>
-                        PageActivityScope(isActive: value, child: child!),
-                    child: isScript
-                        ? const ScriptsView()
-                        : const ClashProvidersView(),
-                  ),
+                builder: (_) => ValueListenableBuilder(
+                  valueListenable: active,
+                  builder: (_, value, child) =>
+                      PageActivityScope(isActive: value, child: child!),
+                  child: isScript
+                      ? const ScriptsView()
+                      : const ClashProvidersView(),
                 ),
               ),
             ),
@@ -354,14 +353,21 @@ void main() {
         ),
         isTrue,
       );
+      await tester.tap(find.text(AppLocalizations.current.failedCount(2)));
+      await tester.pumpAndSettle();
       expect(
         find.text(AppLocalizations.current.ruleSetNeedsConversionTip),
+        findsOneWidget,
+      );
+      expect(
+        find.text(AppLocalizations.current.networkTimeoutError),
         findsOneWidget,
       );
       expect(find.textContaining('token=private'), findsNothing);
       expect(find.textContaining('DioException'), findsNothing);
       expect(find.text('rules-0'), findsOneWidget);
-      await tester.tap(find.text(AppLocalizations.current.confirm));
+      expect(find.text('rules-1'), findsOneWidget);
+      await tester.pageBack();
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     },
