@@ -42,7 +42,6 @@ dependencies:
   tray:
     path: plugins/tray
   collection: ^1.19.1
-  animations: ^3.0.0
   package_info_plus: ^10.2.1
   url_launcher: ^6.3.2
   freezed_annotation: ^3.1.0
@@ -110,8 +109,6 @@ flutter:
       platforms: [macos]
     - path: assets/images/tray/windows/
       platforms: [windows]
-  shaders:
-    - shaders/liquid_glass.frag
   fonts:
     - family: JetBrainsMono
       fonts:

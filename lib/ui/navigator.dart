@@ -7,7 +7,6 @@ import 'dart:async';
 
 export 'package:prism_ui/navigator.dart' show RootPage;
 
-import 'package:animations/animations.dart';
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/ui/deferred_push.dart';
 import 'package:fl_clash/ui/drag_back.dart';
@@ -156,11 +155,6 @@ Future<void> _whenStill(Animation<double> animation) {
   animation.addStatusListener(handleStatus);
   return completer.future;
 }
-
-const commonSharedXPageTransitions = SharedAxisPageTransitionsBuilder(
-  transitionType: SharedAxisTransitionType.horizontal,
-  fillColor: Colors.transparent,
-);
 
 class CommonDesktopRoute<T> extends PageRoute<T>
     with DragBackRouteMixin<T>, DeferredPushRouteMixin<T> {
