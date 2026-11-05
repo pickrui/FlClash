@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -265,15 +266,23 @@ void main() {
       expect(find.text(AppLocalizations.current.basicStrategy), findsOneWidget);
       expect(find.text(AppLocalizations.current.proxyGroup), findsOneWidget);
       expect(
-        tester
-            .widget<ListTile>(find.widgetWithText(ListTile, 'Missing'))
-            .enabled,
-        false,
+        tester.widget<ListItem>(find.widgetWithText(ListItem, 'Missing')).onTap,
+        isNull,
+      );
+      expect(
+        find.ancestor(
+          of: find.widgetWithText(ListItem, 'Missing'),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Semantics && widget.properties.enabled == false,
+          ),
+        ),
+        findsOneWidget,
       );
       await tester.enterText(find.byType(TextField), 'node');
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(ListTile, 'Node'), findsOneWidget);
-      expect(find.widgetWithText(ListTile, 'Group'), findsNothing);
+      expect(find.widgetWithText(ListItem, 'Node'), findsOneWidget);
+      expect(find.widgetWithText(ListItem, 'Group'), findsNothing);
       final sources = routingProviderSources(
         _profile.copyWith(url: 'https://example.com/sub'),
         {
