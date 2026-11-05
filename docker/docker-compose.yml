@@ -1,0 +1,24 @@
+services:
+  flclash:
+    image: ghcr.io/pickrui/flclash:latest
+    container_name: flclash
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - flclash-config:/config
+    shm_size: "1gb"
+    restart: unless-stopped
+
+volumes:
+  flclash-config:

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=FlClash
+Exec=/usr/share/FlClash/FlClash
+Icon=FlClash
+Terminal=false
+X-GNOME-Autostart-enabled=true
+X-XFCE-Autostart=true
