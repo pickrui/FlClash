@@ -21,7 +21,8 @@ import 'package:fl_clash/views/connection/dns_queries.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/test_app.dart';
