@@ -21,7 +21,7 @@ class LinuxPackageFormatDialog extends StatelessWidget {
     return AlertScope.of(context).dialog(
       title: localizations.updatePackageFormat,
       actions: [
-        TextButton(
+        AlertScope.of(context).action(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(localizations.cancel),
         ),

@@ -22,7 +22,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/common_button.dart' show IconButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:prism_ui/prism_list.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/navigator.dart';

@@ -5,23 +5,27 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math' as math;
 
-import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/metrics.dart';
-import 'package:fl_clash/ui/shape.dart';
-import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:prism_ui/common_button.dart' as prism;
-import 'package:prism_ui/card_surface.dart' as prism;
-import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:flutter/widgets.dart';
+import 'package:prism_ui/context.dart';
+import 'package:prism_ui/icons/icons.dart';
+import 'package:prism_ui/inherited.dart';
+import 'package:prism_ui/shape.dart';
+import 'package:prism_ui/surface.dart';
 
-import 'card.dart';
+import 'package:prism_ui/card.dart';
+import 'package:prism_ui/card_surface.dart';
+import 'package:fl_clash/ui/common_button.dart';
+
 import 'goo.dart';
 import 'liquid_glass.dart';
+
+import 'package:prism_ui/list_row.dart';
+
 import 'navigation_dock.dart';
+
+import 'package:prism_ui/theme_data.dart';
 
 class MoreActionButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -39,17 +43,13 @@ class MoreActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: CommonCard(
+      child: Card(
         radius: AppCorner.xl,
         onPressed: onPressed,
-        child: ListTile(
-          minTileHeight: listRowMinHeight,
-          minVerticalPadding: listRowVerticalPadding,
-          titleTextStyle: context.listTitleStyle,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ListRow(
           title: Text(label),
           trailing:
-              trailing ?? const GlyphIcon(AppGlyphs.chevronForward, size: 18),
+              trailing ?? const GlyphIcon(Glyphs.chevronForward, size: 18),
         ),
       ),
     );
@@ -146,7 +146,7 @@ class _TonalButtonGroupState extends State<TonalButtonGroup>
               child: ValueListenableBuilder(
                 valueListenable: _pointer,
                 builder: (_, pointer, child) => LiquidGlass(
-                  style: LiquidGlassStyle.regular(colorScheme.asPrism),
+                  style: LiquidGlassStyle.regular(colorScheme),
                   pressed: pointer != null,
                   child: child,
                 ),
@@ -394,8 +394,8 @@ class TonalButton extends StatelessWidget {
           grouped: true,
           size: size,
           child: glyph == null
-              ? prism.FilledButton(onPressed: onPressed, child: label)
-              : prism.FilledButton.icon(
+              ? FilledButton(onPressed: onPressed, child: label)
+              : FilledButton.icon(
                   onPressed: onPressed,
                   icon: GlyphIcon(glyph, fill: 1),
                   label: label,
@@ -439,140 +439,83 @@ class TonalButtonTheme extends StatelessWidget {
         : context.raisedSurfaceLevel.colorOf(colorScheme);
     final foreground = colorScheme.onSurface;
     final disabledForeground = foreground.withValues(alpha: 0.38);
-    ButtonStyle? paneOf(bool Function(Set<WidgetState> states) tinted) {
+    ButtonLayerBuilder? paneOf(bool Function(Set<WidgetState> states) tinted) {
       if (!paned) {
         return null;
       }
-      final regularGlass = LiquidGlassStyle.regular(colorScheme.asPrism);
+      final regularGlass = LiquidGlassStyle.regular(colorScheme);
       final tintedGlass = LiquidGlassStyle.tinted(
-        colorScheme.asPrism,
+        colorScheme,
         colorScheme.primary,
       );
-      return liquidGlassButtonStyle(
+      return LiquidGlass.buttonBackground(
         (states) => tinted(states) ? tintedGlass : regularGlass,
       );
     }
 
-    ButtonStyle feedback(ButtonStyle? pane, {required bool standsOff}) {
-      final behind = pane?.backgroundBuilder;
-      return ButtonStyle(
-        splashFactory: NoSplash.splashFactory,
-        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-        backgroundColor: pane?.backgroundColor,
-        backgroundBuilder: (context, states, child) {
-          final content = behind == null
-              ? child!
-              : behind(context, states, child);
-          final mark = _HoverMarkScope.maybeOf(context);
-          return mark == null
-              ? ElasticHover(child: content)
-              : _HoverSlot(
-                  mark: mark,
-                  enabled: !states.contains(WidgetState.disabled),
-                  child: content,
-                );
-        },
-      ).merge(focusRingStyle(colorScheme, standsOff: standsOff));
+    ButtonLayerBuilder feedback(ButtonLayerBuilder? pane) {
+      return (context, states, child) {
+        final content = pane == null ? child! : pane(context, states, child);
+        final mark = _HoverMarkScope.maybeOf(context);
+        return mark == null
+            ? ElasticHover(child: content)
+            : _HoverSlot(
+                mark: mark,
+                enabled: !states.contains(WidgetState.disabled),
+                child: content,
+              );
+      };
     }
 
     final iconPane = goo
-        ? GooSurface.buttonStyle
+        ? GooSurface.buttonBackground
         : paneOf((states) => states.contains(WidgetState.selected));
     final filledPane = paneOf(
       (states) => !states.contains(WidgetState.disabled),
-    );
-    final filledFeedback = feedback(filledPane, standsOff: !grouped);
-    final themed = IconButtonTheme(
-      data: IconButtonThemeData(
-        style: feedback(iconPane, standsOff: paned).merge(
-          IconButton.styleFrom(
-            backgroundColor: fill,
-            foregroundColor: foreground,
-            disabledBackgroundColor: fill,
-            disabledForegroundColor: disabledForeground,
-            fixedSize: Size.square(size.button),
-            minimumSize: Size.square(size.button),
-            padding: EdgeInsets.zero,
-            iconSize: size.icon,
-            visualDensity: VisualDensity.standard,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-        ),
-      ),
-      child: FilledButtonTheme(
-        data: FilledButtonThemeData(
-          style: filledFeedback.merge(
-            FilledButton.styleFrom(
-              backgroundColor: grouped ? fill : null,
-              foregroundColor: grouped
-                  ? foreground
-                  : paned
-                  ? colorScheme.onPrimary
-                  : null,
-              disabledBackgroundColor: grouped ? fill : null,
-              disabledForegroundColor: grouped ? disabledForeground : null,
-              minimumSize: Size.square(size.button),
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              shape: AppShape.full,
-              visualDensity: VisualDensity.standard,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
-        ),
-        child: IconTheme.merge(
-          data: const IconThemeData(fill: 1),
-          child: child,
-        ),
-      ),
     );
     final filledFill = grouped
         ? fill
         : filledPane == null
         ? null
         : Colors.transparent;
-    return _GlassButtons(
-      glass: paned,
-      child: prism.ButtonTheme(
-        data: prism.ButtonTheme.of(context).copyWith(
-          icon: prism.ButtonStyle.from(
-            backgroundColor: fill,
-            foregroundColor: foreground,
-            disabledBackgroundColor: fill,
-            disabledForegroundColor: disabledForeground,
-            fixedSize: Size.square(size.button),
-            minimumSize: Size.square(size.button),
-            padding: EdgeInsets.zero,
-            iconSize: size.icon,
-            visualDensity: prism.VisualDensity.standard,
-            tapTargetSize: prism.TapTargetSize.shrinkWrap,
-            backgroundBuilder: feedback(
-              iconPane,
-              standsOff: paned,
-            ).backgroundBuilder,
-            pressLook: prism.PressLook.none,
-            ringStandsOff: paned,
-          ),
-          filled: prism.ButtonStyle.from(
-            backgroundColor: filledFill,
-            disabledBackgroundColor: filledFill,
-            foregroundColor: grouped
-                ? foreground
-                : paned
-                ? colorScheme.onPrimary
-                : null,
-            disabledForegroundColor: grouped ? disabledForeground : null,
-            minimumSize: Size.square(size.button),
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            visualDensity: prism.VisualDensity.standard,
-            tapTargetSize: prism.TapTargetSize.shrinkWrap,
-            backgroundBuilder: filledFeedback.backgroundBuilder,
-            pressLook: prism.PressLook.none,
-            ringStandsOff: !grouped,
-          ),
+    final themed = ButtonTheme(
+      data: ButtonTheme.of(context).copyWith(
+        icon: ButtonStyle.from(
+          backgroundColor: fill,
+          foregroundColor: foreground,
+          disabledBackgroundColor: fill,
+          disabledForegroundColor: disabledForeground,
+          fixedSize: Size.square(size.button),
+          minimumSize: Size.square(size.button),
+          padding: EdgeInsets.zero,
+          iconSize: size.icon,
+          visualDensity: VisualDensity.standard,
+          tapTargetSize: TapTargetSize.shrinkWrap,
+          backgroundBuilder: feedback(iconPane),
+          pressLook: PressLook.none,
+          ringStandsOff: paned,
         ),
-        child: themed,
+        filled: ButtonStyle.from(
+          backgroundColor: filledFill,
+          disabledBackgroundColor: filledFill,
+          foregroundColor: grouped
+              ? foreground
+              : paned
+              ? colorScheme.onPrimary
+              : null,
+          disabledForegroundColor: grouped ? disabledForeground : null,
+          minimumSize: Size.square(size.button),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          visualDensity: VisualDensity.standard,
+          tapTargetSize: TapTargetSize.shrinkWrap,
+          backgroundBuilder: feedback(filledPane),
+          pressLook: PressLook.none,
+          ringStandsOff: !grouped,
+        ),
       ),
+      child: IconTheme.merge(data: const IconThemeData(fill: 1), child: child),
     );
+    return _GlassButtons(glass: paned, child: themed);
   }
 }
 

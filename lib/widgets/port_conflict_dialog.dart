@@ -60,11 +60,12 @@ class _PortConflictDialogState extends State<PortConflictDialog> {
     return AlertScope.of(context).dialog(
       title: localizations.portUnavailableTitle,
       actions: [
-        TextButton(
+        AlertScope.of(context).action(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(localizations.cancel),
         ),
-        FilledButton(
+        AlertScope.of(context).action(
+          filled: true,
           onPressed: _submit,
           child: Text(localizations.saveAndRetry),
         ),

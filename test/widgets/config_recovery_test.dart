@@ -10,7 +10,8 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/config_recovery.dart';
 import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/ui/loading.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
 
 import 'package:flutter_test/flutter_test.dart';

@@ -10,7 +10,8 @@ import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 
 void main() {
   test('a profile reads how far an outline reaches each way', () {

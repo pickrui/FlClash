@@ -15,7 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide FilledButton;
-import 'package:prism_ui/common_button.dart' show FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 
 import '../helpers/preferences.dart';
 import '../helpers/test_app.dart';

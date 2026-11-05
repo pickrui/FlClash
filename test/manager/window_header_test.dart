@@ -14,7 +14,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton, ButtonTheme;
+import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonTheme;
+import 'package:prism_ui/card_surface.dart' show PressLook;
+import 'package:prism_ui/press_surface.dart';
 
 import '../helpers/test_app.dart';
 import '../helpers/glyph_finders.dart';
@@ -334,7 +337,7 @@ void main() {
       expect(tester.getSize(_pinIcon), const Size.square(pinIconSize));
       expect(tester.getCenter(_pinIcon), tester.getCenter(pin));
       expect(
-        tester.widget<IconButton>(pin).style?.shape?.resolve({}),
+        tester.widget<IconButton>(pin).style?.shape,
         const CircleBorder(),
         reason: 'the pin keeps the round ripple of a regular icon button',
       );
@@ -375,7 +378,7 @@ void main() {
       );
     });
 
-    testWidgets('caption buttons are flat rectangles that keep the ripple', (
+    testWidgets('caption buttons are flat rectangles with state tint', (
       tester,
     ) async {
       await pumpBar(tester, width: 900);
@@ -384,13 +387,15 @@ void main() {
       expect(size.width, greaterThan(size.height));
 
       final context = tester.element(_glyph(CaptionGlyph.close));
-      final themeStyle = IconButtonTheme.of(context).style!;
+      final themeStyle = ButtonTheme.of(context).icon!;
       final onSurface = Theme.of(context).colorScheme.onSurface;
-      expect(themeStyle.shape?.resolve({}), AppShape.none);
-      expect(themeStyle.minimumSize?.resolve({}), size);
-      expect(themeStyle.splashFactory, isNull);
-      expect(themeStyle.animationDuration, isNull);
-      expect(themeStyle.overlayColor, isNull);
+      expect(themeStyle.shape, AppShape.none);
+      expect(themeStyle.minimumSize, size);
+      expect(themeStyle.pressLook, PressLook.none);
+      expect(
+        themeStyle.overlayColor?.resolve({WidgetState.pressed}),
+        Theme.of(context).colorScheme.onSurfaceVariant.opacity10,
+      );
       expect(themeStyle.foregroundColor?.resolve({}), onSurface);
       expect(
         themeStyle.foregroundColor?.resolve({WidgetState.pressed}),
@@ -427,8 +432,7 @@ void main() {
       expect(
         style.overlayColor?.resolve({WidgetState.pressed}),
         colorScheme.onError.opacity12,
-        reason:
-            'the ripple on the error colored close button must stay visible',
+        reason: 'the pressed tint on the error colored close button must stay visible',
       );
 
       for (final icon in [
@@ -459,15 +463,13 @@ void main() {
       final context = tester.element(_glyph(CaptionGlyph.close));
       final colorScheme = Theme.of(context).colorScheme;
       expect(IconTheme.of(context).color, colorScheme.onError);
-      final material = tester.widget<Material>(
-        find
-            .descendant(
-              of: _captionButton(_glyph(CaptionGlyph.close)),
-              matching: find.byType(Material),
-            )
-            .first,
+      final surface = tester.widget<PressSurface>(
+        find.descendant(
+          of: _captionButton(_glyph(CaptionGlyph.close)),
+          matching: find.byType(PressSurface),
+        ),
       );
-      expect(material.color, colorScheme.error);
+      expect(surface.fill, colorScheme.error);
     });
 
     testWidgets('the bar keeps its height in a narrow window', (tester) async {

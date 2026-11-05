@@ -25,7 +25,10 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/rules.dart';
 import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, TextButton, FilledButton;
 import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -150,11 +153,7 @@ mixin ProfileRoutingActions<T extends ConsumerStatefulWidget>
         tooltip: appLocalizations.checkRouting,
         onPressed: checking ? null : checkAndApplyRouting,
         icon: checking
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: ActivityIndicator(),
-              )
+            ? const SizedBox(width: 20, height: 20, child: ActivityIndicator())
             : const GlyphIcon(AppGlyphs.rules),
       ),
     ];

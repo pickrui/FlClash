@@ -9,7 +9,9 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:prism_ui/shape.dart' as prism;
-import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, InputDecoration, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:fl_clash/widgets/sheet_scaffold.dart';
 

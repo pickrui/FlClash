@@ -12,11 +12,14 @@ import 'package:fl_clash/ui/button.dart';
 import 'package:fl_clash/ui/card.dart';
 import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
+import 'package:prism_ui/press_surface.dart';
 
-Material _materialOf(WidgetTester tester, Key key) => tester.widget<Material>(
-  find.descendant(of: find.byKey(key), matching: find.byType(Material)).first,
-);
+PressSurface _surfaceOf(WidgetTester tester, Key key) =>
+    tester.widget<PressSurface>(
+      find.descendant(of: find.byKey(key), matching: find.byType(PressSurface)),
+    );
 
 CardSurface _cardOf(WidgetTester tester, Key key) => tester.widget<CardSurface>(
   find
@@ -80,7 +83,7 @@ void main() {
         SurfaceLevel.block.colorOf(colorScheme),
       );
       expect(
-        _materialOf(tester, action).color,
+        _surfaceOf(tester, action).fill,
         SurfaceLevel.block.colorOf(colorScheme),
       );
     });

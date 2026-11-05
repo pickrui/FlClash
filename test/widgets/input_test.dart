@@ -12,7 +12,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField;
+import 'package:material_ui/material_ui.dart' hide TextFormField, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -17,7 +17,10 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:prism_ui/shape.dart' as prism;
-import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, InputDecoration, IconButton, FilledButton, ButtonStyle;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, FilledButton, ButtonStyle;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 
 import 'overwrite_sheet.dart';
@@ -715,7 +718,7 @@ class _ProfileProxyChainsContentState
             actions: [
               if (selectedProxyChains.isNotEmpty) ...[
                 CommonMinIconButtonTheme(
-                  child: IconButton.filledTonal(
+                  child: IconButton(
                     tooltip: context.appLocalizations.delete,
                     onPressed: _handleDeleteProxyChains,
                     icon: const GlyphIcon(AppGlyphs.delete, fill: 1),
@@ -1128,7 +1131,9 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                         : () {
                             _handleDelete(proxy);
                           },
-                    color: context.colorScheme.error,
+                    style: ButtonStyle.from(
+                      foregroundColor: context.colorScheme.error,
+                    ),
                     icon: const GlyphIcon(AppGlyphs.delete),
                   ),
                 ],
@@ -1291,7 +1296,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                     if (_proxies.isNotEmpty) const SizedBox(width: 8),
                     if (_proxies.isNotEmpty)
                       CommonMinIconButtonTheme(
-                        child: IconButton.filledTonal(
+                        child: IconButton(
                           tooltip: appLocalizations.clearProxyChain,
                           onPressed: _handleClear,
                           icon: const GlyphIcon(AppGlyphs.delete, fill: 1),

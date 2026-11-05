@@ -15,7 +15,7 @@ import 'package:fl_clash/services/cloud_google_login.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud_layout.dart';

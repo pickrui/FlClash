@@ -19,12 +19,12 @@ import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/ui/route_motion_hold.dart';
-import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton, ButtonStyle;
+import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 const _systemUiOverlayStyle = SystemUiOverlayStyle(
@@ -709,12 +709,12 @@ class _TorchButton extends StatelessWidget {
               child: IconButton(
                 tooltip: context.appLocalizations.toggleFlashlight,
                 isSelected: lit,
-                style: IconButton.styleFrom(
+                style: ButtonStyle.from(
                   fixedSize: const Size.square(_torchSize),
                   iconSize: _torchIconSize,
                   backgroundColor: lit && !glass ? colorScheme.primary : null,
                   foregroundColor: lit ? colorScheme.onPrimary : null,
-                ).merge(focusRingStyle(colorScheme, standsOff: lit && !glass)),
+                ).merge(ButtonStyle(ringStandsOff: lit && !glass)),
                 onPressed: controller.toggleTorch,
                 icon: const GlyphIcon(AppGlyphs.torchOff),
                 selectedIcon: GlyphIcon(

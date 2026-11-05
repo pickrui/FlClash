@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/l10n.dart';
 import 'package:flutter/services.dart';
 import 'package:prism_ui/checkbox.dart' as prism;
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/common_button.dart' show IconButton, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:prism_ui/text_field.dart' show TextFormField, InputDecoration;
 
 export 'package:prism_ui/input.dart' show FilledInputTheme;

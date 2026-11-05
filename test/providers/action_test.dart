@@ -22,7 +22,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/add.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/preferences.dart';

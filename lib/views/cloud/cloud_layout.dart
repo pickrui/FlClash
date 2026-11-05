@@ -19,7 +19,7 @@ import 'package:fl_clash/widgets/input_dialog.dart' show VisibilityToggleButton;
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prism_ui/theme_data.dart' as prism;
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 
 const _contentMaxWidth = 720.0;
 

@@ -23,7 +23,8 @@ import 'package:fl_clash/views/theme_preview.dart';
 import 'package:fl_clash/widgets/config_item.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ThemeView extends StatelessWidget {

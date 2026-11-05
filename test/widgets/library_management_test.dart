@@ -19,7 +19,10 @@ import 'package:fl_clash/views/config/rules.dart';
 import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/widgets/error_status.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, IconButton, TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 
 import '../helpers/test_app.dart';

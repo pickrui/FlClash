@@ -24,7 +24,9 @@ import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
-import 'package:material_ui/material_ui.dart' hide TextField, TextFormField;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, TextFormField, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
 
 import '../helpers/app_paths.dart';

@@ -16,7 +16,8 @@ import 'package:fl_clash/ui/metrics.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton, ButtonStyle;
+import 'package:fl_clash/ui/common_button.dart' show TextButton, ButtonStyle;
 import 'package:prism_ui/list_row.dart';
 import 'package:prism_ui/press_surface.dart';
 
@@ -506,7 +507,7 @@ class _OptionsValueButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: onPressed,
-      style: TextButton.styleFrom(
+      style: ButtonStyle.from(
         foregroundColor: context.colorScheme.onSurfaceVariant,
         textStyle: context.listTitleStyle,
         padding: const EdgeInsets.symmetric(horizontal: 8),

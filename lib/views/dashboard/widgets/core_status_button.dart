@@ -14,9 +14,12 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/ui/liquid_glass.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/ui/typography.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, FilledButton, ButtonStyle;
+import 'package:prism_ui/card_surface.dart' show PressLook;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, FilledButton, ButtonStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CoreStatusButton extends ConsumerStatefulWidget {
@@ -105,10 +108,10 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
       CoreStatus.connected => colorScheme.successContainer,
       CoreStatus.disconnected => colorScheme.errorContainer,
     };
-    final style = ElasticPress.buttonStyle
+    final style = (const ButtonStyle(pressLook: PressLook.none))
         .merge(tinted(statusColor))
         .merge(
-          FilledButton.styleFrom(
+          ButtonStyle.from(
             backgroundColor: statusColor,
             foregroundColor: switch (coreStatus) {
               CoreStatus.connecting => null,

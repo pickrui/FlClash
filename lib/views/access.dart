@@ -18,7 +18,8 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/installed_apps.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide FilledButton, OutlinedButton;
+import 'package:fl_clash/ui/common_button.dart' show FilledButton, OutlinedButton;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

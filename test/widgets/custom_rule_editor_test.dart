@@ -13,7 +13,8 @@ import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField;
+import 'package:material_ui/material_ui.dart' hide TextFormField, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';

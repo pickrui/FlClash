@@ -15,7 +15,8 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/ui/card.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';

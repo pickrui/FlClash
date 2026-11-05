@@ -22,7 +22,8 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -247,10 +248,10 @@ class CustomOverwriteContent extends ConsumerWidget {
                 dividerColor: Colors.transparent,
                 content: Text(appLocalizations.configDataDetected),
                 actions: [
-                  FilledButton.tonalIcon(
+                  TonalButton(
                     onPressed: () => _quickFill(context, ref),
-                    icon: const GlyphIcon(AppGlyphs.sparkle, fill: 1),
-                    label: Text(appLocalizations.quickFill),
+                    glyph: AppGlyphs.sparkle,
+                    label: appLocalizations.quickFill,
                   ),
                 ],
               ),

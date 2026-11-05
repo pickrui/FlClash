@@ -12,7 +12,9 @@ import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart' show ValueListenable, listEquals;
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
+import 'package:prism_ui/card.dart' as prism;
 
 const _stripInset = 16.0;
 const _tabSpacing = 8.0;
@@ -279,17 +281,11 @@ class _TabExtents {
     _TabExtents? previous,
   ) {
     final style = _labelStyleOf(context);
-    final buttonStyle = FilledButtonTheme.of(context).style;
-    final defaults = const FilledButton(
-      onPressed: null,
-      child: null,
-    ).defaultStyleOf(context);
-    final minimumSize = (buttonStyle?.minimumSize ?? defaults.minimumSize)!
-        .resolve(const {})!;
-    final density = (buttonStyle?.visualDensity ?? defaults.visualDensity)!;
-    final adjustment = density.baseSizeAdjustment.dx;
-    final minWidth = max(0.0, minimumSize.width + adjustment);
-    final padding = 2 * (_tabPadding + max(0.0, adjustment));
+    final minWidth = prism.Card.minimumOf(context).minWidth;
+    final padding = prism.Card.paddingOf(
+      context,
+      const EdgeInsets.symmetric(horizontal: _tabPadding),
+    ).horizontal;
     final textScaler = MediaQuery.textScalerOf(context);
     final lock = textScaler.scale(_lockSize) + _lockGap;
     final labels = [for (final group in groups) (group.name, _isFixed(group))];

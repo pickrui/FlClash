@@ -48,6 +48,7 @@ void main() {
       for (final match in _iconButton.allMatches(source)) {
         final arguments = _arguments(source, match.end);
         if (RegExp(r'\btooltip\s*:').hasMatch(arguments)) continue;
+        if (RegExp(r'\bthis\.tooltip\b').hasMatch(arguments)) continue;
         // An icon slot holding text is already its own visible label.
         if (RegExp(r'icon:\s*Text\(').hasMatch(arguments)) continue;
 

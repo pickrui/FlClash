@@ -8,7 +8,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 
 import '../helpers/test_app.dart';
 

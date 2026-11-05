@@ -26,7 +26,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/chip_title.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Updates [providers] of the running profile a few at a time; the failures

@@ -13,7 +13,8 @@ import 'package:fl_clash/ui/sortable.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Tooltip;
+import 'package:prism_ui/tooltip.dart';
 
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
@@ -140,8 +141,7 @@ void main() {
     await pumpEditor(tester);
 
     final removeBadges = find.byWidgetPredicate(
-      (widget) =>
-          widget is Tooltip && (widget.message?.startsWith('Remove ') ?? false),
+      (widget) => widget is Tooltip && widget.message.startsWith('Remove '),
     );
     expect(removeBadges, findsNWidgets(2));
     expect(find.byTooltip('Remove Network speed'), findsOneWidget);

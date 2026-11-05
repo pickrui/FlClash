@@ -15,7 +15,8 @@ import 'package:fl_clash/ui/button.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/foot_bar.dart';
 import 'package:fl_clash/ui/popup.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

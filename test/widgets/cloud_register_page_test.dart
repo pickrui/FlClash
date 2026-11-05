@@ -11,7 +11,8 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/views/cloud/cloud_register_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import '../helpers/test_app.dart';
 

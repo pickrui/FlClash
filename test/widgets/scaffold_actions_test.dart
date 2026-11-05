@@ -5,7 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';

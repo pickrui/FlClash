@@ -11,7 +11,8 @@ import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide TextField, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 
 Future<void> _dragRight(WidgetTester tester, Finder finder, double dx) {

@@ -22,7 +22,8 @@ import 'package:fl_clash/views/config/providers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import '../helpers/test_app.dart';
 import '../plugins/code_forge/support.dart';

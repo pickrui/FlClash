@@ -17,7 +17,8 @@ import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField;
+import 'package:material_ui/material_ui.dart' hide TextFormField, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';

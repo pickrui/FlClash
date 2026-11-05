@@ -18,7 +18,10 @@ import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/view_scope.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, TextButton, ButtonStyle;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, TextButton, ButtonStyle;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -2133,7 +2136,7 @@ class AppBarActionButton extends StatelessWidget {
       tooltip: data.tooltip,
       isSelected: data.isSelected,
       style: data.isSelected == true
-          ? IconButton.styleFrom(
+          ? ButtonStyle.from(
               backgroundColor: TonalButtonTheme.glassOf(context)
                   ? null
                   : colorScheme.primary,

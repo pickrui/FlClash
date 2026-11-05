@@ -22,7 +22,8 @@ import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 import 'package:prism_ui/common_button.dart' as prism;
 
 import '../helpers/test_app.dart';

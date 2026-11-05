@@ -11,7 +11,8 @@ import 'package:fl_clash/features/form/form_page.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide TextField, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 
 import '../helpers/test_app.dart';

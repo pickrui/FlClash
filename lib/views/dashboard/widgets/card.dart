@@ -17,7 +17,9 @@ import 'package:fl_clash/views/dashboard/style.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton, ButtonStyle;
+import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;
 
 EdgeInsets dashboardCardPadding(DashboardDensity density) => switch (density) {
   DashboardDensity.standard => const EdgeInsets.symmetric(
@@ -844,10 +846,10 @@ class DashboardIconButton extends StatelessWidget {
           tooltip: tooltip,
           padding: EdgeInsets.zero,
           iconSize: glyphSize,
-          style: IconButton.styleFrom(
+          style: ButtonStyle.from(
             minimumSize: const Size.square(size),
             fixedSize: const Size.square(size),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            tapTargetSize: prism.TapTargetSize.shrinkWrap,
             foregroundColor: context.colorScheme.onSurfaceVariant,
           ),
           onPressed: onPressed,

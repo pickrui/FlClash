@@ -21,7 +21,9 @@ import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/views/profiles/custom_groups.dart';
 import 'package:fl_clash/views/profiles/custom_overwrite.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, TextFormField;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, TextFormField, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/ui/input.dart';

@@ -20,7 +20,10 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, InputDecoration, IconButton, TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:prism_ui/shape.dart' as prism;
 
@@ -936,7 +939,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
               ),
               if (selectedProfileProxies.isNotEmpty) ...[
                 CommonMinIconButtonTheme(
-                  child: IconButton.filledTonal(
+                  child: IconButton(
                     tooltip: context.appLocalizations.delete,
                     onPressed: _handleDeleteProfileProxies,
                     icon: const GlyphIcon(AppGlyphs.delete, fill: 1),

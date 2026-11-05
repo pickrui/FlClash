@@ -12,7 +12,8 @@ import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide FilledButton, ButtonStyle;
+import 'package:fl_clash/ui/common_button.dart' show FilledButton, ButtonStyle;
 
 class BatteryOptimizationItem extends ConsumerStatefulWidget {
   const BatteryOptimizationItem({
@@ -201,7 +202,7 @@ class AuthorizeButton extends StatelessWidget {
     return CommonMinFilledButtonTheme(
       child: ElasticButton(
         child: FilledButton(
-          style: FilledButton.styleFrom(
+          style: ButtonStyle.from(
             backgroundColor: authorized ? null : colorScheme.errorContainer,
             foregroundColor: authorized ? null : colorScheme.onErrorContainer,
             padding: const EdgeInsets.symmetric(horizontal: 12),

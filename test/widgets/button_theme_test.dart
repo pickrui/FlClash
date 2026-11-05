@@ -10,7 +10,7 @@ import 'package:fl_clash/ui/theme.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prism_ui/card_surface.dart' as prism;
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:prism_ui/press_surface.dart' as prism;
 
 import '../helpers/test_app.dart';

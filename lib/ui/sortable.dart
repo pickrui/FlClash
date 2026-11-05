@@ -14,7 +14,8 @@ import 'package:fl_clash/ui/motion.dart';
 import 'package:fl_clash/ui/shape.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
 
 import 'focus.dart';
 

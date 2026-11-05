@@ -12,7 +12,9 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:fl_clash/ui/dialog.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField;
+import 'package:material_ui/material_ui.dart'
+    hide TextFormField, TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -14,7 +14,8 @@ import 'package:fl_clash/ui/shape.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide FilledButton, ButtonStyle;
+import 'package:fl_clash/ui/common_button.dart' show FilledButton, ButtonStyle;
 import 'package:flutter/services.dart';
 
 class InitErrorApp extends StatelessWidget {
@@ -203,7 +204,7 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
         children: [
           FilledButton.icon(
             onPressed: () => _copyToClipboard(context),
-            style: FilledButton.styleFrom(
+            style: ButtonStyle.from(
               backgroundColor: colorScheme.error,
               foregroundColor: colorScheme.onError,
             ),

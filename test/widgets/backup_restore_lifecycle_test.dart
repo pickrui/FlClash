@@ -19,7 +19,8 @@ import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 
 import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';

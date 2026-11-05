@@ -19,7 +19,9 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter/gestures.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';

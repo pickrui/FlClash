@@ -17,7 +17,8 @@ import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../helpers/test_app.dart';

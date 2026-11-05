@@ -21,7 +21,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/ui/loading.dart';
 import 'package:fl_clash/ui/switch.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:rust_api/rust_api.dart';
 
 import '../helpers/app_paths.dart';

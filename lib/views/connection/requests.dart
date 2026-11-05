@@ -13,7 +13,9 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton, ButtonStyle;
+import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fl_clash/ui/route_motion_hold.dart';
@@ -223,8 +225,10 @@ class _RequestsViewState extends ConsumerState<RequestsView>
     return IconButton(
       tooltip: context.appLocalizations.close,
       padding: EdgeInsets.zero,
-      visualDensity: VisualDensity.compact,
-      style: IconButton.styleFrom(minimumSize: Size.zero),
+      style: ButtonStyle.from(
+        minimumSize: Size.zero,
+        visualDensity: prism.VisualDensity.compact,
+      ),
       icon: closing
           ? const SizedBox.square(dimension: 18, child: ActivityIndicator())
           : const GlyphIcon(AppGlyphs.block),

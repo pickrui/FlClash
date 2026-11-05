@@ -14,7 +14,8 @@ import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:prism_ui/surface.dart' show Surface;
 
 import '../helpers/test_app.dart';

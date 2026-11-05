@@ -20,7 +20,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 
 import 'cloud_layout.dart';
 import 'node_filter_widgets.dart';

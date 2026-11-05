@@ -22,7 +22,8 @@ import 'package:flutter/rendering.dart';
 import 'package:prism_ui/sheet.dart' show sheetFloatInset;
 import 'package:prism_ui/shape.dart' show AppCorner;
 import 'package:prism_ui/surface.dart' show Surface;
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

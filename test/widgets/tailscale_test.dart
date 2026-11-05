@@ -17,9 +17,12 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, IconButton, TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextField;
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:fl_clash/ui/qr_code.dart';
 
 import '../helpers/fake_tailscale_backend.dart';

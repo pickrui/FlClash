@@ -16,7 +16,8 @@ import 'package:fl_clash/widgets/app_update.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 
 import '../helpers/test_app.dart';
 

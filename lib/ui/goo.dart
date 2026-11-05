@@ -43,12 +43,7 @@ class GooSurface extends StatelessWidget {
   static bool of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<_GooScope>() != null;
 
-  static const buttonStyle = ButtonStyle(
-    backgroundColor: WidgetStatePropertyAll(Colors.transparent),
-    backgroundBuilder: _paneBehind,
-  );
-
-  static Widget _paneBehind(
+  static Widget buttonBackground(
     BuildContext context,
     Set<WidgetState> states,
     Widget? child,

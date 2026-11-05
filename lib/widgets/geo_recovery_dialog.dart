@@ -100,8 +100,10 @@ class _GeoRecoveryDialogState extends State<GeoRecoveryDialog> {
       child: AlertScope.of(context).dialog(
         title: l.geoDownloadFailed,
         actions: [
-          TextButton(onPressed: () => _close(false), child: Text(l.cancel)),
-          FilledButton(
+          AlertScope.of(context)
+              .action(onPressed: () => _close(false), child: Text(l.cancel)),
+          AlertScope.of(context).action(
+            filled: true,
             onPressed: _downloading ? null : _download,
             child: Text(l.download),
           ),

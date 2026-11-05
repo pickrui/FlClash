@@ -11,7 +11,8 @@ import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/widgets/app_update.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';

@@ -11,7 +11,8 @@ import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/ui/scaffold.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
 
 class ScriptConfigPreviewPage extends StatelessWidget {
   const ScriptConfigPreviewPage({

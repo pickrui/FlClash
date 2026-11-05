@@ -11,7 +11,8 @@ import 'package:fl_clash/views/config/on_demand.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide TextField, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:wifi_ssid/wifi_ssid.dart';
 

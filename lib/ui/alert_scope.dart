@@ -8,6 +8,12 @@ import 'package:material_ui/material_ui.dart';
 /// Shows and frames alerts for code that must not import them, as their glass
 /// and press reach far into the UI.
 abstract interface class AlertPresenter {
+  Widget action({
+    required VoidCallback? onPressed,
+    required Widget child,
+    bool filled,
+  });
+
   Future<T?> show<T>({
     BuildContext? context,
     required BuildContext root,

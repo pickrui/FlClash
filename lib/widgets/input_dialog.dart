@@ -6,7 +6,8 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/app_glyphs.dart';
 import 'package:prism_ui/icons/glyph_icon.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
 
 class VisibilityToggleButton extends StatelessWidget {
   final bool obscureText;

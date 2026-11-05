@@ -20,7 +20,7 @@ import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/ui/l10n.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:prism_ui/card_surface.dart' as prism;
 import 'package:prism_ui/theme_data.dart' as prism;
 
@@ -72,6 +72,15 @@ mixin AlertHostRoute<T> on ModalRoute<T> {}
 /// Shows [CommonDialog]s on [showFloatingDialog].
 class CommonAlertPresenter implements AlertPresenter {
   const CommonAlertPresenter();
+
+  @override
+  Widget action({
+    required VoidCallback? onPressed,
+    required Widget child,
+    bool filled = false,
+  }) => filled
+      ? prism.FilledButton(onPressed: onPressed, child: child)
+      : prism.TextButton(onPressed: onPressed, child: child);
 
   // Focus sits in the route the user acts in, so an alert raised from a route
   // that hosts alerts opens over it.
@@ -775,77 +784,39 @@ class _AlertAction extends StatelessWidget {
       (false, Brightness.dark) => 1.0,
       _ => _pressedFillShare,
     };
-    return TextButtonTheme(
-      data: TextButtonThemeData(
-        style:
-            TextButton.styleFrom(
-              foregroundColor: foreground,
-              disabledForegroundColor: colorScheme.onSurface.withValues(
-                alpha: 0.38,
-              ),
-              textStyle: isDefault
-                  ? AppTextStyle.body.of(context, emphasized: true)
-                  : AppTextStyle.body
-                        .of(context)
-                        .copyWith(fontWeight: FontWeight.w500),
-              minimumSize: const Size(0, _actionHeight),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              shape: AppShape.full,
-              visualDensity: VisualDensity.standard,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              splashFactory: NoSplash.splashFactory,
-            ).copyWith(
-              backgroundColor: WidgetStateProperty<Color?>.fromMap({
-                WidgetState.disabled: fill,
-                WidgetState.pressed: background.withValues(
-                  alpha: background.a * pressedShare,
-                ),
-                WidgetState.any: background,
-              }),
-              overlayColor: WidgetStateProperty<Color?>.fromMap({
-                WidgetState.focused: foreground.withValues(alpha: 0.1),
-                WidgetState.pressed: Colors.transparent,
-                WidgetState.hovered: foreground.withValues(alpha: 0.08),
-              }),
-              side: focusRingStyle(colorScheme, standsOff: isDefault).side,
+    return prism.ButtonTheme(
+      data: prism.ButtonTheme.of(context).copyWith(
+        text: prism.ButtonStyle(
+          foregroundColor: WidgetStateProperty<Color?>.fromMap({
+            WidgetState.disabled: colorScheme.onSurface.withValues(alpha: 0.38),
+            WidgetState.any: foreground,
+          }),
+          backgroundColor: WidgetStateProperty<Color?>.fromMap({
+            WidgetState.disabled: fill,
+            WidgetState.pressed: background.withValues(
+              alpha: background.a * pressedShare,
             ),
-      ),
-      child: prism.ButtonTheme(
-        data: prism.ButtonTheme.of(context).copyWith(
-          text: prism.ButtonStyle(
-            foregroundColor: WidgetStateProperty<Color?>.fromMap({
-              WidgetState.disabled: colorScheme.onSurface.withValues(
-                alpha: 0.38,
-              ),
-              WidgetState.any: foreground,
-            }),
-            backgroundColor: WidgetStateProperty<Color?>.fromMap({
-              WidgetState.disabled: fill,
-              WidgetState.pressed: background.withValues(
-                alpha: background.a * pressedShare,
-              ),
-              WidgetState.any: background,
-            }),
-            overlayColor: WidgetStateProperty<Color?>.fromMap({
-              WidgetState.focused: foreground.withValues(alpha: 0.1),
-              WidgetState.pressed: Colors.transparent,
-              WidgetState.hovered: foreground.withValues(alpha: 0.08),
-            }),
-            textStyle: isDefault
-                ? AppTextStyle.body.of(context, emphasized: true)
-                : AppTextStyle.body
-                      .of(context)
-                      .copyWith(fontWeight: FontWeight.w500),
-            minimumSize: const Size(0, _actionHeight),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            visualDensity: prism.VisualDensity.standard,
-            tapTargetSize: prism.TapTargetSize.shrinkWrap,
-            pressLook: prism.PressLook.none,
-            ringStandsOff: isDefault,
-          ),
+            WidgetState.any: background,
+          }),
+          overlayColor: WidgetStateProperty<Color?>.fromMap({
+            WidgetState.focused: foreground.withValues(alpha: 0.1),
+            WidgetState.pressed: Colors.transparent,
+            WidgetState.hovered: foreground.withValues(alpha: 0.08),
+          }),
+          textStyle: isDefault
+              ? AppTextStyle.body.of(context, emphasized: true)
+              : AppTextStyle.body
+                    .of(context)
+                    .copyWith(fontWeight: FontWeight.w500),
+          minimumSize: const Size(0, _actionHeight),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          visualDensity: prism.VisualDensity.standard,
+          tapTargetSize: prism.TapTargetSize.shrinkWrap,
+          pressLook: prism.PressLook.none,
+          ringStandsOff: isDefault,
         ),
-        child: child,
       ),
+      child: child,
     );
   }
 }

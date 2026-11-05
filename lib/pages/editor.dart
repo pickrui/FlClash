@@ -28,7 +28,12 @@ import 'package:prism_ui/text_selection_controls.dart'
     show textSelectionColorOf;
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, InputDecoration;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, InputDecoration, IconButton, FilledButton, ButtonStyle;
+import 'package:prism_ui/card_surface.dart' show PressLook;
+import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, FilledButton, ButtonStyle;
 import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
@@ -1336,9 +1341,9 @@ class _FindOptionToggle extends StatelessWidget {
         tooltip: tooltip,
         isSelected: selected,
         onPressed: onPressed,
-        style: ElasticPress.buttonStyle
+        style: (const ButtonStyle(pressLook: PressLook.none))
             .merge(
-              IconButton.styleFrom(
+              ButtonStyle.from(
                 backgroundColor: selected ? colorScheme.primary : null,
                 foregroundColor: selected
                     ? colorScheme.onPrimary
@@ -1347,11 +1352,11 @@ class _FindOptionToggle extends StatelessWidget {
                 minimumSize: Size.square(TonalButtonSize.compact.button),
                 padding: EdgeInsets.zero,
                 iconSize: TonalButtonSize.compact.icon,
-                visualDensity: VisualDensity.standard,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: prism.VisualDensity.standard,
+                tapTargetSize: prism.TapTargetSize.shrinkWrap,
               ),
             )
-            .merge(focusRingStyle(colorScheme, standsOff: selected)),
+            .merge(ButtonStyle(ringStandsOff: selected)),
         icon: AnimatedGlyph(glyph: glyph, filled: selected),
       ),
     );
@@ -1382,10 +1387,10 @@ class _FindBarButton extends StatelessWidget {
           isSelected: selected,
           onPressed: onPressed,
           style: selected
-              ? IconButton.styleFrom(
+              ? ButtonStyle.from(
                   backgroundColor: colorScheme.primary,
                   foregroundColor: colorScheme.onPrimary,
-                ).merge(focusRingStyle(colorScheme, standsOff: true))
+                ).merge(const ButtonStyle(ringStandsOff: true))
               : null,
           icon: GlyphIcon(glyph),
         ),

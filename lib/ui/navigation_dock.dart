@@ -18,7 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:material_color_utilities/material_color_utilities.dart'
     show Hct;
 import 'package:material_ui/material_ui.dart';
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:prism_ui/card_surface.dart' as prism;
 
 import 'liquid_glass.dart';

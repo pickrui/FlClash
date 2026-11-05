@@ -10,7 +10,9 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
+import 'package:prism_ui/press_surface.dart';
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -20,8 +22,14 @@ void _noop() {}
 const _mobile = Size(400, 900);
 const _desktop = Size(1200, 900);
 
-Finder _container(Finder button) =>
-    find.descendant(of: button, matching: find.byType(Material)).first;
+Finder _container(Finder button) => find
+    .descendant(
+      of: button,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Material || widget is PressSurface,
+      ),
+    )
+    .first;
 
 Future<void> _pumpBar(
   WidgetTester tester, {

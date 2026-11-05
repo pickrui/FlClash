@@ -11,8 +11,9 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/views/cloud/store_payment_dialog.dart';
 import 'package:fl_clash/ui/qr_code.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:fl_clash/ui/common_button.dart' show TextButton;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 
 import '../helpers/test_app.dart';
 

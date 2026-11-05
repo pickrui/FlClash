@@ -25,7 +25,9 @@ import 'package:fl_clash/ui/fade_box.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/text.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/ui/button.dart';
+import 'package:material_ui/material_ui.dart' hide IconButton, FilledButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<bool?> _runBackupTask(
@@ -253,9 +255,9 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
                     leading: const GlyphIcon(AppGlyphs.account),
                     title: Text(appLocalizations.noInfo),
                     subtitle: Text(appLocalizations.pleaseBindWebDAV),
-                    trailing: FilledButton.tonal(
+                    trailing: TonalButton(
                       onPressed: isLoading ? null : () => _showAddWebDAV(dav),
-                      child: Text(appLocalizations.bind),
+                      label: appLocalizations.bind,
                     ),
                   )
                 else ...[
@@ -302,9 +304,9 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
                         ],
                       ),
                     ),
-                    trailing: FilledButton.tonal(
+                    trailing: TonalButton(
                       onPressed: isLoading ? null : () => _showAddWebDAV(dav),
-                      child: Text(appLocalizations.edit),
+                      label: appLocalizations.edit,
                     ),
                   ),
                   const SizedBox(height: 4),

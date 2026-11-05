@@ -6,7 +6,8 @@
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide TextField, IconButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

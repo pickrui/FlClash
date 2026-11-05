@@ -24,7 +24,11 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, TextButton, FilledButton, ButtonStyle;
+import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, TextButton, FilledButton, ButtonStyle;
 import 'package:fl_clash/ui/qr_code.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -940,11 +944,11 @@ class _PrimaryPill extends StatelessWidget {
       enabled: onPressed != null,
       child: FilledButton(
         onPressed: onPressed,
-        style: FilledButton.styleFrom(
+        style: ButtonStyle.from(
           minimumSize: Size(size, size),
           shape: AppShape.full,
           textStyle: AppTextStyle.body.of(context, emphasized: true),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          tapTargetSize: prism.TapTargetSize.shrinkWrap,
         ),
         child: Text(label),
       ),

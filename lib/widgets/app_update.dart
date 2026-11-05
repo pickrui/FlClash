@@ -21,7 +21,11 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/update_download.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, TextButton, FilledButton, OutlinedButton, ButtonStyle;
+import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart'
+    show IconButton, TextButton, FilledButton, OutlinedButton, ButtonStyle;
 import 'package:url_launcher/url_launcher.dart';
 
 const _updateNoticeDuration = Duration(seconds: 10);
@@ -118,8 +122,10 @@ class _AppUpdateAvailableNoticeState
                       FilledButton(onPressed: open, child: Text(l.view)),
                       IconButton(
                         tooltip: l.close,
-                        color: onContainer,
-                        visualDensity: VisualDensity.compact,
+                        style: ButtonStyle.from(
+                          foregroundColor: onContainer,
+                          visualDensity: prism.VisualDensity.compact,
+                        ),
                         icon: const GlyphIcon(AppGlyphs.close),
                         onPressed: () => ref
                             .read(updateActionProvider.notifier)

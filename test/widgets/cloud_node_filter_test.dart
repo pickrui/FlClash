@@ -14,9 +14,11 @@ import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/cloud/node_filter_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart'
+    hide TextField, IconButton, TextButton;
+import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
-import 'package:prism_ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';
