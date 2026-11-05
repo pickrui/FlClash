@@ -108,6 +108,36 @@ Future<ProviderContainer> openAccess(
 }
 
 void main() {
+  testWidgets('selecting another app rebuilds only its row', (tester) async {
+    final api = InstalledAppsFake()
+      ..packages = [
+        installedPackage('one.app'),
+        installedPackage('two.app'),
+        installedPackage('three.app'),
+      ];
+    await openAccess(tester, api);
+    await tester.tap(find.byType(CommonCheckBox).first);
+    await tester.pumpAndSettle();
+    final selectedPackage = tester
+        .widget<PackageListItem>(find.byType(PackageListItem).at(1))
+        .package
+        .packageName;
+    final rebuilt = <String>[];
+    var pageBuilds = 0;
+    final previous = debugOnRebuildDirtyWidget;
+    debugOnRebuildDirtyWidget = (element, _) {
+      if (element.widget case final PackageListItem row) {
+        rebuilt.add(row.package.packageName);
+      }
+      if (element.widget is AccessView) pageBuilds++;
+    };
+    addTearDown(() => debugOnRebuildDirtyWidget = previous);
+    await tester.tap(find.byType(CommonCheckBox).at(1));
+    await tester.pumpAndSettle();
+    expect(pageBuilds, 0);
+    expect(rebuilt, [selectedPackage]);
+  });
+
   for (final stage in ['active', 'removing', 'disposed']) {
     final removed = stage != 'active';
     testWidgets(
