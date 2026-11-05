@@ -6,12 +6,11 @@
 package com.oixcloud.clash.service
 
 import android.app.Service
-import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import com.oixcloud.clash.core.Core
 import com.oixcloud.clash.common.GlobalState
+import com.oixcloud.clash.service.modules.MemoryPressureModule
 import com.oixcloud.clash.service.modules.NetworkObserveModule
 import com.oixcloud.clash.service.modules.NotificationModule
 import com.oixcloud.clash.service.modules.SuspendModule
@@ -24,6 +23,7 @@ class CommonService : Service(), IBaseService {
     private val loader = moduleLoader {
         install(NetworkObserveModule(self))
         install(NotificationModule(self))
+        install(MemoryPressureModule(self))
         install(SuspendModule(self))
     }
 
@@ -41,16 +41,12 @@ class CommonService : Service(), IBaseService {
     }
 
     override fun onLowMemory() {
-        Core.forceGC()
+        lowCoreMemory()
         super.onLowMemory()
     }
 
     override fun onTrimMemory(level: Int) {
-        if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND ||
-            level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL
-        ) {
-            Core.forceGC()
-        }
+        trimCoreMemory(level)
         super.onTrimMemory(level)
     }
 

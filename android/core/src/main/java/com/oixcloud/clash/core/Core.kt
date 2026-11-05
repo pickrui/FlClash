@@ -17,6 +17,8 @@ data object Core {
 
     fun forceGC() = Mobile.forceGC()
 
+    fun setMitmPressure(level: Int) = Mobile.setMitmPressure(level)
+
     fun updateDNS(
         dns: String,
     ) = Mobile.updateDns(dns)

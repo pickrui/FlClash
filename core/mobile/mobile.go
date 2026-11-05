@@ -97,6 +97,10 @@ func ForceGC() {
 	core.ForceGC()
 }
 
+func SetMitmPressure(level int32) {
+	core.SetMitmPressure(level)
+}
+
 func UpdateDns(value string) {
 	core.UpdateDns(value)
 }

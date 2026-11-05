@@ -298,6 +298,9 @@ func ForceGC() {
 	})
 }
 
+// The Android service reports pressure even when the core has no MITM engine.
+func SetMitmPressure(level int32) {}
+
 func UpdateDns(value string) {
 	defer recoverExport("updateDns")
 	handleUpdateDns(value)

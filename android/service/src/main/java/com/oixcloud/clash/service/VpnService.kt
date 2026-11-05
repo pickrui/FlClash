@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 package com.oixcloud.clash.service
 
-import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
@@ -31,6 +30,7 @@ import com.oixcloud.clash.service.models.VpnOptions
 import com.oixcloud.clash.service.models.getIpv4RouteAddress
 import com.oixcloud.clash.service.models.getIpv6RouteAddress
 import com.oixcloud.clash.service.models.toCIDR
+import com.oixcloud.clash.service.modules.MemoryPressureModule
 import com.oixcloud.clash.service.modules.NetworkObserveModule
 import com.oixcloud.clash.service.modules.NotificationModule
 import com.oixcloud.clash.service.modules.SuspendModule
@@ -58,6 +58,7 @@ class VpnService : SystemVpnService(), IBaseService {
     private val loader = moduleLoader {
         install(NetworkObserveModule(self))
         install(NotificationModule(self))
+        install(MemoryPressureModule(self))
         install(SuspendModule(self))
     }
 
@@ -143,16 +144,12 @@ class VpnService : SystemVpnService(), IBaseService {
 
 
     override fun onLowMemory() {
-        Core.forceGC()
+        lowCoreMemory()
         super.onLowMemory()
     }
 
     override fun onTrimMemory(level: Int) {
-        if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND ||
-            level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL
-        ) {
-            Core.forceGC()
-        }
+        trimCoreMemory(level)
         super.onTrimMemory(level)
     }
 
