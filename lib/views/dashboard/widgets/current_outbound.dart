@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math' as math;
 
+import 'package:prism_ui/press_region.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -462,14 +463,11 @@ class _IpText extends ConsumerWidget {
         child: FocusRing(
           shape: AppShape.xs,
           standsOff: true,
-          child: InkWell(
+          child: PressRegion(
             onTap: () => ref
                 .read(appSettingProvider.notifier)
                 .update((state) => state.copyWith(hideIp: !hidden)),
-            customBorder: AppShape.xs,
-            hoverColor: Colors.transparent,
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
+            shape: AppShape.xs,
             child: DashboardFitText(address, style: style),
           ),
         ),
@@ -562,12 +560,10 @@ class _CountryBadgeState extends State<_CountryBadge>
         button: true,
         enabled: enabled,
         label: tooltip,
-        child: InkResponse(
+        child: PressRegion(
           onTap: enabled ? widget.onRefresh : null,
           onHover: (value) => setState(() => _hovered = value),
           onFocusChange: (value) => setState(() => _focused = value),
-          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-          splashFactory: NoSplash.splashFactory,
           child: ElasticPress(
             enabled: enabled,
             child: AnimatedBuilder(
@@ -782,13 +778,11 @@ class _StartToggleState extends ConsumerState<_StartToggle>
       child: Semantics(
         button: true,
         label: tooltip,
-        child: InkResponse(
+        child: PressRegion(
           onTap: _toggle,
           onHover: (value) => setState(() => _hovered = value),
-          onHighlightChanged: (value) => setState(() => _pressed = value),
+          onPressedChanged: (value) => setState(() => _pressed = value),
           onFocusChange: (value) => setState(() => _focused = value),
-          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-          splashFactory: NoSplash.splashFactory,
           child: ElasticPress(
             child: TweenAnimationBuilder<double>(
               tween: Tween(end: _overlay),

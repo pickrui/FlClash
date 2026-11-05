@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:prism_ui/press_region.dart';
+import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -554,14 +556,14 @@ class _IconTile extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Material(
+                Surface(
                   color: context.raisedSurfaceLevel.colorOf(colorScheme),
                   shape: AppShape.md,
                   clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    customBorder: AppShape.md,
+                  child: PressRegion(
+                    overlay: PressRegion.pressOverlay,
+                    shape: AppShape.md,
                     onTap: onPressed,
-                    onLongPress: onLongPress,
                     child: SizedBox.square(
                       dimension: _iconPlateSize,
                       child: Center(

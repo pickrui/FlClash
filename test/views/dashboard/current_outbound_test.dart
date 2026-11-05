@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:prism_ui/press_region.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -88,7 +89,7 @@ Widget _card({
 Finder _clover() => find.ancestor(
   of: find.byType(ShapeBadge),
   matching: find.byWidgetPredicate(
-    (widget) => widget is InkResponse && widget.runtimeType == InkResponse,
+    (widget) => widget is PressRegion && widget.runtimeType == PressRegion,
   ),
 );
 
@@ -99,7 +100,7 @@ double _cloverTurn(WidgetTester tester) => tester
     .rotation;
 
 Finder _startButton() =>
-    find.byWidgetPredicate((widget) => widget.runtimeType == InkResponse).last;
+    find.byWidgetPredicate((widget) => widget.runtimeType == PressRegion).last;
 
 void main() {
   late ProviderContainer container;
@@ -416,7 +417,7 @@ void main() {
       await pumpCard(tester);
 
       expect(find.byType(SkeletonText), findsOneWidget);
-      expect(tester.widget<InkResponse>(_clover()).onTap, isNull);
+      expect(tester.widget<PressRegion>(_clover()).onTap, isNull);
       final turn = _cloverTurn(tester);
       await tester.pump(const Duration(milliseconds: 300));
       expect(_cloverTurn(tester), isNot(turn));
@@ -427,7 +428,7 @@ void main() {
       expect(find.byType(SkeletonText), findsNothing);
       expect(find.text(_ip), findsOneWidget);
       expect(_cloverTurn(tester) % (math.pi / 2), closeTo(0, 1e-9));
-      expect(tester.widget<InkResponse>(_clover()).onTap, isNotNull);
+      expect(tester.widget<PressRegion>(_clover()).onTap, isNotNull);
     });
 
     testWidgets('a failed check says so and checks again from its clover', (

@@ -190,10 +190,7 @@ void main() {
       await _pump(tester, const Size(900, 1800));
       await _scrollTo(tester, swatch(0xFFFF8D28));
       final content = find.descendant(
-        of: find.descendant(
-          of: swatch(0xFFFF8D28),
-          matching: find.byType(InkWell),
-        ),
+        of: swatch(0xFFFF8D28),
         matching: find.byType(Stack),
       );
       Focus.of(tester.element(content.first)).requestFocus();

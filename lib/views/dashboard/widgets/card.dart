@@ -6,6 +6,8 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:prism_ui/press_region.dart';
+import 'package:prism_ui/surface.dart' show Surface;
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -82,14 +84,14 @@ class DashboardCard extends StatelessWidget {
         foregroundDecoration: side == BorderSide.none
             ? null
             : ShapeDecoration(shape: shape.copyWith(side: side)),
-        child: Material(
-          type: MaterialType.transparency,
+        child: Surface.transparent(
           child: onTap == null
               ? content
               : FocusRing(
                   shape: shape,
-                  child: InkWell(
-                    customBorder: shape,
+                  child: PressRegion(
+                    overlay: PressRegion.pressOverlay,
+                    shape: shape,
                     onTap: onTap,
                     child: content,
                   ),
@@ -404,14 +406,12 @@ class DashboardConnectedButton extends StatelessWidget {
                   color: Color.lerp(background, colorScheme.primary, amount),
                   shape: shape,
                 ),
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: InkWell(
-                    customBorder: shape,
-                    splashFactory: NoSplash.splashFactory,
-                    highlightColor: Colors.transparent,
+                child: Surface.transparent(
+                  child: PressRegion(
+                    overlay: PressRegion.hoverOverlay,
+                    shape: shape,
                     onTap: onTap,
-                    child: child,
+                    child: child!,
                   ),
                 ),
               ),
@@ -511,15 +511,15 @@ class DashboardBlock extends StatelessWidget {
       ),
       child: onTap == null
           ? content
-          : Material(
-              type: MaterialType.transparency,
+          : Surface.transparent(
               child: Semantics(
                 button: true,
                 label: semanticLabel,
                 child: FocusRing(
                   shape: shape,
-                  child: InkWell(
-                    customBorder: shape,
+                  child: PressRegion(
+                    overlay: PressRegion.pressOverlay,
+                    shape: shape,
                     onTap: onTap,
                     child: content,
                   ),
