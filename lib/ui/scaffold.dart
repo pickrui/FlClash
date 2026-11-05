@@ -20,7 +20,7 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/view_scope.dart';
 import 'package:material_ui/material_ui.dart'
     hide IconButton, TextButton, ButtonStyle, ButtonTheme, Theme;
-import 'package:prism_ui/theme_data.dart' show Theme, TapTargetSize;
+import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:fl_clash/ui/common_button.dart'
     show IconButton, TextButton, ButtonStyle, ButtonTheme;
 import 'package:flutter/foundation.dart';
@@ -43,10 +43,24 @@ import 'sheet_navigator.dart';
 import 'sortable.dart';
 
 import 'package:prism_ui/scaffold.dart' as prism;
+import 'package:prism_ui/scaffold.dart'
+    show
+        appBarActionInset,
+        AppBarActionEdge,
+        genActions,
+        barButtonGap,
+        isCompactBar,
+        ActionEdgeGap;
 import 'package:prism_ui/bar_item_presence.dart';
 import 'package:prism_ui/press_region.dart';
 
-export 'package:prism_ui/scaffold.dart' show AppBarClearance;
+export 'package:prism_ui/scaffold.dart'
+    show
+        AppBarClearance,
+        appBarActionInset,
+        appBarLeadingWidth,
+        AppBarActionEdge,
+        genActions;
 
 class ScaffoldKeyword {
   const ScaffoldKeyword({
@@ -137,7 +151,7 @@ class CommonScaffold extends StatefulWidget {
 
 class CommonScaffoldState extends State<CommonScaffold>
     with SingleTickerProviderStateMixin {
-  late final ValueNotifier<AppBarState> _appBarState;
+  late final ValueNotifier<AppBarSearchState?> _appBarState;
   final ValueNotifier<bool> _loadingNotifier = ValueNotifier(false);
   final _textController = TextEditingController();
   final _searchFocusNode = FocusNode();
@@ -169,13 +183,13 @@ class CommonScaffoldState extends State<CommonScaffold>
   var _sorting = false;
 
   bool get _isSearch {
-    return _appBarState.value.searchState?.query != null;
+    return _appBarState.value?.query != null;
   }
 
   @override
   void initState() {
     super.initState();
-    _appBarState = ValueNotifier(AppBarState(searchState: widget.searchState));
+    _appBarState = ValueNotifier(widget.searchState);
     _loadingNotifier.value = widget.isLoading;
     _textController.text = widget.searchState?.query ?? '';
     _searchMotion.jumpTo(open: _isSearch);
@@ -190,14 +204,12 @@ class CommonScaffoldState extends State<CommonScaffold>
   }
 
   Future<void> _updateSearchState(AppBarSearchStateBuilder builder) async {
-    _appBarState.value = _appBarState.value.copyWith(
-      searchState: builder(_appBarState.value.searchState),
-    );
+    _appBarState.value = builder(_appBarState.value);
   }
 
   void _handleToSearch() {
     _searchOrigin.value = _measureSearchOrigin();
-    _updateSearchState((state) => state?.copyWith(query: _textController.text));
+    _updateSearchState((state) => state?.withQuery(_textController.text));
     _moveSearch(open: true);
   }
 
@@ -267,7 +279,7 @@ class CommonScaffoldState extends State<CommonScaffold>
       return true;
     }
     if (event is! KeyDownEvent ||
-        _appBarState.value.searchState == null ||
+        _appBarState.value == null ||
         _sorting ||
         !controlSingleActivator(LogicalKeyboardKey.keyF)
             .accepts(event, HardwareKeyboard.instance) ||
@@ -314,11 +326,9 @@ class CommonScaffoldState extends State<CommonScaffold>
       final wasSearching = _isSearch;
       final next = widget.searchState;
       final query = oldWidget.searchState?.query == next?.query
-          ? _appBarState.value.searchState?.query
+          ? _appBarState.value?.query
           : next?.query;
-      _appBarState.value = _appBarState.value.copyWith(
-        searchState: next?.copyWith(query: query),
-      );
+      _appBarState.value = next?.withQuery(query);
       if (next != null && oldWidget.searchState?.query != next.query) {
         _textController.text = next.query ?? '';
       }
@@ -338,8 +348,8 @@ class CommonScaffoldState extends State<CommonScaffold>
 
   void _handleClearInput() {
     _textController.text = '';
-    if (_appBarState.value.searchState != null) {
-      _appBarState.value.searchState!.onSearch('');
+    if (_appBarState.value != null) {
+      _appBarState.value!.onSearch('');
     }
   }
 
@@ -351,7 +361,7 @@ class CommonScaffoldState extends State<CommonScaffold>
     _searchOrigin.value = _searchOrigin.value?.withField(field);
     _handleClearInput();
     _searchFocusNode.unfocus();
-    _updateSearchState((state) => state?.copyWith(query: null));
+    _updateSearchState((state) => state?.withQuery(null));
     _moveSearch(open: false);
     // The covered bar, search button included, returns with the next frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -707,7 +717,7 @@ class CommonScaffoldState extends State<CommonScaffold>
       actions: actions,
       actionsWidth:
           buttonCount * TonalButtonSize.bar.button +
-          math.max(0, actions.length - 1) * _barButtonGap,
+          math.max(0, actions.length - 1) * barButtonGap,
       cancel: fills
           ? _barButton(
               IconButtonData(
@@ -728,7 +738,7 @@ class CommonScaffoldState extends State<CommonScaffold>
           autofocus: true,
           controller: _textController,
           focusNode: _searchFocusNode,
-          onChanged: (value) => _appBarState.value.searchState?.onSearch(value),
+          onChanged: (value) => _appBarState.value?.onSearch(value),
         ),
       ),
     );
@@ -783,7 +793,7 @@ class CommonScaffoldState extends State<CommonScaffold>
         ModalRoute.of(context)?.impliesAppBarDismissal == true;
     final compactTitle = isCompact || pushed;
     final titleEndInset = appBarActionInset(
-      _isCompactBar(context, isMobileView),
+      isCompactBar(context, isMobileView),
     );
     // Under a sheet the bar drops its actions, so none reads as the sheet's.
     final uncovered = ReverseAnimation(sheetCoverOf(context));
@@ -793,7 +803,7 @@ class CommonScaffoldState extends State<CommonScaffold>
       loading: _loadingNotifier,
       listenable: Listenable.merge([_appBarState, _searchCovered]),
       builder: (_) {
-        final searchState = _appBarState.value.searchState;
+        final searchState = _appBarState.value;
         final leading = _buildLeading(backAction, pop: form.pop);
         final barSearch = searchState != null && !form.hasDockedSearch;
         final covered = barSearch && _searchCovered.value;
@@ -862,7 +872,7 @@ class CommonScaffoldState extends State<CommonScaffold>
                           : _actionsUnderSearch,
                     ),
                   ),
-                  gap: action is SizedBox || action is _ActionEdgeGap,
+                  gap: action is SizedBox || action is ActionEdgeGap,
                 ),
           ],
         );
@@ -883,7 +893,7 @@ class CommonScaffoldState extends State<CommonScaffold>
       searchInBar: widget.searchInBar,
       hasConfirmationAction: widget.confirmationAction != null,
     );
-    _searchFillsBar = _isCompactBar(context, ViewScope.isMobileOf(context));
+    _searchFillsBar = isCompactBar(context, ViewScope.isMobileOf(context));
     _searchDocked = form.hasDockedSearch;
     final keywords = widget.keywords;
     final docked = form.dockedSearch;
@@ -1691,7 +1701,7 @@ class _BarSearch extends StatelessWidget {
                           Row(
                             children: [
                               ...actions.separated(
-                                const SizedBox(width: _barButtonGap),
+                                const SizedBox(width: barButtonGap),
                               ),
                             ],
                           ),
@@ -1964,68 +1974,6 @@ class _SheetPop {
 
   final bool useCloseIcon;
   final bool atFoot;
-}
-
-const double _barButtonGap = 8;
-const double _iconButtonTapPadding = 4;
-
-/// Where a filled button sits from the app bar edge, leading included: the
-/// layout margin iOS gives a compact and a regular width.
-double appBarActionInset(bool compact) => compact ? 16 : 20;
-
-double _iconActionInset(bool isMobileView) => isMobileView ? 4 : 8;
-
-double appBarLeadingWidth(bool compact) =>
-    TonalButtonSize.bar.button + appBarActionInset(compact) * 2;
-
-/// A phone view or a sheet: an iOS compact width.
-bool _isCompactBar(BuildContext context, bool isMobileView) {
-  final sheet = SheetProvider.of(context)?.type;
-  return isMobileView || (sheet != null && sheet != SheetType.page);
-}
-
-enum AppBarActionEdge {
-  icon,
-  container;
-
-  double spaceOf(BuildContext context, bool isMobileView) => switch (this) {
-    icon => _iconActionInset(isMobileView) - _tapPaddingOf(context),
-    container => appBarActionInset(_isCompactBar(context, isMobileView)),
-  };
-
-  double get gap => switch (this) {
-    icon => appBarActionSpace,
-    container => _barButtonGap,
-  };
-}
-
-/// Only the touch platforms ask for the 48 dp target that pads the container out.
-double _tapPaddingOf(BuildContext context) =>
-    Theme.of(context).tapTargetSize == TapTargetSize.padded
-    ? _iconButtonTapPadding
-    : 0;
-
-List<Widget> genActions(
-  List<Widget> actions, {
-  required AppBarActionEdge edge,
-}) {
-  return <Widget>[
-    ...actions.separated(SizedBox(width: edge.gap)),
-    _ActionEdgeGap(edge),
-  ];
-}
-
-class _ActionEdgeGap extends StatelessWidget {
-  const _ActionEdgeGap(this.edge);
-
-  final AppBarActionEdge edge;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: edge.spaceOf(context, ViewScope.isMobileOf(context)),
-    );
-  }
 }
 
 class _TitleMenuButton extends StatelessWidget {
