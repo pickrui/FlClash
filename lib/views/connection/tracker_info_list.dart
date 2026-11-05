@@ -55,6 +55,11 @@ final trackerInfoFacets = <RecordFacet<TrackerInfo>>[
     labelOf: (value) => value.toUpperCase(),
   ),
   RecordFacet(RecordFacetKind.rule, (info) => [info.rule], offered: true),
+  RecordFacet(
+    RecordFacetKind.mitm,
+    (info) => [if (info.metadata.mitm) 'MITM'],
+    offered: true,
+  ),
   RecordFacet(RecordFacetKind.app, (info) => [info.metadata.process]),
   RecordFacet(RecordFacetKind.proxy, (info) => info.chains),
 ];

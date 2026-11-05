@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/config.dart';
+import 'package:fl_clash/state.dart';
 import 'package:fl_clash/features/connection/detail_tabs.dart';
 import 'package:fl_clash/features/connection/mitm_exchanges.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -275,6 +276,74 @@ class _TrackerInfoBody extends StatelessWidget {
   }
 }
 
+/// Adds the host of a connection to the hostnames or excludes it, so that the
+/// list can be filled from what the apps really connect to.
+class _MitmHostSection extends ConsumerWidget {
+  final Metadata metadata;
+
+  const _MitmHostSection({required this.metadata});
+
+  Future<void> _confirm(
+    BuildContext context,
+    WidgetRef ref, {
+    required String title,
+    required String tip,
+    required Mitm Function(Mitm) update,
+  }) async {
+    final res = await globalState.showMessage(
+      title: title,
+      message: TextSpan(text: tip),
+    );
+    if (res != true) {
+      return;
+    }
+    ref
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(mitm: update(state.mitm)));
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final host = metadata.host;
+    final (enable, hostname) = ref.watch(
+      patchClashConfigProvider.select(
+        (state) => (state.mitm.enable, state.mitm.hostname),
+      ),
+    );
+    if (!enable || host.isEmpty || metadata.network.toLowerCase() != 'tcp') {
+      return const SizedBox.shrink();
+    }
+    final appLocalizations = context.appLocalizations;
+    final decrypted = metadata.mitm || metadata.mitmRefused;
+    final excludes =
+        !hostname.contains('-$host') && (decrypted || hostname.contains(host));
+    final title = excludes
+        ? appLocalizations.mitmExcludeHost
+        : appLocalizations.mitmDecryptHost;
+    return generateSection(
+      title: appLocalizations.mitm,
+      items: [
+        ListItem(
+          title: Text(title),
+          onTap: () => _confirm(
+            context,
+            ref,
+            title: title,
+            tip: excludes
+                ? appLocalizations.mitmExcludeHostTip(host)
+                : appLocalizations.mitmDecryptHostTip(host),
+            update: (mitm) =>
+                excludes ? mitm.excludingHost(host) : mitm.decryptingHost(host),
+          ),
+        ),
+      ],
+      footer: metadata.mitmRefused
+          ? appLocalizations.mitmClientRefusedCertificate
+          : null,
+    );
+  }
+}
+
 class TrackerInfoDetailView extends ConsumerWidget {
   final TrackerInfo trackerInfo;
 
@@ -361,6 +430,7 @@ class TrackerInfoDetailView extends ConsumerWidget {
             _buildChains(context),
           ],
         ),
+        if (mitmFeature) _MitmHostSection(metadata: metadata),
       ],
     );
   }

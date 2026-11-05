@@ -10,6 +10,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/table_layout.dart';
 import 'package:fl_clash/widgets/record_table.dart';
+import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -232,7 +233,7 @@ class TrackerTargetText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final port = trackerInfo.metadata.destinationPort;
-    return Text.rich(
+    final target = Text.rich(
       TextSpan(
         children: [
           TextSpan(text: trackerInfo.title),
@@ -243,6 +244,16 @@ class TrackerTargetText extends StatelessWidget {
             ),
         ],
       ),
+    );
+    if (!trackerInfo.metadata.mitm) {
+      return target;
+    }
+    return Row(
+      spacing: 6,
+      children: [
+        Flexible(child: target),
+        const RecordLabel(label: 'MITM'),
+      ],
     );
   }
 }
