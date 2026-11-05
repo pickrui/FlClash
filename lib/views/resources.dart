@@ -27,6 +27,7 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/widgets/updating_failures.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/resource_file_info.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
@@ -138,13 +139,7 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
     final failures = await ref
         .read(resourcesProvider)
         .updateAll(shouldContinue: () => mounted);
-    if (failures.isNotEmpty && mounted) {
-      await globalState.showMessage(
-        title: context.appLocalizations.resources,
-        message: TextSpan(text: failures.join('\n')),
-        cancelable: false,
-      );
-    }
+    if (mounted) showUpdatingFailures(context, failures);
   }, silence: false);
 
   Future<void> _updateInterval() async {

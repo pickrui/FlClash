@@ -189,6 +189,7 @@ Future<ProviderContainer> _pushRoute(
     UncontrolledProviderScope(
       container: container,
       child: TestApp(
+        builder: (_, child) => StatusManager(child: child!),
         child: Builder(
           builder: (context) => TextButton(
             onPressed: () =>
@@ -374,6 +375,8 @@ void main() {
     action.pending[2]!.complete(_second);
     action.pending[3]!.completeError(StateError('fixture-managed-private'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.failedCount(2)));
+    await tester.pumpAndSettle();
     expect(
       find.text(AppLocalizations.current.networkTimeoutError),
       findsOneWidget,
@@ -382,7 +385,7 @@ void main() {
     expect(find.textContaining('DioException'), findsNothing);
     expect(find.text('StateError'), findsOneWidget);
     expect(find.textContaining('fixture-managed-private'), findsNothing);
-    await tester.tap(find.text('Confirm'));
+    await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Update'));
     await tester.pump();

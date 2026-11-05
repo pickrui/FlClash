@@ -1786,5 +1786,6 @@
   "decryptUntrusted": "로컬 신뢰 없이 복호화",
   "invalidOfCount": "{total}개 중 {invalid}개 무효",
   "batchLineInputTip": "한 줄에 한 항목",
-  "mitmModuleScriptsChanged": "{name}의 스크립트가 변경되어 껐습니다"
+  "mitmModuleScriptsChanged": "{name}의 스크립트가 변경되어 껐습니다",
+  "failedCount": "{count}개 항목 실패. 눌러서 보기"
 }

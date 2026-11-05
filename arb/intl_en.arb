@@ -1786,5 +1786,6 @@
   "decryptUntrusted": "Decrypt without local trust",
   "invalidOfCount": "{invalid} of {total} invalid",
   "batchLineInputTip": "One item per line",
-  "mitmModuleScriptsChanged": "{name} changed its scripts and was turned off"
+  "mitmModuleScriptsChanged": "{name} changed its scripts and was turned off",
+  "failedCount": "{count} items failed. Tap to view"
 }

@@ -1786,5 +1786,6 @@
   "decryptUntrusted": "本机未信任时也解密",
   "invalidOfCount": "{total} 条中 {invalid} 条无效",
   "batchLineInputTip": "每行一项",
-  "mitmModuleScriptsChanged": "{name} 的脚本有变化，已关闭"
+  "mitmModuleScriptsChanged": "{name} 的脚本有变化，已关闭",
+  "failedCount": "{count} 项失败，点击查看"
 }

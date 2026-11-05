@@ -15143,6 +15143,16 @@ class AppLocalizations {
       args: [name],
     );
   }
+
+  /// `{count} items failed. Tap to view`
+  String failedCount(Object count) {
+    return Intl.message(
+      '$count items failed. Tap to view',
+      name: 'failedCount',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

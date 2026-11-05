@@ -200,19 +200,19 @@ class ResourceUpdates {
         .updateGeoResource(type, url, shouldContinue: shouldContinue);
   });
 
-  Future<List<String>> updateAll({
+  Future<List<UpdatingMessage>> updateAll({
     required bool Function() shouldContinue,
   }) async {
-    final failures = <String>[];
+    final failures = <UpdatingMessage>[];
     Future<void> run(String label, Future<void> Function() action) async {
       if (!ref.mounted || !shouldContinue()) return;
       try {
         await action();
       } catch (error) {
         failures.add(
-          appLocalizations.failedItem(
-            label,
-            userFacingErrorMessage(error, appLocalizations),
+          UpdatingMessage(
+            label: label,
+            message: userFacingErrorMessage(error, appLocalizations),
           ),
         );
       }

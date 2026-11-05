@@ -1786,5 +1786,6 @@
   "decryptUntrusted": "Расшифровывать без локального доверия",
   "invalidOfCount": "Недействительно: {invalid} из {total}",
   "batchLineInputTip": "По одному элементу в строке",
-  "mitmModuleScriptsChanged": "Скрипты модуля {name} изменились, модуль выключен"
+  "mitmModuleScriptsChanged": "Скрипты модуля {name} изменились, модуль выключен",
+  "failedCount": "Ошибок: {count}. Нажмите, чтобы посмотреть"
 }

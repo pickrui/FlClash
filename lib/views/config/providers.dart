@@ -22,6 +22,7 @@ import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/widgets/updating_failures.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/ui/surface.dart';
@@ -237,8 +238,8 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
         }
       },
     );
-    if (_isCurrentPage && failures.isNotEmpty) {
-      await globalState.showAllUpdatingMessagesDialog([
+    if (mounted && _isCurrentPage && failures.isNotEmpty) {
+      showUpdatingFailures(context, [
         for (final provider in candidates) ?failures[provider.id],
       ]);
     }

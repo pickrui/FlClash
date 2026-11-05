@@ -26,6 +26,7 @@ import 'package:fl_clash/models/core.dart';
 import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/widgets/updating_failures.dart';
 import 'package:fl_clash/widgets/chip_title.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -96,8 +97,8 @@ class _ExternalProvidersSliverState
     } finally {
       if (mounted) setState(() => _isUpdating = false);
     }
-    if (failures.isNotEmpty) {
-      await globalState.showAllUpdatingMessagesDialog(failures);
+    if (mounted && failures.isNotEmpty) {
+      showUpdatingFailures(context, failures);
     }
   }
 
@@ -163,8 +164,8 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
     } finally {
       if (mounted) setState(() => _updating = false);
     }
-    if (failures.isNotEmpty) {
-      await globalState.showAllUpdatingMessagesDialog(failures);
+    if (mounted && failures.isNotEmpty) {
+      showUpdatingFailures(context, failures);
     }
   }
 

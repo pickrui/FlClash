@@ -148,7 +148,7 @@ void main() {
         expect(reads, feature ? 1 : 0);
         expect(action.updated, feature ? [2, 3] : isEmpty);
         expect(failures, hasLength(feature ? 1 : 0));
-        if (feature) expect(failures.single, contains('Broken'));
+        if (feature) expect(failures.single.label, 'Broken');
       },
     );
   }
@@ -271,11 +271,13 @@ void main() {
         type: DioExceptionType.receiveTimeout,
       ),
     );
-    expect(await updating, [l.failedItem(item.label, l.networkTimeoutError)]);
+    expect(await updating, [
+      UpdatingMessage(label: item.label, message: l.networkTimeoutError),
+    ]);
     response = Completer<List<int>>()
       ..complete(utf8.encode('<html>failed</html>'));
     expect(await service.updateAll(shouldContinue: () => true), [
-      l.failedItem(item.label, l.providerContentInvalid),
+      UpdatingMessage(label: item.label, message: l.providerContentInvalid),
     ]);
     expect(await file.readAsBytes(), valid);
     expect(container.read(isUpdatingProvider(item.updatingKey)), isFalse);

@@ -15,6 +15,7 @@ import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/widgets/updating_failures.dart';
 import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/navigator.dart';
@@ -95,8 +96,11 @@ class _ProfilesViewState extends State<ProfilesView> {
     } finally {
       if (mounted) setState(() => _isUpdating = false);
     }
-    if (isCurrent() && (route?.isCurrent ?? true) && messages.isNotEmpty) {
-      await globalState.showAllUpdatingMessagesDialog(messages);
+    if (mounted &&
+        isCurrent() &&
+        (route?.isCurrent ?? true) &&
+        messages.isNotEmpty) {
+      showUpdatingFailures(context, messages);
     }
   }
 

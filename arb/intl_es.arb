@@ -1786,5 +1786,6 @@
   "decryptUntrusted": "Descifrar sin confianza local",
   "invalidOfCount": "{invalid} de {total} no válidos",
   "batchLineInputTip": "Un elemento por línea",
-  "mitmModuleScriptsChanged": "Los scripts de {name} han cambiado y se ha desactivado"
+  "mitmModuleScriptsChanged": "Los scripts de {name} han cambiado y se ha desactivado",
+  "failedCount": "{count} elementos fallaron. Toca para ver"
 }
