@@ -885,6 +885,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "customProfileResources": MessageLookupByLibrary.simpleMessage(
       "사용자 지정 프로필 리소스",
     ),
+    "customResources": MessageLookupByLibrary.simpleMessage("사용자 지정"),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "사용자 지정 라우팅을 구성한 후 사용자 지정 모드로 전환하세요. 이 초안을 편집해도 현재 모드는 바뀌지 않습니다.",
     ),

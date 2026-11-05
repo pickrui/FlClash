@@ -15213,6 +15213,11 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Custom`
+  String get customResources {
+    return Intl.message('Custom', name: 'customResources', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

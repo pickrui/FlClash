@@ -1103,6 +1103,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "customProfileResources": MessageLookupByLibrary.simpleMessage(
       "Ressources des profils personnalisés",
     ),
+    "customResources": MessageLookupByLibrary.simpleMessage("Personnalisé"),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "Complétez votre routage, puis passez en mode Personnalisé. Modifier ce brouillon ne change pas le mode actuel.",
     ),

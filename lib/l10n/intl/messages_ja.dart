@@ -907,6 +907,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "customProfileResources": MessageLookupByLibrary.simpleMessage(
       "カスタムプロファイルのリソース",
     ),
+    "customResources": MessageLookupByLibrary.simpleMessage("カスタム"),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "カスタム設定を入力してから、カスタムモードに切り替えてください。下書きの編集では現在のモードは変わりません",
     ),

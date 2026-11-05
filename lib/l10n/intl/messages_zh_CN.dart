@@ -805,6 +805,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "基于自有节点、资源库和其他配置组建策略组与规则",
     ),
     "customProfileResources": MessageLookupByLibrary.simpleMessage("自定义配置资源"),
+    "customResources": MessageLookupByLibrary.simpleMessage("自定义"),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "先填写自定义内容，再切换至自定义模式。编辑草稿不会切换当前模式",
     ),

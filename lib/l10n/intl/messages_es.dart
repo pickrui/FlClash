@@ -1093,6 +1093,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "customProfileResources": MessageLookupByLibrary.simpleMessage(
       "Recursos de perfil personalizado",
     ),
+    "customResources": MessageLookupByLibrary.simpleMessage("Personalizado"),
     "customRoutingDraftHint": MessageLookupByLibrary.simpleMessage(
       "Complete su enrutamiento y cambie al modo Personalizado. Editar este borrador no cambia el modo actual.",
     ),

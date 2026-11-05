@@ -12,16 +12,25 @@ import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/features/overwrite/proxy_chain.dart';
+
+import 'filters.dart';
+import 'icon_sets.dart';
+import 'providers.dart';
 
 import 'rules.dart';
 import 'mitm.dart';
 
-class AdvancedConfigView extends StatelessWidget {
+class AdvancedConfigView extends ConsumerWidget {
   const AdvancedConfigView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final profile = ref.watch(currentProfileProvider);
     final items = [
       ListItem.open(
         title: Text(appLocalizations.network),
@@ -65,7 +74,36 @@ class AdvancedConfigView extends StatelessWidget {
           top: context.sectionsTopPadding,
           bottom: 16 + context.bottomInset,
         ),
-        children: [generateSection(items: items)],
+        children: [
+          generateSection(items: items),
+          generateSection(
+            title: appLocalizations.customResources,
+            items: [
+              if (profile != null)
+                ListItem.open(
+                  title: Text(appLocalizations.proxyChainCustomNodes),
+                  subtitle: Text(profile.realLabel),
+                  leading: const GlyphIcon(AppGlyphs.proxies),
+                  widget: ProfileProxyChainsView(profileId: profile.id),
+                ),
+              ListItem.open(
+                title: Text(appLocalizations.appProviderLibrary),
+                leading: const GlyphIcon(AppGlyphs.resources),
+                widget: const ClashProvidersView(),
+              ),
+              ListItem.open(
+                title: Text(appLocalizations.filters),
+                leading: const GlyphIcon(AppGlyphs.filter),
+                widget: const FiltersView(),
+              ),
+              ListItem.open(
+                title: Text(appLocalizations.iconSets),
+                leading: const GlyphIcon(AppGlyphs.photos),
+                widget: const IconSetsView(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
