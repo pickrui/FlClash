@@ -11,6 +11,7 @@ import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/mitm_module.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
@@ -33,6 +34,27 @@ const maxBackupArchiveBytes = 64 * 1024 * 1024;
 const maxBackupFileBytes = 64 * 1024 * 1024;
 const maxBackupTotalBytes = 256 * 1024 * 1024;
 const maxBackupEntries = 4096;
+
+List<String> mitmBackupEntries(Iterable<MitmModule> modules) {
+  final local = modules.where((module) => !module.isRemote);
+  return [
+    for (final module in local)
+      join(mitmDirectoryName, mitmModulesDirectoryName, module.fileName),
+    for (final name in {
+      for (final module in local) ...mitmAttachments(module).values,
+    })
+      if (_isMitmResourceName(name))
+        join(mitmDirectoryName, mitmResourcesDirectoryName, name),
+  ];
+}
+
+bool _isMitmResourceName(String name) =>
+    name.isNotEmpty &&
+    name != '.' &&
+    name != '..' &&
+    !name.contains('/') &&
+    !name.contains(':') &&
+    !name.contains(r'\');
 
 typedef BackupArchiveRequest = ({
   Map<String, dynamic> configMap,
@@ -296,6 +318,7 @@ Future<String> _backupTask(BackupArchiveRequest args) async {
   final storageSnapshotDir = Directory(storageSnapshotPath);
   final profilesDir = Directory(join(storageSnapshotPath, 'profiles'));
   final scriptsDir = Directory(join(storageSnapshotPath, 'scripts'));
+  final mitmDir = Directory(join(storageSnapshotPath, mitmDirectoryName));
   final tempDBFile = File(join(storageSnapshotPath, backupDatabaseName));
   final tempZipFile = File(tempZipFilePath);
   final tempConfigFile = File(tempConfigFilePath);
@@ -338,6 +361,9 @@ Future<String> _backupTask(BackupArchiveRequest args) async {
       }
       if (await scriptsDir.exists()) {
         await encoder.addDirectory(scriptsDir);
+      }
+      if (await mitmDir.exists()) {
+        await encoder.addDirectory(mitmDir);
       }
     } finally {
       await encoder.close();
@@ -794,6 +820,11 @@ Future<MigrationData> _restoreTask(RestoreArchiveRequest paths) async {
   } on FormatException {
     throw const BackupException(BackupFailure.invalid);
   }
+  final patch = restoreConfigMap['patchClashConfig'];
+  if (patch is Map<String, dynamic>) {
+    final mitm = patch['mitm'];
+    if (mitm is Map<String, dynamic>) mitm['trusted-fingerprint'] = null;
+  }
   final version = restoreConfigMap['version'] ?? 0;
   if (version is! int || version < 0) {
     throw const BackupException(BackupFailure.invalid);
@@ -837,6 +868,7 @@ Future<MigrationData> _restoreTask(RestoreArchiveRequest paths) async {
       database.profileRuleLinks.all().map((item) => item.toLink()).get(),
       database.clashProvidersDao.all().get(),
       database.iconSetsDao.all().get(),
+      database.mitmModulesDao.query().get(),
     ]);
     final profiles = results[0].cast<Profile>();
     final scripts = results[1].cast<Script>();
@@ -861,7 +893,42 @@ Future<MigrationData> _restoreTask(RestoreArchiveRequest paths) async {
         throw const BackupException(BackupFailure.invalid);
       }
     }
+    final modules = <MitmModule>[];
+    for (final module in results[6].cast<MitmModule>()) {
+      if (module.resources.values.any((name) => !_isMitmResourceName(name))) {
+        throw const BackupException(BackupFailure.invalid);
+      }
+      final file = File(
+        join(
+          restoreDirPath,
+          mitmDirectoryName,
+          mitmModulesDirectoryName,
+          module.fileName,
+        ),
+      );
+      final exists = !module.isRemote && await file.exists();
+      final scripts = exists
+          ? parseMitmModule(
+              await file.readAsString(),
+              values: module.arguments,
+            ).declaredScripts
+          : module.scripts;
+      modules.add(
+        module.copyWith(
+          enabled:
+              module.enabled && (module.isRemote || exists) && scripts == 0,
+          scripts: scripts,
+        ),
+      );
+    }
+    for (final entry in mitmBackupEntries(modules)) {
+      final source = File(join(restoreDirPath, entry));
+      if (await source.exists()) {
+        fileMigrations.add(VM2(source.path, join(homeDirPath, entry)));
+      }
+    }
     return migrationData.copyWith(
+      mitmModules: modules,
       profiles: profiles,
       scripts: scripts,
       rules: results[2].cast<Rule>(),

@@ -39,8 +39,10 @@ import 'package:fl_clash/utils/safe_storage.dart';
 import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
 import 'package:fl_clash/widgets/linux_package_format_dialog.dart';
 import 'package:fl_clash/widgets/port_conflict_dialog.dart';
+import 'package:fl_clash/common/mitm_module.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -63,6 +65,7 @@ part 'actions/network.dart';
 part 'actions/core.dart';
 part 'actions/system.dart';
 part 'actions/backup.dart';
+part 'actions/mitm_modules.dart';
 part 'actions/back_block.dart';
 part 'actions/store.dart';
 part 'actions/common.dart';

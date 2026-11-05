@@ -14,7 +14,6 @@ import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/mitm.dart';
-import 'package:fl_clash/providers/mitm_modules.dart';
 import 'package:fl_clash/features/mitm/module_editor.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';

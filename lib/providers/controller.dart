@@ -130,6 +130,7 @@ class AppController {
     _ref.read(scriptsProvider.notifier).replaceFromDatabase(scripts);
     _setAppliedSetupState(null);
     _ref.invalidate(addedRuleStreamProvider);
+    _ref.invalidate(mitmModulesProvider);
     _ref.invalidate(setupStateProvider);
     _ref.read(currentProfileIdProvider.notifier).value =
         config.currentProfileId;

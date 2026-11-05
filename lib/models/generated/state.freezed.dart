@@ -6642,7 +6642,7 @@ as Map<String, String>,
 /// @nodoc
 mixin _$MigrationData {
 
- Map<String, Object?>? get configMap; List<Rule> get rules; List<Script> get scripts; List<Profile> get profiles; List<ProfileRuleLink> get links; List<ClashProvider> get clashProviders; List<IconSet> get iconSets; List<VM2<String, String>> get fileMigrations;
+ Map<String, Object?>? get configMap; List<Rule> get rules; List<Script> get scripts; List<Profile> get profiles; List<ProfileRuleLink> get links; List<ClashProvider> get clashProviders; List<IconSet> get iconSets; List<MitmModule> get mitmModules; List<VM2<String, String>> get fileMigrations;
 /// Create a copy of MigrationData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -6654,20 +6654,20 @@ $MigrationDataCopyWith<MigrationData> get copyWith => _$MigrationDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as MigrationData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MigrationData&&const DeepCollectionEquality().equals(other.configMap, _this.configMap)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&const DeepCollectionEquality().equals(other.scripts, _this.scripts)&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&const DeepCollectionEquality().equals(other.links, _this.links)&&const DeepCollectionEquality().equals(other.clashProviders, _this.clashProviders)&&const DeepCollectionEquality().equals(other.iconSets, _this.iconSets)&&const DeepCollectionEquality().equals(other.fileMigrations, _this.fileMigrations));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MigrationData&&const DeepCollectionEquality().equals(other.configMap, _this.configMap)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&const DeepCollectionEquality().equals(other.scripts, _this.scripts)&&const DeepCollectionEquality().equals(other.profiles, _this.profiles)&&const DeepCollectionEquality().equals(other.links, _this.links)&&const DeepCollectionEquality().equals(other.clashProviders, _this.clashProviders)&&const DeepCollectionEquality().equals(other.iconSets, _this.iconSets)&&const DeepCollectionEquality().equals(other.mitmModules, _this.mitmModules)&&const DeepCollectionEquality().equals(other.fileMigrations, _this.fileMigrations));
 }
 
 
 @override
 int get hashCode {
   final _this = this as MigrationData;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.configMap),const DeepCollectionEquality().hash(_this.rules),const DeepCollectionEquality().hash(_this.scripts),const DeepCollectionEquality().hash(_this.profiles),const DeepCollectionEquality().hash(_this.links),const DeepCollectionEquality().hash(_this.clashProviders),const DeepCollectionEquality().hash(_this.iconSets),const DeepCollectionEquality().hash(_this.fileMigrations));
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.configMap),const DeepCollectionEquality().hash(_this.rules),const DeepCollectionEquality().hash(_this.scripts),const DeepCollectionEquality().hash(_this.profiles),const DeepCollectionEquality().hash(_this.links),const DeepCollectionEquality().hash(_this.clashProviders),const DeepCollectionEquality().hash(_this.iconSets),const DeepCollectionEquality().hash(_this.mitmModules),const DeepCollectionEquality().hash(_this.fileMigrations));
 }
 
 @override
 String toString() {
   final _this = this as MigrationData;
-  return 'MigrationData(configMap: ${_this.configMap}, rules: ${_this.rules}, scripts: ${_this.scripts}, profiles: ${_this.profiles}, links: ${_this.links}, clashProviders: ${_this.clashProviders}, iconSets: ${_this.iconSets}, fileMigrations: ${_this.fileMigrations})';
+  return 'MigrationData(configMap: ${_this.configMap}, rules: ${_this.rules}, scripts: ${_this.scripts}, profiles: ${_this.profiles}, links: ${_this.links}, clashProviders: ${_this.clashProviders}, iconSets: ${_this.iconSets}, mitmModules: ${_this.mitmModules}, fileMigrations: ${_this.fileMigrations})';
 }
 
 
@@ -6678,7 +6678,7 @@ abstract mixin class $MigrationDataCopyWith<$Res>  {
   factory $MigrationDataCopyWith(MigrationData value, $Res Function(MigrationData) _then) = _$MigrationDataCopyWithImpl;
 @useResult
 $Res call({
- Map<String, Object?>? configMap, List<Rule> rules, List<Script> scripts, List<Profile> profiles, List<ProfileRuleLink> links, List<ClashProvider> clashProviders, List<IconSet> iconSets, List<VM2<String, String>> fileMigrations
+ Map<String, Object?>? configMap, List<Rule> rules, List<Script> scripts, List<Profile> profiles, List<ProfileRuleLink> links, List<ClashProvider> clashProviders, List<IconSet> iconSets, List<MitmModule> mitmModules, List<VM2<String, String>> fileMigrations
 });
 
 
@@ -6695,7 +6695,7 @@ class _$MigrationDataCopyWithImpl<$Res>
 
 /// Create a copy of MigrationData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? configMap = freezed,Object? rules = null,Object? scripts = null,Object? profiles = null,Object? links = null,Object? clashProviders = null,Object? iconSets = null,Object? fileMigrations = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? configMap = freezed,Object? rules = null,Object? scripts = null,Object? profiles = null,Object? links = null,Object? clashProviders = null,Object? iconSets = null,Object? mitmModules = null,Object? fileMigrations = null,}) {
   return _then(MigrationData(
 configMap: freezed == configMap ? _self.configMap : configMap // ignore: cast_nullable_to_non_nullable
 as Map<String, Object?>?,rules: null == rules ? _self.rules : rules // ignore: cast_nullable_to_non_nullable
@@ -6704,7 +6704,8 @@ as List<Script>,profiles: null == profiles ? _self.profiles : profiles // ignore
 as List<Profile>,links: null == links ? _self.links : links // ignore: cast_nullable_to_non_nullable
 as List<ProfileRuleLink>,clashProviders: null == clashProviders ? _self.clashProviders : clashProviders // ignore: cast_nullable_to_non_nullable
 as List<ClashProvider>,iconSets: null == iconSets ? _self.iconSets : iconSets // ignore: cast_nullable_to_non_nullable
-as List<IconSet>,fileMigrations: null == fileMigrations ? _self.fileMigrations : fileMigrations // ignore: cast_nullable_to_non_nullable
+as List<IconSet>,mitmModules: null == mitmModules ? _self.mitmModules : mitmModules // ignore: cast_nullable_to_non_nullable
+as List<MitmModule>,fileMigrations: null == fileMigrations ? _self.fileMigrations : fileMigrations // ignore: cast_nullable_to_non_nullable
 as List<VM2<String, String>>,
   ));
 }
@@ -6790,10 +6791,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<ClashProvider> clashProviders,  List<IconSet> iconSets,  List<VM2<String, String>> fileMigrations)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<ClashProvider> clashProviders,  List<IconSet> iconSets,  List<MitmModule> mitmModules,  List<VM2<String, String>> fileMigrations)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MigrationData() when $default != null:
-return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.clashProviders,_that.iconSets,_that.fileMigrations);case _:
+return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.clashProviders,_that.iconSets,_that.mitmModules,_that.fileMigrations);case _:
   return orElse();
 
 }
@@ -6811,10 +6812,10 @@ return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<ClashProvider> clashProviders,  List<IconSet> iconSets,  List<VM2<String, String>> fileMigrations)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<ClashProvider> clashProviders,  List<IconSet> iconSets,  List<MitmModule> mitmModules,  List<VM2<String, String>> fileMigrations)  $default,) {final _that = this;
 switch (_that) {
 case _MigrationData():
-return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.clashProviders,_that.iconSets,_that.fileMigrations);case _:
+return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.clashProviders,_that.iconSets,_that.mitmModules,_that.fileMigrations);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -6831,10 +6832,10 @@ return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<ClashProvider> clashProviders,  List<IconSet> iconSets,  List<VM2<String, String>> fileMigrations)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<String, Object?>? configMap,  List<Rule> rules,  List<Script> scripts,  List<Profile> profiles,  List<ProfileRuleLink> links,  List<ClashProvider> clashProviders,  List<IconSet> iconSets,  List<MitmModule> mitmModules,  List<VM2<String, String>> fileMigrations)?  $default,) {final _that = this;
 switch (_that) {
 case _MigrationData() when $default != null:
-return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.clashProviders,_that.iconSets,_that.fileMigrations);case _:
+return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.links,_that.clashProviders,_that.iconSets,_that.mitmModules,_that.fileMigrations);case _:
   return null;
 
 }
@@ -6846,7 +6847,7 @@ return $default(_that.configMap,_that.rules,_that.scripts,_that.profiles,_that.l
 
 
 class _MigrationData implements MigrationData {
-  const _MigrationData({ Map<String, Object?>? configMap,  List<Rule> rules = const [],  List<Script> scripts = const [],  List<Profile> profiles = const [],  List<ProfileRuleLink> links = const [],  List<ClashProvider> clashProviders = const [],  List<IconSet> iconSets = const [],  List<VM2<String, String>> fileMigrations = const []}): _configMap = configMap,_rules = rules,_scripts = scripts,_profiles = profiles,_links = links,_clashProviders = clashProviders,_iconSets = iconSets,_fileMigrations = fileMigrations;
+  const _MigrationData({ Map<String, Object?>? configMap,  List<Rule> rules = const [],  List<Script> scripts = const [],  List<Profile> profiles = const [],  List<ProfileRuleLink> links = const [],  List<ClashProvider> clashProviders = const [],  List<IconSet> iconSets = const [],  List<MitmModule> mitmModules = const [],  List<VM2<String, String>> fileMigrations = const []}): _configMap = configMap,_rules = rules,_scripts = scripts,_profiles = profiles,_links = links,_clashProviders = clashProviders,_iconSets = iconSets,_mitmModules = mitmModules,_fileMigrations = fileMigrations;
   
 
  final  Map<String, Object?>? _configMap;
@@ -6900,6 +6901,13 @@ class _MigrationData implements MigrationData {
   return EqualUnmodifiableListView(_iconSets);
 }
 
+ final  List<MitmModule> _mitmModules;
+@override@JsonKey() List<MitmModule> get mitmModules {
+  if (_mitmModules is EqualUnmodifiableListView) return _mitmModules;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_mitmModules);
+}
+
  final  List<VM2<String, String>> _fileMigrations;
 @override@JsonKey() List<VM2<String, String>> get fileMigrations {
   if (_fileMigrations is EqualUnmodifiableListView) return _fileMigrations;
@@ -6918,18 +6926,18 @@ _$MigrationDataCopyWith<_MigrationData> get copyWith => __$MigrationDataCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MigrationData&&const DeepCollectionEquality().equals(other.configMap, _configMap)&&const DeepCollectionEquality().equals(other.rules, _rules)&&const DeepCollectionEquality().equals(other.scripts, _scripts)&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&const DeepCollectionEquality().equals(other.links, _links)&&const DeepCollectionEquality().equals(other.clashProviders, _clashProviders)&&const DeepCollectionEquality().equals(other.iconSets, _iconSets)&&const DeepCollectionEquality().equals(other.fileMigrations, _fileMigrations));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MigrationData&&const DeepCollectionEquality().equals(other.configMap, _configMap)&&const DeepCollectionEquality().equals(other.rules, _rules)&&const DeepCollectionEquality().equals(other.scripts, _scripts)&&const DeepCollectionEquality().equals(other.profiles, _profiles)&&const DeepCollectionEquality().equals(other.links, _links)&&const DeepCollectionEquality().equals(other.clashProviders, _clashProviders)&&const DeepCollectionEquality().equals(other.iconSets, _iconSets)&&const DeepCollectionEquality().equals(other.mitmModules, _mitmModules)&&const DeepCollectionEquality().equals(other.fileMigrations, _fileMigrations));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_configMap),const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_scripts),const DeepCollectionEquality().hash(_profiles),const DeepCollectionEquality().hash(_links),const DeepCollectionEquality().hash(_clashProviders),const DeepCollectionEquality().hash(_iconSets),const DeepCollectionEquality().hash(_fileMigrations));
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_configMap),const DeepCollectionEquality().hash(_rules),const DeepCollectionEquality().hash(_scripts),const DeepCollectionEquality().hash(_profiles),const DeepCollectionEquality().hash(_links),const DeepCollectionEquality().hash(_clashProviders),const DeepCollectionEquality().hash(_iconSets),const DeepCollectionEquality().hash(_mitmModules),const DeepCollectionEquality().hash(_fileMigrations));
 }
 
 @override
 String toString() {
-    return 'MigrationData(configMap: $configMap, rules: $rules, scripts: $scripts, profiles: $profiles, links: $links, clashProviders: $clashProviders, iconSets: $iconSets, fileMigrations: $fileMigrations)';
+    return 'MigrationData(configMap: $configMap, rules: $rules, scripts: $scripts, profiles: $profiles, links: $links, clashProviders: $clashProviders, iconSets: $iconSets, mitmModules: $mitmModules, fileMigrations: $fileMigrations)';
 }
 
 
@@ -6940,7 +6948,7 @@ abstract mixin class _$MigrationDataCopyWith<$Res> implements $MigrationDataCopy
   factory _$MigrationDataCopyWith(_MigrationData value, $Res Function(_MigrationData) _then) = __$MigrationDataCopyWithImpl;
 @override @useResult
 $Res call({
- Map<String, Object?>? configMap, List<Rule> rules, List<Script> scripts, List<Profile> profiles, List<ProfileRuleLink> links, List<ClashProvider> clashProviders, List<IconSet> iconSets, List<VM2<String, String>> fileMigrations
+ Map<String, Object?>? configMap, List<Rule> rules, List<Script> scripts, List<Profile> profiles, List<ProfileRuleLink> links, List<ClashProvider> clashProviders, List<IconSet> iconSets, List<MitmModule> mitmModules, List<VM2<String, String>> fileMigrations
 });
 
 
@@ -6957,7 +6965,7 @@ class __$MigrationDataCopyWithImpl<$Res>
 
 /// Create a copy of MigrationData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? configMap = freezed,Object? rules = null,Object? scripts = null,Object? profiles = null,Object? links = null,Object? clashProviders = null,Object? iconSets = null,Object? fileMigrations = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? configMap = freezed,Object? rules = null,Object? scripts = null,Object? profiles = null,Object? links = null,Object? clashProviders = null,Object? iconSets = null,Object? mitmModules = null,Object? fileMigrations = null,}) {
   return _then(_MigrationData(
 configMap: freezed == configMap ? _self._configMap : configMap // ignore: cast_nullable_to_non_nullable
 as Map<String, Object?>?,rules: null == rules ? _self._rules : rules // ignore: cast_nullable_to_non_nullable
@@ -6966,7 +6974,8 @@ as List<Script>,profiles: null == profiles ? _self._profiles : profiles // ignor
 as List<Profile>,links: null == links ? _self._links : links // ignore: cast_nullable_to_non_nullable
 as List<ProfileRuleLink>,clashProviders: null == clashProviders ? _self._clashProviders : clashProviders // ignore: cast_nullable_to_non_nullable
 as List<ClashProvider>,iconSets: null == iconSets ? _self._iconSets : iconSets // ignore: cast_nullable_to_non_nullable
-as List<IconSet>,fileMigrations: null == fileMigrations ? _self._fileMigrations : fileMigrations // ignore: cast_nullable_to_non_nullable
+as List<IconSet>,mitmModules: null == mitmModules ? _self._mitmModules : mitmModules // ignore: cast_nullable_to_non_nullable
+as List<MitmModule>,fileMigrations: null == fileMigrations ? _self._fileMigrations : fileMigrations // ignore: cast_nullable_to_non_nullable
 as List<VM2<String, String>>,
   ));
 }

@@ -115,6 +115,15 @@ extension BackupControllerExt on AppController {
             await target.parent.create(recursive: true);
             await source.safeCopy(target.path);
           }
+          final modules = await database.mitmModulesDao.query().get();
+          final homePath = await appPath.homeDirPath;
+          for (final entry in mitmBackupEntries(modules)) {
+            final source = File(p.join(homePath, entry));
+            if (!await source.exists()) continue;
+            final target = File(p.join(snapshotPath, entry));
+            await target.parent.create(recursive: true);
+            await source.safeCopy(target.path);
+          }
           return snapshotPath;
         } catch (_) {
           await snapshotDir.safeDelete(recursive: true);
@@ -200,6 +209,7 @@ extension BackupControllerExt on AppController {
               .all()
               .get();
           final previousIconSets = await database.iconSetsDao.all().get();
+          final previousModules = await database.mitmModulesDao.query().get();
           final previousRules = await database.select(database.rules).map((
             row,
           ) {
@@ -218,7 +228,9 @@ extension BackupControllerExt on AppController {
               previousProviders.length !=
                   await database.clashProviders.count.getSingle() ||
               previousIconSets.length !=
-                  await database.iconSets.count.getSingle();
+                  await database.iconSets.count.getSingle() ||
+              previousModules.length !=
+                  await database.mitmModules.count.getSingle();
           await preferences.saveDurableConfig(previousConfig);
           restoreJournal = await RestoreJournal.begin(
             homePath: await appPath.homeDirPath,
@@ -286,6 +298,7 @@ extension BackupControllerExt on AppController {
                     isOverride: isOverride,
                     clashProviders: migrationData.clashProviders,
                     iconSets: migrationData.iconSets,
+                    mitmModules: migrationData.mitmModules,
                   );
                   databaseChanged = true;
                   final profileIds = (await database.profilesDao.all().get())
@@ -345,6 +358,7 @@ extension BackupControllerExt on AppController {
                         isOverride: true,
                         clashProviders: previousProviders,
                         iconSets: previousIconSets,
+                        mitmModules: previousModules,
                       );
                     } catch (failure) {
                       rollbackError = failure;
@@ -538,6 +552,11 @@ extension BackupControllerExt on AppController {
       throw StateError(
         'restore committed but core activation failed: $coreRecoveryError',
       );
+    }
+    if (restoreCommitted) {
+      final modules = _ref.read(mitmModulesActionProvider.notifier);
+      await modules.clean();
+      unawaited(modules.autoUpdate());
     }
   }
 }

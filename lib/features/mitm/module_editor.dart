@@ -10,7 +10,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/providers/mitm_modules.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:collection/collection.dart';
 import 'package:fl_clash/ui/navigator.dart';

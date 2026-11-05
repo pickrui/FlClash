@@ -9,6 +9,8 @@ Map<String, dynamic> createBackupConfigMap(Config config, int version) {
   final configMap = Map<String, dynamic>.from(
     jsonDecode(jsonEncode(sanitizeConfigForPreferences(config))) as Map,
   );
+  final patch = configMap['patchClashConfig'] as Map<String, dynamic>;
+  (patch['mitm'] as Map<String, dynamic>)['trusted-fingerprint'] = null;
   configMap['version'] = version;
   return configMap;
 }

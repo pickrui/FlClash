@@ -11,7 +11,7 @@ import 'package:fl_clash/common/mitm_module.dart';
 import 'package:fl_clash/database/database.dart' as db;
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/mitm_modules.dart';
+import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
