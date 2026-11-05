@@ -152,7 +152,7 @@ CLAUDE.md
 /lib/models/cloud_account.dart
 /lib/models/generated/cloud_account.freezed.dart
 /lib/models/generated/cloud_account.g.dart
-/test/common/config_key_recovery_test.dart
 /test/common/config_key_store_test.dart
-/test/models/store_plan_test.dart
+/test/common/config_key_recovery_test.dart
 /test/providers/cloud_account_provider_test.dart
+/test/models/store_plan_test.dart
