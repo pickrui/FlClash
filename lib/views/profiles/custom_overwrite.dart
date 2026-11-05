@@ -24,8 +24,8 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:material_ui/material_ui.dart' show MaterialBanner, Badge;
-import 'package:prism_ui/theme_data.dart' show Colors;
+import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/typography.dart';
 import 'package:prism_ui/tooltip.dart' show Tooltip;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
@@ -247,17 +247,27 @@ class CustomOverwriteContent extends ConsumerWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: MaterialBanner(
-                elevation: 0,
-                dividerColor: Colors.transparent,
-                content: Text(appLocalizations.configDataDetected),
-                actions: [
-                  TonalButton(
-                    onPressed: () => _quickFill(context, ref),
-                    glyph: AppGlyphs.sparkle,
-                    label: appLocalizations.quickFill,
+              child: Surface(
+                color: context.colorScheme.surfaceContainer,
+                shape: AppShape.xl,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: 12,
+                    children: [
+                      Text(appLocalizations.configDataDetected),
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: TonalButton(
+                          onPressed: () => _quickFill(context, ref),
+                          glyph: AppGlyphs.sparkle,
+                          label: appLocalizations.quickFill,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -278,16 +288,25 @@ class _CountBadge extends StatelessWidget {
       message: issues > 0
           ? context.appLocalizations.overwriteIssuesSummary(issues)
           : '$count',
-      child: Badge(
-        backgroundColor: issues > 0
-            ? context.colorScheme.errorContainer
-            : context.colorScheme.secondaryContainer,
-        textColor: issues > 0
-            ? context.colorScheme.onErrorContainer
-            : context.colorScheme.onSecondaryContainer,
-        label: Text('$count'),
-        largeSize: 28,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 28),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: ShapeDecoration(
+          shape: AppShape.full,
+          color: issues > 0
+              ? context.colorScheme.errorContainer
+              : context.colorScheme.secondaryContainer,
+        ),
+        child: Text(
+          '$count',
+          style: AppTextStyle.caption1
+              .of(context, emphasized: true)
+              .copyWith(
+                color: issues > 0
+                    ? context.colorScheme.onErrorContainer
+                    : context.colorScheme.onSecondaryContainer,
+              ),
+        ),
       ),
     );
   }
