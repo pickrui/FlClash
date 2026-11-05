@@ -71,4 +71,35 @@ void main() {
     expect(find.text('Invalid content'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('grouped failure details open at the top on fractional screens', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1080, 2400)
+      ..devicePixelRatio = 2.75
+      ..padding = const FakeViewPadding(top: 96, bottom: 70);
+    addTearDown(tester.view.reset);
+    await mount(tester);
+    final failures = [
+      for (var i = 0; i < 24; i++)
+        UpdatingMessage(
+          label: 'Subscription $i',
+          message: i < 12 ? 'Timed out' : 'Invalid content',
+        ),
+    ];
+    showUpdatingFailures(pageContext, failures);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.text(AppLocalizations.current.failedCount(failures.length)),
+    );
+    await tester.pumpAndSettle();
+    final position = tester
+        .state<ScrollableState>(find.byType(Scrollable).first)
+        .position;
+    expect(position.maxScrollExtent, greaterThan(0));
+    expect(position.pixels, position.minScrollExtent);
+    expect(find.text('Subscription 0').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
