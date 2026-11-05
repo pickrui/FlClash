@@ -1,0 +1,376 @@
+import 'dart:convert';
+
+import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/models/models.dart';
+import 'package:flutter/material.dart';
+import 'package:test/test.dart';
+
+/// Helper to round-trip a model through JSON encode/decode.
+T roundTrip<T>(
+  Object? Function() toJson,
+  T Function(Map<String, Object?> json) fromJson,
+) {
+  final encoded = jsonEncode(toJson());
+  final decoded = jsonDecode(encoded) as Map<String, Object?>;
+  return fromJson(decoded);
+}
+
+void main() {
+  group('AppSettingProps JSON round-trip', () {
+    test('default values survive round-trip', () {
+      const props = AppSettingProps();
+      final restored = roundTrip(
+        () => props.toJson(),
+        AppSettingProps.fromJson,
+      );
+      expect(restored.onlyStatisticsProxy, false);
+      expect(restored.autoLaunch, false);
+      expect(restored.silentLaunch, false);
+      expect(restored.autoRun, false);
+      expect(restored.openLogs, false);
+      expect(restored.closeConnections, true);
+      expect(restored.isAnimateToPage, false);
+      expect(restored.showLabel, false);
+      expect(restored.minimizeOnExit, true);
+      expect(restored.restoreStrategy, RestoreStrategy.compatible);
+      expect(restored.testUrl, defaultTestUrl);
+      expect(restored.customUserAgent, '');
+    });
+
+    test('custom values survive round-trip', () {
+      const props = AppSettingProps(
+        locale: 'zh_CN',
+        onlyStatisticsProxy: true,
+        autoLaunch: true,
+        closeConnections: false,
+        testUrl: 'https://custom.test',
+        customUserAgent: 'CustomUA/1.0',
+      );
+      final restored = roundTrip(
+        () => props.toJson(),
+        AppSettingProps.fromJson,
+      );
+      expect(restored.locale, 'zh_CN');
+      expect(restored.onlyStatisticsProxy, true);
+      expect(restored.autoLaunch, true);
+      expect(restored.closeConnections, false);
+      expect(restored.testUrl, 'https://custom.test');
+      expect(restored.customUserAgent, 'CustomUA/1.0');
+    });
+
+    test('missing test URL uses the Cloudflare default', () {
+      final restored = AppSettingProps.fromJson({});
+
+      expect(restored.testUrl, defaultTestUrl);
+      expect(restored.testUrl, 'http://cp.cloudflare.com/generate_204');
+    });
+
+    test('gstatic default migrates to Cloudflare', () {
+      final restored = AppSettingProps.fromJson({
+        'testUrl': 'https://www.gstatic.com/generate_204',
+      });
+
+      expect(restored.testUrl, defaultTestUrl);
+    });
+
+    test('safeFromJson returns default on null', () {
+      final result = AppSettingProps.safeFromJson(null);
+      expect(result, isA<AppSettingProps>());
+      expect(result.onlyStatisticsProxy, false);
+    });
+
+    test('safeFromJson returns default on invalid JSON', () {
+      final result = AppSettingProps.safeFromJson({'invalid': 'data'});
+      expect(result, isA<AppSettingProps>());
+    });
+  });
+
+  group('WindowProps JSON round-trip', () {
+    test('default values', () {
+      const props = WindowProps();
+      expect(props.width, 0);
+      expect(props.height, 0);
+      expect(props.top, null);
+      expect(props.left, null);
+    });
+
+    test('fromJson handles null', () {
+      final props = WindowProps.fromJson(null);
+      expect(props.width, 0);
+    });
+
+    test('size extension defaults to 680x580 when empty', () {
+      const props = WindowProps();
+      expect(props.size.width, 680);
+      expect(props.size.height, 580);
+    });
+
+    test('size extension uses actual values', () {
+      const props = WindowProps(width: 800, height: 600);
+      expect(props.size.width, 800);
+      expect(props.size.height, 600);
+    });
+
+    test('round-trip with values', () {
+      const props = WindowProps(width: 1024, height: 768, top: 100, left: 200);
+      final restored = roundTrip(() => props.toJson(), WindowProps.fromJson);
+      expect(restored.width, 1024);
+      expect(restored.height, 768);
+      expect(restored.top, 100);
+      expect(restored.left, 200);
+    });
+  });
+
+  group('VpnProps JSON round-trip', () {
+    test('default values', () {
+      const props = VpnProps();
+      expect(props.enable, true);
+      expect(props.systemProxy, true);
+      expect(props.ipv6, false);
+      expect(props.allowBypass, true);
+      expect(props.dnsHijacking, false);
+      expect(props.accessControlProps.enable, false);
+    });
+
+    test('fromJson handles null', () {
+      final props = VpnProps.fromJson(null);
+      expect(props.enable, true);
+    });
+
+    test('round-trip with custom values', () {
+      const accessControl = AccessControlProps(
+        enable: true,
+        mode: AccessControlMode.acceptSelected,
+      );
+      const props = VpnProps(
+        enable: false,
+        systemProxy: false,
+        ipv6: true,
+        accessControlProps: accessControl,
+      );
+      final restored = roundTrip(() => props.toJson(), VpnProps.fromJson);
+      expect(restored.enable, false);
+      expect(restored.systemProxy, false);
+      expect(restored.ipv6, true);
+    });
+  });
+
+  group('NetworkProps JSON round-trip', () {
+    test('default values', () {
+      const props = NetworkProps();
+      expect(props.systemProxy, true);
+      expect(props.bypassDomain, defaultBypassDomain);
+      expect(props.routeMode, RouteMode.config);
+      expect(props.autoSetSystemDns, true);
+      expect(props.appendSystemDns, false);
+      expect(props.autoSetIpv6, false);
+      expect(props.manualIpv6, null);
+      expect(props.toJson(), isNot(contains('manualIpv6')));
+      expect(props.blockQuic, false);
+      expect(props.blockWebRtc, false);
+      expect(props.suspendOnIdle, false);
+    });
+
+    test('round-trip with custom values', () {
+      const props = NetworkProps(
+        systemProxy: false,
+        bypassDomain: ['example.com'],
+        routeMode: RouteMode.bypassPrivate,
+        autoSetIpv6: true,
+        manualIpv6: true,
+        blockQuic: true,
+        blockWebRtc: true,
+        suspendOnIdle: true,
+      );
+      final restored = roundTrip(() => props.toJson(), NetworkProps.fromJson);
+      expect(restored.systemProxy, false);
+      expect(restored.bypassDomain, ['example.com']);
+      expect(restored.routeMode, RouteMode.bypassPrivate);
+      expect(restored.autoSetIpv6, true);
+      expect(restored.manualIpv6, true);
+      expect(restored.toJson()['manualIpv6'], true);
+      expect(restored.blockQuic, true);
+      expect(restored.blockWebRtc, true);
+      expect(restored.suspendOnIdle, true);
+    });
+
+    test('older settings keep idle suspension disabled', () {
+      expect(NetworkProps.fromJson(null).suspendOnIdle, false);
+      expect(NetworkProps.fromJson({'systemProxy': true}).suspendOnIdle, false);
+    });
+  });
+
+  group('ProxiesStyleProps JSON round-trip', () {
+    test('default values', () {
+      const props = ProxiesStyleProps();
+      expect(props.type, ProxiesType.tab);
+      expect(props.sortType, ProxiesSortType.none);
+      expect(props.layout, ProxiesLayout.standard);
+    });
+
+    test('round-trip with custom values', () {
+      const props = ProxiesStyleProps(
+        type: ProxiesType.list,
+        sortType: ProxiesSortType.delay,
+      );
+      final restored = roundTrip(
+        () => props.toJson(),
+        ProxiesStyleProps.fromJson,
+      );
+      expect(restored.type, ProxiesType.list);
+      expect(restored.sortType, ProxiesSortType.delay);
+    });
+  });
+
+  group('ThemeProps JSON round-trip', () {
+    test('default values', () {
+      const props = ThemeProps();
+      expect(props.primaryColor, null);
+      expect(props.primaryColors, defaultPrimaryColors);
+      expect(props.themeMode, ThemeMode.dark);
+      expect(props.pureBlack, false);
+      expect(props.textScale.scale, 1.0);
+    });
+
+    test('safeFromJson returns default on null', () {
+      final result = ThemeProps.safeFromJson(null);
+      expect(result.themeMode, ThemeMode.dark);
+    });
+
+    test('round-trip with custom values', () {
+      const props = ThemeProps(
+        primaryColor: 0xFF123456,
+        themeMode: ThemeMode.light,
+        pureBlack: true,
+        textScale: TextScale(enable: true, scale: 1.5),
+      );
+      final restored = roundTrip(() => props.toJson(), ThemeProps.fromJson);
+      expect(restored.primaryColor, 0xFF123456);
+      expect(restored.themeMode, ThemeMode.light);
+      expect(restored.pureBlack, true);
+      expect(restored.textScale.scale, 1.5);
+    });
+  });
+
+  group('AccessControlProps', () {
+    test('currentList returns acceptList in acceptSelected mode', () {
+      const props = AccessControlProps(
+        enable: true,
+        mode: AccessControlMode.acceptSelected,
+        acceptList: ['app1', 'app2'],
+        rejectList: ['app3'],
+      );
+      expect(props.currentList, ['app1', 'app2']);
+    });
+
+    test('currentList returns rejectList in rejectSelected mode', () {
+      const props = AccessControlProps(
+        enable: true,
+        mode: AccessControlMode.rejectSelected,
+        acceptList: ['app1'],
+        rejectList: ['app3', 'app4'],
+      );
+      expect(props.currentList, ['app3', 'app4']);
+    });
+  });
+
+  group('ClashConfig Geo update JSON', () {
+    test('normalizes unsafe update intervals', () {
+      expect(normalizeGeoUpdateInterval(1), 1);
+      expect(normalizeGeoUpdateInterval(maxGeoUpdateInterval), 8760);
+      expect(normalizeGeoUpdateInterval(0), defaultGeoUpdateInterval);
+      expect(normalizeGeoUpdateInterval(8761), defaultGeoUpdateInterval);
+      expect(normalizeGeoUpdateInterval(2562048), defaultGeoUpdateInterval);
+    });
+
+    test('enables automatic updates for new or missing settings', () {
+      for (final config in [
+        defaultClashConfig,
+        ClashConfig.fromJson({}),
+        ClashConfig.safeFormJson(null),
+      ]) {
+        expect(config.geoAutoUpdate, true);
+        expect(config.geoUpdateInterval, 24);
+        expect(config.toJson()['geo-auto-update'], true);
+      }
+    });
+
+    test('preserves an explicitly disabled automatic update setting', () {
+      final config = ClashConfig.fromJson({'geo-auto-update': false});
+      final restored = roundTrip(() => config.toJson(), ClashConfig.fromJson);
+
+      expect(config.geoAutoUpdate, false);
+      expect(restored.geoAutoUpdate, false);
+      expect(restored.toJson()['geo-auto-update'], false);
+    });
+
+    test('custom values survive round-trip', () {
+      const config = ClashConfig(geoAutoUpdate: true, geoUpdateInterval: 6);
+      final restored = roundTrip(() => config.toJson(), ClashConfig.fromJson);
+      expect(restored.geoAutoUpdate, true);
+      expect(restored.geoUpdateInterval, 6);
+      expect(config.toJson()['geo-auto-update'], true);
+      expect(config.toJson()['geo-update-interval'], 6);
+    });
+  });
+
+  group('Config composite serialization', () {
+    test('default Config round-trip', () {
+      const config = Config(themeProps: ThemeProps());
+      final restored = roundTrip(() => config.toJson(), Config.fromJson);
+      expect(restored.currentProfileId, null);
+      expect(restored.overrideDns, false);
+      expect(restored.networkProps.systemProxy, true);
+      expect(restored.vpnProps.enable, true);
+      expect(restored.hotKeyActions, isEmpty);
+      expect(restored.patchClashConfig.geoAutoUpdate, true);
+    });
+
+    test('realFromJson handles null', () {
+      final result = Config.realFromJson(null);
+      expect(result.appSettingProps.onlyStatisticsProxy, false);
+      expect(result.patchClashConfig.geoAutoUpdate, true);
+    });
+
+    test('missing Geo settings default on while saved opt-out survives', () {
+      expect(Config.fromJson({}).patchClashConfig.geoAutoUpdate, true);
+      expect(
+        Config.fromJson(
+          jsonDecode('{"patchClashConfig":{}}'),
+        ).patchClashConfig.geoAutoUpdate,
+        true,
+      );
+      final config = Config.fromJson({
+        'patchClashConfig': {'geo-auto-update': false},
+      });
+      final restored = roundTrip(() => config.toJson(), Config.fromJson);
+      expect(restored.patchClashConfig.geoAutoUpdate, false);
+    });
+
+    test('full config round-trip', () {
+      const config = Config(
+        currentProfileId: 42,
+        overrideDns: true,
+        hotKeyActions: [],
+        appSettingProps: AppSettingProps(locale: 'en', autoLaunch: true),
+        networkProps: NetworkProps(systemProxy: false),
+        vpnProps: VpnProps(enable: false),
+        themeProps: ThemeProps(
+          primaryColor: 0xFF00FF00,
+          themeMode: ThemeMode.system,
+        ),
+        windowProps: WindowProps(width: 1280, height: 720),
+      );
+      final restored = roundTrip(() => config.toJson(), Config.fromJson);
+      expect(restored.currentProfileId, 42);
+      expect(restored.overrideDns, true);
+      expect(restored.appSettingProps.locale, 'en');
+      expect(restored.appSettingProps.autoLaunch, true);
+      expect(restored.networkProps.systemProxy, false);
+      expect(restored.vpnProps.enable, false);
+      expect(restored.windowProps.width, 1280);
+      expect(restored.windowProps.height, 720);
+    });
+  });
+}

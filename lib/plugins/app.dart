@@ -1,0 +1,124 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/models/models.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class App {
+  static App? _instance;
+  late MethodChannel methodChannel;
+  Function()? onExit;
+
+  App._internal() {
+    methodChannel = const MethodChannel('$packageName/app');
+    methodChannel.setMethodCallHandler((call) async {
+      switch (call.method) {
+        case 'exit':
+          if (onExit != null) {
+            await onExit!();
+          }
+        default:
+          throw MissingPluginException();
+      }
+    });
+  }
+
+  factory App() {
+    _instance ??= App._internal();
+    return _instance!;
+  }
+
+  Future<bool?> moveTaskToBack() async {
+    return methodChannel.invokeMethod<bool>('moveTaskToBack');
+  }
+
+  Future<List<Package>> getPackages() async {
+    final packagesString = await methodChannel.invokeMethod<String>(
+      'getPackages',
+    );
+    final List<dynamic> packagesRaw =
+        (await packagesString?.commonToJSON<List<dynamic>>()) ?? [];
+    return packagesRaw.map((e) => Package.fromJson(e)).toSet().toList();
+  }
+
+  Future<List<String>> getChinaPackageNames() async {
+    final packageNamesString = await methodChannel.invokeMethod<String>(
+      'getChinaPackageNames',
+    );
+    final List<dynamic> packageNamesRaw =
+        await packageNamesString?.commonToJSON<List<dynamic>>() ?? [];
+    return packageNamesRaw.map((e) => e.toString()).toList();
+  }
+
+  Future<bool?> requestNotificationsPermission() async {
+    return methodChannel.invokeMethod<bool>('requestNotificationsPermission');
+  }
+
+  Future<bool> openFile(String path) async {
+    return await methodChannel.invokeMethod<bool>('openFile', {'path': path}) ??
+        false;
+  }
+
+  final Map<String, ImageProvider?> _packageIcons = {};
+  final Map<String, Future<ImageProvider?>> _packageIconTasks = {};
+
+  bool hasPackageIcon(String packageName) {
+    return _packageIcons.containsKey(packageName);
+  }
+
+  ImageProvider? getCachedPackageIcon(String packageName) {
+    return _packageIcons[packageName];
+  }
+
+  Future<ImageProvider?> getPackageIcon(String packageName) {
+    if (packageName.isEmpty) {
+      return Future.value(null);
+    }
+    if (_packageIcons.containsKey(packageName)) {
+      return Future.value(_packageIcons[packageName]);
+    }
+    return _packageIconTasks[packageName] ??= _loadPackageIcon(packageName);
+  }
+
+  Future<ImageProvider?> _loadPackageIcon(String packageName) async {
+    ImageProvider? icon;
+    try {
+      final path = await methodChannel.invokeMethod<String>('getPackageIcon', {
+        'packageName': packageName,
+      });
+      icon = path == null ? null : FileImage(File(path));
+    } catch (error) {
+      commonPrint.log('getPackageIcon error: $error');
+    }
+    _packageIcons[packageName] = icon;
+    _packageIconTasks.remove(packageName);
+    return icon;
+  }
+
+  @visibleForTesting
+  void clearPackageIconCache() {
+    _packageIcons.clear();
+    _packageIconTasks.clear();
+  }
+
+  Future<bool?> tip(String? message) async {
+    return methodChannel.invokeMethod<bool>('tip', {'message': '$message'});
+  }
+
+  Future<bool?> initShortcuts() async {
+    return methodChannel.invokeMethod<bool>(
+      'initShortcuts',
+      appLocalizations.toggle,
+    );
+  }
+
+  Future<bool?> updateExcludeFromRecents(bool value) async {
+    return methodChannel.invokeMethod<bool>('updateExcludeFromRecents', {
+      'value': value,
+    });
+  }
+}
+
+final app = system.isAndroid ? App() : null;
