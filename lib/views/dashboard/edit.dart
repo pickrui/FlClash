@@ -11,6 +11,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/typography.dart';
+import 'package:prism_ui/surface.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -539,7 +540,7 @@ class _LiftedCard extends StatelessWidget {
           ),
         );
       },
-      child: Material(type: MaterialType.transparency, child: child),
+      child: Surface.transparent(child: child),
     );
   }
 }
