@@ -455,7 +455,7 @@
   "justNow": "Ahora mismo",
   "turnOn": "Activar",
   "turnOff": "Desactivar",
-  "vpnConfigChangeDetected": "Cambio de configuración VPN detectado",
+  "vpnConfigChangeDetected": "La configuración de la VPN cambió. Toca para reiniciar",
   "restart": "Reiniciar",
   "speedStatistics": "Estadísticas de velocidad",
   "resetPageChangesTip": "Esta página tiene cambios. ¿Desea restablecerla?",

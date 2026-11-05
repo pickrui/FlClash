@@ -3153,7 +3153,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "virtualIpv4": MessageLookupByLibrary.simpleMessage("가상 IPv4"),
     "vividStyle": MessageLookupByLibrary.simpleMessage("선명"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
-      "VPN 설정 변경 감지",
+      "VPN 관련 구성이 변경되었습니다. 눌러서 재시작",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN은 VpnService를 통해 모든 시스템 트래픽을 자동으로 라우팅합니다.",

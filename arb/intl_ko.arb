@@ -455,7 +455,7 @@
   "justNow": "방금",
   "turnOn": "켜기",
   "turnOff": "끄기",
-  "vpnConfigChangeDetected": "VPN 설정 변경 감지",
+  "vpnConfigChangeDetected": "VPN 관련 구성이 변경되었습니다. 눌러서 재시작",
   "restart": "다시 시작",
   "speedStatistics": "속도 통계",
   "resetPageChangesTip": "현재 페이지에 변경 사항이 있습니다. 초기화하시겠습니까?",

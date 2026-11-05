@@ -4030,7 +4030,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "virtualIpv4": MessageLookupByLibrary.simpleMessage("IPv4 virtual"),
     "vividStyle": MessageLookupByLibrary.simpleMessage("Vivo"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
-      "Cambio de configuración VPN detectado",
+      "La configuración de la VPN cambió. Toca para reiniciar",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "La VPN enruta automáticamente todo el tráfico del sistema a través de VpnService.",

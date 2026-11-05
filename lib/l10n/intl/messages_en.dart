@@ -3779,7 +3779,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "virtualIpv4": MessageLookupByLibrary.simpleMessage("Virtual IPv4"),
     "vividStyle": MessageLookupByLibrary.simpleMessage("Vivid"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
-      "VPN configuration change detected",
+      "VPN settings changed. Tap to restart",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN routes all system traffic through VpnService automatically",

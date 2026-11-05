@@ -455,7 +455,7 @@
   "justNow": "Just now",
   "turnOn": "Turn On",
   "turnOff": "Turn Off",
-  "vpnConfigChangeDetected": "VPN configuration change detected",
+  "vpnConfigChangeDetected": "VPN settings changed. Tap to restart",
   "restart": "Restart",
   "speedStatistics": "Speed statistics",
   "resetPageChangesTip": "The current page has changes. Are you sure you want to reset?",

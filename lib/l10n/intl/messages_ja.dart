@@ -508,7 +508,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "公式のクーポンコードを入力してください。残りの期間に応じて差額を精算し、継続割引のコードは更新価格も変更します。",
     ),
     "blacklistMode": MessageLookupByLibrary.simpleMessage("ブラックリストモード"),
-    "blockQuic": MessageLookupByLibrary.simpleMessage("QUICをブロック"),
+    "blockQuic": MessageLookupByLibrary.simpleMessage("QUIC をブロック"),
     "blockQuicDesc": MessageLookupByLibrary.simpleMessage(
       "UDP 443のトラフィックを拒否し、接続をTCPにフォールバックさせます",
     ),
@@ -3205,7 +3205,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "virtualIpv4": MessageLookupByLibrary.simpleMessage("仮想 IPv4"),
     "vividStyle": MessageLookupByLibrary.simpleMessage("ビビッド"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
-      "VPN設定の変更が検出されました",
+      "VPN関連の設定が変更されました。タップして再起動",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN は VpnService でシステムの全トラフィックを自動的にルーティングします",

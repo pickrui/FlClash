@@ -4043,7 +4043,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "virtualIpv4": MessageLookupByLibrary.simpleMessage("IPv4 virtuelle"),
     "vividStyle": MessageLookupByLibrary.simpleMessage("Vif"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
-      "Modification de la configuration VPN détectée",
+      "La configuration liée au VPN a changé. Appuyez pour redémarrer",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "Le VPN fait passer automatiquement tout le trafic du système par VpnService.",

@@ -455,7 +455,7 @@
   "justNow": "Только что",
   "turnOn": "Включить",
   "turnOff": "Выключить",
-  "vpnConfigChangeDetected": "Обнаружено изменение конфигурации VPN",
+  "vpnConfigChangeDetected": "Настройки VPN изменены. Нажмите, чтобы перезапустить",
   "restart": "Перезапустить",
   "speedStatistics": "Статистика скорости",
   "resetPageChangesTip": "На текущей странице есть изменения. Вы уверены, что хотите сбросить?",

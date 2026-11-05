@@ -3583,10 +3583,10 @@ class AppLocalizations {
     return Intl.message('Turn Off', name: 'turnOff', desc: '', args: []);
   }
 
-  /// `VPN configuration change detected`
+  /// `VPN settings changed. Tap to restart`
   String get vpnConfigChangeDetected {
     return Intl.message(
-      'VPN configuration change detected',
+      'VPN settings changed. Tap to restart',
       name: 'vpnConfigChangeDetected',
       desc: '',
       args: [],

@@ -486,7 +486,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "输入官方系统折扣代码，按套餐剩余时长结算差价；循环折扣代码会同步更新续费价格",
     ),
     "blacklistMode": MessageLookupByLibrary.simpleMessage("黑名单模式"),
-    "blockQuic": MessageLookupByLibrary.simpleMessage("禁用 QUIC"),
+    "blockQuic": MessageLookupByLibrary.simpleMessage("阻止 QUIC"),
     "blockQuicDesc": MessageLookupByLibrary.simpleMessage(
       "拦截 UDP 443 流量，迫使连接回落到 TCP",
     ),
@@ -2847,7 +2847,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "virtualIpv4": MessageLookupByLibrary.simpleMessage("虚拟 IPv4"),
     "vividStyle": MessageLookupByLibrary.simpleMessage("鲜明"),
     "vpnConfigChangeDetected": MessageLookupByLibrary.simpleMessage(
-      "检测到VPN相关配置改动",
+      "VPN 相关配置已改动，点击重启",
     ),
     "vpnEnableDesc": MessageLookupByLibrary.simpleMessage(
       "VPN 通过 VpnService 自动路由系统所有流量",
