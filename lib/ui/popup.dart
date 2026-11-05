@@ -14,9 +14,6 @@ import 'package:flutter/physics.dart' show SpringSimulation;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/widgets.dart';
-import 'package:material_ui/material_ui.dart'
-    as legacy
-    show InkResponse, Material, MaterialType;
 import 'package:prism_ui/l10n.dart';
 import 'package:prism_ui/popup.dart'
     as prism
@@ -1449,11 +1446,6 @@ class _PopupAnchorState extends State<CommonPopupBox> {
         case final Surface surface:
           color = surface.color ?? Colors.transparent;
           return;
-        case final legacy.Material material:
-          color = material.type == legacy.MaterialType.transparency
-              ? Colors.transparent
-              : material.color ?? Colors.transparent;
-          return;
       }
       element.visitChildren(visit);
     }
@@ -1501,9 +1493,6 @@ class _PopupAnchorState extends State<CommonPopupBox> {
           return;
         case final PressRegion region:
           enabled = region.onTap != null;
-          return;
-        case final legacy.InkResponse response:
-          enabled = response.onTap != null;
           return;
       }
       element.visitChildren(visit);
