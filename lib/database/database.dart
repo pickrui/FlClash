@@ -20,12 +20,13 @@ part 'clash_providers.dart';
 part 'groups.dart';
 part 'icons.dart';
 part 'links.dart';
+part 'mitm_modules.dart';
 part 'profiles.dart';
 part 'rules.dart';
 part 'scripts.dart';
 part 'schema.dart';
 
-const currentDatabaseSchemaVersion = 9;
+const currentDatabaseSchemaVersion = 10;
 
 @DriftDatabase(
   tables: [
@@ -37,6 +38,7 @@ const currentDatabaseSchemaVersion = 9;
     IconRecords,
     ClashProviders,
     IconSets,
+    MitmModules,
   ],
   daos: [
     ProfilesDao,
@@ -46,6 +48,7 @@ const currentDatabaseSchemaVersion = 9;
     IconRecordsDao,
     ClashProvidersDao,
     IconSetsDao,
+    MitmModulesDao,
   ],
 )
 class Database extends _$Database {
@@ -107,6 +110,12 @@ class Database extends _$Database {
             "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'icon_sets'",
           ).get();
           if (existing.isEmpty) await m.createTable(iconSets);
+        }
+        if (from < 10) {
+          final existing = await customSelect(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'mitm_modules'",
+          ).get();
+          if (existing.isEmpty) await m.createTable(mitmModules);
         }
         final profileColumns = await _profileColumnNames();
         if (from < 9 && profileColumns.add('age_secret_key')) {
@@ -240,14 +249,17 @@ class Database extends _$Database {
     bool isOverride = false,
     List<ClashProvider> clashProviders = const [],
     List<IconSet> iconSets = const [],
+    List<MitmModule> mitmModules = const [],
   }) async {
     await transaction(() async {
       await batch((b) async {
         if (isOverride) {
           profilesDao.setAllWithBatch(b, profiles);
           scriptsDao.setAllWithBatch(b, scripts);
+          mitmModulesDao.setAllWithBatch(b, mitmModules);
           await rulesDao.restoreWithBatch(b, rules, links);
         } else {
+          mitmModulesDao.putAllWithBatch(b, mitmModules);
           profilesDao.putAllWithBatch(
             b,
             profiles.map((item) => item.toCompanion()),

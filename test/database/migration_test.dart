@@ -573,6 +573,9 @@ Future<void> _createDatabase(
   for (final iconSet in iconSets) {
     await database.iconSetsDao.put(iconSet);
   }
+  if (schemaVersion < 10) {
+    await database.customStatement('DROP TABLE mitm_modules');
+  }
   if (schemaVersion < 9 && !keepColumns.contains('age_secret_key')) {
     await database.customStatement(
       'ALTER TABLE profiles DROP COLUMN age_secret_key',

@@ -98,6 +98,20 @@ bool hasCompatibleDatabaseSchema(
         'content',
         'order',
       },
+    if (version >= 10)
+      'mitm_modules': {
+        'id',
+        'name',
+        'description',
+        'url',
+        'enabled',
+        'order',
+        'arguments',
+        'resources',
+        'system',
+        'scripts',
+        'last_update_time',
+      },
     if (version >= 8)
       'icon_sets': {'id', 'name', 'url', 'icons', 'last_update_time', 'order'},
   };
