@@ -456,3 +456,136 @@ abstract class _$MitmExportWarned extends $Notifier<bool> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// Why the Core skips each of the user's hostnames, by the line.
+
+@ProviderFor(mitmHostnameIssues)
+final mitmHostnameIssuesProvider = MitmHostnameIssuesProvider._();
+
+/// Why the Core skips each of the user's hostnames, by the line.
+
+final class MitmHostnameIssuesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, String>>,
+          Map<String, String>,
+          FutureOr<Map<String, String>>
+        >
+    with
+        $FutureModifier<Map<String, String>>,
+        $FutureProvider<Map<String, String>> {
+  /// Why the Core skips each of the user's hostnames, by the line.
+  MitmHostnameIssuesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mitmHostnameIssuesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$mitmHostnameIssuesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<Map<String, String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Map<String, String>> create(Ref ref) {
+    return mitmHostnameIssues(ref);
+  }
+}
+
+String _$mitmHostnameIssuesHash() =>
+    r'2665dded42e187044c2fb182a068363bdfc0279c';
+
+/// Null while the module's content is not on disk.
+
+@ProviderFor(mitmModuleDetails)
+final mitmModuleDetailsProvider = MitmModuleDetailsFamily._();
+
+/// Null while the module's content is not on disk.
+
+final class MitmModuleDetailsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<MitmModuleDetails?>,
+          MitmModuleDetails?,
+          FutureOr<MitmModuleDetails?>
+        >
+    with
+        $FutureModifier<MitmModuleDetails?>,
+        $FutureProvider<MitmModuleDetails?> {
+  /// Null while the module's content is not on disk.
+  MitmModuleDetailsProvider._({
+    required MitmModuleDetailsFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'mitmModuleDetailsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$mitmModuleDetailsHash();
+
+  @override
+  String toString() {
+    return r'mitmModuleDetailsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<MitmModuleDetails?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<MitmModuleDetails?> create(Ref ref) {
+    final argument = this.argument as int;
+    return mitmModuleDetails(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MitmModuleDetailsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$mitmModuleDetailsHash() => r'6b9db3a033630264f42c3b032bff07974e45d6c2';
+
+/// Null while the module's content is not on disk.
+
+final class MitmModuleDetailsFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<MitmModuleDetails?>, int> {
+  MitmModuleDetailsFamily._()
+    : super(
+        retry: null,
+        name: r'mitmModuleDetailsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Null while the module's content is not on disk.
+
+  MitmModuleDetailsProvider call(int id) =>
+      MitmModuleDetailsProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'mitmModuleDetailsProvider';
+}
