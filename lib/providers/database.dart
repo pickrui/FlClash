@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/database/database.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -154,6 +155,37 @@ void reloadProviderAfterDatabaseError(Ref ref) {
   }
 }
 
+class _Writes {
+  final void Function() _reread;
+  var _pending = 0;
+  var _missed = false;
+
+  _Writes(this._reread);
+
+  bool admit() {
+    final idle = _pending == 0;
+    _missed |= !idle;
+    return idle;
+  }
+
+  void start() => _pending++;
+
+  void finish() {
+    _pending--;
+    if (_pending == 0 && _missed) {
+      _missed = false;
+      _reread();
+    }
+  }
+}
+
+void _reportReread(Object error, StackTrace stackTrace) {
+  commonPrint.log(
+    'Database read-back failed: ${compactError(error)}, $stackTrace',
+    logLevel: LogLevel.warning,
+  );
+}
+
 @riverpod
 Stream<List<Profile>> profilesStream(Ref ref) {
   return database.profilesDao.all().watch();
@@ -166,27 +198,35 @@ Stream<List<Rule>> addedRuleStream(Ref ref, int profileId) {
 
 @Riverpod(keepAlive: true)
 class Profiles extends _$Profiles {
-  int _pendingWrites = 0;
+  late final _writes = _Writes(_reread);
 
   @override
   List<Profile> build() {
     final databaseProfiles = ref.watch(profilesStreamProvider).value;
-    if (_pendingWrites > 0) {
+    if (!_writes.admit()) {
       return stateOrNull ?? const [];
     }
     return databaseProfiles ?? stateOrNull ?? const [];
+  }
+
+  void _reread() {
+    database.profilesDao.all().get().then((rows) {
+      if (ref.mounted && _writes.admit()) {
+        state = rows;
+      }
+    }, onError: _reportReread);
   }
 
   Future<void> _queueWrite(
     FutureOr<void> Function() action, {
     bool reportOnWait = true,
   }) {
-    _pendingWrites++;
+    _writes.start();
     return queueDatabaseWrite(
       action,
       onError: () => reloadProviderAfterDatabaseError(ref),
       reportOnWait: reportOnWait,
-      onFinished: () => _pendingWrites--,
+      onFinished: _writes.finish,
     );
   }
 
