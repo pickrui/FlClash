@@ -215,31 +215,32 @@ void main() {
     await teardownCard(tester);
   });
 
-  testWidgets(
-    'request details return to their list within the dashboard sheet',
-    (tester) async {
-      container.read(requestsProvider.notifier).addRequest(_request(0));
-      await pumpCard(tester);
-      final page = container.read(currentPageLabelProvider);
-      await tester.tap(_stat('Recent requests'));
-      await tester.pumpAndSettle();
-      expect(find.byType(NestedPagedSheet), findsOneWidget);
-      await tester.tap(
-        find.textContaining('host-0.test', findRichText: true).first,
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(TrackerInfoDetailView), findsOneWidget);
-      expect(container.read(currentPageLabelProvider), page);
-      await tester.tap(find.byTooltip('Back'));
-      await tester.pumpAndSettle();
-      expect(find.byType(TrackerInfoDetailView), findsNothing);
-      expect(find.byType(RequestsView), findsOneWidget);
-      await tester.tap(find.byTooltip('Close'));
-      await tester.pumpAndSettle();
-      expect(find.byType(RequestsView), findsNothing);
-      await teardownCard(tester);
-    },
-  );
+  testWidgets('closing request details returns to the dashboard list sheet', (
+    tester,
+  ) async {
+    container.read(requestsProvider.notifier).addRequest(_request(0));
+    await pumpCard(tester);
+    final page = container.read(currentPageLabelProvider);
+    await tester.tap(_stat('Recent requests'));
+    await tester.pumpAndSettle();
+    expect(find.byType(NestedPagedSheet), findsOneWidget);
+    await tester.tap(
+      find.textContaining('host-0.test', findRichText: true).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(TrackerInfoDetailView), findsOneWidget);
+    expect(container.read(currentPageLabelProvider), page);
+    expect(find.byType(NestedPagedSheet), findsNWidgets(2));
+    await tester.tap(find.byTooltip('Close').last);
+    await tester.pumpAndSettle();
+    expect(find.byType(TrackerInfoDetailView), findsNothing);
+    expect(find.byType(NestedPagedSheet), findsOneWidget);
+    expect(find.byType(RequestsView), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(find.byType(RequestsView), findsNothing);
+    await teardownCard(tester);
+  });
 
   testWidgets('the connection count stops behind a pushed page and while '
       'paused', (tester) async {
