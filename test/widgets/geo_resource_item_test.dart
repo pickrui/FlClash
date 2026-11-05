@@ -173,6 +173,73 @@ void main() {
     );
   }
 
+  testWidgets('large resource sections build only visible rows', (
+    tester,
+  ) async {
+    final previousFeature = mitmFeature;
+    ProviderContainer? previousContainer;
+    try {
+      previousContainer = globalState.container;
+    } catch (_) {}
+    mitmFeature = true;
+    addTearDown(() {
+      mitmFeature = previousFeature;
+      if (previousContainer != null) globalState.container = previousContainer;
+    });
+    final modules = List.generate(
+      500,
+      (index) => MitmModule(
+        id: index + 1,
+        name: 'Remote resource $index',
+        url: 'https://example.invalid/module/$index',
+        lastUpdateTime: DateTime(2026),
+      ),
+    );
+    final container = ProviderContainer(
+      overrides: [
+        iconSetsProvider.overrideWithBuild((_, _) => Stream.value([])),
+        clashProvidersProvider.overrideWith((_) => Stream.value([])),
+        scriptsProvider.overrideWithBuild((_, _) => Stream.value([])),
+        mitmModulesProvider.overrideWithBuild((_, _) => Stream.value(modules)),
+      ],
+    );
+    globalState.container = container;
+    try {
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(locale: Locale('en'), child: ResourcesView()),
+        ),
+      );
+      await pumpUntilFound(
+        tester,
+        find.text(AppLocalizations.current.autoUpdate),
+      );
+      final rows = find.byWidgetPredicate(
+        (widget) =>
+            widget is Text &&
+            (widget.data?.startsWith('Remote resource ') ?? false),
+      );
+      expect(rows.evaluate().length, lessThan(20));
+      final scroll = tester.state<ScrollableState>(
+        find
+            .descendant(
+              of: find.byType(ResourcesView),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      scroll.position.jumpTo(scroll.position.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(find.text('Remote resource 499'), findsOneWidget);
+      expect(rows.evaluate().length, lessThan(20));
+    } finally {
+      await tester.pumpWidget(const SizedBox());
+      container.dispose();
+      await tester.pump();
+    }
+  });
+
   testWidgets('missing resource has a readable empty state and a sync action', (
     tester,
   ) async {
