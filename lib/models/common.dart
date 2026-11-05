@@ -663,6 +663,33 @@ extension DnsQueryExt on DnsQuery {
 }
 
 @freezed
+abstract class MitmModule with _$MitmModule {
+  const factory MitmModule({
+    required int id,
+    required String name,
+    @Default('') String description,
+    String? url,
+    @Default(true) bool enabled,
+    int? order,
+    @Default({}) Map<String, String> arguments,
+    @Default({}) Map<String, String> resources,
+    String? system,
+
+    /// Its scripts FlClash runs, which turning it on asks about first.
+    @Default(0) int scripts,
+    required DateTime lastUpdateTime,
+  }) = _MitmModule;
+}
+
+extension MitmModuleExt on MitmModule {
+  bool get isRemote => url != null;
+
+  String get fileName => '$id.txt';
+
+  String get updatingKey => 'mitm_module_$id';
+}
+
+@freezed
 abstract class ClashProvider with _$ClashProvider {
   const factory ClashProvider({
     required int id,

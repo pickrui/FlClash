@@ -635,6 +635,19 @@ enum LoadingTag {
 
 enum RequestFeed { recent, live }
 
+enum MitmList {
+  hostname('hostname'),
+  urlRewrite('url-rewrite'),
+  headerRewrite('header-rewrite'),
+  bodyRewrite('body-rewrite'),
+  mapLocal('map-local'),
+  script('script');
+
+  final String key;
+
+  const MitmList(this.key);
+}
+
 enum CoreStatus { connecting, connected, disconnected }
 
 enum RuleScene { added, disabled, custom }

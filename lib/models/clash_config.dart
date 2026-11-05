@@ -1499,3 +1499,34 @@ Map<String, int>? usePositionOf(
         names['${entry.key}'] ?? '${entry.key}': position < 0 ? 0 : position,
   };
 }
+
+class MitmRules {
+  const MitmRules({
+    this.hostname = const [],
+    this.urlRewrite = const [],
+    this.headerRewrite = const [],
+    this.bodyRewrite = const [],
+    this.mapLocal = const [],
+    this.script = const [],
+  });
+
+  final List<String> hostname;
+  final List<String> urlRewrite;
+  final List<String> headerRewrite;
+  final List<String> bodyRewrite;
+  final List<String> mapLocal;
+  final List<String> script;
+
+  List<String> linesOf(MitmList list) => switch (list) {
+    MitmList.hostname => hostname,
+    MitmList.urlRewrite => urlRewrite,
+    MitmList.headerRewrite => headerRewrite,
+    MitmList.bodyRewrite => bodyRewrite,
+    MitmList.mapLocal => mapLocal,
+    MitmList.script => script,
+  };
+
+  Map<String, Object?> toJson() => {
+    for (final list in MitmList.values) list.key: linesOf(list),
+  };
+}
