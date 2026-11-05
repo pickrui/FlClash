@@ -151,10 +151,10 @@ void main() {
     container.read(initProvider.notifier).value = true;
     await tester.pump();
     expect(modules.updates, safeModeBuild ? 0 : 1);
-    await tester.pump(const Duration(minutes: 1));
+    await tester.pump(const Duration(minutes: 20));
     expect(modules.updates, safeModeBuild ? 0 : 2);
     await finish(tester);
-    await tester.pump(const Duration(minutes: 1));
+    await tester.pump(const Duration(minutes: 20));
     expect(modules.updates, safeModeBuild ? 0 : 2);
   });
 }

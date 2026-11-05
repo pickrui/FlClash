@@ -208,6 +208,8 @@ void main() {
             expect(runs, 1);
 
             await enterBackground(tester);
+            await tester.pump(const Duration(minutes: 19));
+            expect(runs, 1);
             await tester.pump(const Duration(minutes: 1));
             expect(runs, desktop ? 2 : 1);
           });
@@ -224,7 +226,7 @@ void main() {
             globalState.container.read(initProvider.notifier).value = true;
             expect(runs, desktop ? 1 : 0);
 
-            await tester.pump(const Duration(minutes: 1));
+            await tester.pump(const Duration(minutes: 20));
             expect(runs, desktop ? 2 : 0);
           });
         },

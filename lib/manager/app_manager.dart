@@ -57,7 +57,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     ),
   );
   late final _profileUpdates = PeriodicTaskRunner(
-    interval: const Duration(minutes: 1),
+    interval: const Duration(minutes: 20),
     onError: (error, _) => commonPrint.log(
       'Automatic profile update failed: $error',
       logLevel: LogLevel.warning,
