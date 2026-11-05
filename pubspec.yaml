@@ -58,7 +58,6 @@ dependencies:
   path_parsing: ^1.1.0
   re_highlight: ^0.0.3
   archive: ^4.0.7
-  emoji_regex: ^0.0.5
   device_info_plus: ^13.2.0
   wifi_ssid:
     path: plugins/wifi_ssid

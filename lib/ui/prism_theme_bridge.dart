@@ -7,6 +7,10 @@ import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart' as legacy;
 import 'package:prism_ui/measure.dart' as prism;
 import 'package:prism_ui/theme_data.dart' as prism;
+import 'package:prism_ui/text.dart' show EmojiFont;
+
+import 'emoji.dart';
+import 'text_style.dart' show FontFamily;
 
 import 'surface.dart';
 import 'typography.dart';
@@ -45,7 +49,11 @@ class PrismThemeBridge extends StatelessWidget {
             context,
             MediaQuery.textScalerOf(context).scale(1),
           ),
-          child: child,
+          child: EmojiFont(
+            family: FontFamily.twEmoji.value,
+            pattern: emojiPattern,
+            child: child,
+          ),
         ),
       ),
     );
