@@ -141,6 +141,8 @@ class DesktopUpdateWorkerTest(unittest.TestCase):
         self.stop_parent()
         self.assertNotEqual(worker.wait(timeout=10), 0)
         self.assertEqual(self.target.read_bytes(), old)
+        self.wait_for(self.marker)
+        self.assertEqual(self.marker.read_text(), 'old')
         self.assertEqual(self.result.read_text(), 'failed')
 
     def test_bad_signature_never_reports_ready(self):
