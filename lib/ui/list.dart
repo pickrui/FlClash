@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:prism_ui/list_row.dart';
+import 'package:prism_ui/press_surface.dart';
 
 import 'button.dart';
 import 'card.dart';
@@ -126,7 +127,7 @@ class ListItem<T> extends StatelessWidget {
   final Widget title;
   final Widget? subtitle;
   final EdgeInsets padding;
-  final ListTileTitleAlignment tileTitleAlignment;
+  final ListRowAlignment alignment;
   final Widget? trailing;
   final _ListItemAction _action;
   final double? horizontalTitleGap;
@@ -147,7 +148,7 @@ class ListItem<T> extends StatelessWidget {
     this.color,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
-    this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.alignment = ListRowAlignment.center,
   }) : _action = const _DefaultAction();
 
   ListItem.open({
@@ -164,7 +165,7 @@ class ListItem<T> extends StatelessWidget {
     this.color,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
-    this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.alignment = ListRowAlignment.center,
   }) : _action = _OpenAction(
          widget: widget,
          onChanged: onChanged,
@@ -184,7 +185,7 @@ class ListItem<T> extends StatelessWidget {
     this.color,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
-    this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.alignment = ListRowAlignment.center,
   }) : _action = _NextAction(widget: widget),
        onTap = null;
 
@@ -202,7 +203,7 @@ class ListItem<T> extends StatelessWidget {
     this.color,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
-    this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.alignment = ListRowAlignment.center,
   }) : _action = _OptionsAction<T>(
          options: options,
          value: value,
@@ -231,7 +232,7 @@ class ListItem<T> extends StatelessWidget {
     this.color,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
-    this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.alignment = ListRowAlignment.center,
   }) : _action = _InputAction(
          title: dialogTitle,
          value: value,
@@ -256,7 +257,7 @@ class ListItem<T> extends StatelessWidget {
     this.color,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
-    this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.alignment = ListRowAlignment.center,
   }) : _action = _CheckboxAction(value: value, onChanged: onChanged),
        trailing = null,
        onTap = null;
@@ -273,7 +274,7 @@ class ListItem<T> extends StatelessWidget {
     this.color,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
-    this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.alignment = ListRowAlignment.center,
   }) : _action = _ToggleAction(value: value, onChanged: onChanged),
        trailing = null,
        onTap = null;
@@ -290,7 +291,7 @@ class ListItem<T> extends StatelessWidget {
     this.color,
     this.minTileHeight,
     this.minVerticalPadding = listRowVerticalPadding,
-    this.tileTitleAlignment = ListTileTitleAlignment.center,
+    this.alignment = ListRowAlignment.center,
   }) : _action = _RadioAction<T>(value: value, onTap: onTap),
        leading = null,
        onTap = null;
@@ -317,21 +318,23 @@ class ListItem<T> extends StatelessWidget {
         ),
       );
     }
-    return ListTile(
-      key: key,
-      tileColor: color,
-      titleTextStyle: context.listTitleStyle,
-      subtitleTextStyle: context.listSubtitleStyle,
+    final row = ListRow(
       leading: leading ?? this.leading,
-      horizontalTitleGap: horizontalTitleGap,
       title: title,
-      minTileHeight: minTileHeight ?? listRowMinHeight,
-      minVerticalPadding: minVerticalPadding,
       subtitle: subtitle,
-      titleAlignment: tileTitleAlignment,
-      onTap: onTap,
       trailing: trailing ?? this.trailing,
-      contentPadding: padding,
+      padding: padding,
+      horizontalTitleGap: horizontalTitleGap,
+      minVerticalPadding: minVerticalPadding,
+      minHeight: minTileHeight ?? listRowMinHeight,
+      alignment: alignment,
+    );
+    if (onTap == null && color == null) return row;
+    return PressSurface(
+      fill: color ?? Colors.transparent,
+      shape: AppShape.all(AppCorner.none),
+      onPressed: onTap,
+      child: row,
     );
   }
 
