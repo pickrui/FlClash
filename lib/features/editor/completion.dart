@@ -16,5 +16,5 @@ CodeForgeCompletionSource? editorCompletionSource(
 ) => switch (language) {
   Language.yaml => ClashCompletionSource(schema.root).call,
   Language.javaScript => ScriptCompletionSource().call,
-  Language.json || Language.text => null,
+  Language.json || Language.ini || Language.xml || Language.text => null,
 };

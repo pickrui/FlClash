@@ -41,6 +41,123 @@ abstract class CoreOptions with _$CoreOptions {
       _$CoreOptionsFromJson(json);
 }
 
+/// The CA the Core signs decrypted hosts' certificates with.
+@freezed
+abstract class MitmCertificate with _$MitmCertificate {
+  const factory MitmCertificate({
+    required String pem,
+    required String fingerprint,
+    required String subject,
+    @JsonKey(name: 'not-before') required DateTime notBefore,
+    @JsonKey(name: 'not-after') required DateTime notAfter,
+  }) = _MitmCertificate;
+
+  factory MitmCertificate.fromJson(Map<String, Object?> json) =>
+      _$MitmCertificateFromJson(json);
+}
+
+@freezed
+abstract class MitmScriptOutput with _$MitmScriptOutput {
+  const factory MitmScriptOutput({
+    @Default([]) List<String> logs,
+    @Default('') String result,
+    @Default('') String error,
+  }) = _MitmScriptOutput;
+
+  factory MitmScriptOutput.fromJson(Map<String, Object?> json) =>
+      _$MitmScriptOutputFromJson(json);
+}
+
+/// Times are in milliseconds, sizes those of the client's bodies.
+@freezed
+abstract class MitmExchangeSummary with _$MitmExchangeSummary {
+  const factory MitmExchangeSummary({
+    required int id,
+    required DateTime start,
+    @Default(false) bool pending,
+    @Default(0) int duration,
+    @Default('') String method,
+    @Default('') String url,
+    @Default(0) int status,
+    @Default(0) @JsonKey(name: 'request-size') int requestSize,
+    @Default(0) @JsonKey(name: 'response-size') int responseSize,
+    @Default('') String error,
+  }) = _MitmExchangeSummary;
+
+  factory MitmExchangeSummary.fromJson(Map<String, Object?> json) =>
+      _$MitmExchangeSummaryFromJson(json);
+}
+
+/// Every request that started after [since] is still kept.
+@freezed
+abstract class MitmExchangeList with _$MitmExchangeList {
+  const factory MitmExchangeList({
+    @Default(false) bool capturing,
+    DateTime? since,
+    @Default([]) List<MitmExchangeSummary> exchanges,
+    @Default(false) bool closed,
+  }) = _MitmExchangeList;
+
+  factory MitmExchangeList.fromJson(Map<String, Object?> json) =>
+      _$MitmExchangeListFromJson(json);
+}
+
+@freezed
+abstract class MitmAction with _$MitmAction {
+  const factory MitmAction({
+    required String kind,
+    @Default('') String phase,
+    @Default('') String detail,
+  }) = _MitmAction;
+
+  factory MitmAction.fromJson(Map<String, Object?> json) =>
+      _$MitmActionFromJson(json);
+}
+
+@freezed
+abstract class MitmExchange with _$MitmExchange {
+  const factory MitmExchange({
+    required int id,
+    required DateTime start,
+    @Default(false) bool pending,
+    @Default(0) int duration,
+    @Default(0) int ttfb,
+    @Default('') String method,
+    @Default('') String url,
+    @Default('') @JsonKey(name: 'original-url') String originalUrl,
+    @Default('') String proto,
+    @Default(0) int status,
+    @Default(0) @JsonKey(name: 'request-size') int requestSize,
+    @Default(0) @JsonKey(name: 'response-size') int responseSize,
+    @Default('') String error,
+    @Default('') String connection,
+    @Default({})
+    @JsonKey(name: 'request-header')
+    Map<String, List<String>> requestHeader,
+    @Default({})
+    @JsonKey(name: 'response-header')
+    Map<String, List<String>> responseHeader,
+    @Default([]) List<MitmAction> actions,
+  }) = _MitmExchange;
+
+  factory MitmExchange.fromJson(Map<String, Object?> json) =>
+      _$MitmExchangeFromJson(json);
+}
+
+/// One side of a request as kept, decoded unless [encoding] names the coding
+/// the Core could not undo; [data] is Base64.
+@freezed
+abstract class MitmBody with _$MitmBody {
+  const factory MitmBody({
+    @Default('') String data,
+    @Default(false) bool truncated,
+    @Default('') String encoding,
+  }) = _MitmBody;
+
+  factory MitmBody.fromJson(Map<String, Object?> json) =>
+      _$MitmBodyFromJson(json);
+}
+
 Map<String, Object?> _tunCoreJson(Tun tun) => tun.coreJson;
 
 @freezed

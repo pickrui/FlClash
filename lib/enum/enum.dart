@@ -618,7 +618,7 @@ enum RuleTarget {
 
 enum RestoreStrategy { compatible, override }
 
-enum Language { yaml, javaScript, json, text }
+enum Language { yaml, javaScript, json, ini, xml, text }
 
 enum ScrollPositionCacheKey { proxiesTabList }
 

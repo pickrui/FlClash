@@ -33,6 +33,172 @@ Map<String, dynamic> _$CoreOptionsToJson(_CoreOptions instance) =>
       'delay-test-timeout': instance.delayTestTimeout,
     };
 
+_MitmCertificate _$MitmCertificateFromJson(Map<String, dynamic> json) =>
+    _MitmCertificate(
+      pem: json['pem'] as String,
+      fingerprint: json['fingerprint'] as String,
+      subject: json['subject'] as String,
+      notBefore: DateTime.parse(json['not-before'] as String),
+      notAfter: DateTime.parse(json['not-after'] as String),
+    );
+
+Map<String, dynamic> _$MitmCertificateToJson(_MitmCertificate instance) =>
+    <String, dynamic>{
+      'pem': instance.pem,
+      'fingerprint': instance.fingerprint,
+      'subject': instance.subject,
+      'not-before': instance.notBefore.toIso8601String(),
+      'not-after': instance.notAfter.toIso8601String(),
+    };
+
+_MitmScriptOutput _$MitmScriptOutputFromJson(Map<String, dynamic> json) =>
+    _MitmScriptOutput(
+      logs:
+          (json['logs'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          const [],
+      result: json['result'] as String? ?? '',
+      error: json['error'] as String? ?? '',
+    );
+
+Map<String, dynamic> _$MitmScriptOutputToJson(_MitmScriptOutput instance) =>
+    <String, dynamic>{
+      'logs': instance.logs,
+      'result': instance.result,
+      'error': instance.error,
+    };
+
+_MitmExchangeSummary _$MitmExchangeSummaryFromJson(Map<String, dynamic> json) =>
+    _MitmExchangeSummary(
+      id: (json['id'] as num).toInt(),
+      start: DateTime.parse(json['start'] as String),
+      pending: json['pending'] as bool? ?? false,
+      duration: (json['duration'] as num?)?.toInt() ?? 0,
+      method: json['method'] as String? ?? '',
+      url: json['url'] as String? ?? '',
+      status: (json['status'] as num?)?.toInt() ?? 0,
+      requestSize: (json['request-size'] as num?)?.toInt() ?? 0,
+      responseSize: (json['response-size'] as num?)?.toInt() ?? 0,
+      error: json['error'] as String? ?? '',
+    );
+
+Map<String, dynamic> _$MitmExchangeSummaryToJson(
+  _MitmExchangeSummary instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'start': instance.start.toIso8601String(),
+  'pending': instance.pending,
+  'duration': instance.duration,
+  'method': instance.method,
+  'url': instance.url,
+  'status': instance.status,
+  'request-size': instance.requestSize,
+  'response-size': instance.responseSize,
+  'error': instance.error,
+};
+
+_MitmExchangeList _$MitmExchangeListFromJson(
+  Map<String, dynamic> json,
+) => _MitmExchangeList(
+  capturing: json['capturing'] as bool? ?? false,
+  since: json['since'] == null ? null : DateTime.parse(json['since'] as String),
+  exchanges:
+      (json['exchanges'] as List<dynamic>?)
+          ?.map((e) => MitmExchangeSummary.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  closed: json['closed'] as bool? ?? false,
+);
+
+Map<String, dynamic> _$MitmExchangeListToJson(_MitmExchangeList instance) =>
+    <String, dynamic>{
+      'capturing': instance.capturing,
+      'since': instance.since?.toIso8601String(),
+      'exchanges': instance.exchanges,
+      'closed': instance.closed,
+    };
+
+_MitmAction _$MitmActionFromJson(Map<String, dynamic> json) => _MitmAction(
+  kind: json['kind'] as String,
+  phase: json['phase'] as String? ?? '',
+  detail: json['detail'] as String? ?? '',
+);
+
+Map<String, dynamic> _$MitmActionToJson(_MitmAction instance) =>
+    <String, dynamic>{
+      'kind': instance.kind,
+      'phase': instance.phase,
+      'detail': instance.detail,
+    };
+
+_MitmExchange _$MitmExchangeFromJson(
+  Map<String, dynamic> json,
+) => _MitmExchange(
+  id: (json['id'] as num).toInt(),
+  start: DateTime.parse(json['start'] as String),
+  pending: json['pending'] as bool? ?? false,
+  duration: (json['duration'] as num?)?.toInt() ?? 0,
+  ttfb: (json['ttfb'] as num?)?.toInt() ?? 0,
+  method: json['method'] as String? ?? '',
+  url: json['url'] as String? ?? '',
+  originalUrl: json['original-url'] as String? ?? '',
+  proto: json['proto'] as String? ?? '',
+  status: (json['status'] as num?)?.toInt() ?? 0,
+  requestSize: (json['request-size'] as num?)?.toInt() ?? 0,
+  responseSize: (json['response-size'] as num?)?.toInt() ?? 0,
+  error: json['error'] as String? ?? '',
+  connection: json['connection'] as String? ?? '',
+  requestHeader:
+      (json['request-header'] as Map<String, dynamic>?)?.map(
+        (k, e) =>
+            MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+      ) ??
+      const {},
+  responseHeader:
+      (json['response-header'] as Map<String, dynamic>?)?.map(
+        (k, e) =>
+            MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+      ) ??
+      const {},
+  actions:
+      (json['actions'] as List<dynamic>?)
+          ?.map((e) => MitmAction.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+);
+
+Map<String, dynamic> _$MitmExchangeToJson(_MitmExchange instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'start': instance.start.toIso8601String(),
+      'pending': instance.pending,
+      'duration': instance.duration,
+      'ttfb': instance.ttfb,
+      'method': instance.method,
+      'url': instance.url,
+      'original-url': instance.originalUrl,
+      'proto': instance.proto,
+      'status': instance.status,
+      'request-size': instance.requestSize,
+      'response-size': instance.responseSize,
+      'error': instance.error,
+      'connection': instance.connection,
+      'request-header': instance.requestHeader,
+      'response-header': instance.responseHeader,
+      'actions': instance.actions,
+    };
+
+_MitmBody _$MitmBodyFromJson(Map<String, dynamic> json) => _MitmBody(
+  data: json['data'] as String? ?? '',
+  truncated: json['truncated'] as bool? ?? false,
+  encoding: json['encoding'] as String? ?? '',
+);
+
+Map<String, dynamic> _$MitmBodyToJson(_MitmBody instance) => <String, dynamic>{
+  'data': instance.data,
+  'truncated': instance.truncated,
+  'encoding': instance.encoding,
+};
+
 _UpdateParams _$UpdateParamsFromJson(Map<String, dynamic> json) =>
     _UpdateParams(
       tun: Tun.fromJson(json['tun'] as Map<String, dynamic>),

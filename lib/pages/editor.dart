@@ -45,6 +45,8 @@ import 'package:code_forge/code_forge.dart'
         FindController,
         UndoRedoController;
 import 'package:re_highlight/languages/javascript.dart';
+import 'package:re_highlight/languages/ini.dart';
+import 'package:re_highlight/languages/xml.dart';
 import 'package:re_highlight/languages/json.dart';
 import 'package:re_highlight/languages/plaintext.dart';
 import 'package:re_highlight/languages/yaml.dart';
@@ -937,6 +939,8 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
         Language.yaml => langYaml,
         Language.javaScript => langJavascript,
         Language.json => langJson,
+        Language.ini => langIni,
+        Language.xml => langXml,
         Language.text => langPlaintext,
       },
       editorTheme: _editorTheme,
