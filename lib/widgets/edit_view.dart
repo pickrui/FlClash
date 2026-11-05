@@ -267,14 +267,13 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
             illustration: NullStatusIllustration.data,
             label: appLocalizations.noData,
           ),
-          child: ReorderableListView.builder(
+          child: PrismReorderableListView(
             padding: EdgeInsets.only(
               bottom: 16 + context.bottomInset,
               top: context.contentTopPadding,
               left: 16,
               right: 16,
             ),
-            buildDefaultDragHandles: false,
             itemCount: _entries.length,
             itemBuilder: (context, index) {
               final entry = _entries[index];

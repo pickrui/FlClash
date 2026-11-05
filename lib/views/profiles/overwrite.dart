@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 // ignore_for_file: deprecated_member_use
 
+import 'package:prism_ui/prism_list.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/typography.dart';
@@ -679,7 +680,7 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
             onRetry: () =>
                 ref.invalidate(profileAddedRulesProvider(widget.profileId)),
             emptyLabel: appLocalizations.nullTip(appLocalizations.rule),
-            child: SliverReorderableList(
+            child: SliverPrismReorderableList(
               itemCount: addedRules.length,
               itemBuilder: (_, index) => ReorderableDelayedDragStartListener(
                 key: ObjectKey(addedRules[index]),
@@ -882,7 +883,7 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16)
                 .copyWith(top: context.contentTopPadding),
-            sliver: SliverList.builder(
+            sliver: SliverPrismList(
               itemCount: rules.length,
               itemBuilder: (context, index) {
                 final rule = rules[index];

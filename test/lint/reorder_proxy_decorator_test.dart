@@ -10,13 +10,10 @@ import 'package:test/test.dart';
 
 final _reorderableList = RegExp(
   r'\b(?:ReorderableListView(?:\.\w+)?|ReorderableList|SliverReorderableList|'
-  r'SuperSliverReorderableList)\(',
+  r'PrismReorderableListView|SliverPrismReorderableList)\(',
 );
 
-const _allowed = {
-  'lib/ui/super_reorderable_list.dart',
-  'lib/views/dashboard/edit.dart',
-};
+const _allowed = {'lib/views/dashboard/edit.dart'};
 
 final _decorator = RegExp(r'\bcommonProxyDecorator\b');
 
