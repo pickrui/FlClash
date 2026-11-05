@@ -299,7 +299,7 @@ void main() {
       expect(find.text('GB'), findsOneWidget);
       expect(find.text('Status'), findsOneWidget);
       expect(find.text('Not running'), findsOneWidget);
-      expect(find.text('—'), findsOneWidget);
+      expect(find.text(appLocalizations.runTime), findsNothing);
     });
 
     testWidgets('shows short region names independently of the badge', (
@@ -395,7 +395,7 @@ void main() {
         );
         final address = find.text(ip);
         expect(address, findsOneWidget);
-        expect(find.text('02:36:00'), findsOneWidget);
+        expect(find.text('Running · 02:36:00'), findsOneWidget);
         expect(tester.takeException(), isNull);
         await tester.tap(address);
         await tester.pump();
@@ -504,12 +504,11 @@ void main() {
         minutes: 23,
       ).inMilliseconds;
       await tester.pumpAndSettle();
-      expect(find.text('101:23'), findsOneWidget);
-      expect(find.text('Running'), findsOneWidget);
+      expect(find.text('Running · 101:23'), findsOneWidget);
 
       container.read(runTimeProvider.notifier).value = null;
       await tester.pumpAndSettle();
-      expect(find.text('—'), findsOneWidget);
+      expect(find.text('Not running'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

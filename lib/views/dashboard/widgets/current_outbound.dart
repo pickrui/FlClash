@@ -136,7 +136,6 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
             checking: detection.isLoading,
             onRefresh: _refresh,
             active: isStart,
-            running: isStart && !suspended,
             metrics: metrics,
           ),
         ),
@@ -222,10 +221,26 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
                   glyph: AppGlyphs.status,
                   title: appLocalizations.status,
                   leading: [
-                    DashboardChip(
-                      label: chipLabel,
-                      tone: chipTone,
-                      dot: isStart,
+                    Flexible(
+                      flex: 3,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Consumer(
+                          builder: (context, ref, _) {
+                            final runTime = isStart && !suspended
+                                ? ref.watch(runTimeProvider)
+                                : null;
+                            return DashboardChip(
+                              label: runTime == null
+                                  ? chipLabel
+                                  : '$chipLabel · ${getTimeText(runTime)}',
+                              tone: chipTone,
+                              dot: isStart,
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ],
                   trailing: [
@@ -321,7 +336,6 @@ class _ExitRow extends ConsumerWidget {
     required this.checking,
     required this.onRefresh,
     required this.active,
-    required this.running,
     required this.metrics,
   });
 
@@ -330,7 +344,6 @@ class _ExitRow extends ConsumerWidget {
   final bool checking;
   final VoidCallback onRefresh;
   final bool active;
-  final bool running;
   final _OutboundMetrics metrics;
 
   @override
@@ -414,8 +427,6 @@ class _ExitRow extends ConsumerWidget {
             Expanded(child: detailsCell),
           ],
         ),
-        const SizedBox(height: 8),
-        _RunTimeCell(active: running),
       ],
     );
   }
@@ -574,41 +585,6 @@ class _CountryBadgeState extends State<_CountryBadge>
           ),
         ),
       ),
-    );
-  }
-}
-
-TextStyle _cellStyle(BuildContext context) =>
-    AppTextStyle.subheadline.of(context, emphasized: true).toTabular;
-
-class _RunTimeCell extends ConsumerWidget {
-  const _RunTimeCell({required this.active});
-
-  final bool active;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final runTime = active ? ref.watch(runTimeProvider) : null;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: 8,
-      children: [
-        Flexible(
-          child: Text(
-            context.appLocalizations.runTime,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: DashboardText.label(context),
-          ),
-        ),
-        Flexible(
-          flex: 2,
-          child: DashboardFitText(
-            active ? getTimeText(runTime) : '—',
-            style: _cellStyle(context),
-          ),
-        ),
-      ],
     );
   }
 }
