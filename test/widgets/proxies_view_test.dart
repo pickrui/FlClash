@@ -34,7 +34,8 @@ import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, AppBar, ThemeData;
+    hide IconButton, AppBar, ThemeData, TabBarView;
+import 'package:prism_ui/tab_view.dart' show TabBarView;
 import 'package:prism_ui/theme_data.dart' show ThemeData;
 import 'package:prism_ui/scaffold.dart' show AppBar;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;

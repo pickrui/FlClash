@@ -13,7 +13,7 @@ import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart' show ValueListenable, listEquals;
 import 'package:flutter/widgets.dart';
-import 'package:material_ui/material_ui.dart' show TabController;
+import 'package:prism_ui/tab_view.dart' show TabController;
 import 'package:prism_ui/theme_data.dart' show Colors;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:prism_ui/card.dart' as prism;
