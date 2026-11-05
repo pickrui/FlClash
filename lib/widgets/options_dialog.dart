@@ -9,6 +9,7 @@ import 'package:material_ui/material_ui.dart';
 import 'sheet_scaffold.dart';
 
 import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/selection_mark.dart';
 
 class OptionsDialog<T> extends StatelessWidget {
   final String title;
@@ -31,34 +32,29 @@ class OptionsDialog<T> extends StatelessWidget {
     return PagedSheetForm(
       title: title,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: RadioGroup(
-        onChanged: (value) {
-          context.safeNestedPop(value);
-        },
-        groupValue: value,
-        child: Wrap(
-          children: [
-            for (final option in options)
-              Builder(
-                builder: (context) {
-                  if (value == option) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Scrollable.ensureVisible(context);
-                    });
-                  }
-                  final subtitle = subtitleBuilder?.call(option);
-                  return ListItem.radio(
-                    value: option,
-                    onTap: () {
-                      context.safeNestedPop(option);
-                    },
-                    title: Text(textBuilder(option)),
-                    subtitle: subtitle != null ? Text(subtitle) : null,
-                  );
-                },
-              ),
-          ],
-        ),
+      child: Wrap(
+        children: [
+          for (final option in options)
+            Builder(
+              builder: (context) {
+                if (value == option) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Scrollable.ensureVisible(context);
+                  });
+                }
+                final subtitle = subtitleBuilder?.call(option);
+                return DecorationListItem(
+                  isSelected: value == option,
+                  trailing: value == option ? const SelectionCheck() : null,
+                  onPressed: () {
+                    context.safeNestedPop(option);
+                  },
+                  title: Text(textBuilder(option)),
+                  subtitle: subtitle != null ? Text(subtitle) : null,
+                );
+              },
+            ),
+        ],
       ),
     );
   }

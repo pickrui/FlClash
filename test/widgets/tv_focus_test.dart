@@ -46,21 +46,18 @@ void main() {
     expect(harnessKey.currentState!.changes, [1]);
   });
 
-  testWidgets('radio list item exposes one remote focus target', (
+  testWidgets('selected list item exposes one remote focus target', (
     tester,
   ) async {
     var activations = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: RadioGroup<int>(
-            groupValue: 0,
-            onChanged: (_) {},
-            child: ListItem.radio(
-              title: const Text('Rule'),
-              value: 0,
-              onTap: () => activations++,
-            ),
+          body: DecorationListItem(
+            title: const Text('Rule'),
+            isSelected: true,
+            trailing: const SelectionCheck(),
+            onPressed: () => activations++,
           ),
         ),
       ),
@@ -76,12 +73,8 @@ void main() {
       return node.context!.findAncestorWidgetOfExactType<PressSurface>() !=
           null;
     });
-    final radioFocusNodes = focusNodes.where((node) {
-      return node.context!.findAncestorWidgetOfExactType<Radio<int>>() != null;
-    });
 
     expect(rowFocusNodes, hasLength(1));
-    expect(radioFocusNodes, isEmpty);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.sendKeyEvent(LogicalKeyboardKey.select);

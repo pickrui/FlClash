@@ -48,13 +48,6 @@ final class _DefaultAction extends _ListItemAction {
   const _DefaultAction();
 }
 
-final class _RadioAction<T> extends _ListItemAction {
-  final T value;
-  final VoidCallback? onTap;
-
-  const _RadioAction({required this.value, this.onTap});
-}
-
 final class _ToggleAction extends _ListItemAction {
   final bool value;
   final ValueChanged<bool>? onChanged;
@@ -281,23 +274,6 @@ class ListItem<T> extends StatelessWidget {
        trailing = null,
        onTap = null;
 
-  ListItem.radio({
-    super.key,
-    required this.title,
-    this.subtitle,
-    this.trailing,
-    this.padding = const EdgeInsets.only(left: 12, right: 16),
-    required T value,
-    VoidCallback? onTap,
-    this.horizontalTitleGap = 8,
-    this.color,
-    this.minTileHeight,
-    this.minVerticalPadding = listRowVerticalPadding,
-    this.alignment = ListRowAlignment.center,
-  }) : _action = _RadioAction<T>(value: value, onTap: onTap),
-       leading = null,
-       onTap = null;
-
   Widget _buildListTile(
     BuildContext context, {
     required ItemPosition? position,
@@ -472,22 +448,6 @@ class ListItem<T> extends StatelessWidget {
             value: toggleAction.value,
             onChanged: toggleAction.onChanged,
           ),
-        );
-      case final _RadioAction radio:
-        final radioDelegate = radio as _RadioAction<T>;
-        return _buildListTile(
-          context,
-          position: position,
-          onTap: radioDelegate.onTap,
-          leading: ExcludeFocus(
-            child: Radio<T>(
-              visualDensity: VisualDensity.compact,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              value: radioDelegate.value,
-              toggleable: true,
-            ),
-          ),
-          trailing: trailing,
         );
       case _DefaultAction():
         return _buildListTile(context, position: position, onTap: onTap);

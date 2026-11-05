@@ -472,34 +472,33 @@ class _ProfilePickerSheet extends ConsumerWidget {
       ),
       child: CommonScaffold(
         title: context.appLocalizations.switchProfile,
-        body: RadioGroup<int>(
-          groupValue: currentId,
-          onChanged: select,
-          child: ListView.builder(
-            shrinkWrap: true,
-            padding: EdgeInsets.fromLTRB(
-              16,
-              context.contentTopPadding,
-              16,
-              88 + context.bottomInset,
-            ),
-            itemCount: profiles.length,
-            itemBuilder: (context, index) {
-              final profile = profiles[index];
-              return ItemPositionProvider(
-                position: ItemPosition.get(index, profiles.length),
-                child: ListItem.radio(
-                  value: profile.id,
-                  onTap: () => select(profile.id),
-                  title: EmojiText(
-                    profile.realLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              );
-            },
+        body: ListView.builder(
+          shrinkWrap: true,
+          padding: EdgeInsets.fromLTRB(
+            16,
+            context.contentTopPadding,
+            16,
+            88 + context.bottomInset,
           ),
+          itemCount: profiles.length,
+          itemBuilder: (context, index) {
+            final profile = profiles[index];
+            return ItemPositionProvider(
+              position: ItemPosition.get(index, profiles.length),
+              child: DecorationListItem(
+                isSelected: profile.id == currentId,
+                trailing: profile.id == currentId
+                    ? const SelectionCheck()
+                    : null,
+                onPressed: () => select(profile.id),
+                title: EmojiText(
+                  profile.realLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
