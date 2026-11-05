@@ -1,0 +1,86 @@
+name: Windows platform checks
+
+on:
+  workflow_call:
+    inputs:
+      flutter-version:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      flutter-version:
+        description: Flutter SDK version
+        required: true
+        default: '3.47.6'
+        type: string
+
+env:
+  MSYS_NO_PATHCONV: 1
+
+jobs:
+  windows-helper-test:
+    name: Windows helper test
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Compile Windows installer code
+        run: python -m unittest discover -s test/ci -p test_windows_installer.py -v
+
+      - name: Check format
+        run: cargo fmt --manifest-path services/helper/Cargo.toml -- --check
+
+      - name: Run Windows service tests
+        run: cargo test --manifest-path services/helper/Cargo.toml --features windows-service
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: ${{ inputs.flutter-version }}
+          cache: true
+      - run: flutter pub get
+      - name: Setup Go for hook regressions
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: '1.26.10'
+          cache: false
+      - name: Check Windows Go hook and build cache
+        working-directory: plugins/setup/setup_hooks
+        run: |
+          dart pub get
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dart test test/go_build_test.dart test/windows_cache_test.dart
+      - name: Skip native build hooks for Windows unit tests
+        run: dart tool/set_native_build_assets.dart false
+      - name: Check Windows runtime and recovery
+        shell: bash
+        run: |
+          dart tool/test.dart --no-pub \
+            test/core/desktop/process_probe_test.dart \
+            test/core/desktop/helper_client_test.dart \
+            test/core/desktop/launch_policy_test.dart \
+            test/widgets/init_error_screen_test.dart \
+            test/common/single_instance_wakeup_test.dart \
+            test/common/window_test.dart \
+            test/common/window_visibility_test.dart \
+            test/common/launch_test.dart \
+            test/common/file_secure_storage_test.dart \
+            test/common/config_reset_test.dart \
+            test/common/config_backup_test.dart \
+            test/plugins/window_plugin_native_test.dart \
+            test/widgets/config_recovery_test.dart \
+            test/services/network_diagnostic_platform_test.dart \
+            test/services/network_diagnostic_proxy_channel_test.dart \
+            test/common/update_download_task_test.dart \
+            test/widgets/update_download_page_test.dart
+
+      - name: Check Windows native proxy shutdown handling
+        shell: pwsh
+        run: ./tool/check_windows_proxy.ps1
+
+      - name: Check desktop update handoff
+        shell: powershell
+        run: ./tool/check_desktop_update.ps1
