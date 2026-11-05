@@ -297,6 +297,73 @@ class Scripts extends _$Scripts with AsyncNotifierMixin {
   }
 }
 
+@riverpod
+class MitmModules extends _$MitmModules with AsyncNotifierMixin {
+  @override
+  Stream<List<MitmModule>> build() => database.mitmModulesDao.query().watch();
+
+  @override
+  List<MitmModule> get value => state.value ?? [];
+
+  void replaceFromDatabase(List<MitmModule> modules) {
+    value = List<MitmModule>.from(modules);
+  }
+
+  Future<void> _write(List<MitmModule> next, FutureOr<void> Function() action) {
+    value = next;
+    return queueDatabaseWrite(
+      action,
+      onError: () => reloadProviderAfterDatabaseError(ref),
+    );
+  }
+
+  Future<void> put(MitmModule module, {bool first = false}) {
+    final next = List<MitmModule>.from(value);
+    final index = next.indexWhere((item) => item.id == module.id);
+    if (index == -1 && first) {
+      return _reorder([module, ...next]);
+    }
+    final saved = index == -1 ? module.copyWith(order: next.length) : module;
+    if (index == -1) {
+      next.add(saved);
+    } else {
+      next[index] = saved;
+    }
+    return _write(next, () => database.mitmModules.put(saved.toCompanion()));
+  }
+
+  Future<void> del(int id) {
+    final next = value.where((module) => module.id != id).toList();
+    return _write(
+      next,
+      () => database.mitmModules.remove((row) => row.id.equals(id)),
+    );
+  }
+
+  Future<void> order(int oldIndex, int newIndex) {
+    final next = List<MitmModule>.from(value);
+    next.insert(newIndex, next.removeAt(oldIndex));
+    return _reorder(next);
+  }
+
+  Future<void> _reorder(List<MitmModule> next) {
+    final changed = <MitmModulesCompanion>[];
+    next.forEachIndexed((index, item) {
+      if (item.order != index) {
+        next[index] = item.copyWith(order: index);
+        changed.add(item.toCompanion(index));
+      }
+    });
+    return _write(next, () => database.mitmModulesDao.putAll(changed));
+  }
+
+  @override
+  bool updateShouldNotify(
+    AsyncValue<List<MitmModule>> previous,
+    AsyncValue<List<MitmModule>> next,
+  ) => _asyncListChanged(previous, next, const ListEquality<MitmModule>());
+}
+
 extension on List<Rule> {
   List<Rule> keyedForPrepend(Iterable<Rule> rules) {
     final values = map((rule) => rule.value).toSet();

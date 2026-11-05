@@ -113,6 +113,9 @@ final double kHeaderHeight = getWindowHeaderHeight(
   isMacOS: system.isMacOS,
 );
 const profilesDirectoryName = 'profiles';
+const mitmDirectoryName = 'mitm';
+const mitmModulesDirectoryName = 'modules';
+const mitmResourcesDirectoryName = 'resources';
 const localhost = '127.0.0.1';
 const clashConfigKey = 'clash_config';
 const configKey = 'config';

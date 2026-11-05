@@ -183,6 +183,12 @@ class AppPath {
   static String scriptPathIn(String scriptsDir, String fileName) =>
       join(scriptsDir, '$fileName.js');
 
+  Future<String> get mitmModulesDirPath async =>
+      join(await homeDirPath, mitmDirectoryName, mitmModulesDirectoryName);
+
+  Future<String> get mitmResourcesDirPath async =>
+      join(await homeDirPath, mitmDirectoryName, mitmResourcesDirectoryName);
+
   Future<String> getProvidersRootPath() async {
     final directory = await profilesPath;
     return join(directory, 'providers');

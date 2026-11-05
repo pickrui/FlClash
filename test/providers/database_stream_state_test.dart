@@ -64,6 +64,11 @@ void _testStreamStates<T>(
 }
 
 void main() {
+  _testStreamStates<MitmModule>(
+    'MITM modules',
+    mitmModulesProvider,
+    (stream) => mitmModulesProvider.overrideWithBuild((_, _) => stream),
+  );
   _testStreamStates<Script>(
     'scripts',
     scriptsProvider,
