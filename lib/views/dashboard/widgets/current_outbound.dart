@@ -268,13 +268,13 @@ class _OutboundMetrics {
       padding: dashboardCardPadding(density),
       gap: 16,
       ipTop: 10,
-      badgeSize: 48,
+      badgeSize: 40,
       ip: AppTextStyle.title1,
-      buttonSize: 104,
-      buttonSlot: 120,
-      decorationSize: 290,
-      decorationEnd: -64,
-      decorationTop: -87,
+      buttonSize: 88,
+      buttonSlot: 104,
+      decorationSize: 220,
+      decorationEnd: -48,
+      decorationTop: -56,
     ),
     DashboardDensity.compact => _OutboundMetrics(
       padding: dashboardCardPadding(density),
@@ -282,23 +282,23 @@ class _OutboundMetrics {
       ipTop: 8,
       badgeSize: 40,
       ip: AppTextStyle.title2,
-      buttonSize: 84,
-      buttonSlot: 100,
-      decorationSize: 250,
-      decorationEnd: -64,
-      decorationTop: -75,
+      buttonSize: 72,
+      buttonSlot: 88,
+      decorationSize: 192,
+      decorationEnd: -44,
+      decorationTop: -48,
     ),
     DashboardDensity.mobile => const _OutboundMetrics(
       padding: EdgeInsetsDirectional.fromSTEB(20, 18, 16, 18),
       gap: 10,
       ipTop: 12,
-      badgeSize: 48,
+      badgeSize: 40,
       ip: AppTextStyle.title2,
-      buttonSize: 88,
-      buttonSlot: 88,
-      decorationSize: 240,
-      decorationEnd: -60,
-      decorationTop: -66,
+      buttonSize: 72,
+      buttonSlot: 80,
+      decorationSize: 180,
+      decorationEnd: -44,
+      decorationTop: -44,
     ),
   };
 
@@ -356,91 +356,67 @@ class _ExitRow extends ConsumerWidget {
             if (info.asn case final asn?) 'AS$asn',
           ].join(' · ');
     final appLocalizations = context.appLocalizations;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final stacked =
-            info != null &&
-            info.ip.contains(':') &&
-            info.ip.length > 20 &&
-            constraints.maxWidth < 320;
-        final badge = _CountryBadge(
-          countryCode: hideIp ? null : info?.countryCode,
-          size: metrics.badgeSize,
-          active: active,
-          checking: checking,
-          onRefresh: onRefresh,
-        );
-        final detailsCell = SizedBox(
-          height: 32 * DashboardDensityScope.scaleOf(context),
+    final detailsCell = SizedBox(
+      height: 32 * DashboardDensityScope.scaleOf(context),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: details.isNotEmpty
+            ? Tooltip(
+                message: details,
+                child: Text(
+                  details,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: DashboardText.label(context),
+                ),
+              )
+            : failed
+            ? Text(
+                appLocalizations.tapIconToRetry,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: DashboardText.label(context),
+              )
+            : null,
+      ),
+    );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: metrics.ip.leading * DashboardDensityScope.scaleOf(context),
           child: Align(
-            alignment: AlignmentDirectional.topStart,
-            child: details.isNotEmpty
-                ? Tooltip(
-                    message: details,
-                    child: Text(
-                      details,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: DashboardText.label(context),
-                    ),
-                  )
+            alignment: AlignmentDirectional.centerStart,
+            child: info != null
+                ? _IpText(ip: info.ip, hidden: hideIp, style: style)
                 : failed
                 ? Text(
-                    appLocalizations.tapIconToRetry,
-                    maxLines: 2,
+                    appLocalizations.serviceFailed,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: DashboardText.label(context),
+                    style: style.copyWith(color: colorScheme.error),
                   )
-                : null,
+                : SkeletonText(width: 140, style: style),
           ),
-        );
-        final text = Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        const SizedBox(height: 6),
+        Row(
+          spacing: 8,
           children: [
-            SizedBox(
-              height:
-                  metrics.ip.leading * DashboardDensityScope.scaleOf(context),
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: info != null
-                    ? _IpText(ip: info.ip, hidden: hideIp, style: style)
-                    : failed
-                    ? Text(
-                        appLocalizations.serviceFailed,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: style.copyWith(color: colorScheme.error),
-                      )
-                    : SkeletonText(width: 140, style: style),
-              ),
+            _CountryBadge(
+              countryCode: hideIp ? null : info?.countryCode,
+              size: metrics.badgeSize,
+              active: active,
+              checking: checking,
+              onRefresh: onRefresh,
             ),
-            const SizedBox(height: 4),
-            if (stacked)
-              Row(
-                spacing: 8,
-                children: [
-                  badge,
-                  Expanded(child: detailsCell),
-                ],
-              )
-            else
-              detailsCell,
-            SizedBox(height: stacked ? 6 : 10),
-            _RunTimeCell(active: running),
+            Expanded(child: detailsCell),
           ],
-        );
-        return stacked
-            ? text
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 12,
-                children: [
-                  badge,
-                  Expanded(child: text),
-                ],
-              );
-      },
+        ),
+        const SizedBox(height: 8),
+        _RunTimeCell(active: running),
+      ],
     );
   }
 }
