@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:prism_ui/linear_progress.dart';
 import 'package:fl_clash/ui/context.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/loading.dart';
@@ -26,7 +27,8 @@ import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/text.dart';
 import 'package:fl_clash/ui/button.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, FilledButton;
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, FilledButton, LinearProgressIndicator;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

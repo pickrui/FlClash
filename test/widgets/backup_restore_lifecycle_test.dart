@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:prism_ui/linear_progress.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/dav_client.dart';
@@ -19,7 +20,8 @@ import 'package:fl_clash/ui/inherited.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
-import 'package:material_ui/material_ui.dart' hide IconButton, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, TextButton, LinearProgressIndicator;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 
 import '../helpers/app_paths.dart';

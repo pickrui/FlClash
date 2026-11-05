@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:prism_ui/linear_progress.dart';
 import 'package:fl_clash/features/providers/provider_file.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -26,7 +27,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/chip_title.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, TextButton, LinearProgressIndicator;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

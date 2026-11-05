@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:prism_ui/linear_progress.dart';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -13,7 +14,7 @@ import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextFormField, TextButton, FilledButton;
+    hide TextFormField, TextButton, FilledButton, LinearProgressIndicator;
 import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
@@ -71,8 +72,17 @@ void main() {
       tester.widget<TextFormField>(find.byType(TextFormField)).enabled,
       isFalse,
     );
-    for (final chip in tester.widgetList<ActionChip>(find.byType(ActionChip))) {
-      expect(chip.onPressed, isNull);
+    for (final label in [
+      AppLocalizations.current.geoOriginalSource,
+      'GitHub',
+      AppLocalizations.current.geoBackupSource,
+    ]) {
+      expect(
+        tester
+            .widget<TextButton>(find.widgetWithText(TextButton, label))
+            .onPressed,
+        isNull,
+      );
     }
     pending.complete(null);
     await tester.pumpAndSettle();
