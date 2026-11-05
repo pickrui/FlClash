@@ -133,6 +133,8 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         ),
       ],
       body: RefreshIndicator(
+        color: context.colorScheme.primary,
+        backgroundColor: context.colorScheme.surfaceContainer,
         onRefresh: () => _runGuarded(_refresh),
         child: storeState.isLoading && storeState.plans.isEmpty
             ? const Center(child: ActivityIndicator.page())

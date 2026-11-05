@@ -16,9 +16,7 @@ import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:material_ui/material_ui.dart'
-    show MaterialBanner, RefreshIndicator;
-import 'package:prism_ui/theme_data.dart' show Colors;
+import 'package:material_ui/material_ui.dart' show RefreshIndicator;
 import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -318,62 +316,91 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     final secondary = AppTextStyle.footnote
         .of(context)
         .copyWith(color: colorScheme.onSurfaceVariant);
-    return MaterialBanner(
-      backgroundColor: level.colorOf(colorScheme),
-      dividerColor: Colors.transparent,
-      leading: GlyphIcon(
-        failed ? AppGlyphs.error : AppGlyphs.warning,
-        color: failed ? colorScheme.error : colorScheme.warning,
-      ),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        spacing: 6,
-        children: [
-          Text(
-            warning,
-            style: AppTextStyle.subheadline
-                .of(context, emphasized: true)
-                .copyWith(color: colorScheme.onSurface),
-          ),
-          if (certificateHint != null) Text(certificateHint, style: secondary),
-          if (certificateRetryError != null)
-            Text(
-              accountState.isLoggedIn
-                  ? AppLocalizations.current.certificateSyncRetryDescription
-                  : AppLocalizations.current.certificateCheckOnlyHint,
-              style: secondary,
+    return Surface(
+      key: const ValueKey('cloud-service-status'),
+      color: level.colorOf(colorScheme),
+      shape: AppShape.xl,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 16,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 16,
+              children: [
+                GlyphIcon(
+                  failed ? AppGlyphs.error : AppGlyphs.warning,
+                  color: failed ? colorScheme.error : colorScheme.warning,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 6,
+                    children: [
+                      Text(
+                        warning,
+                        style: AppTextStyle.subheadline
+                            .of(context, emphasized: true)
+                            .copyWith(color: colorScheme.onSurface),
+                      ),
+                      if (certificateHint != null)
+                        Text(certificateHint, style: secondary),
+                      if (certificateRetryError != null)
+                        Text(
+                          accountState.isLoggedIn
+                              ? AppLocalizations
+                                    .current
+                                    .certificateSyncRetryDescription
+                              : AppLocalizations
+                                    .current
+                                    .certificateCheckOnlyHint,
+                          style: secondary,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-        ],
-      ),
-      forceActionsBelow: true,
-      actions: [
-        if (certificateRetryError != null)
-          SurfaceScope(
-            level: level,
-            child: TonalButton(
-              size: TonalButtonSize.compact,
-              label: accountState.isLoggedIn
-                  ? AppLocalizations
-                        .current
-                        .retryCloudSyncWithCertificateException
-                  : AppLocalizations
-                        .current
-                        .retryWithoutCertificateVerification,
-              onPressed: _isCheckingService || accountBusy
-                  ? null
-                  : () => _checkHealth(certificateError: certificateRetryError),
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (certificateRetryError != null)
+                  SurfaceScope(
+                    level: level,
+                    child: TonalButton(
+                      size: TonalButtonSize.compact,
+                      label: accountState.isLoggedIn
+                          ? AppLocalizations
+                                .current
+                                .retryCloudSyncWithCertificateException
+                          : AppLocalizations
+                                .current
+                                .retryWithoutCertificateVerification,
+                      onPressed: _isCheckingService || accountBusy
+                          ? null
+                          : () => _checkHealth(
+                              certificateError: certificateRetryError,
+                            ),
+                    ),
+                  ),
+                SurfaceScope(
+                  level: level,
+                  child: TonalButton(
+                    size: TonalButtonSize.compact,
+                    label: AppLocalizations.current.checkApi,
+                    onPressed: _isCheckingService ? null : _checkHealth,
+                  ),
+                ),
+              ],
             ),
-          ),
-        SurfaceScope(
-          level: level,
-          child: TonalButton(
-            size: TonalButtonSize.compact,
-            label: AppLocalizations.current.checkApi,
-            onPressed: _isCheckingService ? null : _checkHealth,
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -440,6 +467,8 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       );
     }
     return RefreshIndicator(
+      color: context.colorScheme.primary,
+      backgroundColor: context.colorScheme.surfaceContainer,
       onRefresh: () async {
         if (!busy) await notifier.refreshProfile(force: true);
       },

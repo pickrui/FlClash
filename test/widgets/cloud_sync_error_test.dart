@@ -73,7 +73,7 @@ void main() {
     });
     await tester.pumpAndSettle();
     expect(checks, 2);
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
     expect(
       find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
       findsOneWidget,
@@ -101,7 +101,7 @@ void main() {
     await tester.tap(find.widgetWithText(prism.FilledButton, 'Check API'));
     await tester.pumpAndSettle();
     expect(checks, 3);
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
     expect(
       find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
       findsOneWidget,
@@ -177,7 +177,7 @@ void main() {
     await tester.tap(find.widgetWithText(prism.FilledButton, 'Check API'));
     await tester.pumpAndSettle();
     expect(attempts, [false, true, false]);
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
     expect(
       find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
       findsOneWidget,
@@ -478,7 +478,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Allow Temporarily and Sync'), findsNothing);
-    expect(find.byType(MaterialBanner), findsOneWidget);
+    expect(find.byKey(const ValueKey('cloud-service-status')), findsOneWidget);
   });
 
   testWidgets(
@@ -500,7 +500,7 @@ void main() {
       await tester.tap(find.text('Allow Temporarily'));
       await tester.pumpAndSettle();
       expect(attempts, [false, true, false]);
-      expect(find.byType(MaterialBanner), findsNothing);
+      expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
       expect(
         find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
         findsOneWidget,
@@ -536,7 +536,10 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.tap(find.text(l.cancel).last);
       await tester.pumpAndSettle();
-      expect(find.byType(MaterialBanner), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('cloud-service-status')),
+        findsOneWidget,
+      );
     });
   }
 
@@ -553,7 +556,7 @@ void main() {
         .toPage(PageLabel.oixCloud);
     await tester.pumpAndSettle();
     expect(checks, 3);
-    expect(find.byType(MaterialBanner), findsNothing);
+    expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
     expect(
       find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
       findsOneWidget,
@@ -577,7 +580,7 @@ void main() {
       first.completeError(const CloudApiException('Old connection failed'));
       await tester.pumpAndSettle();
       expect(checks, 3);
-      expect(find.byType(MaterialBanner), findsNothing);
+      expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
       expect(
         find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
         findsOneWidget,
