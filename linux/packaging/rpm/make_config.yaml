@@ -1,0 +1,18 @@
+display_name: FlClash for Dler Cloud
+package_name: flclash
+
+packager: Dler Inc.
+license: GPL-3.0
+icon: ./assets/images/icon.png
+
+keywords:
+  - FlClash
+  - Clash
+  - ClashMeta
+  - Proxy
+
+generic_name: FlClash for Dler Cloud
+
+group: Applications/Internet
+
+startup_notify: true
