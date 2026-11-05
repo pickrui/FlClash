@@ -567,3 +567,43 @@ class _MapInputPageState
     ),
   );
 }
+
+Future<String?> showListEntryDialog(
+  BuildContext context, {
+  required List<String> entries,
+  String? entry,
+  String? valueLabel,
+  int? itemMaxLength,
+  String? Function(String item)? itemValidator,
+}) async {
+  final appLocalizations = context.appLocalizations;
+  final label = valueLabel ?? appLocalizations.value;
+
+  String? validator(String? value) {
+    final parsed = parseListInput(value ?? '', maxLength: itemMaxLength);
+    if (!parsed.isValid) {
+      return appLocalizations.maxLengthTip(label, itemMaxLength!);
+    }
+    if (parsed.entries.isEmpty) {
+      return appLocalizations.emptyTip(label);
+    }
+    if (parsed.entries.length > 1) {
+      return appLocalizations.singleValueTip(label);
+    }
+    final next = parsed.entries.single;
+    if (next != entry && entries.contains(next)) {
+      return appLocalizations.existsTip(label);
+    }
+    return itemValidator?.call(next);
+  }
+
+  final result = await globalState.showCommonDialog<List<String>>(
+    child: _EntryDialog<String>(
+      title: entry == null ? appLocalizations.add : appLocalizations.edit,
+      valueField: Field(label: label, value: entry ?? '', validator: validator),
+      valueMaxLength: itemMaxLength,
+      toEntry: (value) => parseListInput(value).entries.single,
+    ),
+  );
+  return result?.single;
+}

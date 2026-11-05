@@ -14,6 +14,7 @@ import 'package:fl_clash/ui/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'rules.dart';
+import 'mitm.dart';
 
 class AdvancedConfigView extends StatelessWidget {
   const AdvancedConfigView({super.key});
@@ -50,6 +51,12 @@ class AdvancedConfigView extends StatelessWidget {
         leading: const GlyphIcon(AppGlyphs.code),
         widget: const ScriptsView(),
       ),
+      if (mitmFeature)
+        ListItem.open(
+          title: Text(appLocalizations.mitm),
+          leading: const GlyphIcon(AppGlyphs.lockOpen),
+          widget: MitmView(isAndroid: system.isAndroid),
+        ),
     ];
     return BaseScaffold(
       title: appLocalizations.advancedConfig,
