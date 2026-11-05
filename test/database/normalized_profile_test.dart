@@ -45,6 +45,10 @@ void main() {
       // Simulate the old local schema with data written only to its snapshot.
       await old.customStatement('DROP TABLE proxy_groups');
       await old.customStatement('DROP TABLE icon_records');
+      await old.customStatement('DROP TABLE custom_proxies');
+      await old.customStatement(
+        'ALTER TABLE profiles DROP COLUMN proxy_aliases',
+      );
       await old.customStatement('PRAGMA user_version = 3');
       await old.close();
       final db = Database(NativeDatabase(file));

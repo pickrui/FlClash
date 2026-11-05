@@ -62,7 +62,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
       ? OverwriteType.custom
       : profile?.overwriteType ?? OverwriteType.standard;
   final proxyChains = profile?.proxyChains ?? [];
-  final profileProxies = profile?.profileProxies ?? [];
+  final profileProxies = await ref.watch(customProxiesProvider.future);
   final customProxyGroups = profile?.customProxyGroups ?? [];
   final customRules = profile?.customRules ?? [];
   final dns = ref.watch(patchClashConfigProvider.select((state) => state.dns));
@@ -118,6 +118,8 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     addedRules: addedRules,
     proxyChains: proxyChains,
     profileProxies: profileProxies,
+    proxyAliases: profile?.proxyAliases ?? const {},
+    managedProfile: profile?.isoixCloudProfile ?? false,
     clashProviders: clashProviders,
     customProxyGroups: customProxyGroups,
     customRules: customRules,

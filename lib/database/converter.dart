@@ -86,3 +86,14 @@ class IconSetIconsConverter extends TypeConverter<List<IconSetIcon>, String> {
     return _jsonListToSql(value, (item) => item.toJson());
   }
 }
+
+class JsonMapConverter extends TypeConverter<Map<String, Object?>, String> {
+  const JsonMapConverter();
+
+  @override
+  Map<String, Object?> fromSql(String value) =>
+      Map<String, Object?>.from(json.decode(value) as Map);
+
+  @override
+  String toSql(Map<String, Object?> value) => json.encode(value);
+}

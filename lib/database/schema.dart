@@ -30,6 +30,7 @@ bool hasCompatibleDatabaseSchema(
       if (version >= 4) 'match_target',
       if (version >= 7) ...{'profile_type', 'overrides'},
       if (version >= 9) 'age_secret_key',
+      if (version >= 11) 'proxy_aliases',
     },
     'scripts': {
       'id',
@@ -111,6 +112,15 @@ bool hasCompatibleDatabaseSchema(
         'system',
         'scripts',
         'last_update_time',
+      },
+    if (version >= 11)
+      'custom_proxies': {
+        'id',
+        'definition',
+        'enabled',
+        'uri',
+        'empty_options',
+        'order',
       },
     if (version >= 8)
       'icon_sets': {'id', 'name', 'url', 'icons', 'last_update_time', 'order'},

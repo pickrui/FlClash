@@ -129,7 +129,7 @@ class ProxiesAction extends _$ProxiesAction {
     ExternalProvider provider,
   ) => _controller.providerEditorSaver(provider);
 
-  /// Copies a node of the current profile into that profile's custom nodes.
+  /// Copies an ordinary subscription node into the shared custom library.
   Future<void> addToLocalProxies(String proxyName) async {
     final profile = ref.read(currentProfileProvider);
     if (profile == null || profile.isoixCloudProfile) return;
@@ -157,7 +157,8 @@ class ProxiesAction extends _$ProxiesAction {
         proxyName,
         ...rawProxyNames(rawConfig),
         ...rawProxyGroupNames(rawConfig),
-        for (final group in current.customProxyGroups) group.name,
+        for (final profile in ref.read(profilesProvider))
+          for (final group in profile.customProxyGroups) group.name,
         for (final group in ref.read(groupsProvider)) ...[
           group.name,
           for (final proxy in group.all) proxy.name,

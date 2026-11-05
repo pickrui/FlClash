@@ -17,6 +17,7 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 part 'generated/database.g.dart';
 part 'converter.dart';
 part 'clash_providers.dart';
+part 'custom_proxies.dart';
 part 'groups.dart';
 part 'icons.dart';
 part 'links.dart';
@@ -26,7 +27,7 @@ part 'rules.dart';
 part 'scripts.dart';
 part 'schema.dart';
 
-const currentDatabaseSchemaVersion = 10;
+const currentDatabaseSchemaVersion = 11;
 
 @DriftDatabase(
   tables: [
@@ -39,6 +40,7 @@ const currentDatabaseSchemaVersion = 10;
     ClashProviders,
     IconSets,
     MitmModules,
+    CustomProxies,
   ],
   daos: [
     ProfilesDao,
@@ -49,6 +51,7 @@ const currentDatabaseSchemaVersion = 10;
     ClashProvidersDao,
     IconSetsDao,
     MitmModulesDao,
+    CustomProxiesDao,
   ],
 )
 class Database extends _$Database {
@@ -87,7 +90,11 @@ class Database extends _$Database {
         );
         await customStatement('PRAGMA foreign_keys = ON');
       },
-      onUpgrade: (m, from, to) async {
+      onUpgrade: (m, from, to) => transaction(() async {
+        if (from < 11) {
+          await m.createTable(customProxies);
+          await m.addColumn(profiles, profiles.proxyAliases);
+        }
         if (from < 6) {
           final columns = (await customSelect(
             'PRAGMA table_info(scripts)',
@@ -196,31 +203,43 @@ class Database extends _$Database {
             }
           });
         }
-      },
+        if (from < 11) {
+          final merged = mergeProfileProxies(await profilesDao.all().get());
+          await customProxiesDao.setAll(merged.proxies);
+          for (final profile in merged.profiles) {
+            await putProfile(profile);
+          }
+        }
+      }),
     );
   }
 
   /// The profile snapshot keeps older JSON backups compatible. Normalized groups
   /// are replaced in the same transaction, so UI queries never see a half-write.
-  Future<void> putProfile(Profile profile) => transaction(() async {
-    final previous = await (select(
-      profiles,
-    )..where((row) => row.id.equals(profile.id))).getSingleOrNull();
-    await into(profiles).insertOnConflictUpdate(profile.toCompanion());
-    await batch((batch) async {
-      if (previous == null ||
-          !proxyGroupsEquality.equals(
-            previous.customProxyGroups,
-            profile.customProxyGroups,
-          )) {
-        await proxyGroupsDao.replaceWithBatch(batch, profile);
-      }
-      if (previous == null ||
-          !ruleListEquality.equals(previous.customRules, profile.customRules)) {
-        await rulesDao.replaceCustomWithBatch(batch, profile);
-      }
-    });
-  });
+  Future<void> putProfile(Profile profile, {bool existingOnly = false}) =>
+      transaction(() async {
+        final previous = await (select(
+          profiles,
+        )..where((row) => row.id.equals(profile.id))).getSingleOrNull();
+        if (existingOnly && previous == null) return;
+        await into(profiles).insertOnConflictUpdate(profile.toCompanion());
+        await batch((batch) async {
+          if (previous == null ||
+              !proxyGroupsEquality.equals(
+                previous.customProxyGroups,
+                profile.customProxyGroups,
+              )) {
+            await proxyGroupsDao.replaceWithBatch(batch, profile);
+          }
+          if (previous == null ||
+              !ruleListEquality.equals(
+                previous.customRules,
+                profile.customRules,
+              )) {
+            await rulesDao.replaceCustomWithBatch(batch, profile);
+          }
+        });
+      });
 
   Future<Set<String>> _profileColumnNames() async {
     final rows = await customSelect('PRAGMA table_info("profiles")').get();
@@ -234,11 +253,24 @@ class Database extends _$Database {
     });
   }
 
-  Future<void> createSnapshot(String path) async {
+  Future<void> createSnapshot(String path, {bool portable = false}) async {
     final file = File(path);
     await file.safeDelete();
     final escapedPath = path.replaceAll("'", "''");
     await customStatement("VACUUM INTO '$escapedPath'");
+    if (portable) {
+      final snapshot = Database(NativeDatabase(file));
+      try {
+        final managedIds = (await snapshot.profilesDao.all().get())
+            .where((profile) => !profile.includeInPortableBackup)
+            .map((profile) => profile.id)
+            .toList();
+        await snapshot.profiles.remove((row) => row.id.isIn(managedIds));
+        await snapshot.customStatement('VACUUM');
+      } finally {
+        await snapshot.close();
+      }
+    }
   }
 
   Future<void> restore(
@@ -250,8 +282,21 @@ class Database extends _$Database {
     List<ClashProvider> clashProviders = const [],
     List<IconSet> iconSets = const [],
     List<MitmModule> mitmModules = const [],
+    List<ProfileProxy> customProxies = const [],
   }) async {
     await transaction(() async {
+      final merged = mergeProfileProxies(
+        profiles,
+        existing: isOverride ? const [] : await customProxiesDao.all().get(),
+        imported: customProxies,
+        reservedNames: {
+          if (!isOverride)
+            for (final profile in await profilesDao.all().get())
+              for (final group in profile.customProxyGroups) group.name,
+        },
+      );
+      profiles = merged.profiles;
+      await customProxiesDao.setAll(merged.proxies);
       await batch((b) async {
         if (isOverride) {
           profilesDao.setAllWithBatch(b, profiles);

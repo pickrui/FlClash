@@ -74,6 +74,10 @@ void main() {
         } else {
           await old.customStatement('DROP TABLE mitm_modules');
         }
+        await old.customStatement('DROP TABLE custom_proxies');
+        await old.customStatement(
+          'ALTER TABLE profiles DROP COLUMN proxy_aliases',
+        );
         await old.customStatement('PRAGMA user_version = 9');
         await old.close();
         final upgraded = Database(NativeDatabase(file));
@@ -86,7 +90,7 @@ void main() {
         final version = await upgraded
             .customSelect('PRAGMA user_version')
             .getSingle();
-        expect(version.read<int>('user_version'), 10);
+        expect(version.read<int>('user_version'), currentDatabaseSchemaVersion);
       },
     );
   }

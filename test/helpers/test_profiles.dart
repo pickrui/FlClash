@@ -37,6 +37,21 @@ class TestProfiles extends Profiles {
   }
 
   @override
+  Future<void> setCustomProxies(
+    List<ProfileProxy> next, {
+    Profile? editedProfile,
+    List<Profile> editedProfiles = const [],
+  }) async {
+    final edited = {
+      for (final p in editedProfiles) p.id: p,
+      ?editedProfile?.id: editedProfile!,
+    };
+    state = [
+      for (final p in state) (edited[p.id] ?? p).copyWith(profileProxies: next),
+    ];
+  }
+
+  @override
   void updateProfile(int profileId, Profile Function(Profile profile) builder) {
     final index = state.indexWhere((item) => item.id == profileId);
     if (index == -1) return;

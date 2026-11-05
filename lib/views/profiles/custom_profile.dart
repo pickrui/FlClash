@@ -18,6 +18,7 @@ import 'package:fl_clash/features/overwrite/proxy_chain.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/database/database.dart' show mergeProfileProxies;
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -177,7 +178,6 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
     return profile == null ||
         profile.customProxyGroups.isEmpty &&
             profile.customRules.isEmpty &&
-            profile.profileProxies.isEmpty &&
             profile.proxyChains.isEmpty &&
             profile.overrides == const ProfileOverrides();
   }
@@ -304,7 +304,10 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
             profileProxies: [
               ...profile.profileProxies,
               for (final (:uri, :proxy) in withFreeNodeNames(nodes, {
+                ...RuleTarget.ruleTargetNames,
                 for (final node in profile.profileProxies) node.name,
+                for (final profile in ref.read(profilesProvider))
+                  for (final group in profile.customProxyGroups) group.name,
               }))
                 ProfileProxy.create(uri: uri, proxy: proxy),
             ],
@@ -346,21 +349,31 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
         failed.add(provider.label);
       }
     }
+    final current = ref.read(profileProvider(widget.profileId))!;
+    final imported = current.copyWith(
+      customProxyGroups: config.proxyGroups,
+      customRules: [for (final rule in config.rules) Rule.value(rule)],
+      profileProxies: [
+        for (final proxy in config.proxies)
+          ProfileProxy.create(uri: '', proxy: proxy),
+      ],
+      proxyChains: [
+        for (final proxies in config.proxyChains)
+          ProxyChain.create(proxies: proxies),
+      ],
+      overrides: config.overrides,
+    );
+    final merged = mergeProfileProxies(
+      [imported],
+      existing: current.profileProxies,
+      reservedNames: {
+        for (final profile in ref.read(profilesProvider))
+          for (final group in profile.customProxyGroups) group.name,
+      },
+    );
     profiles.updateProfile(
       widget.profileId,
-      (profile) => profile.copyWith(
-        customProxyGroups: config.proxyGroups,
-        customRules: [for (final rule in config.rules) Rule.value(rule)],
-        profileProxies: [
-          for (final proxy in config.proxies)
-            ProfileProxy.create(uri: '', proxy: proxy),
-        ],
-        proxyChains: [
-          for (final proxies in config.proxyChains)
-            ProxyChain.create(proxies: proxies),
-        ],
-        overrides: config.overrides,
-      ),
+      (_) => merged.profiles.single.copyWith(profileProxies: merged.proxies),
     );
     return config.report.withProviders(failed);
   }
@@ -371,7 +384,6 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
         profile.label == _initialLabel &&
         profile.customProxyGroups.isEmpty &&
         profile.customRules.isEmpty &&
-        profile.profileProxies.isEmpty &&
         profile.proxyChains.isEmpty &&
         profile.overrides == const ProfileOverrides();
   }

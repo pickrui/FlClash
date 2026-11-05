@@ -869,6 +869,7 @@ Future<MigrationData> _restoreTask(RestoreArchiveRequest paths) async {
       database.clashProvidersDao.all().get(),
       database.iconSetsDao.all().get(),
       database.mitmModulesDao.query().get(),
+      database.customProxiesDao.all().get(),
     ]);
     final profiles = results[0].cast<Profile>();
     final scripts = results[1].cast<Script>();
@@ -929,6 +930,7 @@ Future<MigrationData> _restoreTask(RestoreArchiveRequest paths) async {
     }
     return migrationData.copyWith(
       mitmModules: modules,
+      customProxies: results[7].cast<ProfileProxy>(),
       profiles: profiles,
       scripts: scripts,
       rules: results[2].cast<Rule>(),

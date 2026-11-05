@@ -47,6 +47,10 @@ class Profiles extends Table {
       .map(const ProfileProxyListConverter())
       .withDefault(const Constant('[]'))();
 
+  TextColumn get proxyAliases => text()
+      .map(const StringMapConverter())
+      .withDefault(const Constant('{}'))();
+
   TextColumn get customProxyGroups => text()
       .map(const ProxyGroupListConverter())
       .withDefault(const Constant('[]'))();
@@ -258,6 +262,7 @@ extension RawProfilExt on RawProfile {
       unfoldSet: unfoldSet,
       proxyChains: proxyChains,
       profileProxies: profileProxies,
+      proxyAliases: proxyAliases,
       customProxyGroups: customProxyGroups,
       customRules: customRules,
       scriptId: scriptId,
@@ -290,6 +295,7 @@ extension ProfilesCompanionExt on Profile {
       overwriteType: overwriteType,
       proxyChains: Value(proxyChains),
       profileProxies: Value(profileProxies),
+      proxyAliases: Value(proxyAliases),
       customProxyGroups: Value(customProxyGroups),
       customRules: Value(customRules),
       scriptId: Value(scriptId),

@@ -9,6 +9,51 @@ part of '../database.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(CustomProxies)
+final customProxiesProvider = CustomProxiesProvider._();
+
+final class CustomProxiesProvider
+    extends $StreamNotifierProvider<CustomProxies, List<ProfileProxy>> {
+  CustomProxiesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'customProxiesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$customProxiesHash();
+
+  @$internal
+  @override
+  CustomProxies create() => CustomProxies();
+}
+
+String _$customProxiesHash() => r'b6c4c76de70de38b67ffbddf1c84d4146129df49';
+
+abstract class _$CustomProxies extends $StreamNotifier<List<ProfileProxy>> {
+  Stream<List<ProfileProxy>> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<List<ProfileProxy>>, List<ProfileProxy>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<ProfileProxy>>, List<ProfileProxy>>,
+              AsyncValue<List<ProfileProxy>>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(profilesStream)
 final profilesStreamProvider = ProfilesStreamProvider._();
 
@@ -154,7 +199,7 @@ final class ProfilesProvider
   }
 }
 
-String _$profilesHash() => r'612dcea07b2a74df3e40a9b22f2f44dad8cb4591';
+String _$profilesHash() => r'e6582019b915d933fce9a026b907eb24447f00cd';
 
 abstract class _$Profiles extends $Notifier<List<Profile>> {
   List<Profile> build();

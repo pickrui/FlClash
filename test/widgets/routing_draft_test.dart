@@ -221,6 +221,9 @@ void main() {
       tester,
       setupState: [
         profileProvider(1).overrideWithValue(_profile),
+        customProxiesProvider.overrideWithBuild(
+          (_, _) => later(_profile.profileProxies),
+        ),
         scriptsProvider.overrideWithBuild((_, _) => later(<Script>[])),
         addedRuleStreamProvider(1)
             .overrideWith((_) => later(_state.addedRules)),

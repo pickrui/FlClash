@@ -201,6 +201,8 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required List<Rule> addedRules,
     required List<ProxyChain> proxyChains,
     required List<ProfileProxy> profileProxies,
+    @Default({}) Map<String, String> proxyAliases,
+    @Default(false) bool managedProfile,
     @Default([]) List<ClashProvider> clashProviders,
     required List<ProxyGroup> customProxyGroups,
     required List<Rule> customRules,
@@ -240,6 +242,7 @@ abstract class MigrationData with _$MigrationData {
     @Default([]) List<ClashProvider> clashProviders,
     @Default([]) List<IconSet> iconSets,
     @Default([]) List<MitmModule> mitmModules,
+    @Default([]) List<ProfileProxy> customProxies,
     @Default([]) List<VM2<String, String>> fileMigrations,
   }) = _MigrationData;
 }
@@ -255,6 +258,8 @@ abstract class SetupState with _$SetupState {
     required List<Rule> addedRules,
     required List<ProxyChain> proxyChains,
     required List<ProfileProxy> profileProxies,
+    @Default({}) Map<String, String> proxyAliases,
+    @Default(false) bool managedProfile,
     @Default([]) List<ClashProvider> clashProviders,
     required List<ProxyGroup> customProxyGroups,
     required List<Rule> customRules,
@@ -321,10 +326,15 @@ extension SetupStateExt on SetupState {
     )) {
       return true;
     }
-    if (!profileProxyListEquality.equals(
-      profileProxies,
-      lastSetupState.profileProxies,
-    )) {
+    if (managedProfile != lastSetupState.managedProfile ||
+        !const MapEquality<String, String>().equals(
+          proxyAliases,
+          lastSetupState.proxyAliases,
+        ) ||
+        !profileProxyListEquality.equals(
+          profileProxies,
+          lastSetupState.profileProxies,
+        )) {
       return true;
     }
     if (matchTarget != lastSetupState.matchTarget &&

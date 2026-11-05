@@ -295,6 +295,11 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
           ?.map((e) => ProfileProxy.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  proxyAliases:
+      (json['proxyAliases'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ) ??
+      const {},
   customProxyGroups:
       (json['customProxyGroups'] as List<dynamic>?)
           ?.map((e) => ProxyGroup.fromJson(e as Map<String, dynamic>))
@@ -331,6 +336,7 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'overwriteType': _$OverwriteTypeEnumMap[instance.overwriteType]!,
   'proxyChains': instance.proxyChains,
   'profileProxies': instance.profileProxies,
+  'proxyAliases': instance.proxyAliases,
   'customProxyGroups': instance.customProxyGroups,
   'customRules': instance.customRules,
   'scriptId': instance.scriptId,

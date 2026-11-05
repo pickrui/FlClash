@@ -120,8 +120,9 @@ Future<(TestProfiles, List<String>)> _pump(
   Widget? child,
   Size viewSize = const Size(800, 600),
   List<Override> overrides = const [],
+  List<Profile> otherProfiles = const [],
 }) async {
-  final profiles = TestProfiles([profile]);
+  final profiles = TestProfiles([profile, ...otherProfiles]);
   final messages = <String>[];
   await tester.pumpWidget(
     TestApp(
@@ -165,6 +166,97 @@ Future<void> _deleteFromMenu(WidgetTester tester, String title) async {
 }
 
 void main() {
+  testWidgets('a shared node used by another profile cannot be removed', (
+    tester,
+  ) async {
+    const node = ProfileProxy(
+      id: 11,
+      proxy: {'name': 'Solo', 'type': 'direct'},
+    );
+    final (profiles, messages) = await _pump(
+      tester,
+      _SetupAction(),
+      _baseProfile.copyWith(profileProxies: [node]),
+      otherProfiles: [
+        _baseProfile.copyWith(
+          id: 2,
+          url: 'oixcloud://managed',
+          profileProxies: [node],
+          customProxyGroups: const [
+            ProxyGroup(
+              name: 'Other',
+              type: GroupType.Selector,
+              proxies: ['Solo'],
+            ),
+          ],
+        ),
+      ],
+    );
+    await _deleteFromMenu(tester, 'Solo');
+    expect(profiles.state.map((p) => p.profileProxies), [
+      [node],
+      [node],
+    ]);
+    expect(messages, contains(_l10n.customOutboundInUse('Solo')));
+  });
+
+  testWidgets(
+    'a shared node rename updates other profile chains independently',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final core = _Core();
+      when(() => core.isCompleted).thenReturn(true);
+      when(() => core.validateProxies(any())).thenAnswer((_) async => {});
+      const node = ProfileProxy(id: 11, proxy: {'name': 'Solo', 'type': 'ss'});
+      final (profiles, _) = await _pump(
+        tester,
+        _SetupAction(),
+        _baseProfile.copyWith(profileProxies: [node]),
+        otherProfiles: [
+          _baseProfile.copyWith(
+            id: 2,
+            url: 'oixcloud://managed',
+            profileProxies: [node],
+            proxyChains: const [
+              ProxyChain(id: 12, proxies: ['Solo', 'Managed']),
+            ],
+          ),
+        ],
+        overrides: [coreHandlerProvider.overrideWithValue(core)],
+      );
+      await tester.tap(
+        find.descendant(
+          of: _tile('Solo'),
+          matching: find.byTooltip(_l10n.more),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(_l10n.edit));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.descendant(
+          of: find.byKey(const ValueKey('proxy-row-name')),
+          matching: find.byType(TextField),
+        ),
+        'Renamed',
+      );
+      await tester.tap(find.byTooltip(_l10n.save));
+      await tester.pumpAndSettle();
+      expect(profiles.state.map((p) => p.profileProxies.single.name), [
+        'Renamed',
+        'Renamed',
+      ]);
+      expect(profiles.state.first.proxyChains, isEmpty);
+      expect(profiles.state.last.proxyChains.single.proxies, [
+        'Renamed',
+        'Managed',
+      ]);
+    },
+  );
+
   for (final scenario in ['apply', 'cancel', 'referenced', 'stale']) {
     testWidgets(
       'batch share links handle $scenario without losing node identity',

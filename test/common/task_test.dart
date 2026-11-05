@@ -1897,6 +1897,8 @@ DOMAIN,ads.example.test,REJECT
     legacyDatabase.execute(
       "INSERT INTO profile_rule_mapping (id, rule_id) VALUES ('orphan', 999)",
     );
+    legacyDatabase.execute('DROP TABLE custom_proxies');
+    legacyDatabase.execute('ALTER TABLE profiles DROP COLUMN proxy_aliases');
     legacyDatabase.execute('PRAGMA user_version = 2');
     legacyDatabase.close();
 

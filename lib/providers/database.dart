@@ -159,6 +159,7 @@ class _Writes {
   final void Function() _reread;
   var _pending = 0;
   var _missed = false;
+  var revision = 0;
 
   _Writes(this._reread);
 
@@ -168,7 +169,10 @@ class _Writes {
     return idle;
   }
 
-  void start() => _pending++;
+  void start() {
+    _pending++;
+    revision++;
+  }
 
   void finish() {
     _pending--;
@@ -196,8 +200,11 @@ mixin _SettledWrites<T> on AsyncNotifierMixin<T> {
   }
 
   void _reread() {
+    final revision = _writes.revision;
     _query?.call().then((rows) {
-      if (ref.mounted && _writes.admit()) value = rows;
+      if (ref.mounted && revision == _writes.revision && _writes.admit()) {
+        value = rows;
+      }
     }, onError: _reportReread);
   }
 
@@ -215,6 +222,29 @@ mixin _SettledWrites<T> on AsyncNotifierMixin<T> {
   }
 }
 
+@Riverpod(keepAlive: true)
+class CustomProxies extends _$CustomProxies
+    with AsyncNotifierMixin, _SettledWrites {
+  @override
+  Stream<List<ProfileProxy>> build() {
+    final query = database.customProxiesDao.all();
+    return _settled(query.watch(), query.get);
+  }
+
+  @override
+  List<ProfileProxy> get value => state.value ?? [];
+
+  void replaceFromDatabase(List<ProfileProxy> proxies) {
+    value = List<ProfileProxy>.from(proxies);
+  }
+
+  @override
+  bool updateShouldNotify(
+    AsyncValue<List<ProfileProxy>> previous,
+    AsyncValue<List<ProfileProxy>> next,
+  ) => _asyncListChanged(previous, next, const ListEquality<ProfileProxy>());
+}
+
 @riverpod
 Stream<List<Profile>> profilesStream(Ref ref) {
   return database.profilesDao.all().watch();
@@ -228,20 +258,43 @@ Stream<List<Rule>> addedRuleStream(Ref ref, int profileId) {
 @Riverpod(keepAlive: true)
 class Profiles extends _$Profiles {
   late final _writes = _Writes(_reread);
+  List<Profile>? _lastDatabaseSnapshot;
 
   @override
   List<Profile> build() {
     final databaseProfiles = ref.watch(profilesStreamProvider).value;
+    final proxies = ref.watch(customProxiesProvider).value;
+    final changed = !identical(databaseProfiles, _lastDatabaseSnapshot);
+    _lastDatabaseSnapshot = databaseProfiles;
     if (!_writes.admit()) {
       return stateOrNull ?? const [];
     }
-    return databaseProfiles ?? stateOrNull ?? const [];
+    final profiles =
+        (changed ? databaseProfiles : null) ?? stateOrNull ?? const <Profile>[];
+    return proxies == null
+        ? profiles
+        : [
+            for (final profile in profiles)
+              const ListEquality<ProfileProxy>().equals(
+                    profile.profileProxies,
+                    proxies,
+                  )
+                  ? profile
+                  : profile.copyWith(profileProxies: proxies),
+          ];
   }
 
   void _reread() {
+    final revision = _writes.revision;
     database.profilesDao.all().get().then((rows) {
-      if (ref.mounted && _writes.admit()) {
-        state = rows;
+      if (ref.mounted && revision == _writes.revision && _writes.admit()) {
+        final proxies = ref.read(customProxiesProvider).value;
+        state = proxies == null
+            ? rows
+            : [
+                for (final profile in rows)
+                  profile.copyWith(profileProxies: proxies),
+              ];
       }
     }, onError: _reportReread);
   }
@@ -262,10 +315,15 @@ class Profiles extends _$Profiles {
   Future<void> put(Profile profile, {bool reportOnWait = true}) {
     final vm2 = state.copyAndAddProfile(profile);
     final nextProfiles = vm2.a;
-    final newProfile = vm2.b;
-    state = nextProfiles;
+    final proxies =
+        ref.read(customProxiesProvider).value ?? const <ProfileProxy>[];
+    final newProfile = vm2.b.copyWith(profileProxies: proxies);
+    state = [
+      for (final row in nextProfiles)
+        row.id == newProfile.id ? newProfile : row,
+    ];
     return _queueWrite(
-      () => database.putProfile(newProfile),
+      () => database.putProfile(newProfile.copyWith(profileProxies: const [])),
       reportOnWait: reportOnWait,
     );
   }
@@ -275,7 +333,10 @@ class Profiles extends _$Profiles {
     var next = state;
     final saved = <Profile>[];
     for (final profile in profiles) {
-      final vm2 = next.copyAndAddProfile(profile);
+      final projected = profile.copyWith(
+        profileProxies: ref.read(customProxiesProvider).value ?? const [],
+      );
+      final vm2 = next.copyAndAddProfile(projected);
       next = vm2.a;
       saved.add(vm2.b);
     }
@@ -283,7 +344,7 @@ class Profiles extends _$Profiles {
     return _queueWrite(
       () => database.transaction(() async {
         for (final profile in saved) {
-          await database.putProfile(profile);
+          await database.putProfile(profile.copyWith(profileProxies: const []));
         }
       }),
       reportOnWait: reportOnWait,
@@ -303,16 +364,115 @@ class Profiles extends _$Profiles {
     );
   }
 
+  Future<void> setCustomProxies(
+    List<ProfileProxy> next, {
+    Profile? editedProfile,
+    List<Profile> editedProfiles = const [],
+  }) {
+    final catalog = ref.read(customProxiesProvider.notifier);
+    final previous = catalog.value;
+    final profiles = state;
+    final byId = {for (final proxy in next) proxy.id: proxy};
+    final renames = <String, String>{};
+    final unavailable = <String>{};
+    for (final proxy in previous) {
+      final saved = byId[proxy.id];
+      if (saved != null && saved.name != proxy.name) {
+        renames[proxy.name] = saved.name;
+      }
+      if (proxy.enable && (saved == null || !saved.enable)) {
+        unavailable.add(saved?.name ?? proxy.name);
+      }
+    }
+    final updated = profiles.map((profile) {
+      final edited =
+          editedProfiles.firstWhereOrNull((p) => p.id == profile.id) ??
+          (profile.id == editedProfile?.id ? editedProfile : null);
+      var changed = edited ?? profile;
+      for (final entry in renames.entries) {
+        changed = changed.copyAndRenameOutboundReferences(
+          entry.key,
+          entry.value,
+        );
+      }
+      for (final name in unavailable) {
+        if (edited != null) break;
+        changed = changed
+            .copyWith(
+              proxyChains: changed.proxyChains.copyAndDisableChainsUsingProxy(
+                name,
+              ),
+            )
+            .copyAndRemoveOutboundCaches({name});
+      }
+      return changed.copyWith(
+        profileProxies: next,
+        proxyAliases: {
+          for (final entry in changed.proxyAliases.entries)
+            if (next.any(
+              (p) => p.name == (renames[entry.value] ?? entry.value),
+            ))
+              entry.key: renames[entry.value] ?? entry.value,
+          ...renames,
+        },
+      );
+    }).toList();
+    final changedProfiles = [
+      for (final (index, profile) in updated.indexed)
+        if (profile.copyWith(profileProxies: const []) !=
+            profiles[index].copyWith(profileProxies: const []))
+          profile,
+    ];
+    _writes.start();
+    catalog._writes.start();
+    catalog.replaceFromDatabase(next);
+    replaceFromDatabase(updated);
+    return queueDatabaseWrite(
+      () => database.transaction(() async {
+        await database.customProxiesDao.setAll(next);
+        for (final profile in changedProfiles) {
+          await database.putProfile(
+            profile.copyWith(profileProxies: const []),
+            existingOnly: true,
+          );
+        }
+      }),
+      onError: () {
+        if (ref.mounted) {
+          ref.invalidate(customProxiesProvider);
+          ref.invalidate(profilesStreamProvider);
+        }
+      },
+      onFinished: () {
+        _writes.finish();
+        catalog._writes.finish();
+        _reread();
+      },
+    );
+  }
+
   void updateProfile(int profileId, Profile Function(Profile profile) builder) {
     final index = state.indexWhere((element) => element.id == profileId);
     if (index == -1) {
       return;
     }
     final List<Profile> profilesTemp = List.from(state);
-    final newProfile = builder(profilesTemp[index]);
+    final previous = profilesTemp[index];
+    final newProfile = builder(previous);
+    if (!const ListEquality<ProfileProxy>().equals(
+      previous.profileProxies,
+      newProfile.profileProxies,
+    )) {
+      unawaited(
+        setCustomProxies(newProfile.profileProxies, editedProfile: newProfile),
+      );
+      return;
+    }
     profilesTemp[index] = newProfile;
     state = profilesTemp;
-    _queueWrite(() => database.putProfile(newProfile));
+    _queueWrite(
+      () => database.putProfile(newProfile.copyWith(profileProxies: const [])),
+    );
   }
 
   /// [profiles] lacks the rows this version cannot read, which therefore stay

@@ -13,9 +13,7 @@ import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/features/overwrite/proxy_chain.dart';
+import 'package:fl_clash/features/overwrite/profile_proxy.dart';
 
 import 'filters.dart';
 import 'icon_sets.dart';
@@ -30,7 +28,6 @@ class AdvancedConfigView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final profile = ref.watch(currentProfileProvider);
     final items = [
       ListItem.open(
         title: Text(appLocalizations.network),
@@ -79,13 +76,11 @@ class AdvancedConfigView extends ConsumerWidget {
           generateSection(
             title: appLocalizations.customResources,
             items: [
-              if (profile != null)
-                ListItem.open(
-                  title: Text(appLocalizations.proxyChainCustomNodes),
-                  subtitle: Text(profile.realLabel),
-                  leading: const GlyphIcon(AppGlyphs.proxies),
-                  widget: ProfileProxyChainsView(profileId: profile.id),
-                ),
+              ListItem.open(
+                title: Text(appLocalizations.proxyChainCustomNodes),
+                leading: const GlyphIcon(AppGlyphs.proxies),
+                widget: const CustomProxiesView(),
+              ),
               ListItem.open(
                 title: Text(appLocalizations.appProviderLibrary),
                 leading: const GlyphIcon(AppGlyphs.resources),

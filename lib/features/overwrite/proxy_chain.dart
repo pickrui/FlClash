@@ -973,8 +973,9 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       );
       return false;
     }
-    final profile = ref.read(profileProvider(widget.profileId));
-    if (profile != null && hasProfileProxyCustomNameConflict(profile, res)) {
+    if (ref
+        .read(profilesProvider)
+        .any((profile) => hasProfileProxyCustomNameConflict(profile, res))) {
       context.showNotifier(
         appLocalizations.existsTip(appLocalizations.proxies),
       );

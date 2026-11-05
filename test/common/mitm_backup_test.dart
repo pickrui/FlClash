@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 import '../helpers/app_paths.dart';
+import '../helpers/preferences.dart';
 
 MitmModule _module(
   int id, {
@@ -51,6 +52,8 @@ void main() {
     };
     root = await Directory.systemTemp.createTemp('mitm_backup');
     await useAppPaths(root);
+    await mockPreferences();
+    await preferences.setVersion(migration.currentVersion);
     await db.reopenDatabase();
   });
   tearDown(() async {
@@ -119,8 +122,39 @@ void main() {
         p.join(await appPath.homeDirPath, mitmDirectoryName, 'ca.key'),
         'private key fixture',
       );
+      const userNode = ProfileProxy(
+        id: 71,
+        proxy: {'name': 'User', 'type': 'direct'},
+      );
+      await db.database.customProxiesDao.setAll([userNode]);
+      await db.database.putProfile(
+        const Profile(
+          id: 72,
+          url: 'oixcloud://managed',
+          autoUpdateDuration: Duration(hours: 1),
+          ageSecretKey: 'managed-fixture-key',
+        ),
+      );
       final path = await controller.backup();
       final archive = ZipDecoder().decodeBytes(await File(path).readAsBytes());
+      final restored = await restoreTask(
+        archivePath: path,
+        stagingDirPath: p.join(root.path, 'read-portable'),
+        homeDirPath: p.join(root.path, 'restored'),
+      );
+      expect(restored.customProxies, [userNode]);
+      expect(restored.profiles, isEmpty);
+      expect(
+        (await db.database.profilesDao.all().get()).single.ageSecretKey,
+        'managed-fixture-key',
+      );
+      final portableBytes =
+          archive.findFile(backupDatabaseName)!.content as List<int>;
+      expect(
+        latin1.decode(portableBytes),
+        isNot(contains('managed-fixture-key')),
+      );
+
       final names = archive.files
           .where((file) => file.isFile)
           .map((file) => file.name)

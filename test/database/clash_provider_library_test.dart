@@ -398,6 +398,8 @@ void main() {
     final old = Database(NativeDatabase(file));
     await old.putProfile(profile);
     await old.customStatement('DROP TABLE clash_providers');
+    await old.customStatement('DROP TABLE custom_proxies');
+    await old.customStatement('ALTER TABLE profiles DROP COLUMN proxy_aliases');
     await old.customStatement('PRAGMA user_version = 4');
     await old.close();
     final upgraded = Database(NativeDatabase(file));

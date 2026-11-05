@@ -242,6 +242,98 @@ void _migrateLegacyProviderFile({
   } on FileSystemException catch (_) {}
 }
 
+String _renameCustomProxyRule(String rule, Map<String, String> aliases) {
+  for (final entry in aliases.entries) {
+    rule = renameRuleTarget(rule, entry.key, entry.value);
+  }
+  return rule;
+}
+
+Map<String, dynamic> applyCustomProxyAliases(
+  Map<String, dynamic> source,
+  Map<String, String> aliases,
+) {
+  if (aliases.isEmpty) return source;
+  final result = Map<String, dynamic>.from(source);
+  Object? target(Object? value) => aliases[value] ?? value;
+  for (final key in ['proxies', 'proxy-groups']) {
+    if (source[key] case final List rows) {
+      result[key] = [
+        for (final row in rows)
+          if (row is Map)
+            {
+              ...row,
+              if (key == 'proxies') 'name': target(row['name']),
+              if (row.containsKey('dialer-proxy'))
+                'dialer-proxy': target(row['dialer-proxy']),
+              if (row.containsKey('empty-fallback'))
+                'empty-fallback': target(row['empty-fallback']),
+              if (row.containsKey('default-selected'))
+                'default-selected': target(row['default-selected']),
+              if (row['proxies'] case final List members)
+                'proxies': [for (final member in members) target(member)],
+            }
+          else
+            row,
+      ];
+    }
+  }
+  if (source['rules'] case final List rules) {
+    result['rules'] = [
+      for (final rule in rules)
+        if (rule is String) _renameCustomProxyRule(rule, aliases) else rule,
+    ];
+  }
+  for (final key in ['proxy-providers', 'rule-providers']) {
+    if (source[key] case final Map providers) {
+      result[key] = {
+        for (final entry in providers.entries)
+          entry.key: switch (entry.value) {
+            final Map value when value.containsKey('dialer-proxy') => {
+              ...value,
+              'dialer-proxy': target(value['dialer-proxy']),
+            },
+            _ => entry.value,
+          },
+      };
+    }
+  }
+  if (source['ntp'] case final Map ntp) {
+    result['ntp'] = {
+      ...ntp,
+      if (ntp.containsKey('dialer-proxy'))
+        'dialer-proxy': target(ntp['dialer-proxy']),
+    };
+  }
+  if (source['dns'] case final Map dns) {
+    Object? servers(Object? value) => switch (value) {
+      final String server => renamedDnsServer(server, aliases),
+      final List values => [
+        for (final server in values)
+          if (server is String) renamedDnsServer(server, aliases) else server,
+      ],
+      _ => value,
+    };
+    result['dns'] = {
+      for (final entry in dns.entries)
+        entry.key: switch (entry.key) {
+          'nameserver' ||
+          'fallback' ||
+          'default-nameserver' ||
+          'proxy-server-nameserver' ||
+          'direct-nameserver' => servers(entry.value),
+          'nameserver-policy' ||
+          'proxy-server-nameserver-policy' when entry.value is Map => {
+            for (final policy in (entry.value as Map).entries)
+              policy.key: servers(policy.value),
+          },
+          _ => entry.value,
+        },
+    };
+  }
+  return result;
+}
+
 Future<Map<String, dynamic>> _makeRealProfileTask(
   MakeRealProfileState data,
 ) async {
@@ -249,9 +341,29 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   final realPatchConfig = data.realPatchConfig;
   final profilesPath = data.profilesPath;
   final profileId = data.profileId;
-  final addedRules = data.addedRules;
   final proxyChains = data.proxyChains;
-  final profileProxies = data.profileProxies;
+  final managedNames = data.managedProfile
+      ? _proxyNames(rawConfig)
+      : const <String>{};
+  final activeNames = {
+    for (final proxy in data.profileProxies)
+      if (proxy.isValid) proxy.name,
+  };
+  final aliases = {
+    for (final entry in data.proxyAliases.entries)
+      if (entry.key != entry.value &&
+          activeNames.contains(entry.value) &&
+          !managedNames.contains(entry.key))
+        entry.key: entry.value,
+  };
+  rawConfig = applyCustomProxyAliases(rawConfig, aliases);
+  final addedRules = [
+    for (final rule in data.addedRules)
+      rule.copyWith(value: _renameCustomProxyRule(rule.value, aliases)),
+  ];
+  final profileProxies = data.profileProxies
+      .where((proxy) => !managedNames.contains(proxy.name))
+      .toList();
   final customProxyGroups = data.customProxyGroups;
   final customRules = data.customRules;
   if (data.overwriteType == OverwriteType.custom &&
@@ -516,6 +628,14 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
         ...Map<String, dynamic>.from(rawConfig['ntp']),
       ...ntpOverride,
     };
+  }
+  if (aliases.isNotEmpty) {
+    rawConfig.addAll(
+      applyCustomProxyAliases({
+        'dns': rawConfig['dns'],
+        if (rawConfig.containsKey('ntp')) 'ntp': rawConfig['ntp'],
+      }, aliases),
+    );
   }
   if (appendSystemDns) {
     final List<String> nameserver = List<String>.from(

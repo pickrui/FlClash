@@ -19,7 +19,7 @@ import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:test/test.dart';
 
 const _routingColumns =
-    'overwrite_type, proxy_chains, profile_proxies, custom_proxy_groups, '
+    'overwrite_type, proxy_chains, custom_proxy_groups, '
     'custom_rules';
 
 const _v6Profiles = [
@@ -65,6 +65,14 @@ const _v6Profiles = [
     url: 'https://example.com/plain',
     autoUpdateDuration: Duration(hours: 1),
   ),
+];
+
+final _migratedV6Profiles = [
+  _v6Profiles.first.copyWith(
+    profileProxies: const [],
+    proxyAliases: const {'Node': 'Node'},
+  ),
+  ..._v6Profiles.skip(1),
 ];
 
 final _iconSet = IconSet(
@@ -248,7 +256,7 @@ void main() {
         _rawRows(file, 'SELECT profile_type, overrides FROM profiles'),
         List.filled(3, [null, null]),
       );
-      expect(profiles, _v6Profiles);
+      expect(profiles, _migratedV6Profiles);
       expect(profiles.map((profile) => profile.type), [
         ProfileType.url,
         ProfileType.file,
@@ -313,7 +321,7 @@ void main() {
         addTearDown(database.close);
 
         expect(await database.iconSetsDao.all().get(), iconSets);
-        expect(await database.profilesDao.all().get(), _v6Profiles);
+        expect(await database.profilesDao.all().get(), _migratedV6Profiles);
         await database.iconSetsDao.put(_localIconSet);
         expect(await database.iconSetsDao.all().get(), [
           ...iconSets,
@@ -343,7 +351,13 @@ void main() {
         );
         final db = Database(NativeDatabase(file));
         addTearDown(db.close);
-        expect(await db.profilesDao.all().get(), [profile]);
+        expect(await db.profilesDao.all().get(), [
+          profile.copyWith(
+            profileProxies: const [],
+            proxyAliases: const {'Node': 'Node'},
+          ),
+        ]);
+        expect(await db.customProxiesDao.all().get(), profile.profileProxies);
         final edited = profile.copyWith(ageSecretKey: 'new-fixture-key');
         await db.profilesDao.putAll([edited.toCompanion()]);
         expect(await db.profilesDao.all().get(), [edited]);
@@ -406,7 +420,8 @@ void main() {
       homeDirPath: '${root.path}/live',
     );
 
-    expect(migration.profiles, _v6Profiles);
+    expect(migration.profiles, _migratedV6Profiles);
+    expect(migration.customProxies, _v6Profiles.first.profileProxies);
     expect(
       migration.fileMigrations.map((file) => file.b),
       _v6Profiles.map(
@@ -594,6 +609,10 @@ Future<void> _createDatabase(
       );
     }
   }
+  await database.customStatement('DROP TABLE custom_proxies');
+  await database.customStatement(
+    'ALTER TABLE profiles DROP COLUMN proxy_aliases',
+  );
   await database.customStatement('PRAGMA user_version = $schemaVersion');
   await database.close();
 }

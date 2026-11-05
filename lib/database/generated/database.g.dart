@@ -174,6 +174,16 @@ class $ProfilesTable extends Profiles
     defaultValue: const Constant('[]'),
   ).withConverter<List<ProfileProxy>>($ProfilesTable.$converterprofileProxies);
   @override
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String>
+  proxyAliases = GeneratedColumn<String>(
+    'proxy_aliases',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  ).withConverter<Map<String, String>>($ProfilesTable.$converterproxyAliases);
+  @override
   late final GeneratedColumnWithTypeConverter<List<ProxyGroup>, String>
   customProxyGroups = GeneratedColumn<String>(
     'custom_proxy_groups',
@@ -238,6 +248,7 @@ class $ProfilesTable extends Profiles
     unfoldSet,
     proxyChains,
     profileProxies,
+    proxyAliases,
     customProxyGroups,
     customRules,
     order,
@@ -427,6 +438,12 @@ class $ProfilesTable extends Profiles
           data['${effectivePrefix}profile_proxies'],
         )!,
       ),
+      proxyAliases: $ProfilesTable.$converterproxyAliases.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}proxy_aliases'],
+        )!,
+      ),
       customProxyGroups: $ProfilesTable.$convertercustomProxyGroups.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -477,6 +494,8 @@ class $ProfilesTable extends Profiles
       const ProxyChainListConverter();
   static TypeConverter<List<ProfileProxy>, String> $converterprofileProxies =
       const ProfileProxyListConverter();
+  static TypeConverter<Map<String, String>, String> $converterproxyAliases =
+      const StringMapConverter();
   static TypeConverter<List<ProxyGroup>, String> $convertercustomProxyGroups =
       const ProxyGroupListConverter();
   static TypeConverter<List<Rule>, String> $convertercustomRules =
@@ -506,6 +525,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final Set<String> unfoldSet;
   final List<ProxyChain> proxyChains;
   final List<ProfileProxy> profileProxies;
+  final Map<String, String> proxyAliases;
   final List<ProxyGroup> customProxyGroups;
   final List<Rule> customRules;
   final int? order;
@@ -528,6 +548,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     required this.unfoldSet,
     required this.proxyChains,
     required this.profileProxies,
+    required this.proxyAliases,
     required this.customProxyGroups,
     required this.customRules,
     this.order,
@@ -590,6 +611,11 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       );
     }
     {
+      map['proxy_aliases'] = Variable<String>(
+        $ProfilesTable.$converterproxyAliases.toSql(proxyAliases),
+      );
+    }
+    {
       map['custom_proxy_groups'] = Variable<String>(
         $ProfilesTable.$convertercustomProxyGroups.toSql(customProxyGroups),
       );
@@ -645,6 +671,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       unfoldSet: Value(unfoldSet),
       proxyChains: Value(proxyChains),
       profileProxies: Value(profileProxies),
+      proxyAliases: Value(proxyAliases),
       customProxyGroups: Value(customProxyGroups),
       customRules: Value(customRules),
       order: order == null && nullToAbsent
@@ -691,6 +718,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       profileProxies: serializer.fromJson<List<ProfileProxy>>(
         json['profileProxies'],
       ),
+      proxyAliases: serializer.fromJson<Map<String, String>>(
+        json['proxyAliases'],
+      ),
       customProxyGroups: serializer.fromJson<List<ProxyGroup>>(
         json['customProxyGroups'],
       ),
@@ -728,6 +758,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       'unfoldSet': serializer.toJson<Set<String>>(unfoldSet),
       'proxyChains': serializer.toJson<List<ProxyChain>>(proxyChains),
       'profileProxies': serializer.toJson<List<ProfileProxy>>(profileProxies),
+      'proxyAliases': serializer.toJson<Map<String, String>>(proxyAliases),
       'customProxyGroups': serializer.toJson<List<ProxyGroup>>(
         customProxyGroups,
       ),
@@ -757,6 +788,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     Set<String>? unfoldSet,
     List<ProxyChain>? proxyChains,
     List<ProfileProxy>? profileProxies,
+    Map<String, String>? proxyAliases,
     List<ProxyGroup>? customProxyGroups,
     List<Rule>? customRules,
     Value<int?> order = const Value.absent(),
@@ -786,6 +818,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     unfoldSet: unfoldSet ?? this.unfoldSet,
     proxyChains: proxyChains ?? this.proxyChains,
     profileProxies: profileProxies ?? this.profileProxies,
+    proxyAliases: proxyAliases ?? this.proxyAliases,
     customProxyGroups: customProxyGroups ?? this.customProxyGroups,
     customRules: customRules ?? this.customRules,
     order: order.present ? order.value : this.order,
@@ -832,6 +865,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       profileProxies: data.profileProxies.present
           ? data.profileProxies.value
           : this.profileProxies,
+      proxyAliases: data.proxyAliases.present
+          ? data.proxyAliases.value
+          : this.proxyAliases,
       customProxyGroups: data.customProxyGroups.present
           ? data.customProxyGroups.value
           : this.customProxyGroups,
@@ -865,6 +901,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ..write('unfoldSet: $unfoldSet, ')
           ..write('proxyChains: $proxyChains, ')
           ..write('profileProxies: $profileProxies, ')
+          ..write('proxyAliases: $proxyAliases, ')
           ..write('customProxyGroups: $customProxyGroups, ')
           ..write('customRules: $customRules, ')
           ..write('order: $order, ')
@@ -892,6 +929,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     unfoldSet,
     proxyChains,
     profileProxies,
+    proxyAliases,
     customProxyGroups,
     customRules,
     order,
@@ -918,6 +956,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           other.unfoldSet == this.unfoldSet &&
           other.proxyChains == this.proxyChains &&
           other.profileProxies == this.profileProxies &&
+          other.proxyAliases == this.proxyAliases &&
           other.customProxyGroups == this.customProxyGroups &&
           other.customRules == this.customRules &&
           other.order == this.order &&
@@ -942,6 +981,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<Set<String>> unfoldSet;
   final Value<List<ProxyChain>> proxyChains;
   final Value<List<ProfileProxy>> profileProxies;
+  final Value<Map<String, String>> proxyAliases;
   final Value<List<ProxyGroup>> customProxyGroups;
   final Value<List<Rule>> customRules;
   final Value<int?> order;
@@ -964,6 +1004,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.unfoldSet = const Value.absent(),
     this.proxyChains = const Value.absent(),
     this.profileProxies = const Value.absent(),
+    this.proxyAliases = const Value.absent(),
     this.customProxyGroups = const Value.absent(),
     this.customRules = const Value.absent(),
     this.order = const Value.absent(),
@@ -987,6 +1028,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     required Set<String> unfoldSet,
     this.proxyChains = const Value.absent(),
     this.profileProxies = const Value.absent(),
+    this.proxyAliases = const Value.absent(),
     this.customProxyGroups = const Value.absent(),
     this.customRules = const Value.absent(),
     this.order = const Value.absent(),
@@ -1016,6 +1058,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<String>? unfoldSet,
     Expression<String>? proxyChains,
     Expression<String>? profileProxies,
+    Expression<String>? proxyAliases,
     Expression<String>? customProxyGroups,
     Expression<String>? customRules,
     Expression<int>? order,
@@ -1040,6 +1083,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       if (unfoldSet != null) 'unfold_set': unfoldSet,
       if (proxyChains != null) 'proxy_chains': proxyChains,
       if (profileProxies != null) 'profile_proxies': profileProxies,
+      if (proxyAliases != null) 'proxy_aliases': proxyAliases,
       if (customProxyGroups != null) 'custom_proxy_groups': customProxyGroups,
       if (customRules != null) 'custom_rules': customRules,
       if (order != null) 'order': order,
@@ -1065,6 +1109,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<Set<String>>? unfoldSet,
     Value<List<ProxyChain>>? proxyChains,
     Value<List<ProfileProxy>>? profileProxies,
+    Value<Map<String, String>>? proxyAliases,
     Value<List<ProxyGroup>>? customProxyGroups,
     Value<List<Rule>>? customRules,
     Value<int?>? order,
@@ -1089,6 +1134,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       unfoldSet: unfoldSet ?? this.unfoldSet,
       proxyChains: proxyChains ?? this.proxyChains,
       profileProxies: profileProxies ?? this.profileProxies,
+      proxyAliases: proxyAliases ?? this.proxyAliases,
       customProxyGroups: customProxyGroups ?? this.customProxyGroups,
       customRules: customRules ?? this.customRules,
       order: order ?? this.order,
@@ -1162,6 +1208,11 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
         $ProfilesTable.$converterprofileProxies.toSql(profileProxies.value),
       );
     }
+    if (proxyAliases.present) {
+      map['proxy_aliases'] = Variable<String>(
+        $ProfilesTable.$converterproxyAliases.toSql(proxyAliases.value),
+      );
+    }
     if (customProxyGroups.present) {
       map['custom_proxy_groups'] = Variable<String>(
         $ProfilesTable.$convertercustomProxyGroups.toSql(
@@ -1209,6 +1260,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           ..write('unfoldSet: $unfoldSet, ')
           ..write('proxyChains: $proxyChains, ')
           ..write('profileProxies: $profileProxies, ')
+          ..write('proxyAliases: $proxyAliases, ')
           ..write('customProxyGroups: $customProxyGroups, ')
           ..write('customRules: $customRules, ')
           ..write('order: $order, ')
@@ -5659,6 +5711,405 @@ class MitmModulesCompanion extends UpdateCompanion<RawMitmModule> {
   }
 }
 
+class $CustomProxiesTable extends CustomProxies
+    with TableInfo<$CustomProxiesTable, RawCustomProxy> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CustomProxiesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>, String>
+  definition =
+      GeneratedColumn<String>(
+        'definition',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<Map<String, Object?>>(
+        $CustomProxiesTable.$converterdefinition,
+      );
+  static const VerificationMeta _enabledMeta = const VerificationMeta(
+    'enabled',
+  );
+  @override
+  late final GeneratedColumn<bool> enabled = GeneratedColumn<bool>(
+    'enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _uriMeta = const VerificationMeta('uri');
+  @override
+  late final GeneratedColumn<String> uri = GeneratedColumn<String>(
+    'uri',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Set<String>, String>
+  emptyOptions = GeneratedColumn<String>(
+    'empty_options',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<Set<String>>($CustomProxiesTable.$converteremptyOptions);
+  static const VerificationMeta _orderMeta = const VerificationMeta('order');
+  @override
+  late final GeneratedColumn<int> order = GeneratedColumn<int>(
+    'order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    definition,
+    enabled,
+    uri,
+    emptyOptions,
+    order,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'custom_proxies';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RawCustomProxy> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('enabled')) {
+      context.handle(
+        _enabledMeta,
+        enabled.isAcceptableOrUnknown(data['enabled']!, _enabledMeta),
+      );
+    }
+    if (data.containsKey('uri')) {
+      context.handle(
+        _uriMeta,
+        uri.isAcceptableOrUnknown(data['uri']!, _uriMeta),
+      );
+    }
+    if (data.containsKey('order')) {
+      context.handle(
+        _orderMeta,
+        order.isAcceptableOrUnknown(data['order']!, _orderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RawCustomProxy map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RawCustomProxy(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      definition: $CustomProxiesTable.$converterdefinition.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}definition'],
+        )!,
+      ),
+      enabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}enabled'],
+      )!,
+      uri: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uri'],
+      )!,
+      emptyOptions: $CustomProxiesTable.$converteremptyOptions.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}empty_options'],
+        )!,
+      ),
+      order: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order'],
+      )!,
+    );
+  }
+
+  @override
+  $CustomProxiesTable createAlias(String alias) {
+    return $CustomProxiesTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Map<String, Object?>, String> $converterdefinition =
+      const JsonMapConverter();
+  static TypeConverter<Set<String>, String> $converteremptyOptions =
+      const StringSetConverter();
+}
+
+class RawCustomProxy extends DataClass implements Insertable<RawCustomProxy> {
+  final int id;
+  final Map<String, Object?> definition;
+  final bool enabled;
+  final String uri;
+  final Set<String> emptyOptions;
+  final int order;
+  const RawCustomProxy({
+    required this.id,
+    required this.definition,
+    required this.enabled,
+    required this.uri,
+    required this.emptyOptions,
+    required this.order,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    {
+      map['definition'] = Variable<String>(
+        $CustomProxiesTable.$converterdefinition.toSql(definition),
+      );
+    }
+    map['enabled'] = Variable<bool>(enabled);
+    map['uri'] = Variable<String>(uri);
+    {
+      map['empty_options'] = Variable<String>(
+        $CustomProxiesTable.$converteremptyOptions.toSql(emptyOptions),
+      );
+    }
+    map['order'] = Variable<int>(order);
+    return map;
+  }
+
+  CustomProxiesCompanion toCompanion(bool nullToAbsent) {
+    return CustomProxiesCompanion(
+      id: Value(id),
+      definition: Value(definition),
+      enabled: Value(enabled),
+      uri: Value(uri),
+      emptyOptions: Value(emptyOptions),
+      order: Value(order),
+    );
+  }
+
+  factory RawCustomProxy.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RawCustomProxy(
+      id: serializer.fromJson<int>(json['id']),
+      definition: serializer.fromJson<Map<String, Object?>>(json['definition']),
+      enabled: serializer.fromJson<bool>(json['enabled']),
+      uri: serializer.fromJson<String>(json['uri']),
+      emptyOptions: serializer.fromJson<Set<String>>(json['emptyOptions']),
+      order: serializer.fromJson<int>(json['order']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'definition': serializer.toJson<Map<String, Object?>>(definition),
+      'enabled': serializer.toJson<bool>(enabled),
+      'uri': serializer.toJson<String>(uri),
+      'emptyOptions': serializer.toJson<Set<String>>(emptyOptions),
+      'order': serializer.toJson<int>(order),
+    };
+  }
+
+  RawCustomProxy copyWith({
+    int? id,
+    Map<String, Object?>? definition,
+    bool? enabled,
+    String? uri,
+    Set<String>? emptyOptions,
+    int? order,
+  }) => RawCustomProxy(
+    id: id ?? this.id,
+    definition: definition ?? this.definition,
+    enabled: enabled ?? this.enabled,
+    uri: uri ?? this.uri,
+    emptyOptions: emptyOptions ?? this.emptyOptions,
+    order: order ?? this.order,
+  );
+  RawCustomProxy copyWithCompanion(CustomProxiesCompanion data) {
+    return RawCustomProxy(
+      id: data.id.present ? data.id.value : this.id,
+      definition: data.definition.present
+          ? data.definition.value
+          : this.definition,
+      enabled: data.enabled.present ? data.enabled.value : this.enabled,
+      uri: data.uri.present ? data.uri.value : this.uri,
+      emptyOptions: data.emptyOptions.present
+          ? data.emptyOptions.value
+          : this.emptyOptions,
+      order: data.order.present ? data.order.value : this.order,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RawCustomProxy(')
+          ..write('id: $id, ')
+          ..write('definition: $definition, ')
+          ..write('enabled: $enabled, ')
+          ..write('uri: $uri, ')
+          ..write('emptyOptions: $emptyOptions, ')
+          ..write('order: $order')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, definition, enabled, uri, emptyOptions, order);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RawCustomProxy &&
+          other.id == this.id &&
+          other.definition == this.definition &&
+          other.enabled == this.enabled &&
+          other.uri == this.uri &&
+          other.emptyOptions == this.emptyOptions &&
+          other.order == this.order);
+}
+
+class CustomProxiesCompanion extends UpdateCompanion<RawCustomProxy> {
+  final Value<int> id;
+  final Value<Map<String, Object?>> definition;
+  final Value<bool> enabled;
+  final Value<String> uri;
+  final Value<Set<String>> emptyOptions;
+  final Value<int> order;
+  const CustomProxiesCompanion({
+    this.id = const Value.absent(),
+    this.definition = const Value.absent(),
+    this.enabled = const Value.absent(),
+    this.uri = const Value.absent(),
+    this.emptyOptions = const Value.absent(),
+    this.order = const Value.absent(),
+  });
+  CustomProxiesCompanion.insert({
+    this.id = const Value.absent(),
+    required Map<String, Object?> definition,
+    this.enabled = const Value.absent(),
+    this.uri = const Value.absent(),
+    required Set<String> emptyOptions,
+    required int order,
+  }) : definition = Value(definition),
+       emptyOptions = Value(emptyOptions),
+       order = Value(order);
+  static Insertable<RawCustomProxy> custom({
+    Expression<int>? id,
+    Expression<String>? definition,
+    Expression<bool>? enabled,
+    Expression<String>? uri,
+    Expression<String>? emptyOptions,
+    Expression<int>? order,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (definition != null) 'definition': definition,
+      if (enabled != null) 'enabled': enabled,
+      if (uri != null) 'uri': uri,
+      if (emptyOptions != null) 'empty_options': emptyOptions,
+      if (order != null) 'order': order,
+    });
+  }
+
+  CustomProxiesCompanion copyWith({
+    Value<int>? id,
+    Value<Map<String, Object?>>? definition,
+    Value<bool>? enabled,
+    Value<String>? uri,
+    Value<Set<String>>? emptyOptions,
+    Value<int>? order,
+  }) {
+    return CustomProxiesCompanion(
+      id: id ?? this.id,
+      definition: definition ?? this.definition,
+      enabled: enabled ?? this.enabled,
+      uri: uri ?? this.uri,
+      emptyOptions: emptyOptions ?? this.emptyOptions,
+      order: order ?? this.order,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (definition.present) {
+      map['definition'] = Variable<String>(
+        $CustomProxiesTable.$converterdefinition.toSql(definition.value),
+      );
+    }
+    if (enabled.present) {
+      map['enabled'] = Variable<bool>(enabled.value);
+    }
+    if (uri.present) {
+      map['uri'] = Variable<String>(uri.value);
+    }
+    if (emptyOptions.present) {
+      map['empty_options'] = Variable<String>(
+        $CustomProxiesTable.$converteremptyOptions.toSql(emptyOptions.value),
+      );
+    }
+    if (order.present) {
+      map['order'] = Variable<int>(order.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CustomProxiesCompanion(')
+          ..write('id: $id, ')
+          ..write('definition: $definition, ')
+          ..write('enabled: $enabled, ')
+          ..write('uri: $uri, ')
+          ..write('emptyOptions: $emptyOptions, ')
+          ..write('order: $order')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$Database extends GeneratedDatabase {
   _$Database(QueryExecutor e) : super(e);
   $DatabaseManager get managers => $DatabaseManager(this);
@@ -5673,6 +6124,7 @@ abstract class _$Database extends GeneratedDatabase {
   late final $ClashProvidersTable clashProviders = $ClashProvidersTable(this);
   late final $IconSetsTable iconSets = $IconSetsTable(this);
   late final $MitmModulesTable mitmModules = $MitmModulesTable(this);
+  late final $CustomProxiesTable customProxies = $CustomProxiesTable(this);
   late final Index idxRuleTarget = Index(
     'idx_rule_target',
     'CREATE INDEX idx_rule_target ON rules (rule_target)',
@@ -5699,6 +6151,9 @@ abstract class _$Database extends GeneratedDatabase {
   );
   late final IconSetsDao iconSetsDao = IconSetsDao(this as Database);
   late final MitmModulesDao mitmModulesDao = MitmModulesDao(this as Database);
+  late final CustomProxiesDao customProxiesDao = CustomProxiesDao(
+    this as Database,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5713,6 +6168,7 @@ abstract class _$Database extends GeneratedDatabase {
     clashProviders,
     iconSets,
     mitmModules,
+    customProxies,
     idxRuleTarget,
     idxProfileSceneOrder,
     idxProfileNameOrder,
@@ -5761,6 +6217,7 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   required Set<String> unfoldSet,
   Value<List<ProxyChain>> proxyChains,
   Value<List<ProfileProxy>> profileProxies,
+  Value<Map<String, String>> proxyAliases,
   Value<List<ProxyGroup>> customProxyGroups,
   Value<List<Rule>> customRules,
   Value<int?> order,
@@ -5784,6 +6241,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<Set<String>> unfoldSet,
   Value<List<ProxyChain>> proxyChains,
   Value<List<ProfileProxy>> profileProxies,
+  Value<Map<String, String>> proxyAliases,
   Value<List<ProxyGroup>> customProxyGroups,
   Value<List<Rule>> customRules,
   Value<int?> order,
@@ -5930,6 +6388,16 @@ class $$ProfilesTableFilterComposer
   ColumnWithTypeConverterFilters<List<ProfileProxy>, List<ProfileProxy>, String>
   get profileProxies => $composableBuilder(
     column: $table.profileProxies,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    Map<String, String>,
+    Map<String, String>,
+    String
+  >
+  get proxyAliases => $composableBuilder(
+    column: $table.proxyAliases,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
@@ -6102,6 +6570,11 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get proxyAliases => $composableBuilder(
+    column: $table.proxyAliases,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get customProxyGroups => $composableBuilder(
     column: $table.customProxyGroups,
     builder: (column) => ColumnOrderings(column),
@@ -6209,6 +6682,12 @@ class $$ProfilesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<ProfileProxy>, String>
   get profileProxies => $composableBuilder(
     column: $table.profileProxies,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Map<String, String>, String>
+  get proxyAliases => $composableBuilder(
+    column: $table.proxyAliases,
     builder: (column) => column,
   );
 
@@ -6335,6 +6814,7 @@ class $$ProfilesTableTableManager
                 Value<Set<String>> unfoldSet = const Value.absent(),
                 Value<List<ProxyChain>> proxyChains = const Value.absent(),
                 Value<List<ProfileProxy>> profileProxies = const Value.absent(),
+                Value<Map<String, String>> proxyAliases = const Value.absent(),
                 Value<List<ProxyGroup>> customProxyGroups =
                     const Value.absent(),
                 Value<List<Rule>> customRules = const Value.absent(),
@@ -6358,6 +6838,7 @@ class $$ProfilesTableTableManager
                 unfoldSet: unfoldSet,
                 proxyChains: proxyChains,
                 profileProxies: profileProxies,
+                proxyAliases: proxyAliases,
                 customProxyGroups: customProxyGroups,
                 customRules: customRules,
                 order: order,
@@ -6383,6 +6864,7 @@ class $$ProfilesTableTableManager
                 required Set<String> unfoldSet,
                 Value<List<ProxyChain>> proxyChains = const Value.absent(),
                 Value<List<ProfileProxy>> profileProxies = const Value.absent(),
+                Value<Map<String, String>> proxyAliases = const Value.absent(),
                 Value<List<ProxyGroup>> customProxyGroups =
                     const Value.absent(),
                 Value<List<Rule>> customRules = const Value.absent(),
@@ -6406,6 +6888,7 @@ class $$ProfilesTableTableManager
                 unfoldSet: unfoldSet,
                 proxyChains: proxyChains,
                 profileProxies: profileProxies,
+                proxyAliases: proxyAliases,
                 customProxyGroups: customProxyGroups,
                 customRules: customRules,
                 order: order,
@@ -9152,6 +9635,240 @@ typedef $$MitmModulesTableProcessedTableManager =
       RawMitmModule,
       PrefetchHooks Function()
     >;
+typedef $$CustomProxiesTableCreateCompanionBuilder =
+    CustomProxiesCompanion Function({
+      Value<int> id,
+      required Map<String, Object?> definition,
+      Value<bool> enabled,
+      Value<String> uri,
+      required Set<String> emptyOptions,
+      required int order,
+    });
+typedef $$CustomProxiesTableUpdateCompanionBuilder =
+    CustomProxiesCompanion Function({
+      Value<int> id,
+      Value<Map<String, Object?>> definition,
+      Value<bool> enabled,
+      Value<String> uri,
+      Value<Set<String>> emptyOptions,
+      Value<int> order,
+    });
+
+class $$CustomProxiesTableFilterComposer
+    extends Composer<_$Database, $CustomProxiesTable> {
+  $$CustomProxiesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    Map<String, Object?>,
+    Map<String, Object>,
+    String
+  >
+  get definition => $composableBuilder(
+    column: $table.definition,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uri => $composableBuilder(
+    column: $table.uri,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Set<String>, Set<String>, String>
+  get emptyOptions => $composableBuilder(
+    column: $table.emptyOptions,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get order => $composableBuilder(
+    column: $table.order,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CustomProxiesTableOrderingComposer
+    extends Composer<_$Database, $CustomProxiesTable> {
+  $$CustomProxiesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get definition => $composableBuilder(
+    column: $table.definition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get enabled => $composableBuilder(
+    column: $table.enabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uri => $composableBuilder(
+    column: $table.uri,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get emptyOptions => $composableBuilder(
+    column: $table.emptyOptions,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get order => $composableBuilder(
+    column: $table.order,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CustomProxiesTableAnnotationComposer
+    extends Composer<_$Database, $CustomProxiesTable> {
+  $$CustomProxiesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Map<String, Object?>, String>
+  get definition => $composableBuilder(
+    column: $table.definition,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get enabled =>
+      $composableBuilder(column: $table.enabled, builder: (column) => column);
+
+  GeneratedColumn<String> get uri =>
+      $composableBuilder(column: $table.uri, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Set<String>, String> get emptyOptions =>
+      $composableBuilder(
+        column: $table.emptyOptions,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<int> get order =>
+      $composableBuilder(column: $table.order, builder: (column) => column);
+}
+
+class $$CustomProxiesTableTableManager
+    extends
+        RootTableManager<
+          _$Database,
+          $CustomProxiesTable,
+          RawCustomProxy,
+          $$CustomProxiesTableFilterComposer,
+          $$CustomProxiesTableOrderingComposer,
+          $$CustomProxiesTableAnnotationComposer,
+          $$CustomProxiesTableCreateCompanionBuilder,
+          $$CustomProxiesTableUpdateCompanionBuilder,
+          (
+            RawCustomProxy,
+            BaseReferences<_$Database, $CustomProxiesTable, RawCustomProxy>,
+          ),
+          RawCustomProxy,
+          PrefetchHooks Function()
+        > {
+  $$CustomProxiesTableTableManager(_$Database db, $CustomProxiesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CustomProxiesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CustomProxiesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CustomProxiesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<Map<String, Object?>> definition = const Value.absent(),
+                Value<bool> enabled = const Value.absent(),
+                Value<String> uri = const Value.absent(),
+                Value<Set<String>> emptyOptions = const Value.absent(),
+                Value<int> order = const Value.absent(),
+              }) => CustomProxiesCompanion(
+                id: id,
+                definition: definition,
+                enabled: enabled,
+                uri: uri,
+                emptyOptions: emptyOptions,
+                order: order,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required Map<String, Object?> definition,
+                Value<bool> enabled = const Value.absent(),
+                Value<String> uri = const Value.absent(),
+                required Set<String> emptyOptions,
+                required int order,
+              }) => CustomProxiesCompanion.insert(
+                id: id,
+                definition: definition,
+                enabled: enabled,
+                uri: uri,
+                emptyOptions: emptyOptions,
+                order: order,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CustomProxiesTable, RawCustomProxy>(table),
+                  BaseReferences<
+                    _$Database,
+                    $CustomProxiesTable,
+                    RawCustomProxy
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CustomProxiesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$Database,
+      $CustomProxiesTable,
+      RawCustomProxy,
+      $$CustomProxiesTableFilterComposer,
+      $$CustomProxiesTableOrderingComposer,
+      $$CustomProxiesTableAnnotationComposer,
+      $$CustomProxiesTableCreateCompanionBuilder,
+      $$CustomProxiesTableUpdateCompanionBuilder,
+      (
+        RawCustomProxy,
+        BaseReferences<_$Database, $CustomProxiesTable, RawCustomProxy>,
+      ),
+      RawCustomProxy,
+      PrefetchHooks Function()
+    >;
 
 class $DatabaseManager {
   final _$Database _db;
@@ -9174,6 +9891,8 @@ class $DatabaseManager {
       $$IconSetsTableTableManager(_db, _db.iconSets);
   $$MitmModulesTableTableManager get mitmModules =>
       $$MitmModulesTableTableManager(_db, _db.mitmModules);
+  $$CustomProxiesTableTableManager get customProxies =>
+      $$CustomProxiesTableTableManager(_db, _db.customProxies);
 }
 
 mixin _$ProfilesDaoMixin on DatabaseAccessor<Database> {
@@ -9286,4 +10005,16 @@ class MitmModulesDaoManager {
   MitmModulesDaoManager(this._db);
   $$MitmModulesTableTableManager get mitmModules =>
       $$MitmModulesTableTableManager(_db.attachedDatabase, _db.mitmModules);
+}
+
+mixin _$CustomProxiesDaoMixin on DatabaseAccessor<Database> {
+  $CustomProxiesTable get customProxies => attachedDatabase.customProxies;
+  CustomProxiesDaoManager get managers => CustomProxiesDaoManager(this);
+}
+
+class CustomProxiesDaoManager {
+  final _$CustomProxiesDaoMixin _db;
+  CustomProxiesDaoManager(this._db);
+  $$CustomProxiesTableTableManager get customProxies =>
+      $$CustomProxiesTableTableManager(_db.attachedDatabase, _db.customProxies);
 }

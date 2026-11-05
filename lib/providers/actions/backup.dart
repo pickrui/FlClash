@@ -92,6 +92,7 @@ extension BackupControllerExt on AppController {
           final scripts = await database.scriptsDao.all().get();
           await database.createSnapshot(
             p.join(snapshotPath, backupDatabaseName),
+            portable: true,
           );
           for (final profile in profiles.where(
             (item) => item.includeConfigFileInPortableBackup,
@@ -210,6 +211,9 @@ extension BackupControllerExt on AppController {
               .get();
           final previousIconSets = await database.iconSetsDao.all().get();
           final previousModules = await database.mitmModulesDao.query().get();
+          final previousCustomProxies = await database.customProxiesDao
+              .all()
+              .get();
           final previousRules = await database.select(database.rules).map((
             row,
           ) {
@@ -230,7 +234,9 @@ extension BackupControllerExt on AppController {
               previousIconSets.length !=
                   await database.iconSets.count.getSingle() ||
               previousModules.length !=
-                  await database.mitmModules.count.getSingle();
+                  await database.mitmModules.count.getSingle() ||
+              previousCustomProxies.length !=
+                  await database.customProxies.count.getSingle();
           await preferences.saveDurableConfig(previousConfig);
           restoreJournal = await RestoreJournal.begin(
             homePath: await appPath.homeDirPath,
@@ -299,6 +305,7 @@ extension BackupControllerExt on AppController {
                     clashProviders: migrationData.clashProviders,
                     iconSets: migrationData.iconSets,
                     mitmModules: migrationData.mitmModules,
+                    customProxies: migrationData.customProxies,
                   );
                   databaseChanged = true;
                   final profileIds = (await database.profilesDao.all().get())
@@ -359,6 +366,7 @@ extension BackupControllerExt on AppController {
                         clashProviders: previousProviders,
                         iconSets: previousIconSets,
                         mitmModules: previousModules,
+                        customProxies: previousCustomProxies,
                       );
                     } catch (failure) {
                       rollbackError = failure;
@@ -447,6 +455,14 @@ extension BackupControllerExt on AppController {
               _ref.invalidate(addedRuleStreamProvider);
               _ref.invalidate(setupStateProvider);
             }
+            final proxies = await database.customProxiesDao.all().get();
+            _ref
+                .read(customProxiesProvider.notifier)
+                .replaceFromDatabase(proxies);
+            _ref.read(profilesProvider.notifier).replaceFromDatabase([
+              for (final profile in _ref.read(profilesProvider))
+                profile.copyWith(profileProxies: proxies),
+            ]);
             await restoreDir.safeDelete(recursive: true);
           } finally {
             recoveryRequired = restoreJournal?.hasPendingRollback == true;

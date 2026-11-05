@@ -36,6 +36,120 @@ MakeRealProfileState overlayState({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test(
+    'managed nodes retain their definition when sharing global custom nodes',
+    () async {
+      final source = <String, dynamic>{
+        'proxies': [
+          {
+            'name': 'Managed',
+            'type': 'socks5',
+            'server': 'managed.test',
+            'port': 1080,
+            'password': 'managed-fixture',
+          },
+        ],
+        'proxy-groups': [
+          {
+            'name': 'Out',
+            'type': 'select',
+            'proxies': ['Managed'],
+          },
+        ],
+        'rules': ['MATCH,Out'],
+      };
+      final result = await makeRealProfileTask(
+        overlayState(
+          rawConfig: source,
+          profileProxies: const [
+            ProfileProxy(id: 1, proxy: {'name': 'Managed', 'type': 'direct'}),
+            ProfileProxy(id: 2, proxy: {'name': 'Home', 'type': 'direct'}),
+          ],
+        ).copyWith(managedProfile: true),
+      );
+      final nodes = (result['proxies'] as List).cast<Map>();
+      expect(
+        nodes.singleWhere((p) => p['name'] == 'Managed')['server'],
+        'managed.test',
+      );
+      expect(
+        nodes.singleWhere((p) => p['name'] == 'Managed')['password'],
+        'managed-fixture',
+      );
+      expect(nodes.any((p) => p['name'] == 'Home'), isTrue);
+    },
+  );
+
+  test(
+    'migration aliases preserve raw rule, DNS, group and dialer references',
+    () async {
+      final source = <String, dynamic>{
+        'proxies': [
+          {'name': 'Home', 'type': 'direct'},
+          {'name': 'Other', 'type': 'direct', 'dialer-proxy': 'Home'},
+        ],
+        'proxy-groups': [
+          {
+            'name': 'Out',
+            'type': 'select',
+            'proxies': ['Home'],
+          },
+        ],
+        'rules': ['DOMAIN,example.test,Home', 'MATCH,Out'],
+        'dns': {
+          'nameserver': ['https://dns.test/query#Home'],
+        },
+        'ntp': {'dialer-proxy': 'Home'},
+        'proxy-providers': {
+          'Remote': {'dialer-proxy': 'Home'},
+        },
+      };
+      final aliased = applyCustomProxyAliases(source, {'Home': 'Home (2)'});
+      expect((aliased['proxies'] as List)[1]['dialer-proxy'], 'Home (2)');
+      expect((aliased['dns'] as Map)['nameserver'], [
+        'https://dns.test/query#Home%20(2)',
+      ]);
+      expect((aliased['ntp'] as Map)['dialer-proxy'], 'Home (2)');
+      expect(
+        (aliased['proxy-providers'] as Map)['Remote']['dialer-proxy'],
+        'Home (2)',
+      );
+      final result = await makeRealProfileTask(
+        overlayState(
+          rawConfig: source,
+          addedRules: const [Rule(id: 1, value: 'DOMAIN,added.test,Home')],
+          profileProxies: const [
+            ProfileProxy(id: 1, proxy: {'name': 'Home (2)', 'type': 'direct'}),
+          ],
+        ).copyWith(
+          proxyAliases: {'Home': 'Home (2)'},
+          realPatchConfig: const ClashConfig(
+            dns: Dns(nameserver: ['https://global.test/query#Home']),
+            dnsOverrideKeys: {DnsOverrideKey.nameserver},
+            ntp: Ntp(dialerProxy: 'Home'),
+            ntpOverrideKeys: {NtpOverrideKey.dialerProxy},
+          ),
+        ),
+      );
+      expect(
+        (result['proxies'] as List).where((p) => p['name'] == 'Home (2)'),
+        hasLength(1),
+      );
+      expect(
+        result['rules'],
+        containsAll([
+          'DOMAIN,added.test,Home (2)',
+          'DOMAIN,example.test,Home (2)',
+        ]),
+      );
+      expect((result['dns'] as Map)['nameserver'], [
+        'https://global.test/query#Home%20(2)',
+      ]);
+      expect((result['ntp'] as Map)['dialer-proxy'], 'Home (2)');
+      expect((source['proxies'] as List).first['name'], 'Home');
+    },
+  );
+
   const personalGroup = ProxyGroup(
     name: 'Personal',
     type: GroupType.URLTest,

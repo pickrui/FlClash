@@ -362,7 +362,21 @@ extension SetupControllerExt on AppController {
     }
     final path =
         existingPath ?? await appPath.getProfilePath(profileId.toString());
-    return coreController.getConfig(path);
+    final source = await coreController.getConfig(path);
+    final activeNames = {
+      for (final proxy in profile?.profileProxies ?? <ProfileProxy>[])
+        if (proxy.isValid) proxy.name,
+    };
+    final managedNames = profile?.isoixCloudProfile == true
+        ? rawProxyNames(source)
+        : const <String>{};
+    return applyCustomProxyAliases(source, {
+      for (final entry
+          in profile?.proxyAliases.entries ?? <MapEntry<String, String>>[])
+        if (activeNames.contains(entry.value) &&
+            !managedNames.contains(entry.key))
+          entry.key: entry.value,
+    });
   }
 
   Future<String?> findRawProfileOutboundReference(
@@ -804,6 +818,8 @@ extension SetupControllerExt on AppController {
           addedRules: addedRules,
           proxyChains: proxyChains,
           profileProxies: setupState.profileProxies,
+          proxyAliases: setupState.proxyAliases,
+          managedProfile: setupState.managedProfile,
           clashProviders: setupState.clashProviders,
           mitmModules: setupState.mitmModules,
           customProxyGroups: customProxyGroups,
