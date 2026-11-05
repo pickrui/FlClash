@@ -45,12 +45,14 @@ class DashboardCard extends StatelessWidget {
     this.onTap,
     this.semanticLabel,
     this.clipBehavior = Clip.none,
+    this.side = BorderSide.none,
     required this.child,
   });
 
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
   final String? semanticLabel;
+  final BorderSide side;
 
   /// Off by default so a control swelling under an [ElasticPress] can paint
   /// past the card's edge; only a card whose own content bleeds clips.
@@ -75,6 +77,9 @@ class DashboardCard extends StatelessWidget {
           shape: shape,
           shadows: DashboardShadows.e1(context),
         ),
+        foregroundDecoration: side == BorderSide.none
+            ? null
+            : ShapeDecoration(shape: shape.copyWith(side: side)),
         child: Material(
           type: MaterialType.transparency,
           child: onTap == null

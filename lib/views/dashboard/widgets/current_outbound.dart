@@ -109,6 +109,8 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
     );
     final isStart = ref.watch(isStartProvider);
     final suspended = isStart && ref.watch(suspendProvider);
+    final rootAccess =
+        mitmFeature && (ref.watch(rootAccessProvider).value ?? false);
     final detection = ref.watch(networkDetectionProvider);
     final ipInfo = detection.ipInfo;
     final failed = !detection.isLoading && ipInfo == null;
@@ -147,9 +149,22 @@ class _CurrentOutboundCardState extends ConsumerState<CurrentOutboundCard>
         ),
       ],
     );
-    return DashboardCard(
-      padding: EdgeInsets.zero,
-      semanticLabel: appLocalizations.status,
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: rootAccess ? 1 : 0),
+      duration: context.motionDuration(commonDuration),
+      builder: (context, root, child) => DashboardCard(
+        padding: EdgeInsets.zero,
+        semanticLabel: rootAccess
+            ? '${appLocalizations.status} ${appLocalizations.root}'
+            : appLocalizations.status,
+        side: root == 0
+            ? BorderSide.none
+            : BorderSide(
+                color: context.colorScheme.primary.withValues(alpha: root),
+                width: 1.5,
+              ),
+        child: child!,
+      ),
       child: Stack(
         children: [
           Positioned.fill(

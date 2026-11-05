@@ -165,6 +165,57 @@ void main() {
     await tester.pump();
   }
 
+  for (final (feature, granted) in [
+    (false, true),
+    (true, false),
+    (true, true),
+  ]) {
+    testWidgets(
+      'root status follows feature=$feature and permission=$granted',
+      (tester) async {
+        final previousFeature = mitmFeature;
+        addTearDown(() => mitmFeature = previousFeature);
+        mitmFeature = feature;
+        var rootGranted = granted;
+        var checks = 0;
+        container.dispose();
+        container = containerWith(
+          overrides: [
+            rootAccessProvider.overrideWith((_) async {
+              checks++;
+              return rootGranted;
+            }),
+          ],
+        );
+        await pumpCard(tester);
+        await tester.pumpAndSettle();
+        var card = tester.widget<DashboardCard>(find.byType(DashboardCard));
+        expect(checks, feature ? 1 : 0);
+        final highlighted = feature && granted;
+        expect(
+          card.semanticLabel,
+          highlighted
+              ? '${appLocalizations.status} ${appLocalizations.root}'
+              : appLocalizations.status,
+        );
+        expect(
+          card.side,
+          highlighted ? isNot(BorderSide.none) : BorderSide.none,
+        );
+        if (highlighted) {
+          expect(card.side.width, 1.5);
+          rootGranted = false;
+          container.invalidate(rootAccessProvider);
+          await tester.pumpAndSettle();
+          card = tester.widget<DashboardCard>(find.byType(DashboardCard));
+          expect(card.side, BorderSide.none);
+          expect(card.semanticLabel, appLocalizations.status);
+        }
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
+  }
+
   group('the exit address', () {
     testWidgets('cached IP location follows language changes without a query', (
       tester,
