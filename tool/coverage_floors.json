@@ -1,0 +1,18 @@
+{
+  "common": 73,
+  "core": 70,
+  "database": 75,
+  "enum": 54,
+  "features": 68,
+  "icons": 93,
+  "lib": 29,
+  "manager": 44,
+  "models": 77,
+  "pages": 72,
+  "plugins": 53,
+  "providers": 32,
+  "services": 80,
+  "utils": 76,
+  "views": 47,
+  "widgets": 72
+}

@@ -1,0 +1,59 @@
+display_name: FlClash
+package_name: FlClash
+maintainer:
+  name: chen08209
+  email: chen08209@gmail.com
+
+priority: optional
+section: x11
+installed_size: 6604
+essential: false
+icon: ./assets/images/icon.png
+
+dependencies:
+  - libayatana-appindicator3-1
+  - libsecret-1-0
+
+keywords:
+  - FlClash
+  - Clash
+  - ClashMeta
+  - Proxy
+
+generic_name: FlClash
+
+categories:
+  - Network
+
+startup_notify: true
+
+
+postinstall_scripts:
+  - |
+    set -eu
+    CORE_PATH="/usr/share/FlClash/FlClashCore"
+    HELPER_PATH="/usr/share/FlClash/FlClashHelperService"
+    UNIT_PATH="/etc/systemd/system/flclash-helper.service"
+    # The app grants setuid to its user's group when TUN is first enabled.
+    if [ -f "$CORE_PATH" ]; then chmod u-s "$CORE_PATH"; fi
+    if [ -d /run/systemd/system ] && [ -x "$HELPER_PATH" ]; then
+      if [ -f "$UNIT_PATH" ]; then
+        owner=$(sed -n 's/^Environment=FLCLASH_HELPER_OWNER_UID=//p' "$UNIT_PATH")
+        case "$owner" in ''|*[!0-9]*|0) echo "Invalid FlClash Helper owner" >&2; exit 1 ;; esac
+        PKEXEC_UID="$owner" "$HELPER_PATH" install
+      fi
+    fi
+postuninstall_scripts:
+  - |
+    case "${1:-}" in remove|purge) ;; *) exit 0 ;; esac
+    set -e
+    if [ -d /run/systemd/system ] && [ -f /etc/systemd/system/flclash-helper.service ]; then
+      systemctl disable --now flclash-helper.service
+    fi
+    rm -f /etc/systemd/system/flclash-helper.service
+    if [ ! -L /usr/local/libexec/flclash ]; then
+      rm -rf /usr/local/libexec/flclash
+    fi
+    if command -v systemctl >/dev/null 2>&1; then
+      systemctl daemon-reload >/dev/null 2>&1 || true
+    fi
