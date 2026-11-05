@@ -16,6 +16,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/ui/card.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -274,7 +275,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(profiles.writes, 0);
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(CommonDialog), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -290,7 +291,7 @@ void main() {
 
       expect(profiles.profile.overwriteType, mode);
       expect(profiles.writes, 1);
-      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(CommonDialog), findsNothing);
       expect(tester.takeException(), isNull);
     });
   }
@@ -318,7 +319,7 @@ void main() {
           find.text(AppLocalizations.current.emptyCustomOverwrite),
           findsOneWidget,
         );
-        final bounds = tester.getRect(find.byType(AlertDialog));
+        final bounds = tester.getRect(find.byType(CommonDialog));
         expect(bounds.left, greaterThanOrEqualTo(0));
         expect(bounds.right, lessThanOrEqualTo(360));
         expect(tester.takeException(), isNull);

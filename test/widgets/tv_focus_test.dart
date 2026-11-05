@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/press_surface.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -71,7 +72,8 @@ void main() {
       return context != null && node.canRequestFocus;
     }).toList();
     final rowFocusNodes = focusNodes.where((node) {
-      return node.context!.findAncestorWidgetOfExactType<ListTile>() != null;
+      return node.context!.findAncestorWidgetOfExactType<PressSurface>() !=
+          null;
     });
     final radioFocusNodes = focusNodes.where((node) {
       return node.context!.findAncestorWidgetOfExactType<Radio<int>>() != null;

@@ -16,6 +16,7 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/views/backup_and_restore.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -325,7 +326,7 @@ void main() {
       delete();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byType(AlertDialog, skipOffstage: false), findsNWidgets(2));
+      expect(find.byType(CommonDialog, skipOffstage: false), findsNWidgets(2));
       await tester.tap(find.text(appLocalizations.cancel));
       await tester.pumpAndSettle();
       expect(client.deleted, isEmpty);

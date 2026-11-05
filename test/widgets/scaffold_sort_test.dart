@@ -9,7 +9,8 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';

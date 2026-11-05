@@ -8,6 +8,7 @@ import 'package:fl_clash/widgets/config_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:prism_ui/list_row.dart';
 
 import '../helpers/test_app.dart';
 
@@ -34,7 +35,7 @@ void main() {
     tester,
   ) async {
     await _pump(tester, _empty);
-    final tile = tester.widget<ListTile>(find.byType(ListTile));
+    final tile = tester.widget<ListRow>(find.byType(ListRow));
     expect(tile.subtitle, isNull);
 
     await _pump(tester, _filled);

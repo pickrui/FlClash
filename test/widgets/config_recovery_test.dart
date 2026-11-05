@@ -11,6 +11,7 @@ import 'package:fl_clash/pages/config_recovery.dart';
 import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/ui/loading.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -179,7 +180,7 @@ void main() {
       await tester.tap(find.text('Back up and reset'));
       await tester.pumpAndSettle();
       expect(resets, 0);
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byType(CommonDialog), findsOneWidget);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       expect(resets, 0);
@@ -299,7 +300,7 @@ void main() {
 
     await tester.tap(find.text('Use local file storage'));
     await tester.pumpAndSettle();
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.byType(CommonDialog), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(calls, isEmpty);

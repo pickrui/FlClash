@@ -13,6 +13,7 @@ import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/custom_overwrite.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -155,7 +156,7 @@ void main() {
     expect(tester.widget<TextButton>(_clearButton).onPressed, isNull);
     await tester.tap(_clearButton);
     await tester.pumpAndSettle();
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(CommonDialog), findsNothing);
     expect(profiles.profile, empty);
     expect(profiles.writes, 0);
   });
@@ -273,13 +274,13 @@ Finder get _clearButton => find.byKey(const Key('clear-custom-routing'));
 Future<void> _openClear(WidgetTester tester) async {
   await tester.tap(_clearButton);
   await tester.pumpAndSettle();
-  expect(find.byType(AlertDialog), findsOneWidget);
+  expect(find.byType(CommonDialog), findsOneWidget);
 }
 
 Future<void> _confirmClear(WidgetTester tester) async {
   await tester.tap(
     find.descendant(
-      of: find.byType(AlertDialog),
+      of: find.byType(CommonDialog),
       matching: find.widgetWithText(
         TextButton,
         AppLocalizations.current.clearCustomRouting,
@@ -287,7 +288,7 @@ Future<void> _confirmClear(WidgetTester tester) async {
     ),
   );
   await tester.pumpAndSettle();
-  expect(find.byType(AlertDialog), findsNothing);
+  expect(find.byType(CommonDialog), findsNothing);
 }
 
 Future<_TestProfiles> _pumpContent(
