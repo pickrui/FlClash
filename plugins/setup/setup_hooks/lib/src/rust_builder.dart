@@ -16,7 +16,7 @@ import 'target.dart';
 import 'util.dart';
 
 final _log = Logger('rust_builder');
-const _helperToolchain = '1.99.0';
+const _helperToolchain = '1.99.1';
 
 class RustBuilder {
   RustBuilder({

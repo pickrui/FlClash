@@ -14,7 +14,7 @@ on:
       flutter-version:
         description: Flutter SDK version
         required: true
-        default: '3.47.6'
+        default: '3.47.9'
         type: string
 
 env:
