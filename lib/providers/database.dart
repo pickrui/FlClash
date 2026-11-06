@@ -355,7 +355,8 @@ class Profiles extends _$Profiles {
     List<ProfileProxy> next, {
     Profile? editedProfile,
     List<Profile> editedProfiles = const [],
-    Map<int, Set<String>> groupOwnedNames = const {},
+    Map<int, Set<String>> rawOwnedNames = const {},
+    Map<int, Set<String>> aliasFreeNames = const {},
   }) {
     final catalog = ref.read(customProxiesProvider.notifier);
     final previous = catalog.value;
@@ -377,8 +378,9 @@ class Profiles extends _$Profiles {
           editedProfiles.firstWhereOrNull((p) => p.id == profile.id) ??
           (profile.id == editedProfile?.id ? editedProfile : null);
       var changed = edited ?? profile;
+      final kept = rawOwnedNames[profile.id] ?? const <String>{};
       for (final entry in renames.entries) {
-        if (groupOwnedNames[profile.id]?.contains(entry.key) ?? false) continue;
+        if (kept.contains(entry.key)) continue;
         changed = changed.copyAndRenameOutboundReferences(
           entry.key,
           entry.value,
@@ -402,7 +404,10 @@ class Profiles extends _$Profiles {
               (p) => p.name == (renames[entry.value] ?? entry.value),
             ))
               entry.key: renames[entry.value] ?? entry.value,
-          ...renames,
+          for (final entry in renames.entries)
+            if (!kept.contains(entry.key) &&
+                !(aliasFreeNames[profile.id]?.contains(entry.key) ?? false))
+              entry.key: entry.value,
         },
       );
     }).toList();
@@ -424,8 +429,9 @@ class Profiles extends _$Profiles {
           excludingProfiles: {
             for (final profile in profiles)
               if (profile.isoixCloudProfile) profile.id,
-            ...groupOwnedNames.keys,
+            ...rawOwnedNames.keys,
           },
+          keptNames: rawOwnedNames.values.expand((names) => names).toSet(),
         );
         for (final profile in changedProfiles) {
           await database.putProfile(

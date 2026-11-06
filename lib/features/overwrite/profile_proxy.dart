@@ -17,6 +17,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
@@ -406,9 +407,12 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     List<ProfileProxy> nodes,
     List<Profile> source,
     List<Profile> profiles,
-    Map<int, Set<String>> groupOwnedNames,
+    Map<int, Set<String>> rawOwnedNames,
+    Map<int, Set<String>> aliasFreeNames,
   })?
   _prepared;
+  var _subscriptionNames = const <String>{};
+  var _rawGroupNames = const <String>{};
 
   Profile? get _profile => widget.profileId == null
       ? Profile(
@@ -425,14 +429,65 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     final profile = _profile;
     if (profile == null || !profile.appliesAddedRules) return false;
     final targets = await context.setupAction.appliedRuleTargets(profileId);
-    final used = names.intersection({
-      for (final target in targets) profile.proxyAliases[target] ?? target,
-    });
+    final used = names.intersection(_ruleRoutes(profile, targets));
     if (used.isEmpty) return false;
     if (mounted) {
       context.showNotifier(appLocalizations.customOutboundInUse(used.first));
     }
     return true;
+  }
+
+  Set<String> _ruleRoutes(Profile profile, Set<String> targets) {
+    final active = {
+      for (final node in profile.profileProxies)
+        if (node.isValid) node.name,
+    };
+    return {
+      for (final target in targets) ...[
+        if (active.contains(target)) target,
+        if (profile.proxyAliases[target] case final alias?
+            when !active.contains(target) || isProxyNameCopy(target, alias))
+          alias,
+        if (!active.contains(target) &&
+            !profile.proxyAliases.containsKey(target))
+          target,
+      ],
+    };
+  }
+
+  bool _holdsNode(Profile profile, String name, List<ProfileProxy> nodes) =>
+      profile.proxyAliases.containsValue(name) &&
+      nodes.any((node) => node.name == name && node.isValid);
+
+  bool _leftToRaw(
+    Profile profile,
+    String name,
+    List<ProfileProxy> nodes, {
+    required Set<String> rawNames,
+    required Set<String> rawGroups,
+  }) =>
+      rawGroups.contains(name) ||
+      (rawNames.contains(name) && !_holdsNode(profile, name, nodes));
+
+  /// With its references moved, a rename's alias would only capture a node the
+  /// subscription adds under the old name later, unless something the rename
+  /// cannot rewrite still says it: the raw file, a script or the app's own DNS.
+  bool _renameNeedsNoAlias(
+    Profile profile,
+    String name,
+    Map<String, dynamic> raw,
+  ) {
+    if (profile.isoixCloudProfile ||
+        profile.overwriteType == OverwriteType.script) {
+      return false;
+    }
+    final app = ref.read(patchClashConfigProvider);
+    return findRawOutboundReference(raw, name) == null &&
+        findRawOutboundReference({
+              'dns': app.dns.toJson(),
+              'ntp': app.ntp.toJson(),
+            }, name) ==
+            null;
   }
 
   Future<bool> _prepareOtherProfiles(List<ProfileProxy> next) async {
@@ -463,10 +518,26 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     if (renamed.isEmpty && removedIds.isEmpty && added.isEmpty) return true;
     final setupAction = context.setupAction;
     final prepared = <Profile>[];
-    final groupOwnedNames = <int, Set<String>>{};
+    final rawOwnedNames = <int, Set<String>>{};
+    final aliasFreeNames = <int, Set<String>>{};
     try {
       for (final profile in profiles) {
-        if (profile.id == widget.profileId) continue;
+        if (profile.id == widget.profileId) {
+          for (final name in renamed.keys) {
+            if (_leftToRaw(
+              profile,
+              name,
+              previous,
+              rawNames: _subscriptionNames,
+              rawGroups: _rawGroupNames,
+            )) {
+              (rawOwnedNames[profile.id] ??= {}).add(name);
+            } else if (_renameNeedsNoAlias(profile, name, const {})) {
+              (aliasFreeNames[profile.id] ??= {}).add(name);
+            }
+          }
+          continue;
+        }
         // Unaliased: an alias stands in for a node only while the node exists,
         // and these checks are about what remains once it does not.
         Map<String, dynamic>? raw;
@@ -496,11 +567,9 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         if (unavailable.isNotEmpty && profile.appliesAddedRules) {
           final targets = await setupAction.appliedRuleTargets(profile.id);
           if (!mounted) return false;
-          for (final target in targets) {
-            final name = profile.proxyAliases[target] ?? target;
-            if (unavailable.contains(name)) {
-              throw appLocalizations.customOutboundInUse(name);
-            }
+          final used = unavailable.intersection(_ruleRoutes(profile, targets));
+          if (used.isNotEmpty) {
+            throw appLocalizations.customOutboundInUse(used.first);
           }
         }
         for (final name in unavailable) {
@@ -530,12 +599,39 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
             throw appLocalizations.proxyChainUnavailableNodeTip(node.name);
           }
         }
-        if (raw == null) continue;
+        if (raw == null) {
+          for (final name in renamed.keys) {
+            if (_renameNeedsNoAlias(profile, name, const {})) {
+              (aliasFreeNames[profile.id] ??= {}).add(name);
+            }
+          }
+          continue;
+        }
         var updated = profile;
         for (final entry in renamed.entries) {
-          if (rawGroups.contains(entry.key) ||
-              rawGroups.contains(entry.value)) {
-            (groupOwnedNames[profile.id] ??= {}).add(entry.key);
+          if (_leftToRaw(
+            profile,
+            entry.key,
+            previous,
+            rawNames: rawNames,
+            rawGroups: rawGroups,
+          )) {
+            (rawOwnedNames[profile.id] ??= {}).add(entry.key);
+            continue;
+          }
+          if (rawGroups.contains(entry.value) ||
+              rawNames.contains(entry.value)) {
+            // The raw group or node would quietly take over these routes.
+            final targets = profile.appliesAddedRules
+                ? await setupAction.appliedRuleTargets(profile.id)
+                : const <String>{};
+            if (!mounted) return false;
+            if (_holdsNode(profile, entry.key, previous) ||
+                targets.contains(entry.key) ||
+                profile.hasCustomOutboundReferences(entry.key)) {
+              throw appLocalizations.customOutboundInUse(entry.key);
+            }
+            (rawOwnedNames[profile.id] ??= {}).add(entry.key);
             continue;
           }
           final conflict = findProxyChainRenameConflict(
@@ -552,6 +648,9 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
             entry.key,
             entry.value,
           );
+          if (_renameNeedsNoAlias(profile, entry.key, raw)) {
+            (aliasFreeNames[profile.id] ??= {}).add(entry.key);
+          }
         }
         var chains = _removeProxiesFromChains(
           updated.proxyChains,
@@ -579,11 +678,19 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       if (!identical(profiles, ref.read(profilesProvider))) {
         throw appLocalizations.routingChanged;
       }
+      // A global rule stays on a kept name, and a profile that keeps one has no
+      // rule rows renamed, so aliases carry them.
+      final keptNames = rawOwnedNames.values.expand((names) => names).toSet();
       _prepared = (
         nodes: next,
         source: profiles,
         profiles: prepared,
-        groupOwnedNames: groupOwnedNames,
+        rawOwnedNames: rawOwnedNames,
+        aliasFreeNames: {
+          for (final MapEntry(:key, :value) in aliasFreeNames.entries)
+            if (!rawOwnedNames.containsKey(key))
+              key: value.difference(keptNames),
+        },
       );
       return true;
     } catch (error) {
@@ -613,7 +720,8 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
               if (applies) ...prepared.profiles,
               if (widget.profileId != null) next,
             ],
-            groupOwnedNames: applies ? prepared.groupOwnedNames : const {},
+            rawOwnedNames: applies ? prepared.rawOwnedNames : const {},
+            aliasFreeNames: applies ? prepared.aliasFreeNames : const {},
           );
       return true;
     } catch (error) {
@@ -733,6 +841,8 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       context.showNotifier(appLocalizations.routingChanged);
       return null;
     }
+    _subscriptionNames = rawProxyNames(rawConfig);
+    _rawGroupNames = rawProxyGroupNames(rawConfig);
     if (previous?.name != res.name &&
         (hasProfileProxyGroupNameConflict(rawConfig, res) ||
             (profile.isoixCloudProfile &&
@@ -790,12 +900,25 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     ProfileProxy profileProxy, {
     String? previousName,
   }) {
+    final name = profileProxy.name;
     return _updateProfile((state) {
-      return state
-          .copyWith(
-            profileProxies: state.profileProxies.copyAndPut(profileProxy),
-          )
-          .copyAndRenameOutboundReferences(previousName, profileProxy.name);
+      final next = state.copyWith(
+        profileProxies: state.profileProxies.copyAndPut(profileProxy),
+        // Taking a subscription's name here means to override it; keeping it does not.
+        proxyAliases: previousName != name && _subscriptionNames.contains(name)
+            ? {...state.proxyAliases, name: name}
+            : state.proxyAliases,
+      );
+      return previousName != null &&
+              _leftToRaw(
+                state,
+                previousName,
+                state.profileProxies,
+                rawNames: _subscriptionNames,
+                rawGroups: _rawGroupNames,
+              )
+          ? next
+          : next.copyAndRenameOutboundReferences(previousName, name);
     });
   }
 
@@ -1124,6 +1247,8 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           if (!mounted || raw == null) {
             throw appLocalizations.nodeInvalidDefinition;
           }
+          _subscriptionNames = rawProxyNames(raw);
+          _rawGroupNames = rawProxyGroupNames(raw);
           final removedIds = previous
               .map((node) => node.id)
               .toSet()
@@ -1198,7 +1323,17 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           }
           final saved = await _updateProfile(
             (current) => current
-                .copyWith(profileProxies: next, proxyChains: proxyChains)
+                .copyWith(
+                  profileProxies: next,
+                  proxyChains: proxyChains,
+                  proxyAliases: {
+                    ...current.proxyAliases,
+                    for (final node in next)
+                      if (!previousNames.contains(node.name) &&
+                          _subscriptionNames.contains(node.name))
+                        node.name: node.name,
+                  },
+                )
                 .copyAndRemoveOutboundCaches(removedNames),
           );
           if (!saved) throw appLocalizations.nodeInvalidDefinition;
@@ -1230,12 +1365,26 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     final visibleSelected = selectedProfileProxies.intersection(visibleIds);
 
     final coreErrors = ref.watch(customProxyCoreErrorsProvider).value;
+    final profileId = widget.profileId;
+    final aliases = profileId == null
+        ? const <String, String>{}
+        : ref.watch(profileProvider(profileId))?.proxyAliases ??
+              const <String, String>{};
+    final routing = profileId == null || !ref.watch(initProvider)
+        ? null
+        : ref.watch(routingSourceProvider(profileId)).value;
+    final subscriptionNames = routing == null
+        ? const <String>{}
+        : rawProxyNames(routing);
 
     Widget rowAt(int index) {
       final profileProxy = visible[index];
       final isEditing = selectedProfileProxies.isNotEmpty;
       final isSelected = selectedProfileProxies.contains(profileProxy.id);
       final coreError = coreErrors?[profileProxy.id];
+      final yielded =
+          subscriptionNames.contains(profileProxy.name) &&
+          !aliases.containsValue(profileProxy.name);
       return MemoBuilder(
         key: ValueKey(profileProxy.id),
         inputs: [
@@ -1245,6 +1394,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           isEditing,
           isSelected,
           coreError,
+          yielded,
           query.isEmpty,
         ],
         builder: (context) {
@@ -1254,8 +1404,11 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
             invalid: coreError != null,
             title: profileProxy.name,
             subtitle: Text(
-              coreError ?? ProxyDefinition(profileProxy.proxy).displayType,
-              maxLines: coreError == null ? 1 : 2,
+              coreError ??
+                  (yielded
+                      ? appLocalizations.proxyYieldsToSubscription
+                      : ProxyDefinition(profileProxy.proxy).displayType),
+              maxLines: coreError == null && !yielded ? 1 : 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyle.footnote
                   .of(context)

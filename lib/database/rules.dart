@@ -60,10 +60,21 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
     return {for (final rule in applied) ?ruleTarget(rule.value)};
   }
 
-  /// [excludingProfiles] own the old name through their managed snapshot.
+  Future<Set<int>> globalRuleIds() async {
+    final query = selectOnly(profileRuleLinks)
+      ..addColumns([profileRuleLinks.ruleId])
+      ..where(profileRuleLinks.profileId.isNull());
+    return {
+      for (final row in await query.get()) row.read(profileRuleLinks.ruleId)!,
+    };
+  }
+
+  /// [excludingProfiles] own the old name through their snapshot. A global rule
+  /// stays on a name in [keptNames], which aliases carry for the other profiles.
   Future<void> renameRuleTargets(
     Map<String, String> names, {
     Set<int> excludingProfiles = const {},
+    Set<String> keptNames = const {},
   }) async {
     if (names.isEmpty) return;
     final owned = selectOnly(profileRuleLinks)
@@ -72,9 +83,15 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
         profileRuleLinks.profileId.isIn(excludingProfiles) &
             profileRuleLinks.scene.equalsValue(RuleScene.disabled).not(),
       );
+    final global = selectOnly(profileRuleLinks)
+      ..addColumns([profileRuleLinks.ruleId])
+      ..where(profileRuleLinks.profileId.isNull());
     await _rewriteTargets(
       names,
-      (rule) => rule.ruleTarget.isIn(names.keys) & rule.id.isNotInQuery(owned),
+      (rule) =>
+          rule.ruleTarget.isIn(names.keys) &
+          rule.id.isNotInQuery(owned) &
+          (rule.ruleTarget.isNotIn(keptNames) | rule.id.isNotInQuery(global)),
     );
   }
 

@@ -101,6 +101,20 @@ void main() {
     );
   });
 
+  test('a tunnel protects the outbound it names', () {
+    for (final tunnel in [
+      'tcp,127.0.0.1:1,a.test:1,Node',
+      {'address': '127.0.0.1:1', 'proxy': 'Node'},
+    ]) {
+      expect(
+        findRawOutboundReference({
+          'tunnels': [tunnel],
+        }, 'Node'),
+        'tunnels[0]',
+      );
+    }
+  });
+
   test('overlay DNS hosts also protect raw subscription outbounds', () {
     for (final scheme in ['ts', 'tailscale', 'et', 'easytier']) {
       expect(

@@ -1758,5 +1758,6 @@
   "fallbackFilterGeositeDesc": "Домены из этих категорий GeoSite сразу разрешаются через Fallback.",
   "fallbackFilterIpcidrDesc": "Если Nameserver возвращает IP из этих диапазонов, используется ответ Fallback.",
   "fallbackFilterDomainDesc": "Эти домены сразу разрешаются через Fallback.",
-  "customResources": "Пользовательские"
+  "customResources": "Пользовательские",
+  "proxyYieldsToSubscription": "В подписке есть узел с таким именем, в этом профиле используется он"
 }

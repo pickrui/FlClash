@@ -1758,5 +1758,6 @@
   "fallbackFilterGeositeDesc": "Domains in these GeoSite categories are resolved by Fallback directly.",
   "fallbackFilterIpcidrDesc": "When Nameserver returns an IP in these ranges, the Fallback answer is used.",
   "fallbackFilterDomainDesc": "These domains are resolved by Fallback directly.",
-  "customResources": "Custom"
+  "customResources": "Custom",
+  "proxyYieldsToSubscription": "A subscription node has this name, so this profile uses that one"
 }

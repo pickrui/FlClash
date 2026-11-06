@@ -195,6 +195,14 @@ extension BackupControllerExt on AppController {
             await appPath.profilesPath,
             coreController.validateConfig,
           );
+          final profileRawNames =
+              isOverride || migrationData.customProxies.isEmpty
+              ? const <int, Set<String>>{}
+              : await restoredProfileRawNames(
+                  migrationData.profiles,
+                  migrationData.fileMigrations,
+                  coreController.getConfig,
+                );
           final previousConfig = config;
           previousProfileId = previousConfig.currentProfileId;
           final previousProfiles = await database.profilesDao.all().get();
@@ -306,6 +314,7 @@ extension BackupControllerExt on AppController {
                     iconSets: migrationData.iconSets,
                     mitmModules: migrationData.mitmModules,
                     customProxies: migrationData.customProxies,
+                    profileRawNames: profileRawNames,
                   );
                   databaseChanged = true;
                   final profileIds = (await database.profilesDao.all().get())

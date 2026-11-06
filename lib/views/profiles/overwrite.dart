@@ -583,7 +583,12 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
               target != null &&
               parsed.ruleAction != RuleAction.SUB_RULE &&
               target.toUpperCase() != RuleTarget.MATCH.value &&
-              !targets.contains(target),
+              !targets.contains(
+                ref
+                        .read(profileProvider(widget.profileId))
+                        ?.proxyAliases[target] ??
+                    target,
+              ),
         ),
       ),
     );

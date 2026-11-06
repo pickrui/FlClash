@@ -84,6 +84,7 @@ Future<void> _pumpPage(
   int? scriptId,
   SetupAction? setup,
   Map<String, dynamic> source = const {},
+  Map<String, String> proxyAliases = const {},
 }) async {
   const size = Size(800, 1400);
   await tester.binding.setSurfaceSize(size);
@@ -99,6 +100,7 @@ Future<void> _pumpPage(
               autoUpdateDuration: Duration.zero,
               overwriteType: mode,
               scriptId: scriptId,
+              proxyAliases: proxyAliases,
             ),
           ],
         ),
@@ -330,11 +332,13 @@ void main() {
               (2, 'Removed'),
               (3, 'match'),
               (4, 'DIRECT'),
+              (5, 'Old'),
             ])
               Rule(id: id, value: 'DOMAIN,$id.test,$target'),
           ]),
         ),
       ],
+      proxyAliases: const {'Old': 'Proxy'},
       source: {
         'proxy-groups': [
           {
@@ -351,7 +355,7 @@ void main() {
         for (final item in tester.widgetList<RuleItem>(find.byType(RuleItem)))
           item.rule.id: item.missingTarget,
       },
-      {1: false, 2: true, 3: false, 4: false},
+      {1: false, 2: true, 3: false, 4: false, 5: false},
     );
   });
 

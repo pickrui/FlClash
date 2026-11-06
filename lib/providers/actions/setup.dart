@@ -818,6 +818,9 @@ extension SetupControllerExt on AppController {
       ...providerCacheKeysFromConfig(rawConfig),
     ]);
     final directory = await appPath.profilesPath;
+    final globalRuleIds = addedRules.isEmpty || setupState.proxyAliases.isEmpty
+        ? const <int>{}
+        : await database.rulesDao.globalRuleIds();
     final res = _providerCacheLock.synchronized(
       () => makeRealProfileTask(
         MakeRealProfileState(
@@ -838,6 +841,7 @@ extension SetupControllerExt on AppController {
           realPatchConfig: realPatchConfig,
           appendSystemDns: appendSystemDns,
           addedRules: addedRules,
+          globalRuleIds: globalRuleIds,
           proxyChains: proxyChains,
           profileProxies: setupState.profileProxies,
           proxyAliases: setupState.proxyAliases,

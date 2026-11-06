@@ -255,14 +255,19 @@ Future<Map<int, String>> customProxyCoreErrors(Ref ref) async {
       ref.watch(customProxiesProvider).value ?? const <ProfileProxy>[];
   if (proxies.isEmpty) return const {};
   final verdicts = ref.watch(customProxyVerdictsProvider);
+  final core = ref.read(coreHandlerProvider);
+  // Connected comes before init, which relative key files need to resolve.
+  if (!await core.isInit) {
+    final retry = Timer(const Duration(seconds: 1), ref.invalidateSelf);
+    ref.onDispose(retry.cancel);
+    return const {};
+  }
   final unchecked = [
     for (final proxy in proxies)
       if (!verdicts.containsKey(proxy.normalizedProxy)) proxy.normalizedProxy,
   ];
   if (unchecked.isNotEmpty) {
-    final results = await ref
-        .read(coreHandlerProvider)
-        .validateProxies(unchecked);
+    final results = await core.validateProxies(unchecked);
     for (final (index, definition) in unchecked.indexed) {
       verdicts[definition] = results[index] ?? '';
     }

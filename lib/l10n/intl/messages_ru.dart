@@ -2869,6 +2869,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Совпавшие имена прокси-серверов используют указанный здесь DNS-сервер вместо Proxy Server Nameserver.",
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Тип прокси"),
+    "proxyYieldsToSubscription": MessageLookupByLibrary.simpleMessage(
+      "В подписке есть узел с таким именем, в этом профиле используется он",
+    ),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Очистить кэш"),
     "publicKey": MessageLookupByLibrary.simpleMessage("Открытый ключ"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage(

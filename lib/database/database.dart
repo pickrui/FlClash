@@ -185,18 +185,33 @@ class Database extends _$Database {
               'ALTER TABLE profile_rule_mapping DROP COLUMN source_id',
             );
           }
-          // An alias no longer rewrites a rule at apply time when a real node
-          // holds its name, so a profile's own rules move to the node they meant.
-          for (final profile in await profilesDao.all().get()) {
-            if (profile.isoixCloudProfile) continue;
-            await rulesDao.renameProfileRuleTargets(profile.id, {
-              for (final entry in profile.proxyAliases.entries)
-                if (entry.key != entry.value) entry.key: entry.value,
-            });
-          }
+          await _moveRulesOffShadowedAliases(await profilesDao.all().get());
         }
       }),
     );
+  }
+
+  /// Apply skips an alias for a rule when a real node has its name.
+  Future<void> _moveRulesOffShadowedAliases(List<Profile> profiles) async {
+    final nodes = await customProxiesDao.all().get();
+    final known = {for (final proxy in nodes) proxy.name};
+    final active = {
+      for (final proxy in nodes)
+        if (proxy.isValid) proxy.name,
+    };
+    for (final profile in profiles) {
+      final groups = {
+        for (final group in profile.customProxyGroups) group.name,
+      };
+      await rulesDao.renameProfileRuleTargets(profile.id, {
+        for (final MapEntry(:key, :value) in profile.proxyAliases.entries)
+          if (key != value &&
+              known.contains(key) &&
+              active.contains(value) &&
+              !groups.contains(key))
+            key: value,
+      });
+    }
   }
 
   Future<void> putProfile(Profile profile, {bool existingOnly = false}) async {
@@ -251,12 +266,17 @@ class Database extends _$Database {
     List<IconSet> iconSets = const [],
     List<MitmModule> mitmModules = const [],
     List<ProfileProxy> customProxies = const [],
+    Map<int, Set<String>> profileRawNames = const {},
   }) async {
     await transaction(() async {
+      final importedAliases = {
+        for (final profile in profiles) profile.id: profile.proxyAliases,
+      };
       final merged = mergeProfileProxies(
         profiles,
         existing: isOverride ? const [] : await customProxiesDao.all().get(),
         imported: customProxies,
+        rawNames: profileRawNames,
         reservedNames: {
           if (!isOverride)
             for (final profile in await profilesDao.all().get())
@@ -294,6 +314,16 @@ class Database extends _$Database {
       await clashProvidersDao.restore(clashProviders, replace: isOverride);
       await iconSetsDao.restore(iconSets, replace: isOverride);
       await rulesDao.repairOrders();
+      await _moveRulesOffShadowedAliases([
+        for (final profile in profiles)
+          profile.copyWith(
+            proxyAliases: {
+              for (final MapEntry(:key, :value) in profile.proxyAliases.entries)
+                if ((importedAliases[profile.id]![key] ?? key) == key)
+                  key: value,
+            },
+          ),
+      ]);
     });
   }
 

@@ -800,6 +800,9 @@ extension ProxiesControllerExt on AppController {
         publish: _ref.read(providersProvider.notifier).setProvider,
       );
       return '';
+    } catch (_) {
+      if (isCurrent()) rethrow;
+      return '';
     } finally {
       final remaining = _providerUpdateCounts[key]! - 1;
       if (remaining == 0) {

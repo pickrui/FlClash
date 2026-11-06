@@ -668,6 +668,9 @@ DOMAIN,ads.example.test,REJECT
           customRules: customRules,
           customProxyGroups: customProxyGroups,
           profileProxies: profileProxies,
+          proxyAliases: {
+            for (final proxy in profileProxies) proxy.name: proxy.name,
+          },
           realPatchConfig: realPatchConfig,
         ),
       );

@@ -124,12 +124,43 @@ void main() {
       addTearDown(() => root.delete(recursive: true));
       final file = File('${root.path}/database.sqlite');
       final old = Database(NativeDatabase(file));
+      await old.customProxiesDao.setAll([
+        node,
+        const ProfileProxy(id: 12, proxy: {'name': 'Home (2)', 'type': 'ss'}),
+        const ProfileProxy(
+          id: 13,
+          enable: false,
+          proxy: {'name': 'Idle', 'type': 'ss'},
+        ),
+      ]);
       await old.putProfile(
-        profile(1, node).copyWith(proxyAliases: const {'Home': 'Home (2)'}),
+        profile(1, node).copyWith(
+          proxyAliases: const {
+            'Home': 'Home (2)',
+            'Gone': 'Home',
+            'Other': 'Off',
+            'Idle': 'Home (2)',
+          },
+        ),
       );
       await old.rulesDao.putProfileAddedRule(
         1,
         const Rule(id: 90, value: 'DOMAIN,example.test,Home'),
+      );
+      await old.rulesDao.putProfileAddedRule(
+        1,
+        const Rule(id: 92, value: 'DOMAIN,gone.test,Gone'),
+      );
+      await old.rulesDao.putProfileAddedRule(
+        1,
+        const Rule(id: 93, value: 'DOMAIN,other.test,Other'),
+      );
+      await old.rulesDao.putGlobalRule(
+        const Rule(id: 94, value: 'DOMAIN,global.test,Home'),
+      );
+      await old.rulesDao.putProfileAddedRule(
+        1,
+        const Rule(id: 95, value: 'DOMAIN,idle.test,Idle'),
       );
       await old.customStatement(
         'CREATE TABLE proxy_groups (id INTEGER PRIMARY KEY)',
@@ -150,8 +181,17 @@ void main() {
       final db = Database(NativeDatabase(file));
       addTearDown(db.close);
       expect(
-        (await db.rulesDao.allProfileAddedRules(1).get()).single.value,
-        'DOMAIN,example.test,Home (2)',
+        (await db.rulesDao.allProfileAddedRules(1).get()).map((r) => r.value),
+        unorderedEquals([
+          'DOMAIN,example.test,Home (2)',
+          'DOMAIN,gone.test,Gone',
+          'DOMAIN,other.test,Other',
+          'DOMAIN,idle.test,Home (2)',
+        ]),
+      );
+      expect(
+        (await db.rulesDao.allGlobalAddedRules().get()).single.value,
+        'DOMAIN,global.test,Home',
       );
       final leftovers = await db
           .customSelect(
@@ -215,6 +255,85 @@ void main() {
       expect(
         (await db.profilesDao.all().getSingle()).proxyChains,
         incoming.proxyChains,
+      );
+    },
+  );
+
+  test(
+    'a merged restore moves rules only for the collisions it adds',
+    () async {
+      final db = Database(NativeDatabase.memory());
+      addTearDown(db.close);
+      await db.customProxiesDao.setAll([
+        node,
+        const ProfileProxy(id: 13, proxy: {'name': 'Kept', 'type': 'direct'}),
+        const ProfileProxy(id: 14, proxy: {'name': 'Kept (2)', 'type': 'ss'}),
+      ]);
+      const added = ProfileRuleLink(
+        profileId: 2,
+        ruleId: 90,
+        scene: RuleScene.added,
+        order: 'a',
+      );
+      await db.restore(
+        [
+          profile(2, node).copyWith(
+            proxyAliases: const {'Kept': 'Kept (2)', 'Home': 'Home'},
+            profileProxies: [],
+          ),
+        ],
+        [],
+        const [
+          Rule(id: 90, value: 'DOMAIN,example.test,Home'),
+          Rule(id: 91, value: 'DOMAIN,kept.test,Kept'),
+        ],
+        [added, added.copyWith(ruleId: 91, order: 'b')],
+        customProxies: [
+          node.copyWith(id: 15, proxy: {...node.proxy, 'server': 'other.test'}),
+        ],
+      );
+      expect(
+        (await db.rulesDao.allProfileAddedRules(2).get()).map((r) => r.value),
+        unorderedEquals([
+          'DOMAIN,example.test,Home (2)',
+          'DOMAIN,kept.test,Kept',
+        ]),
+      );
+    },
+  );
+
+  test(
+    'a merged restore leaves a subscription node of a colliding name',
+    () async {
+      final db = Database(NativeDatabase.memory());
+      addTearDown(db.close);
+      await db.customProxiesDao.setAll([node]);
+      await db.restore(
+        [profile(2, node).copyWith(profileProxies: [], proxyChains: [])],
+        [],
+        const [Rule(id: 90, value: 'DOMAIN,example.test,Home')],
+        const [
+          ProfileRuleLink(
+            profileId: 2,
+            ruleId: 90,
+            scene: RuleScene.added,
+            order: 'a',
+          ),
+        ],
+        customProxies: [
+          node.copyWith(id: 15, proxy: {...node.proxy, 'server': 'other.test'}),
+        ],
+        profileRawNames: {
+          2: {'Home'},
+        },
+      );
+      expect(
+        (await db.profilesDao.all().get()).single.proxyAliases,
+        isNot(contains('Home')),
+      );
+      expect(
+        (await db.rulesDao.allProfileAddedRules(2).get()).single.value,
+        'DOMAIN,example.test,Home',
       );
     },
   );

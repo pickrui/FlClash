@@ -2305,6 +2305,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "일치하는 프록시 서버 도메인은 Proxy Server Nameserver 대신 여기서 지정한 DNS 서버를 사용합니다.",
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("프록시 유형"),
+    "proxyYieldsToSubscription": MessageLookupByLibrary.simpleMessage(
+      "구독에 같은 이름의 노드가 있어 이 프로필은 해당 노드를 사용합니다",
+    ),
     "pruneCache": MessageLookupByLibrary.simpleMessage("캐시 정리"),
     "publicKey": MessageLookupByLibrary.simpleMessage("공개 키"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage("자동 갱신"),

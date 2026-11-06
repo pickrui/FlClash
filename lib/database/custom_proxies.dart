@@ -65,6 +65,7 @@ class CustomProxiesDao extends DatabaseAccessor<Database>
   List<ProfileProxy> existing = const [],
   List<ProfileProxy> imported = const [],
   Set<String> reservedNames = const {},
+  Map<int, Set<String>> rawNames = const {},
 }) {
   final proxies = List<ProfileProxy>.from(existing);
   final ids = {for (final proxy in proxies) proxy.id};
@@ -123,6 +124,10 @@ class CustomProxiesDao extends DatabaseAccessor<Database>
         entry.key: globalRenames[entry.value] ?? entry.value,
     };
     for (final entry in globalRenames.entries) {
+      if ((rawNames[profile.id]?.contains(entry.key) ?? false) &&
+          !profile.proxyAliases.containsValue(entry.key)) {
+        continue;
+      }
       next = next.copyAndRenameOutboundReferences(entry.key, entry.value);
       aliases.putIfAbsent(entry.key, () => entry.value);
     }

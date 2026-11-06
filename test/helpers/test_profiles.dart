@@ -36,13 +36,17 @@ class TestProfiles extends Profiles {
     state = List.of(profiles);
   }
 
+  Map<int, Set<String>> aliasFreeNames = const {};
+
   @override
   Future<void> setCustomProxies(
     List<ProfileProxy> next, {
     Profile? editedProfile,
     List<Profile> editedProfiles = const [],
-    Map<int, Set<String>> groupOwnedNames = const {},
+    Map<int, Set<String>> rawOwnedNames = const {},
+    Map<int, Set<String>> aliasFreeNames = const {},
   }) async {
+    this.aliasFreeNames = aliasFreeNames;
     final edited = {
       for (final p in editedProfiles) p.id: p,
       ?editedProfile?.id: editedProfile!,

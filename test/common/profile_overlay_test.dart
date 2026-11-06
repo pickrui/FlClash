@@ -289,6 +289,85 @@ void main() {
     expect((result['proxy-groups'] as List).single['proxies'], ['DIRECT']);
   });
 
+  test('a shared node overrides a subscription node only if owned', () async {
+    const raw = {
+      'proxies': [
+        {'name': 'HK', 'type': 'socks5', 'server': 'sub.test', 'port': 1080},
+      ],
+      'rules': ['MATCH,HK'],
+    };
+    final state = overlayState(
+      rawConfig: raw,
+      profileProxies: const [
+        ProfileProxy(id: 1, proxy: {'name': 'HK', 'type': 'direct'}),
+      ],
+    );
+    Object? typeOf(Map result) => (result['proxies'] as List).single['type'];
+
+    expect(typeOf(await makeRealProfileTask(state)), 'socks5');
+    expect(
+      typeOf(
+        await makeRealProfileTask(
+          state.copyWith(proxyAliases: const {'HK': 'HK'}),
+        ),
+      ),
+      'direct',
+    );
+    expect(
+      typeOf(
+        await makeRealProfileTask(
+          state.copyWith(proxyAliases: const {'Earlier': 'HK'}),
+        ),
+      ),
+      'socks5',
+    );
+  });
+
+  test('a rule picked by name keeps the node holding that name', () async {
+    final result = await makeRealProfileTask(
+      overlayState(
+        rawConfig: const {'rules': <String>[]},
+        addedRules: const [
+          Rule(id: 1, value: 'DOMAIN,a.test,Home'),
+          Rule(id: 2, value: 'DOMAIN,b.test,Home'),
+          Rule(id: 3, value: 'DOMAIN,c.test,Next'),
+        ],
+        profileProxies: const [
+          ProfileProxy(id: 1, proxy: {'name': 'Home', 'type': 'direct'}),
+          ProfileProxy(id: 2, proxy: {'name': 'Home (2)', 'type': 'direct'}),
+          ProfileProxy(id: 3, proxy: {'name': 'Next', 'type': 'direct'}),
+          ProfileProxy(id: 4, proxy: {'name': 'Later', 'type': 'direct'}),
+        ],
+      ).copyWith(
+        proxyAliases: const {'Home': 'Home (2)', 'Next': 'Later'},
+        globalRuleIds: const {2, 3},
+      ),
+    );
+    expect(result['rules'], contains('DOMAIN,a.test,Home'));
+    expect(result['rules'], contains('DOMAIN,b.test,Home (2)'));
+    expect(result['rules'], contains('DOMAIN,c.test,Next'));
+  });
+
+  test('an alias follows sub-rules and tunnels', () {
+    final result = applyCustomProxyAliases(
+      const {
+        'sub-rules': {
+          'inner': ['MATCH,A'],
+        },
+        'tunnels': [
+          'tcp,127.0.0.1:1,a.test:1,A',
+          {'address': '127.0.0.1:2', 'proxy': 'A'},
+        ],
+      },
+      {'A': 'B'},
+    );
+    expect((result['sub-rules'] as Map)['inner'], ['MATCH,B']);
+    expect(result['tunnels'], [
+      'tcp,127.0.0.1:1,a.test:1,B',
+      {'address': '127.0.0.1:2', 'proxy': 'B'},
+    ]);
+  });
+
   test('an alias never moves routing from a group onto a node', () async {
     final result = await makeRealProfileTask(
       overlayState(
@@ -412,28 +491,21 @@ void main() {
     );
   });
 
-  test(
-    'merge rejects personal group names shared by a personal node',
-    () async {
-      await expectLater(
-        makeRealProfileTask(
-          overlayState(
-            rawConfig: const {
-              'rules': ['MATCH,DIRECT'],
-            },
-            groups: const [personalGroup],
-            profileProxies: const [
-              ProfileProxy(
-                id: 1,
-                proxy: {'name': 'Personal', 'type': 'direct'},
-              ),
-            ],
-          ),
-        ),
-        throwsA(isA<OverlayNameConflictException>()),
-      );
-    },
-  );
+  test('a personal group keeps its name over a shared node', () async {
+    final result = await makeRealProfileTask(
+      overlayState(
+        rawConfig: const {
+          'rules': ['MATCH,DIRECT'],
+        },
+        groups: const [personalGroup],
+        profileProxies: const [
+          ProfileProxy(id: 1, proxy: {'name': 'Personal', 'type': 'direct'}),
+        ],
+      ),
+    );
+    expect((result['proxy-groups'] as List).single['name'], 'Personal');
+    expect(result['proxies'], isNot(contains(anything)));
+  });
 
   for (final raw in <Map<String, dynamic>>[
     {

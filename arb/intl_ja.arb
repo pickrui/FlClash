@@ -1758,5 +1758,6 @@
   "fallbackFilterGeositeDesc": "これらの GeoSite カテゴリのドメインは、直接 Fallback で解決します。",
   "fallbackFilterIpcidrDesc": "Nameserver がこれらの範囲の IP を返したときは、Fallback の結果を使います。",
   "fallbackFilterDomainDesc": "これらのドメインは、直接 Fallback で解決します。",
-  "customResources": "カスタム"
+  "customResources": "カスタム",
+  "proxyYieldsToSubscription": "サブスクリプションに同名のノードがあるため、このプロファイルではそちらを使用します"
 }

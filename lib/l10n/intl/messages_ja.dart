@@ -2347,6 +2347,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "一致したプロキシサーバーのドメイン名は、Proxy Server Nameserver より優先してここで指定した DNS サーバーを使います。",
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("ノードの種類"),
+    "proxyYieldsToSubscription": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションに同名のノードがあるため、このプロファイルではそちらを使用します",
+    ),
     "pruneCache": MessageLookupByLibrary.simpleMessage("キャッシュの削除"),
     "publicKey": MessageLookupByLibrary.simpleMessage("公開鍵"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage("自動更新"),

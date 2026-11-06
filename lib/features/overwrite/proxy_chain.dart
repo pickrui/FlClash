@@ -950,7 +950,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
   }
 
   bool _canAddProfileProxy(ProfileProxy res) {
-    if (_containsProxy(res.name)) {
+    if (_containsProxy(res.name) ||
+        rawProxyNames(_rawConfig).contains(res.name)) {
       context.showNotifier(
         appLocalizations.existsTip(appLocalizations.proxies),
       );

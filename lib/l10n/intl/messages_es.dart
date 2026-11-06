@@ -2906,6 +2906,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Los nombres de servidores proxy coincidentes usan el servidor DNS indicado aquí en lugar de Proxy Server Nameserver.",
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Tipo de proxy"),
+    "proxyYieldsToSubscription": MessageLookupByLibrary.simpleMessage(
+      "La suscripción tiene un nodo con este nombre y este perfil usa ese",
+    ),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Depurar caché"),
     "publicKey": MessageLookupByLibrary.simpleMessage("Clave pública"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage(

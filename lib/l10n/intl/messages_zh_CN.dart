@@ -2081,6 +2081,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "匹配的代理服务器域名改用此处指定的 DNS 服务器，优先于 Proxy Server Nameserver",
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("节点类型"),
+    "proxyYieldsToSubscription": MessageLookupByLibrary.simpleMessage(
+      "订阅中有同名节点，此配置使用订阅节点",
+    ),
     "pruneCache": MessageLookupByLibrary.simpleMessage("修剪缓存"),
     "publicKey": MessageLookupByLibrary.simpleMessage("公钥"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage("自动续费"),

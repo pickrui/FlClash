@@ -199,6 +199,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required ClashConfig realPatchConfig,
     required bool appendSystemDns,
     required List<Rule> addedRules,
+    @Default({}) Set<int> globalRuleIds,
     required List<ProxyChain> proxyChains,
     required List<ProfileProxy> profileProxies,
     @Default({}) Map<String, String> proxyAliases,

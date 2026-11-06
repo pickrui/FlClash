@@ -248,6 +248,10 @@ String _renameCustomProxyRule(String rule, Map<String, String> aliases) {
   return next == null ? rule : renameRuleTarget(rule, target!, next);
 }
 
+/// The form a node took when its name was already held by a different node.
+bool isProxyNameCopy(String name, String copy) =>
+    copy.startsWith('$name (') && copy.endsWith(')');
+
 /// A group's name stands for that group: an alias would move routing onto a node.
 Map<String, String> usableCustomProxyAliases(
   Map source,
@@ -297,6 +301,37 @@ Map<String, dynamic> applyCustomProxyAliases(
     result['rules'] = [
       for (final rule in rules)
         if (rule is String) _renameCustomProxyRule(rule, aliases) else rule,
+    ];
+  }
+  if (source['sub-rules'] case final Map subRules) {
+    result['sub-rules'] = {
+      for (final entry in subRules.entries)
+        entry.key: switch (entry.value) {
+          final List rules => [
+            for (final rule in rules)
+              if (rule is String)
+                _renameCustomProxyRule(rule, aliases)
+              else
+                rule,
+          ],
+          _ => entry.value,
+        },
+    };
+  }
+  if (source['tunnels'] case final List tunnels) {
+    result['tunnels'] = [
+      for (final tunnel in tunnels)
+        switch (tunnel) {
+          final Map row when row.containsKey('proxy') => {
+            ...row,
+            'proxy': target(row['proxy']),
+          },
+          final String row when row.split(',').length == 4 => [
+            ...row.split(',').take(3),
+            target(row.split(',').last),
+          ].join(','),
+          _ => tunnel,
+        },
     ];
   }
   for (final key in ['proxy-providers', 'rule-providers']) {
@@ -354,13 +389,12 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   MakeRealProfileState data,
 ) async {
   var rawConfig = Map<String, dynamic>.from(data.rawConfig);
+  final rawNames = _proxyNames(rawConfig);
   final realPatchConfig = data.realPatchConfig;
   final profilesPath = data.profilesPath;
   final profileId = data.profileId;
   final proxyChains = data.proxyChains;
-  final managedNames = data.managedProfile
-      ? _proxyNames(rawConfig)
-      : const <String>{};
+  final managedNames = data.managedProfile ? rawNames : const <String>{};
   final activeNames = {
     for (final proxy in data.profileProxies)
       if (proxy.isValid) proxy.name,
@@ -378,13 +412,43 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     aliases,
     includeResolvers: false,
   );
+  // A rule picked by name means the node holding that name, if one does.
+  final ruleAliases = {
+    for (final entry in aliases.entries)
+      if (!activeNames.contains(entry.key)) entry.key: entry.value,
+  };
+  // Sharing nodes renamed this profile's own node `name (2)` beside another
+  // profile's `name`, and one global row cannot move for one profile.
+  final globalRuleAliases = {
+    ...ruleAliases,
+    for (final entry in aliases.entries)
+      if (isProxyNameCopy(entry.key, entry.value)) entry.key: entry.value,
+  };
   final addedRules = [
     for (final rule in data.addedRules)
-      rule.copyWith(value: _renameCustomProxyRule(rule.value, aliases)),
+      rule.copyWith(
+        value: _renameCustomProxyRule(
+          rule.value,
+          data.globalRuleIds.contains(rule.id)
+              ? globalRuleAliases
+              : ruleAliases,
+        ),
+      ),
   ];
-  var profileProxies = data.profileProxies
-      .where((proxy) => !managedNames.contains(proxy.name))
-      .toList();
+  // A shared node leaves a same-named subscription node alone, unless this
+  // profile holds it: an alias from a subscription name to the node.
+  final ownedNames = {
+    for (final entry in data.proxyAliases.entries)
+      if (rawNames.contains(entry.key)) entry.value,
+  };
+  final subscriptionNames = _proxyNames(rawConfig);
+  var profileProxies = [
+    for (final proxy in data.profileProxies)
+      if (!managedNames.contains(proxy.name) &&
+          (ownedNames.contains(proxy.name) ||
+              !subscriptionNames.contains(proxy.name)))
+        proxy,
+  ];
   final customProxyGroups = data.customProxyGroups;
   final customRules = data.customRules;
   if (data.overwriteType == OverwriteType.custom &&
@@ -538,6 +602,8 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   final groupNames = {
     if (rawConfig['proxy-groups'] case final List groups)
       for (final group in groups.whereType<Map>()) group['name'],
+    if (data.overwriteType == OverwriteType.merge)
+      for (final group in customProxyGroups) group.name,
   };
   profileProxies = [
     for (final proxy in profileProxies)

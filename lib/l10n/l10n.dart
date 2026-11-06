@@ -14868,6 +14868,16 @@ class AppLocalizations {
   String get customResources {
     return Intl.message('Custom', name: 'customResources', desc: '', args: []);
   }
+
+  /// `A subscription node has this name, so this profile uses that one`
+  String get proxyYieldsToSubscription {
+    return Intl.message(
+      'A subscription node has this name, so this profile uses that one',
+      name: 'proxyYieldsToSubscription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

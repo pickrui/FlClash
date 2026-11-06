@@ -2739,6 +2739,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Matching proxy server hostnames use the DNS server given here instead of Proxy Server Nameserver.",
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Proxy type"),
+    "proxyYieldsToSubscription": MessageLookupByLibrary.simpleMessage(
+      "A subscription node has this name, so this profile uses that one",
+    ),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Prune cache"),
     "publicKey": MessageLookupByLibrary.simpleMessage("Public key"),
     "purchaseAutoRenewLabel": MessageLookupByLibrary.simpleMessage(

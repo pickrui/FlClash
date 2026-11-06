@@ -16,6 +16,7 @@ import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart'
@@ -232,34 +233,376 @@ void main() {
     expect(find.byType(SliverPrismReorderableList), findsOneWidget);
   });
 
-  testWidgets('a node the Core rejects shows why in the global node list', (
+  for (final (from, to, refused, holder, enable) in const [
+    ('HK', 'Mine', null, 'Mine', true),
+    ('HK', 'Mine', null, 'HK', false),
+    ('Free', 'Renamed', null, 'HK', true),
+    ('Free', 'Sub', 'Free', '', true),
+    ('Free', 'Grp', 'Free', '', true),
+    ('HK', 'Sub', 'HK', '', true),
+  ]) {
+    testWidgets('renaming $from to $to respects raw names (enabled: $enable)', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final core = _Core();
+      when(() => core.isCompleted).thenReturn(true);
+      when(() => core.validateProxies(any())).thenAnswer((_) async => {});
+      final nodes = [
+        ProfileProxy(
+          id: 11,
+          enable: enable,
+          proxy: {'name': 'HK', 'type': 'ss'},
+        ),
+        const ProfileProxy(id: 12, proxy: {'name': 'Free', 'type': 'ss'}),
+      ];
+      const chain = ProxyChain(id: 21, proxies: ['HK', 'Free']);
+      final (profiles, messages) = await _pump(
+        tester,
+        _SetupAction(
+          rawConfig: const {
+            'proxies': [
+              {'name': 'HK', 'type': 'socks5'},
+              {'name': 'Sub', 'type': 'socks5'},
+            ],
+            'proxy-groups': [
+              {
+                'name': 'Grp',
+                'type': 'select',
+                'proxies': ['HK'],
+              },
+            ],
+          },
+        ),
+        _baseProfile.copyWith(
+          profileProxies: nodes,
+          proxyChains: const [chain],
+        ),
+        child: const CustomProxiesView(),
+        otherProfiles: [
+          _baseProfile.copyWith(
+            id: 2,
+            profileProxies: nodes,
+            proxyAliases: const {'HK': 'HK'},
+            proxyChains: const [chain],
+          ),
+        ],
+        overrides: [
+          customProxiesProvider.overrideWith(_SharedProxies.new),
+          coreHandlerProvider.overrideWithValue(core),
+        ],
+      );
+      await tester.tap(
+        find.descendant(of: _tile(from), matching: find.byTooltip(_l10n.more)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(_l10n.edit));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.descendant(
+          of: find.byKey(const ValueKey('proxy-row-name')),
+          matching: find.byType(TextField),
+        ),
+        to,
+      );
+      await tester.tap(find.byTooltip(_l10n.save));
+      await tester.pumpAndSettle();
+      if (refused != null) {
+        expect(messages, [_l10n.customOutboundInUse(refused)]);
+        expect(profiles.state.first.profileProxies, nodes);
+        return;
+      }
+      expect(messages, isEmpty);
+      expect(profiles.state.first.proxyChains.single.proxies.first, 'HK');
+      expect(profiles.state.last.proxyChains.single.proxies.first, holder);
+      if (from == 'Free') {
+        expect(profiles.aliasFreeNames, {
+          1: {'Free'},
+          2: {'Free'},
+        });
+      }
+    });
+  }
+
+  testWidgets('renaming on a profile page leaves its raw group references', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final core = _Core();
+    when(() => core.isCompleted).thenReturn(true);
+    when(() => core.validateProxies(any())).thenAnswer((_) async => {});
+    const chain = ProxyChain(id: 21, proxies: ['Auto', 'DIRECT']);
+    final (profiles, _) = await _pump(
+      tester,
+      _SetupAction(
+        rawConfig: const {
+          'proxy-groups': [
+            {
+              'name': 'Auto',
+              'type': 'select',
+              'proxies': ['DIRECT'],
+            },
+          ],
+        },
+      ),
+      _baseProfile.copyWith(
+        profileProxies: const [
+          ProfileProxy(id: 11, proxy: {'name': 'Auto', 'type': 'ss'}),
+        ],
+        proxyChains: const [chain],
+      ),
+      overrides: [coreHandlerProvider.overrideWithValue(core)],
+    );
+    await tester.tap(
+      find.descendant(of: _tile('Auto'), matching: find.byTooltip(_l10n.more)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_l10n.edit));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const ValueKey('proxy-row-name')),
+        matching: find.byType(TextField),
+      ),
+      'Auto2',
+    );
+    await tester.tap(find.byTooltip(_l10n.save));
+    await tester.pumpAndSettle();
+    final saved = profiles.state.single;
+    expect(saved.profileProxies.single.name, 'Auto2');
+    expect(saved.proxyChains.single.proxies.first, 'Auto');
+  });
+
+  for (final kind in ['script', 'app DNS', 'kept name']) {
+    testWidgets('a rename keeps its alias for a $kind reference', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final core = _Core();
+      when(() => core.isCompleted).thenReturn(true);
+      when(() => core.validateProxies(any())).thenAnswer((_) async => {});
+      final (profiles, messages) = await _pump(
+        tester,
+        _SetupAction(
+          rawConfig: const {
+            'proxies': [
+              {'name': 'Sub', 'type': 'socks5'},
+            ],
+          },
+        ),
+        _baseProfile.copyWith(
+          overwriteType: kind == 'script'
+              ? OverwriteType.script
+              : OverwriteType.standard,
+          profileProxies: const [
+            ProfileProxy(id: 11, proxy: {'name': 'Free', 'type': 'ss'}),
+            ProfileProxy(id: 12, proxy: {'name': 'Sub', 'type': 'ss'}),
+          ],
+        ),
+        child: const CustomProxiesView(),
+        overrides: [
+          customProxiesProvider.overrideWith(_SharedProxies.new),
+          coreHandlerProvider.overrideWithValue(core),
+          if (kind == 'app DNS')
+            patchClashConfigProvider.overrideWithBuild(
+              (_, _) => const ClashConfig(
+                dns: Dns(nameserver: ['https://dns.test/q#Free']),
+              ),
+            ),
+        ],
+      );
+      final from = kind == 'kept name' ? 'Sub' : 'Free';
+      await tester.tap(
+        find.descendant(of: _tile(from), matching: find.byTooltip(_l10n.more)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(_l10n.edit));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.descendant(
+          of: find.byKey(const ValueKey('proxy-row-name')),
+          matching: find.byType(TextField),
+        ),
+        'Renamed',
+      );
+      await tester.tap(find.byTooltip(_l10n.save));
+      await tester.pumpAndSettle();
+      expect(messages, isEmpty);
+      expect(
+        profiles.state.single.profileProxies.first.name,
+        kind == 'kept name' ? 'Free' : 'Renamed',
+      );
+      expect(profiles.aliasFreeNames, isEmpty);
+    });
+  }
+
+  testWidgets('a chain cannot add a node under a subscription node name', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final core = _Core();
+    when(() => core.isCompleted).thenReturn(true);
+    when(() => core.validateProxies(any())).thenAnswer((_) async => {});
+    when(() => core.decodeShareLinks(any())).thenAnswer(
+      (_) async => [
+        [
+          {'name': 'Sub', 'type': 'socks5', 'server': 'a.test', 'port': 1},
+        ],
+      ],
+    );
+    final (profiles, messages) = await _pump(
+      tester,
+      _SetupAction(),
+      _baseProfile,
+      child: ProxyChainEditView(
+        profileId: 1,
+        rawConfig: const {
+          'proxies': [
+            {'name': 'Sub', 'type': 'socks5', 'server': 'a.test', 'port': 1},
+          ],
+        },
+        canSave: (_) async => true,
+      ),
+      overrides: [coreHandlerProvider.overrideWithValue(core)],
+    );
+    await tester.tap(find.text(_l10n.addProxyChainNode));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('proxy-share-link')),
+      'socks5://a.test:1',
+    );
+    await tester.tap(find.byTooltip(_l10n.save).last);
+    await tester.pumpAndSettle();
+    expect(messages, [_l10n.existsTip(_l10n.proxies)]);
+    expect(profiles.state.single.profileProxies, isEmpty);
+  });
+
+  testWidgets('a profile page says which nodes it leaves to its subscription', (
     tester,
   ) async {
     final core = _Core();
     when(() => core.isCompleted).thenReturn(true);
-    when(() => core.validateProxies(any()))
-        .thenAnswer((_) async => {1: 'missing server'});
-    await _pump(
+    when(() => core.validateProxies(any())).thenAnswer((_) async => {});
+    const nodes = [
+      ProfileProxy(id: 11, proxy: {'name': 'HK', 'type': 'ss'}),
+      ProfileProxy(id: 12, proxy: {'name': 'Mine', 'type': 'ss'}),
+    ];
+    final (profiles, _) = await _pump(
       tester,
-      _SetupAction(),
-      _baseProfile.copyWith(
-        profileProxies: const [
-          ProfileProxy(id: 11, proxy: {'name': 'Good', 'type': 'direct'}),
-          ProfileProxy(id: 12, proxy: {'name': 'Bad', 'type': 'socks5'}),
-        ],
+      _SetupAction(
+        rawConfig: const {
+          'proxies': [
+            {'name': 'HK', 'type': 'socks5'},
+          ],
+        },
       ),
-      child: const CustomProxiesView(),
+      _baseProfile.copyWith(profileProxies: nodes),
       overrides: [
-        customProxiesProvider.overrideWith(_SharedProxies.new),
-        coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+        initProvider.overrideWithBuild((_, _) => true),
+        routingSourceProvider(1).overrideWith(
+          (_) async => const {
+            'proxies': [
+              {'name': 'HK'},
+            ],
+          },
+        ),
         coreHandlerProvider.overrideWithValue(core),
       ],
     );
-    expect(tester.widget<OverwriteEntryTile>(_tile('Good')).invalid, isFalse);
-    expect(tester.widget<OverwriteEntryTile>(_tile('Bad')).invalid, isTrue);
-    expect(find.text('missing server'), findsOneWidget);
-    verify(() => core.validateProxies(any())).called(1);
+    expect(find.text(_l10n.proxyYieldsToSubscription), findsOneWidget);
+    expect(
+      find.descendant(
+        of: _tile('HK'),
+        matching: find.text(_l10n.proxyYieldsToSubscription),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.descendant(of: _tile('HK'), matching: find.byTooltip(_l10n.more)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_l10n.edit));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip(_l10n.save));
+    await tester.pumpAndSettle();
+    expect(profiles.state.single.proxyAliases, isEmpty);
   });
+
+  testWidgets('a node a rule reaches past its alias cannot be deleted', (
+    tester,
+  ) async {
+    const nodes = [
+      ProfileProxy(id: 11, proxy: {'name': 'Home', 'type': 'direct'}),
+      ProfileProxy(id: 12, proxy: {'name': 'Home (2)', 'type': 'direct'}),
+    ];
+    final (profiles, messages) = await _pump(
+      tester,
+      _SetupAction()..ruleTargets = {'Home'},
+      _baseProfile.copyWith(
+        profileProxies: nodes,
+        proxyAliases: const {'Home': 'Home (2)'},
+      ),
+    );
+    await _deleteFromMenu(tester, 'Home');
+    expect(messages, [_l10n.customOutboundInUse('Home')]);
+    expect(profiles.state.single.profileProxies, nodes);
+  });
+
+  for (final initialized in [true, false]) {
+    testWidgets('a rejected node shows why, Core initialized: $initialized', (
+      tester,
+    ) async {
+      final core = _Core();
+      when(() => core.isCompleted).thenReturn(true);
+      var ready = initialized;
+      when(() => core.isInit).thenAnswer((_) async => ready);
+      when(() => core.validateProxies(any()))
+          .thenAnswer((_) async => {1: 'missing server'});
+      await _pump(
+        tester,
+        _SetupAction(),
+        _baseProfile.copyWith(
+          profileProxies: const [
+            ProfileProxy(id: 11, proxy: {'name': 'Good', 'type': 'direct'}),
+            ProfileProxy(id: 12, proxy: {'name': 'Bad', 'type': 'socks5'}),
+          ],
+        ),
+        child: const CustomProxiesView(),
+        overrides: [
+          customProxiesProvider.overrideWith(_SharedProxies.new),
+          coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+          coreHandlerProvider.overrideWithValue(core),
+        ],
+      );
+      expect(tester.widget<OverwriteEntryTile>(_tile('Good')).invalid, isFalse);
+      expect(
+        tester.widget<OverwriteEntryTile>(_tile('Bad')).invalid,
+        initialized,
+      );
+      expect(
+        find.text('missing server'),
+        initialized ? findsOneWidget : findsNothing,
+      );
+      if (initialized) {
+        verify(() => core.validateProxies(any())).called(1);
+      } else {
+        verifyNever(() => core.validateProxies(any()));
+        ready = true;
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pumpAndSettle();
+        expect(find.text('missing server'), findsOneWidget);
+      }
+    });
+  }
 
   for (final width in [390.0, 1000.0]) {
     testWidgets('global nodes can be reordered by dragging at width $width', (
@@ -1586,6 +1929,9 @@ void main() {
         addedRules: const [],
         proxyChains: next.proxyChains,
         profileProxies: next.profileProxies,
+        proxyAliases: {
+          for (final proxy in next.profileProxies) proxy.name: proxy.name,
+        },
         customProxyGroups: next.customProxyGroups,
         customRules: const [],
         defaultUA: 'FlClash',

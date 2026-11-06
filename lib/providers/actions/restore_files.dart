@@ -15,6 +15,25 @@ Map<String, dynamic> createBackupConfigMap(Config config, int version) {
   return configMap;
 }
 
+/// Node and group names each restored profile's file holds, before it goes live.
+Future<Map<int, Set<String>>> restoredProfileRawNames(
+  List<Profile> profiles,
+  List<VM2<String, String>> migrations,
+  Future<Map<String, dynamic>> Function(String path) read,
+) async {
+  final sources = {
+    for (final migration in migrations) p.basename(migration.b): migration.a,
+  };
+  final names = <int, Set<String>>{};
+  for (final profile in profiles) {
+    final source = sources[profile.fileName];
+    if (source == null) continue;
+    final raw = await read(source);
+    names[profile.id] = {...rawProxyNames(raw), ...rawProxyGroupNames(raw)};
+  }
+  return names;
+}
+
 Future<void> validateRestoredProfileFiles(
   List<VM2<String, String>> migrations,
   String profilesPath,

@@ -1155,6 +1155,30 @@ void main() {
     });
   });
 
+  test(
+    'restored profiles report the node and group names their file holds',
+    () async {
+      final names = await restoredProfileRawNames(
+        const [
+          Profile(id: 1, autoUpdateDuration: Duration.zero),
+          Profile(id: 2, autoUpdateDuration: Duration.zero),
+        ],
+        const [VM2('/restore/1.yaml', '/profiles/1.yaml')],
+        (path) async => {
+          'proxies': [
+            {'name': 'Node'},
+          ],
+          'proxy-groups': [
+            {'name': 'Group'},
+          ],
+        },
+      );
+      expect(names, {
+        1: {'Node', 'Group'},
+      });
+    },
+  );
+
   test('validates restored profiles but ignores scripts', () async {
     final root = await Directory.systemTemp.createTemp('restore_validate_');
     addTearDown(() => root.delete(recursive: true));

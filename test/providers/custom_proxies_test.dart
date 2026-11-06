@@ -84,6 +84,45 @@ void main() {
   });
 
   test(
+    'a profile keeping the old name takes no alias or renamed rule',
+    () async {
+      const rule = Rule(id: 90, value: 'DOMAIN,example.test,Home');
+      await db.database.rulesDao.putGlobalRule(rule);
+      final renamed = node.copyWith(proxy: {...node.proxy, 'name': 'Renamed'});
+      final owner = container.read(profilesProvider.notifier);
+      await owner.setCustomProxies(
+        [renamed],
+        rawOwnedNames: {
+          1: {node.name},
+        },
+      );
+      await waitForPendingDatabaseWrites();
+      final stored = await db.database.profilesDao.all().get();
+      expect(stored.map((p) => p.proxyAliases[node.name]), [null, 'Renamed']);
+      expect(
+        (await db.database.rulesDao.allGlobalAddedRules().get()).single.value,
+        rule.value,
+      );
+    },
+  );
+
+  test('a rename nothing else refers to leaves no alias behind', () async {
+    final renamed = node.copyWith(proxy: {...node.proxy, 'name': 'Renamed'});
+    await container
+        .read(profilesProvider.notifier)
+        .setCustomProxies(
+          [renamed],
+          aliasFreeNames: {
+            1: {node.name},
+          },
+        );
+    await waitForPendingDatabaseWrites();
+    final stored = await db.database.profilesDao.all().get();
+    expect(stored.map((p) => p.proxyAliases[node.name]), [null, 'Renamed']);
+    expect(stored.first.proxyChains.single.proxies.last, 'Renamed');
+  });
+
+  test(
     'ordinary and managed profiles share nodes while chains remain scoped',
     () async {
       final before = container.read(profilesProvider);
