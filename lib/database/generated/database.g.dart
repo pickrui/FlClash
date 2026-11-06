@@ -5440,10 +5440,11 @@ class $$ProfilesTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (profileRuleLinksRefs)
-                    await $_getPrefetchedData<
+                    await $_getPrefetchedDataByColumns<
                       RawProfile,
                       $ProfilesTable,
-                      RawProfileRuleLink
+                      RawProfileRuleLink,
+                      $ProfileRuleLinksTable
                     >(
                       currentTable: table,
                       referencedTable: $$ProfilesTableReferences
@@ -5453,8 +5454,8 @@ class $$ProfilesTableTableManager
                         table,
                         p0,
                       ).profileRuleLinksRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.profileId == item.id),
+                      currentColumn: 'id',
+                      referencedColumn: 'profile_id',
                       typedResults: items,
                     ),
                 ];
@@ -6013,10 +6014,11 @@ class $$RulesTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (profileRuleLinksRefs)
-                    await $_getPrefetchedData<
+                    await $_getPrefetchedDataByColumns<
                       RawRule,
                       $RulesTable,
-                      RawProfileRuleLink
+                      RawProfileRuleLink,
+                      $ProfileRuleLinksTable
                     >(
                       currentTable: table,
                       referencedTable: $$RulesTableReferences
@@ -6026,8 +6028,8 @@ class $$RulesTableTableManager
                         table,
                         p0,
                       ).profileRuleLinksRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.ruleId == item.id),
+                      currentColumn: 'id',
+                      referencedColumn: 'rule_id',
                       typedResults: items,
                     ),
                 ];

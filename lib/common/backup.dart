@@ -802,7 +802,11 @@ Future<MigrationData> _restoreTask(RestoreArchiveRequest paths) async {
   // Archive entries read lazily from this stream during extraction.
   final input = InputFileStream(backupFilePath);
   try {
-    await extractBackupArchive(zipDecoder.decodeStream(input), restoreDirPath);
+    // Since archive 4.6 damaged data goes unreported unless verification is asked for.
+    await extractBackupArchive(
+      zipDecoder.decodeStream(input, verify: true),
+      restoreDirPath,
+    );
   } finally {
     await input.close();
   }

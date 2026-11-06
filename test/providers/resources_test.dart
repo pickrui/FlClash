@@ -161,7 +161,7 @@ void main() {
     expect(downloads, 1);
     expect(await File(await item.resourcePath).readAsBytes(), valid);
     await container.pump();
-    expect(container.exists(scriptsProvider), isFalse);
+    expect(container.read(scriptsProvider.exists), isFalse);
   });
 
   for (final interval in [defaultGeoUpdateInterval, 0]) {

@@ -53,7 +53,7 @@ class _AccessViewState extends ConsumerState<AccessView>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadReady =
-        ref.exists(installedAppsProvider) &&
+        ref.read(installedAppsProvider.exists) &&
         ref.read(installedAppsProvider).hasValue;
     final accessControl = ref
         .read(vpnSettingProvider.select((state) => state.accessControlProps))
