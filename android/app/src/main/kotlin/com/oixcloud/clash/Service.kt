@@ -38,6 +38,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+// A start runs establish() and waits for the Core's run lock, which a config
+// apply or provider update can hold well past an ordinary call's budget.
+private const val SERVICE_LIFECYCLE_TIMEOUT_MILLIS = 60_000L
+
 object Service {
     private const val INIT_METHOD = "core.init"
     private val validationMethods = setOf("config.validate", "config.validateBytes")
@@ -358,7 +362,7 @@ object Service {
 
 
     suspend fun startService(options: VpnOptions, runTime: Long): Long {
-        return delegate.useService {
+        return delegate.useService(timeoutMillis = SERVICE_LIFECYCLE_TIMEOUT_MILLIS) {
             awaitIResultInterface { callback ->
                 it.startService(options, runTime, callback)
             }
@@ -366,7 +370,7 @@ object Service {
     }
 
     suspend fun stopService(): Long {
-        return delegate.useService {
+        return delegate.useService(timeoutMillis = SERVICE_LIFECYCLE_TIMEOUT_MILLIS) {
             awaitIResultInterface { callback ->
                 it.stopService(callback)
             }

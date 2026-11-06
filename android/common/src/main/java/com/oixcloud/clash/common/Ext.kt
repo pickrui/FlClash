@@ -88,18 +88,21 @@ val Intent.toPendingIntent: PendingIntent
     )
 
 
+/** Costs a binder call, so once per service start rather than per notification. */
+fun Context.ensureNotificationChannel() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+    val manager = getSystemService(NotificationManager::class.java) ?: return
+    val channel = manager.getNotificationChannel(GlobalState.NOTIFICATION_CHANNEL)
+        ?: NotificationChannel(
+            GlobalState.NOTIFICATION_CHANNEL,
+            getString(R.string.service_notification_channel),
+            NotificationManager.IMPORTANCE_LOW,
+        )
+    channel.name = getString(R.string.service_notification_channel)
+    manager.createNotificationChannel(channel)
+}
+
 fun Service.startForeground(notification: Notification) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val manager = getSystemService(NotificationManager::class.java)
-        val channel = manager?.getNotificationChannel(GlobalState.NOTIFICATION_CHANNEL)
-            ?: NotificationChannel(
-                GlobalState.NOTIFICATION_CHANNEL,
-                getString(R.string.service_notification_channel),
-                NotificationManager.IMPORTANCE_LOW
-            )
-        channel.name = getString(R.string.service_notification_channel)
-        manager?.createNotificationChannel(channel)
-    }
     startForegroundCompat(GlobalState.NOTIFICATION_ID, notification)
 }
 

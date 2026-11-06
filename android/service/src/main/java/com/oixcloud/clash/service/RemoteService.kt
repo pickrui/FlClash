@@ -188,7 +188,9 @@ class RemoteService : Service(),
                         intent = nextIntent
                         nextDelegate.bind()
                     }
-                    checkNotNull(delegate).useService { service ->
+                    // Inside the caller's 60 s, which a start can use most of
+                    // while the Core's run lock is held, so this error surfaces.
+                    checkNotNull(delegate).useService(timeoutMillis = 55_000) { service ->
                         startingService = service
                         service.start()
                     }.getOrThrow()

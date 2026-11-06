@@ -20,6 +20,7 @@ import com.oixcloud.clash.common.quickIntent
 import com.oixcloud.clash.common.receiveBroadcastFlow
 import com.oixcloud.clash.common.startForeground
 import com.oixcloud.clash.common.tickerFlow
+import com.oixcloud.clash.common.ensureNotificationChannel
 import com.oixcloud.clash.common.toPendingIntent
 import com.oixcloud.clash.core.Core
 import com.oixcloud.clash.service.R
@@ -54,6 +55,7 @@ class NotificationModule(private val service: Service) : Module() {
     override fun onInstall() {
         synchronized(lock) {
             installed = true
+            service.ensureNotificationChannel()
             // Foreground promotion is part of startup, including while the
             // screen is off, and a failure must reach service rollback.
             update((State.notificationParamsFlow.value ?: NotificationParams()).extended)
@@ -118,6 +120,8 @@ class NotificationModule(private val service: Service) : Module() {
         }
     }
 
+    private val stopIntent by lazy { QuickAction.STOP.quickIntent.toPendingIntent }
+
     private fun update(params: ExtendedNotificationParams) = synchronized(lock) {
         if (!installed) return
         service.startForeground(
@@ -126,7 +130,7 @@ class NotificationModule(private val service: Service) : Module() {
                 setContentText(params.contentText)
                 clearActions()
                 if (params.showStopAction) {
-                    addAction(0, params.stopText, QuickAction.STOP.quickIntent.toPendingIntent)
+                    addAction(0, params.stopText, stopIntent)
                 }
                 build()
             })

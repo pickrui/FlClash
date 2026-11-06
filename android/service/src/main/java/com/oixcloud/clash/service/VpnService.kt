@@ -22,6 +22,7 @@ import com.oixcloud.clash.common.LocalNetworkAccess
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.BroadcastAction
 import com.oixcloud.clash.common.sendBroadcast
+import com.oixcloud.clash.common.ensureNotificationChannel
 import com.oixcloud.clash.common.startForeground
 import com.oixcloud.clash.core.Core
 import com.oixcloud.clash.service.models.normalizeTunMtu
@@ -29,6 +30,7 @@ import com.oixcloud.clash.service.models.tunOptions
 import com.oixcloud.clash.service.models.VpnOptions
 import com.oixcloud.clash.service.models.getIpv4RouteAddress
 import com.oixcloud.clash.service.models.getIpv6RouteAddress
+import com.oixcloud.clash.service.models.CIDR
 import com.oixcloud.clash.service.models.toCIDR
 import com.oixcloud.clash.service.modules.MemoryPressureModule
 import com.oixcloud.clash.service.modules.NetworkObserveModule
@@ -74,6 +76,7 @@ class VpnService : SystemVpnService(), IBaseService {
         synchronized(lifecycleLock) {
             if (started) return START_NOT_STICKY
             try {
+                ensureNotificationChannel()
                 startForeground(
                     NotificationCompat.Builder(this, GlobalState.NOTIFICATION_CHANNEL)
                         .setSmallIcon(R.drawable.ic_service)
@@ -163,6 +166,26 @@ class VpnService : SystemVpnService(), IBaseService {
         return super.onBind(intent) ?: binder
     }
 
+    // Flutter lists every routed family: one missing from a non-empty list is excluded.
+    private fun Builder.addRoutes(
+        routes: () -> List<CIDR>,
+        fallbackAddress: String,
+        routeAll: Boolean,
+    ) {
+        val routeList = runCatching(routes).getOrNull()
+        if (routeAll || routeList == null) {
+            addRoute(fallbackAddress, 0)
+            return
+        }
+        try {
+            routeList.forEach { route ->
+                addRoute(route.address, route.prefixLength)
+            }
+        } catch (_: Exception) {
+            addRoute(fallbackAddress, 0)
+        }
+    }
+
     private fun handleStart(requested: VpnOptions) {
         val options = requested.copy(stack = LocalNetworkAccess.effectiveStack(
             requested.enable, requested.stack, LocalNetworkAccess.isGranted(this),
@@ -173,22 +196,11 @@ class VpnService : SystemVpnService(), IBaseService {
             Log.d(
                 "addAddress", "address: ${cidr.address} prefixLength:${cidr.prefixLength}"
             )
-            val routeAddress = runCatching { options.getIpv4RouteAddress() }
-                .getOrDefault(emptyList())
-            if (routeAddress.isNotEmpty()) {
-                try {
-                    routeAddress.forEach { i ->
-                        Log.d(
-                            "addRoute4", "address: ${i.address} prefixLength:${i.prefixLength}"
-                        )
-                        addRoute(i.address, i.prefixLength)
-                    }
-                } catch (_: Exception) {
-                    addRoute(NET_ANY, 0)
-                }
-            } else {
-                addRoute(NET_ANY, 0)
-            }
+            addRoutes(
+                routes = options::getIpv4RouteAddress,
+                fallbackAddress = NET_ANY,
+                routeAll = options.routeAddress.isEmpty(),
+            )
             if (options.ipv6) {
                 try {
                     val cidr = IPV6_ADDRESS.toCIDR()
@@ -202,26 +214,11 @@ class VpnService : SystemVpnService(), IBaseService {
                     )
                 }
 
-                try {
-                    val routeAddress = options.getIpv6RouteAddress()
-                    if (routeAddress.isNotEmpty()) {
-                        try {
-                            routeAddress.forEach { i ->
-                                Log.d(
-                                    "addRoute6",
-                                    "address: ${i.address} prefixLength:${i.prefixLength}"
-                                )
-                                addRoute(i.address, i.prefixLength)
-                            }
-                        } catch (_: Exception) {
-                            addRoute("::", 0)
-                        }
-                    } else {
-                        addRoute(NET_ANY6, 0)
-                    }
-                } catch (_: Exception) {
-                    addRoute(NET_ANY6, 0)
-                }
+                addRoutes(
+                    routes = options::getIpv6RouteAddress,
+                    fallbackAddress = NET_ANY6,
+                    routeAll = options.routeAddress.isEmpty(),
+                )
             }
             addDnsServer(DNS)
             if (options.ipv6) {
