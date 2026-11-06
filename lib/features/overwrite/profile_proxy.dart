@@ -212,6 +212,7 @@ class OverwriteEntryTile extends StatelessWidget {
   final bool enable;
   final bool isSelected;
   final bool isEditing;
+  final bool invalid;
   final VoidCallback onSelected;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -224,6 +225,7 @@ class OverwriteEntryTile extends StatelessWidget {
     required this.enable,
     required this.isSelected,
     required this.isEditing,
+    this.invalid = false,
     required this.onSelected,
     required this.onEdit,
     required this.onDelete,
@@ -239,6 +241,7 @@ class OverwriteEntryTile extends StatelessWidget {
         padding: EdgeInsets.zero,
         radius: 18,
         isSelected: isSelected,
+        isError: invalid,
         onPressed: onSelected,
         child: ListRow(
           minHeight:
@@ -1226,10 +1229,13 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     final visibleIds = visible.map((node) => node.id).toSet();
     final visibleSelected = selectedProfileProxies.intersection(visibleIds);
 
+    final coreErrors = ref.watch(customProxyCoreErrorsProvider).value;
+
     Widget rowAt(int index) {
       final profileProxy = visible[index];
       final isEditing = selectedProfileProxies.isNotEmpty;
       final isSelected = selectedProfileProxies.contains(profileProxy.id);
+      final coreError = coreErrors?[profileProxy.id];
       return MemoBuilder(
         key: ValueKey(profileProxy.id),
         inputs: [
@@ -1238,21 +1244,25 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           index,
           isEditing,
           isSelected,
+          coreError,
           query.isEmpty,
         ],
         builder: (context) {
           final row = OverwriteEntryTile(
             isEditing: isEditing,
             isSelected: isSelected,
+            invalid: coreError != null,
             title: profileProxy.name,
             subtitle: Text(
-              ProxyDefinition(profileProxy.proxy).displayType,
-              maxLines: 1,
+              coreError ?? ProxyDefinition(profileProxy.proxy).displayType,
+              maxLines: coreError == null ? 1 : 2,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyle.footnote
                   .of(context)
                   .copyWith(
-                    color: context.colorScheme.onSurfaceVariant.opacity80,
+                    color: coreError == null
+                        ? context.colorScheme.onSurfaceVariant.opacity80
+                        : context.colorScheme.error,
                   ),
             ),
             enable: profileProxy.enable,

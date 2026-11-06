@@ -232,6 +232,35 @@ void main() {
     expect(find.byType(SliverPrismReorderableList), findsOneWidget);
   });
 
+  testWidgets('a node the Core rejects shows why in the global node list', (
+    tester,
+  ) async {
+    final core = _Core();
+    when(() => core.isCompleted).thenReturn(true);
+    when(() => core.validateProxies(any()))
+        .thenAnswer((_) async => {1: 'missing server'});
+    await _pump(
+      tester,
+      _SetupAction(),
+      _baseProfile.copyWith(
+        profileProxies: const [
+          ProfileProxy(id: 11, proxy: {'name': 'Good', 'type': 'direct'}),
+          ProfileProxy(id: 12, proxy: {'name': 'Bad', 'type': 'socks5'}),
+        ],
+      ),
+      child: const CustomProxiesView(),
+      overrides: [
+        customProxiesProvider.overrideWith(_SharedProxies.new),
+        coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+        coreHandlerProvider.overrideWithValue(core),
+      ],
+    );
+    expect(tester.widget<OverwriteEntryTile>(_tile('Good')).invalid, isFalse);
+    expect(tester.widget<OverwriteEntryTile>(_tile('Bad')).invalid, isTrue);
+    expect(find.text('missing server'), findsOneWidget);
+    verify(() => core.validateProxies(any())).called(1);
+  });
+
   for (final width in [390.0, 1000.0]) {
     testWidgets('global nodes can be reordered by dragging at width $width', (
       tester,

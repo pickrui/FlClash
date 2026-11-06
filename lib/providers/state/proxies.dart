@@ -235,3 +235,42 @@ VM3<bool, int, ProxiesSortType> needUpdateGroups(Ref ref) {
   );
   return VM3(isProxies, sortNum, sortType);
 }
+
+const _definitionEquality = DeepCollectionEquality();
+
+Duration? _noRetry(int _, Object _) => null;
+
+/// Lives with the list, as a verdict can rest on a file such as an ssh key.
+@riverpod
+Map<Map<String, Object?>, String> customProxyVerdicts(Ref ref) => LinkedHashMap(
+  equals: _definitionEquality.equals,
+  hashCode: _definitionEquality.hash,
+);
+
+/// What the Core says is wrong with a shared node, by node id.
+@Riverpod(retry: _noRetry)
+Future<Map<int, String>> customProxyCoreErrors(Ref ref) async {
+  if (ref.watch(coreStatusProvider) != CoreStatus.connected) return const {};
+  final proxies =
+      ref.watch(customProxiesProvider).value ?? const <ProfileProxy>[];
+  if (proxies.isEmpty) return const {};
+  final verdicts = ref.watch(customProxyVerdictsProvider);
+  final unchecked = [
+    for (final proxy in proxies)
+      if (!verdicts.containsKey(proxy.normalizedProxy)) proxy.normalizedProxy,
+  ];
+  if (unchecked.isNotEmpty) {
+    final results = await ref
+        .read(coreHandlerProvider)
+        .validateProxies(unchecked);
+    for (final (index, definition) in unchecked.indexed) {
+      verdicts[definition] = results[index] ?? '';
+    }
+  }
+  return {
+    for (final proxy in proxies)
+      if (verdicts[proxy.normalizedProxy] case final message?
+          when message.isNotEmpty)
+        proxy.id: message,
+  };
+}
