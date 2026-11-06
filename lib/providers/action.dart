@@ -58,7 +58,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'generated/action.g.dart';
 part 'actions/update.dart';
 part 'actions/app_state.dart';
-part 'actions/profile.dart';
+part 'actions/profiles.dart';
 part 'actions/logs.dart';
 part 'actions/proxies.dart';
 part 'actions/setup.dart';

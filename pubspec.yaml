@@ -13,8 +13,6 @@ dependencies:
     path: plugins/setup/setup_hooks
   flutter:
     sdk: flutter
-  flutter_localizations:
-    sdk: flutter
   intl: any
   path_provider: ^2.1.6
   path: ^1.9.1
@@ -53,7 +51,6 @@ dependencies:
   win32: ^6.4.0
   code_forge:
     path: plugins/code_forge
-  path_parsing: ^1.1.0
   re_highlight: ^0.0.3
   archive: ^4.3.0
   device_info_plus: ^13.3.0

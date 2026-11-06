@@ -24,8 +24,8 @@ import 'config.dart';
 import 'database.dart';
 
 part 'generated/state.g.dart';
-part 'states/navigation.dart';
-part 'states/proxies.dart';
-part 'states/system.dart';
-part 'states/profile.dart';
-part 'states/theme.dart';
+part 'state/navigation.dart';
+part 'state/proxies.dart';
+part 'state/system.dart';
+part 'state/profile.dart';
+part 'state/theme.dart';

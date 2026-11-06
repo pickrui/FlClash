@@ -36,7 +36,7 @@ NavigationItem _item(PageLabel label) =>
 class _PageOpener extends StatelessWidget {
   final ValueChanged<String?> onClosed;
 
-  const _PageOpener({super.key, required this.onClosed});
+  const _PageOpener({required this.onClosed});
 
   @override
   Widget build(BuildContext context) {

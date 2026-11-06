@@ -105,25 +105,11 @@ class Database extends _$Database {
             }
           }
         }
-        if (from < 5) {
-          final existing = await customSelect(
-            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'clash_providers'",
-          ).get();
-          if (existing.isEmpty) await m.createTable(clashProviders);
-        }
-        // A build that went back to schema 7 kept the table it had added.
-        if (from < 8) {
-          final existing = await customSelect(
-            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'icon_sets'",
-          ).get();
-          if (existing.isEmpty) await m.createTable(iconSets);
-        }
-        if (from < 10) {
-          final existing = await customSelect(
-            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'mitm_modules'",
-          ).get();
-          if (existing.isEmpty) await m.createTable(mitmModules);
-        }
+        // createTable is IF NOT EXISTS: a build that went back to an older
+        // schema kept the tables it had added.
+        if (from < 5) await m.createTable(clashProviders);
+        if (from < 8) await m.createTable(iconSets);
+        if (from < 10) await m.createTable(mitmModules);
         final profileColumns = await _profileColumnNames();
         if (from < 9 && profileColumns.add('age_secret_key')) {
           await m.addColumn(profiles, profiles.ageSecretKey);
@@ -157,15 +143,8 @@ class Database extends _$Database {
           if (profileColumns.add('match_target')) {
             await m.addColumn(profiles, profiles.matchTarget);
           }
-          final tables = (await customSelect(
-            "SELECT name FROM sqlite_master WHERE type = 'table'",
-          ).get()).map((row) => row.read<String>('name')).toSet();
-          if (!tables.contains('proxy_groups')) {
-            await m.createTable(proxyGroups);
-          }
-          if (!tables.contains('icon_records')) {
-            await m.createTable(iconRecords);
-          }
+          await m.createTable(proxyGroups);
+          await m.createTable(iconRecords);
           final ruleColumns = (await customSelect(
             'PRAGMA table_info(rules)',
           ).get()).map((row) => row.read<String>('name')).toSet();

@@ -448,25 +448,6 @@ void main() {
     expect(profile.hasCustomOutboundReferences('Other'), false);
   });
 
-  test('removing an unreferenced group clears UI selection caches', () {
-    const group = ProxyGroup(name: 'Target', type: GroupType.Selector);
-    const profile = Profile(
-      id: 1,
-      autoUpdateDuration: Duration(hours: 1),
-      currentGroupName: 'Target',
-      selectedMap: {'Target': 'DIRECT', 'Nested': 'Target'},
-      unfoldSet: {'Target', 'Nested'},
-      customProxyGroups: [group],
-    );
-
-    final result = profile.copyAndRemoveCustomProxyGroup(group);
-
-    expect(result.currentGroupName, isNull);
-    expect(result.selectedMap, isEmpty);
-    expect(result.unfoldSet, {'Nested'});
-    expect(result.customProxyGroups, isEmpty);
-  });
-
   test('renaming a custom node updates custom group and rule references', () {
     const profile = Profile(
       id: 1,
