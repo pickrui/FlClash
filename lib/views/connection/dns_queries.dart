@@ -363,6 +363,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
         tooltip: appLocalizations.clearData,
         onPressed: () {
           ref.read(dnsQueriesProvider.notifier).clear();
+          ref.read(dnsQueryCountProvider.notifier).value = 0;
           setState(() => _queries = []);
           _filters.offer(_queries);
         },

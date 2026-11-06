@@ -427,13 +427,11 @@ class DashboardChip extends StatelessWidget {
     required this.label,
     this.tone = DashboardChipTone.idle,
     this.dot = false,
-    this.large = false,
   });
 
   final String label;
   final DashboardChipTone tone;
   final bool dot;
-  final bool large;
 
   @override
   Widget build(BuildContext context) {
@@ -445,8 +443,8 @@ class DashboardChip extends StatelessWidget {
       DashboardChipTone.warn => (colors.warnContainer, colors.onWarnContainer),
     };
     return Container(
-      height: large ? 28 : 24,
-      padding: EdgeInsets.symmetric(horizontal: large ? 12 : 10),
+      height: 24,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: ShapeDecoration(color: background, shape: AppShape.full),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -102,7 +102,11 @@ void main() {
   late ProviderContainer container;
 
   setUp(() {
-    container = ProviderContainer();
+    container = ProviderContainer(
+      overrides: [
+        coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+      ],
+    );
     globalState.container = container;
   });
 
@@ -673,7 +677,10 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     final stream = _StreamCore(() => const []);
     final scoped = ProviderContainer(
-      overrides: [coreHandlerProvider.overrideWithValue(stream.core)],
+      overrides: [
+        coreHandlerProvider.overrideWithValue(stream.core),
+        coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+      ],
     );
     addTearDown(scoped.dispose);
     await tester.pumpWidget(

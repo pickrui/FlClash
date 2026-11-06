@@ -60,6 +60,14 @@ Override _items(List<PageLabel> labels) =>
     );
 
 void main() {
+  test('a tab takes a snapshot only in transit', () {
+    expect(fadeTabTakesSnapshot(0), isFalse);
+    expect(fadeTabTakesSnapshot(0.5), isTrue);
+    expect(fadeTabTakesSnapshot(-0.5), isTrue);
+    expect(fadeTabTakesSnapshot(1), isFalse);
+    expect(fadeTabTakesSnapshot(-1), isFalse);
+  });
+
   for (final animation in TabAnimation.values) {
     testWidgets('nonadjacent $animation navigation skips intermediate pages', (
       tester,
@@ -222,6 +230,54 @@ void main() {
     }
   });
 
+  testWidgets('a page inserted before the current one stays on screen', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final viewSize = viewSizeProvider.overrideWithBuild(
+      (_, _) => const Size(400, 800),
+    );
+    final container = ProviderContainer(
+      overrides: [
+        viewSize,
+        _items(const [PageLabel.dashboard, PageLabel.tools]),
+        profilesProvider.overrideWithValue([]),
+      ],
+    );
+    addTearDown(container.dispose);
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(tabAnimation: TabAnimation.fade));
+    container.read(currentPageLabelProvider.notifier).value = PageLabel.tools;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(child: HomePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    container.updateOverrides([
+      viewSize,
+      _items(const [PageLabel.dashboard, PageLabel.logs, PageLabel.tools]),
+      profilesProvider.overrideWithValue([]),
+    ]);
+    await tester.pumpAndSettle();
+
+    final page = find.text('tools:true');
+    expect(page.hitTestable(), findsOneWidget);
+    expect(
+      tester
+          .widget<Opacity>(
+            find.ancestor(of: page, matching: find.byType(Opacity)).first,
+          )
+          .opacity,
+      1,
+    );
+  });
+
   testWidgets('the dock over the system bar leaves the content one clearance', (
     tester,
   ) async {
@@ -294,10 +350,7 @@ void main() {
             value: [
               NavigationItem(
                 label: PageLabel.dashboard,
-                builder: (_) => _PageOpener(
-                  key: const GlobalObjectKey(PageLabel.dashboard),
-                  onClosed: results.add,
-                ),
+                builder: (_) => _PageOpener(onClosed: results.add),
               ),
               _item(PageLabel.tools),
             ],

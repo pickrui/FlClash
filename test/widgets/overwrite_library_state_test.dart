@@ -366,9 +366,11 @@ void main() {
       ),
     ]);
     await tester.pumpAndSettle();
-    PopGuard rulesScope() => tester
-        .widgetList<PopGuard>(find.byType(PopGuard))
-        .singleWhere((scope) => scope.child is SliverMainAxisGroup);
+    PopGuard rulesScope() => tester.widget<PopGuard>(
+      find
+          .ancestor(of: find.byType(RuleItem), matching: find.byType(PopGuard))
+          .first,
+    );
     expect(rulesScope().onPop, isNull);
     tester.widget<RuleItem>(find.byType(RuleItem)).onSelected();
     await tester.pump();

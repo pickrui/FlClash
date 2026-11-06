@@ -134,6 +134,26 @@ Color? _sheetColor(WidgetTester tester) {
 }
 
 void main() {
+  testWidgets('a scrolling dialog list stays within a short screen', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const list = Key('dialog-list');
+    await tester.pumpWidget(
+      const TestApp(
+        child: PagedSheetForm(
+          title: 'Pick',
+          overrideScroll: true,
+          child: SizedBox(key: list, height: 400),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byKey(list)).height, lessThan(200));
+  });
+
   final dark = _theme(Brightness.dark);
   final darkColor = SurfaceLevel.page.colorOf(dark.elevatedColorScheme!);
   for (final (kind, size, open) in [

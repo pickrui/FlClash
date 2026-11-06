@@ -58,7 +58,7 @@ class _ConnectionStatsCardState extends ConsumerState<ConnectionStatsCard>
             feed: DashboardFeed.requests,
             shape: shape,
             count: ThrottledCount(
-              provider: requestsProvider.select((state) => state.length),
+              provider: requestCountProvider,
               builder: (_, count) => _Count(count),
             ),
           ),
@@ -66,7 +66,7 @@ class _ConnectionStatsCardState extends ConsumerState<ConnectionStatsCard>
             feed: DashboardFeed.dns,
             shape: shape,
             count: ThrottledCount(
-              provider: dnsQueriesProvider.select((state) => state.length),
+              provider: dnsQueryCountProvider,
               builder: (_, count) => _Count(count),
             ),
           ),

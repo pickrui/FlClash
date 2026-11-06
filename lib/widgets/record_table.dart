@@ -151,11 +151,6 @@ class RecordTable<T> {
   List<Widget> cellsOf(BuildContext context, T item) => [
     for (final column in columns) column.cell(context, item),
   ];
-
-  /// For a list separated by zero-height dividers, which sit at odd indexes.
-  double estimateExtent(int? index, double crossAxisExtent) {
-    return index != null && index.isEven ? rowHeight : 0;
-  }
 }
 
 /// Builds a record list as a table once it is wide enough, with the column

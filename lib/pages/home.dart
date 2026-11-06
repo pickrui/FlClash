@@ -23,8 +23,10 @@ class HomePage extends ConsumerWidget {
     final hasViewSize = ref.watch(
       viewSizeProvider.select((size) => !size.isEmpty),
     );
+    // The window is revealed on this frame; under the Windows sidebar
+    // material an unpainted body shows black until the next frame lands.
     if (!hasViewSize) {
-      return const SizedBox.shrink();
+      return ColoredBox(color: SurfaceLevel.page.colorOf(context.colorScheme));
     }
     return HomeBackScopeContainer(
       isTV: system.isTV,
@@ -197,7 +199,11 @@ class _NavigationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scopedView = PageFocusScope(child: view);
+    // The global key lives here, not on the view: the same view also opens as
+    // a pushed page, which may overlap a pop of itself.
+    final scopedView = PageFocusScope(
+      child: KeyedSubtree(key: GlobalObjectKey(item.label), child: view),
+    );
     final keptView = KeepScope(
       key: ValueKey(item.label),
       child: isMobile
@@ -381,9 +387,18 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
   }
 }
 
+const _restingDelta = 0.001;
+
+/// Only in transit: a page resting off screen would keep its raster, and open
+/// the next visit on what it showed when the user left.
+@visibleForTesting
+bool fadeTabTakesSnapshot(double delta) =>
+    delta.abs() > _restingDelta && delta.abs() < 1 - _restingDelta;
+
 /// Cancels the page view's slide so a tab switch cross-fades in place, and
 /// wraps every page even when off so switching the setting keeps their state.
-class _FadeTabPage extends StatelessWidget {
+/// A page off its resting place is drawn from a snapshot, as a moving route is.
+class _FadeTabPage extends StatefulWidget {
   const _FadeTabPage({
     super.key,
     required this.controller,
@@ -397,26 +412,56 @@ class _FadeTabPage extends StatelessWidget {
   final bool enabled;
   final Widget child;
 
+  @override
+  State<_FadeTabPage> createState() => _FadeTabPageState();
+}
+
+class _FadeTabPageState extends State<_FadeTabPage> {
+  final _snapshot = SnapshotController();
+
+  @override
+  void dispose() {
+    _snapshot.dispose();
+    super.dispose();
+  }
+
+  // Not controller.page: it clamps to the extent of the last layout, which a
+  // page inserted before the current one outgrows before the next layout.
   double get _delta {
-    if (!controller.hasClients || !controller.position.hasContentDimensions) {
+    final controller = widget.controller;
+    if (!controller.hasClients) {
       return 0;
     }
-    final page = controller.page ?? position.toDouble();
-    return (position - page).clamp(-1.0, 1.0);
+    final metrics = controller.position;
+    if (!metrics.hasContentDimensions || metrics.viewportDimension == 0) {
+      return 0;
+    }
+    final page = metrics.pixels / metrics.viewportDimension;
+    return (widget.position - page).clamp(-1.0, 1.0);
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: controller,
+      animation: widget.controller,
       builder: (_, child) {
-        final delta = enabled ? _delta : 0.0;
+        final offset = _delta;
+        _snapshot.allowSnapshotting = fadeTabTakesSnapshot(offset);
+        final delta = widget.enabled ? offset : 0.0;
         return FractionalTranslation(
           translation: Offset(-delta, 0),
           child: Opacity(opacity: 1 - delta.abs(), child: child),
         );
       },
-      child: child,
+      child: SnapshotWidget(
+        controller: _snapshot,
+        mode: SnapshotMode.permissive,
+        autoresize: true,
+        child: LiquidGlassHost(
+          enabled: LiquidGlassScope.of(context),
+          child: widget.child,
+        ),
+      ),
     );
   }
 }

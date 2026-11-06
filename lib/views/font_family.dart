@@ -170,10 +170,20 @@ class _FontLabelState extends State<_FontLabel> {
 
   static void _showNext(Duration _) {
     final next = _waiting.firstOrNull;
-    if (next != null && next.mounted && isRouteMoving(next.context)) {
-      // The frames of the motion carry the queue until it stops.
-      SchedulerBinding.instance.addPostFrameCallback(_showNext);
-      return;
+    if (next != null && next.mounted) {
+      if (isRouteMoving(next.context)) {
+        // The frames of the motion carry the queue until it stops.
+        SchedulerBinding.instance.addPostFrameCallback(_showNext);
+        return;
+      }
+      final scrollPosition = Scrollable.maybeOf(next.context)?.position;
+      // A scroll can end without another frame to carry the queue.
+      if (scrollPosition?.isScrollingNotifier.value ?? false) {
+        SchedulerBinding.instance
+          ..addPostFrameCallback(_showNext)
+          ..ensureVisualUpdate();
+        return;
+      }
     }
     _scheduled = false;
     while (_waiting.isNotEmpty) {

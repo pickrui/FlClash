@@ -22,8 +22,6 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
 
   Widget? buildSubtitle(T entry);
 
-  Widget? buildLeading(T entry);
-
   bool sameEntries(List<T> a, List<T> b);
 
   Object popResult(List<T> entries);
@@ -184,7 +182,6 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
         position: position,
         child: SelectedDecorationListItem(
           title: buildTitle(entry),
-          leading: buildLeading(entry),
           subtitle: buildSubtitle(entry),
           isSelected: isSelected,
           isEditing: isEditing,
@@ -312,7 +309,6 @@ class ListInputPage extends ConsumerStatefulWidget {
   final List<String> items;
   final Widget Function(String item) titleBuilder;
   final Widget Function(String item)? subtitleBuilder;
-  final Widget Function(String item)? leadingBuilder;
   final String? valueLabel;
   final int? itemMaxLength;
   final String? Function(String item)? itemValidator;
@@ -323,7 +319,6 @@ class ListInputPage extends ConsumerStatefulWidget {
     required this.title,
     required this.items,
     required this.titleBuilder,
-    this.leadingBuilder,
     this.valueLabel,
     this.subtitleBuilder,
     this.itemMaxLength,
@@ -355,9 +350,6 @@ class _ListInputPageState extends _EditViewState<ListInputPage, String> {
     }
     return widget.subtitleBuilder?.call(entry);
   }
-
-  @override
-  Widget? buildLeading(String entry) => widget.leadingBuilder?.call(entry);
 
   @override
   bool sameEntries(List<String> a, List<String> b) =>
@@ -461,7 +453,6 @@ class MapInputPage extends ConsumerStatefulWidget {
   final Map<String, String> entries;
   final Widget Function(MapEntry<String, String> item) titleBuilder;
   final Widget Function(MapEntry<String, String> item)? subtitleBuilder;
-  final Widget Function(MapEntry<String, String> item)? leadingBuilder;
   final String? keyLabel;
   final String? valueLabel;
   final int? keyMaxLength;
@@ -479,7 +470,6 @@ class MapInputPage extends ConsumerStatefulWidget {
     required this.title,
     required this.entries,
     required this.titleBuilder,
-    this.leadingBuilder,
     this.keyLabel,
     this.valueLabel,
     this.subtitleBuilder,
@@ -513,10 +503,6 @@ class _MapInputPageState
   @override
   Widget? buildSubtitle(MapEntry<String, String> entry) =>
       widget.subtitleBuilder?.call(entry);
-
-  @override
-  Widget? buildLeading(MapEntry<String, String> entry) =>
-      widget.leadingBuilder?.call(entry);
 
   @override
   bool sameEntries(

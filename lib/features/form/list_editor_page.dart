@@ -29,7 +29,6 @@ class ListEditorPage<T, K> extends ConsumerStatefulWidget {
   final void Function(int oldIndex, int newIndex) onReorder;
   final VoidCallback onAdd;
   final VoidCallback? onQuickEdit;
-  final List<PopupMenuItem> addMenuItems;
   final String emptyLabel;
   final double? itemExtent;
   final K Function(T item) idOf;
@@ -45,7 +44,6 @@ class ListEditorPage<T, K> extends ConsumerStatefulWidget {
     required this.onReorder,
     required this.onAdd,
     this.onQuickEdit,
-    this.addMenuItems = const [],
     required this.emptyLabel,
     this.itemExtent,
     required this.idOf,
@@ -227,7 +225,6 @@ class _ListEditorPageState<T, K> extends ConsumerState<ListEditorPage<T, K>> {
           ListEditorAddAction(
             onAdd: widget.onAdd,
             onQuickEdit: widget.onQuickEdit,
-            menuItems: widget.addMenuItems,
           ),
       ],
       selectionActions: isSelecting ? selectionActions : const [],

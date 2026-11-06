@@ -23,7 +23,7 @@ void main() {
               openLogs: true,
               hasProxies: true,
             )) {
-              expect(item.builder(context).key, GlobalObjectKey(item.label));
+              expect(item.builder(context).key, isNull);
             }
             return const SizedBox();
           },

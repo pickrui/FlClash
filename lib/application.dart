@@ -261,27 +261,13 @@ class ApplicationState extends ConsumerState<Application> {
 
 Widget buildNavigationPage(BuildContext context, PageLabel label) =>
     switch (label) {
-      PageLabel.dashboard => const DashboardView(
-        key: GlobalObjectKey(PageLabel.dashboard),
-      ),
-      PageLabel.proxies => const ProxiesView(
-        key: GlobalObjectKey(PageLabel.proxies),
-      ),
-      PageLabel.profiles => const ProfilesView(
-        key: GlobalObjectKey(PageLabel.profiles),
-      ),
-      PageLabel.oixCloud => const CloudAccountPage(
-        key: GlobalObjectKey(PageLabel.oixCloud),
-      ),
-      PageLabel.requests => const RequestsView(
-        key: GlobalObjectKey(PageLabel.requests),
-      ),
-      PageLabel.dnsQueries => const DnsQueriesView(
-        key: GlobalObjectKey(PageLabel.dnsQueries),
-      ),
-      PageLabel.resources => const ResourcesView(
-        key: GlobalObjectKey(PageLabel.resources),
-      ),
-      PageLabel.logs => const LogsView(key: GlobalObjectKey(PageLabel.logs)),
-      PageLabel.tools => const ToolsView(key: GlobalObjectKey(PageLabel.tools)),
+      PageLabel.dashboard => const DashboardView(),
+      PageLabel.proxies => const ProxiesView(),
+      PageLabel.profiles => const ProfilesView(),
+      PageLabel.oixCloud => const CloudAccountPage(),
+      PageLabel.requests => const RequestsView(),
+      PageLabel.dnsQueries => const DnsQueriesView(),
+      PageLabel.resources => const ResourcesView(),
+      PageLabel.logs => const LogsView(),
+      PageLabel.tools => const ToolsView(),
     };

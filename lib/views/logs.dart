@@ -45,27 +45,20 @@ class _LogsViewState extends ConsumerState<LogsView>
     isFollowing: () => _logsStateNotifier.value.autoScrollToEnd,
   );
 
-  List<Log> _logs = [];
   bool _exporting = false;
 
   @override
   void initState() {
     super.initState();
-    _logs = ref.read(logsProvider).list;
+    final logs = ref.read(logsProvider).list;
     _scrollController = sheetScrollController(
       context,
       initialScrollOffset: double.maxFinite,
     );
-    _logsStateNotifier.value = _logsStateNotifier.value.copyWith(logs: _logs);
-    _filters.offer(_logs);
-    ref.listenManual(logsProvider.select((state) => state.list), (prev, next) {
-      if (prev != next) {
-        final isEquality = logListEquality.equals(prev, next);
-        if (!isEquality) {
-          _logs = next;
-          updateLogsThrottler();
-        }
-      }
+    _logsStateNotifier.value = _logsStateNotifier.value.copyWith(logs: logs);
+    _filters.offer(logs);
+    ref.listenManual(logsProvider.select((state) => state.revision), (_, _) {
+      updateLogsThrottler();
     });
   }
 
@@ -113,13 +106,6 @@ class _LogsViewState extends ConsumerState<LogsView>
   void updateLogsThrottler() {
     throttler.call(this, () {
       if (!mounted) {
-        return;
-      }
-      final isEquality = logListEquality.equals(
-        _logs,
-        _logsStateNotifier.value.logs,
-      );
-      if (isEquality) {
         return;
       }
       updateAfterFrameWhenRouteSettled(() {

@@ -126,6 +126,7 @@ class _CoreManagerState extends ConsumerState<CoreManager>
   @override
   void onRequest(TrackerInfo trackerInfo) {
     ref.read(requestsProvider.notifier).addRequest(trackerInfo);
+    ref.read(requestCountProvider.notifier).update((count) => count + 1);
     super.onRequest(trackerInfo);
   }
 
@@ -138,6 +139,7 @@ class _CoreManagerState extends ConsumerState<CoreManager>
   @override
   void onDnsQuery(DnsQuery query) {
     ref.read(dnsQueriesProvider.notifier).addQuery(query);
+    ref.read(dnsQueryCountProvider.notifier).update((count) => count + 1);
   }
 
   @override

@@ -109,6 +109,27 @@ void main() {
     expect(query(), isEmpty);
   });
 
+  testWidgets('clearing DNS records also clears their count', (tester) async {
+    final container = ProviderContainer(
+      overrides: [
+        viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(dnsQueryCountProvider.notifier).value = 3;
+    container
+        .read(dnsQueriesProvider.notifier)
+        .addQuery(
+          DnsQuery(domain: 'one.test', type: 'A', time: DateTime.utc(2026)),
+        );
+    await _pumpDnsQueries(tester, container);
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(AppLocalizations.current.clearData));
+    await tester.pumpAndSettle();
+    expect(container.read(dnsQueryCountProvider), 0);
+  });
+
   testWidgets(
     'browsing DNS history retains trimmed rows until following resumes',
     (tester) async {

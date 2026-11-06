@@ -163,7 +163,7 @@ class _AccessViewState extends ConsumerState<AccessView>
       tooltip: isSelectedAll
           ? appLocalizations.cancelSelectAll
           : appLocalizations.selectAll,
-      onPressed: onPressed,
+      onPressed: allValueList.isEmpty ? null : onPressed,
     );
   }
 
@@ -481,26 +481,24 @@ class _AccessViewState extends ConsumerState<AccessView>
     final viewPackageNames = {
       for (final package in viewPackages) package.packageName,
     };
-    final canSelect =
-        accessControl.enable &&
+    final needsAttention =
         !installed.isLoading &&
-        !installed.hasError &&
-        viewPackages.isNotEmpty;
-    final selectAll = canSelect
+        (installed.hasError ||
+            (installed.value?.permissionGranted != true && packages.isEmpty));
+    // Only a choice of the user's changes the bar: a list still loading or
+    // filtered empty disables select all instead of taking it away.
+    final selectAll = accessControl.enable && !needsAttention
         ? _buildSelectAllAction(
             isSelectedAll: ref.watch(
               accessControlStateProvider.select(
                 (state) =>
+                    viewPackageNames.isNotEmpty &&
                     state.currentList.toSet().containsAll(viewPackageNames),
               ),
             ),
             allValueList: viewPackageNames.toList(),
           )
         : null;
-    final needsAttention =
-        !installed.isLoading &&
-        (installed.hasError ||
-            (installed.value?.permissionGranted != true && packages.isEmpty));
     final saved = _withSortedList(
       ref.watch(vpnSettingProvider.select((state) => state.accessControlProps)),
     );

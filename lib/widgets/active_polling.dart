@@ -63,9 +63,11 @@ mixin ActivePollingMixin<T extends StatefulWidget>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // The overlay turns tickers off on a page an opaque route covers once
+    // that route has finished moving in.
     final isPageActive =
         PageActivityScope.isActiveOf(context) &&
-        (ModalRoute.isCurrentOf(context) ?? true);
+        TickerMode.valuesOf(context).enabled;
     if (_isPageActive == isPageActive) {
       return;
     }

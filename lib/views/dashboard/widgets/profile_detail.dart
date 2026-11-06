@@ -101,55 +101,71 @@ class ProfileDetailSheet extends ConsumerWidget {
             onPressed: () => _handlePreview(context, profile),
           ),
       ],
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-          top: context.contentTopPadding,
-          bottom: 20 + context.bottomInset,
-        ),
-        children: [
-          _StatsGrid(
-            stats: switch (activeCounts) {
-              final counts? => profileStatsOf(counts, providers),
-              null => null,
-            },
-            failed: activeCounts == null,
-          ),
-          if (subscriptionInfo != null && subscriptionInfo.total > 0)
-            generateSection(
-              title: appLocalizations.subscriptionInfo,
-              items: [
-                ListItem(
-                  title: SubscriptionInfoView(
-                    subscriptionInfo: subscriptionInfo,
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+              top: context.contentTopPadding,
+              bottom: 20 + context.bottomInset,
+            ),
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _StatsGrid(
+                        stats: switch (activeCounts) {
+                          final counts? => profileStatsOf(counts, providers),
+                          null => null,
+                        },
+                        failed: activeCounts == null,
+                      ),
+                      if (subscriptionInfo != null &&
+                          subscriptionInfo.total > 0)
+                        generateSection(
+                          title: appLocalizations.subscriptionInfo,
+                          items: [
+                            ListItem(
+                              title: SubscriptionInfoView(
+                                subscriptionInfo: subscriptionInfo,
+                              ),
+                            ),
+                          ],
+                        ),
+                      generateSection(
+                        title: appLocalizations.profile,
+                        items: [
+                          _InfoRow(
+                            label: appLocalizations.lastUpdated,
+                            value: Text(
+                              profile.lastUpdateDate?.lastUpdateTimeDesc ?? '—',
+                            ),
+                          ),
+                          _InfoRow(
+                            label: appLocalizations.overrideMode,
+                            value: Text(
+                              profile.type == ProfileType.custom
+                                  ? appLocalizations.customProfile
+                                  : _overwriteLabel(
+                                      context,
+                                      profile.overwriteType,
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          generateSection(
-            title: appLocalizations.profile,
-            items: [
-              _InfoRow(
-                label: appLocalizations.lastUpdated,
-                value: Text(profile.lastUpdateDate?.lastUpdateTimeDesc ?? '—'),
-              ),
-              _InfoRow(
-                label: appLocalizations.overrideMode,
-                value: Text(
-                  profile.type == ProfileType.custom
-                      ? appLocalizations.customProfile
-                      : _overwriteLabel(context, profile.overwriteType),
+                generateSliverSection(
+                  title: appLocalizations.providers,
+                  items: providers,
+                  itemBuilder: (provider) => _ProviderRow(provider: provider),
                 ),
-              ),
-            ],
-          ),
-          if (providers.isNotEmpty)
-            generateSection(
-              title: appLocalizations.providers,
-              items: [
-                for (final provider in providers)
-                  _ProviderRow(provider: provider),
               ],
             ),
+          ),
         ],
       ),
     );

@@ -131,7 +131,6 @@ String getDelayTestUrl({required String proxyName, required String testUrl}) {
 
 const stringListEquality = ListEquality<String>();
 const intListEquality = ListEquality<int>();
-const logListEquality = ListEquality<Log>();
 const ruleListEquality = ListEquality<Rule>();
 const proxyChainListEquality = ListEquality<ProxyChain>();
 const profileProxyListEquality = ListEquality<ProfileProxy>();

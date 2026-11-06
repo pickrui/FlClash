@@ -219,6 +219,9 @@ extension SetupControllerExt on AppController {
     _coreLifecycleOperations.detached(() => applyProfile(force: true));
     _ref.read(logsProvider.notifier).value = createLogBuffer(maxLength);
     _ref.read(requestsProvider.notifier).value = FixedList(maxLength);
+    _ref.read(dnsQueriesProvider.notifier).clear();
+    _ref.read(dnsQueryCountProvider.notifier).value = 0;
+    _ref.read(requestCountProvider.notifier).value = 0;
   }
 
   Future<void> updateStatus(

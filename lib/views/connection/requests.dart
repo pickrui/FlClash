@@ -454,6 +454,11 @@ class _LiveFeedState extends ConsumerState<_LiveFeed>
 
   @override
   Future<void> poll(PollGuard isCurrent) async {
+    if (ref.read(coreStatusProvider) != CoreStatus.connected) {
+      _feed.stop();
+      _publishConnections(const []);
+      return;
+    }
     try {
       await _feed.maintain();
     } catch (error) {

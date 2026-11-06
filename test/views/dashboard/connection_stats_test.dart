@@ -154,16 +154,8 @@ void main() {
   ) async {
     await pumpCard(tester);
 
-    final requests = container.read(requestsProvider.notifier);
-    for (var index = 0; index < 284; index++) {
-      requests.addRequest(_request(index));
-    }
-    final queries = container.read(dnsQueriesProvider.notifier);
-    for (var index = 0; index < 42; index++) {
-      queries.addQuery(
-        DnsQuery(domain: 'host-$index.test', type: 'A', time: DateTime(2026)),
-      );
-    }
+    container.read(requestCountProvider.notifier).value = 284;
+    container.read(dnsQueryCountProvider.notifier).value = 42;
     await tester.pump();
 
     expect(find.text('284'), findsNothing);

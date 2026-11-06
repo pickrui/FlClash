@@ -123,7 +123,7 @@ mixin ConnectionsPolling<T extends ConsumerStatefulWidget>
       ref.read(coreStatusProvider) == CoreStatus.connected;
 
   @override
-  Duration get pollInterval => const Duration(seconds: 1);
+  Duration get pollInterval => Duration(seconds: pollsConnections ? 1 : 2);
 
   @override
   void stopPolling() {
@@ -392,18 +392,14 @@ class _ConnectionsTableCardState extends ConsumerState<ConnectionsTableCard>
                       segment(
                         DashboardFeed.requests,
                         ThrottledCount(
-                          provider: requestsProvider.select(
-                            (state) => state.length,
-                          ),
+                          provider: requestCountProvider,
                           builder: (_, count) => _TabCount(count),
                         ),
                       ),
                       segment(
                         DashboardFeed.dns,
                         ThrottledCount(
-                          provider: dnsQueriesProvider.select(
-                            (state) => state.length,
-                          ),
+                          provider: dnsQueryCountProvider,
                           builder: (_, count) => _TabCount(count),
                         ),
                       ),
