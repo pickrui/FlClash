@@ -33,7 +33,7 @@ func TestMessageBatcherBoundsEncodedLogBytes(t *testing.T) {
 	}
 	close(queue)
 	delivered, batches := 0, 0
-	runMessageBatcher(nil, queue, func(messages []Message) {
+	runMessageBatcher(nil, nil, queue, func(messages []Message) {
 		encoded, err := json.Marshal(messages)
 		if err != nil {
 			t.Fatal(err)
@@ -84,7 +84,7 @@ func TestMessageBatcherReleasesPayloadWhileIdle(t *testing.T) {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		runMessageBatcher(nil, queue, func(messages []Message) {
+		runMessageBatcher(nil, nil, queue, func(messages []Message) {
 			if len(messages) != 1 {
 				panic("unexpected message count")
 			}
@@ -119,7 +119,7 @@ func TestMessageBatcherKeepsDeliveredBatchIndependent(t *testing.T) {
 	}
 	close(queue)
 	var batches [][]Message
-	runMessageBatcher(nil, queue, func(messages []Message) { batches = append(batches, messages) })
+	runMessageBatcher(nil, nil, queue, func(messages []Message) { batches = append(batches, messages) })
 	var count int
 	for _, batch := range batches {
 		for _, message := range batch {
@@ -141,7 +141,7 @@ func TestMessageBatcherStartsDeadlineWithFirstMessage(t *testing.T) {
 		done := make(chan struct{})
 		go func() {
 			defer close(done)
-			runMessageBatcher(nil, queue, func(messages []Message) { batches <- messages })
+			runMessageBatcher(nil, nil, queue, func(messages []Message) { batches <- messages })
 		}()
 		synctest.Wait()
 		for round := 0; round < 2; round++ {
@@ -178,7 +178,7 @@ func TestMessageBatcherFlushesFullBatchThenPendingOnClose(t *testing.T) {
 		done := make(chan struct{})
 		go func() {
 			defer close(done)
-			runMessageBatcher(nil, queue, func(messages []Message) { batches <- messages })
+			runMessageBatcher(nil, nil, queue, func(messages []Message) { batches <- messages })
 		}()
 		for i := 0; i < messageBatchSize; i++ {
 			queue <- Message{Type: LogMessage, Data: i}
@@ -225,7 +225,7 @@ func TestMessageBatcherPreservesStreamOrderAndBulkFairness(t *testing.T) {
 	close(priority)
 	close(bulk)
 	var highCount, bulkCount, delivered int
-	runMessageBatcher(priority, bulk, func(messages []Message) {
+	runMessageBatcher(nil, priority, bulk, func(messages []Message) {
 		if len(messages) > messageBatchSize {
 			t.Fatal("batch size limit exceeded")
 		}

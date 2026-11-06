@@ -40,8 +40,6 @@ func handleGetConnectionCount() int {
 }
 
 func handleCloseConnections(groupName string) bool {
-	runLock.Lock()
-	defer runLock.Unlock()
 	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
 		if groupName == "" || slices.Contains(c.Info().Chain, groupName) {
 			_ = c.Close()
@@ -52,8 +50,6 @@ func handleCloseConnections(groupName string) bool {
 }
 
 func handleResetConnections() bool {
-	runLock.Lock()
-	defer runLock.Unlock()
 	resolver.ResetConnection()
 	return true
 }
@@ -69,20 +65,18 @@ func handleClearDnsState() bool {
 // TCP gives up on it, and so do the DNS clients' pooled connections. The cache
 // is cleared rather than waited out: mihomo serves an expired entry once more
 // before it refreshes it.
+//
+// An apply can hold runLock for a provider download stuck on one of these very
+// connections, so closing them does not wait for it.
 func handleResetNetwork() bool {
-	runLock.Lock()
-	defer runLock.Unlock()
 	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
 		_ = c.Close()
 		return true
 	})
-	dns.ClearAll()
-	return true
+	return handleClearDnsState()
 }
 
 func handleCloseConnection(connectionId string) bool {
-	runLock.Lock()
-	defer runLock.Unlock()
 	c := statistic.DefaultManager.Get(connectionId)
 	if c == nil {
 		return false

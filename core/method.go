@@ -398,14 +398,12 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		safeGo("compileRuleSet", func() {
-			info, failure := compileRuleSetContent(params)
-			if failure != nil {
-				response.failure(failure.Code, failure.Message, failure.Details)
-				return
-			}
-			response.success(info)
-		})
+		info, failure := compileRuleSetContent(params)
+		if failure != nil {
+			response.failure(failure.Code, failure.Message, failure.Details)
+			return
+		}
+		response.success(info)
 	case previewRuleSetMethod:
 		params := struct {
 			Content  []byte `json:"content"`
@@ -414,14 +412,12 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		safeGo("previewRuleSet", func() {
-			text, err := previewRuleSetContent(params.Content, params.Behavior)
-			if err != nil {
-				response.failure("core_error", err.Error(), nil)
-				return
-			}
-			response.success(text)
-		})
+		text, err := previewRuleSetContent(params.Content, params.Behavior)
+		if err != nil {
+			response.failure("core_error", err.Error(), nil)
+			return
+		}
+		response.success(text)
 	case dumpRuleSetMethod:
 		params := struct {
 			Name string `json:"name"`
@@ -430,14 +426,12 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		safeGo("dumpRuleSet", func() {
-			text, err := handleDumpRuleSet(params.Name, params.Path)
-			if err != nil {
-				response.failure("core_error", err.Error(), nil)
-				return
-			}
-			response.success(text)
-		})
+		text, err := handleDumpRuleSet(params.Name, params.Path)
+		if err != nil {
+			response.failure("core_error", err.Error(), nil)
+			return
+		}
+		response.success(text)
 	case updateGeoDataMethod:
 		params := UpdateGeoDataParams{}
 		if !decodeMethodArguments(call, response, &params) {
@@ -454,7 +448,7 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		safeGo("replaceProviderFile", func() { response.providerResult(handleReplaceProviderFile(params)) })
+		response.providerResult(handleReplaceProviderFile(params))
 	case sideLoadExternalProviderMethod:
 		params := map[string]string{}
 		if !decodeMethodArguments(call, response, &params) {
@@ -496,47 +490,43 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		safeGo("deleteFile", func() {
-			if err := os.RemoveAll(params.Path); err != nil {
-				response.failure("core_error", err.Error(), nil)
-				return
-			}
-			response.success("")
-		})
+		if err := os.RemoveAll(params.Path); err != nil {
+			response.failure("core_error", err.Error(), nil)
+			return
+		}
+		response.success("")
 	case getTailscaleStatusMethod:
 		params := NameParams{}
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		safeGo("getTailscaleStatus", func() {
-			status, err := handleGetTailscaleStatus(params.Name)
-			if err != nil {
-				response.failure("core_error", err.Error(), nil)
-				return
-			}
-			response.success(status)
-		})
+		status, err := handleGetTailscaleStatus(params.Name)
+		if err != nil {
+			response.failure("core_error", err.Error(), nil)
+			return
+		}
+		response.success(status)
+
 	case tailscaleLoginMethod, tailscaleLogoutMethod, forgetTailscaleNetworkMethod:
 		request := TailscaleRequest{}
 		if !decodeMethodArguments(call, response, &request) {
 			return
 		}
-		safeGo("tailscaleRequest", func() {
-			var err error
-			switch call.Method {
-			case tailscaleLoginMethod:
-				err = handleTailscaleLogin(request)
-			case tailscaleLogoutMethod:
-				err = handleTailscaleLogout(request.Name)
-			default:
-				err = handleForgetTailscaleNetwork(request)
-			}
-			if err != nil {
-				response.failure("core_error", err.Error(), nil)
-				return
-			}
-			response.success(true)
-		})
+		var err error
+		switch call.Method {
+		case tailscaleLoginMethod:
+			err = handleTailscaleLogin(request)
+		case tailscaleLogoutMethod:
+			err = handleTailscaleLogout(request.Name)
+		default:
+			err = handleForgetTailscaleNetwork(request)
+		}
+		if err != nil {
+			response.failure("core_error", err.Error(), nil)
+			return
+		}
+		response.success(true)
+
 	default:
 		response.notImplemented(call.Method)
 	}

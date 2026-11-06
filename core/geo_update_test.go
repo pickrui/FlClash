@@ -157,10 +157,10 @@ func captureGeoUpdateEvents(t *testing.T) chan Message {
 	t.Helper()
 	// The batcher retains its original queue; capture actual events without
 	// attaching a transport or changing the sender.
-	previousQueue := priorityMessageQueue
+	previousQueue := stateMessageQueue
 	events := make(chan Message, messageQueueSize)
-	priorityMessageQueue = events
-	t.Cleanup(func() { priorityMessageQueue = previousQueue })
+	stateMessageQueue = events
+	t.Cleanup(func() { stateMessageQueue = previousQueue })
 	return events
 }
 

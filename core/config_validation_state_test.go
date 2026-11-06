@@ -46,7 +46,10 @@ func TestParseAndValidateConfigDataPreservesRuntimeState(t *testing.T) {
 	if before.Mode == candidateMode {
 		candidateMode = tunnel.Direct
 	}
-	events := captureGeoUpdateEvents(t)
+	events := make(chan Message, messageQueueSize)
+	previousQueue := priorityMessageQueue
+	priorityMessageQueue = events
+	t.Cleanup(func() { priorityMessageQueue = previousQueue })
 
 	for _, test := range []struct {
 		name    string

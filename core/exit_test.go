@@ -396,7 +396,7 @@ func TestCompileRuleSetRPC(t *testing.T) {
 	t.Cleanup(func() { _ = local.Close(); _ = remote.Close() })
 	for _, input := range []string{"example.com", "example.com\n192.0.2.1"} {
 		arguments, _ := json.Marshal(CompileRuleSetParams{Content: []byte(input), Convert: true})
-		handleMethodCall(&MethodCall{Method: compileRuleSetMethod, Arguments: arguments}, MethodResponse{ID: "rules"})
+		go handleMethodCall(&MethodCall{Method: compileRuleSetMethod, Arguments: arguments}, MethodResponse{ID: "rules"})
 		_ = remote.SetReadDeadline(time.Now().Add(2 * time.Second))
 		data, err := readFrame(remote)
 		if err != nil {

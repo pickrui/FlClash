@@ -23,12 +23,13 @@ const (
 )
 
 var (
+	stateMessageQueue    = make(chan Message, messageQueueSize)
 	priorityMessageQueue = make(chan Message, messageQueueSize)
 	bulkMessageQueue     = make(chan Message, messageQueueSize)
 )
 
 func init() {
-	go runMessageBatcher(priorityMessageQueue, bulkMessageQueue, sendMessageBatch)
+	go runMessageBatcher(stateMessageQueue, priorityMessageQueue, bulkMessageQueue, sendMessageBatch)
 }
 
 // Request events need metadata and live counters, not the underlying connection.
@@ -37,11 +38,20 @@ func requestMessage(tracker statistic.Tracker) Message {
 }
 
 func sendMessage(message Message) {
-	queue := priorityMessageQueue
-	if message.Type == LogMessage || message.Type == RequestMessage || message.Type == DnsMessage {
-		queue = bulkMessageQueue
+	if !hasEventListener() {
+		return
 	}
-	enqueueLatest(queue, message)
+	switch message.Type {
+	case LoadedMessage, GeoUpdateMessage:
+		// Evicted by a burst, a final state would leave the host waiting forever.
+		enqueueIfRoom(stateMessageQueue, message)
+	case LogMessage, RequestMessage:
+		enqueueLatest(bulkMessageQueue, message)
+	case DnsMessage:
+		enqueueIfRoom(bulkMessageQueue, message)
+	default:
+		enqueueLatest(priorityMessageQueue, message)
+	}
 }
 
 func enqueueLatest(queue chan Message, message Message) {
@@ -73,6 +83,7 @@ func logMessageSize(message Message, used int) int {
 }
 
 func runMessageBatcher(
+	stateMessages <-chan Message,
 	priorityMessages <-chan Message,
 	bulkMessages <-chan Message,
 	send func([]Message),
@@ -123,7 +134,17 @@ func runMessageBatcher(
 		}
 	}
 	priorityBurst := 0
-	for priorityMessages != nil || bulkMessages != nil {
+	for stateMessages != nil || priorityMessages != nil || bulkMessages != nil {
+		select {
+		case message, ok := <-stateMessages:
+			if !ok {
+				stateMessages = nil
+			} else {
+				appendMessage(message)
+			}
+			continue
+		default:
+		}
 		if priorityBurst >= messagePriorityBurst && bulkMessages != nil {
 			select {
 			case message, ok := <-bulkMessages:
@@ -150,6 +171,12 @@ func runMessageBatcher(
 		default:
 		}
 		select {
+		case message, ok := <-stateMessages:
+			if !ok {
+				stateMessages = nil
+			} else {
+				appendMessage(message)
+			}
 		case message, ok := <-priorityMessages:
 			if !ok {
 				priorityMessages = nil

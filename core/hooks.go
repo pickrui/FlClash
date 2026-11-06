@@ -39,6 +39,9 @@ func init() {
 		})
 	}
 	dns.SetQueryNotify(func(record dns.QueryRecord) {
+		if !hasEventListener() {
+			return
+		}
 		if query := newDnsQuery(record); query != nil {
 			sendMessage(Message{Type: DnsMessage, Data: query})
 		}
