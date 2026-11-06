@@ -327,6 +327,7 @@ jobs:
             os: windows-11-arm
             arch: arm64
             name: "Windows (arm64)"
+            flutter-channel: master
           - platform: macos
             os: macos-15-intel
             arch: amd64
@@ -344,6 +345,7 @@ jobs:
             os: ubuntu-22.04-arm
             arch: arm64
             name: "Linux (arm64)"
+            flutter-channel: master
 
     steps:
       - name: Free disk space for Android builds
@@ -399,7 +401,9 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
-          channel: master
+          # Stable publishes no Windows or Linux arm64 archive; master makes the action
+          # clone the SDK at the pinned tag and fetch the host's own Dart SDK.
+          channel: ${{ matrix.flutter-channel || 'stable' }}
           flutter-version: ${{ env.FLUTTER_VERSION }}
           # The repository cache is capped at 10 GB. Flutter SDK caches (1-2 GB each,
           # about a minute saved) pushed out the Go build cache, which saves ~8 minutes.

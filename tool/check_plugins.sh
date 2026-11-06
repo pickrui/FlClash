@@ -7,7 +7,7 @@
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
-for package in plugins/code_forge plugins/proxy plugins/rust_api plugins/setup plugins/setup/setup_hooks plugins/tray plugins/wifi_ssid plugins/window; do
+for package in plugins/dynamic_color plugins/code_forge plugins/proxy plugins/rust_api plugins/setup plugins/setup/setup_hooks plugins/tray plugins/wifi_ssid plugins/window; do
   (
     cd "$package"
     dart pub get
