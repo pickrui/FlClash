@@ -5,7 +5,7 @@ compileSdk = "37"
 ndkVersion = "28.2.13676358"
 coreKtx = "1.19.1"
 coreSplashscreen = "1.2.0"
-gson = "2.14.0"
+gson = "2.15.0"
 smaliDexlib2 = "3.0.10"
 
 [libraries]

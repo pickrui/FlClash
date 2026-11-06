@@ -7,14 +7,14 @@ group = "io.material.plugins.dynamic_color"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    val kotlinVersion = "2.3.20"
+    val kotlinVersion = "2.4.21"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.13.1")
+        classpath("com.android.tools.build:gradle:9.5.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
@@ -56,7 +56,7 @@ android {
     }
 
     dependencies {
-        val materialVersion = "1.7.0"
+        val materialVersion = "1.14.0"
         implementation("com.google.android.material:material:$materialVersion")
     }
 
