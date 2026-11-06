@@ -205,7 +205,7 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
     final selected = ref.watch(itemsProvider(_selectionKey));
     final isEditing = selected.isNotEmpty;
     final hasChanges = !sameEntries(_entries, _initialEntries);
-    return CommonPopScope(
+    return PopGuard(
       onPop: !isEditing && !_confirming && !hasChanges
           ? null
           : (_) {
@@ -217,7 +217,7 @@ abstract class _EditViewState<W extends ConsumerStatefulWidget, T>
               _handleBack();
               return false;
             },
-      child: CommonScaffold(
+      child: Scaffold(
         title: title,
         confirmationAction: !isEditing && hasChanges
             ? IconButtonData(

@@ -15,7 +15,9 @@ import 'package:fl_clash/ui/button.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:fl_clash/ui/foot_bar.dart';
 import 'package:fl_clash/ui/popup.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, Checkbox, TextButton;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import 'package:flutter/services.dart';
@@ -123,7 +125,7 @@ void main() {
     final navigator = tester.state<NavigatorState>(
       find.byType(Navigator).first,
     );
-    final route = CommonRoute<void>(builder: (_) => const AccessView());
+    final route = CardPageRoute<void>(builder: (_) => const AccessView());
     unawaited(navigator.push(route));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 16));
@@ -145,7 +147,7 @@ void main() {
         installedPackage('three.app'),
       ];
     await openAccess(tester, api);
-    await tester.tap(find.byType(CommonCheckBox).first);
+    await tester.tap(find.byType(Checkbox).first);
     await tester.pumpAndSettle();
     final selectedPackage = tester
         .widget<PackageListItem>(find.byType(PackageListItem).at(1))
@@ -161,7 +163,7 @@ void main() {
       if (element.widget is AccessView) pageBuilds++;
     };
     addTearDown(() => debugOnRebuildDirtyWidget = previous);
-    await tester.tap(find.byType(CommonCheckBox).at(1));
+    await tester.tap(find.byType(Checkbox).at(1));
     await tester.pumpAndSettle();
     expect(pageBuilds, 0);
     expect(rebuilt, [selectedPackage]);
@@ -177,14 +179,14 @@ void main() {
         final container = await openAccess(tester, api, asRoute: true);
         final route = ModalRoute.of(tester.element(find.byType(AccessView)))!;
         final navigator = route.navigator!;
-        await tester.tap(find.byType(CommonCheckBox).first);
+        await tester.tap(find.byType(Checkbox).first);
         await tester.pumpAndSettle();
         expect(container.read(accessControlStateProvider).rejectList, [
           'fixture.app',
         ]);
         await tester.binding.handlePopRoute();
         await tester.pumpAndSettle();
-        expect(find.byType(CommonDialog), findsOneWidget);
+        expect(find.byType(AlertDialog), findsOneWidget);
         if (removed) {
           navigator.removeRoute(route);
           if (stage == 'disposed') await tester.pumpAndSettle();
@@ -193,7 +195,8 @@ void main() {
         unawaited(
           showDialog<void>(
             context: navigator.context,
-            builder: (_) => const AlertDialog(content: Text('Other message')),
+            builder: (_) =>
+                const material.AlertDialog(content: Text('Other message')),
           ),
         );
         await tester.pumpAndSettle();
@@ -253,7 +256,7 @@ void main() {
       clipboard.complete({'text': 'fixture.app'});
       await tester.pumpAndSettle();
       expect(commonAction.errors, isEmpty);
-      expect(find.byType(CommonDialog), findsNothing);
+      expect(find.byType(AlertDialog), findsNothing);
       expect(
         container.read(accessControlStateProvider).rejectList,
         removed ? isEmpty : ['fixture.app'],
@@ -272,7 +275,7 @@ void main() {
       final api = InstalledAppsFake()
         ..packages = [installedPackage('fixture.app')];
       final container = await openAccess(tester, api, asRoute: true);
-      await tester.tap(find.byType(CommonCheckBox).first);
+      await tester.tap(find.byType(Checkbox).first);
       await tester.pumpAndSettle();
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
@@ -326,7 +329,7 @@ void main() {
       );
       final l10n = AppLocalizations.current;
       Finder inMenu(String label) => find.descendant(
-        of: find.byType(CommonPopupMenu),
+        of: find.byType(PopupMenu),
         matching: find.text(label),
       );
       Future<void> pickSetting(String label) async {
@@ -352,7 +355,7 @@ void main() {
       expect(draft.acceptList, original.acceptList);
       expect(draft.rejectList, original.rejectList);
       expect(container.read(vpnSettingProvider).accessControlProps, original);
-      expect(find.byType(CommonPopupMenu), findsNothing);
+      expect(find.byType(PopupMenu), findsNothing);
       expect(find.text('system.app'), findsWidgets);
       expect(find.text('offline.app'), findsWidgets);
       await tester.tap(find.byTooltip(l10n.save));
@@ -390,14 +393,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.descendant(
-        of: find.byType(CommonPopupMenu),
+        of: find.byType(PopupMenu),
         matching: find.text(AppLocalizations.current.accessControl),
       ),
       findsOneWidget,
     );
     await tester.tap(
       find.descendant(
-        of: find.byType(CommonPopupMenu),
+        of: find.byType(PopupMenu),
         matching: find.text(AppLocalizations.current.turnOn),
       ),
     );
@@ -600,7 +603,7 @@ void main() {
       expect(find.text('system.app'), findsNothing);
       api.changes.add(null);
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(CommonCheckBox).first);
+      await tester.tap(find.byType(Checkbox).first);
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip(AppLocalizations.current.save));
       await tester.pumpAndSettle();

@@ -12,7 +12,8 @@ import 'package:fl_clash/views/dashboard/widgets/network_takeover.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
@@ -78,7 +79,7 @@ void main() {
         container: container,
         child: TestApp(
           locale: const Locale('en'),
-          child: Scaffold(body: ListView(children: [card])),
+          child: material.Scaffold(body: ListView(children: [card])),
         ),
       ),
     );
@@ -121,7 +122,7 @@ void main() {
       await tester.tap(find.text(testCase.title).last);
       await tester.pumpAndSettle();
 
-      expect(find.byType(CommonScaffold), findsNothing);
+      expect(find.byType(Scaffold), findsNothing);
       expect(testCase.read(container), !testCase.initial);
     });
   }
@@ -200,7 +201,7 @@ void main() {
           container: container,
           child: TestApp(
             locale: const Locale('en'),
-            child: Scaffold(
+            child: material.Scaffold(
               body: Align(
                 alignment: Alignment.topLeft,
                 child: SizedBox(

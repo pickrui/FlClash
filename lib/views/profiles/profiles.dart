@@ -141,7 +141,7 @@ class _ProfilesViewState extends State<ProfilesView> {
         final isLoading = ref.watch(loadingProvider(LoadingTag.profiles));
         final state = ref.watch(profilesStateProvider);
         final spacing = cardSpacingOf(context, ref.watch(viewModeProvider));
-        return CommonScaffold(
+        return Scaffold(
           isLoading: isLoading,
           title: appLocalizations.profiles,
           actions: state.profiles.isEmpty
@@ -402,7 +402,7 @@ class ProfileItem extends ConsumerWidget {
     final data = profile.url;
     globalState.showCommonDialog<void>(
       child: Builder(
-        builder: (context) => CommonDialog(
+        builder: (context) => AlertDialog(
           title: profile.realLabel,
           actions: [
             TextButton(
@@ -505,76 +505,76 @@ class ProfileItem extends ConsumerWidget {
     );
   }
 
-  List<CommonPopupMenuItem> _menuItems(BuildContext context, WidgetRef ref) {
+  List<PopupMenuItem> _menuItems(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final isUrl = profile.type == ProfileType.url;
     final isCustom = profile.type == ProfileType.custom;
     final isoixCloud = profile.isoixCloudProfile;
     return [
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.edit,
         label: appLocalizations.edit,
         onPressed: () => _handleEdit(context),
       ),
       if (isCustom) ...[
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.textShort,
           label: appLocalizations.rename,
           onPressed: () => showRenameProfileDialog(context, ref, profile),
         ),
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.eye,
           label: appLocalizations.runtimeConfig,
           onPressed: () => _handlePreview(context),
         ),
       ] else
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.puzzle,
           label: appLocalizations.override,
           onPressed: () => _handlePushGenProfilePage(context, profile.id),
         ),
       if (isUrl)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.sync,
           label: appLocalizations.sync,
           onPressed: () => updateProfile(context),
         ),
       if (!isCustom)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.split,
           label: appLocalizations.proxyChains,
           onPressed: () => _handlePushProxyChainsPage(context, profile.id),
         ),
       if (!isCustom && !isoixCloud)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.moreCircle,
           label: appLocalizations.more,
           subItems: [
-            CommonPopupMenuItem(
+            PopupMenuItem(
               glyph: AppGlyphs.eye,
               label: appLocalizations.runtimeConfig,
               onPressed: () => _handlePreview(context),
             ),
             if (isUrl)
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.copy,
                 label: appLocalizations.copyLink,
                 onPressed: () => _handleCopyLink(context),
               ),
             if (isUrl)
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.qrCode,
                 label: appLocalizations.qrcode,
                 onPressed: _handleShowQrCode,
               ),
-            CommonPopupMenuItem(
+            PopupMenuItem(
               glyph: AppGlyphs.export,
               label: appLocalizations.exportFile,
               onPressed: () => _handleExportFile(context),
             ),
           ],
         ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         danger: true,
         glyph: AppGlyphs.delete,
         label: appLocalizations.delete,
@@ -590,7 +590,7 @@ class ProfileItem extends ConsumerWidget {
     final isSelected = profile.id == groupValue;
     return ContextMenuRegion(
       menuItems: isUpdating ? null : _menuItems(context, ref),
-      child: CommonCard(
+      child: Card(
         enterActionsOnRight: true,
         radius: AppCorner.xl,
         isSelected: isSelected,
@@ -729,7 +729,7 @@ class _ReorderableProfilesSheetState
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(
+    return Scaffold(
       confirmationAction: IconButtonData(
         glyph: AppGlyphs.check,
         onPressed: _handleSave,

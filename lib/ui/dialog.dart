@@ -69,7 +69,7 @@ Future<T?> showFloatingDialog<T>({
 /// A route whose navigator an alert raised from inside it opens on.
 mixin AlertHostRoute<T> on ModalRoute<T> {}
 
-/// Shows [CommonDialog]s on [showFloatingDialog].
+/// Shows [AlertDialog]s on [showFloatingDialog].
 class CommonAlertPresenter implements AlertPresenter {
   const CommonAlertPresenter();
 
@@ -122,7 +122,7 @@ class CommonAlertPresenter implements AlertPresenter {
     EdgeInsets? padding,
     bool destructive = false,
   }) {
-    return CommonDialog(
+    return AlertDialog(
       title: title,
       actions: actions,
       padding: padding,
@@ -431,7 +431,7 @@ class _AlertFrame extends StatelessWidget {
   }
 }
 
-class CommonDialog extends StatelessWidget {
+class AlertDialog extends StatelessWidget {
   final String title;
   final Widget? trailing;
   final Widget? child;
@@ -456,7 +456,7 @@ class CommonDialog extends StatelessWidget {
   final double? maxWidth;
   final EdgeInsets? insetPadding;
 
-  const CommonDialog({
+  const AlertDialog({
     super.key,
     required this.title,
     this.trailing,
@@ -724,7 +724,7 @@ class _RenderCenteredTitle extends RenderBox
   }
 }
 
-/// Text buttons laid out and filled as [CommonDialog] sets its own.
+/// Text buttons laid out and filled as [AlertDialog] sets its own.
 class AlertActions extends StatelessWidget {
   const AlertActions({
     super.key,

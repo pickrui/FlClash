@@ -51,13 +51,13 @@ void main() {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CommonMinFilledButtonTheme(
+              MinFilledButtonTheme(
                 child: prism.FilledButton(
                   onPressed: () {},
                   child: const Text('Save'),
                 ),
               ),
-              CommonMinIconButtonTheme(
+              MinIconButtonTheme(
                 child: prism.IconButton(
                   onPressed: () {},
                   icon: const GlyphIcon(AppGlyphs.check),

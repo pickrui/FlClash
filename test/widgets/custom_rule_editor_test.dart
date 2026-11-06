@@ -13,7 +13,9 @@ import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide Scaffold, TextButton, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
@@ -540,11 +542,11 @@ Finder get _vertical => find.byWidgetPredicate(
 );
 
 IconButtonData _saveAction(WidgetTester tester) => tester
-    .widget<CommonScaffold>(
+    .widget<Scaffold>(
       find
           .descendant(
             of: find.byType(CustomRuleEditorDialog),
-            matching: find.byType(CommonScaffold),
+            matching: find.byType(Scaffold),
           )
           .first,
     )
@@ -565,7 +567,7 @@ Future<void> _chooseTarget(
   await tester.pumpAndSettle();
   if (query != null) {
     tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold).last)
+        .widget<Scaffold>(find.byType(Scaffold).last)
         .searchState!
         .onSearch(query);
     await tester.pumpAndSettle();
@@ -611,7 +613,7 @@ Future<void> _open(
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) => wrapAppScopes(context, child!),
-        home: Scaffold(
+        home: material.Scaffold(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () async {

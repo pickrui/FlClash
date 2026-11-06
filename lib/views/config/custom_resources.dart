@@ -18,7 +18,7 @@ class CustomResourcesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    return CommonScaffold(
+    return Scaffold(
       title: l.customProfileResources,
       body: Builder(
         builder: (context) => ListView(

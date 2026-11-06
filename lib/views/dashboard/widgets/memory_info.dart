@@ -416,7 +416,7 @@ class _MemoryDetailSheetState extends ConsumerState<MemoryDetailSheet>
     final appLocalizations = context.appLocalizations;
     final snapshot = _snapshot;
     final feedback = _feedback;
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.memoryInfo,
       actions: [
         AppBarActionButton(

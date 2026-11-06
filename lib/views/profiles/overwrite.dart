@@ -196,7 +196,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView>
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.override,
       isLoading: previewing || checking,
       actions: buildRoutingActions(
@@ -350,7 +350,7 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
                   OverwriteType.custom,
                   OverwriteType.script,
                 ])
-                  CommonCard(
+                  Card(
                     key: ValueKey('overwrite-mode-${type.name}'),
                     isSelected: overwriteType == type,
                     fillsSelection: true,
@@ -629,7 +629,7 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
                 : context.colorScheme.tertiary,
           ),
     );
-    return CommonPopScope(
+    return PopGuard(
       onPop: selectedRules.isEmpty
           ? null
           : (_) {
@@ -922,7 +922,7 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
         .toList();
     final error = rulesState.error ?? disabledRulesState.error;
     final loading = rulesState.isLoading || disabledRulesState.isLoading;
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.editGlobalRules,
       searchState: AppBarSearchState(
         onSearch: (value) => setState(() => _query = SearchQuery(value)),

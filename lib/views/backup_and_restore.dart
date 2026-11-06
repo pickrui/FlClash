@@ -236,7 +236,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
     final isLoading = ref.watch(loadingProvider(LoadingTag.backup_restore));
     final davError = dav == null ? null : _davSettingError(dav);
     final client = _davConnection.client;
-    return CommonScaffold(
+    return Scaffold(
       isLoading: isLoading,
       title: appLocalizations.backupAndRestore,
       body: Builder(
@@ -462,7 +462,7 @@ class _DavBackupsDialogState extends State<DavBackupsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonDialog(
+    return AlertDialog(
       title: appLocalizations.selectBackup,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       child: Column(
@@ -500,7 +500,7 @@ class RestoreOptionsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonDialog(
+    return AlertDialog(
       title: appLocalizations.restore,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       child: Wrap(

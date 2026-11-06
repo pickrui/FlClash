@@ -5,7 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, AppBar;
+import 'package:material_ui/material_ui.dart'
+    hide AppBar, IconButton, PopupMenuItem, Scaffold;
 import 'package:prism_ui/scaffold.dart' show AppBar;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_test/flutter_test.dart';
@@ -35,7 +36,7 @@ Future<List<String>> _pumpBar(
   await tester.pumpWidget(
     TestApp(
       wrapInProviderScope: true,
-      child: CommonScaffold(
+      child: Scaffold(
         title: 'Page',
         searchState: hasSearch ? AppBarSearchState(onSearch: (_) {}) : null,
         primaryAction: primary == null
@@ -45,7 +46,7 @@ Future<List<String>> _pumpBar(
         selectionActions: [for (final label in selection) action(label)],
         menuItems: [
           for (final label in menuItems)
-            CommonPopupMenuItem(label: label, onPressed: () => taps.add(label)),
+            PopupMenuItem(label: label, onPressed: () => taps.add(label)),
         ],
         body: const SizedBox.expand(),
       ),
@@ -155,13 +156,10 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        child: CommonScaffold(
+        child: Scaffold(
           title: 'Page',
           titleMenuItems: [
-            CommonPopupMenuItem(
-              label: 'Rename',
-              onPressed: () => taps.add('Rename'),
-            ),
+            PopupMenuItem(label: 'Rename', onPressed: () => taps.add('Rename')),
           ],
           body: const SizedBox.expand(),
         ),

@@ -21,7 +21,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:prism_ui/sheet.dart' show sheetFloatInset;
 import 'package:prism_ui/shape.dart' show AppCorner;
-import 'package:material_ui/material_ui.dart' hide TextButton, Theme, ThemeData;
+import 'package:material_ui/material_ui.dart'
+    hide Scaffold, Scrollbar, TextButton, Theme, ThemeData;
 import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,7 +35,7 @@ const _mobile = Size(400, 900);
 const _desktop = Size(1200, 900);
 
 Widget _sheet(BuildContext context, ScrollController? controller) {
-  return CommonScaffold(
+  return Scaffold(
     title: 'title',
     body: ListView.builder(
       controller: controller,
@@ -74,9 +75,9 @@ class _OwnControllerListState extends State<_OwnControllerList> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(
+    return Scaffold(
       title: 'title',
-      body: CommonScrollBar(
+      body: Scrollbar(
         controller: _controller,
         child: ListView.builder(
           controller: _controller,
@@ -146,7 +147,7 @@ void main() {
   testWidgets('a sheet floats as a card inset from the sides and foot below '
       'its tallest detent, and spans the display there', (tester) async {
     await openSheet(tester);
-    final page = find.byType(CommonScaffold);
+    final page = find.byType(Scaffold);
     ClipRSuperellipseLayer clip() => tester.layers
         .whereType<ClipRSuperellipseLayer>()
         .firstWhere((layer) => layer.clipRSuperellipse!.width == _mobile.width);
@@ -190,7 +191,7 @@ void main() {
 
     expect(
       card.top,
-      moreOrLessEquals(tester.getRect(find.byType(CommonScaffold)).top),
+      moreOrLessEquals(tester.getRect(find.byType(Scaffold)).top),
     );
     await close(tester);
   });
@@ -242,9 +243,9 @@ void main() {
   ) async {
     await openSheet(
       tester,
-      builder: (context, controller) => CommonScaffold(
+      builder: (context, controller) => Scaffold(
         title: 'title',
-        body: CommonScrollBar(
+        body: Scrollbar(
           controller: controller,
           child: ListView.builder(
             controller: controller,
@@ -590,9 +591,9 @@ void main() {
       'comes to fit', (tester) async {
     await openSheet(
       tester,
-      builder: (_, controller) => CommonScaffold(
+      builder: (_, controller) => Scaffold(
         title: 'title',
-        body: CommonScrollBar(
+        body: Scrollbar(
           controller: controller,
           child: ListView.builder(
             controller: controller,
@@ -708,7 +709,7 @@ void main() {
   ) async {
     await openSheet(
       tester,
-      builder: (_, controller) => CommonScaffold(
+      builder: (_, controller) => Scaffold(
         title: 'title',
         body: ListView(
           controller: controller,

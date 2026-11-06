@@ -378,7 +378,7 @@ class _MitmViewState extends ConsumerState<MitmView> {
     final check = certificate.value == null
         ? null
         : ref.watch(mitmTrustStateProvider).value;
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.mitm,
       isLoading: ref.watch(loadingProvider(LoadingTag.mitm)),
       body: NullStatusSwitcher(
@@ -585,7 +585,7 @@ class _MitmCaptureView extends ConsumerWidget {
       ),
     );
     final options = mitmCaptureOptions(isAndroid: isAndroid);
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.httpCapture,
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(

@@ -21,7 +21,7 @@ import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, TextFormField, TextButton;
+    hide Switch, TextButton, TextField, TextFormField;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
 import 'package:code_forge/code_forge.dart';
@@ -120,9 +120,9 @@ void main() {
       await tester.pumpAndSettle();
       final switchFinder = find.descendant(
         of: find.byType(Ipv6Item),
-        matching: find.byType(CommonSwitch),
+        matching: find.byType(Switch),
       );
-      expect(tester.widget<CommonSwitch>(switchFinder).onChanged, isNull);
+      expect(tester.widget<Switch>(switchFinder).onChanged, isNull);
       await tester.tap(find.byTooltip('Remove'));
       await tester.pumpAndSettle();
       expect(
@@ -201,7 +201,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Status'), findsOneWidget);
       expect(find.byTooltip('Add override entry'), findsOneWidget);
-      await tester.tap(find.byType(CommonSwitch).last);
+      await tester.tap(find.byType(Switch).last);
       await tester.pumpAndSettle();
       var patch = container.read(patchClashConfigProvider);
       expect(ntp ? patch.ntp.enable : patch.dns.enable, ntp);

@@ -93,7 +93,7 @@ class CustomProvidersView extends ConsumerWidget {
           in ref.watch(clashProvidersProvider).value ?? const <ClashProvider>[])
         if (provider.kind == ProviderKind.rule) provider.label: provider,
     };
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.providers,
       body: NullStatusSwitcher(
         isEmpty: proxy.isEmpty && rule.isEmpty,

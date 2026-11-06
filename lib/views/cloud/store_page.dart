@@ -122,7 +122,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     final profile = ref.watch(cloudAccountProvider.select((s) => s.profile));
     final busy = _busy || storeState.isLoading;
 
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.store,
       isLoading: _busy || (storeState.isLoading && storeState.plans.isNotEmpty),
       iconActions: [
@@ -573,7 +573,7 @@ class _PlanPickerSheet extends StatelessWidget {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * 0.7,
       ),
-      child: CommonScaffold(
+      child: Scaffold(
         title: title,
         body: ListView(
           shrinkWrap: true,

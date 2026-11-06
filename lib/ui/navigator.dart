@@ -19,9 +19,9 @@ import 'package:flutter/widgets.dart';
 class BaseNavigator {
   static PageRoute<T> _routeOf<T>(BuildContext context, Widget child) {
     if (!context.isMobileView) {
-      return CommonDesktopRoute(builder: (context) => child);
+      return FadePageRoute(builder: (context) => child);
     }
-    return CommonRoute(builder: (context) => child);
+    return CardPageRoute(builder: (context) => child);
   }
 
   /// The mobile layout drops a home page's navigator, pages and all, so a
@@ -42,7 +42,7 @@ class BaseNavigator {
       });
     }
 
-    final route = CommonDesktopRoute<T>(
+    final route = FadePageRoute<T>(
       builder: (_) => _DropWatch(onDropped: reopenIfDropped, child: child),
     );
     unawaited(
@@ -156,11 +156,11 @@ Future<void> _whenStill(Animation<double> animation) {
   return completer.future;
 }
 
-class CommonDesktopRoute<T> extends PageRoute<T>
+class FadePageRoute<T> extends PageRoute<T>
     with DragBackRouteMixin<T>, DeferredPushRouteMixin<T> {
   final Widget Function(BuildContext context) builder;
 
-  CommonDesktopRoute({required this.builder});
+  FadePageRoute({required this.builder});
 
   @override
   Color? get barrierColor => null;
@@ -205,11 +205,11 @@ class CommonDesktopRoute<T> extends PageRoute<T>
   Duration get reverseTransitionDuration => const Duration(milliseconds: 200);
 }
 
-class CommonRoute<T> extends PageRoute<T>
+class CardPageRoute<T> extends PageRoute<T>
     with DragBackRouteMixin<T>, DeferredPushRouteMixin<T>, CardRouteMixin<T> {
   final Widget Function(BuildContext context) builder;
 
-  CommonRoute({required this.builder, super.settings});
+  CardPageRoute({required this.builder, super.settings});
 
   // Paint the first frame off screen before the page begins to move.
   @override

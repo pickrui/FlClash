@@ -14,13 +14,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:prism_ui/app.dart';
 import 'package:material_ui/material_ui.dart'
     hide
-        TextField,
-        ThemeData,
         ColorScheme,
-        IconButton,
-        TextButton,
         FilledButton,
-        OutlinedButton;
+        IconButton,
+        OutlinedButton,
+        Scaffold,
+        TextButton,
+        TextField,
+        ThemeData;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:prism_ui/theme_data.dart' show ThemeData, ColorScheme;
 import 'package:prism_ui/text_field.dart' show TextField;
 
@@ -41,7 +43,7 @@ Future<List<FocusNode>> _pump(
   await tester.pumpWidget(
     PrismApp(
       theme: _theme,
-      home: Scaffold(
+      home: material.Scaffold(
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -220,7 +222,7 @@ void main() {
         theme: _theme,
         home: RemoteFocusAdapter(
           enabled: remote,
-          child: Scaffold(
+          child: material.Scaffold(
             body: Column(
               children: [
                 const TextField(key: Key('before')),

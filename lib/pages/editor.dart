@@ -387,7 +387,7 @@ class _EditorPageState extends ConsumerState<EditorPage>
     final fontSize = ref.watch(
       appSettingProvider.select((state) => state.editorFontSize),
     );
-    return CommonPopScope(
+    return PopGuard(
       onPop: _handlePop,
       child: CallbackShortcuts(
         bindings: {
@@ -397,7 +397,7 @@ class _EditorPageState extends ConsumerState<EditorPage>
         },
         child: Focus(
           autofocus: true,
-          child: CommonScaffold(
+          child: Scaffold(
             titleWidget: _EditorTitleField(
               controller: _titleController,
               enabled: widget.titleEditable && !_busy,
@@ -418,26 +418,26 @@ class _EditorPageState extends ConsumerState<EditorPage>
                     onPressed: _barState.isDirty ? _handleSave : null,
                   ),
             menuItems: [
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.undo,
                 label: appLocalizations.undo,
                 onPressed: _barState.canUndo && !_busy
                     ? _undoController.undo
                     : null,
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.redo,
                 label: appLocalizations.redo,
                 onPressed: _barState.canRedo && !_busy
                     ? _undoController.redo
                     : null,
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.textSize,
                 label: appLocalizations.fontSize,
                 subItems: [
                   for (final size in EditorFontSize.values)
-                    CommonPopupMenuItem(
+                    PopupMenuItem(
                       label: switch (size) {
                         EditorFontSize.standard => appLocalizations.standard,
                         EditorFontSize.large => appLocalizations.large,
@@ -453,7 +453,7 @@ class _EditorPageState extends ConsumerState<EditorPage>
                     ),
                 ],
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.wrap,
                 label: appLocalizations.lineWrap,
                 checked: lineWrap,
@@ -826,7 +826,7 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
     final point = navigatorBox.globalToLocal(request.globalPosition);
     final controller = widget.controller;
     late final PopupRoute<void> route;
-    late final ValueNotifier<List<CommonPopupMenuItem>> items;
+    late final ValueNotifier<List<PopupMenuItem>> items;
     late final ValueNotifier<Rect> anchor;
     var selection = controller.selection;
     var selectingAll = false;
@@ -845,9 +845,9 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
             );
     }
 
-    List<CommonPopupMenuItem> menuItems() => [
+    List<PopupMenuItem> menuItems() => [
       if (request.hasSelection && !request.readOnly)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.cut,
           label: appLocalizations.cut,
           onPressed: () {
@@ -856,7 +856,7 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
           },
         ),
       if (request.hasSelection)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.copy,
           label: appLocalizations.copy,
           onPressed: () {
@@ -865,7 +865,7 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
           },
         ),
       if (!request.readOnly)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.paste,
           label: appLocalizations.paste,
           onPressed: () {
@@ -874,7 +874,7 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
           },
         ),
       if (!request.isAllSelected)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.selectAll,
           label: appLocalizations.selectAll,
           onPressed: () {
@@ -897,12 +897,12 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
     }
     anchor = ValueNotifier(anchorRect());
     route = system.isDesktop
-        ? CommonPopupRoute<void>(
+        ? AnchoredPopupRoute<void>(
             barrierLabel: UiLocalizations.of(context).close,
             placement: PopupPlacement.belowPoint,
             modal: false,
             anchorOf: () => point & Size.zero,
-            builder: (_) => CommonPopupMenu(items: items.value),
+            builder: (_) => PopupMenu(items: items.value),
           )
         : EditMenuRoute(
             barrierLabel: UiLocalizations.of(context).close,

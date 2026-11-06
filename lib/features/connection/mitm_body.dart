@@ -161,10 +161,10 @@ class _MitmHexView extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final style = AppTextStyle.footnote.of(context).toJetBrainsMono;
-    return CommonScaffold(
+    return Scaffold(
       title: title,
       menuItems: [
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.copy,
           label: appLocalizations.copyAsBase64,
           onPressed: () => _copyBase64(context),

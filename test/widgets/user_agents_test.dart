@@ -85,7 +85,7 @@ void main() {
       findsNWidgets(defaultUserAgents.length),
     );
     await openMenu(tester, appLocalizations.defaultText);
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
     await openMenu(tester, defaultUserAgents.first);
     expect(find.text(appLocalizations.edit), findsOneWidget);
   });
@@ -103,7 +103,7 @@ void main() {
     await tester.tap(find.text(defaultUserAgents.last));
     await openMenu(tester, defaultUserAgents.last);
     expect(selected(), isNull);
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
 
     final sortButton = find.widgetWithGlyph(IconButton, AppGlyphs.sort);
     expect(tester.widget<IconButton>(sortButton).isSelected, isTrue);

@@ -68,7 +68,7 @@ class _DecorationListItemState extends State<DecorationListItem> {
       emphasized: widget.invalid,
       states: _states,
       endIndent: 14,
-      child: CommonCard(
+      child: Card(
         shape: AppShape.of(borderRadius),
         isError: widget.invalid,
         isSelected: widget.isSelected,
@@ -158,7 +158,7 @@ class SelectedDecorationListItem extends StatelessWidget {
         onPressed();
       },
       subtitle: subtitle,
-      trailing: CommonCheckBox(
+      trailing: Checkbox(
         value: isSelected,
         isCircle: true,
         onChanged: (_) {

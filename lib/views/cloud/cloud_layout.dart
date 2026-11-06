@@ -154,7 +154,7 @@ class CloudFormSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sheet = SheetProvider.of(context);
-    final scaffold = CommonScaffold(
+    final scaffold = Scaffold(
       title: title,
       backAction: onClose,
       confirmationAction: confirmation,
@@ -260,7 +260,7 @@ class CloudSecretField extends StatelessWidget {
             onFieldSubmitted: onFieldSubmitted,
           ),
         ),
-        CommonMinIconButtonTheme(
+        MinIconButtonTheme(
           child: VisibilityToggleButton(
             obscureText: obscure,
             onPressed: onToggle,

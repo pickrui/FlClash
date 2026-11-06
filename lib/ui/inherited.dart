@@ -26,21 +26,21 @@ class ProfileIdProvider extends InheritedWidget {
       profileId != oldWidget.profileId;
 }
 
-class CommonScaffoldBackActionProvider extends InheritedWidget {
+class ScaffoldBackActionProvider extends InheritedWidget {
   final VoidCallback? backAction;
 
-  const CommonScaffoldBackActionProvider({
+  const ScaffoldBackActionProvider({
     super.key,
     required this.backAction,
     required super.child,
   });
 
-  static CommonScaffoldBackActionProvider? of(BuildContext context) {
+  static ScaffoldBackActionProvider? of(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<CommonScaffoldBackActionProvider>();
+        .dependOnInheritedWidgetOfExactType<ScaffoldBackActionProvider>();
   }
 
   @override
-  bool updateShouldNotify(CommonScaffoldBackActionProvider oldWidget) =>
+  bool updateShouldNotify(ScaffoldBackActionProvider oldWidget) =>
       backAction != oldWidget.backAction;
 }

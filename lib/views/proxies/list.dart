@@ -243,7 +243,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
               );
               Widget buildColumn(int column) {
                 final controller = _columnController(column);
-                return CommonScrollBar(
+                return Scrollbar(
                   controller: controller,
                   thumbVisibility: true,
                   child: CustomScrollView(
@@ -652,7 +652,7 @@ class ListHeader extends ConsumerWidget {
         ? SurfaceLevel.floatingOf(colorScheme)
         : context.raisedSurfaceLevel;
     final radius = AppCorner.xl.ap(context);
-    final card = CommonCard(
+    final card = Card(
       enterActionsOnRight: true,
       enterAnimated: enterAnimated,
       key: key,
@@ -706,7 +706,7 @@ class ListHeader extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(_headerButtonInset),
         child: SurfaceScope(
-          // CommonCard fills one level above its scope.
+          // Card fills one level above its scope.
           level: SurfaceLevel.values[level.index - 1],
           child: card,
         ),
@@ -923,7 +923,7 @@ class _GroupActions extends StatelessWidget {
                   ? context.appLocalizations.collapseList
                   : context.appLocalizations.expandList,
               onPressed: onToggle,
-              icon: CommonExpandIcon(expand: isExpand),
+              icon: ExpandIcon(expand: isExpand),
             ),
           ),
         ],

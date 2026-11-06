@@ -7,7 +7,8 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/ui/keyboard.dart';
@@ -30,7 +31,7 @@ Widget _page({
   List<Widget> actions = const [],
   List<IconButtonData> searchActions = const [],
 }) {
-  return CommonScaffold(
+  return Scaffold(
     title: 'Page',
     searchState: onSearch == null
         ? null
@@ -54,7 +55,7 @@ void main() {
           ],
           child: ValueListenableBuilder<String?>(
             valueListenable: query,
-            builder: (_, value, _) => CommonScaffold(
+            builder: (_, value, _) => Scaffold(
               title: 'Items',
               searchState: AppBarSearchState(query: value, onSearch: (_) {}),
               body: const SizedBox.expand(),
@@ -83,7 +84,7 @@ void main() {
           backBlockActionProvider.overrideWith(TestBackBlockAction.new),
         ],
         child: StatefulBuilder(
-          builder: (context, setState) => CommonScaffold(
+          builder: (context, setState) => Scaffold(
             title: 'Items',
             searchState: AppBarSearchState(
               onSearch: (value) => setState(() => query = value),
@@ -169,7 +170,7 @@ void main() {
 
     navigator.push(
       MaterialPageRoute<void>(
-        builder: (_) => const Scaffold(body: Text('covering route')),
+        builder: (_) => const material.Scaffold(body: Text('covering route')),
       ),
     );
     await tester.pumpAndSettle();

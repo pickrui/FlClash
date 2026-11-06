@@ -207,7 +207,7 @@ class _ResourcesViewState extends ConsumerState<ResourcesView> {
       for (final key in resourceKeys) ref.watch(isUpdatingProvider(key)),
     ].any((value) => value);
 
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.resources,
       iconActions: [
         IconButtonData(
@@ -349,12 +349,12 @@ class _ResourceItem extends StatelessWidget {
     }
   }
 
-  List<CommonPopupMenuItem> _menuItems(BuildContext context) {
+  List<PopupMenuItem> _menuItems(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final url = this.url;
     return [
       if (!isUpdating)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.sync,
           label: appLocalizations.sync,
           onPressed: () {
@@ -362,13 +362,13 @@ class _ResourceItem extends StatelessWidget {
           },
         ),
       if (onEdit != null)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.edit,
           label: appLocalizations.edit,
           onPressed: onEdit,
         ),
       if (url != null)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.copy,
           label: appLocalizations.copyLink,
           onPressed: () {
@@ -724,7 +724,7 @@ class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonDialog(
+    return AlertDialog(
       title: widget.title,
       actions: [
         if (widget.defaultValue != null &&

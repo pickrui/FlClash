@@ -52,7 +52,7 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(
+    return Scaffold(
       title: context.appLocalizations.proxyGroup,
       searchState: AppBarSearchState(
         onSearch: (value) => setState(() => _query = value),
@@ -398,15 +398,15 @@ class _CustomProxyGroupsSectionState
     });
   }
 
-  List<CommonPopupMenuItem> _menuItems(ProxyGroup group) {
+  List<PopupMenuItem> _menuItems(ProxyGroup group) {
     final appLocalizations = context.appLocalizations;
     return [
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.copy,
         label: appLocalizations.copy,
         onPressed: () => _duplicate(group),
       ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.delete,
         label: appLocalizations.delete,
         danger: true,
@@ -509,7 +509,7 @@ class _CustomProxyGroupsSectionState
       );
     }
 
-    return CommonPopScope(
+    return PopGuard(
       onPop: selected.isEmpty && !_sorting
           ? null
           : (_) {
@@ -605,7 +605,7 @@ class _ProxyGroupItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (issues.isNotEmpty) RoutingIssueButton(issues: issues),
-          CommonCheckBox(
+          Checkbox(
             value: isSelected,
             isCircle: true,
             onChanged: onSelected == null ? null : (_) => onSelected!(),

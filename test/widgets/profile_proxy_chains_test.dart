@@ -23,7 +23,8 @@ import 'package:prism_ui/prism_list.dart';
 import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, TextButton, FilledButton;
+    hide FilledButton, Scaffold, Switch, TextButton, TextField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_riverpod/misc.dart';
@@ -146,7 +147,7 @@ Future<(TestProfiles, List<String>)> _pump(
       homeBuilder: (child) => _Status(messages: messages, child: child),
       child:
           child ??
-          const Scaffold(
+          const material.Scaffold(
             body: CustomScrollView(
               slivers: [ProfileProxyChainsContent(profileId: 1)],
             ),
@@ -161,7 +162,7 @@ Finder _tile(String title) =>
     find.widgetWithText(OverwriteEntryTile, title).first;
 
 Finder _switchOf(String title) =>
-    find.descendant(of: _tile(title), matching: find.byType(CommonSwitch));
+    find.descendant(of: _tile(title), matching: find.byType(Switch));
 
 Future<void> _deleteFromMenu(WidgetTester tester, String title) async {
   await tester.tap(
@@ -197,9 +198,7 @@ void main() {
     await tester.tap(find.text('Alpha'));
     await tester.tap(find.text('Beta'));
     await tester.pumpAndSettle();
-    final search = tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
-        .searchState!;
+    final search = tester.widget<Scaffold>(find.byType(Scaffold)).searchState!;
     search.onSearch('SOCKS5 fixture.example');
     await tester.pumpAndSettle();
     expect(find.text('Alpha'), findsNothing);

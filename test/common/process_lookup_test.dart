@@ -13,7 +13,7 @@ import 'package:fl_clash/views/config/general.dart';
 import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Switch;
 
 import '../helpers/test_app.dart';
 
@@ -146,14 +146,8 @@ void main() {
         'rules': ['PROCESS-NAME,AliApp.exe,DIRECT'],
       });
       await tester.pump();
-      expect(
-        tester.widget<CommonSwitch>(find.byType(CommonSwitch)).value,
-        isFalse,
-      );
-      expect(
-        tester.widget<CommonSwitch>(find.byType(CommonSwitch)).onChanged,
-        isNotNull,
-      );
+      expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+      expect(tester.widget<Switch>(find.byType(Switch)).onChanged, isNotNull);
       expect(
         find.text(
           'Process rules look up the process only when they are checked',
@@ -164,14 +158,8 @@ void main() {
         'rules': ['MATCH,DIRECT'],
       });
       await tester.pump();
-      expect(
-        tester.widget<CommonSwitch>(find.byType(CommonSwitch)).value,
-        isFalse,
-      );
-      expect(
-        tester.widget<CommonSwitch>(find.byType(CommonSwitch)).onChanged,
-        isNotNull,
-      );
+      expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+      expect(tester.widget<Switch>(find.byType(Switch)).onChanged, isNotNull);
       expect(
         container.read(patchClashConfigProvider).findProcessMode,
         FindProcessMode.off,

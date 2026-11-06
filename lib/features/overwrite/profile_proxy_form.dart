@@ -595,7 +595,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
           key: ValueKey('proxy-row-$key'),
           title: title,
           leading: leading,
-          trailing: CommonSwitch(
+          trailing: Switch(
             value: value == true,
             onChanged: (value) => _updateField(field, value),
           ),
@@ -816,7 +816,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
             if (!field.isCredential) _fieldRow(field),
           FormRow(
             title: 'UDP',
-            trailing: CommonSwitch(
+            trailing: Switch(
               value: _udp ?? false,
               onChanged: (value) {
                 setState(() => _udp = value);
@@ -867,7 +867,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
       isDirty: () => !const ListEquality().equals(_origin, _snapshot),
       save: _handleSubmit,
       isBusy: () => _saving || _switching,
-      child: CommonScaffold(
+      child: Scaffold(
         title: l.proxyChainCustomNode,
         confirmationAction: IconButtonData(
           glyph: AppGlyphs.check,

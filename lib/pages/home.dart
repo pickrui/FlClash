@@ -444,7 +444,7 @@ class HomeBackScopeContainer extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final systemAction = context.systemAction;
 
-    return CommonPopScope(
+    return PopGuard(
       onPop: (context) async {
         final pageLabel = ref.read(navigationStateProvider).pageLabel;
         final realContext =

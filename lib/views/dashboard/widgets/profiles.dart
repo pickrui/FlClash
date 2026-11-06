@@ -473,7 +473,7 @@ class _ProfilePickerSheet extends ConsumerWidget {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * 0.7,
       ),
-      child: CommonScaffold(
+      child: Scaffold(
         title: context.appLocalizations.switchProfile,
         body: PrismListView(
           shrinkWrap: true,

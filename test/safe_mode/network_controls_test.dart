@@ -21,7 +21,7 @@ import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Switch;
 
 import '../helpers/test_app.dart';
 
@@ -169,14 +169,14 @@ void main() {
       await tester.pumpAndSettle();
       final toggleFinder = find.descendant(
         of: find.byType(entry.value.runtimeType),
-        matching: find.byType(CommonSwitch),
+        matching: find.byType(Switch),
       );
-      final toggle = tester.widget<CommonSwitch>(toggleFinder);
+      final toggle = tester.widget<Switch>(toggleFinder);
       expect(toggle.value, !safeModeBuild);
       expect(toggle.onChanged, safeModeBuild ? isNull : isNotNull);
       await tester.tap(toggleFinder, warnIfMissed: false);
       await tester.pumpAndSettle();
-      expect(tester.widget<CommonSwitch>(toggleFinder).value, isFalse);
+      expect(tester.widget<Switch>(toggleFinder).value, isFalse);
       if (safeModeBuild) {
         expect(container.read(networkSettingProvider).systemProxy, isTrue);
         expect(container.read(networkSettingProvider).autoSetSystemDns, isTrue);

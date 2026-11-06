@@ -16,7 +16,7 @@ import 'package:fl_clash/views/profiles/custom_groups.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
 
 import '../helpers/test_app.dart';
 
@@ -74,7 +74,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Personal'), findsOneWidget);
     tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .widget<Scaffold>(find.byType(Scaffold))
         .searchState!
         .onSearch('Personal');
     await tester.pumpAndSettle();

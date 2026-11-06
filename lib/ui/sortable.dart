@@ -21,7 +21,7 @@ import 'package:fl_clash/ui/common_button.dart' show IconButton;
 
 import 'focus.dart';
 
-/// The sort mode a [CommonScaffold] keeps for its body, or a section keeps
+/// The sort mode a [Scaffold] keeps for its body, or a section keeps
 /// for its own rows.
 class SortModeScope extends InheritedWidget {
   const SortModeScope({super.key, required this.sorting, required super.child});

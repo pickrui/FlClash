@@ -493,7 +493,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
-        of: find.byType(CommonPopupMenu),
+        of: find.byType(PopupMenu),
         matching: find.text(appLocalizations.add),
       ),
     );

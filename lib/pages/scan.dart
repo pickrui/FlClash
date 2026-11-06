@@ -310,7 +310,7 @@ class _ScanPageState extends ConsumerState<ScanPage>
         sized: false,
         child: ValueListenableBuilder<MobileScannerState>(
           valueListenable: controller,
-          builder: (context, state, child) => CommonPopScope(
+          builder: (context, state, child) => PopGuard(
             onPop: state.isRunning || state.isStarting ? _handlePop : null,
             child: child!,
           ),

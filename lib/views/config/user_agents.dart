@@ -110,17 +110,17 @@ class _UserAgentsViewState extends ConsumerState<UserAgentsView> {
     }
   }
 
-  List<CommonPopupMenuItem> _buildMenuItems(String userAgent) {
+  List<PopupMenuItem> _buildMenuItems(String userAgent) {
     final appLocalizations = context.appLocalizations;
     return [
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.edit,
         label: appLocalizations.edit,
         onPressed: () {
           _handleEdit(userAgent);
         },
       ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         danger: true,
         glyph: AppGlyphs.delete,
         label: appLocalizations.delete,
@@ -170,7 +170,7 @@ class _UserAgentsViewState extends ConsumerState<UserAgentsView> {
       patchClashConfigProvider.select((state) => state.globalUa),
     );
     final entries = _visibleUserAgents(userAgents, selected);
-    return CommonScaffold(
+    return Scaffold(
       canSort: entries.length > 1,
       title: appLocalizations.userAgent,
       actions: [

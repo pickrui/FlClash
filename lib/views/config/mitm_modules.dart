@@ -52,14 +52,14 @@ Future<void> _setEnabled(WidgetRef ref, MitmModule module, bool enabled) async {
 
 /// Runs a cron, event or generic script line now; any other line, any while
 /// decryption is off, and a task still running have none.
-CommonPopupMenuItem? mitmRunScriptItem(WidgetRef ref, String line) {
+PopupMenuItem? mitmRunScriptItem(WidgetRef ref, String line) {
   final name = mitmTaskName(line);
   if (name == null ||
       !ref.read(patchClashConfigProvider).mitm.enable ||
       ref.read(isUpdatingProvider(mitmScriptUpdatingKey(name)))) {
     return null;
   }
-  return CommonPopupMenuItem(
+  return PopupMenuItem(
     glyph: AppGlyphs.playPause(0),
     label: appLocalizations.mitmRunScript,
     onPressed: () => _runScript(ref, name),
@@ -227,30 +227,30 @@ class MitmModulesView extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final state = ref.watch(mitmModulesProvider);
     final modules = state.value ?? const <MitmModule>[];
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.mitmModules,
       canSort: modules.length > 1,
       isLoading: ref.watch(loadingProvider(LoadingTag.mitm)),
       actions: [
-        CommonPopupBox(
+        PopupAnchor(
           targetBuilder: (open) => IconButton(
             tooltip: appLocalizations.add,
             onPressed: open,
             icon: const GlyphIcon(AppGlyphs.addCircle),
           ),
-          popupBuilder: (_) => CommonPopupMenu(
+          popupBuilder: (_) => PopupMenu(
             items: [
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.compose,
                 label: appLocalizations.mitmNewModule,
                 onPressed: () => openMitmModuleEditor(context, ref),
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.cloudDownload,
                 label: appLocalizations.importUrl,
                 onPressed: () => _importFromUrl(context, ref),
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.importFile,
                 label: appLocalizations.importFile,
                 onPressed: () => _importFromFile(context, ref),
@@ -333,19 +333,19 @@ class _MitmModuleRow extends ConsumerWidget {
             ? null
             : [
                 if (module.isRemote)
-                  CommonPopupMenuItem(
+                  PopupMenuItem(
                     glyph: AppGlyphs.sync,
                     label: appLocalizations.update,
                     onPressed: () => _updateModule(ref, module),
                   )
                 else
-                  CommonPopupMenuItem(
+                  PopupMenuItem(
                     glyph: AppGlyphs.edit,
                     label: appLocalizations.edit,
                     onPressed: () =>
                         openMitmModuleEditor(context, ref, module: module),
                   ),
-                CommonPopupMenuItem(
+                PopupMenuItem(
                   danger: true,
                   glyph: AppGlyphs.delete,
                   label: appLocalizations.delete,
@@ -374,7 +374,7 @@ class _MitmModuleRow extends ConsumerWidget {
                       padding: EdgeInsetsDirectional.only(end: 8),
                       child: ActivityIndicator(size: 24),
                     )
-                  : CommonSwitch(
+                  : Switch(
                       value: module.enabled,
                       onChanged: (value) => _setEnabled(ref, module, value),
                     ),
@@ -434,7 +434,7 @@ class MitmModuleView extends ConsumerWidget {
     String title,
     List<String> lines, {
     Map<String, String> issues = const {},
-    List<CommonPopupMenuItem> Function(String line)? menuItemsOf,
+    List<PopupMenuItem> Function(String line)? menuItemsOf,
   }) {
     return Builder(
       builder: (context) {
@@ -538,7 +538,7 @@ class MitmModuleView extends ConsumerWidget {
       for (final name in mitmAttachments(module).keys)
         ContextMenuRegion(
           menuItems: [
-            CommonPopupMenuItem(
+            PopupMenuItem(
               danger: true,
               glyph: AppGlyphs.delete,
               label: appLocalizations.delete,
@@ -621,7 +621,7 @@ class MitmModuleView extends ConsumerWidget {
     final details = ref.watch(mitmModuleDetailsProvider(id));
     final content = details.value?.content;
     final issues = details.value?.issues ?? const {};
-    return CommonScaffold(
+    return Scaffold(
       title: module?.name ?? appLocalizations.mitmModule,
       body: NullStatusSwitcher(
         isLoading: module == null || details.isLoading && !details.hasValue,
@@ -727,14 +727,14 @@ class _MitmModuleLinesView extends StatelessWidget {
   /// reader left it out.
   final List<(String, String?)> lines;
   final bool notes;
-  final List<CommonPopupMenuItem> Function(String line)? menuItemsOf;
+  final List<PopupMenuItem> Function(String line)? menuItemsOf;
 
   @override
   Widget build(BuildContext context) {
     final noteStyle = notes
         ? context.listCaptionStyle
         : TextStyle(color: context.colorScheme.error);
-    return CommonScaffold(
+    return Scaffold(
       title: title,
       body: PrismListView(
         padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(

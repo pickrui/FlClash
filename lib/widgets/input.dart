@@ -221,12 +221,12 @@ class _EntryDialogState<T> extends State<_EntryDialog<T>> {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    return CommonDialog(
+    return AlertDialog(
       title: _isBatch ? appLocalizations.batchAdd : widget.title,
       hasFields: true,
       trailing: widget.batch == null
           ? null
-          : CommonMinIconButtonTheme(
+          : MinIconButtonTheme(
               child: IconButton(
                 tooltip: _isBatch
                     ? appLocalizations.singleAdd

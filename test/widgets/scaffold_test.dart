@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/models.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide Chip, Scaffold, TextField;
 import 'package:prism_ui/text_field.dart' show TextField;
 
 import '../helpers/test_app.dart';
@@ -26,7 +26,7 @@ void main() {
         wrapInProviderScope: true,
         child: RepaintBoundary(
           key: pageKey,
-          child: CommonScaffold(
+          child: Scaffold(
             title: 'Page',
             body: Column(
               children: [
@@ -69,7 +69,7 @@ void main() {
         child: Builder(
           builder: (context) {
             aboveInset = context.bottomInset;
-            return CommonScaffold(
+            return Scaffold(
               title: 'title',
               body: Builder(
                 builder: (context) {
@@ -121,7 +121,7 @@ void main() {
       const bodyKey = Key('retained-body');
       await tester.pumpWidget(
         TestApp(
-          child: CommonScaffold(
+          child: Scaffold(
             title: 'Requests',
             keywords: keywords,
             body: const SizedBox.expand(key: bodyKey),
@@ -134,9 +134,7 @@ void main() {
       await tester.tap(find.text('TCP'));
       await tester.pump();
       expect(
-        tester
-            .widget<CommonChip>(find.widgetWithText(CommonChip, 'TCP'))
-            .selected,
+        tester.widget<Chip>(find.widgetWithText(Chip, 'TCP')).selected,
         isTrue,
       );
       await tester.tap(find.text('curl'));
@@ -158,7 +156,7 @@ void main() {
       TestApp(
         locale: const Locale('en'),
         wrapInProviderScope: true,
-        child: CommonScaffold(
+        child: Scaffold(
           title: 'Proxies',
           searchState: AppBarSearchState(onSearch: onSearch),
           actions: const [Icon(Icons.tune)],

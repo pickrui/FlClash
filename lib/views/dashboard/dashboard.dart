@@ -59,7 +59,7 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     final editing = _editing;
     final gap = cardSpacingOf(context, ref.watch(viewModeProvider));
     final appLocalizations = context.appLocalizations;
-    return CommonScaffold(
+    return Scaffold(
       backgroundColor: DashboardColors.of(context).page,
       title: editing
           ? appLocalizations.editDashboard

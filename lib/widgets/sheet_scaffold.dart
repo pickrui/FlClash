@@ -30,7 +30,7 @@ class AdaptiveSheetScaffold extends StatelessWidget {
     final type = this.type ?? SheetProvider.of(context)?.type ?? SheetType.page;
     return SheetProvider(
       type: type,
-      child: CommonScaffold(
+      child: Scaffold(
         key: type == SheetType.bottomSheet
             ? const ValueKey('adaptive-sheet')
             : null,
@@ -65,7 +65,7 @@ class PagedSheetForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!isSheetPage(context)) {
-      return CommonDialog(
+      return AlertDialog(
         title: title,
         actions: actions,
         overrideScroll: overrideScroll,
@@ -75,7 +75,7 @@ class PagedSheetForm extends StatelessWidget {
         child: child,
       );
     }
-    return CommonScaffold(
+    return Scaffold(
       title: title,
       body: Padding(
         padding: EdgeInsets.fromLTRB(

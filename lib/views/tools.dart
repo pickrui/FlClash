@@ -127,7 +127,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       _getNetworkList(),
       _getOtherList(vm2.b),
     ];
-    return CommonScaffold(
+    return Scaffold(
       title: context.appLocalizations.tools,
       body: Builder(
         builder: (context) => ListView(

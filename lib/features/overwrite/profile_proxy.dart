@@ -245,7 +245,7 @@ class OverwriteEntryTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       color: Colors.transparent,
-      child: CommonCard(
+      child: Card(
         padding: EdgeInsets.zero,
         radius: 18,
         isSelected: isSelected,
@@ -266,7 +266,7 @@ class OverwriteEntryTile extends StatelessWidget {
               ? SizedBox(
                   width: 24,
                   height: 24,
-                  child: CommonCheckBox(
+                  child: Checkbox(
                     value: isSelected,
                     isCircle: true,
                     onChanged: (_) {
@@ -277,16 +277,16 @@ class OverwriteEntryTile extends StatelessWidget {
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CommonSwitch(value: enable, onChanged: onToggle),
-                    CommonPopupBox(
-                      popupBuilder: (_) => CommonPopupMenu(
+                    Switch(value: enable, onChanged: onToggle),
+                    PopupAnchor(
+                      popupBuilder: (_) => PopupMenu(
                         items: [
-                          CommonPopupMenuItem(
+                          PopupMenuItem(
                             glyph: AppGlyphs.edit,
                             label: appLocalizations.edit,
                             onPressed: onEdit,
                           ),
-                          CommonPopupMenuItem(
+                          PopupMenuItem(
                             danger: true,
                             glyph: AppGlyphs.delete,
                             label: appLocalizations.delete,
@@ -356,7 +356,7 @@ class _CustomProxiesViewState extends State<CustomProxiesView> {
   var _query = '';
 
   @override
-  Widget build(BuildContext context) => CommonScaffold(
+  Widget build(BuildContext context) => Scaffold(
     title: context.appLocalizations.proxyChainCustomNodes,
     searchState: AppBarSearchState(
       onSearch: (query) => setState(() => _query = query),
@@ -1178,7 +1178,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
                 icon: const GlyphIcon(AppGlyphs.edit),
               ),
               if (selectedProfileProxies.isNotEmpty) ...[
-                CommonMinIconButtonTheme(
+                MinIconButtonTheme(
                   child: IconButton(
                     tooltip: context.appLocalizations.delete,
                     onPressed: visibleSelected.isEmpty
@@ -1192,7 +1192,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
                 ),
                 const SizedBox(width: 8),
               ],
-              CommonMinFilledButtonTheme(
+              MinFilledButtonTheme(
                 child: selectedProfileProxies.isNotEmpty
                     ? FilledButton(
                         onPressed: () =>

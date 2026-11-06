@@ -15,9 +15,10 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/ui/card.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, Card, TextButton;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
+import 'package:fl_clash/ui/dialog.dart' show AlertDialog;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -276,7 +277,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(profiles.writes, 0);
-    expect(find.byType(CommonDialog), findsNothing);
+    expect(find.byType(AlertDialog), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -292,7 +293,7 @@ void main() {
 
       expect(profiles.profile.overwriteType, mode);
       expect(profiles.writes, 1);
-      expect(find.byType(CommonDialog), findsNothing);
+      expect(find.byType(AlertDialog), findsNothing);
       expect(tester.takeException(), isNull);
     });
   }
@@ -320,7 +321,7 @@ void main() {
           find.text(AppLocalizations.current.emptyCustomOverwrite),
           findsOneWidget,
         );
-        final bounds = tester.getRect(find.byType(CommonDialog));
+        final bounds = tester.getRect(find.byType(AlertDialog));
         expect(bounds.left, greaterThanOrEqualTo(0));
         expect(bounds.right, lessThanOrEqualTo(360));
         expect(tester.takeException(), isNull);
@@ -332,8 +333,8 @@ void main() {
 Finder _card(OverwriteType type) =>
     find.byKey(ValueKey('overwrite-mode-${type.name}'));
 
-CommonCard _modeCard(WidgetTester tester, OverwriteType type) =>
-    tester.widget<CommonCard>(_card(type));
+Card _modeCard(WidgetTester tester, OverwriteType type) =>
+    tester.widget<Card>(_card(type));
 
 Future<void> _tapMode(WidgetTester tester, OverwriteType type) async {
   await tester.ensureVisible(_card(type));

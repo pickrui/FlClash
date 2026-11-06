@@ -17,10 +17,15 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/views/backup_and_restore.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, IconButton, TextButton, LinearProgressIndicator;
+    hide
+        AlertDialog,
+        IconButton,
+        LinearProgressIndicator,
+        TextButton,
+        TextField;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
-import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
+import 'package:fl_clash/ui/dialog.dart' show AlertDialog;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -79,22 +84,19 @@ void main() {
     for (final count in davMaxBackupsOptions) {
       expect(
         find.descendant(
-          of: find.byType(CommonPopupMenu),
+          of: find.byType(PopupMenu),
           matching: find.text('$count'),
         ),
         findsOneWidget,
       );
     }
     await tester.tap(
-      find.descendant(
-        of: find.byType(CommonPopupMenu),
-        matching: find.text('5'),
-      ),
+      find.descendant(of: find.byType(PopupMenu), matching: find.text('5')),
     );
     await tester.pumpAndSettle();
 
     expect(container.read(davSettingProvider)?.maxBackups, 5);
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
   });
 
   for (final retention in [true, false]) {
@@ -130,7 +132,7 @@ void main() {
         await tester.pump();
         await tester.tap(find.text(title));
         await tester.pump(const Duration(milliseconds: 800));
-        expect(find.byType(CommonPopupMenu), findsNothing);
+        expect(find.byType(PopupMenu), findsNothing);
         loading.stop();
         await tester.pumpAndSettle();
 
@@ -138,7 +140,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(
           find.descendant(
-            of: find.byType(CommonPopupMenu),
+            of: find.byType(PopupMenu),
             matching: find.text(choice),
           ),
         );
@@ -152,7 +154,7 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(
           find.descendant(
-            of: find.byType(CommonPopupMenu),
+            of: find.byType(PopupMenu),
             matching: find.text(choice),
           ),
         );
@@ -330,7 +332,7 @@ void main() {
       delete();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byType(CommonDialog, skipOffstage: false), findsNWidgets(2));
+      expect(find.byType(AlertDialog, skipOffstage: false), findsNWidgets(2));
       await tester.tap(find.text(appLocalizations.cancel));
       await tester.pumpAndSettle();
       expect(client.deleted, isEmpty);

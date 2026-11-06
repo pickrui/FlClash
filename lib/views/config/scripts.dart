@@ -216,33 +216,33 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
     );
   }
 
-  List<CommonPopupMenuItem> _buildMenuItems(Script script) {
+  List<PopupMenuItem> _buildMenuItems(Script script) {
     final l = context.appLocalizations;
     return [
-      CommonPopupMenuItem(
+      PopupMenuItem(
         label: l.edit,
         glyph: AppGlyphs.edit,
         onPressed: () => _edit(script),
       ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         label: l.scriptOptions,
         glyph: AppGlyphs.sliders,
         onPressed: () =>
             BaseNavigator.push(context, ScriptOptionsPage(script: script)),
       ),
       if (script.url != null) ...[
-        CommonPopupMenuItem(
+        PopupMenuItem(
           label: l.url,
           glyph: AppGlyphs.link,
           onPressed: () => _update(script, editUrl: true),
         ),
-        CommonPopupMenuItem(
+        PopupMenuItem(
           label: l.sync,
           glyph: AppGlyphs.sync,
           onPressed: () => _update(script),
         ),
       ],
-      CommonPopupMenuItem(
+      PopupMenuItem(
         label: l.delete,
         glyph: AppGlyphs.delete,
         danger: true,
@@ -300,30 +300,30 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
     final state = ref.watch(scriptsProvider);
     final scripts = state.value ?? [];
     final unavailable = _importing || state.isLoading || state.hasError;
-    return CommonScaffold(
+    return Scaffold(
       title: l.script,
       canSort: !state.hasError && scripts.length > 1,
       isLoading: _importing || state.isLoading,
       actions: [
-        CommonPopupBox(
+        PopupAnchor(
           targetBuilder: (open) => IconButton(
             tooltip: l.add,
             onPressed: unavailable ? null : () => open(),
             icon: const GlyphIcon(AppGlyphs.addCircle),
           ),
-          popupBuilder: (_) => CommonPopupMenu(
+          popupBuilder: (_) => PopupMenu(
             items: [
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 label: l.startFromScratch,
                 glyph: AppGlyphs.compose,
                 onPressed: _edit,
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 label: l.importUrl,
                 glyph: AppGlyphs.cloudDownload,
                 onPressed: () => _import(fromUrl: true),
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 label: l.importFile,
                 glyph: AppGlyphs.importFile,
                 onPressed: () => _import(fromUrl: false),
@@ -506,9 +506,9 @@ class _ScriptOptionsPageState extends ConsumerState<ScriptOptionsPage> {
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
     final defaults = _defaults;
-    return CommonPopScope(
+    return PopGuard(
       onPop: (_) => !_saving,
-      child: CommonScaffold(
+      child: Scaffold(
         title: l10n.scriptOptions,
         isLoading: _saving,
         iconActions: [

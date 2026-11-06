@@ -199,7 +199,7 @@ class AuthorizeButton extends StatelessWidget {
       appLocalizations.tapToAuthorize,
       ?label,
     }..remove(shown);
-    return CommonMinFilledButtonTheme(
+    return MinFilledButtonTheme(
       child: ElasticButton(
         child: FilledButton(
           style: ButtonStyle.from(

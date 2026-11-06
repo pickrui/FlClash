@@ -16,7 +16,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prism_ui/app.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, TextButton, ThemeData, ThemeMode, ColorScheme;
+    hide ColorScheme, IconButton, Scaffold, TextButton, ThemeData, ThemeMode;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:prism_ui/theme_data.dart'
     show ThemeData, ThemeMode, ColorScheme;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
@@ -32,7 +33,7 @@ Future<BuildContext> _pumpHost(WidgetTester tester) async {
       child: Builder(
         builder: (context) {
           host = context;
-          return const Scaffold(body: SizedBox.expand());
+          return const material.Scaffold(body: SizedBox.expand());
         },
       ),
     ),
@@ -102,7 +103,7 @@ Future<ValueNotifier<ThemeMode>> _openFromPage(
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,
           builder: (context, child) => wrapAppScopes(context, child!),
-          home: CommonScaffold(
+          home: Scaffold(
             title: 'Page',
             body: Builder(
               builder: (context) => TextButton(

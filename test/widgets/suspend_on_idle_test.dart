@@ -10,7 +10,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/config/general.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:fl_clash/ui/switch.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Switch;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,11 +40,8 @@ void main() {
       final idle = find.byType(SuspendOnIdleItem);
       if (platform == TargetPlatform.android) {
         expect(idle.hitTestable(), findsOneWidget);
-        final toggle = find.descendant(
-          of: idle,
-          matching: find.byType(CommonSwitch),
-        );
-        expect(tester.widget<CommonSwitch>(toggle).value, isFalse);
+        final toggle = find.descendant(of: idle, matching: find.byType(Switch));
+        expect(tester.widget<Switch>(toggle).value, isFalse);
         await tester.tap(toggle);
         await tester.pumpAndSettle();
         expect(
@@ -68,25 +65,19 @@ void main() {
       initial: const NetworkProps(blockQuic: true),
     );
 
-    await tester.tap(find.byType(CommonSwitch));
+    await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
 
     expect(container.read(networkSettingProvider).suspendOnIdle, isTrue);
     expect(container.read(networkSettingProvider).blockQuic, isTrue);
-    expect(
-      tester.widget<CommonSwitch>(find.byType(CommonSwitch)).value,
-      isTrue,
-    );
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
 
     await tester.tap(find.text('Pause proxy when idle'));
     await tester.pumpAndSettle();
 
     expect(container.read(networkSettingProvider).suspendOnIdle, isFalse);
     expect(container.read(networkSettingProvider).blockQuic, isTrue);
-    expect(
-      tester.widget<CommonSwitch>(find.byType(CommonSwitch)).value,
-      isFalse,
-    );
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
     expect(tester.takeException(), isNull);
   });
 
@@ -96,10 +87,7 @@ void main() {
       initial: const NetworkProps(suspendOnIdle: true),
     );
 
-    expect(
-      tester.widget<CommonSwitch>(find.byType(CommonSwitch)).value,
-      isTrue,
-    );
+    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
     expect(tester.takeException(), isNull);
   });
 }

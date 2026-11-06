@@ -18,7 +18,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/common/app_localizations.dart';
-import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:material_ui/material_ui.dart' hide Card, Scaffold, Theme;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:prism_ui/theme_data.dart' show Theme;
 
 import '../../helpers/glyph_finders.dart';
@@ -58,7 +59,7 @@ void main() {
         container: container,
         child: TestApp(
           locale: const Locale('en'),
-          child: Scaffold(
+          child: material.Scaffold(
             body: Align(
               alignment: Alignment.topLeft,
               child: SizedBox(
@@ -190,7 +191,7 @@ void main() {
     Widget neighbor(String label) {
       return SizedBox(
         height: 80,
-        child: CommonCard(onPressed: () {}, child: Text(label)),
+        child: Card(onPressed: () {}, child: Text(label)),
       );
     }
 
@@ -205,7 +206,7 @@ void main() {
           container: container,
           child: TestApp(
             locale: const Locale('en'),
-            child: Scaffold(
+            child: material.Scaffold(
               body: FocusTraversalGroup(
                 policy: PageTraversalPolicy(),
                 child: PageFocusScope(

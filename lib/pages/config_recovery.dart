@@ -69,7 +69,7 @@ class _ConfigRecoveryScreenState extends State<ConfigRecoveryScreen> {
     final confirmed = await showFloatingDialog<bool>(
       context: context,
       child: Builder(
-        builder: (context) => CommonDialog(
+        builder: (context) => AlertDialog(
           title: title,
           destructive: destructive,
           actions: [

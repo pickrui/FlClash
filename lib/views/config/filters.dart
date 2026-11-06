@@ -134,7 +134,7 @@ class _FilterItem extends StatelessWidget {
         text: Text(filter.label, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
       subtitle: FilterRegexText(filter.regex),
-      trailing: CommonCheckBox(
+      trailing: Checkbox(
         value: isSelected,
         isCircle: true,
         onChanged: (_) => onSelected(),

@@ -21,7 +21,7 @@ import 'package:fl_clash/views/connection/dns_queries.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide Chip, TextField;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:mocktail/mocktail.dart';
 
@@ -196,7 +196,7 @@ void main() {
     );
     await _pumpDnsQueries(tester, container);
     Future<void> toggle(String label) async {
-      final chip = find.widgetWithText(CommonChip, label);
+      final chip = find.widgetWithText(Chip, label);
       await tester.ensureVisible(chip);
       await tester.pumpAndSettle();
       await tester.tap(chip);
@@ -238,7 +238,7 @@ void main() {
       ),
     );
     await _pumpDnsQueries(tester, container);
-    await tester.tap(find.widgetWithText(CommonChip, 'Cached'));
+    await tester.tap(find.widgetWithText(Chip, 'Cached'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('More'));
     await tester.pumpAndSettle();
@@ -252,7 +252,7 @@ void main() {
     await _pumpDnsQueries(tester, container, locale: const Locale('zh', 'CN'));
     expect(find.text('query.example'), findsNothing);
     expect(
-      find.widgetWithText(CommonChip, AppLocalizations.current.dnsQueryCached),
+      find.widgetWithText(Chip, AppLocalizations.current.dnsQueryCached),
       findsOneWidget,
     );
     await tester.enterText(

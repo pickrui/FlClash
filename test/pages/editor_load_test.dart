@@ -431,13 +431,13 @@ void main() {
       buttons: kSecondaryButton,
     );
     await settle(tester, 8);
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
 
     await typeText(tester, controller, 'g');
     await settle(tester, 12);
 
     expect(controller.text, 'mode: g');
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
   });
 
   Future<(CodeForgeController, List<String>)> pushSaving(
@@ -537,7 +537,7 @@ void main() {
     );
     await settle(tester, 8);
     expect(saved, ['mode: rules']);
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
     await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
     await tester.pump();
     expect(controller.text, 'mode: rules');
@@ -618,12 +618,12 @@ void main() {
       buttons: kSecondaryButton,
     );
     await settle(tester, 8);
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
 
     controller.focusNode!.unfocus();
     await settle(tester, 12);
 
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
   });
 
   testWidgets('saving takes in the word still being composed', (tester) async {
@@ -682,7 +682,7 @@ void main() {
       buttons: kSecondaryButton,
     );
     await settle(tester, 8);
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
 
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyS);

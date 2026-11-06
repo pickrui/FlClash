@@ -22,7 +22,7 @@ class SettingTextCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonCard(
+    return Card(
       onPressed: onPressed,
       isSelected: isSelected,
       fillsSelection: true,

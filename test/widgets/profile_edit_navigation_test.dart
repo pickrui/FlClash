@@ -20,7 +20,9 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/profiles/edit.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, TextButton, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 import 'package:mocktail/mocktail.dart';
@@ -178,7 +180,8 @@ void main() {
       unawaited(
         showDialog<void>(
           context: editorContext,
-          builder: (_) => const AlertDialog(content: Text('Other message')),
+          builder: (_) =>
+              const material.AlertDialog(content: Text('Other message')),
         ),
       );
       await tester.pump();
@@ -197,7 +200,8 @@ void main() {
       unawaited(
         showDialog<void>(
           context: tester.element(find.byType(EditProfileView)),
-          builder: (_) => const AlertDialog(content: Text('Save message')),
+          builder: (_) =>
+              const material.AlertDialog(content: Text('Save message')),
         ),
       );
       await tester.pump();
@@ -243,7 +247,7 @@ void main() {
     final profiles = await openEditor(tester);
     await tester.binding.handlePopRoute();
     await settle(tester);
-    expect(find.byType(CommonDialog), findsOneWidget);
+    expect(find.byType(AlertDialog), findsOneWidget);
     await tester.binding.handlePopRoute();
     await settle(tester, 12);
     expect(find.byType(EditorPage), findsOneWidget);
@@ -272,7 +276,7 @@ void main() {
     expect(find.byType(EditorPage), findsNothing);
     await tester.binding.handlePopRoute();
     await settle(tester);
-    expect(find.byType(CommonDialog), findsOneWidget);
+    expect(find.byType(AlertDialog), findsOneWidget);
     await tester.tapAt(const Offset(8, 8));
     await tester.pumpAndSettle();
     expect(find.byType(EditProfileView), findsOneWidget);

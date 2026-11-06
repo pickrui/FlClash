@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:fl_clash/ui/inherited.dart';
 
-class CommonPopScope extends StatefulWidget {
+class PopGuard extends StatefulWidget {
   final Widget child;
 
   /// Any handler vetoes the pop up front, which also turns off the drag back,
@@ -17,7 +17,7 @@ class CommonPopScope extends StatefulWidget {
   final FutureOr<bool> Function(BuildContext context)? onPop;
   final FutureOr<void> Function()? onPopSuccess;
 
-  const CommonPopScope({
+  const PopGuard({
     super.key,
     required this.child,
     this.onPop,
@@ -25,10 +25,10 @@ class CommonPopScope extends StatefulWidget {
   });
 
   @override
-  State<CommonPopScope> createState() => _CommonPopScopeState();
+  State<PopGuard> createState() => _PopGuardState();
 }
 
-class _CommonPopScopeState extends State<CommonPopScope> {
+class _PopGuardState extends State<PopGuard> {
   bool _handlingPop = false;
 
   Future<void> _handlePop(bool didPop, Object? result) async {

@@ -379,7 +379,7 @@ class ListItem<T> extends StatelessWidget {
           onTap: optionsDelegate.onChanged == null
               ? null
               : () => openMenu?.call(),
-          trailing: CommonPopupBox(
+          trailing: PopupAnchor(
             targetBuilder: (open) {
               openMenu = open;
               return _OptionsValueButton(
@@ -387,10 +387,10 @@ class ListItem<T> extends StatelessWidget {
                 onPressed: optionsDelegate.onChanged == null ? null : open,
               );
             },
-            popupBuilder: (_) => CommonPopupMenu(
+            popupBuilder: (_) => PopupMenu(
               items: [
                 for (final option in optionsDelegate.options)
-                  CommonPopupMenuItem(
+                  PopupMenuItem(
                     label: optionsDelegate.textBuilder(option),
                     checked: option == optionsDelegate.value,
                     onPressed: () => optionsDelegate.onChanged?.call(option),
@@ -431,7 +431,7 @@ class ListItem<T> extends StatelessWidget {
               : () {
                   checkboxDelegate.onChanged!(!checkboxDelegate.value);
                 },
-          trailing: CommonCheckBox(
+          trailing: Checkbox(
             value: checkboxDelegate.value,
             onChanged: checkboxDelegate.onChanged,
           ),
@@ -445,7 +445,7 @@ class ListItem<T> extends StatelessWidget {
               : () {
                   toggleAction.onChanged!(!toggleAction.value);
                 },
-          trailing: CommonSwitch(
+          trailing: Switch(
             value: toggleAction.value,
             onChanged: toggleAction.onChanged,
           ),

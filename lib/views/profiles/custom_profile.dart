@@ -83,21 +83,21 @@ Future<void> showRenameProfileDialog(
 
 enum CustomImportSource { url, file, text }
 
-List<CommonPopupMenuItem> customImportMenuItems(
+List<PopupMenuItem> customImportMenuItems(
   AppLocalizations appLocalizations,
   void Function(CustomImportSource source) onSelected,
 ) => [
-  CommonPopupMenuItem(
+  PopupMenuItem(
     label: appLocalizations.importUrl,
     glyph: AppGlyphs.cloudDownload,
     onPressed: () => onSelected(CustomImportSource.url),
   ),
-  CommonPopupMenuItem(
+  PopupMenuItem(
     label: appLocalizations.importFile,
     glyph: AppGlyphs.importFile,
     onPressed: () => onSelected(CustomImportSource.file),
   ),
-  CommonPopupMenuItem(
+  PopupMenuItem(
     label: appLocalizations.importText,
     glyph: AppGlyphs.compose,
     onPressed: () => onSelected(CustomImportSource.text),
@@ -408,18 +408,18 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
     _showGroupsNextFrame();
     return ArrivalHold(
       ready: _groupsShown,
-      child: CommonPopScope(
+      child: PopGuard(
         onPop: widget.isNew ? _nameBeforeLeaving : null,
-        child: CommonScaffold(
+        child: Scaffold(
           title: profile?.realLabel ?? appLocalizations.customProfile,
           titleMenuItems: [
             if (profile != null) ...[
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.textShort,
                 label: appLocalizations.rename,
                 onPressed: () => showRenameProfileDialog(context, ref, profile),
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 glyph: AppGlyphs.eye,
                 label: appLocalizations.runtimeConfig,
                 onPressed: previewRouting,
@@ -436,12 +436,12 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
             ),
           ],
           actions: [
-            CommonPopupBox(
+            PopupAnchor(
               targetBuilder: (open) => FilledButton(
                 onPressed: profile == null || _importing ? null : () => open(),
                 child: Text(appLocalizations.import),
               ),
-              popupBuilder: (_) => CommonPopupMenu(
+              popupBuilder: (_) => PopupMenu(
                 items: customImportMenuItems(appLocalizations, _import),
               ),
             ),
@@ -658,7 +658,7 @@ class _MoreSectionsView extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final status = _watchSettingsStatus(ref, profileId);
     final chains = _watchChainCount(ref, profileId);
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.more,
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
@@ -716,7 +716,7 @@ class _ProfileProxiesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(
+    return Scaffold(
       title: context.appLocalizations.proxyChainCustomNodes,
       body: CustomScrollView(
         slivers: [

@@ -101,7 +101,7 @@ void main() {
     tester,
   ) async {
     await pumpFeed(tester);
-    final route = CommonDesktopRoute<void>(
+    final route = FadePageRoute<void>(
       builder: (_) => ArrivalHold(ready: false, child: _Feed(source: source)),
     );
     navigator.currentState!.push(route);

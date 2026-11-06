@@ -8,7 +8,8 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/paged_sheet.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton, FilledButton;
+import 'package:material_ui/material_ui.dart'
+    hide FilledButton, Scaffold, TextButton;
 import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/test_app.dart';
 
 Widget _scaffold(String name, {Widget? body}) {
-  return CommonScaffold(
+  return Scaffold(
     title: name,
     actions: [TextButton(onPressed: () {}, child: Text('$name action'))],
     body: body ?? const SizedBox.expand(),

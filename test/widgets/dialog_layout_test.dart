@@ -13,7 +13,7 @@ import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, TextButton, Theme, SelectableText;
+    hide AlertDialog, SelectableText, TextButton, TextField, Theme;
 import 'package:prism_ui/selectable_text.dart' show SelectableText;
 import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
@@ -40,7 +40,7 @@ Future<void> _pumpDialog(
         textDirection: textDirection,
         child: Scaffold(
           body: Center(
-            child: CommonDialog(
+            child: AlertDialog(
               title: 'Title',
               destructive: destructive,
               actions: [
@@ -83,7 +83,7 @@ Future<void> _pumpLauncher(WidgetTester tester) async {
           builder: (context) => TextButton(
             onPressed: () => showFloatingDialog<void>(
               context: context,
-              child: const CommonDialog(title: 'Title', child: Text('Body')),
+              child: const AlertDialog(title: 'Title', child: Text('Body')),
             ),
             child: const Text('Open'),
           ),
@@ -97,7 +97,7 @@ double _dialogScale(WidgetTester tester) => tester
     .widget<Transform>(
       find
           .ancestor(
-            of: find.byType(CommonDialog),
+            of: find.byType(AlertDialog),
             matching: find.byType(Transform),
           )
           .first,
@@ -109,7 +109,7 @@ double _dialogOpacity(WidgetTester tester) => tester
     .widget<LiquidGlassFade>(
       find
           .ancestor(
-            of: find.byType(CommonDialog),
+            of: find.byType(AlertDialog),
             matching: find.byType(LiquidGlassFade),
           )
           .first,
@@ -219,14 +219,14 @@ void main() {
     expect(_dialogScale(tester), 1);
     expect(_dialogOpacity(tester), 1);
 
-    Navigator.of(tester.element(find.byType(CommonDialog))).pop();
+    Navigator.of(tester.element(find.byType(AlertDialog))).pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(_dialogScale(tester), 1);
     expect(_dialogOpacity(tester), inExclusiveRange(0, 1));
 
     await tester.pumpAndSettle();
-    expect(find.byType(CommonDialog), findsNothing);
+    expect(find.byType(AlertDialog), findsNothing);
   });
 
   testWidgets('on glass a pane lies under the surface and fades with it', (
@@ -244,7 +244,7 @@ void main() {
             builder: (context) => TextButton(
               onPressed: () => showFloatingDialog<void>(
                 context: context,
-                child: const CommonDialog(title: 'Title', child: Text('Body')),
+                child: const AlertDialog(title: 'Title', child: Text('Body')),
               ),
               child: const Text('Open'),
             ),
@@ -262,7 +262,7 @@ void main() {
     await tester.pumpAndSettle();
     final surface = find
         .descendant(
-          of: find.byType(CommonDialog),
+          of: find.byType(AlertDialog),
           matching: find.byType(Surface),
         )
         .first;
@@ -284,7 +284,7 @@ void main() {
             builder: (context) => TextButton(
               onPressed: () => showFloatingDialog<void>(
                 context: context,
-                child: const CommonDialog(title: 'Title', child: Text('Body')),
+                child: const AlertDialog(title: 'Title', child: Text('Body')),
               ),
               child: const Text('Open'),
             ),
@@ -310,7 +310,7 @@ void main() {
 
     await tester.tapAt(const Offset(4, 4));
     await tester.pumpAndSettle();
-    expect(find.byType(CommonDialog), findsNothing);
+    expect(find.byType(AlertDialog), findsNothing);
   });
 
   testWidgets('a message scrolls only once the window is out of room', (
@@ -331,7 +331,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final scrollables = find.descendant(
-      of: find.byType(CommonDialog),
+      of: find.byType(AlertDialog),
       matching: find.byType(Scrollable),
     );
     expect(scrollables, findsWidgets);

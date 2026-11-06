@@ -171,7 +171,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
       child: body,
       builder: (context, body) {
         final pinned = !ViewScope.isMobileOf(context);
-        return CommonScaffold(
+        return Scaffold(
           title: _labelOf(_feed),
           titleMenuItems: _buildFeedMenu(),
           searchState: AppBarSearchState(onSearch: _search),
@@ -189,10 +189,10 @@ class _RequestsViewState extends ConsumerState<RequestsView>
     RequestFeed.live => context.appLocalizations.running,
   };
 
-  List<CommonPopupMenuItem> _buildFeedMenu() {
+  List<PopupMenuItem> _buildFeedMenu() {
     return [
       for (final feed in RequestFeed.values)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           label: _labelOf(feed),
           checked: feed == _feed,
           onPressed: () => _selectFeed(feed),

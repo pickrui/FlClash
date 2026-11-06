@@ -15,7 +15,8 @@ import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
@@ -102,7 +103,7 @@ void main() {
         container: container,
         child: TestApp(
           locale: const Locale('en'),
-          child: Scaffold(
+          child: material.Scaffold(
             body: Align(
               alignment: Alignment.topLeft,
               child: SizedBox(

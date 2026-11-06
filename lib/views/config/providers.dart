@@ -356,28 +356,28 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
     }
   }
 
-  List<CommonPopupMenuItem> _buildMenuItems(ClashProvider item) {
+  List<PopupMenuItem> _buildMenuItems(ClashProvider item) {
     final l = context.appLocalizations;
     final editable = !item.isRemote && item.isTextContent;
     return [
       if (editable)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           label: l.edit,
           glyph: AppGlyphs.compose,
           onPressed: () => _editContent(item),
         ),
       if (!item.isTextContent)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           label: l.preview,
           glyph: AppGlyphs.eye,
           onPressed: () => _preview(item),
         ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         label: l.options,
         glyph: AppGlyphs.settings,
         onPressed: () => _options(item),
       ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         label: l.delete,
         glyph: AppGlyphs.delete,
         danger: true,
@@ -479,7 +479,7 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
         .where((item) => query.matches([item.label, item.url]))
         .toList();
     final unavailable = _importing || state.isLoading || state.hasError;
-    return CommonScaffold(
+    return Scaffold(
       title: l.appProviderLibrary,
       canSort: !state.hasError && query.isEmpty && entries.length > 1,
       isLoading: _importing || state.isLoading,
@@ -487,25 +487,25 @@ class _ClashProvidersViewState extends ConsumerState<ClashProvidersView> {
         onSearch: (value) => setState(() => _search = value),
       ),
       actions: [
-        CommonPopupBox(
+        PopupAnchor(
           targetBuilder: (open) => IconButton(
             tooltip: l.add,
             onPressed: unavailable ? null : () => open(),
             icon: const GlyphIcon(AppGlyphs.addCircle),
           ),
-          popupBuilder: (_) => CommonPopupMenu(
+          popupBuilder: (_) => PopupMenu(
             items: [
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 label: l.startFromScratch,
                 glyph: AppGlyphs.compose,
                 onPressed: _editContent,
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 label: l.importUrl,
                 glyph: AppGlyphs.cloudDownload,
                 onPressed: () => _import(fromUrl: true),
               ),
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 label: l.importFile,
                 glyph: AppGlyphs.importFile,
                 onPressed: () => _import(fromUrl: false),
@@ -778,7 +778,7 @@ class _EditClashProviderViewState extends ConsumerState<EditClashProviderView> {
     final l = context.appLocalizations;
     final isRule = _draft.kind == ProviderKind.rule;
     final size = '${_draft.content.length} B';
-    return CommonPopScope(
+    return PopGuard(
       onPop: (_) => !_saving,
       child: ExcludeFocus(
         excluding: _busy,

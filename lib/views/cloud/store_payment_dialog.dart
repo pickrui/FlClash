@@ -131,7 +131,7 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
         .of(context)
         .toTabular
         .copyWith(color: colorScheme.onSurface);
-    return CommonDialog(
+    return AlertDialog(
       title: appLocalizations.scanOrTransferPay,
       actions: [
         prism.TextButton(

@@ -31,7 +31,7 @@ Future<NavigatorState> _openGuard(
   unawaited(
     navigator.push<void>(
       MaterialPageRoute(
-        builder: (_) => CommonPopScope(
+        builder: (_) => PopGuard(
           onPop: onPop,
           child: const Scaffold(body: Text('Draft')),
         ),
@@ -116,7 +116,7 @@ void main() {
   );
 
   // Opening or closing a layer on a pushed route rebuilds nothing that
-  // CommonPopScope depends on.
+  // PopGuard depends on.
   testWidgets('a closed search layer leaves the unsaved-changes guard on', (
     tester,
   ) async {
@@ -174,7 +174,7 @@ class _LayeredDraftState extends State<_LayeredDraft> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonPopScope(
+    return PopGuard(
       onPop: (_) {
         widget.onGuard();
         return false;

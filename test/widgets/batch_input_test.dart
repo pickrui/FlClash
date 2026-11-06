@@ -194,10 +194,10 @@ void main() {
 
                     result = await Navigator.of(context).push(
                       map
-                          ? CommonRoute<Map<String, String>>(
+                          ? CardPageRoute<Map<String, String>>(
                               builder: buildEditor,
                             )
-                          : CommonRoute<List<String>>(builder: buildEditor),
+                          : CardPageRoute<List<String>>(builder: buildEditor),
                     );
                   },
                 ),
@@ -288,7 +288,7 @@ void main() {
                   child: const Text('open editor'),
                   onPressed: () async {
                     result = await Navigator.of(context).push(
-                      CommonRoute<List<String>>(
+                      CardPageRoute<List<String>>(
                         builder: (context) {
                           editorContext = context;
                           return const ListInputPage(

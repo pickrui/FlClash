@@ -82,7 +82,7 @@ void main() {
         tester,
         (context) =>
             Navigator.of(context)
-                .push(CommonRoute<void>(builder: (_) => page())),
+                .push(CardPageRoute<void>(builder: (_) => page())),
       );
     }
 
@@ -118,7 +118,7 @@ void main() {
       await _pumpOpener(
         tester,
         (context) => Navigator.of(context).push(
-          CommonDesktopRoute<void>(
+          FadePageRoute<void>(
             builder: (_) => Scaffold(
               body: Column(
                 children: [
@@ -273,7 +273,7 @@ void main() {
     await _pumpOpener(
       tester,
       (context) => Navigator.of(context).push(
-        CommonRoute<void>(
+        CardPageRoute<void>(
           builder: (_) => const Scaffold(body: Center(child: Text('rtl page'))),
         ),
       ),
@@ -291,7 +291,7 @@ void main() {
     await _pumpOpener(tester, (context) {
       navigator = Navigator.of(context);
       navigator.push(
-        CommonRoute<void>(
+        CardPageRoute<void>(
           builder: (_) => const Scaffold(body: Center(child: Text('motion'))),
         ),
       );
@@ -308,7 +308,7 @@ void main() {
     await _pumpOpener(
       tester,
       (context) => Navigator.of(context).push(
-        CommonRoute<void>(
+        CardPageRoute<void>(
           builder: (_) => ValueListenableBuilder(
             valueListenable: allowPop,
             builder: (_, value, child) =>
@@ -337,10 +337,10 @@ void main() {
     'removing a settling route releases navigator gesture ownership',
     (tester) async {
       late NavigatorState navigator;
-      late CommonRoute<void> route;
+      late CardPageRoute<void> route;
       await _pumpOpener(tester, (context) {
         navigator = Navigator.of(context);
-        route = CommonRoute<void>(
+        route = CardPageRoute<void>(
           builder: (_) =>
               const Scaffold(body: Center(child: Text('remove me'))),
         );
@@ -360,7 +360,7 @@ void main() {
     await _pumpOpener(tester, (context) {
       navigator = Navigator.of(context);
       navigator.push(
-        CommonRoute<void>(
+        CardPageRoute<void>(
           builder: (_) => const Scaffold(body: Center(child: Text('closing'))),
         ),
       );

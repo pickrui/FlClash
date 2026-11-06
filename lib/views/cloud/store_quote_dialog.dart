@@ -229,7 +229,7 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
     final quoted = quote != null && coupon == _quotedCoupon;
     final busy = _loading || _recharging;
     final recharge = widget.onRecharge;
-    return CommonDialog(
+    return AlertDialog(
       title: widget.title,
       hasFields: true,
       actions: [

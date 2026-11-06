@@ -11,10 +11,10 @@ import 'package:fl_clash/pages/config_recovery.dart';
 import 'package:fl_clash/services/config_key_store.dart';
 import 'package:fl_clash/ui/loading.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextButton, FilledButton, SelectableText;
+    hide AlertDialog, FilledButton, SelectableText, TextButton;
 import 'package:prism_ui/selectable_text.dart' show SelectableText;
 import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
-import 'package:fl_clash/ui/dialog.dart' show CommonDialog;
+import 'package:fl_clash/ui/dialog.dart' show AlertDialog;
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -183,7 +183,7 @@ void main() {
       await tester.tap(find.text('Back up and reset'));
       await tester.pumpAndSettle();
       expect(resets, 0);
-      expect(find.byType(CommonDialog), findsOneWidget);
+      expect(find.byType(AlertDialog), findsOneWidget);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       expect(resets, 0);
@@ -303,7 +303,7 @@ void main() {
 
     await tester.tap(find.text('Use local file storage'));
     await tester.pumpAndSettle();
-    expect(find.byType(CommonDialog), findsOneWidget);
+    expect(find.byType(AlertDialog), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(calls, isEmpty);

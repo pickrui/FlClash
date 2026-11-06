@@ -14,7 +14,13 @@ import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:fl_clash/ui/dialog.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextFormField, TextButton, FilledButton, LinearProgressIndicator;
+    hide
+        AlertDialog,
+        FilledButton,
+        LinearProgressIndicator,
+        TextButton,
+        TextFormField;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
@@ -186,7 +192,7 @@ void main() {
         unawaited(
           showDialog<void>(
             context: tester.element(find.byType(GeoRecoveryDialog)),
-            builder: (context) => AlertDialog(
+            builder: (context) => material.AlertDialog(
               title: const Text('Other message'),
               actions: [
                 TextButton(

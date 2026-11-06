@@ -10,7 +10,7 @@ import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, IconButton, TextButton, AppBar;
+    hide AppBar, IconButton, Scaffold, TextButton, TextField;
 import 'package:prism_ui/scaffold.dart' show AppBar;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
@@ -33,7 +33,7 @@ Future<void> _pushPage(
           MaterialPageRoute<void>(
             builder: (_) => ValueListenableBuilder<bool>(
               valueListenable: canSort,
-              builder: (_, canSort, _) => CommonScaffold(
+              builder: (_, canSort, _) => Scaffold(
                 title: 'Page',
                 canSort: canSort,
                 searchState: AppBarSearchState(onSearch: (_) {}),

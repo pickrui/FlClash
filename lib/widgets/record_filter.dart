@@ -176,44 +176,41 @@ class RecordFilterController<T> extends ValueNotifier<RecordFilterState> {
     return keyOf == null ? null : groupRecords(items, keyOf, reverse: reverse);
   }
 
-  List<CommonPopupMenuItem> menuItems(
-    BuildContext context, {
-    required bool pinned,
-  }) {
+  List<PopupMenuItem> menuItems(BuildContext context, {required bool pinned}) {
     final appLocalizations = context.appLocalizations;
     final options = this.options.value;
     final grouping = value.grouping;
     return [
       if (!pinned && options.isNotEmpty)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.filter,
           label: appLocalizations.filter,
           subItems: [
             for (final facet in facets)
               for (final (index, option) in (options[facet.kind] ?? []).indexed)
-                CommonPopupMenuItem(
+                PopupMenuItem(
                   label: facet.label(option),
                   checked: filters.contains(RecordFilter(facet.kind, option)),
                   keepsOpen: true,
                   section: index == 0
-                      ? CommonPopupMenuSection(title: facet.kind.title)
+                      ? PopupMenuSection(title: facet.kind.title)
                       : null,
                   onPressed: () => toggle(RecordFilter(facet.kind, option)),
                 ),
           ],
         ),
       if (groupers.isNotEmpty)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.layers,
           label: appLocalizations.groupBy,
           subItems: [
-            CommonPopupMenuItem(
+            PopupMenuItem(
               label: appLocalizations.none,
               checked: grouping == null,
               onPressed: () => setGrouping(null),
             ),
             for (final grouper in groupers)
-              CommonPopupMenuItem(
+              PopupMenuItem(
                 label: grouper.grouping.label,
                 checked: grouping == grouper.grouping,
                 onPressed: () => setGrouping(grouper.grouping),

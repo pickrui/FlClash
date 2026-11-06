@@ -636,17 +636,17 @@ class DashboardSwitch extends StatelessWidget {
   final String? semanticLabel;
 
   /// A switch lays out past its track, which would set every row's height.
-  static const trackWidth = CommonSwitch.trackWidth;
+  static const trackWidth = Switch.trackWidth;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: trackWidth,
-      height: CommonSwitch.trackHeight,
+      height: Switch.trackHeight,
       child: OverflowBox(
         maxWidth: double.infinity,
         maxHeight: double.infinity,
-        child: CommonSwitch(
+        child: Switch(
           value: value,
           onChanged: onChanged,
           semanticLabel: semanticLabel,

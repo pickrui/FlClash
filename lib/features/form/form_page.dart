@@ -40,7 +40,7 @@ class FormPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(
+    return Scaffold(
       title: title,
       iconActions: actions,
       confirmationAction: IconButtonData(

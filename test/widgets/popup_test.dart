@@ -14,7 +14,7 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind, kPressTimeout;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, TextButton, Theme, ThemeData, ColorScheme;
+    hide ColorScheme, IconButton, PopupMenuItem, TextButton, Theme, ThemeData;
 import 'package:prism_ui/theme_data.dart' show Theme, ThemeData, ColorScheme;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:flutter_test/flutter_test.dart';
@@ -72,7 +72,7 @@ void main() {
       TestApp(
         child: Scaffold(
           body: Center(
-            child: CommonPopupBox(
+            child: PopupAnchor(
               targetBuilder: (value) {
                 open = value;
                 return const SizedBox(width: 40, height: 40);
@@ -89,20 +89,20 @@ void main() {
 
   Future<PopupOpen> pumpMenu(
     WidgetTester tester,
-    List<CommonPopupMenuItem> items, {
+    List<PopupMenuItem> items, {
     int? maxVisibleItems,
   }) async {
     late PopupOpen open;
     await tester.pumpWidget(
       TestApp(
         homeBuilder: (child) => Scaffold(body: Center(child: child)),
-        child: CommonPopupBox(
+        child: PopupAnchor(
           targetBuilder: (value) {
             open = value;
             return const SizedBox(width: 40, height: 40);
           },
           popupBuilder: (_) =>
-              CommonPopupMenu(items: items, maxVisibleItems: maxVisibleItems),
+              PopupMenu(items: items, maxVisibleItems: maxVisibleItems),
         ),
       ),
     );
@@ -132,13 +132,13 @@ void main() {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(width: 40, height: 40, key: Key('neighbour')),
-              CommonPopupBox(
+              PopupAnchor(
                 targetBuilder: (value) {
                   open = value;
                   return const SizedBox(width: 40, height: 40);
                 },
-                popupBuilder: (_) => CommonPopupMenu(
-                  items: [CommonPopupMenuItem(label: 'one', onPressed: () {})],
+                popupBuilder: (_) => PopupMenu(
+                  items: [PopupMenuItem(label: 'one', onPressed: () {})],
                 ),
               ),
             ],
@@ -170,13 +170,13 @@ void main() {
         ),
         homeBuilder: (child) => Scaffold(body: Center(child: child)),
         child: ElevatedSurfaceTheme(
-          child: CommonPopupBox(
+          child: PopupAnchor(
             targetBuilder: (value) {
               open = value;
               return const SizedBox(width: 40, height: 40);
             },
-            popupBuilder: (_) => CommonPopupMenu(
-              items: [CommonPopupMenuItem(label: 'one', onPressed: () {})],
+            popupBuilder: (_) => PopupMenu(
+              items: [PopupMenuItem(label: 'one', onPressed: () {})],
             ),
           ),
         ),
@@ -195,7 +195,7 @@ void main() {
       TestApp(
         child: Scaffold(
           body: Center(
-            child: CommonPopupBox(
+            child: PopupAnchor(
               targetBuilder: (_) => const SizedBox(width: 40, height: 40),
               popupBuilder: (_) {
                 builds++;
@@ -228,7 +228,7 @@ void main() {
                 if (!visible) {
                   return const SizedBox.shrink();
                 }
-                return CommonPopupBox(
+                return PopupAnchor(
                   targetBuilder: (value) {
                     open = value;
                     return const SizedBox(width: 40, height: 40);
@@ -273,7 +273,7 @@ void main() {
     );
 
     Navigator.of(context).push(
-      CommonPopupRoute<void>(
+      AnchoredPopupRoute<void>(
         barrierLabel: 'Dismiss',
         placement: PopupPlacement.belowPoint,
         anchorOf: () => const Offset(100, 120) & Size.zero,
@@ -318,7 +318,7 @@ void main() {
       );
 
       Navigator.of(context).push(
-        CommonPopupRoute<void>(
+        AnchoredPopupRoute<void>(
           barrierLabel: 'Dismiss',
           placement: PopupPlacement.belowPoint,
           anchorOf: () => Offset(100, point) & Size.zero,
@@ -351,7 +351,7 @@ void main() {
       );
 
       Navigator.of(context).push(
-        CommonPopupRoute<void>(
+        AnchoredPopupRoute<void>(
           barrierLabel: 'Dismiss',
           placement: PopupPlacement.belowPoint,
           anchorOf: () => const Offset(100, 250) & Size.zero,
@@ -394,7 +394,7 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
 
     Navigator.of(context).push(
-      CommonPopupRoute<void>(
+      AnchoredPopupRoute<void>(
         barrierLabel: 'Dismiss',
         placement: PopupPlacement.belowPoint,
         modal: false,
@@ -416,9 +416,9 @@ void main() {
 
   testWidgets('only a checked item carries a check', (tester) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(label: 'on', checked: true),
-      const CommonPopupMenuItem(label: 'off', checked: false),
-      const CommonPopupMenuItem(label: 'plain'),
+      const PopupMenuItem(label: 'on', checked: true),
+      const PopupMenuItem(label: 'off', checked: false),
+      const PopupMenuItem(label: 'plain'),
     ]);
     open();
     await tester.pumpAndSettle();
@@ -437,11 +437,11 @@ void main() {
     tester,
   ) async {
     final open = await pumpBox(tester);
-    final anchor = tester.getRect(find.byType(CommonPopupBox));
+    final anchor = tester.getRect(find.byType(PopupAnchor));
     double sourceOpacity() => tester
         .widget<Opacity>(
           find.descendant(
-            of: find.byType(CommonPopupBox),
+            of: find.byType(PopupAnchor),
             matching: find.byType(Opacity),
           ),
         )
@@ -482,7 +482,7 @@ void main() {
     tester,
   ) async {
     final open = await pumpBox(tester);
-    final anchor = tester.getRect(find.byType(CommonPopupBox)).center;
+    final anchor = tester.getRect(find.byType(PopupAnchor)).center;
     Offset platter() => tester.layers
         .whereType<ClipPathLayer>()
         .last
@@ -529,7 +529,7 @@ void main() {
     );
     const point = Offset(100, 120);
     Navigator.of(context).push(
-      CommonPopupRoute<void>(
+      AnchoredPopupRoute<void>(
         barrierLabel: 'Dismiss',
         placement: PopupPlacement.belowPoint,
         anchorOf: () => point & Size.zero,
@@ -584,9 +584,9 @@ void main() {
 
   testWidgets('a sub menu opens above the level that owns it', (tester) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -606,9 +606,9 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     bool inPlatter() => tester.layers.whereType<ImageFilterLayer>().isNotEmpty;
@@ -629,10 +629,10 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(label: 'first'),
-      const CommonPopupMenuItem(
+      const PopupMenuItem(label: 'first'),
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -648,7 +648,7 @@ void main() {
 
   testWidgets('the menu stays between its min and max width', (tester) async {
     Future<double> widthOf(String label) async {
-      final open = await pumpMenu(tester, [CommonPopupMenuItem(label: label)]);
+      final open = await pumpMenu(tester, [PopupMenuItem(label: label)]);
       open();
       await tester.pumpAndSettle();
       final width = tester.getSize(surfaces).width;
@@ -670,13 +670,13 @@ void main() {
     var toggles = 0;
     var picked = 0;
     final open = await pumpMenu(tester, [
-      CommonPopupMenuItem(
+      PopupMenuItem(
         label: 'many',
         checked: false,
         keepsOpen: true,
         onPressed: () => toggles++,
       ),
-      CommonPopupMenuItem(label: 'one', onPressed: () => picked++),
+      PopupMenuItem(label: 'one', onPressed: () => picked++),
     ]);
     open();
     await tester.pumpAndSettle();
@@ -684,7 +684,7 @@ void main() {
     await tester.tap(find.text('many'));
     await tester.pumpAndSettle();
     expect(toggles, 1);
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
     expect(find.byGlyph(AppGlyphs.check), findsOneWidget);
 
     await tester.tap(find.text('many'));
@@ -695,17 +695,17 @@ void main() {
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
     expect(picked, 1);
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
   });
 
   testWidgets('only a sub menu carries a divider, under its header', (
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(label: 'first'),
-      const CommonPopupMenuItem(
+      const PopupMenuItem(label: 'first'),
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -734,9 +734,9 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -755,9 +755,9 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -777,9 +777,9 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -796,9 +796,9 @@ void main() {
 
   testWidgets('a tap outside closes every level at once', (tester) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -816,8 +816,8 @@ void main() {
   testWidgets('picking an item runs it and closes the popup', (tester) async {
     var pressed = 0;
     final open = await pumpMenu(tester, [
-      CommonPopupMenuItem(label: 'run', onPressed: () => pressed++),
-      const CommonPopupMenuItem(label: 'disabled'),
+      PopupMenuItem(label: 'run', onPressed: () => pressed++),
+      const PopupMenuItem(label: 'disabled'),
     ]);
     open();
     await tester.pumpAndSettle();
@@ -838,13 +838,13 @@ void main() {
   ) async {
     var pressed = 0;
     final open = await pumpMenu(tester, [
-      CommonPopupMenuItem(label: 'one', onPressed: () => pressed++),
-      CommonPopupMenuItem(label: 'two', onPressed: () => pressed++),
+      PopupMenuItem(label: 'one', onPressed: () => pressed++),
+      PopupMenuItem(label: 'two', onPressed: () => pressed++),
     ]);
     open();
     await tester.pumpAndSettle();
     final press = find.descendant(
-      of: find.byType(CommonPopupMenu),
+      of: find.byType(PopupMenu),
       matching: find.byType(ElasticPress),
     );
     final resting = tester.getRect(press);
@@ -923,7 +923,7 @@ void main() {
     final picked = <String>[];
     final open = await pumpMenu(tester, [
       for (final label in ['one', 'two', 'three'])
-        CommonPopupMenuItem(label: label, onPressed: () => picked.add(label)),
+        PopupMenuItem(label: label, onPressed: () => picked.add(label)),
     ]);
     open();
     await tester.pumpAndSettle();
@@ -950,11 +950,11 @@ void main() {
     final picked = <String>[];
     final open = await pumpMenu(tester, [
       for (final label in ['one', 'two'])
-        CommonPopupMenuItem(label: label, onPressed: () => picked.add(label)),
+        PopupMenuItem(label: label, onPressed: () => picked.add(label)),
     ]);
     open();
     await tester.pumpAndSettle();
-    final menu = tester.getRect(find.byType(CommonPopupMenu));
+    final menu = tester.getRect(find.byType(PopupMenu));
 
     final gesture = await tester.startGesture(
       tester.getCenter(find.text('one')),
@@ -977,7 +977,7 @@ void main() {
     final picked = <String>[];
     final open = await pumpMenu(tester, [
       for (var index = 0; index < 30; index++)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           label: 'item $index',
           onPressed: () => picked.add('item $index'),
         ),
@@ -1013,18 +1013,15 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         homeBuilder: (child) => Scaffold(body: Center(child: child)),
-        child: CommonPopupBox(
+        child: PopupAnchor(
           targetBuilder: (open) => TextButton(
             onPressed: enabled ? open : null,
             child: const Text('menu'),
           ),
-          popupBuilder: (_) => CommonPopupMenu(
+          popupBuilder: (_) => PopupMenu(
             items: [
               for (final label in ['one', 'two', 'three'])
-                CommonPopupMenuItem(
-                  label: label,
-                  onPressed: () => picked.add(label),
-                ),
+                PopupMenuItem(label: label, onPressed: () => picked.add(label)),
             ],
           ),
         ),
@@ -1042,7 +1039,7 @@ void main() {
       tester.getCenter(find.text('menu')),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
 
     await gesture.moveTo(tester.getCenter(find.text('two')));
     await tester.pump();
@@ -1051,7 +1048,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(picked, ['two']);
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
   });
 
   testWidgets('a press let go where it went down leaves the menu open', (
@@ -1062,7 +1059,7 @@ void main() {
     await tester.tap(find.text('menu'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
     expect(picked, isEmpty);
   });
 
@@ -1076,7 +1073,7 @@ void main() {
     await tester.tap(find.text('two'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
     expect(picked, isEmpty);
 
     await tester.pumpAndSettle();
@@ -1097,16 +1094,13 @@ void main() {
       ),
     );
     Navigator.of(context).push(
-      CommonPopupRoute<void>(
+      AnchoredPopupRoute<void>(
         barrierLabel: 'Dismiss',
         placement: PopupPlacement.belowPoint,
         anchorOf: () => const Offset(100, 120) & Size.zero,
-        builder: (_) => CommonPopupMenu(
+        builder: (_) => PopupMenu(
           items: [
-            CommonPopupMenuItem(
-              label: 'one',
-              onPressed: () => picked.add('one'),
-            ),
+            PopupMenuItem(label: 'one', onPressed: () => picked.add('one')),
           ],
         ),
       ),
@@ -1165,7 +1159,7 @@ void main() {
       tester.getCenter(find.text('menu')),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
     await gesture.up();
   });
 
@@ -1175,14 +1169,11 @@ void main() {
     final clicks = recordHaptics(tester);
     final picked = <String>[];
     final open = await pumpMenu(tester, [
-      CommonPopupMenuItem(label: 'other', onPressed: () => picked.add('other')),
-      CommonPopupMenuItem(
+      PopupMenuItem(label: 'other', onPressed: () => picked.add('other')),
+      PopupMenuItem(
         label: 'parent',
         subItems: [
-          CommonPopupMenuItem(
-            label: 'child',
-            onPressed: () => picked.add('child'),
-          ),
+          PopupMenuItem(label: 'child', onPressed: () => picked.add('child')),
         ],
       ),
     ]);
@@ -1217,13 +1208,10 @@ void main() {
     final clicks = recordHaptics(tester);
     final picked = <String>[];
     final open = await pumpMenu(tester, [
-      CommonPopupMenuItem(
+      PopupMenuItem(
         label: 'parent',
         subItems: [
-          CommonPopupMenuItem(
-            label: 'child',
-            onPressed: () => picked.add('child'),
-          ),
+          PopupMenuItem(label: 'child', onPressed: () => picked.add('child')),
         ],
       ),
     ]);
@@ -1259,9 +1247,9 @@ void main() {
   ) async {
     final clicks = recordHaptics(tester);
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -1280,9 +1268,9 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -1306,14 +1294,14 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         homeBuilder: (child) => Scaffold(body: Center(child: child)),
-        child: CommonPopupBox(
+        child: PopupAnchor(
           targetBuilder: (open) => IconButton(
             tooltip: 'tip',
             onPressed: open,
             icon: const GlyphIcon(AppGlyphs.more),
           ),
-          popupBuilder: (_) => CommonPopupMenu(
-            items: [CommonPopupMenuItem(label: 'one', onPressed: () {})],
+          popupBuilder: (_) => PopupMenu(
+            items: [PopupMenuItem(label: 'one', onPressed: () {})],
           ),
         ),
       ),
@@ -1340,13 +1328,13 @@ void main() {
           children: [
             const SizedBox(height: 200),
             Center(
-              child: CommonPopupBox(
+              child: PopupAnchor(
                 targetBuilder: (open) =>
                     TextButton(onPressed: open, child: const Text('menu')),
-                popupBuilder: (_) => CommonPopupMenu(
+                popupBuilder: (_) => PopupMenu(
                   items: [
                     for (final label in ['one', 'two', 'three'])
-                      CommonPopupMenuItem(
+                      PopupMenuItem(
                         label: label,
                         onPressed: () => picked.add(label),
                       ),
@@ -1379,7 +1367,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(scrollable.position.pixels, greaterThan(0));
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
   });
 
   testWidgets('in a scroll view a press held on the button opens its menu', (
@@ -1391,13 +1379,13 @@ void main() {
       tester.getCenter(find.text('menu')),
     );
     await tester.pump(kPressTimeout ~/ 2);
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
     await tester.pump(kPressTimeout);
     await tester.pumpAndSettle();
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
   });
 
   for (final kind in [PointerDeviceKind.touch, PointerDeviceKind.mouse]) {
@@ -1418,7 +1406,7 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
       expect(picked, ['two']);
-      expect(find.byType(CommonPopupMenu), findsNothing);
+      expect(find.byType(PopupMenu), findsNothing);
     });
   }
 
@@ -1430,7 +1418,7 @@ void main() {
     await tester.tap(find.text('menu'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(find.byType(PopupMenu), findsOneWidget);
   });
 
   testWidgets('a press carried in from the button stretches the menu', (
@@ -1442,7 +1430,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final press = find.descendant(
-      of: find.byType(CommonPopupMenu),
+      of: find.byType(PopupMenu),
       matching: find.byType(ElasticPress),
     );
     final resting = tester.getRect(press);
@@ -1468,7 +1456,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     final press = find.descendant(
-      of: find.byType(CommonPopupMenu),
+      of: find.byType(PopupMenu),
       matching: find.byType(ElasticPress),
     );
     final resting = tester.getRect(press);
@@ -1495,11 +1483,7 @@ void main() {
     addTearDown(tester.view.reset);
     final open = await pumpMenu(tester, [
       for (var i = 0; i < 30; i++)
-        CommonPopupMenuItem(
-          label: 'Item $i',
-          checked: i == 20,
-          onPressed: () {},
-        ),
+        PopupMenuItem(label: 'Item $i', checked: i == 20, onPressed: () {}),
     ], maxVisibleItems: 5);
     open();
     await tester.pumpAndSettle();
@@ -1525,7 +1509,7 @@ void main() {
     addTearDown(tester.view.reset);
     final open = await pumpMenu(tester, [
       for (var i = 0; i < 30; i++)
-        CommonPopupMenuItem(label: 'Item $i', onPressed: () {}),
+        PopupMenuItem(label: 'Item $i', onPressed: () {}),
     ]);
     open();
     await tester.pumpAndSettle();
@@ -1541,10 +1525,10 @@ void main() {
     tester,
   ) async {
     final items = [
-      CommonPopupMenuItem(label: '🇭🇰 HK', onPressed: () {}),
-      CommonPopupMenuItem(label: 'Fallback', checked: true, onPressed: () {}),
+      PopupMenuItem(label: '🇭🇰 HK', onPressed: () {}),
+      PopupMenuItem(label: 'Fallback', checked: true, onPressed: () {}),
       for (var i = 0; i < 12; i++)
-        CommonPopupMenuItem(label: 'Group $i', onPressed: () {}),
+        PopupMenuItem(label: 'Group $i', onPressed: () {}),
     ];
     Future<double> widthOf(int? maxVisibleItems) async {
       final open = await pumpMenu(
@@ -1569,8 +1553,8 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      CommonPopupMenuItem(label: 'plain', onPressed: () {}),
-      CommonPopupMenuItem(
+      PopupMenuItem(label: 'plain', onPressed: () {}),
+      PopupMenuItem(
         glyph: AppGlyphs.delete,
         label: 'delete',
         danger: true,
@@ -1625,12 +1609,12 @@ void main() {
 
   testWidgets('a sub menu is at least as wide as its parent', (tester) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'a label long enough to widen the parent menu',
       ),
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'x')],
+        subItems: [PopupMenuItem(label: 'x')],
       ),
     ]);
     open();
@@ -1646,9 +1630,9 @@ void main() {
 
   testWidgets('the open sub menu casts the stronger shadow', (tester) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -1667,9 +1651,9 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -1689,9 +1673,9 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -1718,11 +1702,11 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
         subItems: [
-          CommonPopupMenuItem(label: 'first child'),
-          CommonPopupMenuItem(label: 'second child'),
+          PopupMenuItem(label: 'first child'),
+          PopupMenuItem(label: 'second child'),
         ],
       ),
     ]);
@@ -1748,12 +1732,12 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'a label long enough to widen the parent menu',
       ),
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -1793,12 +1777,12 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(label: 'plain item'),
-      const CommonPopupMenuItem(
+      const PopupMenuItem(label: 'plain item'),
+      const PopupMenuItem(
         label: 'parent',
         subItems: [
-          CommonPopupMenuItem(label: 'first child'),
-          CommonPopupMenuItem(label: 'second child'),
+          PopupMenuItem(label: 'first child'),
+          PopupMenuItem(label: 'second child'),
         ],
       ),
     ]);
@@ -1832,11 +1816,11 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
         subItems: [
-          CommonPopupMenuItem(label: 'first child'),
-          CommonPopupMenuItem(label: 'second child'),
+          PopupMenuItem(label: 'first child'),
+          PopupMenuItem(label: 'second child'),
         ],
       ),
     ]);
@@ -1861,11 +1845,11 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
         subItems: [
-          CommonPopupMenuItem(label: 'first child'),
-          CommonPopupMenuItem(label: 'second child'),
+          PopupMenuItem(label: 'first child'),
+          PopupMenuItem(label: 'second child'),
         ],
       ),
     ]);
@@ -1889,10 +1873,10 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(label: 'plain item'),
-      const CommonPopupMenuItem(
+      const PopupMenuItem(label: 'plain item'),
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -1911,7 +1895,7 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      CommonPopupMenuItem(label: 'item', onPressed: () {}),
+      PopupMenuItem(label: 'item', onPressed: () {}),
     ]);
     open();
     await tester.pumpAndSettle();
@@ -1926,9 +1910,9 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     double opacityOf(Finder label) => tester
@@ -1965,20 +1949,20 @@ void main() {
     );
 
     Navigator.of(context).push(
-      CommonPopupRoute<void>(
+      AnchoredPopupRoute<void>(
         barrierLabel: 'Dismiss',
         placement: PopupPlacement.belowPoint,
         anchorOf: () => const Offset(100, 250) & Size.zero,
         avoid: const Rect.fromLTRB(0, 200, 800, 300),
-        builder: (_) => const CommonPopupMenu(
+        builder: (_) => const PopupMenu(
           items: [
-            CommonPopupMenuItem(label: 'plain item'),
-            CommonPopupMenuItem(
+            PopupMenuItem(label: 'plain item'),
+            PopupMenuItem(
               label: 'parent',
               subItems: [
-                CommonPopupMenuItem(label: 'first child'),
-                CommonPopupMenuItem(label: 'second child'),
-                CommonPopupMenuItem(label: 'third child'),
+                PopupMenuItem(label: 'first child'),
+                PopupMenuItem(label: 'second child'),
+                PopupMenuItem(label: 'third child'),
               ],
             ),
           ],
@@ -1986,7 +1970,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final menu = find.byType(CommonPopupMenu);
+    final menu = find.byType(PopupMenu);
     final corner = tester.getTopRight(menu);
     final foldedHeight = tester.getSize(menu).height;
     expect(tester.getBottomRight(menu).dy, lessThan(200));
@@ -2006,9 +1990,9 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     open();
@@ -2034,13 +2018,13 @@ void main() {
   ) async {
     final open = await pumpMenu(tester, [
       for (var index = 0; index < 4; index++)
-        CommonPopupMenuItem(label: 'item $index'),
-      const CommonPopupMenuItem(
+        PopupMenuItem(label: 'item $index'),
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
       for (var index = 4; index < 30; index++)
-        CommonPopupMenuItem(label: 'item $index'),
+        PopupMenuItem(label: 'item $index'),
     ]);
     open();
     await tester.pumpAndSettle();
@@ -2079,14 +2063,13 @@ void main() {
         builder: (_, child) => LiquidGlassScope(enabled: true, child: child!),
         child: Scaffold(
           body: Center(
-            child: CommonPopupBox(
+            child: PopupAnchor(
               targetBuilder: (value) {
                 open = value;
                 return const SizedBox(width: 40, height: 40);
               },
-              popupBuilder: (_) => const CommonPopupMenu(
-                items: [CommonPopupMenuItem(label: 'item')],
-              ),
+              popupBuilder: (_) =>
+                  const PopupMenu(items: [PopupMenuItem(label: 'item')]),
             ),
           ),
         ),
@@ -2122,21 +2105,21 @@ void main() {
         child: Scaffold(
           body: Align(
             alignment: Alignment.topRight,
-            child: CommonPopupBox(
+            child: PopupAnchor(
               targetBuilder: (open) => IconButton(
                 onPressed: () => open(),
                 icon: const Icon(Icons.more_vert),
               ),
-              popupBuilder: (_) => CommonPopupMenu(
+              popupBuilder: (_) => PopupMenu(
                 items: [
-                  CommonPopupMenuItem(
+                  PopupMenuItem(
                     label: 'Edit',
                     onPressed: () => pressed.add('Edit'),
                   ),
-                  CommonPopupMenuItem(
+                  PopupMenuItem(
                     label: 'More',
                     subItems: [
-                      CommonPopupMenuItem(
+                      PopupMenuItem(
                         label: 'Delete',
                         onPressed: () => pressed.add('Delete'),
                       ),
@@ -2179,7 +2162,7 @@ void main() {
             ),
             child: Align(
               alignment: Alignment.topLeft,
-              child: CommonPopupBox(
+              child: PopupAnchor(
                 targetBuilder: (value) {
                   open = value;
                   return const SizedBox(width: 40, height: 40);
@@ -2238,22 +2221,19 @@ void main() {
           child: Scaffold(
             body: Align(
               alignment: Alignment.bottomRight,
-              child: CommonPopupBox(
+              child: PopupAnchor(
                 targetBuilder: (open) => IconButton(
                   icon: const Icon(Icons.more_vert),
                   onPressed: () => open(),
                 ),
-                popupBuilder: (_) => CommonPopupMenu(
+                popupBuilder: (_) => PopupMenu(
                   items: [
                     for (var index = 0; index < 12; index++)
-                      CommonPopupMenuItem(
-                        label: 'Resource $index',
-                        onPressed: () {},
-                      ),
-                    CommonPopupMenuItem(
+                      PopupMenuItem(label: 'Resource $index', onPressed: () {}),
+                    PopupMenuItem(
                       label: submenu,
                       subItems: [
-                        CommonPopupMenuItem(
+                        PopupMenuItem(
                           label: 'Apply',
                           onPressed: () => selected = true,
                         ),
@@ -2269,7 +2249,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.more_vert));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      final bounds = tester.getRect(find.byType(CommonPopupMenu));
+      final bounds = tester.getRect(find.byType(PopupMenu));
       expect(bounds.left, greaterThanOrEqualTo(16));
       expect(bounds.right, lessThanOrEqualTo(264));
       expect(bounds.top, greaterThanOrEqualTo(16));
@@ -2284,7 +2264,7 @@ void main() {
       await tester.tap(find.text('Apply'));
       await tester.pumpAndSettle();
       expect(selected, isTrue);
-      expect(find.byType(CommonPopupMenu), findsNothing);
+      expect(find.byType(PopupMenu), findsNothing);
     },
   );
 
@@ -2292,10 +2272,10 @@ void main() {
     tester,
   ) async {
     final open = await pumpMenu(tester, [
-      const CommonPopupMenuItem(label: 'first'),
-      const CommonPopupMenuItem(
+      const PopupMenuItem(label: 'first'),
+      const PopupMenuItem(
         label: 'parent',
-        subItems: [CommonPopupMenuItem(label: 'child')],
+        subItems: [PopupMenuItem(label: 'child')],
       ),
     ]);
     final morph = find.byWidgetPredicate(

@@ -33,13 +33,13 @@ class ListEditorPage<T, K> extends ConsumerStatefulWidget {
   final void Function(int oldIndex, int newIndex) onReorder;
   final VoidCallback onAdd;
   final VoidCallback? onQuickEdit;
-  final List<CommonPopupMenuItem> addMenuItems;
+  final List<PopupMenuItem> addMenuItems;
   final String emptyLabel;
   final double? itemExtent;
   final K Function(T item) idOf;
   final void Function(Set<K> ids)? onDelete;
   final Iterable<String?> Function(T item)? searchFieldsOf;
-  final List<CommonPopupMenuItem> Function(T item)? menuItemsOf;
+  final List<PopupMenuItem> Function(T item)? menuItemsOf;
 
   const ListEditorPage({
     super.key,
@@ -217,7 +217,7 @@ class _ListEditorPageState<T, K> extends ConsumerState<ListEditorPage<T, K>> {
         tooltip: appLocalizations.selectAll,
       ),
     ];
-    return CommonScaffold(
+    return Scaffold(
       canSort:
           widget.menuItemsOf != null &&
           !isSelecting &&
@@ -251,7 +251,7 @@ class _ListEditorPageState<T, K> extends ConsumerState<ListEditorPage<T, K>> {
               selected,
               reorderable: !isSearching,
             );
-            return CommonScrollBar(
+            return Scrollbar(
               controller: _scrollController,
               child: ArrivalCacheExtentBuilder(
                 builder: (cacheExtent) => isSearching
@@ -331,7 +331,7 @@ class _ListEditorPageState<T, K> extends ConsumerState<ListEditorPage<T, K>> {
 class ListEditorAddAction extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback? onQuickEdit;
-  final List<CommonPopupMenuItem> menuItems;
+  final List<PopupMenuItem> menuItems;
 
   const ListEditorAddAction({
     super.key,
@@ -353,7 +353,7 @@ class ListEditorAddAction extends StatelessWidget {
         ),
       );
     }
-    return CommonPopupBox(
+    return PopupAnchor(
       targetBuilder: (open) => AppBarActionButton(
         data: IconButtonData(
           glyph: AppGlyphs.addCircle,
@@ -361,16 +361,16 @@ class ListEditorAddAction extends StatelessWidget {
           tooltip: appLocalizations.add,
         ),
       ),
-      popupBuilder: (_) => CommonPopupMenu(
+      popupBuilder: (_) => PopupMenu(
         items: [
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: AppGlyphs.add,
             label: appLocalizations.add,
             onPressed: onAdd,
           ),
           ...menuItems,
           if (onQuickEdit != null)
-            CommonPopupMenuItem(
+            PopupMenuItem(
               glyph: AppGlyphs.compose,
               label: appLocalizations.quickEdit,
               onPressed: onQuickEdit,

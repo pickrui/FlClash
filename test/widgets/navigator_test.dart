@@ -115,7 +115,7 @@ void main() {
         home: const SizedBox(),
       ),
     );
-    final route = CommonDesktopRoute<void>(builder: (_) => const Text('page'));
+    final route = FadePageRoute<void>(builder: (_) => const Text('page'));
     unawaited(navigatorKey.currentState!.push(route));
 
     await tester.pump();
@@ -141,7 +141,7 @@ void main() {
         home: const SizedBox(),
       ),
     );
-    final route = CommonDesktopRoute<void>(
+    final route = FadePageRoute<void>(
       builder: (_) => ValueListenableBuilder(
         valueListenable: loading,
         builder: (_, loading, _) => NullStatusSwitcher(
@@ -176,7 +176,7 @@ void main() {
         home: const SizedBox(),
       ),
     );
-    final route = CommonDesktopRoute<void>(
+    final route = FadePageRoute<void>(
       builder: (_) => const ArrivalHold(ready: false, child: Text('loading')),
     );
     unawaited(navigatorKey.currentState!.push(route));
@@ -210,7 +210,7 @@ void main() {
           height: 300,
           child: SheetPagesNavigator(
             onGenerateInitialRoutes: (_, _) => [
-              CommonRoute<void>(
+              CardPageRoute<void>(
                 builder: (context) {
                   page = context;
                   return const Text('page');
@@ -252,7 +252,7 @@ void main() {
     );
     unawaited(
       Navigator.of(page).push(
-        CommonRoute<void>(builder: (_) => const Scaffold(body: Text('top'))),
+        CardPageRoute<void>(builder: (_) => const Scaffold(body: Text('top'))),
       ),
     );
     await tester.pumpAndSettle();
@@ -360,7 +360,7 @@ void main() {
         navigatorKey: root,
         home: Navigator(
           key: nested,
-          onGenerateRoute: (_) => CommonRoute<void>(
+          onGenerateRoute: (_) => CardPageRoute<void>(
             builder: (_) => const Scaffold(body: Text('Nested home')),
           ),
         ),

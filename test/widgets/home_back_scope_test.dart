@@ -104,7 +104,7 @@ void main() {
                   child: TextButton(
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => CommonPopScope(
+                        builder: (_) => PopGuard(
                           onPop: (_) {
                             guarded++;
                             return false;
@@ -168,7 +168,7 @@ void main() {
                   child: TextButton(
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => CommonPopScope(
+                        builder: (_) => PopGuard(
                           onPop: (_) {
                             guarded++;
                             return false;

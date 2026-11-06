@@ -29,7 +29,7 @@ class ProxiesView extends ConsumerStatefulWidget {
 }
 
 class _ProxiesViewState extends ConsumerState<ProxiesView> {
-  final GlobalKey<CommonScaffoldState> _scaffoldKey = GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   final GlobalKey<ProxiesTabViewState> _proxiesTabKey = GlobalKey();
 
   // The same instance on every build, so the bar changing with the current
@@ -42,7 +42,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     ref.read(proxiesStyleSettingProvider.notifier).update(update);
   }
 
-  List<CommonPopupMenuItem> _buildMenuItems(
+  List<PopupMenuItem> _buildMenuItems(
     ProxiesStyleProps style, {
     required bool hasProviders,
   }) {
@@ -54,7 +54,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       _optionsMenuItem(
         glyph: AppGlyphs.appsList,
         label: appLocalizations.style,
-        section: const CommonPopupMenuSection(),
+        section: const PopupMenuSection(),
         options: ProxiesType.values,
         value: style.type,
         textOf: (type) => type.label,
@@ -110,11 +110,11 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
           onSelected: (iconStyle) =>
               _updateStyle((state) => state.copyWith(iconStyle: iconStyle)),
         ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.eyeOff,
         label: appLocalizations.hideTimeoutProxies,
         checked: style.hideTimeoutProxies,
-        section: const CommonPopupMenuSection(),
+        section: const PopupMenuSection(),
         onPressed: () => _updateStyle(
           (state) =>
               state.copyWith(hideTimeoutProxies: !state.hideTimeoutProxies),
@@ -135,10 +135,10 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         ),
       ),
       if (hasProviders)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.dataUsage,
           label: appLocalizations.providers,
-          section: const CommonPopupMenuSection(),
+          section: const PopupMenuSection(),
           onPressed: () {
             showExtend(
               context,
@@ -193,7 +193,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     final isTab = proxiesType == ProxiesType.tab;
     final picker = widget.picker;
     final primaryAction = _buildPrimaryAction(isTab);
-    return CommonScaffold(
+    return Scaffold(
       key: _scaffoldKey,
       isLoading: isLoading,
       resizeToAvoidBottomInset: false,
@@ -222,7 +222,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
   }
 }
 
-CommonPopupMenuItem _optionsMenuItem<T>({
+PopupMenuItem _optionsMenuItem<T>({
   required Glyph glyph,
   required String label,
   required List<T> options,
@@ -230,15 +230,15 @@ CommonPopupMenuItem _optionsMenuItem<T>({
   required String Function(T option) textOf,
   required ValueSetter<T> onSelected,
   String? Function(T option)? subtitleOf,
-  CommonPopupMenuSection? section,
+  PopupMenuSection? section,
 }) {
-  return CommonPopupMenuItem(
+  return PopupMenuItem(
     glyph: glyph,
     label: label,
     section: section,
     subItems: [
       for (final option in options)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           label: textOf(option),
           subtitle: subtitleOf?.call(option),
           checked: option == value,

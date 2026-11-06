@@ -189,7 +189,7 @@ class MitmExchangeView extends ConsumerWidget {
     final value = ref.watch(mitmExchangeProvider(id));
     final exchange = value.value;
     final modules = watchLocalMitmModules(ref);
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.details(appLocalizations.request),
       menuItems: exchange == null
           ? const []

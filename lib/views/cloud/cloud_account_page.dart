@@ -258,7 +258,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     final notifier = ref.read(cloudAccountProvider.notifier);
     final serviceWarning = _serviceWarning;
 
-    return CommonScaffold(
+    return Scaffold(
       title: AppLocalizations.current.loggedOutViewTitle, // oixCloud title text
       actions: [_buildHealthButton()],
       iconActions: [

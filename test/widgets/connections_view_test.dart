@@ -21,7 +21,8 @@ import 'package:fl_clash/views/connection/requests.dart';
 import 'package:fl_clash/views/connection/item.dart';
 import 'package:fl_clash/views/connection/tracker_info_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, Scaffold, TextButton;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -197,7 +198,7 @@ void main() {
         ? appLocalizations.running
         : appLocalizations.recentRequests;
     tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .widget<Scaffold>(find.byType(Scaffold))
         .titleMenuItems
         .singleWhere((item) => item.label == label)
         .onPressed!();
@@ -226,7 +227,7 @@ void main() {
       await tester.tap(find.widgetWithText(TonalChip, 'proxy-a').first);
       await tester.pumpAndSettle();
       tester
-          .widget<CommonScaffold>(find.byType(CommonScaffold))
+          .widget<Scaffold>(find.byType(Scaffold))
           .searchState!
           .onSearch('alpha');
       await tester.pumpAndSettle();
@@ -339,7 +340,7 @@ void main() {
       await showRequests(const ValueKey(1));
       expect(stream.starts, 1);
       expect(
-        tester.widget<CommonScaffold>(find.byType(CommonScaffold)).title,
+        tester.widget<Scaffold>(find.byType(Scaffold)).title,
         appLocalizations.running,
       );
       selectFeed(tester, RequestFeed.recent);
@@ -351,7 +352,7 @@ void main() {
       await showRequests(const ValueKey(2));
       expect(stream.starts, 1);
       expect(
-        tester.widget<CommonScaffold>(find.byType(CommonScaffold)).title,
+        tester.widget<Scaffold>(find.byType(Scaffold)).title,
         appLocalizations.recentRequests,
       );
       await tester.pumpWidget(const SizedBox.shrink());

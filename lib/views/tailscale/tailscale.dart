@@ -144,7 +144,7 @@ class _TailscaleViewState extends ConsumerState<TailscaleView>
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final networks = ref.watch(tailscaleNetworksProvider);
-    return CommonScaffold(
+    return Scaffold(
       title: 'Tailscale',
       primaryAction: IconButtonData(
         glyph: AppGlyphs.add,
@@ -218,7 +218,7 @@ class TailscaleGuidePage extends StatelessWidget {
         .of(context)
         .copyWith(color: colorScheme.onSurface);
     final level = context.raisedSurfaceLevel;
-    return CommonScaffold(
+    return Scaffold(
       title: l.tailscaleGuide,
       body: ListView(
         padding: EdgeInsets.fromLTRB(

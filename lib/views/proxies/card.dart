@@ -99,7 +99,7 @@ class ProxyCard extends StatelessWidget {
     }
   }
 
-  List<CommonPopupMenuItem> _menuItems(
+  List<PopupMenuItem> _menuItems(
     BuildContext context,
     WidgetRef ref, {
     required bool inUse,
@@ -109,21 +109,21 @@ class ProxyCard extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return [
       if (groupType == GroupType.Selector)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.checkCircle,
           label: appLocalizations.select,
           checked: inUse,
           onPressed: () => _handleSelect(ref),
         )
       else if (groupType.isComputedSelected)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.pin,
           label: appLocalizations.preferred,
           checked: pinned,
           onPressed: () => _handleSelect(ref),
         ),
       if (addable)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.listAdd,
           label: appLocalizations.addToLocalProxies,
           onPressed: () => _handleAddToCustomNodes(context, ref),
@@ -202,7 +202,7 @@ class ProxyCard extends StatelessWidget {
             pinned: pinned,
             addable: addable,
           ),
-          child: CommonCard(
+          child: Card(
             radius: AppCorner.lg,
             enterActionsOnRight: true,
             key: key,

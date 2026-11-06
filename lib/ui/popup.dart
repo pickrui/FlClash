@@ -145,8 +145,8 @@ final _foldSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 340),
 );
 
-class CommonPopupRoute<T> extends PopupRoute<T> {
-  CommonPopupRoute({
+class AnchoredPopupRoute<T> extends PopupRoute<T> {
+  AnchoredPopupRoute({
     required this.builder,
     required this.anchorOf,
     required this.barrierLabel,
@@ -1383,8 +1383,8 @@ class _PopupPin {
 /// Opens a popup out of the button [targetBuilder] builds. A press on the
 /// button opens it at once, as iOS menus do, so the finger can slide on into
 /// the menu and let go on an item.
-class CommonPopupBox extends StatefulWidget {
-  const CommonPopupBox({
+class PopupAnchor extends StatefulWidget {
+  const PopupAnchor({
     super.key,
     required this.targetBuilder,
     required this.popupBuilder,
@@ -1402,13 +1402,13 @@ class CommonPopupBox extends StatefulWidget {
   final bool bare;
 
   @override
-  State<CommonPopupBox> createState() => _PopupAnchorState();
+  State<PopupAnchor> createState() => _PopupAnchorState();
 }
 
-class _PopupAnchorState extends State<CommonPopupBox> {
+class _PopupAnchorState extends State<PopupAnchor> {
   final _sourceKey = GlobalKey();
   final _sourceHidden = ValueNotifier<bool>(false);
-  CommonPopupRoute<void>? _route;
+  AnchoredPopupRoute<void>? _route;
   int? _pointer;
   Offset _pressOrigin = Offset.zero;
   bool _pressMoved = false;
@@ -1463,7 +1463,7 @@ class _PopupAnchorState extends State<CommonPopupBox> {
   }
 
   void _captureSource(
-    CommonPopupRoute<void> route,
+    AnchoredPopupRoute<void> route,
     ValueNotifier<ui.Image?> snapshot,
   ) {
     if (!mounted || !route.isActive) {
@@ -1566,7 +1566,7 @@ class _PopupAnchorState extends State<CommonPopupBox> {
       return;
     }
     final snapshot = ValueNotifier<ui.Image?>(null);
-    final route = _route = CommonPopupRoute<void>(
+    final route = _route = AnchoredPopupRoute<void>(
       barrierLabel: UiLocalizations.of(context).close,
       builder: (context) => widget.popupBuilder(context),
       anchorOf: _sourceRect,
@@ -1812,24 +1812,24 @@ class _PopupPressRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'popup press';
 }
 
-typedef CommonPopupMenuItem = prism.PopupMenuItem;
-typedef CommonPopupMenuSection = prism.PopupMenuSection;
+typedef PopupMenuItem = prism.PopupMenuItem;
+typedef PopupMenuSection = prism.PopupMenuSection;
 
 const _menuMinWidth = 160.0;
 const _menuMaxWidth = 280.0;
 const _defaultMaxVisibleItems = 7;
 
-class CommonPopupMenu extends StatefulWidget {
-  const CommonPopupMenu({super.key, required this.items, this.maxVisibleItems});
+class PopupMenu extends StatefulWidget {
+  const PopupMenu({super.key, required this.items, this.maxVisibleItems});
 
-  final List<CommonPopupMenuItem> items;
+  final List<PopupMenuItem> items;
 
   /// Half of the next row shows past these, so the cut tells the menu scrolls.
   /// Setting them builds only the rows in view, which needs rows of one height.
   final int? maxVisibleItems;
 
   @override
-  State<CommonPopupMenu> createState() => _PopupMenuState();
+  State<PopupMenu> createState() => _PopupMenuState();
 }
 
 class _MenuStep {
@@ -1857,8 +1857,8 @@ class _MenuLevel {
     this.step,
   });
 
-  final List<CommonPopupMenuItem> items;
-  final CommonPopupMenuItem? owner;
+  final List<PopupMenuItem> items;
+  final PopupMenuItem? owner;
 
   /// The step that opened this level from an item of the one below.
   final _MenuStep? step;
@@ -1879,7 +1879,7 @@ class _Span extends Animatable<double> {
   double transform(double t) => ((t - begin) / (end - begin)).clamp(0.0, 1.0);
 }
 
-class _PopupMenuState extends State<CommonPopupMenu>
+class _PopupMenuState extends State<PopupMenu>
     with SingleTickerProviderStateMixin {
   static const _headerIndex = -1;
   static const _levelWidthScale = 1.12;
@@ -1924,7 +1924,7 @@ class _PopupMenuState extends State<CommonPopupMenu>
   bool _landed = false;
   bool _carrying = false;
 
-  final _toggled = <CommonPopupMenuItem>{};
+  final _toggled = <PopupMenuItem>{};
 
   @override
   void initState() {
@@ -2003,7 +2003,7 @@ class _PopupMenuState extends State<CommonPopupMenu>
 
   /// What the rows would take at their intrinsic width, measured from the
   /// labels as the rows lay them out.
-  double _lazyWidthOf(BuildContext context, List<CommonPopupMenuItem> items) {
+  double _lazyWidthOf(BuildContext context, List<PopupMenuItem> items) {
     final style = AppTextStyle.subheadline.of(context);
     final root = DefaultTextStyle.of(context).style.merge(style);
     final textScaler = MediaQuery.textScalerOf(context);
@@ -2194,10 +2194,10 @@ class _PopupMenuState extends State<CommonPopupMenu>
     _unfoldTop();
   }
 
-  bool _isChecked(CommonPopupMenuItem item) =>
+  bool _isChecked(PopupMenuItem item) =>
       (item.checked ?? false) != _toggled.contains(item);
 
-  void _toggle(CommonPopupMenuItem item, VoidCallback onPressed) {
+  void _toggle(PopupMenuItem item, VoidCallback onPressed) {
     setState(() {
       if (!_toggled.remove(item)) {
         _toggled.add(item);
@@ -2329,7 +2329,7 @@ class _PopupMenuState extends State<CommonPopupMenu>
 
   Widget _buildRow(
     BuildContext context, {
-    required CommonPopupMenuItem item,
+    required PopupMenuItem item,
     required int index,
     required VoidCallback? onTap,
     bool pressed = false,
@@ -2434,7 +2434,7 @@ class _PopupMenuState extends State<CommonPopupMenu>
 
   Widget _buildItem(
     BuildContext context,
-    CommonPopupMenuItem item,
+    PopupMenuItem item,
     int index, {
     required bool active,
   }) {

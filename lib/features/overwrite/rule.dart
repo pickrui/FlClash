@@ -170,7 +170,7 @@ class RuleStatusItem extends StatelessWidget {
           style: AppTextStyle.subheadline.of(context).toJetBrainsMono,
         ),
       ),
-      trailing: CommonSwitch(value: status, onChanged: onChange),
+      trailing: Switch(value: status, onChanged: onChange),
       onPressed: () => onChange(!status),
     );
   }
@@ -406,7 +406,7 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
   }) => FormRow(
     title: title,
     onPressed: onChanged == null ? null : () => onChanged(!value),
-    trailing: CommonSwitch(value: value, onChanged: onChanged),
+    trailing: Switch(value: value, onChanged: onChanged),
   );
 
   @override

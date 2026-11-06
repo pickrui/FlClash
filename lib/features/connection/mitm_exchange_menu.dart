@@ -40,7 +40,7 @@ List<MitmModule> watchLocalMitmModules(WidgetRef ref) => ref.watch(
 /// Copies a request, exports it, or writes a rule for it into one of the
 /// [modules] the user wrote, or a new one. A list knows only a summary of each
 /// request, so [load] reads the rest when an item is picked.
-List<CommonPopupMenuItem> mitmExchangeMenuItems(
+List<PopupMenuItem> mitmExchangeMenuItems(
   BuildContext context,
   WidgetRef ref, {
   required String url,
@@ -64,30 +64,30 @@ List<CommonPopupMenuItem> mitmExchangeMenuItems(
     await action(exchange);
   }
 
-  List<CommonPopupMenuItem> targets(
+  List<PopupMenuItem> targets(
     Future<void> Function(MitmModule? module) addTo,
   ) => [
-    CommonPopupMenuItem(
+    PopupMenuItem(
       glyph: AppGlyphs.add,
       label: appLocalizations.mitmNewModule,
       onPressed: () => addTo(null),
     ),
     for (final module in modules)
-      CommonPopupMenuItem(label: module.name, onPressed: () => addTo(module)),
+      PopupMenuItem(label: module.name, onPressed: () => addTo(module)),
   ];
 
   return [
-    CommonPopupMenuItem(
+    PopupMenuItem(
       glyph: AppGlyphs.link,
       label: appLocalizations.copyLink,
       onPressed: () => _copy(url),
     ),
-    CommonPopupMenuItem(
+    PopupMenuItem(
       glyph: AppGlyphs.code,
       label: appLocalizations.copyAsCurl,
       onPressed: () => withExchange((exchange) => _copyCurl(ref, exchange)),
     ),
-    CommonPopupMenuItem(
+    PopupMenuItem(
       glyph: AppGlyphs.copy,
       label: appLocalizations.copyRequest,
       onPressed: () => withExchange(
@@ -101,7 +101,7 @@ List<CommonPopupMenuItem> mitmExchangeMenuItems(
       ),
     ),
     if (status != 0)
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.copy,
         label: appLocalizations.copyResponse,
         onPressed: () => withExchange(
@@ -115,21 +115,21 @@ List<CommonPopupMenuItem> mitmExchangeMenuItems(
         ),
       ),
     if (!pending && responseSize > 0)
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.copy,
         label: appLocalizations.copyResponseBody,
         onPressed: () =>
             withExchange((exchange) => _copyResponseBody(ref, exchange)),
       ),
-    CommonPopupMenuItem(
+    PopupMenuItem(
       glyph: AppGlyphs.export,
       label: appLocalizations.exportHar,
       onPressed: () => withExchange((exchange) => _exportHar(ref, exchange)),
     ),
-    CommonPopupMenuItem(
+    PopupMenuItem(
       glyph: AppGlyphs.block,
       label: appLocalizations.mitmAddRejectRule,
-      section: const CommonPopupMenuSection(),
+      section: const PopupMenuSection(),
       subItems: targets(
         (module) => withExchange(
           (exchange) => _addRule(
@@ -147,7 +147,7 @@ List<CommonPopupMenuItem> mitmExchangeMenuItems(
       ),
     ),
     if (!pending && status != 0)
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.swap,
         label: appLocalizations.mitmAddMapLocalRule,
         subItems: targets(

@@ -7,7 +7,9 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/cloud/store_sheets.dart';
 import 'package:fl_clash/views/cloud/store_widgets.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide Scaffold, Switch, TextButton, TextField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:fl_clash/ui/common_button.dart' as prism;
@@ -44,7 +46,7 @@ Future<List<T?>> _pumpSheet<T>(WidgetTester tester, Widget sheet) async {
     TestApp(
       locale: const Locale('en'),
       child: Builder(
-        builder: (context) => Scaffold(
+        builder: (context) => material.Scaffold(
           body: TextButton(
             onPressed: () async => results.add(
               await Navigator.of(context)
@@ -80,7 +82,7 @@ void main() {
       ),
     );
     expect(find.text('Available ¥12.50'), findsOneWidget);
-    expect(find.byType(CommonSwitch), findsNothing);
+    expect(find.byType(Switch), findsNothing);
 
     await tester.tap(find.text('Yearly · ¥150'));
     await tester.pumpAndSettle();
@@ -160,7 +162,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         locale: const Locale('en'),
-        child: Scaffold(
+        child: material.Scaffold(
           body: Column(
             children: [
               StorePlanCard(plan: _plan(inventory: 0), onBuy: () {}),
@@ -189,7 +191,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         locale: const Locale('en'),
-        child: Scaffold(
+        child: material.Scaffold(
           body: ListView(
             children: [
               StoreBoughtCard(bought: awaiting(true)),

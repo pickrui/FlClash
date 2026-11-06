@@ -90,7 +90,7 @@ class ProfileDetailSheet extends ConsumerWidget {
     final isUpdating = ref.watch(isUpdatingProvider(profile.updatingKey));
     final appLocalizations = context.appLocalizations;
     final subscriptionInfo = profile.subscriptionInfo;
-    return CommonScaffold(
+    return Scaffold(
       title: profile.realLabel,
       iconActions: [
         if (profile.type == ProfileType.url)

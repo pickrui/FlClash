@@ -151,7 +151,7 @@ class _LogsViewState extends ConsumerState<LogsView>
       child: body,
       builder: (context, body) {
         final pinned = !ViewScope.isMobileOf(context);
-        return CommonScaffold(
+        return Scaffold(
           iconActions: _buildActions(),
           keywords: _filters.keywordsOf(pinned: pinned),
           menuItems: _filters.menuItems(context, pinned: pinned),

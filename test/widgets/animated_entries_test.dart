@@ -6,13 +6,14 @@
 import 'package:fl_clash/ui/animated_entries.dart';
 import 'package:fl_clash/ui/item_position.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget buildEntries(List<String> items, {bool grouped = false}) {
     return MaterialApp(
-      home: Scaffold(
+      home: material.Scaffold(
         body: AnimatedEntries(
           grouped: grouped,
           children: [

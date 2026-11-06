@@ -385,7 +385,7 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
   void _subscriptionInfo() {
     globalState.showCommonDialog<void>(
       child: Builder(
-        builder: (context) => CommonDialog(
+        builder: (context) => AlertDialog(
           title: context.appLocalizations.subscriptionInfo,
           backgroundColor: context.colorScheme.surfaceContainerLow,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -403,39 +403,35 @@ class _ProviderItemState extends ConsumerState<ProviderItem> {
     );
   }
 
-  List<CommonPopupMenuItem> _menuItems(AppLocalizations l) => [
+  List<PopupMenuItem> _menuItems(AppLocalizations l) => [
     if (provider.type == 'Proxy' &&
         ref.read(currentProfileProvider)?.isoixCloudProfile != true)
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.search,
         label: l.lookupProxyConfig,
         onPressed: _lookupProxy,
       ),
     if (_file == ProviderFileType.text)
-      CommonPopupMenuItem(
-        glyph: AppGlyphs.edit,
-        label: l.edit,
-        onPressed: _edit,
-      ),
+      PopupMenuItem(glyph: AppGlyphs.edit, label: l.edit, onPressed: _edit),
     if (_file == ProviderFileType.ruleSet && provider.type == 'Rule')
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.eye,
         label: l.preview,
         onPressed: _preview,
       ),
-    CommonPopupMenuItem(
+    PopupMenuItem(
       glyph: AppGlyphs.upload,
       label: l.upload,
       onPressed: _handleSideLoadProvider,
     ),
     if (provider.vehicleType == 'HTTP')
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.sync,
         label: l.sync,
         onPressed: _handleUpdateProvider,
       ),
     if ((provider.subscriptionInfo?.total ?? 0) > 0)
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.dataUsage,
         label: l.subscriptionInfo,
         onPressed: _subscriptionInfo,

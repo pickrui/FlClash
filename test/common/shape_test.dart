@@ -31,7 +31,7 @@ void main() {
             children: [
               TextButton(onPressed: () {}, child: const Text('text')),
               OutlinedButton(onPressed: () {}, child: const Text('outlined')),
-              CommonMinFilledButtonTheme(
+              MinFilledButtonTheme(
                 child: FilledButton(
                   onPressed: () {},
                   child: const Text('filled'),

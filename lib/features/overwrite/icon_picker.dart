@@ -326,7 +326,7 @@ class _IconPickerViewState extends ConsumerState<IconPickerView> {
     final isEmpty = _query.isNotEmpty
         ? searchSlivers.isEmpty
         : source == null && !isLoading;
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.icon,
       searchState: AppBarSearchState(onSearch: _handleSearch),
       iconActions: [
@@ -415,7 +415,7 @@ class _CurrentIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final description = _describe(context);
     final subtitle = description.subtitle;
-    return CommonCard(
+    return Card(
       radius: AppCorner.xl,
       child: Padding(
         padding: const EdgeInsets.all(12),

@@ -22,7 +22,7 @@ import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide FilledButton;
+import 'package:material_ui/material_ui.dart' hide FilledButton, Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 import 'package:prism_ui/common_button.dart' as prism;
 
@@ -368,8 +368,8 @@ void main() {
       ),
     ]);
     await tester.pumpAndSettle();
-    CommonPopScope rulesScope() => tester
-        .widgetList<CommonPopScope>(find.byType(CommonPopScope))
+    PopGuard rulesScope() => tester
+        .widgetList<PopGuard>(find.byType(PopGuard))
         .singleWhere((scope) => scope.child is SliverMainAxisGroup);
     expect(rulesScope().onPop, isNull);
     tester.widget<RuleItem>(find.byType(RuleItem)).onSelected();
@@ -395,7 +395,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(RuleStatusItem), findsNWidgets(2));
     tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold).last)
+        .widget<Scaffold>(find.byType(Scaffold).last)
         .searchState!
         .onSearch('net');
     await tester.pumpAndSettle();

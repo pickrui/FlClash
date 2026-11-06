@@ -9,16 +9,16 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/inherited.dart';
 import 'package:flutter/widgets.dart';
 
-class CommonExpandIcon extends StatefulWidget {
+class ExpandIcon extends StatefulWidget {
   final bool expand;
 
-  const CommonExpandIcon({super.key, this.expand = false});
+  const ExpandIcon({super.key, this.expand = false});
 
   @override
-  State<CommonExpandIcon> createState() => _CommonExpandIconState();
+  State<ExpandIcon> createState() => _ExpandIconState();
 }
 
-class _CommonExpandIconState extends State<CommonExpandIcon>
+class _ExpandIconState extends State<ExpandIcon>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _iconTurns;
@@ -40,7 +40,7 @@ class _CommonExpandIconState extends State<CommonExpandIcon>
   }
 
   @override
-  void didUpdateWidget(covariant CommonExpandIcon oldWidget) {
+  void didUpdateWidget(covariant ExpandIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.expand != widget.expand) {
       if (widget.expand) {

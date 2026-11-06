@@ -86,12 +86,12 @@ typedef AppBarSearchStateBuilder = AppBarSearchState? Function(
   AppBarSearchState? state,
 );
 
-class CommonScaffold extends StatefulWidget {
+class Scaffold extends StatefulWidget {
   final Widget body;
   final Color? backgroundColor;
   final String? title;
   final Widget? titleWidget;
-  final List<CommonPopupMenuItem> titleMenuItems;
+  final List<PopupMenuItem> titleMenuItems;
   final bool isLoading;
   final List<Widget>? actions;
 
@@ -100,7 +100,7 @@ class CommonScaffold extends StatefulWidget {
   /// Folded into the overflow menu once the bar would hold more than three
   /// buttons, as [primaryAction] and [menuItems] are; [actions] never fold.
   final List<IconButtonData> iconActions;
-  final List<CommonPopupMenuItem> menuItems;
+  final List<PopupMenuItem> menuItems;
 
   /// Answers a form: last in the bar, and in a form sheet the filled default
   /// at its foot beside cancel, where SwiftUI sets one on macOS.
@@ -122,7 +122,7 @@ class CommonScaffold extends StatefulWidget {
   /// Puts the toggle of the sort mode in the bar.
   final bool canSort;
 
-  const CommonScaffold({
+  const Scaffold({
     super.key,
     required this.body,
     this.backgroundColor,
@@ -146,10 +146,10 @@ class CommonScaffold extends StatefulWidget {
   });
 
   @override
-  State<CommonScaffold> createState() => CommonScaffoldState();
+  State<Scaffold> createState() => ScaffoldState();
 }
 
-class CommonScaffoldState extends State<CommonScaffold>
+class ScaffoldState extends State<Scaffold>
     with SingleTickerProviderStateMixin {
   late final ValueNotifier<AppBarSearchState?> _appBarState;
   final ValueNotifier<bool> _loadingNotifier = ValueNotifier(false);
@@ -320,7 +320,7 @@ class CommonScaffoldState extends State<CommonScaffold>
   }
 
   @override
-  void didUpdateWidget(CommonScaffold oldWidget) {
+  void didUpdateWidget(Scaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.searchState != widget.searchState) {
       final wasSearching = _isSearch;
@@ -591,15 +591,14 @@ class CommonScaffoldState extends State<CommonScaffold>
           widget.titleWidget ??
           (widget.titleMenuItems.isEmpty
               ? Text(widget.title!)
-              : CommonPopupBox(
+              : PopupAnchor(
                   placement: PopupPlacement.overAnchorStart,
                   targetBuilder: (open) => _TitleMenuButton(
                     title: widget.title!,
                     compact: compact,
                     onPressed: open,
                   ),
-                  popupBuilder: (_) =>
-                      CommonPopupMenu(items: widget.titleMenuItems),
+                  popupBuilder: (_) => PopupMenu(items: widget.titleMenuItems),
                 )),
     );
   }
@@ -885,8 +884,7 @@ class CommonScaffoldState extends State<CommonScaffold>
   Widget build(BuildContext context) {
     assert(widget.title != null || widget.titleWidget != null);
     final backAction =
-        widget.backAction ??
-        CommonScaffoldBackActionProvider.of(context)?.backAction;
+        widget.backAction ?? ScaffoldBackActionProvider.of(context)?.backAction;
     final form = _SheetForm.of(
       context,
       searchState: widget.searchState,
@@ -1763,7 +1761,7 @@ class _KeywordStrip extends StatelessWidget {
               constraints: BoxConstraints(
                 maxWidth: math.max(0, width - 2 * _inset),
               ),
-              child: CommonChip(
+              child: Chip(
                 label: keyword.label,
                 onDeleted: keyword.onDeleted,
                 onPressed: keyword.onPressed,
@@ -1788,7 +1786,7 @@ Widget _barButton(IconButtonData data, {Widget? icon}) => ElasticPress(
   child: AppBarActionButton(data: data, icon: icon),
 );
 
-/// [CommonScaffold.selectionActions] as the bar shows them, searching or not.
+/// [Scaffold.selectionActions] as the bar shows them, searching or not.
 class _SelectionButtons {
   const _SelectionButtons(this.actions);
 
@@ -1812,14 +1810,13 @@ class _SelectionButtons {
   ];
 }
 
-({List<IconButtonData> shown, List<CommonPopupMenuItem> overflow})
-_foldBarActions({
+({List<IconButtonData> shown, List<PopupMenuItem> overflow}) _foldBarActions({
   required bool hasLead,
   IconButtonData? primary,
   List<IconButtonData> icons = const [],
   IconButtonData? confirmation,
   int widgetCount = 0,
-  List<CommonPopupMenuItem> menuItems = const [],
+  List<PopupMenuItem> menuItems = const [],
 }) {
   final foldable = [?primary, ...icons];
   final fixed =
@@ -1839,7 +1836,7 @@ _foldBarActions({
     overflow: [
       for (final data in foldable)
         if (!isKept(data))
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: data.glyph,
             label: data.tooltip ?? '',
             checked: data.isSelected,
@@ -1853,17 +1850,17 @@ _foldBarActions({
 class _OverflowMenuButton extends StatelessWidget {
   const _OverflowMenuButton({required this.items});
 
-  final List<CommonPopupMenuItem> items;
+  final List<PopupMenuItem> items;
 
   @override
   Widget build(BuildContext context) {
-    return CommonPopupBox(
+    return PopupAnchor(
       targetBuilder: (open) => IconButton(
         tooltip: UiLocalizations.of(context).more,
         onPressed: open,
         icon: const BarItemGlyph(child: GlyphIcon(AppGlyphs.more)),
       ),
-      popupBuilder: (_) => CommonPopupMenu(items: items),
+      popupBuilder: (_) => PopupMenu(items: items),
     );
   }
 }
@@ -2019,11 +2016,11 @@ class BaseScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(body: body, title: title);
+    return Scaffold(body: body, title: title);
   }
 }
 
 extension ScaffoldContextExtension on BuildContext {
-  CommonScaffoldState? get commonScaffoldState =>
-      findAncestorStateOfType<CommonScaffoldState>();
+  ScaffoldState? get commonScaffoldState =>
+      findAncestorStateOfType<ScaffoldState>();
 }

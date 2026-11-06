@@ -637,7 +637,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     return FormRow(
       title: title,
       onPressed: onChanged == null ? null : () => onChanged(!value),
-      trailing: CommonSwitch(value: value, onChanged: onChanged),
+      trailing: Switch(value: value, onChanged: onChanged),
     );
   }
 
@@ -787,7 +787,7 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
       isDirty: () =>
           !_saving && !const ListEquality().equals(_origin, _snapshot),
       save: _submit,
-      child: CommonScaffold(
+      child: Scaffold(
         title: widget.rule == null ? l10n.addRule : l10n.editRule,
         iconActions: [
           if (_failedCandidate != null && !_saving)

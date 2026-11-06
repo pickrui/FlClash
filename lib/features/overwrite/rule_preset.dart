@@ -146,7 +146,7 @@ class _RulePresetSheetState extends State<RulePresetSheet> {
       isDirty: () => _selected.isNotEmpty,
       save: _submit,
       isBusy: () => _saving || _submitted,
-      child: CommonScaffold(
+      child: Scaffold(
         title: l10n.quickActions,
         confirmationAction: _selected.isEmpty
             ? null

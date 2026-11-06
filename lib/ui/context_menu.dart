@@ -25,7 +25,7 @@ const _touchDevices = {
 /// the menu clear of the row, which a finger or the focus highlight would
 /// otherwise leave covered.
 class ContextMenuRegion extends StatefulWidget {
-  final List<CommonPopupMenuItem>? menuItems;
+  final List<PopupMenuItem>? menuItems;
   final Widget child;
 
   const ContextMenuRegion({super.key, this.menuItems, required this.child});
@@ -37,7 +37,7 @@ class ContextMenuRegion extends StatefulWidget {
 class _ContextMenuRegionState extends State<ContextMenuRegion> {
   Timer? _holdTimer;
   LogicalKeyboardKey? _heldKey;
-  CommonPopupRoute<void>? _menu;
+  AnchoredPopupRoute<void>? _menu;
 
   bool get _enabled {
     final items = widget.menuItems;
@@ -108,13 +108,13 @@ class _ContextMenuRegionState extends State<ContextMenuRegion> {
       box.getTransformTo(navigatorBox),
       Offset.zero & box.size,
     );
-    final menu = _menu = CommonPopupRoute<void>(
+    final menu = _menu = AnchoredPopupRoute<void>(
       barrierLabel: UiLocalizations.of(context).close,
       placement: PopupPlacement.belowPoint,
       elevated: ElevatedSurfaceTheme.isIn(context),
       anchorOf: () => point & Size.zero,
       avoid: avoid ? rowRect : null,
-      builder: (_) => CommonPopupMenu(items: items),
+      builder: (_) => PopupMenu(items: items),
     );
     unawaited(
       navigator.push(menu).whenComplete(() {

@@ -15,7 +15,8 @@ import 'package:fl_clash/views/profiles/edit.dart';
 import 'package:fl_clash/widgets/error_status.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/list.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField, IconButton;
+import 'package:material_ui/material_ui.dart'
+    hide IconButton, Switch, TextFormField;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
@@ -110,7 +111,7 @@ void main() {
         expect(reads, hasLength(1));
         expect(_saveButton(tester).onPressed, isNull);
         expect(find.byType(ActivityIndicator), findsOneWidget);
-        expect(find.byType(CommonSwitch), findsNothing);
+        expect(find.byType(Switch), findsNothing);
         if (failFirst) {
           reads.single.completeError(StateError('fixture storage unavailable'));
           await tester.pumpAndSettle();
@@ -129,7 +130,7 @@ void main() {
         expect(_saveButton(tester).onPressed, isNotNull);
         expect(
           tester
-              .widgetList<CommonSwitch>(find.byType(CommonSwitch))
+              .widgetList<Switch>(find.byType(Switch))
               .every((toggle) => toggle.value),
           isTrue,
         );

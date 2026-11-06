@@ -369,7 +369,7 @@ class _ProfileProxyChainsViewState extends State<ProfileProxyChainsView> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.proxyChains,
       body: CustomScrollView(
         slivers: [
@@ -720,7 +720,7 @@ class _ProfileProxyChainsContentState
             info: Info(label: appLocalizations.proxyChains),
             actions: [
               if (selectedProxyChains.isNotEmpty) ...[
-                CommonMinIconButtonTheme(
+                MinIconButtonTheme(
                   child: IconButton(
                     tooltip: context.appLocalizations.delete,
                     onPressed: _handleDeleteProxyChains,
@@ -729,7 +729,7 @@ class _ProfileProxyChainsContentState
                 ),
                 const SizedBox(width: 8),
               ],
-              CommonMinFilledButtonTheme(
+              MinFilledButtonTheme(
                 child: selectedProxyChains.isNotEmpty
                     ? FilledButton(
                         onPressed: _handleSelectAllProxyChains,
@@ -799,7 +799,7 @@ class _ProfileProxyChainsContentState
     if (!widget.handlePop) {
       return child;
     }
-    return CommonPopScope(
+    return PopGuard(
       onPop: (_) {
         if (selectedProxyChains.isNotEmpty) {
           ref.read(selectedItemsProvider(_proxyChainKey).notifier).value = {};
@@ -1086,7 +1086,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CommonCard(
+          Card(
             padding: EdgeInsets.zero,
             radius: 18,
             child: ListRow(
@@ -1162,7 +1162,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     final isWarning = _proxies.length == 1;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: CommonCard(
+      child: Card(
         radius: 18,
         child: ListRow(
           minHeight: 64,
@@ -1239,7 +1239,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       isDirty: () => !const ListEquality().equals(_origin, _snapshot),
       save: _handleSubmit,
       isBusy: () => _saving,
-      child: CommonScaffold(
+      child: Scaffold(
         title: appLocalizations.proxyChains,
         confirmationAction: IconButtonData(
           glyph: AppGlyphs.check,
@@ -1259,7 +1259,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   child: Column(
                     children: [
-                      CommonCard(
+                      Card(
                         padding: EdgeInsets.zero,
                         radius: 18,
                         child: ListRow(
@@ -1290,7 +1290,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                 child: InfoHeader(
                   info: Info(label: appLocalizations.proxyChainSelectedNodes),
                   actions: [
-                    CommonMinFilledButtonTheme(
+                    MinFilledButtonTheme(
                       child: FilledButton.icon(
                         onPressed: _handleAddProfileProxy,
                         icon: const GlyphIcon(AppGlyphs.link, fill: 1),
@@ -1299,7 +1299,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                     ),
                     if (_proxies.isNotEmpty) const SizedBox(width: 8),
                     if (_proxies.isNotEmpty)
-                      CommonMinIconButtonTheme(
+                      MinIconButtonTheme(
                         child: IconButton(
                           tooltip: appLocalizations.clearProxyChain,
                           onPressed: _handleClear,
@@ -1315,7 +1315,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: CommonCard(
+                    child: Card(
                       radius: 18,
                       child: ListRow(
                         minHeight: 64,
@@ -1365,7 +1365,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: CommonCard(
+                    child: Card(
                       radius: 18,
                       child: ListRow(
                         minHeight: 64,

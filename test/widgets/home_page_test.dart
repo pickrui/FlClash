@@ -17,7 +17,8 @@ import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide FilledButton;
+import 'package:material_ui/material_ui.dart' hide FilledButton, Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -49,7 +50,7 @@ class _PageOpener extends StatelessWidget {
         onPressed: () async => onClosed(
           await BaseNavigator.push<String>(
             context,
-            const Scaffold(body: Center(child: Text('Sub page'))),
+            const material.Scaffold(body: Center(child: Text('Sub page'))),
           ),
         ),
         child: const Text('Open page'),
@@ -244,7 +245,7 @@ void main() {
               for (final label in [PageLabel.dashboard, PageLabel.tools])
                 NavigationItem(
                   label: label,
-                  builder: (_) => CommonScaffold(
+                  builder: (_) => Scaffold(
                     title: label.name,
                     body: Builder(
                       builder: (context) {
@@ -323,7 +324,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       ModalRoute.of(tester.element(find.text('Sub page'))),
-      isA<CommonDesktopRoute<String>>(),
+      isA<FadePageRoute<String>>(),
     );
 
     tester.view.physicalSize = const Size(500, 800);
@@ -331,7 +332,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final reopened = tester.element(find.text('Sub page'));
-    expect(ModalRoute.of(reopened), isA<CommonRoute<String>>());
+    expect(ModalRoute.of(reopened), isA<CardPageRoute<String>>());
     expect(results, isEmpty);
 
     Navigator.of(reopened).pop('done');

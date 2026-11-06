@@ -17,7 +17,9 @@ import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
 import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/ui/scaffold.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide Scaffold, TextButton, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
@@ -254,7 +256,7 @@ void main() {
       await tester.pump();
 
       final saving = tester
-          .widget<CommonScaffold>(find.byType(CommonScaffold).last)
+          .widget<Scaffold>(find.byType(Scaffold).last)
           .confirmationAction!;
       expect(saving.isLoading, isTrue);
       expect(saving.onPressed, isNull);
@@ -689,7 +691,7 @@ void main() {
     unawaited(
       navigator.push<ProxyProviderOptions>(
         MaterialPageRoute(
-          builder: (_) => const Scaffold(body: Text('Covering page')),
+          builder: (_) => const material.Scaffold(body: Text('Covering page')),
         ),
       ),
     );
@@ -859,7 +861,7 @@ class _TestApp extends StatelessWidget {
       builder: (context, child) {
         return wrapAppScopes(context, child!);
       },
-      home: Scaffold(body: child),
+      home: material.Scaffold(body: child),
     );
   }
 }

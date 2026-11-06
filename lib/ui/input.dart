@@ -15,7 +15,7 @@ import 'package:prism_ui/text_field.dart' show TextFormField, InputDecoration;
 export 'package:prism_ui/input.dart' show FilledInputTheme;
 export 'package:prism_ui/input_border.dart' show NoInputBorder;
 
-typedef CommonCheckBox = prism.Checkbox;
+typedef Checkbox = prism.Checkbox;
 
 /// Single-line while hidden: Flutter cannot obscure more than one line.
 class SecretTextFormField extends StatefulWidget {
@@ -180,7 +180,7 @@ class _InputDialogState extends State<InputDialog> {
       suffixText: suffixText,
       hintText: widget.hintText ?? widget.labelText,
     );
-    return CommonDialog(
+    return AlertDialog(
       title: title,
       hasFields: true,
       actions: [

@@ -607,7 +607,7 @@ class OverrideView<K extends Enum, M> extends ConsumerWidget {
     );
     final addEntry = target.addEntry(appLocalizations);
     void handleAdd() => showOverrideAddSheet(context, ref, spec);
-    return CommonScaffold(
+    return Scaffold(
       title: spec.title(appLocalizations),
       iconActions: [
         if (!isEmpty)

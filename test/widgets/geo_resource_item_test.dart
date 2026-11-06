@@ -20,7 +20,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/input.dart';
 import 'package:fl_clash/ui/switch.dart';
 import 'package:fl_clash/views/resources.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField;
+import 'package:material_ui/material_ui.dart' hide Switch, TextFormField;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -369,7 +369,7 @@ void main() {
     expect(container.read(patchClashConfigProvider).geoUpdateInterval, 6);
     expect(find.text('6 ${l10n.hours}'), findsOneWidget);
 
-    await tester.tap(find.byType(CommonSwitch));
+    await tester.tap(find.byType(Switch));
     await settle(tester);
     expect(autoUpdate(), isFalse);
     expect(interval, findsNothing);

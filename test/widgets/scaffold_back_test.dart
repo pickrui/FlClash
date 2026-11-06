@@ -10,7 +10,7 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/logs.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextField;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +28,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: CommonPopScope(
+        home: PopGuard(
           onPop: (_) {
             rootBackCount++;
             return false;
@@ -90,7 +90,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: CommonPopScope(
+          home: PopGuard(
             onPop: (_) {
               rootBackCount++;
               return false;
@@ -195,12 +195,12 @@ void main() {
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,
-          home: CommonPopScope(
+          home: PopGuard(
             onPop: (_) {
               rootBackCount++;
               return false;
             },
-            child: CommonScaffold(
+            child: Scaffold(
               title: 'Logs',
               searchState: AppBarSearchState(onSearch: (_) {}),
               body: const SizedBox(),

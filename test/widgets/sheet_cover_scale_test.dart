@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/scaffold.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,7 +20,7 @@ const _stackedWidth = 400 * stackedSheetScale;
 const _tallest = SheetProps(detents: [0.9]);
 
 Widget _page(String name, int rows, {VoidCallback? onNext}) {
-  return CommonScaffold(
+  return Scaffold(
     key: ValueKey(name),
     title: 'Page $name',
     body: ListView(

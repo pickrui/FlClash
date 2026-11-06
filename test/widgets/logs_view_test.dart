@@ -14,7 +14,7 @@ import 'package:fl_clash/ui/scroll.dart';
 import 'package:fl_clash/views/logs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField;
+import 'package:material_ui/material_ui.dart' hide Chip, TextField;
 import 'package:prism_ui/text_field.dart' show TextField;
 
 import '../helpers/test_app.dart';
@@ -57,10 +57,10 @@ void main() {
           .map((row) => row.log.payload)
           .toList();
       expect(shown(), hasLength(3));
-      await tester.tap(find.widgetWithText(CommonChip, 'warning'));
+      await tester.tap(find.widgetWithText(Chip, 'warning'));
       await tester.pumpAndSettle();
       expect(shown(), ['alpha warning']);
-      await tester.tap(find.widgetWithText(CommonChip, 'error'));
+      await tester.tap(find.widgetWithText(Chip, 'error'));
       await tester.pumpAndSettle();
       expect(shown(), containsAll(['alpha warning', 'beta failure']));
       expect(shown(), hasLength(2));

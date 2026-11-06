@@ -15,7 +15,10 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/cloud/node_filter_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, IconButton, TextButton, Theme;
+    hide AlertDialog, IconButton, Scaffold, TextButton, TextField, Theme;
+import 'package:material_ui/material_ui.dart'
+    as material
+    show AlertDialog, Scaffold;
 import 'package:prism_ui/theme_data.dart' show Theme;
 import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
@@ -173,7 +176,7 @@ Future<_Route> _pumpEditor(
         cloudAccountProvider.overrideWith(() => account),
       ],
       child: Builder(
-        builder: (context) => Scaffold(
+        builder: (context) => material.Scaffold(
           body: Center(
             child: TextButton(
               onPressed: () async {
@@ -458,7 +461,8 @@ void main() {
       unawaited(
         showDialog<void>(
           context: context,
-          builder: (_) => const AlertDialog(content: Text('Newer dialog')),
+          builder: (_) =>
+              const material.AlertDialog(content: Text('Newer dialog')),
         ),
       );
       await tester.pump();

@@ -12,7 +12,7 @@ import 'package:fl_clash/ui/liquid_glass.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:prism_ui/app.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, ThemeData, ColorScheme;
+    hide Card, ColorScheme, IconButton, ThemeData;
 import 'package:prism_ui/theme_data.dart' show ThemeData, ColorScheme;
 import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:prism_ui/press_surface.dart';
@@ -47,13 +47,13 @@ void main() {
           theme: theme,
           home: Scaffold(
             body: Center(
-              child: CommonCard(
+              child: Card(
                 key: outer,
                 onPressed: () {},
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CommonCard(
+                    Card(
                       key: inner,
                       onPressed: () {},
                       child: const SizedBox(width: 40, height: 40),

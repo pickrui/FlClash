@@ -12,7 +12,8 @@ import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide PopupMenuItem, Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';
@@ -38,7 +39,7 @@ class _HarnessState extends State<_Harness> {
       index: index,
       child: ContextMenuRegion(
         menuItems: [
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: AppGlyphs.delete,
             label: 'Delete $item',
             onPressed: () => widget.pressed.add('delete $item'),
@@ -57,7 +58,7 @@ class _HarnessState extends State<_Harness> {
   Widget build(BuildContext context) {
     return SortModeScope(
       sorting: widget.sorting,
-      child: Scaffold(
+      child: material.Scaffold(
         body: ReorderableListView.builder(
           buildDefaultDragHandles: false,
           itemCount: _items.length,
@@ -100,12 +101,12 @@ Future<ValueNotifier<bool>> _pumpSyncing(WidgetTester tester) async {
     ValueListenableBuilder(
       valueListenable: syncing,
       builder: (_, value, _) => TestApp(
-        child: Scaffold(
+        child: material.Scaffold(
           body: ContextMenuRegion(
             menuItems: value
                 ? null
                 : [
-                    CommonPopupMenuItem(
+                    PopupMenuItem(
                       glyph: AppGlyphs.sync,
                       label: 'Sync',
                       onPressed: () => syncing.value = true,
@@ -261,7 +262,7 @@ void main() {
       addTearDown(sorting.dispose);
       await tester.pumpWidget(
         TestApp(
-          child: Scaffold(
+          child: material.Scaffold(
             body: ValueListenableBuilder(
               valueListenable: sorting,
               builder: (_, value, _) => SortModeScope(

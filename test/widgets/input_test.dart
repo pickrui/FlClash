@@ -12,7 +12,9 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/ui/alert_scope.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField, FilledButton;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, FilledButton, Scaffold, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 
@@ -101,7 +103,7 @@ void main() {
           viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
         ],
         child: _TestApp(
-          child: Scaffold(
+          child: material.Scaffold(
             body: ListItem.input(
               title: const Text('Port'),
               dialogTitle: 'Port',
@@ -136,7 +138,7 @@ void main() {
           viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
         ],
         child: _TestApp(
-          child: Scaffold(
+          child: material.Scaffold(
             body: ListItem<String?>.options(
               title: const Text('Language'),
               options: const [null, 'ja'],
@@ -280,7 +282,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final scrollables = find.descendant(
-      of: find.byType(CommonDialog),
+      of: find.byType(AlertDialog),
       matching: find.byType(Scrollable),
     );
     expect(scrollables, findsWidgets);

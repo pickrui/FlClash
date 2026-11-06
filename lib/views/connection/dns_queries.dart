@@ -122,7 +122,7 @@ void _showDnsQueryDetail(BuildContext context, DnsQuery query) {
   showInSheet<void>(
     context,
     builder: (_) {
-      return CommonScaffold(
+      return Scaffold(
         body: DnsQueryDetailView(query: query),
         title: context.appLocalizations.details(
           context.appLocalizations.dnsQueries,
@@ -466,7 +466,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
         final queries = _filters.apply(searched);
         return RecordFilterScope(
           onFilter: _filters.add,
-          child: CommonScaffold(
+          child: Scaffold(
             title: appLocalizations.dnsQueries,
             searchState: AppBarSearchState(
               onSearch: (value) => setState(() => _search = value),

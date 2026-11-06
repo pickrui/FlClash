@@ -40,7 +40,7 @@ class CustomOverwriteDraftView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(
+    return Scaffold(
       title: context.appLocalizations.editCustomRouting,
       body: CustomScrollView(
         slivers: [
@@ -553,13 +553,13 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
     );
   }
 
-  List<CommonPopupMenuItem> _menuItems(Rule rule) => [
-    CommonPopupMenuItem(
+  List<PopupMenuItem> _menuItems(Rule rule) => [
+    PopupMenuItem(
       glyph: AppGlyphs.copy,
       label: appLocalizations.copy,
       onPressed: () => _duplicate(rule),
     ),
-    CommonPopupMenuItem(
+    PopupMenuItem(
       glyph: AppGlyphs.delete,
       label: appLocalizations.delete,
       danger: true,
@@ -628,7 +628,7 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
           : KeyedSubtree(key: ObjectKey(rule), child: row);
     }
 
-    return CommonScaffold(
+    return Scaffold(
       title: appLocalizations.rule,
       canSort: !selecting && !_deleting && query.isEmpty && rules.length > 1,
       searchState: AppBarSearchState(
@@ -652,7 +652,7 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
       ],
       actions: [
         if (!selecting)
-          CommonPopupBox(
+          PopupAnchor(
             targetBuilder: (open) => AppBarActionButton(
               data: IconButtonData(
                 glyph: AppGlyphs.addCircle,
@@ -660,19 +660,19 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
                 onPressed: open,
               ),
             ),
-            popupBuilder: (_) => CommonPopupMenu(
+            popupBuilder: (_) => PopupMenu(
               items: [
-                CommonPopupMenuItem(
+                PopupMenuItem(
                   glyph: AppGlyphs.add,
                   label: appLocalizations.add,
                   onPressed: () => _edit(context, ref),
                 ),
-                CommonPopupMenuItem(
+                PopupMenuItem(
                   glyph: AppGlyphs.rulePresets,
                   label: appLocalizations.quickActions,
                   onPressed: () => _addPresets(context, ref),
                 ),
-                CommonPopupMenuItem(
+                PopupMenuItem(
                   glyph: AppGlyphs.compose,
                   label: appLocalizations.quickEdit,
                   onPressed: _quickEdit,

@@ -102,7 +102,7 @@ class _NetworkDiagnosticProxyGuideState
     final heading = AppTextStyle.subheadline
         .of(context, emphasized: true)
         .copyWith(color: colorScheme.onSurface);
-    return CommonDialog(
+    return AlertDialog(
       title: l.diagProxyGuide,
       maxWidth: 580,
       actions: [

@@ -45,7 +45,7 @@ class AccessView extends ConsumerStatefulWidget {
 
 class _AccessViewState extends ConsumerState<AccessView>
     with WidgetsBindingObserver, RouteSettledMixin<AccessView> {
-  final GlobalKey<CommonScaffoldState> _scaffoldKey = GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   List<String>? _pinedList;
   bool _isInit = false;
   bool _loadReady = false;
@@ -273,32 +273,32 @@ class _AccessViewState extends ConsumerState<AccessView>
     });
   }
 
-  List<CommonPopupMenuItem> _buildMenuItems(AccessControlProps accessControl) {
+  List<PopupMenuItem> _buildMenuItems(AccessControlProps accessControl) {
     String modeText(AccessControlMode mode) => switch (mode) {
       AccessControlMode.acceptSelected => appLocalizations.whitelistMode,
       AccessControlMode.rejectSelected => appLocalizations.blacklistMode,
     };
     return [
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.toggleOn,
         label: appLocalizations.turnOn,
         checked: accessControl.enable,
-        section: CommonPopupMenuSection(title: appLocalizations.accessControl),
+        section: PopupMenuSection(title: appLocalizations.accessControl),
         onPressed: () => _update((state) => state.copyWith(enable: true)),
       ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.toggle,
         label: appLocalizations.turnOff,
         checked: !accessControl.enable,
         onPressed: () => _update((state) => state.copyWith(enable: false)),
       ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.refresh,
         label: appLocalizations.refresh,
-        section: const CommonPopupMenuSection(),
+        section: const PopupMenuSection(),
         onPressed: _reloadPackages,
       ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.sliders,
         label: appLocalizations.settings,
         subtitle: modeText(accessControl.mode),
@@ -323,16 +323,16 @@ class _AccessViewState extends ConsumerState<AccessView>
             onSelected: (sort) =>
                 _update((state) => state.copyWith(sort: sort)),
           ),
-          CommonPopupMenuItem(
+          PopupMenuItem(
             label: appLocalizations.systemApp,
             checked: !accessControl.isFilterSystemApp,
-            section: CommonPopupMenuSection(title: appLocalizations.source),
+            section: PopupMenuSection(title: appLocalizations.source),
             onPressed: () => _update(
               (state) =>
                   state.copyWith(isFilterSystemApp: !state.isFilterSystemApp),
             ),
           ),
-          CommonPopupMenuItem(
+          PopupMenuItem(
             label: appLocalizations.noNetworkApp,
             checked: !accessControl.isFilterNonInternetApp,
             onPressed: () => _update(
@@ -343,21 +343,21 @@ class _AccessViewState extends ConsumerState<AccessView>
           ),
         ],
       ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.moreCircle,
         label: appLocalizations.action,
         subItems: [
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: AppGlyphs.sparkle,
             label: appLocalizations.intelligentSelected,
             onPressed: _intelligentSelected,
           ),
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: AppGlyphs.copy,
             label: appLocalizations.clipboardExport,
             onPressed: _exportToClipboard,
           ),
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: AppGlyphs.paste,
             label: appLocalizations.clipboardImport,
             onPressed: _importFromClipboard,
@@ -518,14 +518,14 @@ class _AccessViewState extends ConsumerState<AccessView>
             (state) => _withSortedList(state) != saved,
           ),
         );
-    return CommonPopScope(
+    return PopGuard(
       onPop: hasChanges
           ? (_) async {
               await _handleBack();
               return false;
             }
           : null,
-      child: CommonScaffold(
+      child: Scaffold(
         key: _scaffoldKey,
         isLoading: isLoading,
         searchState: AppBarSearchState(onSearch: _onSearch),
@@ -605,7 +605,7 @@ class _PackageListState extends ConsumerState<_PackageList>
     final selected = ref
         .watch(accessControlStateProvider.select((state) => state.currentList))
         .toSet();
-    return CommonScrollBar(
+    return Scrollbar(
       controller: _controller,
       child: PrismListView(
         controller: _controller,
@@ -750,7 +750,7 @@ class PackageListItem extends StatelessWidget {
   }
 }
 
-List<CommonPopupMenuItem> _optionsSection<T>({
+List<PopupMenuItem> _optionsSection<T>({
   required String title,
   required List<T> options,
   required T value,
@@ -759,11 +759,11 @@ List<CommonPopupMenuItem> _optionsSection<T>({
 }) {
   return [
     for (final option in options)
-      CommonPopupMenuItem(
+      PopupMenuItem(
         label: textOf(option),
         checked: option == value,
         section: option == options.first
-            ? CommonPopupMenuSection(title: title)
+            ? PopupMenuSection(title: title)
             : null,
         onPressed: () => onSelected(option),
       ),

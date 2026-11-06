@@ -13,7 +13,9 @@ import 'package:fl_clash/views/config/on_demand.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, FilledButton;
+import 'package:material_ui/material_ui.dart'
+    hide FilledButton, Scaffold, TextField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:wifi_ssid/wifi_ssid.dart';
@@ -34,7 +36,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        homeBuilder: (child) => Scaffold(body: child),
+        homeBuilder: (child) => material.Scaffold(body: child),
         child: BatteryOptimizationItem(
           readPermission: () async => allowed,
           openSettings: () async {
@@ -66,7 +68,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        homeBuilder: (child) => Scaffold(body: child),
+        homeBuilder: (child) => material.Scaffold(body: child),
         child: BatteryOptimizationItem(
           readPermission: () async => false,
           changes: changes.stream,
@@ -87,7 +89,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        homeBuilder: (child) => Scaffold(body: child),
+        homeBuilder: (child) => material.Scaffold(body: child),
         child: BatteryOptimizationItem(readPermission: () => pending.future),
       ),
     );
@@ -105,7 +107,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        homeBuilder: (child) => Scaffold(body: child),
+        homeBuilder: (child) => material.Scaffold(body: child),
         child: BatteryOptimizationItem(
           readPermission: () async {
             if (reads++ == 0) throw StateError('fixture');
@@ -132,7 +134,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         overrides: [isStartProvider.overrideWithValue(true)],
-        homeBuilder: (child) => Scaffold(body: child),
+        homeBuilder: (child) => material.Scaffold(body: child),
         child: BatteryOptimizationItem(readPermission: () async => false),
       ),
     );
@@ -154,7 +156,7 @@ void main() {
       await tester.pumpWidget(
         TestApp(
           wrapInProviderScope: true,
-          homeBuilder: (child) => Scaffold(body: child),
+          homeBuilder: (child) => material.Scaffold(body: child),
           child: SsidPermissionItem(
             isMacOS: false,
             checkPermission: () async => permission,
@@ -181,7 +183,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        homeBuilder: (child) => Scaffold(body: child),
+        homeBuilder: (child) => material.Scaffold(body: child),
         child: SsidPermissionItem(
           isMacOS: false,
           isWindows: true,
@@ -212,7 +214,7 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: TestApp(
-            homeBuilder: (child) => Scaffold(body: child),
+            homeBuilder: (child) => material.Scaffold(body: child),
             child: SsidPermissionItem(
               isMacOS: false,
               checkPermission: () async {

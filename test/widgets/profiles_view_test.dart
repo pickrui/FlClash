@@ -25,7 +25,8 @@ import 'package:fl_clash/ui/qr_code.dart';
 import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/views/profiles/custom_groups.dart';
 import 'package:fl_clash/ui/scaffold.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField, TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide Scaffold, TextButton, TextFormField;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -226,7 +227,7 @@ void main() {
     await tester.tap(find.byTooltip('Update'));
     await tester.pump();
     final updating = tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .widget<Scaffold>(find.byType(Scaffold))
         .iconActions
         .first;
     expect(updating.onPressed, isNull);
@@ -235,7 +236,7 @@ void main() {
     action.pending[1]!.complete(_first);
     await tester.pumpAndSettle();
     final idle = tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .widget<Scaffold>(find.byType(Scaffold))
         .iconActions
         .first;
     expect(idle.onPressed, isNotNull);
@@ -340,7 +341,7 @@ void main() {
     final action = _UpdatingProfileAction();
     await openUpdatingProfiles(tester, action, [_third]);
     final update = tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .widget<Scaffold>(find.byType(Scaffold))
         .iconActions
         .first;
     expect(update.onPressed, isNull);
@@ -601,7 +602,7 @@ void main() {
     final navigator = tester.state<NavigatorState>(
       find.byType(Navigator).first,
     );
-    final route = CommonRoute<void>(
+    final route = CardPageRoute<void>(
       builder: (_) => CustomProfileView(profileId: profile.id),
     );
     unawaited(navigator.push(route));

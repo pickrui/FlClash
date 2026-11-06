@@ -55,7 +55,7 @@ class _FailureDetails extends StatelessWidget {
       (labelsByMessage[failure.message] ??= []).add(failure.label);
     }
     final groups = labelsByMessage.entries.toList();
-    return CommonScaffold(
+    return Scaffold(
       title: context.appLocalizations.errorDetails,
       body: SelectionArea(
         child: PrismListView(

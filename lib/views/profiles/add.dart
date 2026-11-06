@@ -166,38 +166,38 @@ class _AddProfileMenuState extends ConsumerState<AddProfileMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonPopupBox(
+    return PopupAnchor(
       targetBuilder: widget.builder,
-      popupBuilder: (_) => CommonPopupMenu(
+      popupBuilder: (_) => PopupMenu(
         items: [
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: AppGlyphs.qrCode,
             label: appLocalizations.qrcode,
             onPressed: () => _toScan(parentContext),
           ),
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: AppGlyphs.importFile,
             label: appLocalizations.file,
             onPressed: parentContext.profileAction.addProfileFormFile,
           ),
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: AppGlyphs.cloudDownload,
             label: appLocalizations.link,
             onPressed: _toAdd,
           ),
           if (system.isTV)
-            CommonPopupMenuItem(
+            PopupMenuItem(
               glyph: AppGlyphs.devices,
               label: appLocalizations.sendFromPhone,
               onPressed: _toSendFromPhone,
             ),
-          CommonPopupMenuItem(
-            section: const CommonPopupMenuSection(),
+          PopupMenuItem(
+            section: const PopupMenuSection(),
             glyph: AppGlyphs.customize,
             label: appLocalizations.customProfile,
             onPressed: _creating ? null : () => _toAddCustom(parentContext),
           ),
-          CommonPopupMenuItem(
+          PopupMenuItem(
             glyph: AppGlyphs.importFile,
             label: appLocalizations.importConfig,
             subItems: customImportMenuItems(
@@ -282,7 +282,7 @@ class _SendFromPhoneDialogState extends State<_SendFromPhoneDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonDialog(
+    return AlertDialog(
       title: context.appLocalizations.sendFromPhone,
       actions: [
         TextButton(

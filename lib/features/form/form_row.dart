@@ -25,7 +25,7 @@ class InfoMessageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonMinIconButtonTheme(
+    return MinIconButtonTheme(
       child: IconButton(
         tooltip: context.appLocalizations.tip,
         onPressed: () {
@@ -57,7 +57,7 @@ class EntryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    return CommonMinIconButtonTheme(
+    return MinIconButtonTheme(
       child: ElasticButton(
         child: IconButton(
           tooltip: _add ? appLocalizations.add : appLocalizations.remove,
@@ -290,7 +290,7 @@ class _FormRowSecretTextFieldState extends State<FormRowSecretTextField> {
             onFieldSubmitted: widget.onFieldSubmitted,
           ),
         ),
-        CommonMinIconButtonTheme(
+        MinIconButtonTheme(
           child: IconButton(
             tooltip: _obscure
                 ? appLocalizations.showPassword

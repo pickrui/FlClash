@@ -235,7 +235,7 @@ class _NestedPagedSheetState extends State<NestedPagedSheet> {
         ],
       ),
     );
-    return CommonPopScope(
+    return PopGuard(
       onPop: (_) async {
         await _handlePop();
         return false;

@@ -9,7 +9,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide Theme;
+import 'package:material_ui/material_ui.dart' hide Scaffold, Theme;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:prism_ui/theme_data.dart' show Theme;
 
 import '../helpers/test_app.dart';
@@ -24,7 +25,7 @@ void main() {
   }) async {
     await tester.pumpWidget(
       TestApp(
-        child: Scaffold(
+        child: material.Scaffold(
           body: Padding(
             padding: EdgeInsets.only(top: top),
             child: generateSection(
@@ -108,7 +109,7 @@ void main() {
       TestApp(
         child: RemoteFocusAdapter(
           enabled: false,
-          child: Scaffold(
+          child: material.Scaffold(
             body: generateSection(
               items: [
                 for (var index = 0; index < 3; index++)
@@ -203,7 +204,7 @@ void main() {
     addTearDown(controller.dispose);
     await tester.pumpWidget(
       TestApp(
-        child: Scaffold(
+        child: material.Scaffold(
           body: ListView(
             controller: controller,
             children: [
@@ -259,7 +260,7 @@ void main() {
     late StateSetter rebuild;
     await tester.pumpWidget(
       TestApp(
-        child: Scaffold(
+        child: material.Scaffold(
           body: StatefulBuilder(
             builder: (context, setState) {
               rebuild = setState;

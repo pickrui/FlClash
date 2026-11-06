@@ -11,7 +11,8 @@ import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/ui/side_sheet.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import '../helpers/test_app.dart';
@@ -19,7 +20,7 @@ import '../helpers/test_app.dart';
 typedef _Opener = void Function(BuildContext context);
 
 Widget _page() {
-  return CommonScaffold(
+  return Scaffold(
     title: 'title',
     body: ListView(
       children: [for (var i = 0; i < 3; i++) ListItem(title: Text('row $i'))],
@@ -62,7 +63,7 @@ Future<void> _open(
             child: Navigator(
               onGenerateInitialRoutes: (_, _) => [
                 MaterialPageRoute<void>(
-                  builder: (context) => Scaffold(
+                  builder: (context) => material.Scaffold(
                     body: TextButton(
                       onPressed: () => opener(context),
                       child: const Text('open'),
@@ -138,7 +139,7 @@ void main() {
         child: Builder(
           builder: (context) {
             hostContext = context;
-            return const Scaffold(body: SizedBox.expand());
+            return const material.Scaffold(body: SizedBox.expand());
           },
         ),
       ),
@@ -146,7 +147,7 @@ void main() {
 
     showModalSideSheet<void>(
       context: hostContext,
-      builder: (_) => const Scaffold(body: Text('sheet')),
+      builder: (_) => const material.Scaffold(body: Text('sheet')),
     );
     await tester.pumpAndSettle();
     expect(find.text('sheet'), findsOneWidget);

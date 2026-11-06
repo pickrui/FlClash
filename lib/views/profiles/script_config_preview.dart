@@ -31,7 +31,7 @@ class ScriptConfigPreviewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
-    return CommonScaffold(
+    return Scaffold(
       title: l10n.scriptChanges,
       actions: [
         IconButton(

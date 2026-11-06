@@ -16,7 +16,8 @@ import 'package:fl_clash/ui/scaffold.dart';
 import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, TextFormField, TextButton;
+    hide Scaffold, Switch, TextButton, TextField, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextFormField;
 import 'package:prism_ui/text_field.dart' as prism;
@@ -46,7 +47,7 @@ void main() {
             locale: locale,
             textScaler: TextScaler.linear(textScale),
             overrides: [viewSizeProvider.overrideWithBuild((_, _) => size)],
-            child: Scaffold(
+            child: material.Scaffold(
               body: Builder(
                 builder: (context) => TextButton(
                   onPressed: () async {
@@ -108,7 +109,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        child: Scaffold(
+        child: material.Scaffold(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () async {
@@ -159,7 +160,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        child: Scaffold(
+        child: material.Scaffold(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () async {
@@ -201,7 +202,7 @@ void main() {
         overrides: [
           viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 900)),
         ],
-        child: Scaffold(
+        child: material.Scaffold(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () async {
@@ -258,7 +259,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        child: Scaffold(
+        child: material.Scaffold(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () async {
@@ -279,17 +280,17 @@ void main() {
     final source = find.widgetWithText(FormRow, l.sourceIp);
     final noResolve = find.descendant(
       of: find.widgetWithText(FormRow, l.noResolve),
-      matching: find.byType(CommonSwitch),
+      matching: find.byType(Switch),
     );
     await tester.ensureVisible(source);
     await tester.pumpAndSettle();
     await tester.tap(source);
     await tester.pumpAndSettle();
-    final toggle = tester.widget<CommonSwitch>(noResolve);
+    final toggle = tester.widget<Switch>(noResolve);
     expect(toggle.value, isTrue);
     expect(toggle.onChanged, isNull);
     final save = tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .widget<Scaffold>(find.byType(Scaffold))
         .confirmationAction!
         .onPressed!;
     save();
@@ -311,7 +312,7 @@ void main() {
         overrides: [
           viewSizeProvider.overrideWithBuild((_, _) => const Size(1000, 850)),
         ],
-        child: Scaffold(
+        child: material.Scaffold(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () async {

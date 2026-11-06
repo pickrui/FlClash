@@ -157,7 +157,7 @@ class _Modules extends MitmModules {
 }
 
 Finder _inMenu(Finder finder) =>
-    find.descendant(of: find.byType(CommonPopupMenu), matching: finder);
+    find.descendant(of: find.byType(PopupMenu), matching: finder);
 
 Future<void> _openRequest(WidgetTester tester) async {
   await _openTab(tester, app_strings.appLocalizations.httpRequests);

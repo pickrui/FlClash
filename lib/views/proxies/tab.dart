@@ -281,7 +281,7 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
         illustration: NullStatusIllustration.proxies,
       );
     }
-    return CommonScrollBar(
+    return Scrollbar(
       controller: _controller,
       thumbVisibility: true,
       child: GridView.builder(

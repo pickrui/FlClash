@@ -347,7 +347,7 @@ class _ProfileProviderOptionsDialogState
       title: title,
       leading: leading,
       onPressed: () => onChanged(!value),
-      trailing: CommonSwitch(value: value, onChanged: onChanged),
+      trailing: Switch(value: value, onChanged: onChanged),
     );
   }
 
@@ -436,7 +436,7 @@ class _ProfileProviderOptionsDialogState
     return OverwriteExitGuard(
       isDirty: () => !_saving && _options != _origin,
       save: _submit,
-      child: CommonScaffold(
+      child: Scaffold(
         title: widget.label,
         confirmationAction: IconButtonData(
           glyph: AppGlyphs.check,

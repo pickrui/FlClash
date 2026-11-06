@@ -23,7 +23,7 @@ import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/views/profiles/custom_groups.dart';
 import 'package:fl_clash/views/profiles/custom_overwrite.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, TextFormField, TextButton;
+    hide Checkbox, TextButton, TextField, TextFormField;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
 import 'package:flutter_test/flutter_test.dart';
@@ -145,7 +145,7 @@ Future<_Profiles> _open(
 }
 
 Future<void> _selectBoth(WidgetTester tester) async {
-  await tester.tap(find.byType(CommonCheckBox).first);
+  await tester.tap(find.byType(Checkbox).first);
   await tester.pumpAndSettle();
   await tester.tap(find.byTooltip(AppLocalizations.current.selectAll));
   await tester.pumpAndSettle();

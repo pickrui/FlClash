@@ -503,7 +503,7 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
         return KeyEventResult.handled;
       },
       autofocus: true,
-      child: CommonDialog(
+      child: AlertDialog(
         title: widget.hotKeyAction.action.label,
         hasFields: true,
         actions: [

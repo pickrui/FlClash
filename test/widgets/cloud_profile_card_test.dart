@@ -6,7 +6,7 @@
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/cloud/cloud_profile_card.dart';
 import 'package:fl_clash/ui/switch.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Switch;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -66,7 +66,7 @@ void main() {
     addTearDown(profile.dispose);
     await _pumpCard(tester, profile);
 
-    expect(find.byType(CommonSwitch), findsNothing);
+    expect(find.byType(Switch), findsNothing);
     expect(find.text('Fixture'), findsOneWidget);
   });
 

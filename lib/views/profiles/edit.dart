@@ -425,10 +425,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             FormRow(
               title: appLocalizations.autoUpdate,
               onPressed: () => _setAutoUpdate(!_autoUpdate),
-              trailing: CommonSwitch(
-                value: _autoUpdate,
-                onChanged: _setAutoUpdate,
-              ),
+              trailing: Switch(value: _autoUpdate, onChanged: _setAutoUpdate),
             ),
             if (_autoUpdate)
               _AutoUpdateIntervalField(
@@ -469,9 +466,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     return FocusTraversalGroup(
       policy: PageTraversalPolicy(),
       child: PageFocusScope(
-        child: CommonPopScope(
+        child: PopGuard(
           onPop: (_) => _handleBack(),
-          child: CommonScaffold(
+          child: Scaffold(
             title: appLocalizations.editProfile,
             confirmationAction: IconButtonData(
               glyph: AppGlyphs.check,
@@ -646,16 +643,16 @@ class _ProfileFileItem extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onUpload;
 
-  List<CommonPopupMenuItem> _menuItems(BuildContext context) {
+  List<PopupMenuItem> _menuItems(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return [
       if (fileInfo != null)
-        CommonPopupMenuItem(
+        PopupMenuItem(
           glyph: AppGlyphs.edit,
           label: appLocalizations.edit,
           onPressed: onEdit,
         ),
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.upload,
         label: appLocalizations.upload,
         onPressed: onUpload,

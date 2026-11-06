@@ -9,7 +9,7 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/config/rules.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
 
 import '../helpers/test_app.dart';
 
@@ -34,7 +34,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(RuleItem), findsNWidgets(3));
     tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .widget<Scaffold>(find.byType(Scaffold))
         .searchState!
         .onSearch('DIRECT example');
     await tester.pumpAndSettle();
@@ -46,10 +46,7 @@ void main() {
     await tester.tap(find.byTooltip('Select all'));
     await tester.pumpAndSettle();
     expect(tester.widget<RuleItem>(find.byType(RuleItem)).isSelected, isFalse);
-    tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
-        .searchState!
-        .onSearch('');
+    tester.widget<Scaffold>(find.byType(Scaffold)).searchState!.onSearch('');
     await tester.pumpAndSettle();
     expect(find.byType(RuleItem), findsNWidgets(3));
     expect(find.byType(ReorderableDelayedDragStartListener), findsNWidgets(3));
@@ -71,7 +68,7 @@ void main() {
     tester.widget<RuleItem>(find.byType(RuleItem).last).onSelected();
     await tester.pumpAndSettle();
     tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .widget<Scaffold>(find.byType(Scaffold))
         .searchState!
         .onSearch('example');
     await tester.pumpAndSettle();

@@ -15,7 +15,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import '../helpers/test_app.dart';
@@ -60,7 +61,7 @@ void main() {
               return wrapAppScopes(context, child!);
             },
             home: Builder(
-              builder: (context) => Scaffold(
+              builder: (context) => material.Scaffold(
                 body: TextButton(
                   child: const Text('Open'),
                   onPressed: () async {
@@ -127,7 +128,7 @@ void main() {
       unawaited(
         navigator.push(
           MaterialPageRoute<void>(
-            builder: (_) => const Scaffold(body: Text('Covered')),
+            builder: (_) => const material.Scaffold(body: Text('Covered')),
           ),
         ),
       );
@@ -139,10 +140,10 @@ void main() {
       navigator.pop();
       await tester.pumpAndSettle();
       final submit = tester
-          .widget<CommonScaffold>(
+          .widget<Scaffold>(
             find.descendant(
               of: find.byType(RulePresetSheet),
-              matching: find.byType(CommonScaffold),
+              matching: find.byType(Scaffold),
             ),
           )
           .confirmationAction!

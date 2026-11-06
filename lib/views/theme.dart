@@ -374,12 +374,12 @@ class _ColorSwatches extends StatelessWidget {
                     menuItems: color == null
                         ? null
                         : [
-                            CommonPopupMenuItem(
+                            PopupMenuItem(
                               glyph: AppGlyphs.edit,
                               label: appLocalizations.edit,
                               onPressed: () => onEdit(color),
                             ),
-                            CommonPopupMenuItem(
+                            PopupMenuItem(
                               danger: true,
                               glyph: AppGlyphs.delete,
                               label: appLocalizations.delete,
@@ -420,7 +420,7 @@ class _ColorSwatch extends StatelessWidget {
   final bool isSelected;
   final String label;
   final VoidCallback onPressed;
-  final List<CommonPopupMenuItem>? menuItems;
+  final List<PopupMenuItem>? menuItems;
 
   @override
   Widget build(BuildContext context) {

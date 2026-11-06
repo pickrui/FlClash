@@ -403,7 +403,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView> {
       networkSettingProvider.select((state) => state.excludeSSIDs),
     );
     final selected = _selected.intersection(ssids.toSet());
-    return CommonScaffold(
+    return Scaffold(
       title: l.onDemand,
       body: CustomScrollView(
         slivers: [

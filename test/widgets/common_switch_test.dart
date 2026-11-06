@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter/gestures.dart' show kPressTimeout;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Card, Switch;
 
 import '../helpers/test_app.dart';
 
@@ -48,7 +48,7 @@ void main() {
             body: StatefulBuilder(
               builder: (context, setState) => ListView(
                 children: [
-                  CommonCard(
+                  Card(
                     statesController: rowStates,
                     onPressed: () {
                       rowTaps++;
@@ -60,7 +60,7 @@ void main() {
                       padding: const EdgeInsets.all(16),
                       child: Align(
                         alignment: Alignment.centerRight,
-                        child: CommonSwitch(
+                        child: Switch(
                           value: value,
                           onChanged: (next) => setState(() => value = next),
                         ),
@@ -77,7 +77,7 @@ void main() {
     );
   }
 
-  Finder switchFinder() => find.byType(CommonSwitch);
+  Finder switchFinder() => find.byType(Switch);
 
   // The track is drawn first, the thumb over it.
   Finder thumbFinder() => find
@@ -129,7 +129,7 @@ void main() {
       TestApp(
         child: Scaffold(
           body: StatefulBuilder(
-            builder: (context, setState) => CommonSwitch(
+            builder: (context, setState) => Switch(
               value: value,
               onChanged: (next) => setState(() => value = next),
             ),
@@ -149,7 +149,7 @@ void main() {
     await tester.pumpWidget(
       const TestApp(
         child: Scaffold(
-          body: Center(child: CommonSwitch(value: false, onChanged: null)),
+          body: Center(child: Switch(value: false, onChanged: null)),
         ),
       ),
     );

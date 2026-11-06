@@ -906,7 +906,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
       title: title,
       leading: leading,
       onPressed: () => onChanged(!value),
-      trailing: CommonSwitch(value: value, onChanged: onChanged),
+      trailing: Switch(value: value, onChanged: onChanged),
     );
   }
 
@@ -1199,16 +1199,16 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
                     appSettingProvider.select((value) => value.filters),
                   );
                   if (filters.isEmpty) return const SizedBox.shrink();
-                  return CommonPopupBox(
+                  return PopupAnchor(
                     targetBuilder: (open) => IconButton(
                       tooltip: appLocalizations.filters,
                       icon: const GlyphIcon(AppGlyphs.filter),
                       onPressed: open,
                     ),
-                    popupBuilder: (_) => CommonPopupMenu(
+                    popupBuilder: (_) => PopupMenu(
                       items: [
                         for (final filter in filters)
-                          CommonPopupMenuItem(
+                          PopupMenuItem(
                             label: filter.label,
                             checked: filter.isAppliedTo(controller.text),
                             onPressed: () {
@@ -1270,7 +1270,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
           !_saving &&
           !const DeepCollectionEquality().equals(_origin, _snapshot),
       save: _submit,
-      child: CommonScaffold(
+      child: Scaffold(
         title: widget.group == null
             ? appLocalizations.addProxyGroup
             : appLocalizations.editProxyGroup,
@@ -1513,12 +1513,12 @@ class _MemberPickerState extends State<_MemberPicker> {
       0,
       (count, category) => count + category.entries.length,
     );
-    return CommonPopScope(
+    return PopGuard(
       onPop: (_) {
         Navigator.of(context).pop(_selected);
         return false;
       },
-      child: CommonScaffold(
+      child: Scaffold(
         title: appLocalizations.addNodes,
         searchState: _query.isNotEmpty || total >= sheetSearchMinItemCount
             ? AppBarSearchState(

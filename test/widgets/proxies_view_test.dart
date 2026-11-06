@@ -34,7 +34,7 @@ import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, AppBar, ThemeData, TabBarView;
+    hide AppBar, Card, IconButton, TabBarView, ThemeData;
 import 'package:prism_ui/tab_view.dart' show TabBarView;
 import 'package:prism_ui/theme_data.dart' show ThemeData;
 import 'package:prism_ui/scaffold.dart' show AppBar;
@@ -327,7 +327,7 @@ void main() {
     await tester.pumpAndSettle();
     final l10n = AppLocalizations.current;
     Finder inMenu(Finder finder) =>
-        find.descendant(of: find.byType(CommonPopupMenu), matching: finder);
+        find.descendant(of: find.byType(PopupMenu), matching: finder);
 
     await tester.tap(find.byTooltip(l10n.more));
     await tester.pumpAndSettle();
@@ -353,7 +353,7 @@ void main() {
     final saved = container.read(proxiesStyleSettingProvider);
     expect(saved.delayTestConcurrency(isAndroid: false), 32);
     expect(saved.androidConcurrencyLimit, isNull);
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -481,7 +481,7 @@ void main() {
       } else {
         await tester.longPress(find.byType(ProxyCard));
         await tester.pumpAndSettle();
-        final menu = find.byType(CommonPopupMenu);
+        final menu = find.byType(PopupMenu);
         expect(
           find.descendant(of: menu, matching: find.byGlyph(AppGlyphs.check)),
           findsOneWidget,
@@ -1091,7 +1091,7 @@ void main() {
       find
           .descendant(
             of: find.byType(GroupTabs),
-            matching: find.byType(CommonCard),
+            matching: find.byType(Card),
             skipOffstage: false,
           )
           .evaluate()
@@ -1117,7 +1117,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Proxy group'));
     await tester.pumpAndSettle();
-    final menu = find.byType(CommonPopupMenu);
+    final menu = find.byType(PopupMenu);
     final bounds = tester.getRect(menu);
     expect(bounds.height, lessThan(1000 / 2));
     final current = tester.getCenter(
@@ -1481,11 +1481,11 @@ void main() {
 
 Finder _tabOf(String name) => find.ancestor(
   of: find.text(name, findRichText: true),
-  matching: find.byType(CommonCard),
+  matching: find.byType(Card),
 );
 
 bool _isTabSelected(WidgetTester tester, String name) =>
-    tester.widget<CommonCard>(_tabOf(name)).isSelected;
+    tester.widget<Card>(_tabOf(name)).isSelected;
 
 class _TestApp extends StatelessWidget {
   final Widget child;

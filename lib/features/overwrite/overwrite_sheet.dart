@@ -168,9 +168,9 @@ class _OverwriteExitGuardState extends State<OverwriteExitGuard> {
   }
 
   @override
-  Widget build(BuildContext context) => CommonScaffoldBackActionProvider(
+  Widget build(BuildContext context) => ScaffoldBackActionProvider(
     backAction: () => unawaited(exit()),
-    child: CommonPopScope(
+    child: PopGuard(
       onPop: (_) async {
         await exit();
         return false;

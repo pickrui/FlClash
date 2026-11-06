@@ -13,7 +13,7 @@ import 'package:fl_clash/ui/search_field.dart';
 import 'package:fl_clash/ui/sheet.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, TextButton, AppBar;
+    hide AppBar, Scaffold, TextButton, TextField;
 import 'package:prism_ui/scaffold.dart' show AppBar;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:prism_ui/text_field.dart' show TextField;
@@ -27,7 +27,7 @@ void main() {
   setUp(() => queries = []);
 
   Widget scaffold({required SheetType? type, Widget? body}) {
-    final scaffold = CommonScaffold(
+    final scaffold = Scaffold(
       title: 'title',
       searchState: AppBarSearchState(onSearch: queries.add),
       body: body ?? const SizedBox(),
@@ -120,7 +120,7 @@ void main() {
                 isScrollControlled: true,
                 builder: (_) => SheetProvider(
                   type: SheetType.bottomSheet,
-                  child: CommonScaffold(
+                  child: Scaffold(
                     title: 'title',
                     searchState: AppBarSearchState(onSearch: queries.add),
                     body: body ?? const SizedBox(height: 200),
@@ -191,7 +191,7 @@ void main() {
           builder: (context) => TextButton(
             onPressed: () => showSheet<void>(
               context: context,
-              builder: (_, _) => CommonScaffold(
+              builder: (_, _) => Scaffold(
                 title: 'title',
                 searchState: AppBarSearchState(onSearch: queries.add),
                 body: const SizedBox(height: 200),
@@ -230,7 +230,7 @@ void main() {
           builder: (context) => TextButton(
             onPressed: () => showSnapSheet(
               context,
-              builder: (_, controller) => CommonScaffold(
+              builder: (_, controller) => Scaffold(
                 title: 'title',
                 searchState: AppBarSearchState(onSearch: queries.add),
                 body: ListView.builder(

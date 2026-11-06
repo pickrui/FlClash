@@ -56,7 +56,7 @@ class CloudAnnouncementCard extends StatelessWidget {
     final accent = AppTextStyle.subheadline
         .of(context, emphasized: true)
         .copyWith(color: colorScheme.primary);
-    return CommonCard(
+    return Card(
       radius: AppCorner.xl,
       onPressed: () => _openDetail(context),
       child: Padding(

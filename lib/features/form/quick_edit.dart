@@ -64,8 +64,8 @@ Future<void> showQuickEdit(
   );
   return sheetNavigatorOf(context).push(
     context.isMobileView
-        ? CommonRoute(builder: (_) => page)
-        : CommonDesktopRoute(builder: (_) => page),
+        ? CardPageRoute(builder: (_) => page)
+        : FadePageRoute(builder: (_) => page),
   );
 }
 

@@ -197,7 +197,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
     final ready = !_loading && _loadError == null && _base?.available == true;
-    return CommonScaffold(
+    return Scaffold(
       title: l10n.nodeFilter,
       isLoading: _submitting,
       iconActions: [

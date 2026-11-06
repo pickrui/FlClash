@@ -140,7 +140,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
     final searching = SearchQuery(_query).isNotEmpty;
     final selectedRules = ref.watch(selectedItemsProvider(_key));
     final isSelecting = selectedRules.isNotEmpty;
-    return CommonPopScope(
+    return PopGuard(
       onPop: (_) {
         if (isSelecting) {
           ref.read(selectedItemsProvider(_key).notifier).value = {};
@@ -149,7 +149,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
         Navigator.of(context).pop();
         return false;
       },
-      child: CommonScaffold(
+      child: Scaffold(
         title: appLocalizations.addedRules,
         isLoading: source.isLoading,
         searchState: AppBarSearchState(

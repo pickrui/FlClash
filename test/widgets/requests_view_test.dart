@@ -15,7 +15,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Chip, Scaffold;
 
 import '../helpers/test_app.dart';
 
@@ -85,15 +85,15 @@ void main() {
       _request('b', 'beta.test', network: 'udp'),
       _request('c', 'gamma.test', network: 'udp'),
     ]);
-    await tester.tap(find.widgetWithText(CommonChip, 'TCP'));
+    await tester.tap(find.widgetWithText(Chip, 'TCP'));
     await tester.pumpAndSettle();
     expect(find.textContaining('alpha.test', findRichText: true), findsWidgets);
     expect(find.textContaining('beta.test', findRichText: true), findsNothing);
-    await tester.tap(find.widgetWithText(CommonChip, 'UDP'));
+    await tester.tap(find.widgetWithText(Chip, 'UDP'));
     await tester.pumpAndSettle();
     expect(find.textContaining('beta.test', findRichText: true), findsWidgets);
     tester
-        .widget<CommonScaffold>(find.byType(CommonScaffold))
+        .widget<Scaffold>(find.byType(Scaffold))
         .searchState!
         .onSearch('beta');
     await tester.pumpAndSettle();
@@ -110,9 +110,7 @@ void main() {
         _request('b', 'beta.test', chains: const ['Tokyo']),
         _request('c', 'gamma.test'),
       ]);
-      final scaffold = tester.widget<CommonScaffold>(
-        find.byType(CommonScaffold),
-      );
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
       final menu = scaffold.menuItems.singleWhere(
         (item) => item.label == appLocalizations.groupBy,
       );

@@ -299,7 +299,7 @@ class _SelectionSheetState<T> extends ConsumerState<SelectionSheet<T>>
     final searchable =
         _query.isNotEmpty ||
         _countOf(widget.sections) >= sheetSearchMinItemCount;
-    return CommonScaffold(
+    return Scaffold(
       title: widget.title,
       searchState: searchable
           ? AppBarSearchState(onSearch: _handleSearch)

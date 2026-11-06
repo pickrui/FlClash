@@ -11,7 +11,8 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/views/cloud/cloud_register_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import '../helpers/test_app.dart';
@@ -37,7 +38,7 @@ Future<void> _open(
         viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 900)),
       ],
       child: Builder(
-        builder: (context) => Scaffold(
+        builder: (context) => material.Scaffold(
           body: TextButton(
             onPressed: () => showFormSheet<void>(
               context: context,

@@ -205,7 +205,7 @@ class _NetworkDiagnosticsPageState
     return switch (check.id) {
       'listener' => (
         l.diagOpenPortSettings,
-        CommonScaffold(
+        Scaffold(
           title: l.inbound,
           body: Builder(
             builder: (context) => ListView(
@@ -226,7 +226,7 @@ class _NetworkDiagnosticsPageState
       ),
       'tun' || 'capture' => (
         l.diagOpenNetworkSettings,
-        CommonScaffold(title: l.network, body: const NetworkListView()),
+        Scaffold(title: l.network, body: const NetworkListView()),
       ),
       'coreDns' => (l.diagOpenDnsSettings, const DnsView()),
       'core' when ref.read(networkDiagnosticSnapshotProvider).suspended => (
@@ -298,7 +298,7 @@ class _NetworkDiagnosticsPageState
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final caption = context.listCaptionStyle;
-    return CommonScaffold(
+    return Scaffold(
       title: l.diagTitle,
       isLoading: _busy,
       iconActions: [

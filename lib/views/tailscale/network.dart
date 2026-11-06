@@ -844,7 +844,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
             networks.where((network) => network.id == _id).firstOrNull,
       ),
     );
-    return CommonScaffold(
+    return Scaffold(
       title: saved?.name ?? l.tailscaleAddNetwork,
       isLoading: _busy,
       confirmationAction: IconButtonData(
@@ -920,7 +920,7 @@ class _AuthKeyFieldState extends State<_AuthKeyField> {
             onChanged: widget.onChanged,
           ),
         ),
-        CommonMinIconButtonTheme(
+        MinIconButtonTheme(
           child: VisibilityToggleButton(
             obscureText: _obscure,
             onPressed: () => setState(() => _obscure = !_obscure),

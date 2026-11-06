@@ -45,7 +45,7 @@ void showTrackerInfoDetail(
     context: context,
     props: nestedPagedSheetProps,
     builder: (_, _) => NestedPagedSheet(
-      builder: (_) => CommonScaffold(
+      builder: (_) => Scaffold(
         body: TrackerInfoDetailView(trackerInfo: trackerInfo),
         title: title,
       ),
@@ -53,7 +53,7 @@ void showTrackerInfoDetail(
   );
 }
 
-List<CommonPopupMenuItem> trackerInfoMenuItems(
+List<PopupMenuItem> trackerInfoMenuItems(
   BuildContext context,
   TrackerInfo trackerInfo, {
   ValueChanged<TrackerInfo>? onClose,
@@ -71,22 +71,22 @@ List<CommonPopupMenuItem> trackerInfoMenuItems(
 
   return [
     if (metadata.host.isNotEmpty)
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.copy,
         label: appLocalizations.copyHost,
         onPressed: () => copy(metadata.host),
       ),
     if (destination.isNotEmpty)
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.copy,
         label: appLocalizations.copyDestination,
         onPressed: () => copy(destination),
       ),
     if (onClose != null)
-      CommonPopupMenuItem(
+      PopupMenuItem(
         glyph: AppGlyphs.block,
         label: appLocalizations.closeConnection,
-        section: const CommonPopupMenuSection(),
+        section: const PopupMenuSection(),
         onPressed: () => onClose(trackerInfo),
       ),
   ];

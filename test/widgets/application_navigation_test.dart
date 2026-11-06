@@ -93,7 +93,7 @@ void main() {
       expect(handlesBack.last, isTrue);
 
       navigator.currentState!.push(
-        CommonRoute<void>(builder: (_) => const Text('Child')),
+        CardPageRoute<void>(builder: (_) => const Text('Child')),
       );
       await tester.pumpAndSettle();
       expect(handlesBack.last, isTrue);
@@ -104,8 +104,8 @@ void main() {
 
       var guarded = 0;
       navigator.currentState!.push(
-        CommonRoute<void>(
-          builder: (_) => CommonPopScope(
+        CardPageRoute<void>(
+          builder: (_) => PopGuard(
             onPop: (_) {
               guarded++;
               return false;

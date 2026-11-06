@@ -95,11 +95,11 @@ void main() {
             match.group(1)!,
           );
           if (block != null &&
-              block.contains('CommonScaffold(') &&
+              block.contains('Scaffold(') &&
               block.contains('searchState:')) {
             offenders.add(
               '$path:${index + 1} — reads the bottom inset with the context '
-              'its CommonScaffold is built with, above the room that scaffold '
+              'its Scaffold is built with, above the room that scaffold '
               'adds for its docked search, so the end of the content stays '
               'under it; read it inside '
               '`body: Builder(builder: (context) => ...)`.',

@@ -17,7 +17,7 @@ import 'package:fl_clash/ui/snap_sheet.dart';
 import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
 import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -28,7 +28,7 @@ final _tallTop = _view.height * (1 - snapSheetDetents.last);
 const _rowHeight = 48.0;
 
 Widget _list(int rows) {
-  return CommonScaffold(
+  return Scaffold(
     title: 'title',
     body: ListView(
       shrinkWrap: true,
@@ -385,7 +385,7 @@ void main() {
       final counts = _Counts();
       await openSheet(
         tester,
-        (_) => CommonScaffold(
+        (_) => Scaffold(
           title: 'title',
           body: _Counted(
             counts: counts,
@@ -491,7 +491,7 @@ void main() {
 
   testWidgets('a nested sheet opened to the tall detent stays there across '
       'a shorter page', (tester) async {
-    Widget page({required VoidCallback onNext}) => CommonScaffold(
+    Widget page({required VoidCallback onNext}) => Scaffold(
       title: 'title',
       body: ListView(
         children: [
@@ -538,7 +538,7 @@ void main() {
     await openSheet(
       tester,
       (_) => NestedPagedSheet(
-        builder: (context) => CommonScaffold(
+        builder: (context) => Scaffold(
           title: 'title',
           body: ListView(
             shrinkWrap: true,
@@ -675,7 +675,7 @@ void main() {
     'still hand a drag down to the sheet',
     (tester) async {
       final dismissals = <bool>[];
-      Widget page(String name, {VoidCallback? onNext}) => CommonScaffold(
+      Widget page(String name, {VoidCallback? onNext}) => Scaffold(
         title: 'title',
         body: ListView(
           padding: const EdgeInsets.only(top: sheetAppBarHeight),
