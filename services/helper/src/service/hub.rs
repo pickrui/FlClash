@@ -323,7 +323,11 @@ fn sha256_file(file: &mut File) -> Result<String, Error> {
         hasher.update(&buffer[..bytes_read]);
     }
 
-    Ok(format!("{:x}", hasher.finalize()))
+    Ok(hasher
+        .finalize()
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect())
 }
 
 fn open_verified_core(path: &Path, expected_sha256: &str) -> Result<File, Error> {
@@ -1818,7 +1822,11 @@ mod tests {
             reader.join().unwrap();
             let pid = pid.unwrap().unwrap();
             let handle = unsafe { OpenProcess(PROCESS_SYNCHRONIZE | PROCESS_TERMINATE, 0, pid) };
-            assert_ne!(handle, 0, "open fixture Core: {}", Error::last_os_error());
+            assert!(
+                !handle.is_null(),
+                "open fixture Core: {}",
+                Error::last_os_error()
+            );
             let handle = unsafe { OwnedHandle::from_raw_handle(handle as _) };
             // Keep the outer Job alive so it cannot mask failure of the Helper's own Job.
             fixture.kill().unwrap();

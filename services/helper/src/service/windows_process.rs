@@ -94,7 +94,7 @@ mod native {
         fn new() -> Result<Self> {
             unsafe {
                 let raw = CreateJobObjectW(std::ptr::null(), std::ptr::null());
-                if raw == 0 {
+                if raw.is_null() {
                     return Err(Error::last_os_error());
                 }
                 let job = Self(OwnedHandle::from_raw_handle(raw as RawHandle));
@@ -203,7 +203,7 @@ mod native {
                 pid,
             )
         };
-        if raw == 0 {
+        if raw.is_null() {
             let error = Error::last_os_error();
             return if error.raw_os_error() == Some(ERROR_INVALID_PARAMETER as i32) {
                 Ok(None)
@@ -281,11 +281,11 @@ mod native {
     fn duplicate_stdio(kind: u32) -> Result<Option<OwnedHandle>> {
         unsafe {
             let original = GetStdHandle(kind);
-            if original == 0 || original == INVALID_HANDLE_VALUE {
+            if original.is_null() || original == INVALID_HANDLE_VALUE {
                 return Ok(None);
             }
             let process = GetCurrentProcess();
-            let mut copy = 0;
+            let mut copy = std::ptr::null_mut();
             if DuplicateHandle(
                 process,
                 original,
@@ -304,7 +304,7 @@ mod native {
 
     fn stderr_pipe() -> Result<(File, OwnedHandle)> {
         unsafe {
-            let (mut read, mut write) = (0, 0);
+            let (mut read, mut write) = (std::ptr::null_mut(), std::ptr::null_mut());
             // Match the capacity of std::process::ChildStderr.
             if CreatePipe(&mut read, &mut write, std::ptr::null(), 64 * 1024) == 0 {
                 return Err(Error::last_os_error());
@@ -376,12 +376,14 @@ mod native {
                 let mut startup: STARTUPINFOEXW = std::mem::zeroed();
                 startup.StartupInfo.cb = std::mem::size_of::<STARTUPINFOEXW>() as u32;
                 startup.StartupInfo.dwFlags = STARTF_USESTDHANDLES;
-                startup.StartupInfo.hStdInput = stdin
-                    .as_ref()
-                    .map_or(0, |handle| handle.as_raw_handle() as HANDLE);
-                startup.StartupInfo.hStdOutput = stdout
-                    .as_ref()
-                    .map_or(0, |handle| handle.as_raw_handle() as HANDLE);
+                startup.StartupInfo.hStdInput =
+                    stdin.as_ref().map_or(std::ptr::null_mut(), |handle| {
+                        handle.as_raw_handle() as HANDLE
+                    });
+                startup.StartupInfo.hStdOutput =
+                    stdout.as_ref().map_or(std::ptr::null_mut(), |handle| {
+                        handle.as_raw_handle() as HANDLE
+                    });
                 startup.StartupInfo.hStdError = write.as_raw_handle() as HANDLE;
                 startup.lpAttributeList = attributes.storage.as_mut_ptr().cast();
                 let mut process: PROCESS_INFORMATION = std::mem::zeroed();
@@ -792,7 +794,11 @@ mod native {
                     pid,
                 )
             };
-            assert_ne!(raw, 0, "open descendant: {}", Error::last_os_error());
+            assert!(
+                !raw.is_null(),
+                "open descendant: {}",
+                Error::last_os_error()
+            );
             let descendant = unsafe { OwnedHandle::from_raw_handle(raw as RawHandle) };
             assert!(child.wait().unwrap().success());
             assert_eq!(unsafe { WaitForSingleObject(raw, 0) }, WAIT_TIMEOUT);
@@ -877,7 +883,7 @@ mod native {
 
         #[cfg(feature = "windows-service")]
         pub(crate) fn deny_job_queries(child: &mut CoreChild) {
-            let mut restricted = 0;
+            let mut restricted = std::ptr::null_mut();
             assert_ne!(
                 unsafe {
                     DuplicateHandle(
@@ -910,7 +916,11 @@ mod native {
         pub(crate) fn defer_exit_confirmation(child: &mut CoreChild) -> ExitConfirmation {
             // Model a retained process handle that is unsignaled after job removal.
             let raw = unsafe { CreateEventW(std::ptr::null(), 1, 0, std::ptr::null()) };
-            assert_ne!(raw, 0, "create exit event: {}", Error::last_os_error());
+            assert!(
+                !raw.is_null(),
+                "create exit event: {}",
+                Error::last_os_error()
+            );
             let event = unsafe { OwnedHandle::from_raw_handle(raw as RawHandle) };
             child.descendants.push((0, event.try_clone().unwrap()));
             ExitConfirmation(event)
@@ -943,7 +953,7 @@ mod native {
             assert!(wait_for_core_exit(|| Ok(child.try_wait_job()?.is_some())).is_err());
             assert!(started.elapsed() < Duration::from_secs(5));
             assert_eq!(child.descendants.len(), 1);
-            let mut restricted = 0;
+            let mut restricted = std::ptr::null_mut();
             assert_ne!(
                 unsafe {
                     DuplicateHandle(
@@ -1153,7 +1163,7 @@ mod native {
             assert_ne!(
                 unsafe {
                     QueryInformationJobObject(
-                        0,
+                        std::ptr::null_mut(),
                         JobObjectBasicAccountingInformation,
                         &mut accounting as *mut _ as *mut _,
                         std::mem::size_of_val(&accounting) as u32,

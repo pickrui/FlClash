@@ -100,7 +100,7 @@ fn wide(value: &str) -> Vec<u16> {
 impl InstanceKey {
     fn open(root: HKEY, path: &str) -> Result<Self> {
         let path = wide(path);
-        let mut key = 0;
+        let mut key = std::ptr::null_mut();
         let status = unsafe {
             RegCreateKeyExW(
                 root,
@@ -125,7 +125,7 @@ impl InstanceKey {
     }
 
     fn existing_with_access(root: HKEY, path: &str, access: u32) -> Result<Option<Self>> {
-        let mut key = 0;
+        let mut key = std::ptr::null_mut();
         let status = unsafe { RegOpenKeyExW(root, wide(path).as_ptr(), 0, access, &mut key) };
         match status {
             ERROR_SUCCESS => Ok(Some(Self(key))),
@@ -718,7 +718,7 @@ mod tests {
         key.write(previous).unwrap();
         child.kill_job().unwrap();
         child.wait().unwrap();
-        let mut raw = 0;
+        let mut raw = std::ptr::null_mut();
         assert_eq!(
             unsafe {
                 RegOpenKeyExW(

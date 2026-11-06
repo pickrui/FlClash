@@ -66,7 +66,7 @@ fn create(name: &str, security: Option<&str>) -> Result<OwnedHandle> {
         LocalFree(descriptor);
         (handle, error)
     };
-    if handle == 0 {
+    if handle.is_null() {
         return Err(Error::from_raw_os_error(error as i32));
     }
     let handle = unsafe { OwnedHandle::from_raw_handle(handle as _) };
@@ -82,11 +82,11 @@ fn create(name: &str, security: Option<&str>) -> Result<OwnedHandle> {
 
 fn borrow(name: &str, source: InstallLockSource) -> Result<OwnedHandle> {
     let process = unsafe { OpenProcess(PROCESS_DUP_HANDLE, 0, source.pid) };
-    if process == 0 {
+    if process.is_null() {
         return Err(Error::last_os_error());
     }
     let process = unsafe { OwnedHandle::from_raw_handle(process as _) };
-    let mut duplicate = 0;
+    let mut duplicate = null_mut();
     if unsafe {
         DuplicateHandle(
             process.as_raw_handle() as HANDLE,
@@ -104,7 +104,7 @@ fn borrow(name: &str, source: InstallLockSource) -> Result<OwnedHandle> {
     let duplicate = unsafe { OwnedHandle::from_raw_handle(duplicate as _) };
     let name: Vec<u16> = name.encode_utf16().chain(Some(0)).collect();
     let named = unsafe { OpenMutexW(SYNCHRONIZATION_SYNCHRONIZE, 0, name.as_ptr()) };
-    if named == 0 {
+    if named.is_null() {
         return Err(Error::last_os_error());
     }
     let named = unsafe { OwnedHandle::from_raw_handle(named as _) };

@@ -75,7 +75,7 @@ pub(super) mod registry {
 
         fn at(root: HKEY, path: &str) -> Result<Self> {
             let path: Vec<u16> = path.encode_utf16().chain(Some(0)).collect();
-            let mut key = 0;
+            let mut key = std::ptr::null_mut();
             let status = unsafe {
                 RegCreateKeyExW(
                     root,
@@ -171,7 +171,7 @@ pub(super) mod registry {
                 StartRecovery::prepare(4, vec![42], key.read().unwrap().as_deref()).unwrap();
             assert_eq!(recovery.start_type, 2);
             let wide_path: Vec<u16> = path.encode_utf16().chain(Some(0)).collect();
-            let mut read_only = 0;
+            let mut read_only = std::ptr::null_mut();
             assert_eq!(
                 unsafe {
                     RegOpenKeyExW(

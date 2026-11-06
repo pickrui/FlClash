@@ -63,12 +63,12 @@ pub fn process_sid(pid: u32) -> IoResult<String> {
     // pointer-bearing TOKEN_USER the alignment it needs.
     unsafe {
         let process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, 0, pid);
-        if process == 0 {
+        if process.is_null() {
             return Err(Error::last_os_error());
         }
         let process = Handle(process);
 
-        let mut token: HANDLE = 0;
+        let mut token: HANDLE = null_mut();
         if OpenProcessToken(process.0, TOKEN_QUERY, &mut token) == 0 {
             return Err(Error::last_os_error());
         }
@@ -232,7 +232,7 @@ impl PublishedPort {
         let data = u32::from(port).to_le_bytes();
         // SAFETY: the buffers outlive the calls, and the opened key is closed.
         let status = unsafe {
-            let mut key: HKEY = 0;
+            let mut key: HKEY = null_mut();
             let mut status = RegCreateKeyExW(
                 root,
                 key_path.as_ptr(),
@@ -368,7 +368,7 @@ mod tests {
 
     fn create_persistent_test_child() -> u32 {
         let child = wide(&format!(r"{TEST_PORT_KEY}\Persistent"));
-        let mut key: HKEY = 0;
+        let mut key: HKEY = null_mut();
         unsafe {
             let status = RegCreateKeyExW(
                 HKEY_CURRENT_USER,
