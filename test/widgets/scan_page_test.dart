@@ -12,8 +12,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fl_clash/ui/loading.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/ui/ui.dart';
+import 'package:material_ui/material_ui.dart' hide AlertDialog, Colors;
+import 'package:material_ui/material_ui.dart'
+    as material
+    show AlertDialog, Colors;
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../helpers/test_app.dart';
@@ -150,7 +153,7 @@ void main() {
   late _FakeScannerPlatform platform;
 
   setUp(() {
-    globalState.accentColor = Colors.blue;
+    globalState.accentColor = material.Colors.blue;
     platform = _FakeScannerPlatform();
     MobileScannerPlatform.instance = platform;
     addTearDown(platform.close);
@@ -372,7 +375,8 @@ void main() {
       unawaited(
         showDialog<void>(
           context: context,
-          builder: (_) => const AlertDialog(content: Text('another route')),
+          builder: (_) =>
+              const material.AlertDialog(content: Text('another route')),
         ),
       );
       await tester.pumpAndSettle();

@@ -15,7 +15,6 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/route_motion_hold.dart';
 import 'package:fl_clash/views/font_family.dart';
 import 'package:fl_clash/views/theme.dart';
 import 'package:fl_clash/views/theme_preview.dart';
@@ -24,11 +23,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, Slider, ThemeData;
-import 'package:prism_ui/theme_data.dart' show ThemeData;
-import 'package:prism_ui/slider.dart' show Slider;
-import 'package:prism_ui/text_field.dart' show TextField;
+import 'package:material_ui/material_ui.dart'
+    hide Colors, Slider, TextField, ThemeData;
+import 'package:material_ui/material_ui.dart' as material show Colors;
 
 import '../helpers/test_app.dart';
 
@@ -488,7 +485,7 @@ Future<ProviderContainer> _pump(
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  globalState.accentColor = Colors.blue;
+  globalState.accentColor = material.Colors.blue;
   final c = ProviderContainer(
     overrides: [viewSizeProvider.overrideWithBuild((_, _) => size)],
   );

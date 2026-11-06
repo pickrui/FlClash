@@ -8,18 +8,9 @@ import 'dart:developer' as developer;
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/services/config_key_store.dart';
-import 'package:fl_clash/ui/button.dart';
-import 'package:prism_ui/selectable_text.dart';
-import 'package:fl_clash/ui/dialog.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/loading.dart';
-import 'package:fl_clash/ui/shape.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Theme;
-import 'package:fl_clash/ui/common_button.dart'
-    show TextButton, FilledButton, ButtonStyle;
 
 class ConfigRecoveryScreen extends StatefulWidget {
   final Future<void> Function() onRetry;

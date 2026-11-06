@@ -10,10 +10,10 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/views/config/general.dart';
-import 'package:fl_clash/ui/switch.dart';
+import 'package:fl_clash/ui/ui.dart';
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide Switch;
 
 import '../helpers/test_app.dart';
 
@@ -128,7 +128,7 @@ void main() {
       await tester.pumpWidget(
         const TestApp(
           wrapInProviderScope: true,
-          child: Scaffold(body: FindProcessItem()),
+          child: material.Scaffold(body: FindProcessItem()),
         ),
       );
       final container = ProviderScope.containerOf(

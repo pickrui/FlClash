@@ -16,13 +16,12 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/resources.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/resource_file_info.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
 
 typedef ReferencedProviders = ({List<String> proxy, List<String> rule});
 

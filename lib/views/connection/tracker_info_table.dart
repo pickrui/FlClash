@@ -7,8 +7,7 @@ import 'dart:math';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/table_layout.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -16,7 +15,6 @@ import 'package:flutter/widgets.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/record_filter.dart';
 import 'package:fl_clash/widgets/record_filter.dart';
-import 'package:fl_clash/ui/context_menu.dart';
 
 import 'item.dart';
 

@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:prism_ui/press_region.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -16,11 +15,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/typography.dart';
-import 'package:fl_clash/ui/route_motion_hold.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/tooltip.dart' show Tooltip;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const _recommendedKey = 'recommended';

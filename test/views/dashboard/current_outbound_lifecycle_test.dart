@@ -13,12 +13,13 @@ import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/ui/inherited.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/widgets/current_outbound.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../../helpers/app_paths.dart';
 import '../../helpers/test_app.dart';
@@ -106,7 +107,7 @@ void main() {
                 valueListenable: active,
                 builder: (_, isActive, child) =>
                     PageActivityScope(isActive: isActive, child: child!),
-                child: const Scaffold(
+                child: const material.Scaffold(
                   body: Align(
                     alignment: Alignment.topLeft,
                     child: SizedBox(

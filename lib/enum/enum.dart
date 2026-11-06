@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 // ignore_for_file: constant_identifier_names
 
-import 'package:fl_clash/ui/color.dart';
 import 'package:prism_ui/banner.dart' show BannerLevel;
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/common/system.dart';
@@ -15,8 +14,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:rust_api/rust_api.dart' show HotKeyModifier;
 
 export 'package:prism_ui/item_position.dart';
-export 'package:fl_clash/ui/inherited.dart' show SheetType;
-export 'package:fl_clash/ui/text_style.dart' show FontFamily;
+export 'package:prism_ui/sheet.dart' show SheetType;
+export 'package:fl_clash/ui/fonts.dart' show FontFamily;
 
 typedef MessageLevel = BannerLevel;
 
@@ -119,7 +118,7 @@ extension LogLevelExt on LogLevel {
       LogLevel.silent => const Color(0xFF616161),
       LogLevel.debug => const Color(0xFFBDBDBD),
       LogLevel.info => null,
-      LogLevel.warning => const Color(0xFFFFAB40).darken(),
+      LogLevel.warning => const Color(0xFFFF950D),
       LogLevel.error => const Color(0xFFFF5252),
     };
   }

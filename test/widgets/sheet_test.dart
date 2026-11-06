@@ -6,21 +6,21 @@
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/scaffold.dart';
-import 'package:fl_clash/ui/sheet.dart';
-import 'package:fl_clash/ui/side_sheet.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
 import 'package:material_ui/material_ui.dart'
-    hide ColorScheme, IconButton, Scaffold, TextButton, ThemeData, ThemeMode;
+    hide
+        ColorScheme,
+        Colors,
+        IconButton,
+        Scaffold,
+        TextButton,
+        ThemeData,
+        ThemeMode;
+import 'package:material_ui/material_ui.dart' as material show Colors;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:prism_ui/theme_data.dart'
-    show ThemeData, ThemeMode, ColorScheme;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
 
 import '../helpers/test_app.dart';
 
@@ -65,7 +65,7 @@ Future<void> _openSheet(
 
 ThemeData _theme(Brightness brightness) {
   final colorScheme = ColorScheme.fromSeed(
-    seedColor: Colors.blue,
+    seedColor: material.Colors.blue,
     brightness: brightness,
   );
   return ThemeData(
@@ -142,7 +142,7 @@ void main() {
       const Size(400, 800),
       (BuildContext context) => showSheet<void>(
         context: context,
-        builder: (_, _) => const Text('sheet'),
+        builder: (_) => const Text('sheet'),
       ),
     ),
     (
@@ -150,7 +150,7 @@ void main() {
       const Size(1200, 800),
       (BuildContext context) => showSheet<void>(
         context: context,
-        builder: (_, _) => const Text('sheet'),
+        builder: (_) => const Text('sheet'),
       ),
     ),
     (
@@ -164,7 +164,7 @@ void main() {
       const Size(1200, 800),
       (BuildContext context) => showFormSheet<void>(
         context: context,
-        builder: (_, _) => const Text('sheet'),
+        builder: (_) => const Text('sheet'),
       ),
     ),
   ]) {

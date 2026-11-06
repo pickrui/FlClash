@@ -14,13 +14,8 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' as prism;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:fl_clash/ui/route_motion_hold.dart';
-import 'package:fl_clash/ui/scroll_behavior.dart';
-import 'package:fl_clash/ui/view_scope.dart';
 import 'package:fl_clash/widgets/record_filter.dart';
 import 'package:fl_clash/widgets/record_table.dart';
 
@@ -46,7 +41,7 @@ class RequestsView extends ConsumerStatefulWidget {
 }
 
 class _RequestsViewState extends ConsumerState<RequestsView>
-    with RouteMotionHoldMixin<RequestsView> {
+    with RouteMotionHoldMixin<RequestsView>, PageFeedHoldMixin<RequestsView> {
   final _recent = TrackerInfoListController();
   final _live = TrackerInfoListController();
   final _closingConnectionIds = <String>{};
@@ -227,7 +222,7 @@ class _RequestsViewState extends ConsumerState<RequestsView>
       padding: EdgeInsets.zero,
       style: ButtonStyle.from(
         minimumSize: Size.zero,
-        visualDensity: prism.VisualDensity.compact,
+        visualDensity: VisualDensity.compact,
       ),
       icon: closing
           ? const SizedBox.square(dimension: 18, child: ActivityIndicator())
@@ -431,7 +426,8 @@ class _LiveFeedState extends ConsumerState<_LiveFeed>
     with
         WidgetsBindingObserver,
         ActivePollingMixin<_LiveFeed>,
-        RouteMotionHoldMixin<_LiveFeed> {
+        RouteMotionHoldMixin<_LiveFeed>,
+        PageFeedHoldMixin<_LiveFeed> {
   late final ScrollController _scrollController;
   int _refreshGeneration = 0;
   final _speedRanker = TrackerSpeedRanker();

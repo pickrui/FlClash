@@ -14,15 +14,13 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
-import 'package:fl_clash/ui/card.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart'
-    hide AlertDialog, Card, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:fl_clash/ui/dialog.dart' show AlertDialog;
+    hide AlertDialog, Card, Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fl_clash/ui/loading.dart';
 
 import '../helpers/test_app.dart';
 
@@ -378,7 +376,7 @@ Future<_TestProfiles> _pumpSelector(
             textScaleFactor: textScale,
           );
         },
-        home: Scaffold(
+        home: material.Scaffold(
           body: CustomScrollView(
             slivers: [
               OverwriteModeSelector(profileId: 1, validator: validator),

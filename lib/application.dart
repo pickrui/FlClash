@@ -5,10 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/views/network_diagnostics.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
-import 'package:prism_ui/app.dart';
-import 'package:fl_clash/ui/liquid_glass.dart';
-import 'package:fl_clash/ui/emoji.dart';
-import 'package:fl_clash/ui/keyboard_inset_hold.dart';
+import 'package:fl_clash/ui/ui.dart';
 
 import 'dart:async';
 
@@ -16,14 +13,11 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:fl_clash/services/desktop_update.dart';
 
 import 'package:fl_clash/widgets/app_update.dart';
-import 'package:fl_clash/ui/input.dart';
 
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/page_transition.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/views/views.dart';

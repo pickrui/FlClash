@@ -6,10 +6,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/shape.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:fl_clash/state.dart';
@@ -17,16 +15,10 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Colors;
-import 'package:prism_ui/divider.dart' show Divider;
-import 'package:prism_ui/theme_data.dart' as prism;
-import 'package:prism_ui/card_surface.dart' show PressLook;
-import 'package:fl_clash/ui/common_button.dart'
-    show IconButton, ButtonStyle, ButtonTheme, ButtonThemeData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window/window.dart';
 
-export 'package:fl_clash/ui/icons/caption_icon.dart';
+export 'package:prism_ui/icons/caption_icon.dart';
 
 const _windowGeometryDelay = Duration(milliseconds: 120);
 
@@ -523,7 +515,7 @@ class WindowHeaderBar extends StatelessWidget {
                 child: ButtonTheme(
                   data: ButtonThemeData(
                     icon: ButtonStyle(
-                      tapTargetSize: prism.TapTargetSize.shrinkWrap,
+                      tapTargetSize: TapTargetSize.shrinkWrap,
                       minimumSize: getCaptionButtonSize(height),
                       maximumSize: getCaptionButtonSize(height),
                       padding: EdgeInsets.zero,

@@ -7,14 +7,11 @@ import 'package:fl_clash/application.dart';
 import 'package:fl_clash/pages/home.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/pop_scope.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
-import 'package:prism_ui/theme_data.dart' show ColorScheme;
 
 import '../helpers/test_app.dart';
 

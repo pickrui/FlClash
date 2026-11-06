@@ -6,18 +6,13 @@
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
-import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/ui/liquid_glass.dart';
-import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Colors;
-import 'package:prism_ui/tab_view.dart' show kTabScrollDuration;
-import 'package:prism_ui/theme_data.dart' show ThemeMode, ColorScheme;
 
 class PreviewChoice<T> {
   const PreviewChoice({

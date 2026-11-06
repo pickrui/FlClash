@@ -8,23 +8,11 @@ import 'dart:math';
 
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/ui/color.dart';
-import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/scroll.dart';
-import 'package:fl_clash/ui/sheet.dart';
-import 'package:fl_clash/ui/sheet_header.dart';
-import 'package:fl_clash/ui/side_sheet.dart';
-import 'package:fl_clash/ui/snap_sheet.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/scaffold.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:prism_ui/sheet.dart' show sheetFloatInset;
-import 'package:prism_ui/shape.dart' show AppCorner;
 import 'package:material_ui/material_ui.dart'
     hide Scaffold, Scrollbar, TextButton, Theme, ThemeData;
-import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

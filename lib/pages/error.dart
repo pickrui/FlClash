@@ -5,25 +5,15 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/constant.dart' show maxMobileWidth;
-import 'package:fl_clash/ui/metrics.dart' show pageToolbarHeight;
-import 'package:fl_clash/ui/view_scope.dart';
-import 'package:fl_clash/ui/color.dart';
+import 'package:fl_clash/ui/ui.dart';
 
 import 'dart:async';
 
 import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/ui/shape.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
-import 'package:fl_clash/ui/common_button.dart' show FilledButton, ButtonStyle;
 import 'package:flutter/services.dart';
-import 'package:prism_ui/app.dart';
-import 'package:prism_ui/banner.dart';
-import 'package:prism_ui/scaffold.dart' as prism;
-import 'package:prism_ui/selectable_text.dart';
 
 class InitErrorApp extends StatelessWidget {
   final Object error;
@@ -117,10 +107,10 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
     return ViewScope(
       size: size,
       isMobile: size.width <= maxMobileWidth,
-      child: prism.PrismScaffold(
+      child: PrismScaffold(
         bar: PreferredSize(
           preferredSize: const Size.fromHeight(pageToolbarHeight),
-          child: prism.AppBar(title: Text(l?.initFailed ?? 'Startup failed')),
+          child: AppBar(title: Text(l?.initFailed ?? 'Startup failed')),
         ),
         body: SafeArea(
           child: Center(

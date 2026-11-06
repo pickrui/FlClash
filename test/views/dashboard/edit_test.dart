@@ -9,12 +9,11 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/dashboard/dashboard.dart';
 import 'package:fl_clash/views/dashboard/edit.dart';
 import 'package:fl_clash/views/dashboard/widgets/widgets.dart';
-import 'package:fl_clash/ui/sortable.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Tooltip;
-import 'package:prism_ui/tooltip.dart';
 
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';

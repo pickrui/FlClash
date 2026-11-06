@@ -11,8 +11,9 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/hotkey.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -179,7 +180,7 @@ Future<ProviderContainer> _openRecorder(
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: const TestApp(locale: Locale('en'), child: Scaffold()),
+      child: const TestApp(locale: Locale('en'), child: material.Scaffold()),
     ),
   );
   globalState.showCommonDialog(

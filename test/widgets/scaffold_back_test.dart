@@ -11,7 +11,7 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/logs.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart' hide Scaffold, TextField;
-import 'package:prism_ui/text_field.dart' show TextField;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 

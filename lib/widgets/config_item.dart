@@ -13,7 +13,7 @@ import 'package:riverpod/misc.dart' show ProviderListenable;
 
 import 'input.dart';
 
-import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/ui.dart';
 
 export 'package:riverpod/misc.dart' show ProviderListenable;
 

@@ -48,10 +48,12 @@ export 'yaml.dart';
 export 'secrets.dart';
 export 'oix_params_storage.dart';
 
-export 'package:fl_clash/ui/color.dart';
-export 'package:fl_clash/ui/measure.dart';
-export 'package:fl_clash/ui/metrics.dart';
-export 'package:fl_clash/ui/text_style.dart';
+export 'package:fl_clash/ui/delay_color.dart';
+export 'package:fl_clash/ui/fonts.dart';
+export 'package:prism_ui/color.dart';
+export 'package:prism_ui/measure.dart';
+export 'package:prism_ui/metrics.dart';
+export 'package:prism_ui/text_style.dart';
 
 export 'window_port.dart';
 export 'window_layout.dart';

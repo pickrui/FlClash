@@ -8,16 +8,14 @@ import 'dart:async';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
-import 'package:fl_clash/ui/models.dart';
-import 'package:fl_clash/ui/scaffold.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:material_ui/material_ui.dart'
-    hide Scaffold, TextButton, TextFormField;
+    hide AlertDialog, Scaffold, TextButton, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextFormField;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -439,7 +437,7 @@ void main() {
     await tester.pump();
     showDialog<void>(
       context: tester.element(find.byType(CustomRuleEditorDialog)),
-      builder: (_) => const AlertDialog(content: Text('Cover')),
+      builder: (_) => const material.AlertDialog(content: Text('Cover')),
     );
     await tester.pump(const Duration(seconds: 1));
     pending.complete('');

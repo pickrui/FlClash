@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:prism_ui/linear_progress.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:code_forge/code_forge.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -18,14 +18,13 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
-import 'package:fl_clash/ui/sortable.dart';
 import 'package:fl_clash/views/config/providers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:material_ui/material_ui.dart'
-    hide TextButton, LinearProgressIndicator;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
+    hide AlertDialog, LinearProgressIndicator, TextButton;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 
 import '../helpers/test_app.dart';
 import '../plugins/code_forge/support.dart';
@@ -242,7 +241,8 @@ void main() {
       unawaited(
         showDialog<void>(
           context: formContext,
-          builder: (_) => const AlertDialog(content: Text('Other message')),
+          builder: (_) =>
+              const material.AlertDialog(content: Text('Other message')),
         ),
       );
       await tester.pump();
@@ -345,7 +345,8 @@ void main() {
     unawaited(
       showDialog<void>(
         context: editorContext,
-        builder: (_) => const AlertDialog(content: Text('Other message')),
+        builder: (_) =>
+            const material.AlertDialog(content: Text('Other message')),
       ),
     );
     await tester.pump();
@@ -547,7 +548,8 @@ void main() {
     unawaited(
       showDialog<void>(
         context: context,
-        builder: (_) => const AlertDialog(content: Text('Other message')),
+        builder: (_) =>
+            const material.AlertDialog(content: Text('Other message')),
       ),
     );
     await tester.pump();

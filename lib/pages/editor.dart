@@ -16,24 +16,8 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:fl_clash/ui/caret_popup.dart';
-import 'package:fl_clash/ui/goo.dart';
-import 'package:fl_clash/ui/route_motion_hold.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/text_loupe.dart';
-import 'package:fl_clash/ui/l10n.dart';
-import 'package:prism_ui/edit_menu.dart';
-import 'package:prism_ui/text_selection_controls.dart'
-    show textSelectionColorOf;
-import 'package:fl_clash/ui/typography.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show ColorScheme;
-import 'package:prism_ui/card_surface.dart' show PressLook;
-import 'package:prism_ui/theme_data.dart' as prism;
-import 'package:fl_clash/ui/common_button.dart'
-    show IconButton, FilledButton, ButtonStyle;
-import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/services.dart';
@@ -1351,8 +1335,8 @@ class _FindOptionToggle extends StatelessWidget {
                 minimumSize: Size.square(TonalButtonSize.compact.button),
                 padding: EdgeInsets.zero,
                 iconSize: TonalButtonSize.compact.icon,
-                visualDensity: prism.VisualDensity.standard,
-                tapTargetSize: prism.TapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.standard,
+                tapTargetSize: TapTargetSize.shrinkWrap,
               ),
             )
             .merge(ButtonStyle(ringStandsOff: selected)),

@@ -7,9 +7,10 @@ import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/views/config/general.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextFormField;
+import 'package:material_ui/material_ui.dart'
+    hide Scaffold, TextButton, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,7 +32,7 @@ Future<ProviderContainer> _openPortForm(WidgetTester tester) async {
       container: container,
       child: const TestApp(
         locale: Locale('en'),
-        child: Scaffold(body: PortItem()),
+        child: material.Scaffold(body: PortItem()),
       ),
     ),
   );

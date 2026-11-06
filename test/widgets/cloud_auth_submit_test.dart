@@ -16,10 +16,12 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/services/cloud_google_login.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextFormField;
-import 'package:fl_clash/ui/common_button.dart' as prism;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, FilledButton, Scaffold, TextButton, TextFormField;
+import 'package:material_ui/material_ui.dart'
+    as material
+    show AlertDialog, Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -54,7 +56,7 @@ Future<_Account> _startLogin(WidgetTester tester) async {
         cloudAccountProvider.overrideWith(() => account),
       ],
       child: Builder(
-        builder: (context) => Scaffold(
+        builder: (context) => material.Scaffold(
           body: TextButton(
             onPressed: () => showCloudLoginPage<void>(context),
             child: const Text('open'),
@@ -150,7 +152,7 @@ void main() {
               ),
             ],
             child: Builder(
-              builder: (context) => Scaffold(
+              builder: (context) => material.Scaffold(
                 body: TextButton(
                   onPressed: () => showCloudLoginPage<void>(context),
                   child: const Text('open'),
@@ -187,11 +189,8 @@ void main() {
           expect(find.byType(CloudLoginPage), findsOneWidget);
           expect(
             tester
-                .widget<prism.FilledButton>(
-                  find.widgetWithText(
-                    prism.FilledButton,
-                    'Sign in with Google',
-                  ),
+                .widget<FilledButton>(
+                  find.widgetWithText(FilledButton, 'Sign in with Google'),
                 )
                 .onPressed,
             isNotNull,
@@ -242,7 +241,7 @@ void main() {
           cloudAccountProvider.overrideWith(_Account.new),
         ],
         child: Builder(
-          builder: (context) => Scaffold(
+          builder: (context) => material.Scaffold(
             body: TextButton(
               onPressed: () => showCloudLoginPage<void>(context),
               child: const Text('open'),
@@ -278,7 +277,7 @@ void main() {
           cloudAccountProvider.overrideWith(_Account.new),
         ],
         child: Builder(
-          builder: (context) => Scaffold(
+          builder: (context) => material.Scaffold(
             body: TextButton(
               onPressed: () => showCloudLoginPage<void>(context),
               child: const Text('open'),
@@ -308,7 +307,8 @@ void main() {
     unawaited(
       showDialog<void>(
         context: context,
-        builder: (_) => const AlertDialog(content: Text('Newer dialog')),
+        builder: (_) =>
+            const material.AlertDialog(content: Text('Newer dialog')),
       ),
     );
     await tester.pump();

@@ -9,7 +9,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:fl_clash/providers/resources.dart';
 import 'package:fl_clash/features/mitm/module_editor.dart';
-import 'package:fl_clash/ui/context_menu.dart';
+import 'package:fl_clash/ui/ui.dart';
 
 import 'package:fl_clash/providers/icon_sets.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
@@ -31,14 +31,9 @@ import 'package:fl_clash/widgets/updating_failures.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/resource_file_info.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
-import 'package:prism_ui/shape.dart' as prism;
 import 'package:flutter/widgets.dart';
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextField, InputDecoration;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' hide context;
-
-import 'package:fl_clash/ui/navigator.dart';
 
 typedef _RemoteResources = ({
   List<IconSet> iconSets,
@@ -747,7 +742,7 @@ class _UpdateGeoUrlFormDialogState extends State<UpdateGeoUrlFormDialog> {
             maxLines: 5,
             minLines: 1,
             controller: _urlController,
-            decoration: const InputDecoration(border: prism.AppInputBorder()),
+            decoration: const InputDecoration(border: AppInputBorder()),
           ),
         ],
       ),

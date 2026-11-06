@@ -22,7 +22,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Chip, TextField;
-import 'package:prism_ui/text_field.dart' show TextField;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/test_app.dart';

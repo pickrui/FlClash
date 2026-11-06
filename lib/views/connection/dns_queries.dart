@@ -11,17 +11,12 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/record_filter.dart';
 import 'package:fl_clash/widgets/record_filter.dart';
-import 'package:fl_clash/ui/view_scope.dart';
-import 'package:fl_clash/ui/scroll_behavior.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/record_feed_list.dart';
 import 'package:fl_clash/features/connection/dns_query_filter.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/ui/paged_sheet.dart';
-import 'package:fl_clash/ui/table_layout.dart';
-import 'package:fl_clash/ui/route_motion_hold.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/record_table.dart';
@@ -141,7 +136,9 @@ class DnsQueriesView extends ConsumerStatefulWidget {
 }
 
 class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
-    with RouteMotionHoldMixin<DnsQueriesView> {
+    with
+        RouteMotionHoldMixin<DnsQueriesView>,
+        PageFeedHoldMixin<DnsQueriesView> {
   late final ScrollController _scrollController =
       widget.scrollController ??
       sheetScrollController(context, initialScrollOffset: double.maxFinite);

@@ -12,10 +12,9 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/linux_package_format_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fl_clash/ui/alert_scope.dart';
-import 'package:fl_clash/ui/dialog.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
+import 'package:fl_clash/ui/ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 /// Collects what the dialog answers, one entry per time it is closed.
 Future<List<LinuxPackageFormat?>> _openDialog(
@@ -37,8 +36,8 @@ Future<List<LinuxPackageFormat?>> _openDialog(
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) =>
-            AlertScope(presenter: const CommonAlertPresenter(), child: child!),
-        home: Scaffold(
+            AlertScope(presenter: const AppAlertPresenter(), child: child!),
+        home: material.Scaffold(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () async => answers.add(

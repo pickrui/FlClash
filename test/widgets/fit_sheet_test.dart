@@ -6,19 +6,12 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/metrics.dart';
-import 'package:fl_clash/ui/paged_sheet.dart';
-import 'package:fl_clash/ui/sheet.dart';
-import 'package:fl_clash/ui/sheet_header.dart';
-import 'package:fl_clash/ui/snap_sheet.dart';
-import 'package:fl_clash/ui/scaffold.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -63,7 +56,7 @@ void main() {
               result = showSheet<Object?>(
                 context: context,
                 props: props,
-                builder: (context, _) => builder(context),
+                builder: (context) => builder(context),
               );
             },
             child: const Text('open'),

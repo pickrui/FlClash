@@ -21,13 +21,12 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/script_library.dart';
 import 'package:fl_clash/views/config/providers.dart';
 import 'package:fl_clash/views/config/scripts.dart';
-import 'package:fl_clash/ui/inherited.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:material_ui/material_ui.dart'
-    hide TextField, TextFormField, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
+    hide Scaffold, TextButton, TextField, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
@@ -582,7 +581,7 @@ void main() {
       unawaited(
         Navigator.of(context).push<void>(
           MaterialPageRoute(
-            builder: (_) => const Scaffold(body: Text('Other page')),
+            builder: (_) => const material.Scaffold(body: Text('Other page')),
           ),
         ),
       );

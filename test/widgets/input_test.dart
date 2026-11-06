@@ -11,12 +11,10 @@ import 'package:fl_clash/providers/cloud_account_provider.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:fl_clash/ui/alert_scope.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart'
     hide AlertDialog, FilledButton, Scaffold, TextFormField;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:fl_clash/ui/common_button.dart' show FilledButton;
-import 'package:prism_ui/text_field.dart' show TextFormField;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -315,8 +313,7 @@ void main() {
     await tester.pump();
     expect(editable().obscureText, isFalse);
     expect(editable().maxLines, 5);
-    expect(editable().enableSuggestions, isFalse);
-    expect(editable().autocorrect, isFalse);
+    expect(editable().keyboardType, TextInputType.visiblePassword);
 
     await tester.tap(find.byTooltip('Hide password'));
     await tester.pump();
@@ -346,10 +343,7 @@ class _TestApp extends StatelessWidget {
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
-        return AlertScope(
-          presenter: const CommonAlertPresenter(),
-          child: child!,
-        );
+        return AlertScope(presenter: const AppAlertPresenter(), child: child!);
       },
       home: child,
     );

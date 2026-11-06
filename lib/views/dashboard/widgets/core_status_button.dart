@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/view_scope.dart';
+import 'package:fl_clash/ui/ui.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -13,13 +13,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:fl_clash/ui/liquid_glass.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/tooltip.dart' show Tooltip;
-import 'package:prism_ui/card_surface.dart' show PressLook;
-import 'package:fl_clash/ui/common_button.dart'
-    show IconButton, FilledButton, ButtonStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CoreStatusButton extends ConsumerStatefulWidget {
@@ -99,8 +93,11 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
     final colorScheme = context.colorScheme;
     final glass = TonalButtonTheme.glassOf(context);
     ButtonStyle? tinted(Color? color) => glass && color != null
-        ? liquidGlassButtonStyle(
-            (_) => LiquidGlassStyle.tinted(colorScheme, color),
+        ? ButtonStyle(
+            backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+            backgroundBuilder: LiquidGlass.buttonBackground(
+              (_) => LiquidGlassStyle.tinted(colorScheme, color),
+            ),
           )
         : null;
     final statusColor = switch (coreStatus) {

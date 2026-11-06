@@ -6,8 +6,7 @@
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/press_surface.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 

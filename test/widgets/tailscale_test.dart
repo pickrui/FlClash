@@ -12,18 +12,15 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/tailscale.dart';
 import 'package:fl_clash/views/tailscale/network.dart';
 import 'package:fl_clash/views/tailscale/tailscale.dart';
-import 'package:fl_clash/ui/chip.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/inherited.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, IconButton, TextButton, FilledButton;
-import 'package:fl_clash/ui/common_button.dart'
-    show IconButton, TextButton, FilledButton;
-import 'package:prism_ui/text_field.dart' show TextField;
-import 'package:fl_clash/ui/common_button.dart' as prism;
-import 'package:fl_clash/ui/qr_code.dart';
+    hide AlertDialog, FilledButton, IconButton, Scaffold, TextButton, TextField;
+import 'package:material_ui/material_ui.dart'
+    as material
+    show AlertDialog, Scaffold;
 
 import '../helpers/fake_tailscale_backend.dart';
 import '../helpers/glyph_finders.dart';
@@ -101,7 +98,7 @@ Future<(FakeTailscaleBackend, ProviderContainer)> _openNetwork(
   final fixture = await _pump(
     tester,
     Builder(
-      builder: (context) => Scaffold(
+      builder: (context) => material.Scaffold(
         body: TextButton(
           onPressed: () => openTailscaleNetwork(context, networkId: network.id),
           child: const Text('Open network'),
@@ -196,10 +193,7 @@ void main() {
   testWidgets('an empty list invites adding a network', (tester) async {
     await _pump(tester, const TailscaleView());
     expect(find.text('Access your tailnet'), findsOneWidget);
-    expect(
-      find.widgetWithText(prism.FilledButton, 'Add network'),
-      findsOneWidget,
-    );
+    expect(find.widgetWithText(FilledButton, 'Add network'), findsOneWidget);
     await _unmount(tester);
   });
 
@@ -427,7 +421,7 @@ void main() {
     expect(find.text('flclash-macos.tail1234.ts.net'), findsOneWidget);
     expect(find.text('100.64.0.1'), findsOneWidget);
     // Signed in, the account offers only signing out.
-    expect(find.widgetWithText(prism.FilledButton, 'Log out'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Log out'), findsOneWidget);
     expect(find.text('Save and log in'), findsNothing);
 
     await tester.tap(find.text('Devices (1)'));
@@ -529,7 +523,8 @@ void main() {
     unawaited(
       showDialog<void>(
         context: context,
-        builder: (_) => const AlertDialog(content: Text('Newer dialog')),
+        builder: (_) =>
+            const material.AlertDialog(content: Text('Newer dialog')),
       ),
     );
     await tester.pump();

@@ -17,11 +17,12 @@ import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:fl_clash/views/dashboard/widgets/intranet_ip.dart';
 import 'package:fl_clash/views/dashboard/widgets/network_takeover.dart';
-import 'package:fl_clash/ui/switch.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide Switch;
+import 'package:material_ui/material_ui.dart' hide Scaffold, Switch;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../helpers/test_app.dart';
 
@@ -162,7 +163,7 @@ void main() {
           container: container,
           child: TestApp(
             locale: const Locale('en'),
-            child: Scaffold(body: entry.value),
+            child: material.Scaffold(body: entry.value),
           ),
         ),
       );

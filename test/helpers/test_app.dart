@@ -7,14 +7,9 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/alert_scope.dart';
-import 'package:fl_clash/ui/emoji.dart';
-import 'package:fl_clash/ui/dialog.dart';
-import 'package:fl_clash/ui/view_scope.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:material_ui/material_ui.dart' hide Theme, ThemeData, ThemeMode;
-import 'package:prism_ui/theme_data.dart' show ThemeData, ThemeMode;
-import 'package:prism_ui/app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -97,7 +92,7 @@ Widget wrapAppScopes(
   return MeasureScope(
     measure: measure,
     child: AlertScope(
-      presenter: const CommonAlertPresenter(),
+      presenter: const AppAlertPresenter(),
       child: hasProviders
           ? AppViewScope(child: child)
           : ViewScope(

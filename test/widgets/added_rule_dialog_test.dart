@@ -11,16 +11,11 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/ui/list.dart';
-import 'package:fl_clash/ui/scaffold.dart';
-import 'package:fl_clash/ui/switch.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
     hide Scaffold, Switch, TextButton, TextField, TextFormField;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextFormField;
-import 'package:prism_ui/text_field.dart' as prism;
 
 import '../helpers/test_app.dart';
 
@@ -131,7 +126,7 @@ void main() {
     await tester.enterText(
       find.descendant(
         of: find.byType(SelectionSheet<RuleAction>),
-        matching: find.byType(prism.TextField),
+        matching: find.byType(TextField),
       ),
       'DST-PORT',
     );

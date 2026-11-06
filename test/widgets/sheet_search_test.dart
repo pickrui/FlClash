@@ -5,18 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/liquid_glass.dart';
-import 'package:fl_clash/ui/models.dart';
-import 'package:fl_clash/ui/scaffold.dart';
-import 'package:fl_clash/ui/search_field.dart';
-import 'package:fl_clash/ui/sheet.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
     hide AppBar, Scaffold, TextButton, TextField;
-import 'package:prism_ui/scaffold.dart' show AppBar;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextField;
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -191,7 +183,7 @@ void main() {
           builder: (context) => TextButton(
             onPressed: () => showSheet<void>(
               context: context,
-              builder: (_, _) => Scaffold(
+              builder: (_) => Scaffold(
                 title: 'title',
                 searchState: AppBarSearchState(onSearch: queries.add),
                 body: const SizedBox(height: 200),

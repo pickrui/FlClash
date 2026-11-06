@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
-import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -24,10 +24,7 @@ import 'package:fl_clash/views/profiles/custom_groups.dart';
 import 'package:fl_clash/views/profiles/custom_overwrite.dart';
 import 'package:material_ui/material_ui.dart'
     hide Checkbox, TextButton, TextField, TextFormField;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fl_clash/ui/input.dart';
 
 import '../helpers/test_app.dart';
 import '../helpers/app_paths.dart';

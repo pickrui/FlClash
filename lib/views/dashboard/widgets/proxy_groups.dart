@@ -8,15 +8,13 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/typography.dart';
+import 'package:prism_ui/shapes/shapes.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/style.dart';
 import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:prism_ui/shapes/shapes.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/tooltip.dart' show Tooltip;
 
 import 'card.dart';
 import 'connections_table.dart';
@@ -40,7 +38,7 @@ Future<void> showProxiesSheet(BuildContext context, {String? groupName}) async {
   container.read(query.notifier).value = '';
   await showSheet<void>(
     context: context,
-    builder: (_, _) => const ProxiesView(picker: true),
+    builder: (_) => const ProxiesView(picker: true),
   );
   container.read(query.notifier).value = pageQuery;
 }

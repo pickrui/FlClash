@@ -142,8 +142,8 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
           onPressed: () {
             showExtend(
               context,
-              builder: (_, type) {
-                return ProvidersView(type: type);
+              builder: (_) {
+                return const ProvidersView();
               },
             );
           },

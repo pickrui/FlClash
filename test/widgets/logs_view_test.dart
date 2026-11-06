@@ -5,17 +5,15 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/ui/chip.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/scroll.dart';
 import 'package:fl_clash/views/logs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Chip, TextField;
-import 'package:prism_ui/text_field.dart' show TextField;
 
 import '../helpers/test_app.dart';
 

@@ -5,12 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math' as math;
 
-import 'package:prism_ui/press_region.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:code_forge/code_forge.dart' show CodeForgeSuggestionDetails;
-import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/scroll_behavior.dart';
-import 'package:fl_clash/ui/shape.dart';
-import 'package:fl_clash/ui/surface.dart';
 import 'package:flutter/widgets.dart';
 
 const _suggestionInset = 8.0;

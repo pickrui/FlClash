@@ -19,9 +19,8 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/cloud/cloud_account_page.dart';
 import 'package:fl_clash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton;
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
-import 'package:fl_clash/ui/common_button.dart' as prism;
+import 'package:material_ui/material_ui.dart' hide FilledButton, IconButton;
+import 'package:fl_clash/ui/ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -75,7 +74,7 @@ void main() {
     expect(checks, 2);
     expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
     expect(
-      find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -94,16 +93,13 @@ void main() {
       find.text('Service Check Failed: Connection timed out'),
       findsOneWidget,
     );
-    expect(
-      find.widgetWithGlyph(prism.IconButton, AppGlyphs.error),
-      findsOneWidget,
-    );
-    await tester.tap(find.widgetWithText(prism.FilledButton, 'Check API'));
+    expect(find.widgetWithGlyph(IconButton, AppGlyphs.error), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Check API'));
     await tester.pumpAndSettle();
     expect(checks, 3);
     expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
     expect(
-      find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -166,7 +162,7 @@ void main() {
     expect(attempts, [false, true]);
     expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
     expect(
-      find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
       findsNothing,
     );
     expect(find.byGlyph(AppGlyphs.warning), findsNWidgets(2));
@@ -174,12 +170,12 @@ void main() {
       find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
       findsOneWidget,
     );
-    await tester.tap(find.widgetWithText(prism.FilledButton, 'Check API'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Check API'));
     await tester.pumpAndSettle();
     expect(attempts, [false, true, false]);
     expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
     expect(
-      find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
       findsOneWidget,
     );
   });
@@ -210,7 +206,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
+        find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
         findsNothing,
       );
       expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
@@ -294,11 +290,11 @@ void main() {
           findsNothing,
         );
         expect(
-          find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
+          find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
           findsNothing,
         );
         expect(
-          find.widgetWithGlyph(prism.IconButton, AppGlyphs.error),
+          find.widgetWithGlyph(IconButton, AppGlyphs.error),
           findsOneWidget,
         );
         expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
@@ -502,7 +498,7 @@ void main() {
       expect(attempts, [false, true, false]);
       expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
       expect(
-        find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
+        find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
         findsOneWidget,
       );
     },
@@ -558,7 +554,7 @@ void main() {
     expect(checks, 3);
     expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
     expect(
-      find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
+      find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
       findsOneWidget,
     );
   });
@@ -582,7 +578,7 @@ void main() {
       expect(checks, 3);
       expect(find.byKey(const ValueKey('cloud-service-status')), findsNothing);
       expect(
-        find.widgetWithGlyph(prism.IconButton, AppGlyphs.checkCircle),
+        find.widgetWithGlyph(IconButton, AppGlyphs.checkCircle),
         findsOneWidget,
       );
     },

@@ -9,11 +9,10 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/plugins/battery.dart';
 import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fl_clash/ui/common_button.dart' show FilledButton, ButtonStyle;
 
 class BatteryOptimizationItem extends ConsumerStatefulWidget {
   const BatteryOptimizationItem({

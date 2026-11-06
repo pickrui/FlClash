@@ -9,8 +9,9 @@ import 'package:fl_clash/views/cloud/cloud_announcement_card.dart';
 import 'package:fl_clash/widgets/sheet_scaffold.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide SelectionArea;
-import 'package:prism_ui/selectable_text.dart' show SelectionArea;
+import 'package:material_ui/material_ui.dart' hide Scaffold, SelectionArea;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 
 import '../helpers/test_app.dart';
 
@@ -39,7 +40,7 @@ Future<void> _pumpCard(
       locale: const Locale('en'),
       textScaler: TextScaler.linear(textScale),
       overrides: [isMobileViewProvider.overrideWith((_) => mobile)],
-      child: Scaffold(
+      child: material.Scaffold(
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: CloudAnnouncementCard(

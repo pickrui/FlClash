@@ -25,7 +25,7 @@ Future<NamedUrl?> showNamedUrlForm(
   FormFieldValidator<String>? urlValidator,
 }) => showFormSheet<NamedUrl>(
   context: context,
-  builder: (_, _) => _NamedUrlForm(
+  builder: (_) => _NamedUrlForm(
     title: title,
     label: label,
     url: url,
@@ -42,7 +42,7 @@ Future<List<NamedUrl>?> showNamedUrlsForm(
   Set<String> existingUrls = const {},
 }) => showFormSheet<List<NamedUrl>>(
   context: context,
-  builder: (_, _) => _NamedUrlForm(
+  builder: (_) => _NamedUrlForm(
     title: title,
     label: '',
     url: '',
@@ -63,7 +63,7 @@ Future<NamedProfileLinks?> showProfileLinksForm(
   Set<String> existingUrls = const {},
 }) => showFormSheet<NamedProfileLinks>(
   context: context,
-  builder: (_, _) => _NamedUrlForm(
+  builder: (_) => _NamedUrlForm(
     title: title,
     label: '',
     url: '',

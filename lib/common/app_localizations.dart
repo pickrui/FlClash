@@ -5,8 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/ui/color.dart';
-import 'package:fl_clash/ui/l10n.dart';
+import 'package:prism_ui/color.dart';
+import 'package:prism_ui/l10n.dart';
 import 'package:flutter/widgets.dart';
 
 part 'l10n_labels.dart';

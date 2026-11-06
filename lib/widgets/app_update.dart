@@ -7,10 +7,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/typography.dart';
-import 'package:fl_clash/ui/shape.dart';
-import 'package:fl_clash/ui/surface.dart' show SurfaceLevel;
+import 'package:prism_ui/context.dart';
+import 'package:prism_ui/typography.dart';
+import 'package:prism_ui/shape.dart';
+import 'package:prism_ui/surface.dart' show SurfaceLevel;
 
 export 'package:fl_clash/common/update_download_task.dart'
     show UpdateDownloadAction;
@@ -26,7 +26,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart'
     hide IconButton, TextButton, FilledButton, OutlinedButton, ButtonStyle;
 import 'package:prism_ui/theme_data.dart' as prism;
-import 'package:fl_clash/ui/common_button.dart'
+import 'package:prism_ui/common_button.dart'
     show IconButton, TextButton, FilledButton, OutlinedButton, ButtonStyle;
 import 'package:url_launcher/url_launcher.dart';
 

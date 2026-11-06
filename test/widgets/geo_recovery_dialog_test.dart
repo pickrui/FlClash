@@ -5,24 +5,23 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:prism_ui/linear_progress.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/geo_recovery_dialog.dart';
-import 'package:fl_clash/ui/alert_scope.dart';
-import 'package:fl_clash/ui/dialog.dart';
 import 'package:material_ui/material_ui.dart'
     hide
         AlertDialog,
+        AppBar,
         FilledButton,
         LinearProgressIndicator,
+        Scaffold,
         TextButton,
         TextFormField;
+import 'package:material_ui/material_ui.dart' as material show AppBar, Scaffold;
 import 'package:material_ui/material_ui.dart' as material show AlertDialog;
-import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
-import 'package:prism_ui/text_field.dart' show TextFormField;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -297,14 +296,14 @@ Future<void> _openDialog(
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) =>
-            AlertScope(presenter: const CommonAlertPresenter(), child: child!),
-        home: Scaffold(
+            AlertScope(presenter: const AppAlertPresenter(), child: child!),
+        home: material.Scaffold(
           body: Builder(
             builder: (context) => TextButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (context) => Scaffold(
-                    appBar: AppBar(title: const Text('Resource page')),
+                  builder: (context) => material.Scaffold(
+                    appBar: material.AppBar(title: const Text('Resource page')),
                     body: TextButton(
                       onPressed: () async {
                         final result = await showDialog<bool>(

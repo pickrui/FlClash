@@ -5,15 +5,12 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/context.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/app_update_scheduler.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/common/periodic_task_runner.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/icons/navigation_glyph.dart';
-import 'package:fl_clash/ui/sidebar.dart';
-import 'package:fl_clash/ui/animated_visibility.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/resources.dart';
 import 'package:fl_clash/providers/mitm.dart';
@@ -23,7 +20,6 @@ import 'package:fl_clash/widgets/icon.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/divider.dart' show Divider;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {

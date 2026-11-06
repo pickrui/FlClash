@@ -6,14 +6,13 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:fl_clash/ui/liquid_glass.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
-import 'package:material_ui/material_ui.dart' hide FilledButton, ColorScheme;
-import 'package:prism_ui/theme_data.dart' show ColorScheme;
-import 'package:fl_clash/ui/common_button.dart' show FilledButton;
+import 'package:material_ui/material_ui.dart'
+    hide ButtonStyle, ColorScheme, Colors, FilledButton;
+import 'package:material_ui/material_ui.dart' as material show Colors;
 
 void main() {
   test('a profile reads how far an outline reaches each way', () {
@@ -93,7 +92,7 @@ void main() {
   test('every glass and rim eases in from bare air and lerps to its ends', () {
     for (final brightness in Brightness.values) {
       final colorScheme = ColorScheme.fromSeed(
-        seedColor: Colors.blue,
+        seedColor: material.Colors.blue,
         brightness: brightness,
       );
       final styles = [
@@ -146,11 +145,11 @@ void main() {
 
   testWidgets('a pane casts its shadows only outside itself', (tester) async {
     final keys = [GlobalKey(), GlobalKey()];
-    final colorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+    final colorScheme = ColorScheme.fromSeed(seedColor: material.Colors.blue);
     Widget pane(Key key, List<BoxShadow> shadows) => RepaintBoundary(
       key: key,
       child: ColoredBox(
-        color: Colors.white,
+        color: material.Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(30),
           child: SizedBox(
@@ -204,11 +203,16 @@ void main() {
       PrismApp(
         home: Center(
           child: FilledButton(
-            style: liquidGlassButtonStyle(
-              (states) => LiquidGlassStyle(
-                tint: states.contains(WidgetState.pressed)
-                    ? Colors.red
-                    : Colors.blue,
+            style: ButtonStyle(
+              backgroundColor: const WidgetStatePropertyAll(
+                material.Colors.transparent,
+              ),
+              backgroundBuilder: LiquidGlass.buttonBackground(
+                (states) => LiquidGlassStyle(
+                  tint: states.contains(WidgetState.pressed)
+                      ? material.Colors.red
+                      : material.Colors.blue,
+                ),
               ),
             ),
             onPressed: () {},
@@ -225,13 +229,13 @@ void main() {
     );
 
     expect(glass().pressed, isFalse);
-    expect(glass().style.tint, Colors.blue);
+    expect(glass().style.tint, material.Colors.blue);
     final gesture = await tester.startGesture(
       tester.getCenter(find.text('Go')),
     );
     await tester.pump(const Duration(milliseconds: 60));
     expect(glass().pressed, isTrue);
-    expect(glass().style.tint, Colors.red);
+    expect(glass().style.tint, material.Colors.red);
     await gesture.up();
     await tester.pumpAndSettle();
     expect(glass().pressed, isFalse);
@@ -247,7 +251,7 @@ void main() {
             child: const SizedBox.square(
               dimension: 40,
               child: LiquidGlass(
-                style: LiquidGlassStyle(tint: Colors.blue),
+                style: LiquidGlassStyle(tint: material.Colors.blue),
                 clipper: _Diamond(),
               ),
             ),
@@ -282,7 +286,9 @@ void main() {
             key: key,
             child: const SizedBox.square(
               dimension: 40,
-              child: LiquidGlass(style: LiquidGlassStyle(tint: Colors.blue)),
+              child: LiquidGlass(
+                style: LiquidGlassStyle(tint: material.Colors.blue),
+              ),
             ),
           ),
         ),

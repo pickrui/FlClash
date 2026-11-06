@@ -5,19 +5,13 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
-import 'package:fl_clash/ui/context.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/services/network_diagnostics.dart';
-import 'package:fl_clash/ui/button.dart';
-import 'package:fl_clash/ui/dialog.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/selectable_text.dart' show SelectableText;
-import 'package:prism_ui/theme_data.dart' show Theme;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
 import 'package:url_launcher/url_launcher.dart';
 
 final networkDiagnosticProxySettingsOpenerProvider =

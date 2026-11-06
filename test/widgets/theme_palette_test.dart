@@ -9,12 +9,13 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/color.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/views/theme.dart';
 import 'package:fl_clash/widgets/palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Colors;
+import 'package:material_ui/material_ui.dart' as material show Colors;
 
 import '../helpers/test_app.dart';
 
@@ -22,9 +23,9 @@ void main() {
   test(
     'system accent follows brightness while explicit colors keep priority',
     () {
-      globalState.accentColor = Colors.green;
-      globalState.lightDynamicPrimary = Colors.blue;
-      globalState.darkDynamicPrimary = Colors.purple;
+      globalState.accentColor = material.Colors.green;
+      globalState.lightDynamicPrimary = material.Colors.blue;
+      globalState.darkDynamicPrimary = material.Colors.purple;
       addTearDown(() {
         globalState.lightDynamicPrimary = null;
         globalState.darkDynamicPrimary = null;
@@ -34,17 +35,18 @@ void main() {
       container
           .read(themeSettingProvider.notifier)
           .update(
-            (state) => state.copyWith(primaryColor: Colors.orange.toARGB32()),
+            (state) =>
+                state.copyWith(primaryColor: material.Colors.orange.toARGB32()),
           );
       final style = container.read(themeSettingProvider).colorStyle;
       for (final brightness in Brightness.values) {
         final systemColor = brightness == Brightness.light
-            ? Colors.blue
-            : Colors.purple;
+            ? material.Colors.blue
+            : material.Colors.purple;
         for (final settings in [
-          (ignore: false, color: null, seed: Colors.orange),
+          (ignore: false, color: null, seed: material.Colors.orange),
           (ignore: true, color: null, seed: systemColor),
-          (ignore: true, color: Colors.red, seed: Colors.red),
+          (ignore: true, color: material.Colors.red, seed: material.Colors.red),
         ]) {
           expect(
             container.read(

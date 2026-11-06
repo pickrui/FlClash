@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:prism_ui/theme_data.dart' show ThemeMode;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:test/test.dart';
 
 /// Helper to round-trip a model through JSON encode/decode.

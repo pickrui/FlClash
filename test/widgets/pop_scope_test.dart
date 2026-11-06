@@ -5,9 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/pop_scope.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
+import 'package:fl_clash/ui/ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:flutter_test/flutter_test.dart';
 
 Future<NavigatorState> _openGuard(
@@ -18,13 +18,15 @@ Future<NavigatorState> _openGuard(
   await tester.pumpWidget(
     MaterialApp(
       navigatorKey: key,
-      home: const Scaffold(body: Text('Home')),
+      home: const material.Scaffold(body: Text('Home')),
     ),
   );
   final navigator = key.currentState!;
   unawaited(
     navigator.push<void>(
-      MaterialPageRoute(builder: (_) => const Scaffold(body: Text('Parent'))),
+      MaterialPageRoute(
+        builder: (_) => const material.Scaffold(body: Text('Parent')),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -33,7 +35,7 @@ Future<NavigatorState> _openGuard(
       MaterialPageRoute(
         builder: (_) => PopGuard(
           onPop: onPop,
-          child: const Scaffold(body: Text('Draft')),
+          child: const material.Scaffold(body: Text('Draft')),
         ),
       ),
     ),
@@ -74,7 +76,7 @@ void main() {
     unawaited(
       navigator.push<void>(
         MaterialPageRoute(
-          builder: (_) => const Scaffold(body: Text('New page')),
+          builder: (_) => const material.Scaffold(body: Text('New page')),
         ),
       ),
     );
@@ -126,7 +128,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: key,
-        home: const Scaffold(body: Text('Home')),
+        home: const material.Scaffold(body: Text('Home')),
       ),
     );
     unawaited(
@@ -179,7 +181,7 @@ class _LayeredDraftState extends State<_LayeredDraft> {
         widget.onGuard();
         return false;
       },
-      child: Scaffold(
+      child: material.Scaffold(
         body: Column(
           children: [
             TextButton(

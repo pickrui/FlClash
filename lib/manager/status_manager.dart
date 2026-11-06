@@ -14,12 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/state.dart';
-import 'package:prism_ui/banner.dart' show BannerLevel;
-import 'package:prism_ui/context.dart';
-import 'package:prism_ui/liquid_glass.dart';
-import 'package:prism_ui/shape.dart';
-import 'package:prism_ui/surface.dart';
-import 'package:prism_ui/typography.dart';
+import 'package:fl_clash/ui/ui.dart';
 
 // iOS 27's notification banner as the simulator showed it in the foreground.
 const _actionMinDuration = Duration(seconds: 6);

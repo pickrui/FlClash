@@ -11,9 +11,7 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/list.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/sheet.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart' show TextInputAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +28,7 @@ Future<void> _showProxyAuthenticationForm(
   final setupAction = context.setupAction;
   return showFormSheet<void>(
     context: context,
-    builder: (_, _) => ProxyAuthenticationForm(
+    builder: (_) => ProxyAuthenticationForm(
       value: ref.read(networkSettingProvider).authentication,
       onSave: setupAction.updateProxyAuthentication,
       focus: focus,
@@ -222,7 +220,7 @@ class _ProxyAuthenticationFormState extends State<ProxyAuthenticationForm> {
           password: _password.text,
         ),
       );
-      if (mounted) BaseNavigator.close(context);
+      if (mounted) closePage(context);
     } catch (_) {
       if (mounted) setState(() => _failed = true);
     } finally {

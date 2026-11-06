@@ -6,30 +6,18 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:prism_ui/press_surface.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/context_menu.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/open_container.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/typography.dart';
-import 'package:fl_clash/ui/view_scope.dart';
 import 'package:fl_clash/views/font_family.dart';
 import 'package:fl_clash/views/theme_preview.dart';
 import 'package:fl_clash/widgets/config_item.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Colors;
-import 'package:prism_ui/tooltip.dart' show Tooltip;
-import 'package:prism_ui/theme_data.dart' show Theme, ThemeData, ThemeMode;
-import 'package:prism_ui/slider.dart' show Slider;
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ThemeView extends StatelessWidget {
@@ -183,8 +171,7 @@ class _PrimaryColorItem extends ConsumerWidget {
     unawaited(
       showSheet<void>(
         context: context,
-        builder: (_, type) => _CustomColorSheet(
-          type: type,
+        builder: (_) => _CustomColorSheet(
           initialColor: initialColor,
           onConfirmed: (color) {
             if (context.mounted) {
@@ -868,7 +855,7 @@ class _FontFamilyItem extends ConsumerWidget {
               : card(
                   () => showSheet<void>(
                     context: context,
-                    builder: (_, _) => const FontFamilyView(),
+                    builder: (_) => const FontFamilyView(),
                   ),
                 ),
         ),
@@ -1083,12 +1070,10 @@ class _ResetButton extends StatelessWidget {
 
 class _CustomColorSheet extends StatefulWidget {
   const _CustomColorSheet({
-    required this.type,
     required this.initialColor,
     required this.onConfirmed,
   });
 
-  final SheetType type;
   final Color initialColor;
 
   /// Runs once the sheet has closed, so retheming every page cannot stall it.
@@ -1122,7 +1107,6 @@ class _CustomColorSheetState extends State<_CustomColorSheet> {
     // Clears Android's edge back-swipe zone; exclusion rects stop at 200 dp.
     final gestureInsets = MediaQuery.systemGestureInsetsOf(context);
     return AdaptiveSheetScaffold(
-      type: widget.type,
       title: appLocalizations.customColor,
       actions: [
         IconButton(

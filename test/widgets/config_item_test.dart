@@ -7,8 +7,9 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/widgets/config_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:prism_ui/list_row.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 
 import '../helpers/test_app.dart';
 
@@ -19,7 +20,7 @@ Future<void> _pump(WidgetTester tester, ProviderListenable<String> selector) {
   return tester.pumpWidget(
     TestApp(
       wrapInProviderScope: true,
-      child: Scaffold(
+      child: material.Scaffold(
         body: ConfigTextItem(
           selector: selector,
           title: (_) => 'Server',

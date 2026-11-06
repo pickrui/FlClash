@@ -22,8 +22,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:prism_ui/loading.dart';
-import 'package:prism_ui/switch.dart';
+import 'package:fl_clash/ui/ui.dart';
 
 import '../helpers/test_app.dart';
 

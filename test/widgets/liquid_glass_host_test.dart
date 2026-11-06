@@ -5,14 +5,15 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:ui' as ui;
 
-import 'package:fl_clash/ui/liquid_glass.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Colors;
+import 'package:material_ui/material_ui.dart' as material show Colors;
 
 const _red = Color(0xFFFF0000);
 const _green = Color(0xFF00FF00);
 const _blue = Color(0xFF0000FF);
-const _clear = LiquidGlassStyle(tint: Colors.transparent, blur: 0);
+const _clear = LiquidGlassStyle(tint: material.Colors.transparent, blur: 0);
 
 typedef _Pane = ({
   Rect pane,
@@ -221,7 +222,7 @@ void main() {
   testWidgets('a pane stays on its level beside one past its frost', (
     tester,
   ) async {
-    const frosted = LiquidGlassStyle(tint: Colors.transparent);
+    const frosted = LiquidGlassStyle(tint: material.Colors.transparent);
     Future<int> levelBeside(double gap) async {
       await tester.pumpWidget(
         _app(
@@ -261,7 +262,10 @@ void main() {
         _pane(const Rect.fromLTWH(100, 100, 200, 100)),
         _pane(
           const Rect.fromLTWH(100, 420, 200, 100),
-          style: const LiquidGlassStyle(tint: Colors.transparent, blur: 12),
+          style: const LiquidGlassStyle(
+            tint: material.Colors.transparent,
+            blur: 12,
+          ),
         ),
       ],
     ),
@@ -303,7 +307,7 @@ void main() {
     tester,
   ) async {
     const hazed = LiquidGlassStyle(
-      tint: Colors.transparent,
+      tint: material.Colors.transparent,
       blur: 0,
       haze: 0.72,
       hazeBlur: 15.6,
@@ -417,7 +421,10 @@ void main() {
             ),
             _pane(
               const Rect.fromLTWH(100, 100, 200, 100),
-              style: const LiquidGlassStyle(tint: Colors.transparent, blur: 12),
+              style: const LiquidGlassStyle(
+                tint: material.Colors.transparent,
+                blur: 12,
+              ),
             ),
           ],
         ),

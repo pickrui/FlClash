@@ -7,21 +7,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:code_forge/code_forge.dart';
-import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/ui/loading.dart';
-import 'package:fl_clash/ui/popup.dart';
 import 'package:flutter/gestures.dart' show kSecondaryButton;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, IconButton, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
-import 'package:prism_ui/text_field.dart' show TextField;
+    hide AlertDialog, IconButton, TextButton, TextField;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -184,7 +181,8 @@ void main() {
     unawaited(
       showDialog<void>(
         context: context,
-        builder: (_) => const AlertDialog(content: Text('Other message')),
+        builder: (_) =>
+            const material.AlertDialog(content: Text('Other message')),
       ),
     );
     await tester.pump();

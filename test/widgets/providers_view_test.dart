@@ -6,12 +6,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:prism_ui/linear_progress.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:code_forge/code_forge.dart';
 import 'package:yaml/yaml.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/pages/editor.dart';
@@ -24,18 +23,22 @@ import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/ui/chip.dart';
-import 'package:fl_clash/ui/list.dart';
 import 'package:fl_clash/views/proxies/providers.dart';
-import 'package:fl_clash/ui/sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, IconButton, TextButton, LinearProgressIndicator;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
-import 'package:prism_ui/text_field.dart' show TextField;
+    hide
+        AlertDialog,
+        IconButton,
+        LinearProgressIndicator,
+        Scaffold,
+        TextButton,
+        TextField;
+import 'package:material_ui/material_ui.dart'
+    as material
+    show AlertDialog, Scaffold;
 
 import '../helpers/test_app.dart';
 
@@ -104,7 +107,7 @@ void main() {
             child: Builder(
               builder: (context) {
                 home = context;
-                return const Scaffold(body: Text('Providers home'));
+                return const material.Scaffold(body: Text('Providers home'));
               },
             ),
           ),
@@ -163,7 +166,8 @@ void main() {
         unawaited(
           showDialog<void>(
             context: editorContext,
-            builder: (_) => const AlertDialog(content: Text('Other message')),
+            builder: (_) =>
+                const material.AlertDialog(content: Text('Other message')),
           ),
         );
         await tester.pump();
@@ -198,7 +202,7 @@ void main() {
         TestApp(
           locale: locale,
           textScaler: const TextScaler.linear(2),
-          child: const Scaffold(
+          child: const material.Scaffold(
             body: Center(
               child: SizedBox(
                 width: 240,
@@ -228,7 +232,7 @@ void main() {
     await tester.pumpWidget(
       const TestApp(
         locale: Locale('en'),
-        child: Scaffold(
+        child: material.Scaffold(
           body: Column(
             children: [
               SubscriptionInfoView(subscriptionInfo: info),
@@ -284,13 +288,13 @@ void main() {
                 builder: (context) => TextButton(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => const ProvidersView(type: SheetType.page),
+                      builder: (_) => const ProvidersView(),
                     ),
                   ),
                   child: const Text('open providers'),
                 ),
               )
-            : const ProvidersView(type: SheetType.page),
+            : const ProvidersView(),
       ),
     );
     await tester.pumpAndSettle();

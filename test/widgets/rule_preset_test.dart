@@ -8,8 +8,7 @@ import 'dart:async';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
 import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
-import 'package:fl_clash/ui/list.dart';
-import 'package:fl_clash/ui/scaffold.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -17,7 +16,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import '../helpers/test_app.dart';
 

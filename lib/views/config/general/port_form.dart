@@ -103,7 +103,7 @@ class _PortFormState extends ConsumerState<_PortForm> {
             tproxyPort: defaultClashConfig.tproxyPort,
           ),
         );
-    BaseNavigator.close(context);
+    closePage(context);
   }
 
   Map<_PortField, String> _issues(AppLocalizations appLocalizations) {
@@ -128,7 +128,7 @@ class _PortFormState extends ConsumerState<_PortForm> {
             tproxyPort: int.parse(_tProxyPortController.text),
           ),
         );
-    BaseNavigator.close(context);
+    closePage(context);
   }
 
   String? _validatePort(

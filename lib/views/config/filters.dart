@@ -34,7 +34,7 @@ class _FiltersViewState extends ConsumerState<FiltersView> {
   Future<void> _handleAddOrUpdate([Filter? filter]) async {
     final res = await showFormSheet<Filter>(
       context: context,
-      builder: (_, _) => _FilterForm(
+      builder: (_) => _FilterForm(
         filter: filter,
         checkRegex: _checkRegex,
         reservedLabels: {

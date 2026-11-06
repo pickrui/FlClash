@@ -10,16 +10,11 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/scaffold.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide FilledButton, Scaffold;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../helpers/test_app.dart';

@@ -13,13 +13,11 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/style.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Easing;
 
 import 'card.dart';
 
@@ -138,7 +136,7 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
     stopPolling();
     await showSheet(
       context: context,
-      builder: (_, _) => MemoryDetailSheet(
+      builder: (_) => MemoryDetailSheet(
         initial: _memoryStateNotifier.value,
         memoryReader: widget.memoryReader,
       ),

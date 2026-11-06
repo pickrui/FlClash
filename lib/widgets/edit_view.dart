@@ -555,7 +555,7 @@ class _MapInputPageState
     MapEntry<String, String>? entry,
   ) => showFormSheet<List<MapEntry<String, String>>>(
     context: context,
-    builder: (_, _) => MapEntryForm(
+    builder: (_) => MapEntryForm(
       entry: entry,
       existingKeys: {..._entries.map(idOf), ...widget.reservedKeys},
       keyLabel: widget.keyLabel,

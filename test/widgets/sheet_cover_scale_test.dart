@@ -5,12 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/ui/sheet.dart';
-import 'package:fl_clash/ui/scaffold.dart';
-import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -55,7 +54,7 @@ void main() {
               showSheet<void>(
                 context: context,
                 props: props,
-                builder: (context, _) => builder(context),
+                builder: (context) => builder(context),
               ),
             ),
             child: const Text('open'),
@@ -80,7 +79,7 @@ void main() {
       showSheet<void>(
         context: sheetContext,
         props: _tallest,
-        builder: (_, _) => _page('B', 2),
+        builder: (_) => _page('B', 2),
       ),
     );
     await tester.pumpAndSettle();
@@ -96,7 +95,7 @@ void main() {
     unawaited(
       showDialog<void>(
         context: sheetContext,
-        builder: (_) => const AlertDialog(content: Text('dialog')),
+        builder: (_) => const material.AlertDialog(content: Text('dialog')),
       ),
     );
     await tester.pumpAndSettle();
@@ -116,7 +115,7 @@ void main() {
       showSheet<void>(
         context: sheetContext,
         props: _tallest,
-        builder: (_, _) => _page('B', 20),
+        builder: (_) => _page('B', 20),
       ),
     );
     await tester.pumpAndSettle();
@@ -154,7 +153,7 @@ void main() {
     final rest = _rectOf(tester, 'A');
 
     unawaited(
-      showSheet<void>(context: sheetContext, builder: (_, _) => _page('B', 20)),
+      showSheet<void>(context: sheetContext, builder: (_) => _page('B', 20)),
     );
     await tester.pumpAndSettle();
     expect(_rectOf(tester, 'A'), rest);

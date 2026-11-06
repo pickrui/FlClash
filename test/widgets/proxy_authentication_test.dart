@@ -7,11 +7,11 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/ui/sheet.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/proxy_authentication.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField, FilledButton;
-import 'package:fl_clash/ui/common_button.dart' show FilledButton;
-import 'package:prism_ui/text_field.dart' show TextFormField;
+import 'package:material_ui/material_ui.dart'
+    hide FilledButton, Scaffold, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -23,12 +23,12 @@ Widget _app(Locale locale, Future<void> Function(AuthenticationProps) save) =>
       overrides: [
         viewSizeProvider.overrideWithBuild((_, _) => const Size(400, 800)),
       ],
-      child: Scaffold(
+      child: material.Scaffold(
         body: Builder(
           builder: (context) => FilledButton(
             onPressed: () => showFormSheet<void>(
               context: context,
-              builder: (_, _) => ProxyAuthenticationForm(
+              builder: (_) => ProxyAuthenticationForm(
                 value: const AuthenticationProps(
                   enable: true,
                   username: 'local',
@@ -96,7 +96,7 @@ void main() {
             ),
           ),
         ],
-        child: const Scaffold(body: ProxyAuthenticationItem()),
+        child: const material.Scaffold(body: ProxyAuthenticationItem()),
       ),
     );
     await tester.pumpAndSettle();

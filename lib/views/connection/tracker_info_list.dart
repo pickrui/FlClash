@@ -20,8 +20,6 @@ import 'package:fl_clash/widgets/record_filter.dart';
 import 'package:fl_clash/widgets/record_feed_list.dart';
 import 'package:fl_clash/widgets/record.dart';
 import 'package:fl_clash/widgets/record_table.dart';
-import 'package:fl_clash/ui/keyed_animated_list.dart';
-import 'package:fl_clash/ui/route_motion_hold.dart';
 
 class TrackerInfoListController extends ValueNotifier<TrackerInfosState> {
   TrackerInfoListController() : super(const TrackerInfosState());

@@ -9,9 +9,12 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/views/cloud/store_quote_dialog.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:fl_clash/ui/common_button.dart' as prism;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart'
+    as material
+    show AlertDialog, Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -72,7 +75,7 @@ Future<List<StoreQuoteChoice?>> _open(
         cloudAccountProvider.overrideWith(_Account.new),
       ],
       child: Builder(
-        builder: (context) => Scaffold(
+        builder: (context) => material.Scaffold(
           body: TextButton(
             onPressed: () async => results.add(
               await showDialog<StoreQuoteChoice>(
@@ -95,9 +98,8 @@ Future<List<StoreQuoteChoice?>> _open(
   return results;
 }
 
-VoidCallback? _action(WidgetTester tester, String label) => tester
-    .widget<prism.TextButton>(find.widgetWithText(prism.TextButton, label))
-    .onPressed;
+VoidCallback? _action(WidgetTester tester, String label) =>
+    tester.widget<TextButton>(find.widgetWithText(TextButton, label)).onPressed;
 
 void main() {
   testWidgets('expired quote closes only its own route under a newer dialog', (
@@ -106,14 +108,15 @@ void main() {
     final panel = _Panel();
     final results = await _open(tester, panel);
     final pending = panel.pendingQuote = Completer<StoreQuote>();
-    await tester.tap(find.widgetWithText(prism.TextButton, 'Verify'));
+    await tester.tap(find.widgetWithText(TextButton, 'Verify'));
     await tester.pump();
     final context = tester.element(find.byType(StoreQuoteDialog));
     final navigator = Navigator.of(context);
     unawaited(
       showDialog<void>(
         context: context,
-        builder: (_) => const AlertDialog(content: Text('Newer dialog')),
+        builder: (_) =>
+            const material.AlertDialog(content: Text('Newer dialog')),
       ),
     );
     await tester.pump();
@@ -152,15 +155,15 @@ void main() {
       find.text('Insufficient balance. Top up before continuing.'),
       findsOneWidget,
     );
-    expect(find.widgetWithText(prism.TextButton, 'Confirm'), findsNothing);
+    expect(find.widgetWithText(TextButton, 'Confirm'), findsNothing);
 
-    await tester.tap(find.widgetWithText(prism.TextButton, 'Recharge'));
+    await tester.tap(find.widgetWithText(TextButton, 'Recharge'));
     await tester.pumpAndSettle();
     expect(panel.recharges, 1);
     expect(panel.quotes, 2);
-    expect(find.widgetWithText(prism.TextButton, 'Recharge'), findsNothing);
+    expect(find.widgetWithText(TextButton, 'Recharge'), findsNothing);
 
-    await tester.tap(find.widgetWithText(prism.TextButton, 'Confirm'));
+    await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
     await tester.pumpAndSettle();
     expect(results.single?.authorizedPrice, 30);
     expect(tester.takeException(), isNull);
@@ -172,7 +175,7 @@ void main() {
     final panel = _Panel()..rechargeSucceeds = false;
     await _open(tester, panel);
 
-    await tester.tap(find.widgetWithText(prism.TextButton, 'Recharge'));
+    await tester.tap(find.widgetWithText(TextButton, 'Recharge'));
     await tester.pumpAndSettle();
     expect(panel.recharges, 1);
     expect(panel.quotes, 1);
@@ -184,7 +187,7 @@ void main() {
   ) async {
     await _open(tester, _Panel(), offerRecharge: false);
 
-    expect(find.widgetWithText(prism.TextButton, 'Recharge'), findsNothing);
+    expect(find.widgetWithText(TextButton, 'Recharge'), findsNothing);
     expect(_action(tester, 'Confirm'), isNull);
   });
 }

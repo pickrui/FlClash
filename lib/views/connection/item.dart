@@ -14,15 +14,11 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/record.dart';
-import 'package:fl_clash/ui/paged_sheet.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_clash/models/record_filter.dart';
 import 'package:fl_clash/widgets/record_filter.dart';
-import 'package:fl_clash/ui/context_menu.dart';
 
 String _endpointText(String ip, String port) {
   if (ip.isEmpty) {
@@ -44,7 +40,7 @@ void showTrackerInfoDetail(
   showSheet<void>(
     context: context,
     props: nestedPagedSheetProps,
-    builder: (_, _) => NestedPagedSheet(
+    builder: (_) => NestedPagedSheet(
       builder: (_) => Scaffold(
         body: TrackerInfoDetailView(trackerInfo: trackerInfo),
         title: title,

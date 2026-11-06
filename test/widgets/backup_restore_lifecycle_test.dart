@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:prism_ui/linear_progress.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/dav_client.dart';
@@ -16,13 +16,11 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/backup_and_restore.dart';
-import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/list.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, TextButton, LinearProgressIndicator;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
+    hide AlertDialog, IconButton, LinearProgressIndicator, TextButton;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 
 import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
@@ -221,7 +219,8 @@ void main() {
     unawaited(
       showDialog<void>(
         context: context,
-        builder: (_) => const AlertDialog(content: Text('Newer dialog')),
+        builder: (_) =>
+            const material.AlertDialog(content: Text('Newer dialog')),
       ),
     );
     await tester.pump();

@@ -6,20 +6,22 @@
 import 'dart:typed_data';
 
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/liquid_glass.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:fl_clash/ui/popup.dart';
-import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kPressTimeout;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart'
-    hide ColorScheme, IconButton, PopupMenuItem, TextButton, Theme, ThemeData;
-import 'package:prism_ui/theme_data.dart' show Theme, ThemeData, ColorScheme;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
+    hide
+        ColorScheme,
+        Divider,
+        IconButton,
+        PopupMenuItem,
+        Scaffold,
+        TextButton,
+        Theme,
+        ThemeData;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/divider.dart' as prism;
-import 'package:prism_ui/press_region.dart';
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
@@ -70,7 +72,7 @@ void main() {
     late PopupOpen open;
     await tester.pumpWidget(
       TestApp(
-        child: Scaffold(
+        child: material.Scaffold(
           body: Center(
             child: PopupAnchor(
               targetBuilder: (value) {
@@ -95,7 +97,7 @@ void main() {
     late PopupOpen open;
     await tester.pumpWidget(
       TestApp(
-        homeBuilder: (child) => Scaffold(body: Center(child: child)),
+        homeBuilder: (child) => material.Scaffold(body: Center(child: child)),
         child: PopupAnchor(
           targetBuilder: (value) {
             open = value;
@@ -124,7 +126,7 @@ void main() {
     late PopupOpen open;
     await tester.pumpWidget(
       TestApp(
-        homeBuilder: (child) => Scaffold(body: child),
+        homeBuilder: (child) => material.Scaffold(body: child),
         child: Padding(
           padding: const EdgeInsets.only(top: 14),
           child: Row(
@@ -168,7 +170,7 @@ void main() {
             surfaceContainerHigh: lifted,
           ),
         ),
-        homeBuilder: (child) => Scaffold(body: Center(child: child)),
+        homeBuilder: (child) => material.Scaffold(body: Center(child: child)),
         child: ElevatedSurfaceTheme(
           child: PopupAnchor(
             targetBuilder: (value) {
@@ -193,7 +195,7 @@ void main() {
     var builds = 0;
     await tester.pumpWidget(
       TestApp(
-        child: Scaffold(
+        child: material.Scaffold(
           body: Center(
             child: PopupAnchor(
               targetBuilder: (_) => const SizedBox(width: 40, height: 40),
@@ -220,7 +222,7 @@ void main() {
     late PopupOpen open;
     await tester.pumpWidget(
       TestApp(
-        child: Scaffold(
+        child: material.Scaffold(
           body: Center(
             child: ValueListenableBuilder<bool>(
               valueListenable: showBox,
@@ -710,17 +712,17 @@ void main() {
     ]);
     open();
     await tester.pumpAndSettle();
-    expect(find.byType(prism.Divider), findsNothing);
+    expect(find.byType(Divider), findsNothing);
 
     await tester.tap(find.text('parent'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(prism.Divider), findsOneWidget);
+    expect(find.byType(Divider), findsOneWidget);
     final header = find.ancestor(
       of: find.text('parent').last,
       matching: find.byType(PressRegion),
     );
-    final divider = find.byType(prism.Divider);
+    final divider = find.byType(Divider);
     expect(tester.getTopLeft(divider).dy, tester.getBottomLeft(header).dy);
     expect(tester.getSize(divider).height, 17);
     expect(
@@ -1012,7 +1014,7 @@ void main() {
     final picked = <String>[];
     await tester.pumpWidget(
       TestApp(
-        homeBuilder: (child) => Scaffold(body: Center(child: child)),
+        homeBuilder: (child) => material.Scaffold(body: Center(child: child)),
         child: PopupAnchor(
           targetBuilder: (open) => TextButton(
             onPressed: enabled ? open : null,
@@ -1293,7 +1295,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       TestApp(
-        homeBuilder: (child) => Scaffold(body: Center(child: child)),
+        homeBuilder: (child) => material.Scaffold(body: Center(child: child)),
         child: PopupAnchor(
           targetBuilder: (open) => IconButton(
             tooltip: 'tip',
@@ -1323,7 +1325,7 @@ void main() {
     final picked = <String>[];
     await tester.pumpWidget(
       TestApp(
-        homeBuilder: (child) => Scaffold(body: child),
+        homeBuilder: (child) => material.Scaffold(body: child),
         child: ListView(
           children: [
             const SizedBox(height: 200),
@@ -2061,7 +2063,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         builder: (_, child) => LiquidGlassScope(enabled: true, child: child!),
-        child: Scaffold(
+        child: material.Scaffold(
           body: Center(
             child: PopupAnchor(
               targetBuilder: (value) {
@@ -2102,7 +2104,7 @@ void main() {
               .copyWith(disableAnimations: reduceMotion),
           child: child!,
         ),
-        child: Scaffold(
+        child: material.Scaffold(
           body: Align(
             alignment: Alignment.topRight,
             child: PopupAnchor(
@@ -2153,7 +2155,7 @@ void main() {
     late PopupOpen open;
     await tester.pumpWidget(
       TestApp(
-        child: Scaffold(
+        child: material.Scaffold(
           body: ValueListenableBuilder<double>(
             valueListenable: shift,
             builder: (_, dx, child) => Padding(
@@ -2218,7 +2220,7 @@ void main() {
                 .copyWith(textScaler: const TextScaler.linear(2)),
             child: child!,
           ),
-          child: Scaffold(
+          child: material.Scaffold(
             body: Align(
               alignment: Alignment.bottomRight,
               child: PopupAnchor(

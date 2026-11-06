@@ -11,8 +11,9 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/widgets/memory_info.dart';
-import 'package:fl_clash/ui/inherited.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/ui/ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -373,7 +374,7 @@ class _TestApp extends StatelessWidget {
         builder: (context, child) {
           return wrapAppScopes(context, child!);
         },
-        home: Scaffold(body: child),
+        home: material.Scaffold(body: child),
       ),
     );
   }

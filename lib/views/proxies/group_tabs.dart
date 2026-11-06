@@ -8,15 +8,10 @@ import 'dart:math';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/common.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart' show ValueListenable, listEquals;
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/tab_view.dart' show TabController;
-import 'package:prism_ui/theme_data.dart' show Colors;
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
-import 'package:prism_ui/card.dart' as prism;
 
 const _stripInset = 16.0;
 const _tabSpacing = 8.0;
@@ -283,8 +278,8 @@ class _TabExtents {
     _TabExtents? previous,
   ) {
     final style = _labelStyleOf(context);
-    final minWidth = prism.Card.minimumOf(context).minWidth;
-    final padding = prism.Card.paddingOf(
+    final minWidth = Card.minimumOf(context).minWidth;
+    final padding = Card.paddingOf(
       context,
       const EdgeInsets.symmetric(horizontal: _tabPadding),
     ).horizontal;

@@ -5,9 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:prism_ui/list_row.dart';
 import 'package:prism_ui/press_region.dart';
+import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/ui/alert_scope.dart';
 import 'package:flutter/widgets.dart';
 
 /// Asked once, when neither the AppImage runtime nor a package manager can say

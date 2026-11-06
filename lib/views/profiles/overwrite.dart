@@ -5,10 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 // ignore_for_file: deprecated_member_use
 
-import 'package:prism_ui/prism_list.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/features/overwrite/rule_preset.dart';
@@ -27,9 +24,6 @@ import 'package:fl_clash/views/config/rules.dart';
 import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/tooltip.dart' show Tooltip;
-import 'package:fl_clash/ui/common_button.dart'
-    show IconButton, TextButton, FilledButton;
 import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

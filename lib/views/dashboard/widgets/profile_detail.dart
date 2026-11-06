@@ -6,14 +6,11 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/providers/provider_file.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/views/proxies/providers.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -31,10 +28,7 @@ Future<void> syncProfile(WidgetRef ref, Profile profile) async {
 }
 
 void showProfileDetailSheet(BuildContext context) {
-  showSheet<void>(
-    context: context,
-    builder: (_, _) => const ProfileDetailSheet(),
-  );
+  showSheet<void>(context: context, builder: (_) => const ProfileDetailSheet());
 }
 
 typedef ProfileStats = ({int groups, int proxies, int rules, int providers});

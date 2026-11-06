@@ -12,7 +12,7 @@ import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:collection/collection.dart';
-import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

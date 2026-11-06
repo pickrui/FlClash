@@ -9,11 +9,13 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/cloud_account_provider.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/views/cloud/store_payment_dialog.dart';
-import 'package:fl_clash/ui/qr_code.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:fl_clash/ui/common_button.dart' as prism;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart'
+    as material
+    show AlertDialog, Scaffold;
 
 import '../helpers/test_app.dart';
 
@@ -51,7 +53,7 @@ Future<List<bool?>> _open(
         paymentStatusQueryProvider.overrideWithValue(payments.query),
       ],
       child: Builder(
-        builder: (context) => Scaffold(
+        builder: (context) => material.Scaffold(
           body: TextButton(
             onPressed: () async => results.add(
               await showDialog<bool>(
@@ -108,9 +110,7 @@ void main() {
     await tester.pump();
     expect(
       tester
-          .widget<prism.TextButton>(
-            find.widgetWithText(prism.TextButton, 'Checking...'),
-          )
+          .widget<TextButton>(find.widgetWithText(TextButton, 'Checking...'))
           .onPressed,
       isNull,
     );
@@ -168,7 +168,8 @@ void main() {
       unawaited(
         showDialog<void>(
           context: context,
-          builder: (_) => const AlertDialog(title: Text('External link')),
+          builder: (_) =>
+              const material.AlertDialog(title: Text('External link')),
         ),
       );
       await tester.pumpAndSettle();

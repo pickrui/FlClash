@@ -19,10 +19,7 @@ import 'package:material_ui/material_ui.dart'
 import 'package:material_ui/material_ui.dart'
     as material
     show AlertDialog, Scaffold;
-import 'package:prism_ui/theme_data.dart' show Theme;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
-import 'package:prism_ui/text_field.dart' show TextField;
-import 'package:fl_clash/ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';
@@ -668,7 +665,7 @@ void main() {
       expect(_onPressed(tester, 'Save'), isNull);
 
       api.previewError = null;
-      await tester.tap(find.widgetWithText(prism.TextButton, 'Retry'));
+      await tester.tap(find.widgetWithText(TextButton, 'Retry'));
       await tester.pumpAndSettle();
       expect(api.previews, const [
         NodeFilter(includeLines: ['gia']),

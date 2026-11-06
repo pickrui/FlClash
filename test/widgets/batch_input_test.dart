@@ -7,14 +7,12 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:fl_clash/widgets/input.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, TextFormField, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
+    hide Scaffold, TextButton, TextField, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../helpers/test_app.dart';
 
@@ -173,7 +171,7 @@ void main() {
             locale: const Locale('en'),
             wrapInProviderScope: true,
             child: Builder(
-              builder: (context) => Scaffold(
+              builder: (context) => material.Scaffold(
                 body: TextButton(
                   child: const Text('open editor'),
                   onPressed: () async {
@@ -283,7 +281,7 @@ void main() {
             locale: const Locale('en'),
             wrapInProviderScope: true,
             child: Builder(
-              builder: (context) => Scaffold(
+              builder: (context) => material.Scaffold(
                 body: TextButton(
                   child: const Text('open editor'),
                   onPressed: () async {
@@ -364,7 +362,7 @@ void main() {
         container: container,
         child: const TestApp(
           locale: Locale('en'),
-          child: Scaffold(body: RouteAddressItem()),
+          child: material.Scaffold(body: RouteAddressItem()),
         ),
       ),
     );

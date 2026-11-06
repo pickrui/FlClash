@@ -19,7 +19,7 @@ import 'package:riverpod/riverpod.dart';
 
 import '../helpers/app_paths.dart';
 
-import 'package:fl_clash/ui/metrics.dart';
+import 'package:fl_clash/ui/ui.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

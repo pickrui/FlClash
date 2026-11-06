@@ -13,11 +13,12 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
 import 'package:fl_clash/views/connection/requests.dart';
 import 'package:fl_clash/views/connection/item.dart';
-import 'package:fl_clash/ui/paged_sheet.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/views/dashboard/widgets/connection_stats.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
@@ -108,7 +109,7 @@ void main() {
             onGenerateRoute: (_) =>
                 MaterialPageRoute<void>(builder: (_) => child),
           ),
-          child: Scaffold(
+          child: material.Scaffold(
             body: ListView(children: const [ConnectionStatsCard()]),
           ),
         ),
@@ -251,7 +252,7 @@ void main() {
 
     navigator.currentState!.push(
       MaterialPageRoute<void>(
-        builder: (_) => const Scaffold(body: Text('covered')),
+        builder: (_) => const material.Scaffold(body: Text('covered')),
       ),
     );
     await tester.pumpAndSettle();

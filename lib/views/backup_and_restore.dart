@@ -6,29 +6,18 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:prism_ui/linear_progress.dart';
-import 'package:fl_clash/ui/context.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/loading.dart';
-import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/common/dav_client.dart';
 import 'package:fl_clash/features/form/webdav_form.dart';
-import 'package:fl_clash/ui/sheet.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/dialog.dart';
-import 'package:fl_clash/ui/fade_box.dart';
-import 'package:fl_clash/ui/list.dart';
-import 'package:fl_clash/ui/scaffold.dart';
-import 'package:fl_clash/ui/text.dart';
-import 'package:fl_clash/ui/button.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<bool?> _runBackupTask(
@@ -119,7 +108,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore> {
   Future<void> _showAddWebDAV(DAVProps? dav) async {
     await showFormSheet<void>(
       context: context,
-      builder: (_, _) => WebDAVForm(dav: dav),
+      builder: (_) => WebDAVForm(dav: dav),
     );
   }
 
@@ -454,7 +443,7 @@ class _DavBackupsDialogState extends State<DavBackupsDialog> {
       );
       if (deleted != true || !mounted) return;
       setState(() => _backups.remove(backup));
-      if (_backups.isEmpty) BaseNavigator.close(context);
+      if (_backups.isEmpty) closePage(context);
     } finally {
       if (mounted) setState(() => _deleting = false);
     }
@@ -471,9 +460,7 @@ class _DavBackupsDialogState extends State<DavBackupsDialog> {
           if (_deleting) const LinearProgressIndicator(),
           for (final backup in _backups)
             ListItem(
-              onTap: _deleting
-                  ? null
-                  : () => BaseNavigator.close(context, backup.name),
+              onTap: _deleting ? null : () => closePage(context, backup.name),
               title: Text(
                 backup.device == null ? backup.name : backup.time!.showFull,
               ),
@@ -506,12 +493,11 @@ class RestoreOptionsDialog extends StatelessWidget {
       child: Wrap(
         children: [
           ListItem(
-            onTap: () =>
-                BaseNavigator.close(context, RestoreOption.onlyProfiles),
+            onTap: () => closePage(context, RestoreOption.onlyProfiles),
             title: Text(appLocalizations.restoreOnlyConfig),
           ),
           ListItem(
-            onTap: () => BaseNavigator.close(context, RestoreOption.all),
+            onTap: () => closePage(context, RestoreOption.all),
             title: Text(appLocalizations.restoreAllData),
           ),
         ],

@@ -9,7 +9,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart' show RefreshIndicator;
@@ -555,7 +555,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   Future<StorePlan?> _showPlanPicker(String title, List<StorePlan> plans) {
     return showSheet<StorePlan>(
       context: context,
-      builder: (_, _) => _PlanPickerSheet(title: title, plans: plans),
+      builder: (_) => _PlanPickerSheet(title: title, plans: plans),
     );
   }
 }

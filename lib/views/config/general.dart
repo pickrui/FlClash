@@ -12,7 +12,6 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/views/application_setting.dart';
 import 'package:fl_clash/views/config/network.dart' show SuspendOnIdleItem;
 import 'package:fl_clash/views/config/on_demand.dart';
@@ -24,8 +23,6 @@ import 'package:fl_clash/widgets/proxy_authentication.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart' show TextInputAction;
-import 'package:prism_ui/theme_data.dart' show Theme;
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -98,7 +95,7 @@ class PortItem extends ConsumerWidget {
       onTap: () {
         showFormSheet<void>(
           context: context,
-          builder: (_, _) => const _PortForm(),
+          builder: (_) => const _PortForm(),
         );
       },
     );
@@ -248,7 +245,7 @@ class ExternalControllerConfigItem extends ConsumerWidget {
       onTap: () {
         showFormSheet<void>(
           context: context,
-          builder: (_, _) => const _ExternalControllerForm(),
+          builder: (_) => const _ExternalControllerForm(),
         );
       },
       trailing: IconButton(
@@ -351,7 +348,7 @@ class _ExternalControllerFormState
 
   void _handleUpdate() {
     if (_save()) {
-      BaseNavigator.close(context);
+      closePage(context);
     }
   }
 
@@ -363,7 +360,7 @@ class _ExternalControllerFormState
       _addressController.text,
       _secretController.text,
     );
-    BaseNavigator.close(context);
+    closePage(context);
   }
 
   Future<void> _handleReset() async {
@@ -385,7 +382,7 @@ class _ExternalControllerFormState
             secret: generateExternalControllerSecret(),
           ),
         );
-    BaseNavigator.close(context);
+    closePage(context);
   }
 
   @override

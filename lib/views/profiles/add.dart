@@ -9,8 +9,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/link_receiver.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/qr_code.dart';
-import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/database.dart';
@@ -21,8 +20,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/pages/scan.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/selectable_text.dart' show SelectableText;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
 
 import 'custom_profile.dart';
 

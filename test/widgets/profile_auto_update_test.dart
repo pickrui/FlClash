@@ -14,17 +14,14 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/views/profiles/edit.dart';
 import 'package:fl_clash/widgets/error_status.dart';
 import 'package:fl_clash/features/form/form_row.dart';
-import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart'
-    hide IconButton, Switch, TextFormField;
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
-import 'package:prism_ui/text_field.dart' show TextFormField;
+    hide IconButton, Scaffold, Switch, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fl_clash/ui/loading.dart';
-import 'package:fl_clash/ui/switch.dart';
 
 import '../helpers/test_app.dart';
 
@@ -276,7 +273,7 @@ Future<void> _openProfile(
         ],
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         builder: (context, child) => wrapAppScopes(context, child!),
-        home: Scaffold(body: EditProfileView(profile: profile)),
+        home: material.Scaffold(body: EditProfileView(profile: profile)),
       ),
     ),
   );

@@ -13,23 +13,13 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/ui/color.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/liquid_glass.dart';
-import 'package:fl_clash/ui/metrics.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:fl_clash/ui/route_motion_hold.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Colors, kThemeAnimationDuration;
-import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:prism_ui/scaffold.dart' as prism;
-import 'package:prism_ui/surface.dart' show Surface;
 
 const _systemUiOverlayStyle = SystemUiOverlayStyle(
   statusBarColor: Colors.transparent,
@@ -377,7 +367,7 @@ class _ScanPageState extends ConsumerState<ScanPage>
                       right: 0,
                       child: TonalButtonTheme(
                         glass: glass,
-                        child: prism.AppBar(
+                        child: AppBar(
                           systemOverlayStyle: _systemUiOverlayStyle,
                           leading: Center(
                             child: ElasticPress(

@@ -8,11 +8,9 @@ import 'package:fl_clash/views/cloud/store_sheets.dart';
 import 'package:fl_clash/views/cloud/store_widgets.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart'
-    hide Scaffold, Switch, TextButton, TextField;
+    hide FilledButton, Scaffold, Switch, TextButton, TextField;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextField;
-import 'package:fl_clash/ui/common_button.dart' as prism;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -65,7 +63,7 @@ Future<List<T?>> _pumpSheet<T>(WidgetTester tester, Widget sheet) async {
 
 /// The button holding [label], not a card around it that is a button too.
 Finder _filledButton(String label) => find
-    .ancestor(of: find.text(label), matching: find.byType(prism.FilledButton))
+    .ancestor(of: find.text(label), matching: find.byType(FilledButton))
     .first;
 
 void main() {
@@ -75,7 +73,6 @@ void main() {
     final results = await _pumpSheet<StorePurchaseChoice>(
       tester,
       StorePurchaseSheet(
-        type: SheetType.page,
         plan: _plan(),
         methods: const [_alipay],
         balance: '12.50',
@@ -98,15 +95,11 @@ void main() {
   testWidgets('a gateway pays online', (tester) async {
     final results = await _pumpSheet<StorePurchaseChoice>(
       tester,
-      StorePurchaseSheet(
-        type: SheetType.page,
-        plan: _plan(),
-        methods: const [_alipay],
-      ),
+      StorePurchaseSheet(plan: _plan(), methods: const [_alipay]),
     );
     await tester.tap(find.text('Alipay'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(prism.FilledButton, 'Buy'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Buy'), findsNothing);
     await tester.ensureVisible(_filledButton('Pay'));
     await tester.tap(_filledButton('Pay'));
     await tester.pumpAndSettle();
@@ -120,10 +113,9 @@ void main() {
   ) async {
     final results = await _pumpSheet<StoreRechargeChoice>(
       tester,
-      const StoreRechargeSheet(type: SheetType.page, methods: [_alipay]),
+      const StoreRechargeSheet(methods: [_alipay]),
     );
-    prism.FilledButton pay() =>
-        tester.widget<prism.FilledButton>(_filledButton('Pay'));
+    FilledButton pay() => tester.widget<FilledButton>(_filledButton('Pay'));
     expect(pay().onPressed, isNull);
     expect(find.text('Allowed range ¥5 – ¥500'), findsOneWidget);
 
@@ -175,7 +167,7 @@ void main() {
     );
     expect(find.text('Sold out'), findsOneWidget);
     expect(find.text('Unavailable'), findsOneWidget);
-    expect(find.widgetWithText(prism.FilledButton, 'Buy'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Buy'), findsOneWidget);
   });
 
   testWidgets('a plan awaiting renewal reads by its auto-renew state', (

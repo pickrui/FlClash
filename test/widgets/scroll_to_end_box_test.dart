@@ -5,9 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/scroll.dart';
-import 'package:fl_clash/ui/scroll_behavior.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:fl_clash/ui/ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:flutter_test/flutter_test.dart';
 
 class _Host extends StatefulWidget {
@@ -37,7 +37,7 @@ class _HostState extends State<_Host> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
+      home: material.Scaffold(
         body: ScrollToEndBox(
           controller: widget.controller,
           enable: widget.enable,

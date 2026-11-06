@@ -6,8 +6,9 @@
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/logs.dart';
-import 'package:material_ui/material_ui.dart' hide SelectableText;
-import 'package:prism_ui/selectable_text.dart' show SelectableText;
+import 'package:material_ui/material_ui.dart' hide Scaffold, SelectableText;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -16,7 +17,7 @@ void main() {
   Future<void> pumpLog(WidgetTester tester, String payload) =>
       tester.pumpWidget(
         TestApp(
-          child: Scaffold(
+          child: material.Scaffold(
             body: LogItem(
               log: Log(
                 payload: payload,

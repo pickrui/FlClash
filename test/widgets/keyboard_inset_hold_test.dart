@@ -5,11 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/keyboard_inset_hold.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide TextField;
-import 'package:prism_ui/text_field.dart' show TextField;
 
 class _InsetProbe extends StatelessWidget {
   const _InsetProbe(this.builds);

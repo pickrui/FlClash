@@ -6,7 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/ui/loading.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/proxies/node_pages.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -15,7 +15,6 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
 
 typedef NodePageKey = ({String group, String query});
 

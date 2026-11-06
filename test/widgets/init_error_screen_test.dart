@@ -11,7 +11,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/error.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
+import 'package:fl_clash/ui/ui.dart';
 
 void main() {
   testWidgets('startup errors remain visible before localizations are loaded', (

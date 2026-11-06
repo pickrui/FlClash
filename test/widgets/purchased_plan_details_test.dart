@@ -6,20 +6,19 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:prism_ui/linear_progress.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/cloud_panel_time.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/cloud/purchased_plan_details.dart';
 import 'package:material_ui/material_ui.dart'
-    hide LinearProgressIndicator, ThemeData;
-import 'package:prism_ui/theme_data.dart' show ThemeData;
+    hide LinearProgressIndicator, Scaffold, ThemeData;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
 
 void main() {
   BoughtRecord record(int status) => BoughtRecord.fromJson({
@@ -108,7 +107,9 @@ void main() {
             ...GlobalMaterialLocalizations.delegates,
           ],
           supportedLocales: AppLocalizations.delegate.supportedLocales,
-          home: Scaffold(body: PurchasedPlanDetails(bought: record(status))),
+          home: material.Scaffold(
+            body: PurchasedPlanDetails(bought: record(status)),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -168,7 +169,7 @@ void main() {
           ),
           home: MediaQuery(
             data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-            child: Scaffold(
+            child: material.Scaffold(
               body: SingleChildScrollView(
                 child: RepaintBoundary(
                   key: key,

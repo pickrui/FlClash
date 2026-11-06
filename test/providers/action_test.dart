@@ -22,8 +22,9 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/add.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/preferences.dart';
@@ -577,7 +578,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         overrides: [profileActionProvider.overrideWith(() => action)],
-        child: Scaffold(
+        child: material.Scaffold(
           body: Builder(
             builder: (context) => AddProfileMenu(
               parentContext: context,

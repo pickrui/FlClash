@@ -6,13 +6,13 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:fl_clash/ui/liquid_glass.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide Colors;
+import 'package:material_ui/material_ui.dart' as material show Colors;
 
 const _destinations = [
   NavigationDockDestination(glyph: AppGlyphs.dashboard, label: 'Home'),
@@ -268,7 +268,7 @@ void main() {
         home: Center(
           child: ElasticPress(
             child: ColoredBox(
-              color: Colors.blue,
+              color: material.Colors.blue,
               child: SizedBox.square(dimension: 40),
             ),
           ),

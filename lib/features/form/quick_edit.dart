@@ -5,14 +5,12 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/context.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/input_entries.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:flutter/widgets.dart';
 
 class QuickEditCancelled implements Exception {

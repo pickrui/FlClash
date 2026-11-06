@@ -11,8 +11,10 @@ import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/widgets/app_update.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton, FilledButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
+import 'package:material_ui/material_ui.dart'
+    hide FilledButton, Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -279,7 +281,7 @@ Future<AppUpdateDownloadTask> openUpdatePage(
       includeNavigatorKey: false,
       locale: locale,
       textScaler: const TextScaler.linear(1.5),
-      child: Scaffold(
+      child: material.Scaffold(
         body: Builder(
           builder: (context) => TextButton(
             onPressed: () async => onResult(

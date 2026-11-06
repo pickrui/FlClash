@@ -6,7 +6,7 @@
 import 'dart:math';
 
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/ui/metrics.dart';
+import 'package:prism_ui/metrics.dart';
 import 'package:flutter/widgets.dart' show BuildContext;
 
 import 'constant.dart';

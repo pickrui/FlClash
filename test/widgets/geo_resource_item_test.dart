@@ -17,11 +17,11 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/icon_sets.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/input.dart';
-import 'package:fl_clash/ui/switch.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/views/resources.dart';
-import 'package:material_ui/material_ui.dart' hide Switch, TextFormField;
-import 'package:prism_ui/text_field.dart' show TextFormField;
+import 'package:material_ui/material_ui.dart'
+    hide Scaffold, Switch, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -85,7 +85,7 @@ void main() {
         container: container,
         child: const TestApp(
           locale: Locale('en'),
-          child: Scaffold(
+          child: material.Scaffold(
             body: GeoDataListItem(geoItem: GeoItem(type: GeoResource.MMDB)),
           ),
         ),
@@ -296,7 +296,7 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: const TestApp(
-          child: Scaffold(
+          child: material.Scaffold(
             body: GeoDataListItem(geoItem: GeoItem(type: GeoResource.MMDB)),
           ),
         ),

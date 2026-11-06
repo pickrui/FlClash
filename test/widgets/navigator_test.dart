@@ -5,17 +5,15 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/page_transition.dart';
-import 'package:fl_clash/ui/deferred_push.dart';
-import 'package:fl_clash/ui/null_status.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
-import 'package:material_ui/material_ui.dart' hide ThemeData;
-import 'package:prism_ui/theme_data.dart' show ThemeData;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, Scaffold, ThemeData;
+import 'package:material_ui/material_ui.dart'
+    as material
+    show AlertDialog, Scaffold;
 
 import '../helpers/hand_over.dart';
 import '../helpers/test_app.dart';
@@ -41,7 +39,9 @@ void main() {
               settings: settings,
               builder: (context) {
                 home = context;
-                return const Scaffold(body: Center(child: Text('home')));
+                return const material.Scaffold(
+                  body: Center(child: Text('home')),
+                );
               },
             ),
           ),
@@ -53,7 +53,10 @@ void main() {
     testWidgets('slides in from the full width on its spring', (tester) async {
       final home = await pumpHome(tester);
       unawaited(
-        BaseNavigator.push(home, const Scaffold(body: Text('pushed page'))),
+        BaseNavigator.push(
+          home,
+          const material.Scaffold(body: Text('pushed page')),
+        ),
       );
       await tester.pump();
       await tester.pump();
@@ -62,7 +65,9 @@ void main() {
       final page = find.text('pushed page');
       final progress = ModalRoute.of(tester.element(page))!.animation!.value;
       final width = tester
-          .getSize(find.ancestor(of: page, matching: find.byType(Scaffold)))
+          .getSize(
+            find.ancestor(of: page, matching: find.byType(material.Scaffold)),
+          )
           .width;
       expect(progress, inExclusiveRange(0, 1));
       expect(tester.getTopLeft(page).dx, closeTo(width * (1 - progress), 0.5));
@@ -72,7 +77,10 @@ void main() {
       final home = await pumpHome(tester);
 
       unawaited(
-        BaseNavigator.push(home, const Scaffold(body: Text('pushed page'))),
+        BaseNavigator.push(
+          home,
+          const material.Scaffold(body: Text('pushed page')),
+        ),
       );
       await expectNoOpacityLayers(tester);
       Navigator.of(tester.element(find.text('pushed page'))).pop();
@@ -84,8 +92,10 @@ void main() {
     ) async {
       final home = await pumpHome(tester);
       final homeRect = tester.getRect(find.text('home'));
-      final width = tester.getSize(find.byType(Scaffold)).width;
-      unawaited(BaseNavigator.push(home, const Scaffold(body: Text('next'))));
+      final width = tester.getSize(find.byType(material.Scaffold)).width;
+      unawaited(
+        BaseNavigator.push(home, const material.Scaffold(body: Text('next'))),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
       final route = ModalRoute.of(tester.element(find.text('next')))!;
@@ -197,7 +207,7 @@ void main() {
         home: Builder(
           builder: (context) {
             host = context;
-            return const Scaffold();
+            return const material.Scaffold();
           },
         ),
       ),
@@ -245,14 +255,16 @@ void main() {
         home: Builder(
           builder: (context) {
             page = context;
-            return const Scaffold(body: Text('page'));
+            return const material.Scaffold(body: Text('page'));
           },
         ),
       ),
     );
     unawaited(
       Navigator.of(page).push(
-        CardPageRoute<void>(builder: (_) => const Scaffold(body: Text('top'))),
+        CardPageRoute<void>(
+          builder: (_) => const material.Scaffold(body: Text('top')),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -280,30 +292,30 @@ void main() {
         home: Builder(
           builder: (context) {
             rootContext = context;
-            return const Scaffold(body: Text('Home'));
+            return const material.Scaffold(body: Text('Home'));
           },
         ),
       ),
     );
-    expect(BaseNavigator.close(rootContext), isFalse);
+    expect(closePage(rootContext), isFalse);
     late BuildContext editorContext;
     final result = key.currentState!.push<String>(
       MaterialPageRoute(
         builder: (context) {
           editorContext = context;
-          return const Scaffold(body: Text('Editor'));
+          return const material.Scaffold(body: Text('Editor'));
         },
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(BaseNavigator.close(editorContext, 'draft'), isTrue);
+    expect(closePage(editorContext, 'draft'), isTrue);
     expect(editorContext.mounted, isTrue);
-    expect(BaseNavigator.close(editorContext, 'duplicate'), isFalse);
+    expect(closePage(editorContext, 'duplicate'), isFalse);
     expect(await result, 'draft');
     await tester.pumpAndSettle();
     expect(editorContext.mounted, isFalse);
-    expect(BaseNavigator.close(editorContext, 'late'), isFalse);
+    expect(closePage(editorContext, 'late'), isFalse);
     expect(find.text('Home'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -316,7 +328,7 @@ void main() {
       PrismApp(
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         navigatorKey: key,
-        home: const Scaffold(body: Text('Home')),
+        home: const material.Scaffold(body: Text('Home')),
       ),
     );
     final navigator = key.currentState!;
@@ -325,20 +337,21 @@ void main() {
       MaterialPageRoute(
         builder: (context) {
           editorContext = context;
-          return const Scaffold(body: Text('Editor'));
+          return const material.Scaffold(body: Text('Editor'));
         },
       ),
     );
     await tester.pumpAndSettle();
     final dialogResult = showDialog<bool>(
       context: editorContext,
-      builder: (_) => const AlertDialog(content: Text('Other message')),
+      builder: (_) =>
+          const material.AlertDialog(content: Text('Other message')),
     );
     await tester.pump();
 
-    expect(BaseNavigator.close(editorContext, 'draft'), isTrue);
+    expect(closePage(editorContext, 'draft'), isTrue);
     expect(await result, 'draft');
-    expect(BaseNavigator.close(editorContext, 'duplicate'), isFalse);
+    expect(closePage(editorContext, 'duplicate'), isFalse);
     await tester.pumpAndSettle();
     expect(find.text('Other message'), findsOneWidget);
     navigator.pop(true);
@@ -361,7 +374,7 @@ void main() {
         home: Navigator(
           key: nested,
           onGenerateRoute: (_) => CardPageRoute<void>(
-            builder: (_) => const Scaffold(body: Text('Nested home')),
+            builder: (_) => const material.Scaffold(body: Text('Nested home')),
           ),
         ),
       ),
@@ -371,7 +384,7 @@ void main() {
       MaterialPageRoute(
         builder: (context) {
           editorContext = context;
-          return const Scaffold(body: Text('Editor'));
+          return const material.Scaffold(body: Text('Editor'));
         },
       ),
     );
@@ -379,12 +392,13 @@ void main() {
     unawaited(
       showDialog<void>(
         context: editorContext,
-        builder: (_) => const AlertDialog(content: Text('Root dialog')),
+        builder: (_) =>
+            const material.AlertDialog(content: Text('Root dialog')),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(BaseNavigator.close(editorContext, 42), isTrue);
+    expect(closePage(editorContext, 42), isTrue);
     expect(await result, 42);
     await tester.pumpAndSettle();
     expect(find.text('Root dialog'), findsOneWidget);

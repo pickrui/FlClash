@@ -6,7 +6,7 @@
 import 'dart:async';
 
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/ui/metrics.dart';
+import 'package:prism_ui/metrics.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 
 import 'constant.dart';

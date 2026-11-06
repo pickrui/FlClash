@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:prism_ui/loading.dart' show LoadingBar;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -16,7 +16,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide FilledButton;
-import 'package:fl_clash/ui/common_button.dart' show FilledButton;
 
 import '../helpers/preferences.dart';
 import '../helpers/test_app.dart';

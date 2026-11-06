@@ -10,8 +10,9 @@ import 'package:fl_clash/views/dashboard/widgets/intranet_ip.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide IconButton;
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
+import 'package:material_ui/material_ui.dart' hide IconButton, Scaffold;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 
 import '../../helpers/test_app.dart';
 
@@ -36,7 +37,7 @@ void main() {
         container: container,
         child: TestApp(
           locale: const Locale('en'),
-          child: Scaffold(
+          child: material.Scaffold(
             body: Align(
               alignment: Alignment.topLeft,
               child: SizedBox(

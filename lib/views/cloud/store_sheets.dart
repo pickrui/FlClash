@@ -7,7 +7,6 @@ import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
@@ -45,12 +44,8 @@ Future<StorePurchaseChoice?> showStorePurchaseSheet(
 }) {
   return showSheet<StorePurchaseChoice>(
     context: context,
-    builder: (_, type) => StorePurchaseSheet(
-      type: type,
-      plan: plan,
-      methods: methods,
-      balance: balance,
-    ),
+    builder: (_) =>
+        StorePurchaseSheet(plan: plan, methods: methods, balance: balance),
   );
 }
 
@@ -60,19 +55,17 @@ Future<StoreRechargeChoice?> showStoreRechargeSheet(
 }) {
   return showSheet<StoreRechargeChoice>(
     context: context,
-    builder: (_, type) => StoreRechargeSheet(type: type, methods: methods),
+    builder: (_) => StoreRechargeSheet(methods: methods),
   );
 }
 
 class StorePurchaseSheet extends StatefulWidget {
-  final SheetType type;
   final StorePlan plan;
   final List<PaymentMethodOption> methods;
   final String? balance;
 
   const StorePurchaseSheet({
     super.key,
-    required this.type,
     required this.plan,
     required this.methods,
     this.balance,
@@ -123,7 +116,6 @@ class _StorePurchaseSheetState extends State<StorePurchaseSheet> {
     ].join(' · ');
     final payWithBalance = _method == null;
     return AdaptiveSheetScaffold(
-      type: widget.type,
       title: appLocalizations.confirmPurchase,
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + context.bottomInset),
@@ -236,14 +228,9 @@ class _StorePurchaseSheetState extends State<StorePurchaseSheet> {
 }
 
 class StoreRechargeSheet extends StatefulWidget {
-  final SheetType type;
   final List<PaymentMethodOption> methods;
 
-  const StoreRechargeSheet({
-    super.key,
-    required this.type,
-    required this.methods,
-  });
+  const StoreRechargeSheet({super.key, required this.methods});
 
   @override
   State<StoreRechargeSheet> createState() => _StoreRechargeSheetState();
@@ -286,7 +273,6 @@ class _StoreRechargeSheetState extends State<StoreRechargeSheet> {
           )
         : null;
     return AdaptiveSheetScaffold(
-      type: widget.type,
       title: appLocalizations.recharge,
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + context.bottomInset),

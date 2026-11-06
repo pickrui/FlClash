@@ -8,8 +8,7 @@ import 'dart:async';
 import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -18,7 +17,6 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart' show TextInputAction;
-import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud_layout.dart';
@@ -27,7 +25,7 @@ import 'cloud_login_page.dart';
 Future<T?> showCloudRegisterPage<T>(BuildContext context) {
   return showFormSheet<T>(
     context: context,
-    builder: (_, _) => const CloudRegisterPage(),
+    builder: (_) => const CloudRegisterPage(),
   );
 }
 
@@ -158,7 +156,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
         errorTitle: AppLocalizations.current.registerFailed,
         isActive: () => mounted && (route?.isActive ?? true),
       );
-      if (registered && mounted) BaseNavigator.close(context);
+      if (registered && mounted) closePage(context);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -427,7 +425,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(l10n.haveAccountAlready, style: context.listCaptionStyle),
-            prism.TextButton(
+            TextButton(
               onPressed: isLoading
                   ? null
                   : () {

@@ -9,9 +9,8 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart' hide Scaffold, TextField;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:prism_ui/text_field.dart' show TextField;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fl_clash/ui/keyboard.dart';
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';

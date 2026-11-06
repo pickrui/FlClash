@@ -7,15 +7,13 @@ import 'package:fl_clash/common/app_localizations.dart' as app_strings;
 
 import 'dart:convert';
 
-import 'package:prism_ui/surface.dart' show Surface;
+import 'package:fl_clash/ui/ui.dart';
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/mitm_body.dart';
 import 'package:fl_clash/views/connection/item.dart';
 import 'package:fl_clash/features/connection/mitm_exchanges.dart';
 import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/ui/paged_sheet.dart';
-import 'package:fl_clash/ui/sheet_navigator.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';

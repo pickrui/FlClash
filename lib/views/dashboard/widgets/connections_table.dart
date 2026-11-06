@@ -12,11 +12,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/connection/connection_feed.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/ui/route_motion_hold.dart';
-import 'package:fl_clash/ui/paged_sheet.dart';
-import 'package:prism_ui/prism_list.dart';
-import 'package:fl_clash/ui/table_layout.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/views/connection/dns_queries.dart';
 import 'package:fl_clash/views/connection/requests.dart';
 import 'package:fl_clash/views/connection/tracker_info_table.dart';
@@ -26,7 +21,6 @@ import 'package:fl_clash/widgets/record_table.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/surface.dart' show Surface;
 import 'package:riverpod_annotation/riverpod_annotation.dart'
     show ProviderListenable;
 
@@ -104,7 +98,8 @@ mixin ConnectionsPolling<T extends ConsumerStatefulWidget>
         ConsumerState<T>,
         WidgetsBindingObserver,
         ActivePollingMixin<T>,
-        RouteMotionHoldMixin<T> {
+        RouteMotionHoldMixin<T>,
+        PageFeedHoldMixin<T> {
   final connectionCount = ValueNotifier(0);
   List<TrackerInfo> connections = const [];
   var tcpCount = 0;
@@ -283,6 +278,7 @@ class _ConnectionsTableCardState extends ConsumerState<ConnectionsTableCard>
         WidgetsBindingObserver,
         ActivePollingMixin<ConnectionsTableCard>,
         RouteMotionHoldMixin<ConnectionsTableCard>,
+        PageFeedHoldMixin<ConnectionsTableCard>,
         ConnectionsPolling<ConnectionsTableCard> {
   var _shown = DashboardFeed.connections;
   List<TrackerInfo> _requests = const [];

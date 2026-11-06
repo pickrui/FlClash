@@ -14,10 +14,8 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/cloud/store_page.dart';
 import 'package:material_ui/material_ui.dart'
-    hide TextField, IconButton, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
-import 'package:prism_ui/text_field.dart' show TextField;
-import 'package:fl_clash/ui/common_button.dart' as prism;
+    hide FilledButton, IconButton, TextButton, TextField;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -25,7 +23,7 @@ import '../helpers/test_app.dart';
 
 /// The button holding [label], not a card around it that is a button too.
 Finder _filledButton(String label) => find
-    .ancestor(of: find.text(label), matching: find.byType(prism.FilledButton))
+    .ancestor(of: find.text(label), matching: find.byType(FilledButton))
     .first;
 
 void main() {
@@ -61,11 +59,11 @@ void main() {
         isNull,
       );
       expect(
-        tester.widget<prism.FilledButton>(_filledButton('Buy')).onPressed,
+        tester.widget<FilledButton>(_filledButton('Buy')).onPressed,
         isNull,
       );
       expect(
-        tester.widget<prism.FilledButton>(_filledButton('Recharge')).onPressed,
+        tester.widget<FilledButton>(_filledButton('Recharge')).onPressed,
         isNull,
       );
       await tester
@@ -314,7 +312,7 @@ void main() {
   }
 
   VoidCallback? activatePressed(WidgetTester tester) =>
-      tester.widget<prism.FilledButton>(_filledButton('Activate')).onPressed;
+      tester.widget<FilledButton>(_filledButton('Activate')).onPressed;
 
   testWidgets(
     'a write losing its response headers is checked against the panel first',

@@ -18,13 +18,12 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/profiles/edit.dart';
-import 'package:fl_clash/ui/dialog.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide AlertDialog, TextButton, TextFormField;
+    hide AlertDialog, Scaffold, TextButton, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:material_ui/material_ui.dart' as material show AlertDialog;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextFormField;
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/app_paths.dart';
@@ -115,8 +114,9 @@ void main() {
           builder: (context) => TextButton(
             onPressed: () => Navigator.of(context).push<void>(
               MaterialPageRoute(
-                builder: (_) =>
-                    const Scaffold(body: EditProfileView(profile: _profile)),
+                builder: (_) => const material.Scaffold(
+                  body: EditProfileView(profile: _profile),
+                ),
               ),
             ),
             child: const Text('Open profile'),

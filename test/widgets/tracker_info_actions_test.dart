@@ -7,13 +7,12 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/models/record_filter.dart';
-import 'package:fl_clash/ui/chip.dart';
-import 'package:fl_clash/ui/context_menu.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/views/connection/item.dart';
 import 'package:fl_clash/widgets/record_filter.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../helpers/test_app.dart';
 
@@ -57,7 +56,7 @@ void main() {
           tester.pumpWidget(
             TestApp(
               wrapInProviderScope: true,
-              child: Scaffold(
+              child: material.Scaffold(
                 body: TrackerInfoItem(
                   trackerInfo: info,
                   detailTitle: 'Details',
@@ -106,7 +105,7 @@ void main() {
       await tester.pumpWidget(
         TestApp(
           wrapInProviderScope: true,
-          child: Scaffold(
+          child: material.Scaffold(
             body: RecordFilterScope(
               onFilter: filters.add,
               child: TrackerInfoItem(

@@ -9,9 +9,8 @@ import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/widgets/icon_history.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fl_clash/ui/loading.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart' hide TextField;
-import 'package:prism_ui/text_field.dart' show TextField;
 
 import '../helpers/test_app.dart';
 

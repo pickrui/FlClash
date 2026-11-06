@@ -11,10 +11,6 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/typography.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
@@ -25,12 +21,6 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Colors;
-import 'package:prism_ui/selectable_text.dart' show SelectableText;
-import 'package:prism_ui/theme_data.dart' as prism;
-import 'package:fl_clash/ui/common_button.dart'
-    show IconButton, TextButton, FilledButton, ButtonStyle;
-import 'package:fl_clash/ui/qr_code.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'tailscale.dart';
@@ -405,7 +395,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     }
     if (!mounted) return;
     setState(() => _busy = false);
-    BaseNavigator.close(context);
+    closePage(context);
   }
 
   Future<void> _openLoginPage(String url) async {
@@ -949,7 +939,7 @@ class _PrimaryPill extends StatelessWidget {
           minimumSize: Size(size, size),
           shape: AppShape.full,
           textStyle: AppTextStyle.body.of(context, emphasized: true),
-          tapTargetSize: prism.TapTargetSize.shrinkWrap,
+          tapTargetSize: TapTargetSize.shrinkWrap,
         ),
         child: Text(label),
       ),

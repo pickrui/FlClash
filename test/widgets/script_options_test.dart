@@ -19,10 +19,10 @@ import 'package:fl_clash/views/config/scripts.dart';
 import 'package:fl_clash/widgets/error_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fl_clash/ui/loading.dart';
-import 'package:fl_clash/ui/switch.dart';
-import 'package:material_ui/material_ui.dart' hide Switch, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
+import 'package:fl_clash/ui/ui.dart';
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, Switch, TextButton;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 import 'package:rust_api/rust_api.dart';
 
 import '../helpers/app_paths.dart';
@@ -160,7 +160,8 @@ void main() {
     unawaited(
       showDialog<void>(
         context: optionsContext,
-        builder: (_) => const AlertDialog(content: Text('Other message')),
+        builder: (_) =>
+            const material.AlertDialog(content: Text('Other message')),
       ),
     );
     await tester.pump();

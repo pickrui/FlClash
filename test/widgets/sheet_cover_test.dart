@@ -5,12 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/paged_sheet.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart'
     hide FilledButton, Scaffold, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,7 +22,7 @@ Widget _scaffold(String name, {Widget? body}) {
   );
 }
 
-Widget _opener(String label, SheetBuilder builder) {
+Widget _opener(String label, WidgetBuilder builder) {
   return Builder(
     builder: (context) => Center(
       child: FilledButton(
@@ -70,7 +68,7 @@ void main() {
       await _pump(
         tester,
         size,
-        _scaffold('Page', body: _opener('open', (_, _) => _scaffold('Sheet'))),
+        _scaffold('Page', body: _opener('open', (_) => _scaffold('Sheet'))),
       );
 
       await tester.tap(find.text('open'));
@@ -97,9 +95,9 @@ void main() {
         size,
         _opener(
           'open outer',
-          (_, _) => _scaffold(
+          (_) => _scaffold(
             'Outer',
-            body: _opener('open inner', (_, _) => _scaffold('Inner')),
+            body: _opener('open inner', (_) => _scaffold('Inner')),
           ),
         ),
       );
@@ -125,7 +123,7 @@ void main() {
               context,
               _scaffold(
                 'Page',
-                body: _opener('open', (_, _) => _scaffold('Sheet')),
+                body: _opener('open', (_) => _scaffold('Sheet')),
               ),
             ),
             child: const Text('push'),
@@ -155,10 +153,10 @@ void main() {
             onPressed: () => showSheet<void>(
               context: context,
               props: nestedPagedSheetProps,
-              builder: (_, _) => NestedPagedSheet(
+              builder: (_) => NestedPagedSheet(
                 builder: (_) => _scaffold(
                   'Page',
-                  body: _opener('open', (_, _) => _scaffold('Sheet')),
+                  body: _opener('open', (_) => _scaffold('Sheet')),
                 ),
               ),
             ),

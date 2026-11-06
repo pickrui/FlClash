@@ -7,14 +7,11 @@ import 'dart:async';
 
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/view_scope.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
     hide IconButton, Scaffold, Theme, ThemeData;
-import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
-import 'package:prism_ui/press_surface.dart';
 
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';

@@ -13,7 +13,7 @@ import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/custom_groups.dart';
-import 'package:fl_clash/ui/scaffold.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Scaffold;

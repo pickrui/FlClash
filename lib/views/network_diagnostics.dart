@@ -15,15 +15,12 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/models/profile.dart';
 import 'package:fl_clash/services/network_diagnostics.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/proxy_authentication.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/selectable_text.dart' show SelectableText;
 
 import 'config/dns.dart';
 import 'config/general.dart' show PortItem;

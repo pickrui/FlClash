@@ -16,20 +16,13 @@ import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/ui/sortable.dart';
-import 'package:fl_clash/ui/scaffold.dart';
-import 'package:fl_clash/ui/common_button.dart' as buttons;
-import 'package:prism_ui/prism_list.dart';
-import 'package:fl_clash/ui/switch.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart'
-    hide FilledButton, Scaffold, Switch, TextButton, TextField;
+    hide FilledButton, IconButton, Scaffold, Switch, TextButton, TextField;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
-import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/list_row.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/test_app.dart';
@@ -217,10 +210,9 @@ void main() {
     search.onSearch('Gamma');
     await tester.pumpAndSettle();
     final delete = find.byWidgetPredicate(
-      (widget) =>
-          widget is buttons.IconButton && widget.tooltip == _l10n.delete,
+      (widget) => widget is IconButton && widget.tooltip == _l10n.delete,
     );
-    expect(tester.widget<buttons.IconButton>(delete).onPressed, isNull);
+    expect(tester.widget<IconButton>(delete).onPressed, isNull);
     search.onSearch('');
     await tester.pumpAndSettle();
     expect(

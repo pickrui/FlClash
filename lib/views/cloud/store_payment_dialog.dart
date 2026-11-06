@@ -11,15 +11,11 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Colors;
-import 'package:prism_ui/selectable_text.dart' show SelectableText;
-import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_clash/ui/qr_code.dart';
 
 final paymentStatusQueryProvider = Provider(
   (_) => CloudApiService().queryPaymentPaid,
@@ -134,17 +130,17 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
     return AlertDialog(
       title: appLocalizations.scanOrTransferPay,
       actions: [
-        prism.TextButton(
+        TextButton(
           onPressed: () => _close(false),
           child: Text(appLocalizations.close),
         ),
         if (isUrl && init.url != null)
-          prism.TextButton(
+          TextButton(
             onPressed: () => globalState.openUrl(init.url!),
             child: Text(appLocalizations.openInBrowser),
           ),
         if (hasPaymentId)
-          prism.TextButton(
+          TextButton(
             onPressed: _checking ? null : () => _check(manual: true),
             child: Text(
               _checking
@@ -224,7 +220,7 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
                         .copyWith(color: colorScheme.onSurface),
                   ),
                 ),
-                prism.IconButton(
+                IconButton(
                   icon: const GlyphIcon(AppGlyphs.copy, size: 20),
                   tooltip: appLocalizations.copy,
                   onPressed: () {

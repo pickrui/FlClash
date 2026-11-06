@@ -15,15 +15,12 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/config/general.dart';
 import 'package:fl_clash/views/config/network.dart' hide Ipv6Item;
-import 'package:prism_ui/list.dart' show ListHeader;
-import 'package:fl_clash/ui/null_status.dart';
-import 'package:fl_clash/ui/switch.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
-    hide Switch, TextButton, TextField, TextFormField;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextField, TextFormField;
+    hide Scaffold, Switch, TextButton, TextField, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:code_forge/code_forge.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart' show Override;
 
@@ -81,7 +78,7 @@ void main() {
   testWidgets('canceling Hosts preserves the saved map', (tester) async {
     final container = await _pumpOverrides(
       tester,
-      const Scaffold(body: HostsItem()),
+      const material.Scaffold(body: HostsItem()),
       (state) => state.copyWith(hosts: const {'fixture.invalid': '192.0.2.1'}),
     );
     await tester.tap(find.byType(HostsItem));
@@ -551,7 +548,7 @@ void main() {
       (tester) async {
         final container = await _pumpOverrides(
           tester,
-          Scaffold(
+          material.Scaffold(
             body: SingleChildScrollView(
               child: TunSection(
                 isDesktop: true,
@@ -632,7 +629,7 @@ void main() {
   ) async {
     final container = await _pumpOverrides(
       tester,
-      const Scaffold(
+      const material.Scaffold(
         body: SingleChildScrollView(
           child: TunSection(isDesktop: false, isLinux: false, isWindows: false),
         ),

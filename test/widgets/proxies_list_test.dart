@@ -5,18 +5,13 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/shape.dart';
-import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/ui/ui.dart' hide ListHeader;
 import 'package:fl_clash/common/layout.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/ui/collapsible_section.dart';
-import 'package:fl_clash/ui/loading.dart';
-import 'package:fl_clash/ui/surface.dart';
 import 'package:fl_clash/views/proxies/card.dart';
 import 'package:fl_clash/views/proxies/common.dart';
 import 'package:fl_clash/views/proxies/list.dart';
@@ -24,9 +19,9 @@ import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide AppBar, Theme, ThemeData;
-import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
-import 'package:prism_ui/scaffold.dart' show AppBar;
+import 'package:material_ui/material_ui.dart'
+    hide AppBar, Scaffold, Theme, ThemeData;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../helpers/node_pages.dart';
 import '../helpers/test_app.dart';
@@ -96,7 +91,7 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
-          homeBuilder: (child) => Scaffold(
+          homeBuilder: (child) => material.Scaffold(
             body: Builder(
               builder: (context) => MediaQuery(
                 data: MediaQuery.of(context)

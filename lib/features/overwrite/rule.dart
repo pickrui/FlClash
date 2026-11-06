@@ -5,8 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 library;
 
-import 'package:fl_clash/ui/context.dart';
-import 'package:fl_clash/ui/typography.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -14,12 +13,7 @@ import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/features/form/form_page.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
-import 'package:fl_clash/ui/text.dart';
-import 'package:fl_clash/ui/inherited.dart' show sheetScrollController;
-import 'package:fl_clash/ui/list.dart';
-import 'package:fl_clash/ui/switch.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/tooltip.dart' show Tooltip;
 
 import 'overwrite_sheet.dart';
 import 'routing_target_picker.dart';

@@ -17,12 +17,7 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/context_menu.dart';
-import 'package:fl_clash/ui/focus.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/navigator.dart';
-import 'package:fl_clash/ui/sortable.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/views/proxies/providers.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -233,7 +228,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         }
         return true;
       }, silence: false);
-      if (saved == true && mounted) BaseNavigator.close(context);
+      if (saved == true && mounted) closePage(context);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -282,7 +277,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       );
       return;
     }
-    BaseNavigator.close(context, data);
+    closePage(context, data);
   }
 
   Future<void> _runFileAction(Future<void> Function() action) async {

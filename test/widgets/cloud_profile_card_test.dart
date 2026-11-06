@@ -5,8 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/views/cloud/cloud_profile_card.dart';
-import 'package:fl_clash/ui/switch.dart';
-import 'package:material_ui/material_ui.dart' hide Switch;
+import 'package:fl_clash/ui/ui.dart';
+import 'package:material_ui/material_ui.dart' hide Scaffold, Switch;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -32,7 +33,7 @@ Future<void> _pumpCard(
   await tester.pumpWidget(
     TestApp(
       locale: const Locale('en'),
-      child: Scaffold(
+      child: material.Scaffold(
         body: SingleChildScrollView(
           child: ValueListenableBuilder<CloudProfile>(
             valueListenable: profile,

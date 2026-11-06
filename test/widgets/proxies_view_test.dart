@@ -20,10 +20,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/proxies/card.dart';
 import 'package:fl_clash/views/proxies/common.dart';
-import 'package:fl_clash/ui/loading.dart';
-import 'package:fl_clash/ui/card.dart';
-import 'package:fl_clash/ui/context_menu.dart';
-import 'package:fl_clash/ui/popup.dart';
+import 'package:fl_clash/ui/ui.dart' hide ListHeader;
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:flutter/services.dart';
 
@@ -34,15 +31,11 @@ import 'package:fl_clash/views/proxies/list.dart';
 import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/views/proxies/tab.dart';
 import 'package:material_ui/material_ui.dart'
-    hide AppBar, Card, IconButton, TabBarView, ThemeData;
-import 'package:prism_ui/tab_view.dart' show TabBarView;
-import 'package:prism_ui/theme_data.dart' show ThemeData;
-import 'package:prism_ui/scaffold.dart' show AppBar;
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
+    hide AppBar, Card, IconButton, Scaffold, TabBarView, ThemeData;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../helpers/node_pages.dart';
@@ -1506,7 +1499,7 @@ class _TestApp extends StatelessWidget {
       builder: (context, child) {
         return wrapAppScopes(context, child!);
       },
-      home: Scaffold(body: child),
+      home: material.Scaffold(body: child),
     );
   }
 }

@@ -6,9 +6,7 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
-import 'package:fl_clash/ui/animated_entries.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/navigator.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
@@ -498,7 +496,7 @@ void showOverrideAddSheet<K extends Enum, M>(
   final remaining = spec.values.where((key) => !added.contains(key));
   showSheet<void>(
     context: context,
-    builder: (_, _) => SelectionSheet<K>(
+    builder: (_) => SelectionSheet<K>(
       title: spec.target.addEntry(appLocalizations),
       sections: [
         for (final (label, keys) in spec.sectionsOf(

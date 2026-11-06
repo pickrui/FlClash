@@ -12,9 +12,10 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/profiles/custom_overwrite.dart';
-import 'package:material_ui/material_ui.dart' hide AlertDialog, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:fl_clash/ui/dialog.dart' show AlertDialog;
+import 'package:material_ui/material_ui.dart'
+    hide AlertDialog, Scaffold, TextButton;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -332,7 +333,7 @@ Future<_TestProfiles> _pumpContent(
         },
         home: draftView
             ? const CustomOverwriteDraftView(profileId: 1)
-            : Scaffold(
+            : material.Scaffold(
                 body: CustomScrollView(
                   slivers: [
                     CustomOverwriteContent(

@@ -7,8 +7,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart'
     hide AppBar, IconButton, PopupMenuItem, Scaffold;
-import 'package:prism_ui/scaffold.dart' show AppBar;
-import 'package:fl_clash/ui/common_button.dart' show IconButton;
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';

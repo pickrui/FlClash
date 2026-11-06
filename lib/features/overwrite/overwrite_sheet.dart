@@ -5,16 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/ui/context.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/inherited.dart';
-import 'package:fl_clash/ui/paged_sheet.dart';
-import 'package:fl_clash/ui/pop_scope.dart';
-import 'package:fl_clash/ui/sheet.dart';
-import 'package:fl_clash/ui/sheet_navigator.dart';
-import 'package:fl_clash/ui/snap_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
 
@@ -44,7 +38,7 @@ Future<T?> showOverwriteSheet<T>({
   return showSheet<T>(
     context: context,
     props: nestedPagedSheetProps,
-    builder: (context, _) => sheet(context),
+    builder: (context) => sheet(context),
   );
 }
 

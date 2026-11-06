@@ -7,18 +7,14 @@ import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/color.dart';
-import 'package:fl_clash/ui/liquid_glass.dart';
-import 'package:fl_clash/ui/typography.dart';
-import 'package:fl_clash/ui/surface.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
-import 'package:material_ui/material_ui.dart' hide ThemeData, Theme;
-import 'package:prism_ui/theme_data.dart' show ThemeData;
+import 'package:material_ui/material_ui.dart' hide Colors, Theme, ThemeData;
+import 'package:material_ui/material_ui.dart' as material show Colors;
 
 void main() {
-  setUp(() => globalState.accentColor = Colors.blue);
+  setUp(() => globalState.accentColor = material.Colors.blue);
 
   testWidgets('a theme setting the theme does not read keeps the same theme', (
     tester,

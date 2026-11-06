@@ -8,8 +8,9 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/views/config/network.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField;
-import 'package:prism_ui/text_field.dart' show TextFormField;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 
 import '../helpers/test_app.dart';
 
@@ -56,7 +57,7 @@ void main() {
         container: container,
         child: const TestApp(
           locale: Locale('en'),
-          child: Scaffold(body: InterfaceNameModeItem()),
+          child: material.Scaffold(body: InterfaceNameModeItem()),
         ),
       ),
     );

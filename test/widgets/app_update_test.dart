@@ -16,8 +16,19 @@ import 'package:fl_clash/widgets/app_update.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextButton, FilledButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton, FilledButton;
+import 'package:material_ui/material_ui.dart'
+    hide
+        AlertDialog,
+        Card,
+        FilledButton,
+        LinearProgressIndicator,
+        Scaffold,
+        SelectableText,
+        TextButton;
+import 'package:material_ui/material_ui.dart'
+    as material
+    show AlertDialog, Card, LinearProgressIndicator, Scaffold, SelectableText;
+import 'package:fl_clash/ui/ui.dart';
 
 import '../helpers/test_app.dart';
 
@@ -72,7 +83,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.textContaining('Internal metadata'), findsNothing);
-      expect(find.byType(SelectableText), findsOneWidget);
+      expect(find.byType(material.SelectableText), findsOneWidget);
       await _tapNotesText(tester, 'Apple Silicon');
       await _tapNotesText(tester, 'Intel');
       expect(launched, [
@@ -159,12 +170,12 @@ void main() {
         ],
         child: const StatusManager(
           updateNotice: AppUpdateTheme(child: AppUpdateAvailableNotice()),
-          child: Scaffold(),
+          child: material.Scaffold(),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(Card), findsNothing);
+    expect(find.byType(material.Card), findsNothing);
     notice.value = _release;
     tester
         .state<StatusManagerState>(find.byType(StatusManager))
@@ -182,12 +193,12 @@ void main() {
     );
     expect(action.opened, isEmpty);
     expect(find.byType(AppUpdatePage), findsNothing);
-    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.byType(material.AlertDialog), findsNothing);
     await tester.tap(find.text(AppLocalizations.current.updateNotice));
     expect(action.opened, [_release]);
     notice.value = null;
     await tester.pumpAndSettle();
-    expect(find.byType(Card), findsNothing);
+    expect(find.byType(material.Card), findsNothing);
   });
 
   testWidgets('closing the notice dismisses that release without opening it', (
@@ -207,7 +218,7 @@ void main() {
         ],
         child: const StatusManager(
           updateNotice: AppUpdateTheme(child: AppUpdateAvailableNotice()),
-          child: Scaffold(),
+          child: material.Scaffold(),
         ),
       ),
     );
@@ -233,21 +244,21 @@ void main() {
         ],
         child: const StatusManager(
           updateNotice: AppUpdateTheme(child: AppUpdateAvailableNotice()),
-          child: Scaffold(),
+          child: material.Scaffold(),
         ),
       ),
     );
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(mouse.removePointer);
-    await mouse.moveTo(tester.getCenter(find.byType(Card)));
+    await mouse.moveTo(tester.getCenter(find.byType(material.Card)));
     await tester.pump(const Duration(seconds: 15));
-    expect(find.byType(Card), findsOneWidget);
+    expect(find.byType(material.Card), findsOneWidget);
     await mouse.moveTo(Offset.zero);
     await tester.pump(const Duration(seconds: 9));
-    expect(find.byType(Card), findsOneWidget);
+    expect(find.byType(material.Card), findsOneWidget);
     await tester.pump(const Duration(seconds: 1));
     await tester.pump();
-    expect(find.byType(Card), findsNothing);
+    expect(find.byType(material.Card), findsNothing);
     expect(action.dismissed, isEmpty);
   });
 
@@ -307,7 +318,7 @@ void main() {
           findsOneWidget,
         );
         expect(find.text(_release.releaseNotes!), findsOneWidget);
-        expect(find.byType(SelectableText), findsOneWidget);
+        expect(find.byType(material.SelectableText), findsOneWidget);
         expect(returned, isFalse);
         if (choice == 'back') {
           await tester.binding.handlePopRoute();
@@ -348,7 +359,7 @@ void main() {
       settle: false,
     );
     expect(calls, 1);
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.byType(material.LinearProgressIndicator), findsOneWidget);
     expect(find.text('v0.8.98'), findsNothing);
     expect(
       find.text(
@@ -363,7 +374,7 @@ void main() {
     pending.complete('Recovered release notes');
     await tester.pumpAndSettle();
     expect(find.text('Recovered release notes'), findsOneWidget);
-    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(find.byType(material.LinearProgressIndicator), findsNothing);
     expect(calls, 1);
   });
 
@@ -493,7 +504,7 @@ Future<void> _openDetails(
       includeNavigatorKey: false,
       locale: locale,
       textScaler: const TextScaler.linear(1.5),
-      child: Scaffold(
+      child: material.Scaffold(
         body: Builder(
           builder: (context) => TextButton(
             onPressed: () async => onResult(

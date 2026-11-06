@@ -7,11 +7,9 @@ import 'package:fl_clash/features/form/selection_sheet.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/state.dart';
-import 'package:fl_clash/ui/snap_sheet.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart' hide TextField, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -171,7 +169,7 @@ void main() {
           builder: (context) => TextButton(
             onPressed: () => showSheet<void>(
               context: context,
-              builder: (_, _) => SelectionSheet<String>(
+              builder: (_) => SelectionSheet<String>(
                 title: 'Add',
                 sections: [
                   SelectionSection(

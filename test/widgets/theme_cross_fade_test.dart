@@ -5,9 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart' hide Theme, ThemeData;
-import 'package:prism_ui/theme_data.dart' show Theme, ThemeData;
 
 const _red = Color(0xFFFF0000);
 const _blue = Color(0xFF0000FF);

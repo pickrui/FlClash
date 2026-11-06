@@ -15,10 +15,9 @@ final _flutterList = RegExp(
 );
 
 const _allowed = {
-  'lib/ui/scaffold.dart': 'the keyword strip runs sideways',
+  'lib/ui/scaffold/scaffold_actions.dart': 'the keyword strip runs sideways',
   'lib/features/editor/completion_popup.dart': 'a few suggestions at most',
   'lib/views/dashboard/edit.dart': 'a few cards, each lifting its own way',
-  'lib/ui/popup.dart': 'the bounded menu uses the shared Prism layout',
 };
 
 void main() {

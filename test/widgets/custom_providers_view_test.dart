@@ -20,13 +20,13 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/resources.dart';
 import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/views/profiles/custom_providers.dart';
-import 'package:fl_clash/ui/list.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/last_update_time_text.dart';
 import 'package:fl_clash/widgets/resource_file_info.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart' hide TextFormField;
-import 'package:prism_ui/text_field.dart' show TextFormField;
+import 'package:material_ui/material_ui.dart' hide Scaffold, TextFormField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
@@ -363,7 +363,7 @@ void main() {
       await tester.pumpWidget(
         TestApp(
           wrapInProviderScope: true,
-          child: Scaffold(
+          child: material.Scaffold(
             body: ResourceFileInfoBuilder(
               source: 'fixture',
               updatingKey: 'fixture',

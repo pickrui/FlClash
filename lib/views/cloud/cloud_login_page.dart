@@ -7,7 +7,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/navigator.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
@@ -16,7 +16,6 @@ import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart' show TextInputAction;
-import 'package:fl_clash/ui/common_button.dart' as prism;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud_layout.dart';
@@ -24,7 +23,7 @@ import 'cloud_layout.dart';
 Future<T?> showCloudLoginPage<T>(BuildContext context) {
   return showFormSheet<T>(
     context: context,
-    builder: (_, _) => const CloudLoginPage(),
+    builder: (_) => const CloudLoginPage(),
   );
 }
 
@@ -116,7 +115,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
         isActive: () => mounted && (route?.isActive ?? true),
       );
       if (signedIn && mounted) {
-        BaseNavigator.close(context);
+        closePage(context);
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -143,7 +142,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
         code: grant.code,
         verifier: grant.verifier,
       );
-      if (mounted && route?.isActive != false) BaseNavigator.close(context);
+      if (mounted && route?.isActive != false) closePage(context);
     } catch (error) {
       if (!mounted ||
           route?.isActive == false ||
@@ -317,7 +316,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
         ),
         Align(
           alignment: AlignmentDirectional.centerEnd,
-          child: prism.TextButton(
+          child: TextButton(
             onPressed: _showForgotPasswordDialog,
             child: Text(l10n.forgotPassword),
           ),
@@ -329,7 +328,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
   Future<void> _showForgotPasswordDialog() async {
     final email = await showFormSheet<String>(
       context: context,
-      builder: (_, _) =>
+      builder: (_) =>
           _ForgotPasswordDialog(initialEmail: _emailController.text.trim()),
     );
     if (email == null || !mounted) {
@@ -428,7 +427,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
           password: _passwordController.text,
         );
         if (mounted && route?.isActive != false) {
-          BaseNavigator.close(context, _emailController.text.trim());
+          closePage(context, _emailController.text.trim());
         }
       }
     } catch (error) {

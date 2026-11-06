@@ -10,7 +10,7 @@ import 'package:code_forge/code_forge.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide TextField;
-import 'package:prism_ui/text_field.dart' show TextField;
+import 'package:fl_clash/ui/ui.dart';
 
 import 'support.dart';
 

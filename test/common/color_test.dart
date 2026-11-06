@@ -5,10 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:math';
 
-import 'package:fl_clash/ui/color.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:material_color_utilities/hct/hct.dart';
-import 'package:material_ui/material_ui.dart' hide ColorScheme;
-import 'package:prism_ui/theme_data.dart' show ColorScheme;
+import 'package:material_ui/material_ui.dart' hide ColorScheme, Colors;
+import 'package:material_ui/material_ui.dart' as material show Colors;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' as material_ui;
 
@@ -36,7 +36,7 @@ double _contrast(Color a, Color b) {
 
 void main() {
   test('opacity extensions use their named alpha values', () {
-    const color = Colors.blue;
+    const color = material.Colors.blue;
     const tolerance = 0.0001;
 
     expect(color.opacity80.a, closeTo(0.8, tolerance));
@@ -154,10 +154,10 @@ void main() {
       );
 
       expect(light.primary, blue, reason: '$style');
-      expect(light.onPrimary, Colors.white, reason: '$style');
+      expect(light.onPrimary, material.Colors.white, reason: '$style');
       expect(_hct(dark.primary).hue, closeTo(_hct(blue).hue, 1));
       expect(_hct(dark.primary).tone, closeTo(_hct(blue).tone + 3, 0.5));
-      expect(dark.onPrimary, Colors.white, reason: '$style');
+      expect(dark.onPrimary, material.Colors.white, reason: '$style');
     }
 
     final soft = seededColorScheme(
@@ -254,12 +254,12 @@ void main() {
     'pure black keeps dark surface levels ordered and light themes intact',
     () {
       final dark = ColorScheme.fromSeed(
-        seedColor: Colors.teal,
+        seedColor: material.Colors.teal,
         brightness: Brightness.dark,
       );
       final result = dark.toPureBlack(true);
-      expect(result.surface, Colors.black);
-      expect(result.surfaceDim, Colors.black);
+      expect(result.surface, material.Colors.black);
+      expect(result.surfaceDim, material.Colors.black);
       final levels = [
         result.surfaceContainerLowest,
         result.surfaceContainerLow,
@@ -274,7 +274,7 @@ void main() {
       expect(result.primary, dark.primary);
       expect(result.onSurface, dark.onSurface);
       expect(dark.toPureBlack(false), dark);
-      final light = ColorScheme.fromSeed(seedColor: Colors.teal);
+      final light = ColorScheme.fromSeed(seedColor: material.Colors.teal);
       expect(light.toPureBlack(true), light);
     },
   );

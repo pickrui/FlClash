@@ -13,7 +13,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Scaffold, TextButton;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
+import 'package:fl_clash/ui/ui.dart';
 
 import '../helpers/test_app.dart';
 
@@ -42,7 +42,7 @@ Future<void> _open(
           body: TextButton(
             onPressed: () => showFormSheet<void>(
               context: context,
-              builder: (_, _) => CloudRegisterPage(loadConfig: loadConfig),
+              builder: (_) => CloudRegisterPage(loadConfig: loadConfig),
             ),
             child: const Text('open'),
           ),

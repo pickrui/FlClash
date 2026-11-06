@@ -10,9 +10,8 @@ import 'package:fl_clash/views/network_diagnostic_proxy_guide.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:prism_ui/app.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:material_ui/material_ui.dart' hide ThemeData;
-import 'package:prism_ui/theme_data.dart' show ThemeData;
 
 Future<void> _pump(
   WidgetTester tester, {

@@ -6,22 +6,15 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:prism_ui/press_region.dart';
-import 'package:fl_clash/common/common.dart';
+import 'package:prism_ui/shapes/shapes.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/navigation_dock.dart';
-import 'package:fl_clash/ui/surface.dart';
-import 'package:fl_clash/ui/typography.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/style.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:prism_ui/shapes/shapes.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' show Colors;
-import 'package:prism_ui/theme_data.dart' as prism;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;
 
 EdgeInsets dashboardCardPadding(DashboardDensity density) => switch (density) {
   DashboardDensity.standard => const EdgeInsets.symmetric(
@@ -849,7 +842,7 @@ class DashboardIconButton extends StatelessWidget {
           style: ButtonStyle.from(
             minimumSize: const Size.square(size),
             fixedSize: const Size.square(size),
-            tapTargetSize: prism.TapTargetSize.shrinkWrap,
+            tapTargetSize: TapTargetSize.shrinkWrap,
             foregroundColor: context.colorScheme.onSurfaceVariant,
           ),
           onPressed: onPressed,

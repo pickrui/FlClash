@@ -10,16 +10,13 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/typography.dart';
-import 'package:prism_ui/surface.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
-import 'package:prism_ui/theme_data.dart' as prism;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, ButtonStyle;
 
 import 'layout.dart';
 import 'style.dart';
@@ -662,7 +659,7 @@ class _RoundButton extends StatelessWidget {
           foregroundColor: foreground,
           minimumSize: const Size.square(28),
           fixedSize: const Size.square(28),
-          tapTargetSize: prism.TapTargetSize.shrinkWrap,
+          tapTargetSize: TapTargetSize.shrinkWrap,
         ),
         onPressed: onPressed,
         icon: GlyphIcon(glyph, size: 16, color: foreground),

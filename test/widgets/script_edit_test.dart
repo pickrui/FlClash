@@ -19,9 +19,10 @@ import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/script_library.dart';
 import 'package:fl_clash/views/config/scripts.dart';
 import 'package:flutter/gestures.dart';
-import 'package:fl_clash/ui/sortable.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:material_ui/material_ui.dart' hide AlertDialog;
+import 'package:material_ui/material_ui.dart' as material show AlertDialog;
 
 import '../helpers/app_paths.dart';
 import '../helpers/test_app.dart';
@@ -217,7 +218,8 @@ void main() {
       unawaited(
         showDialog<void>(
           context: editorContext,
-          builder: (_) => const AlertDialog(content: Text('Other message')),
+          builder: (_) =>
+              const material.AlertDialog(content: Text('Other message')),
         ),
       );
       await tester.pump();

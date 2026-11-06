@@ -11,9 +11,10 @@ import 'package:fl_clash/features/form/form_page.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
-import 'package:material_ui/material_ui.dart' hide TextField, TextButton;
-import 'package:fl_clash/ui/common_button.dart' show TextButton;
-import 'package:prism_ui/text_field.dart' show TextField;
+import 'package:material_ui/material_ui.dart'
+    hide Scaffold, TextButton, TextField;
+import 'package:material_ui/material_ui.dart' as material show Scaffold;
+import 'package:fl_clash/ui/ui.dart';
 
 import '../helpers/test_app.dart';
 
@@ -35,7 +36,7 @@ void main() {
       TestApp(
         wrapInProviderScope: true,
         child: Builder(
-          builder: (context) => Scaffold(
+          builder: (context) => material.Scaffold(
             body: TextButton(
               onPressed: () async {
                 result = await showProfileLinksForm(context, title: 'Import');
@@ -106,7 +107,7 @@ void main() {
           textScaler: const TextScaler.linear(1.3),
           overrides: [viewSizeProvider.overrideWithBuild((_, _) => size)],
           child: Builder(
-            builder: (context) => Scaffold(
+            builder: (context) => material.Scaffold(
               body: TextButton(
                 onPressed: () async {
                   result = await showNamedUrlsForm(

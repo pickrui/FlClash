@@ -655,7 +655,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                 onEditAll: (context, entries) =>
                     showFormSheet<Map<String, String>>(
                       context: context,
-                      builder: (_, _) => _ProxyMapForm(
+                      builder: (_) => _ProxyMapForm(
                         title: title,
                         entries: entries,
                         ownedKeys: _definition.ownedKeysOf(field),
@@ -746,7 +746,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
       itemMaxLength: maxLength,
       onEditAll: (context, entries) => showFormSheet<List<String>>(
         context: context,
-        builder: (_, _) =>
+        builder: (_) =>
             _ProxyListForm(title: title, values: entries, maxLength: maxLength),
       ),
     ),
@@ -905,7 +905,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                     ),
                     keyboardType: TextInputType.url,
                     decoration: InputDecoration(
-                      border: const prism.AppInputBorder(),
+                      border: const AppInputBorder(),
                       hintText: 'URI',
                       helperText: l.proxyChainUriNodeSupportedFormats,
                     ),
@@ -924,7 +924,7 @@ class _ProfileProxyEditViewState extends ConsumerState<ProfileProxyEditView> {
                         .of(context)
                         .copyWith(fontFamily: 'monospace'),
                     decoration: InputDecoration(
-                      border: const prism.AppInputBorder(),
+                      border: const AppInputBorder(),
                       hintText: l.nodeDefinition,
                     ),
                   ),

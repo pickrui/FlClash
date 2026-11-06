@@ -6,14 +6,11 @@
 import 'dart:async';
 
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/ui/sortable.dart';
+import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart'
     hide AppBar, IconButton, Scaffold, TextButton, TextField;
-import 'package:prism_ui/scaffold.dart' show AppBar;
-import 'package:fl_clash/ui/common_button.dart' show IconButton, TextButton;
-import 'package:prism_ui/text_field.dart' show TextField;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/glyph_finders.dart';
