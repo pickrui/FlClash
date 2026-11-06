@@ -98,13 +98,6 @@ void main() {
           'org': 'Example Network',
           'asn': 'AS64500',
         }),
-        IpInfo.fromIpAPIJson({
-          'query': '203.0.113.9',
-          'countryCode': 'GB',
-          'country': 'United Kingdom',
-          'org': 'Example Network',
-          'as': 'AS64500 Example Network',
-        }),
       ];
       for (final info in responses) {
         expect(

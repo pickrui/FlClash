@@ -129,7 +129,6 @@ String getDelayTestUrl({required String proxyName, required String testUrl}) {
   return proxyName == UsedProxy.DIRECT.value ? defaultDirectTestUrl : testUrl;
 }
 
-const trackerInfoListEquality = ListEquality<TrackerInfo>();
 const stringListEquality = ListEquality<String>();
 const intListEquality = ListEquality<int>();
 const logListEquality = ListEquality<Log>();

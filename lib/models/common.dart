@@ -300,10 +300,6 @@ abstract class Traffic with _$Traffic {
 }
 
 extension TrafficExt on Traffic {
-  String get speedText {
-    return '↑ ${up.traffic.show}/s   ↓ ${down.traffic.show}/s';
-  }
-
   String get desc {
     return '${up.traffic.show} ↑ ${down.traffic.show} ↓';
   }
@@ -489,16 +485,6 @@ abstract class IpInfo with _$IpInfo {
 
   static IpInfo fromMyIpJson(Map<String, dynamic> json) =>
       _fromFields(json, countryKey: 'cc', country: json['country']);
-
-  static IpInfo fromIpAPIJson(Map<String, dynamic> json) => _fromFields(
-    json,
-    ipKey: 'query',
-    countryKey: 'countryCode',
-    country: json['country'],
-    organization:
-        _text(json['asname']) ?? _text(json['org']) ?? _text(json['isp']),
-    asn: _text(json['as'])?.split(RegExp(r'\s+')).first,
-  );
 
   static IpInfo fromIdentMeJson(Map<String, dynamic> json) =>
       _fromFields(json, countryKey: 'cc', country: json['country']);

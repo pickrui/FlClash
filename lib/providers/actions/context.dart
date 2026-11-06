@@ -38,10 +38,6 @@ extension ActionContext on BuildContext {
     this,
     listen: false,
   ).read(backupActionProvider.notifier);
-  BackBlockAction get backBlockAction => ProviderScope.containerOf(
-    this,
-    listen: false,
-  ).read(backBlockActionProvider.notifier);
   StoreAction get storeAction => ProviderScope.containerOf(
     this,
     listen: false,

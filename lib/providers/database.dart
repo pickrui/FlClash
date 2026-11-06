@@ -29,19 +29,6 @@ bool _asyncListChanged<T>(
   return !equality.equals(previous.value, next.value);
 }
 
-Future<void> withRollback<T>({
-  required T snapshot,
-  required FutureOr<void> Function() action,
-  required void Function(T snapshot) rollback,
-}) async {
-  try {
-    await action();
-  } catch (e, s) {
-    rollback(snapshot);
-    Error.throwWithStackTrace(e, s);
-  }
-}
-
 class DatabaseWriteQueue {
   Future<void> _tail = Future.value();
   Object? _error;
