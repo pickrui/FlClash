@@ -49,7 +49,7 @@ try {
     $exited = $true
     $report = $true
     $directory = Split-Path -Parent $Target
-    $arguments = '/SILENT /NOCANCEL /SUPPRESSMSGBOXES /SP- /NORESTART /RESTARTEXITCODE=3010 /NORESTARTAPPLICATIONS /FLCLASHUPDATE=1 /DIR="' + $directory + '" /LOG="' + (Join-Path $Stage 'install.log') + '"'
+    $arguments = '/SILENT /NOCANCEL /SUPPRESSMSGBOXES /SP- /NORESTART /RESTARTEXITCODE=3010 /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS /NORESTARTAPPLICATIONS /FLCLASHUPDATE=1 /DIR="' + $directory + '" /LOG="' + (Join-Path $Stage 'install.log') + '"'
     $setup = Start-Process -FilePath $Installer -ArgumentList $arguments -Verb RunAs -Wait -PassThru
     $reboot = $setup.ExitCode -eq 3010
     if ($setup.ExitCode -ne 0) { throw "Update installer exited with $($setup.ExitCode)" }

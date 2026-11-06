@@ -248,8 +248,7 @@ String _renameCustomProxyRule(String rule, Map<String, String> aliases) {
   return next == null ? rule : renameRuleTarget(rule, target!, next);
 }
 
-/// A name one of the profile's own groups holds stands for that group, so an
-/// alias from or to it would move the profile's routing onto a node.
+/// A group's name stands for that group: an alias would move routing onto a node.
 Map<String, String> usableCustomProxyAliases(
   Map source,
   Map<String, String> aliases,

@@ -44,6 +44,7 @@ function Start-Process {
         Assert-Update ($ArgumentList.Contains('/SILENT /NOCANCEL ')) 'Update must show only an uncancelable progress window'
         Assert-Update ($ArgumentList.Contains('/NORESTART ')) 'Update could reboot Windows'
         Assert-Update ($ArgumentList.Contains('/FLCLASHUPDATE=1')) 'Missing update mode'
+        Assert-Update ($ArgumentList.Contains('/FORCECLOSEAPPLICATIONS')) 'A process holding a file would stop the update'
         Assert-Update ($ArgumentList.Contains('/DIR="' + (Split-Path -Parent $global:FlClashUpdateTest_targetFile) + '"')) 'Update changed install directory'
         if ($global:FlClashUpdateTest_scenario -eq 'uac-cancel') { throw 'UAC rejected' }
         return [pscustomobject]@{ ExitCode = 0 }

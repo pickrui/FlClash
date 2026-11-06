@@ -9,6 +9,7 @@ AppUpdatesURL={{PUBLISHER_URL}}
 DefaultDirName={{INSTALL_DIR_NAME}}
 DisableDirPage=no
 DisableProgramGroupPage=yes
+ShowLanguageDialog=auto
 OutputDir=.
 OutputBaseFilename={{OUTPUT_BASE_FILENAME}}
 Compression=lzma
@@ -97,6 +98,40 @@ end;
 function IsAppUpdate: Boolean;
 begin
   Result := ExpandConstant('{param:FLCLASHUPDATE|0}') = '1';
+end;
+
+function PreviousAppDirectory(var Directory: String): Boolean;
+begin
+  Result := RegQueryStringValue(HKLM, 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{{APP_ID}}_is1',
+    'Inno Setup: App Path', Directory) and FileExists(AddBackslash(Directory) + 'FlClash.exe');
+end;
+
+{ Running the installer over an existing install is the whole request: Setup
+  already knows its directory, tasks and language. Only a silent Setup can drop
+  the wizard, so it runs itself again that way, which still asks about a pending
+  restart. Exec refuses to start Setup's own file, hence PowerShell. This one,
+  holding the unelevated token, then reopens the app. }
+function InitializeSetup: Boolean;
+var
+  Directory, Source: String;
+  ResultCode: Integer;
+begin
+  Result := True;
+  if WizardSilent or not PreviousAppDirectory(Directory) then Exit;
+  Log('Upgrading ' + Directory + ' without the wizard');
+  Source := ExpandConstant('{srcexe}');
+  StringChangeEx(Source, '''', '''''', True);
+  if not Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
+    '-NoProfile -NonInteractive -Command "Start-Process -Wait -ErrorAction Stop -FilePath ' +
+    '''' + Source + '''' + ' -ArgumentList ' +
+    '''/SILENT /SP- /CLOSEAPPLICATIONS /FORCECLOSEAPPLICATIONS /NORESTARTAPPLICATIONS''"',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode) or (ResultCode <> 0) then
+  begin
+    Log('The silent upgrade did not start: ' + IntToStr(ResultCode));
+    Exit;
+  end;
+  Result := False;
+  ExecAsOriginalUser(AddBackslash(Directory) + 'FlClash.exe', '', Directory, SW_SHOW, ewNoWait, ResultCode);
 end;
 
 procedure KillProcesses;
@@ -542,6 +577,6 @@ Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
 Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 [Run]
 Filename: "{app}\\{{EXECUTABLE_NAME}}"; Parameters: "--clear-stale-proxy"; Flags: runhidden skipifdoesntexist
-Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent
+Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: nowait postinstall skipifsilent
 [UninstallRun]
 Filename: "{app}\\{{EXECUTABLE_NAME}}"; Parameters: "--clear-stale-proxy"; Flags: runhidden skipifdoesntexist; RunOnceId: "ClearStaleProxy"

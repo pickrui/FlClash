@@ -39,6 +39,14 @@ var
   DataPrompts, DataErrors: Integer;
   DeletedDirectories, RemovedParents: String;
 
+const SW_SHOW = 5; ewNoWait = 1;
+var
+  SilentSetup, RerunFailure: Boolean;
+  PreviousInstall: String;
+  Reruns, Reopens: Integer;
+
+function WizardSilent: Boolean;
+begin Result := SilentSetup; end;
 function DLLGetLastError: LongWord;
 begin Result := ApiError; end;
 function ExpandConstant(S: String): String;
@@ -49,6 +57,7 @@ begin
     if AppDirectory = '' then AppDirectory := 'C:\app';
     Result := StringReplace(S, '{app}', AppDirectory, [rfReplaceAll]);
     Result := StringReplace(Result, '{tmp}', 'C:\tmp', [rfReplaceAll]);
+    Result := StringReplace(Result, '{srcexe}', 'C:\O' + #39 + 'Brien\setup.exe', [rfReplaceAll]);
     Result := StringReplace(Result, '{userappdata}', 'C:\fixture\Roaming', [rfReplaceAll]);
     Result := StringReplace(Result, '{localappdata}', 'C:\fixture\Local', [rfReplaceAll]);
   end;
@@ -121,6 +130,10 @@ function RegKeyExists(Root: Integer; Key: String): Boolean;
 begin Result := ServiceExists and not HiddenServiceKey; end;
 function RegQueryStringValue(Root: Integer; Key, Name: String; var Value: String): Boolean;
 begin
+  if Name = 'Inno Setup: App Path' then begin
+    Assert(Root = HKLM); Assert(Pos('{{APP_ID}}_is1', Key) > 0);
+    Value := PreviousInstall; Result := Value <> ''; Exit;
+  end;
   if Name = 'InstallLocation' then begin
     Assert(Root = HKLM); Assert(Pos('728B3532-C74B-4870-9068-BE70FE12A3E6_is1', Key) > 0);
     Value := LegacyInstallDirectory; Result := Value <> ''; Exit;
@@ -160,12 +173,24 @@ begin
 end;
 function GetExceptionMessage: String;
 begin Result := Exception(ExceptObject).Message; end;
+function ExecAsOriginalUser(FileName, Args, Dir: String; Show, Wait: Integer; var Code: Integer): Boolean;
+begin
+  Assert(FileName = 'C:\app\FlClash.exe'); Assert(Wait = ewNoWait);
+  Inc(Reopens); Code := 0; Result := True;
+end;
 function Exec(FileName, Args, Dir: String; Show, Wait: Integer; var Code: Integer): Boolean;
 begin
   Result := True; Code := 0;
   if Pos('powershell.exe', FileName) > 0 then begin
     Assert(Pos('-NoProfile -NonInteractive -Command "', Args) = 1);
-    if Pos('VersionInfo.InternalName', Args) > 0 then begin
+    if Pos('Start-Process', Args) > 0 then begin
+      Assert(Pos('-FilePath ' + #39 + 'C:\O' + #39 + #39 + 'Brien\setup.exe' + #39, Args) > 0);
+      Assert(Pos('/SILENT ', Args) > 0, 'the rerun must drop the wizard');
+      Assert(Pos('/NORESTART ', Args) = 0, 'a pending restart must be asked');
+      Assert(Pos('/FLCLASHUPDATE', Args) = 0, 'a manual upgrade must stop the running app');
+      Assert(Wait = ewWaitUntilTerminated); Assert(Show = SW_HIDE);
+      Inc(Reruns); if RerunFailure then Code := 1;
+    end else if Pos('VersionInfo.InternalName', Args) > 0 then begin
       Assert(Pos('Get-Item -LiteralPath ', Args) > 0);
       if IdentityFailure then Result := False;
       if ForeignApp then Code := 1;
@@ -275,6 +300,24 @@ begin
   ServiceExists := True;
   OwnerSid := 'S-1-5-21-123';
   InstallCompletePair;
+  if Scenario = 'manual_upgrade' then begin
+    PreviousInstall := 'C:\app';
+    Assert(not InitializeSetup); Assert(Reruns = 1); Assert(Reopens = 1);
+    Halt(0);
+  end;
+  if Scenario = 'rerun_failure' then begin
+    PreviousInstall := 'C:\app'; RerunFailure := True;
+    Assert(InitializeSetup, 'the wizard remains when the rerun cannot start');
+    Assert(Reruns = 1); Assert(Reopens = 0);
+    Halt(0);
+  end;
+  if (Scenario = 'fresh_wizard') or (Scenario = 'silent_setup') then begin
+    if Scenario = 'silent_setup' then begin
+      SilentSetup := True; PreviousInstall := 'C:\app';
+    end;
+    Assert(InitializeSetup); Assert(Reruns = 0); Assert(Reopens = 0);
+    Halt(0);
+  end;
   if Scenario = 'quoted_directory' then begin
     AppDirectory := 'C:\O' + #39 + 'Brien & $safe';
     KillProcesses; Assert(Kills = 1); Halt(0);
@@ -557,6 +600,72 @@ class WindowsInstallerCompileTest(unittest.TestCase):
             self.assertTrue((root / 'fixture.exe').is_file())
 
 
+@unittest.skipUnless(
+    os.name == 'nt' and os.environ.get('GITHUB_ACTIONS'),
+    'installs for real, so only on a disposable Windows runner',
+)
+class WindowsInstallerUpgradeTest(unittest.TestCase):
+    APP_ID = 'com.oixcloud.clash.installer-fixture'
+
+    def build(self, root, version):
+        (root / 'version.txt').write_text(version, encoding='utf-8')
+        code = re.search(
+            r'^function PreviousAppDirectory.*?^function InitializeSetup.*?^end;$',
+            installer_code(), re.M | re.S,
+        ).group(0).replace('{{APP_ID}}', self.APP_ID)
+        script = root / 'fixture.iss'
+        script.write_text(
+            f'[Setup]\nAppId={self.APP_ID}\nAppName=Installer fixture\nAppVersion={version}\n'
+            'DefaultDirName={autopf}\\FlClashInstallerFixture\nDisableDirPage=no\n'
+            'ArchitecturesInstallIn64BitMode=x64os\nSetupLogging=yes\n'
+            f'PrivilegesRequired=admin\nOutputDir=.\nOutputBaseFilename=fixture-{version}\n'
+            '[Files]\nSource: "FlClash.exe"; DestDir: "{app}"; Flags: ignoreversion\n'
+            'Source: "version.txt"; DestDir: "{app}"; Flags: ignoreversion\n'
+            '[Code]\n' + code + '\n',
+            encoding='utf-8-sig',
+        )
+        compiler = shutil.which('ISCC.exe') or str(
+            Path(os.environ.get('ProgramFiles(x86)', r'C:\Program Files (x86)'))
+            / 'Inno Setup 6' / 'ISCC.exe'
+        )
+        result = subprocess.run([compiler, '/Qp', str(script)], cwd=root,
+                                capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return root / f'fixture-{version}.exe'
+
+    def test_second_run_upgrades_without_the_wizard_and_reopens_the_app(self):
+        installed = Path(os.environ['ProgramFiles']) / 'FlClashInstallerFixture'
+        self.addCleanup(subprocess.run, ['taskkill', '/F', '/IM', 'FlClash.exe'],
+                        capture_output=True)
+        with tempfile.TemporaryDirectory(prefix='flclash-inno-upgrade-') as directory:
+            root = Path(directory)
+            # A console with no input keeps running, which shows the app was reopened.
+            shutil.copy(Path(os.environ['SystemRoot']) / 'System32' / 'cmd.exe',
+                        root / 'FlClash.exe')
+            first = self.build(root, '1.0')
+            second = self.build(root, '2.0')
+            subprocess.run([first, '/VERYSILENT', '/SUPPRESSMSGBOXES'], check=True, timeout=120)
+            self.addCleanup(subprocess.run,
+                            [installed / 'unins000.exe', '/VERYSILENT', '/SUPPRESSMSGBOXES'],
+                            timeout=120)
+            self.assertEqual((installed / 'version.txt').read_text(encoding='utf-8'), '1.0')
+            # A wizard would wait for a click and run into this timeout.
+            try:
+                subprocess.run([second], timeout=60)
+            except subprocess.TimeoutExpired:
+                windows = subprocess.run(['tasklist', '/V', '/FO', 'CSV'],
+                                         capture_output=True, text=True, timeout=30).stdout
+                logs = sorted(Path(tempfile.gettempdir()).glob('Setup Log*.txt'))
+                self.fail('\n'.join(
+                    [line for line in windows.splitlines() if 'fixture' in line.lower()]
+                    + [log.read_text(encoding='utf-8', errors='replace') for log in logs]
+                ))
+            self.assertEqual((installed / 'version.txt').read_text(encoding='utf-8'), '2.0')
+            running = subprocess.run(['tasklist', '/FI', 'IMAGENAME eq FlClash.exe'],
+                                     capture_output=True, text=True, timeout=30)
+            self.assertIn('FlClash.exe', running.stdout)
+
+
 @unittest.skipUnless(shutil.which('fpc'), 'requires Free Pascal for isolated installer control-flow tests')
 class WindowsInstallerTest(unittest.TestCase):
     @classmethod
@@ -577,7 +686,8 @@ class WindowsInstallerTest(unittest.TestCase):
             raise AssertionError(result.stdout + result.stderr)
 
     def test_cleanup_and_retry_preserve_the_service_barrier_and_owner(self):
-        for scenario in ['foreign_app', 'identity_failure', 'quoted_directory', 'legacy_service_upgrade',
+        for scenario in ['manual_upgrade', 'rerun_failure', 'fresh_wizard', 'silent_setup',
+                         'foreign_app', 'identity_failure', 'quoted_directory', 'legacy_service_upgrade',
                          'legacy_service_cancel', 'legacy_service_crash', 'legacy_service_foreign', 'cleanup_failure', 'launch_failure', 'extraction_failure', 'retry',
                          'update', 'cancel_after_stop', 'fresh_install', 'owner_read_failure',
                          'legacy_owner_absent', 'uninstall_failure',
