@@ -110,7 +110,7 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
   }
 
   @override
-  Future<bool> shutdown(_) async {
+  Future<bool> shutdown() async {
     if (!_connectedCompleter.isCompleted) {
       return false;
     }

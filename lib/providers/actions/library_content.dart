@@ -143,11 +143,7 @@ extension _LibraryContentActions on AppController {
         if (system.isAndroid) await preferences.saveAppliedConfigMd5(null);
       },
       changeCore: (rollback) async {
-        final message = await coreController.replaceProviderFile(
-          change,
-          rollback: rollback,
-        );
-        if (message.isNotEmpty) throw message;
+        await coreController.replaceProviderFile(change, rollback: rollback);
       },
       config: file,
       recover: () async {

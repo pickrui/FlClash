@@ -40,7 +40,6 @@ void main() {
     crashes = StreamController<DesktopCoreFailure>.broadcast();
     when(() => lifecycle.crashEvents).thenAnswer((_) => crashes.stream);
     when(() => lifecycle.start()).thenAnswer((_) async => result);
-    when(() => lifecycle.restart()).thenAnswer((_) async => result);
     when(() => lifecycle.stop()).thenAnswer((_) async => result);
     when(() => lifecycle.close()).thenAnswer((_) async => result);
     when(() => rpcClient.close()).thenAnswer((_) async {});
@@ -59,11 +58,9 @@ void main() {
     'delegates lifecycle commands without owning platform details',
     () async {
       expect(await service.start(), same(result));
-      expect(await service.restart(), same(result));
       expect(await service.stop(), same(result));
 
       verify(() => lifecycle.start()).called(1);
-      verify(() => lifecycle.restart()).called(1);
       verify(() => lifecycle.stop()).called(1);
     },
   );
@@ -194,7 +191,7 @@ void main() {
     ).thenAnswer((_) => Completer<bool?>().future);
 
     bool? stopped;
-    unawaited(service.shutdown(true).then((value) => stopped = value));
+    unawaited(service.shutdown().then((value) => stopped = value));
     await tester.pump(coreShutdownTimeout + const Duration(seconds: 1));
 
     expect(stopped, isTrue);
@@ -219,7 +216,7 @@ void main() {
       ),
     ).thenAnswer((_) async => null);
 
-    expect(await service.shutdown(true), isTrue);
+    expect(await service.shutdown(), isTrue);
     verify(() => lifecycle.stop()).called(1);
   });
 

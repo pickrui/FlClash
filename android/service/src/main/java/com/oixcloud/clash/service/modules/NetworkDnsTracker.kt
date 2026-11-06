@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 package com.oixcloud.clash.service.modules
 
-/** One registration owns one tracker, so late callbacks cannot revive a stopped session. */
+/** One process-wide observer owns one tracker for the life of the process. */
 internal class NetworkDnsTracker<N>(
     private val now: () -> Long,
     private val schedule: (Long, () -> Unit) -> (() -> Unit),
@@ -20,7 +20,6 @@ internal class NetworkDnsTracker<N>(
     }
 
     private val networks = linkedMapOf<N, Info>()
-    private var active = true
     private var previousDns = emptyList<String>()
     private var pendingDns: List<String>? = null
     private var publishRevision: Any? = null
@@ -32,28 +31,24 @@ internal class NetworkDnsTracker<N>(
 
     @Synchronized
     fun available(network: N, priority: Int) {
-        if (!active) return
         networks.getOrPut(network) { Info(priority) }.priority = priority
         update()
     }
 
     @Synchronized
     fun capabilitiesChanged(network: N, priority: Int) {
-        if (!active) return
         networks[network]?.priority = priority
         update()
     }
 
     @Synchronized
     fun linkPropertiesChanged(network: N, dns: List<String>) {
-        if (!active) return
         networks[network]?.dns = dns.distinct()
         update()
     }
 
     @Synchronized
     fun losing(network: N, lifetimeMs: Int) {
-        if (!active) return
         val info = networks[network] ?: return
         info.cancel?.invoke()
         val delay = lifetimeMs.coerceAtLeast(0).toLong()
@@ -63,7 +58,7 @@ internal class NetworkDnsTracker<N>(
         update()
         info.cancel = if (delay > 0) schedule(delay) {
             synchronized(this) {
-                if (active && networks[network] === info && info.revision === revision) {
+                if (networks[network] === info && info.revision === revision) {
                     info.cancel = null
                     update()
                 }
@@ -73,29 +68,8 @@ internal class NetworkDnsTracker<N>(
 
     @Synchronized
     fun lost(network: N) {
-        if (!active) return
         networks.remove(network)?.cancel?.invoke()
         update()
-    }
-
-    @Synchronized
-    fun stop() {
-        active = false
-        networks.values.forEach { it.cancel?.invoke() }
-        networks.clear()
-        cancelPublish?.invoke()
-        cancelPublish = null
-        pendingDns = null
-        publishRevision = null
-        cancelNetwork?.invoke()
-        cancelNetwork = null
-        pendingNetwork = null
-        networkRevision = null
-        currentNetwork = null
-        if (previousDns.isNotEmpty()) {
-            previousDns = emptyList()
-            publish(emptyList())
-        }
     }
 
     private fun Info.score(time: Long) = priority + if (time < losingUntil) 10 else 0
@@ -116,14 +90,14 @@ internal class NetworkDnsTracker<N>(
         cancelPublish = null
         pendingDns = null
         publishRevision = null
-        if (dns == previousDns || !active) return
+        if (dns == previousDns) return
         val snapshot = dns.toList()
         val revision = Any()
         pendingDns = snapshot
         publishRevision = revision
         cancelPublish = schedule(SETTLE_DELAY_MILLIS) {
             synchronized(this) {
-                if (active && publishRevision === revision) {
+                if (publishRevision === revision) {
                     cancelPublish = null
                     pendingDns = null
                     publishRevision = null
@@ -143,13 +117,13 @@ internal class NetworkDnsTracker<N>(
         cancelNetwork = null
         pendingNetwork = null
         networkRevision = null
-        if (network == null || network == currentNetwork || !active) return
+        if (network == null || network == currentNetwork) return
         val revision = Any()
         pendingNetwork = network
         networkRevision = revision
         cancelNetwork = schedule(SETTLE_DELAY_MILLIS) {
             synchronized(this) {
-                if (active && networkRevision === revision) {
+                if (networkRevision === revision) {
                     cancelNetwork = null
                     pendingNetwork = null
                     networkRevision = null

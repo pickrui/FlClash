@@ -135,13 +135,20 @@ extension SetupControllerExt on AppController {
     required bool Function() shouldContinue,
   }) => _geoRecoveryLock.synchronized(() async {
     if (!shouldContinue()) return false;
-    Future<String> download(String selected) => coreController.updateGeoData(
-      UpdateGeoDataParams(
-        geoName: geoFileName(resource),
-        geoType: resource.name,
-        url: selected,
-      ),
-    );
+    Future<void> download(String selected) async {
+      try {
+        await coreController.updateGeoData(
+          UpdateGeoDataParams(
+            geoName: geoFileName(resource),
+            geoType: resource.name,
+            url: selected,
+          ),
+        );
+      } on CoreMethodException catch (error) {
+        // Recovery decides by the Core's own wording.
+        throw error.message;
+      }
+    }
 
     return downloadGeoWithRecovery(
       initialError: initialError,
@@ -159,7 +166,8 @@ extension SetupControllerExt on AppController {
                   shouldContinue: shouldContinue,
                   download: (selected) async {
                     try {
-                      return Secrets.redactApiDomains(await download(selected));
+                      await download(selected);
+                      return '';
                     } catch (error) {
                       return Secrets.redactApiDomains(error.toString());
                     }
@@ -210,10 +218,9 @@ extension SetupControllerExt on AppController {
         // The normal provider listener is debounced. Apply the new port before
         // retrying, including when we are inside setupConfig's preload callback.
         final updateParams = _ref.read(updateParamsProvider);
-        final message = await coreController.updateConfig(
+        await coreController.updateConfig(
           updateParams.copyWith.tun(enable: _ref.read(realTunEnableProvider)),
         );
-        if (message.isNotEmpty) throw message;
         await savePreferences();
         return true;
       },
@@ -482,10 +489,9 @@ extension SetupControllerExt on AppController {
           return;
         }
         final realTunEnable = _ref.read(realTunEnableProvider);
-        final message = await coreController.updateConfig(
+        await coreController.updateConfig(
           updateParams.copyWith.tun(enable: realTunEnable),
         );
-        if (message.isNotEmpty) throw message;
         addCheckIp();
       });
     });
@@ -1068,31 +1074,25 @@ extension SetupControllerExt on AppController {
       return false;
     }
 
-    final String message;
     try {
-      Future<String> apply() async {
+      Future<void> apply() async {
         if (!isCurrentApply()) throw const _CoreStartCancelledException();
         onApply();
         if (adopted) {
           await preloadInvoke?.call();
-          return '';
+          return;
         }
         final watch = Stopwatch()..start();
-        final result = await coreController.setupConfig(
+        await coreController.setupConfig(
           params: updatedSetupParams,
           preloadInvoke: preloadInvoke,
         );
-        if (result.isNotEmpty) throw result;
         _profileApplyScheduler.recordPush(watch.elapsed);
-        return result;
       }
 
-      message = await (macOS?.applyCoreConfig(config, apply) ?? apply());
+      await (macOS?.applyCoreConfig(config, apply) ?? apply());
     } on _CoreStartCancelledException {
       return false;
-    }
-    if (message.isNotEmpty) {
-      throw message;
     }
     if (appliedDigest != null && !adopted) {
       await preferences.saveAppliedConfigMd5(appliedDigest);

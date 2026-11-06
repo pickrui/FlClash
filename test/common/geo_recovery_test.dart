@@ -62,7 +62,6 @@ void main() {
             initialError: initialError,
             download: () async {
               events.add('download');
-              return '';
             },
             recover: (_) async {
               events.add('recover');
@@ -86,7 +85,7 @@ void main() {
           initialError: _validationFailure,
           download: () async {
             events.add('download');
-            return _geoFailure;
+            throw _geoFailure;
           },
           recover: (error) async {
             expect(error, _geoFailure);
@@ -128,7 +127,7 @@ void main() {
     ]) {
       expect(
         await downloadGeoWithRecovery(
-          download: () async => failure,
+          download: () async => throw failure,
           recover: (error) async {
             expect(error, failure);
             return true;
@@ -153,7 +152,7 @@ void main() {
       () async {
         await expectLater(
           downloadGeoWithRecovery(
-            download: () async => failure,
+            download: () async => throw failure,
             recover: (_) async => throw StateError('unexpected recovery'),
             shouldContinue: () => true,
           ),

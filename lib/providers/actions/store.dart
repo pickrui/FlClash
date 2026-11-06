@@ -58,7 +58,7 @@ extension StoreControllerExt on AppController {
               throw StateError('failed to restore system proxy before clear');
             }
             if (coreController.isCompleted &&
-                !await coreController.shutdown(true)) {
+                !await coreController.shutdown()) {
               throw StateError('failed to stop core before clear');
             }
             _ref.read(coreStatusProvider.notifier).value =

@@ -28,14 +28,6 @@ var probePicks map[string]string
 var probeProviders map[string]any
 var probeRuleSets map[string]any
 
-func routeStamp() (uint64, uint64) {
-	runLock.Lock()
-	defer runLock.Unlock()
-	selectionLock.Lock()
-	defer selectionLock.Unlock()
-	return routeStampLocked()
-}
-
 func routeStampLocked() (uint64, uint64) {
 	configStamp := fmt.Sprintf("%p/%s/%t/%t/%t/%d", currentConfig, tunnel.Mode(), isRunning, networkExcluded, resolver.DisableIPv6.Load(), probeRouteRevision.Load())
 	picks := map[string]string{}

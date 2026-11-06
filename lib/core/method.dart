@@ -63,7 +63,6 @@ enum CoreMethod {
   stopLog('log.stop'),
   startListener('listener.start'),
   stopListener('listener.stop'),
-  setNetworkExcluded('network.setExcluded'),
   getMemoryStats('core.memory'),
   crash('core.crash'),
   setupConfig('config.setup'),

@@ -159,7 +159,7 @@ extension CoreControllerExt on AppController {
         'Core initialization probe failed: $error',
         logLevel: LogLevel.warning,
       );
-      await coreController.shutdown(false);
+      await coreController.shutdown();
     }
     if (coreController.isCompleted) {
       await _initCore();
@@ -167,7 +167,7 @@ extension CoreControllerExt on AppController {
     }
     commonPrint.log('Core disconnected, reconnecting');
     _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
-    await coreController.shutdown(false);
+    await coreController.shutdown();
     await _connectCore();
     if (!coreController.isCompleted) return false;
     await _initCore();
@@ -267,7 +267,7 @@ extension CoreControllerExt on AppController {
       restart: () => _serializeCoreLifecycle(() async {
         _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
         clearDelay();
-        await coreController.shutdown(true);
+        await coreController.shutdown();
         await _connectCore();
         if (!coreController.isCompleted) throw _coreDisconnectedMessage;
         await _initCore();
@@ -288,7 +288,7 @@ extension CoreControllerExt on AppController {
             _ref.read(coreStatusProvider) == CoreStatus.disconnected,
         cleanup: () => runCleanupActions([
           stopSystemProxyIfNeeded,
-          () => coreController.shutdown(false),
+          () => coreController.shutdown(),
         ]),
       );
 

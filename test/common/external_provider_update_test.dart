@@ -27,21 +27,20 @@ void main() {
     published = [];
   });
 
-  Future<String> run(Future<String> Function() update) =>
-      refreshExternalProvider(
-        isCurrent: () => current,
-        update: update,
-        read: () async {
-          reads++;
-          return provider;
-        },
-        publish: published.add,
-      );
+  Future<void> run(Future<void> Function() update) => refreshExternalProvider(
+    isCurrent: () => current,
+    update: update,
+    read: () async {
+      reads++;
+      return provider;
+    },
+    publish: published.add,
+  );
 
   test(
     'successful update reads and publishes the refreshed provider',
     () async {
-      expect(await run(() async => ''), '');
+      await run(() async {});
       expect(reads, 1);
       expect(published, [provider]);
     },
@@ -50,7 +49,10 @@ void main() {
   test(
     'failed update preserves the last provider and returns its error',
     () async {
-      expect(await run(() async => 'invalid rules'), 'invalid rules');
+      await expectLater(
+        run(() async => throw 'invalid rules'),
+        throwsA('invalid rules'),
+      );
       expect(reads, 0);
       expect(published, isEmpty);
     },
@@ -67,16 +69,16 @@ void main() {
 
   test('an obsolete operation does not start', () async {
     current = false;
-    expect(await run(() async => fail('obsolete update started')), '');
+    await run(() async => fail('obsolete update started'));
     expect(reads, 0);
   });
 
   test('switching profiles during an update prevents readback', () async {
-    final response = Completer<String>();
+    final response = Completer<void>();
     final operation = run(() => response.future);
     current = false;
-    response.complete('');
-    expect(await operation, '');
+    response.complete();
+    await operation;
     expect(reads, 0);
     expect(published, isEmpty);
   });
@@ -84,11 +86,11 @@ void main() {
   test(
     'obsolete update errors do not become errors for the new profile',
     () async {
-      final response = Completer<String>();
+      final response = Completer<void>();
       final operation = run(() => response.future);
       current = false;
-      response.complete('old provider no longer exists');
-      expect(await operation, '');
+      response.completeError('old provider no longer exists');
+      await operation;
       expect(reads, 0);
     },
   );
@@ -100,7 +102,7 @@ void main() {
       final reading = Completer<void>();
       final operation = refreshExternalProvider(
         isCurrent: () => current,
-        update: () async => '',
+        update: () async {},
         read: () {
           reading.complete();
           return response.future;
@@ -110,7 +112,7 @@ void main() {
       await reading.future;
       current = false;
       response.complete(provider);
-      expect(await operation, '');
+      await operation;
       expect(published, isEmpty);
     },
   );
@@ -118,11 +120,11 @@ void main() {
   test(
     'stale transport failures are ignored after switching profiles',
     () async {
-      final response = Completer<String>();
+      final response = Completer<void>();
       final operation = run(() => response.future);
       current = false;
       response.completeError(StateError('old core disconnected'));
-      expect(await operation, '');
+      await operation;
       expect(published, isEmpty);
     },
   );
@@ -130,7 +132,7 @@ void main() {
   test('a removed provider is not published', () async {
     await refreshExternalProvider(
       isCurrent: () => true,
-      update: () async => '',
+      update: () async {},
       read: () async => null,
       publish: published.add,
     );

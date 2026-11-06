@@ -317,3 +317,11 @@ func TestProbeRouteInvalidatesOnListenerRestart(t *testing.T) {
 		t.Fatal("a rejected start invalidated the stopped route")
 	}
 }
+
+func routeStamp() (uint64, uint64) {
+	runLock.Lock()
+	defer runLock.Unlock()
+	selectionLock.Lock()
+	defer selectionLock.Unlock()
+	return routeStampLocked()
+}

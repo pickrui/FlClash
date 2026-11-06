@@ -83,8 +83,6 @@ class CoreService extends CoreHandlerInterface {
 
   Future<CoreLifecycleResult> start() => _lifecycle.start();
 
-  Future<CoreLifecycleResult> restart() => _lifecycle.restart();
-
   Future<CoreLifecycleResult> stop() => _lifecycle.stop();
 
   @override
@@ -98,7 +96,7 @@ class CoreService extends CoreHandlerInterface {
   }
 
   @override
-  Future<bool> shutdown(bool isUser) async {
+  Future<bool> shutdown() async {
     try {
       if (isConnected) await shutdownCore();
     } catch (error) {

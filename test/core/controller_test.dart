@@ -466,7 +466,7 @@ void main() {
 
       verifyNever(() => handler.startListener());
       configured.complete('');
-      expect(await result, isEmpty);
+      await result;
       verifyInOrder([
         () => handler.setupConfig(setupParams),
         () => handler.startListener(),
@@ -552,16 +552,17 @@ void main() {
 
   test('rejected configuration does not open listeners', () async {
     when(() => handler.setupConfig(setupParams))
-        .thenAnswer((_) async => 'invalid profile');
+        .thenAnswer((_) async => throw 'invalid profile');
 
-    final result = await controller.setupConfig(
-      params: setupParams,
-      preloadInvoke: () async {
-        fail('listeners must not start with a rejected profile');
-      },
+    await expectLater(
+      controller.setupConfig(
+        params: setupParams,
+        preloadInvoke: () async {
+          fail('listeners must not start with a rejected profile');
+        },
+      ),
+      throwsA('invalid profile'),
     );
-
-    expect(result, 'invalid profile');
     verify(() => handler.setupConfig(setupParams)).called(1);
     verifyNoMoreInteractions(handler);
   });
@@ -593,7 +594,6 @@ void main() {
     when(() => handler.setupConfig(setupParams)).thenAnswer((_) async {
       activePort = 7890;
       events.add('setup');
-      return '';
     });
     when(() => handler.startListener()).thenAnswer((_) async {
       events.add('listen:$activePort');
@@ -604,7 +604,6 @@ void main() {
       await updated.future;
       activePort = updateParams.mixedPort;
       events.add('update:$activePort');
-      return '';
     });
 
     final result = controller.setupConfig(
@@ -619,8 +618,7 @@ void main() {
               }
             },
             resolveConflict: () async {
-              final message = await controller.updateConfig(updateParams);
-              if (message.isNotEmpty) throw message;
+              await controller.updateConfig(updateParams);
               return true;
             },
           ),
@@ -633,7 +631,7 @@ void main() {
     expect(events, ['setup', 'listen:7890']);
     updated.complete();
 
-    expect(await result, isEmpty);
+    await result;
     expect(events, ['setup', 'listen:7890', 'update:7895', 'listen:7895']);
     verify(() => handler.setupConfig(setupParams)).called(1);
     verify(() => handler.updateConfig(updateParams)).called(1);
@@ -658,8 +656,8 @@ void main() {
 
       expect(duplicate, same(first));
       completed.complete('');
-      expect(await first, isEmpty);
-      expect(await duplicate, isEmpty);
+      await first;
+      await duplicate;
       verify(() => handler.updateGeoData(params)).called(1);
       verifyNoMoreInteractions(handler);
     });
@@ -680,10 +678,10 @@ void main() {
 
       expect(recovery, isNot(same(original)));
       originalCompleted.complete('TLS handshake timeout');
-      expect(await original, 'TLS handshake timeout');
+      await original;
       expect(controller.updateGeoData(fallback.copyWith()), same(recovery));
       fallbackCompleted.complete('');
-      expect(await recovery, isEmpty);
+      await recovery;
       verify(() => handler.updateGeoData(params)).called(1);
       verify(() => handler.updateGeoData(fallback)).called(1);
       verifyNoMoreInteractions(handler);
@@ -692,8 +690,8 @@ void main() {
     test('completion releases the request for another download', () async {
       when(() => handler.updateGeoData(params)).thenAnswer((_) async => '');
 
-      expect(await controller.updateGeoData(params), isEmpty);
-      expect(await controller.updateGeoData(params.copyWith()), isEmpty);
+      await controller.updateGeoData(params);
+      await controller.updateGeoData(params.copyWith());
 
       verify(() => handler.updateGeoData(params)).called(2);
       verifyNoMoreInteractions(handler);
@@ -704,11 +702,10 @@ void main() {
       var attempts = 0;
       when(() => handler.updateGeoData(params)).thenAnswer((_) async {
         if (++attempts == 1) throw error;
-        return '';
       });
 
       await expectLater(controller.updateGeoData(params), throwsA(same(error)));
-      expect(await controller.updateGeoData(params.copyWith()), isEmpty);
+      await controller.updateGeoData(params.copyWith());
 
       verify(() => handler.updateGeoData(params)).called(2);
       verifyNoMoreInteractions(handler);

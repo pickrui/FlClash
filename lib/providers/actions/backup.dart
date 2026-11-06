@@ -281,7 +281,7 @@ extension BackupControllerExt on AppController {
             throw StateError('failed to restore system proxy');
           }
           if (coreController.isCompleted) {
-            if (!await coreController.shutdown(true)) {
+            if (!await coreController.shutdown()) {
               throw StateError('failed to stop core before restore');
             }
           }
@@ -533,11 +533,11 @@ extension BackupControllerExt on AppController {
       }
     } else if (recoveryRequired && coreController.isCompleted) {
       try {
-        await coreController.shutdown(false);
+        await coreController.shutdown();
       } catch (_) {}
     } else if (!wasCoreConnected && coreController.isCompleted) {
       try {
-        if (!await coreController.shutdown(false)) {
+        if (!await coreController.shutdown()) {
           throw StateError('failed to restore disconnected core state');
         }
       } catch (error) {

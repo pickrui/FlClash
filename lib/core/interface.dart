@@ -17,7 +17,7 @@ mixin CoreInterface {
 
   Future<String> preload();
 
-  Future<bool> shutdown(bool isUser);
+  Future<bool> shutdown();
 
   FutureOr<bool> destroy();
 
@@ -53,9 +53,9 @@ mixin CoreInterface {
     String session = '',
   });
 
-  Future<String> updateConfig(UpdateParams updateParams);
+  Future<void> updateConfig(UpdateParams updateParams);
 
-  Future<String> setupConfig(SetupParams setupParams);
+  Future<void> setupConfig(SetupParams setupParams);
 
   Future<ChangeProxyResult> changeProxy(ChangeProxyParams changeProxyParams);
 
@@ -86,20 +86,20 @@ mixin CoreInterface {
     RuleProviderBehavior? behavior,
   });
 
-  Future<String> updateGeoData(UpdateGeoDataParams params);
+  Future<void> updateGeoData(UpdateGeoDataParams params);
 
-  Future<String> replaceProviderFile(
+  Future<void> replaceProviderFile(
     ProviderFileChange change, {
     bool rollback = false,
   });
 
-  Future<String> sideLoadExternalProvider({
+  Future<void> sideLoadExternalProvider({
     required String providerName,
     required String data,
     String? providerType,
   });
 
-  Future<String> updateExternalProvider(
+  Future<void> updateExternalProvider(
     String providerName, {
     String? providerType,
   });
@@ -475,15 +475,13 @@ abstract class CoreHandlerInterface with CoreInterface {
   }
 
   @override
-  Future<String> updateConfig(UpdateParams updateParams) async {
+  Future<void> updateConfig(UpdateParams updateParams) async {
     await _command(CoreMethod.updateConfig, arguments: updateParams.toJson());
-    return '';
   }
 
   @override
-  Future<String> setupConfig(SetupParams setupParams) async {
+  Future<void> setupConfig(SetupParams setupParams) async {
     await _command(CoreMethod.setupConfig, arguments: setupParams.toJson());
-    return '';
   }
 
   @override
@@ -592,13 +590,12 @@ abstract class CoreHandlerInterface with CoreInterface {
   }
 
   @override
-  Future<String> updateGeoData(UpdateGeoDataParams params) async {
+  Future<void> updateGeoData(UpdateGeoDataParams params) async {
     await _command(CoreMethod.updateGeoData, arguments: params.toJson());
-    return '';
   }
 
   @override
-  Future<String> replaceProviderFile(
+  Future<void> replaceProviderFile(
     ProviderFileChange change, {
     bool rollback = false,
   }) async {
@@ -606,11 +603,10 @@ abstract class CoreHandlerInterface with CoreInterface {
       CoreMethod.replaceProviderFile,
       arguments: change.toJson(rollback: rollback),
     );
-    return '';
   }
 
   @override
-  Future<String> sideLoadExternalProvider({
+  Future<void> sideLoadExternalProvider({
     required String providerName,
     required String data,
     String? providerType,
@@ -619,11 +615,10 @@ abstract class CoreHandlerInterface with CoreInterface {
       CoreMethod.sideLoadExternalProvider,
       arguments: {'name': providerName, 'type': ?providerType, 'data': data},
     );
-    return '';
   }
 
   @override
-  Future<String> updateExternalProvider(
+  Future<void> updateExternalProvider(
     String providerName, {
     String? providerType,
   }) async {
@@ -631,7 +626,6 @@ abstract class CoreHandlerInterface with CoreInterface {
       CoreMethod.updateExternalProvider,
       arguments: {'name': providerName, 'type': ?providerType},
     );
-    return '';
   }
 
   @override

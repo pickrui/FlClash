@@ -116,29 +116,6 @@ class NetworkDnsTrackerTest {
     }
 
     @Test
-    fun stoppedSessionCancelsPendingDnsAndIgnoresEveryLateCallback() {
-        val f = Fixture()
-        f.add("wifi", 0)
-        f.advance(200)
-        f.tracker.linkPropertiesChanged("wifi", listOf("pending"))
-        f.tracker.losing("wifi", 1000)
-        val old = f.pending.filter { !it.fired && !it.cancelled }
-        f.tracker.stop()
-        val stopped = f.updates.toList()
-        assertEquals(listOf(listOf("wifi"), emptyList<String>()), stopped)
-        assertTrue(old.all { it.cancelled })
-        f.tracker.available("wifi", 0)
-        f.tracker.capabilitiesChanged("wifi", 0)
-        f.tracker.linkPropertiesChanged("wifi", listOf("stale"))
-        f.tracker.losing("wifi", 1000)
-        f.tracker.lost("wifi")
-        old.forEach { it.action() }
-        f.advance(2000)
-        f.tracker.stop()
-        assertEquals(stopped, f.updates)
-    }
-
-    @Test
     fun availableNetworkWithoutDnsDoesNotEraseKnownResolvers() {
         val f = Fixture()
         f.add("cellular", 4)

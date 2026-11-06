@@ -54,23 +54,20 @@ const _groupOnlyProxyTypes = {
   'Pass',
 };
 
-Future<String> refreshExternalProvider({
+Future<void> refreshExternalProvider({
   required bool Function() isCurrent,
-  required Future<String> Function() update,
+  required Future<void> Function() update,
   required Future<ExternalProvider?> Function() read,
   required void Function(ExternalProvider) publish,
 }) async {
-  if (!isCurrent()) return '';
+  if (!isCurrent()) return;
   try {
-    final message = await update();
-    if (!isCurrent()) return '';
-    if (message.isNotEmpty) return message;
+    await update();
+    if (!isCurrent()) return;
     final provider = await read();
     if (isCurrent() && provider != null) publish(provider);
-    return '';
   } catch (_) {
-    if (!isCurrent()) return '';
-    rethrow;
+    if (isCurrent()) rethrow;
   }
 }
 
@@ -717,13 +714,12 @@ extension ProxiesControllerExt on AppController {
         generation: generation,
         update: () async {
           if (!isCurrent()) throw appLocalizations.providerChanged;
-          final result = await coreController.sideLoadExternalProvider(
+          await coreController.sideLoadExternalProvider(
             providerName: provider.name,
             providerType: provider.type,
             data: data,
           );
-          applied = result.isEmpty;
-          return result;
+          applied = true;
         },
       );
       if (message.isNotEmpty) throw message;
@@ -756,9 +752,9 @@ extension ProxiesControllerExt on AppController {
                 generation == _profileApplyGeneration &&
                 profileId == _ref.read(currentProfileIdProvider),
           )) {
-            return '';
+            return;
           }
-          return coreController.sideLoadExternalProvider(
+          await coreController.sideLoadExternalProvider(
             providerName: provider.name,
             providerType: provider.type,
             data: data,
@@ -772,7 +768,7 @@ extension ProxiesControllerExt on AppController {
     ExternalProvider provider, {
     required int? profileId,
     required int generation,
-    required Future<String> Function() update,
+    required Future<void> Function() update,
   }) async {
     bool isCurrent() =>
         generation == _profileApplyGeneration &&
@@ -790,19 +786,20 @@ extension ProxiesControllerExt on AppController {
     _providerUpdateCounts[key] = (_providerUpdateCounts[key] ?? 0) + 1;
     _ref.read(isUpdatingProvider(key).notifier).value = true;
     try {
-      return await refreshExternalProvider(
+      if (!isCurrent()) return '';
+      if (!await ensureCoreReady()) {
+        return isCurrent() ? _coreDisconnectedMessage : '';
+      }
+      await refreshExternalProvider(
         isCurrent: isCurrent,
-        update: () async {
-          if (!await ensureCoreReady()) return _coreDisconnectedMessage;
-          if (!isCurrent()) return '';
-          return update();
-        },
+        update: update,
         read: () => coreController.getExternalProvider(
           provider.name,
           providerType: provider.type,
         ),
         publish: _ref.read(providersProvider.notifier).setProvider,
       );
+      return '';
     } finally {
       final remaining = _providerUpdateCounts[key]! - 1;
       if (remaining == 0) {

@@ -285,10 +285,7 @@ void main() {
               return createProviderLibraryChange(
                 requireCurrent: () {},
                 changeCore: (rollback) async {
-                  expect(
-                    await core.replaceProviderFile(change, rollback: rollback),
-                    '',
-                  );
+                  await core.replaceProviderFile(change, rollback: rollback);
                   if (!rollback && failCommit) {
                     await db.customStatement(
                       'INSERT INTO child_fixture VALUES (99)',

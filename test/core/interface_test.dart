@@ -568,7 +568,7 @@ void main() {
     'provider commands retain typed identity and propagate failures',
     () async {
       final handler = _FakeCoreHandler();
-      final operations = <CoreMethod, Future<String> Function()>{
+      final operations = <CoreMethod, Future<void> Function()>{
         CoreMethod.updateExternalProvider: () =>
             handler.updateExternalProvider('shared', providerType: 'Proxy'),
         CoreMethod.sideLoadExternalProvider: () =>
@@ -580,7 +580,7 @@ void main() {
       };
       for (final entry in operations.entries) {
         handler.response = null;
-        expect(await entry.value(), isEmpty);
+        await entry.value();
         expect((handler.arguments as Map)['name'], 'shared');
         expect(
           (handler.arguments as Map)['type'],
@@ -616,7 +616,7 @@ void main() {
         );
 
         handler.response = null;
-        expect(await handler.updateGeoData(params), isEmpty);
+        await handler.updateGeoData(params);
         handler.failure = const CoreMethodException(
           code: 'core_error',
           message: 'GEO download failed',
@@ -804,7 +804,7 @@ class _FakeCoreHandler extends CoreHandlerInterface {
   Future<String> preload() async => '';
 
   @override
-  Future<bool> shutdown(bool isUser) => shutdownCore();
+  Future<bool> shutdown() => shutdownCore();
 
   @override
   Future<T?> invokeMethod<T>({

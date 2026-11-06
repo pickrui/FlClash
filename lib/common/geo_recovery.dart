@@ -74,16 +74,22 @@ bool canRecoverGeoDownload(Object error) {
 /// before showing recovery, while real download failures go straight to it.
 Future<bool> downloadGeoWithRecovery({
   Object? initialError,
-  required Future<String> Function() download,
+  required Future<void> Function() download,
   required Future<bool> Function(Object error) recover,
   required bool Function() shouldContinue,
 }) async {
   if (!shouldContinue()) return false;
-  final failure = initialError == null || needsInitialGeoDownload(initialError)
-      ? await download()
-      : initialError;
+  Object? failure = initialError;
+  if (initialError == null || needsInitialGeoDownload(initialError)) {
+    try {
+      await download();
+      failure = null;
+    } catch (error) {
+      failure = error;
+    }
+  }
   if (!shouldContinue()) return false;
-  if (failure == '') return true;
+  if (failure == null) return true;
   if (!canRecoverGeoDownload(failure)) throw failure;
   final result = await recover(failure);
   return shouldContinue() && result;

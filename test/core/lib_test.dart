@@ -352,7 +352,7 @@ void main() {
         const CoreEvent(type: CoreEventType.crash, data: 'queue gate'),
       );
       await entered.future;
-      final stopping = replacement == 'stopped' ? core.shutdown(false) : null;
+      final stopping = replacement == 'stopped' ? core.shutdown() : null;
       await Future<void>.delayed(Duration.zero);
 
       for (final listener in service.listeners.toList()) {
