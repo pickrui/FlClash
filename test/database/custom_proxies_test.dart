@@ -117,6 +117,52 @@ void main() {
     },
   );
 
+  test(
+    'v12 drops the mirrors and moves a profile rule off its alias',
+    () async {
+      final root = await Directory.systemTemp.createTemp('flclash-v12-');
+      addTearDown(() => root.delete(recursive: true));
+      final file = File('${root.path}/database.sqlite');
+      final old = Database(NativeDatabase(file));
+      await old.putProfile(
+        profile(1, node).copyWith(proxyAliases: const {'Home': 'Home (2)'}),
+      );
+      await old.rulesDao.putProfileAddedRule(
+        1,
+        const Rule(id: 90, value: 'DOMAIN,example.test,Home'),
+      );
+      await old.customStatement(
+        'CREATE TABLE proxy_groups (id INTEGER PRIMARY KEY)',
+      );
+      await old.customStatement(
+        'ALTER TABLE profile_rule_mapping ADD COLUMN source_id INTEGER',
+      );
+      await old.customStatement(
+        "INSERT INTO rules (id, value) VALUES (91, 'MATCH,Home')",
+      );
+      await old.customStatement(
+        'INSERT INTO profile_rule_mapping (id, profile_id, rule_id, scene) '
+        "VALUES ('mirror', 1, 91, 'custom')",
+      );
+      await old.customStatement('PRAGMA user_version = 11');
+      await old.close();
+
+      final db = Database(NativeDatabase(file));
+      addTearDown(db.close);
+      expect(
+        (await db.rulesDao.allProfileAddedRules(1).get()).single.value,
+        'DOMAIN,example.test,Home (2)',
+      );
+      final leftovers = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE name = 'proxy_groups' "
+            'UNION ALL SELECT value FROM rules WHERE id = 91',
+          )
+          .get();
+      expect(leftovers, isEmpty);
+    },
+  );
+
   test('importing a conflicting node again finds its stored copy', () {
     const stored = ProfileProxy(
       id: 1,

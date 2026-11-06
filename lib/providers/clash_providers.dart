@@ -392,9 +392,7 @@ class ClashProviderLibrary {
       final links = await database.select(database.profileRuleLinks).get();
       for (final rule in await database.select(database.rules).get()) {
         if (!ruleReferencesProvider(rule.value, provider.label)) continue;
-        final ruleLinks = links.where(
-          (link) => link.ruleId == rule.id && link.scene != RuleScene.custom,
-        );
+        final ruleLinks = links.where((link) => link.ruleId == rule.id);
         if (ruleLinks.isEmpty) continue;
         final owners = profiles
             .where(

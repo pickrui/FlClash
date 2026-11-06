@@ -25,9 +25,6 @@ class ProfileRuleLinks extends Table {
   IntColumn get ruleId =>
       integer().references(Rules, #id, onDelete: KeyAction.cascade)();
 
-  // Original rule ID inside the portable per-profile snapshot.
-  IntColumn get sourceId => integer().nullable()();
-
   TextColumn get scene => textEnum<RuleScene>().nullable()();
 
   TextColumn get order => text().nullable()();

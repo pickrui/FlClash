@@ -647,7 +647,7 @@ enum MitmInstallOutcome { installed, untilReboot, prompted, saved }
 
 enum CoreStatus { connecting, connected, disconnected }
 
-enum RuleScene { added, disabled, custom }
+enum RuleScene { added, disabled }
 
 enum EditorFontSize {
   standard(14),

@@ -177,10 +177,6 @@ void main() {
       'AND,((RULE-SET,Renamed),(NETWORK,TCP)),DIRECT',
     );
     expect(
-      (await db.rulesDao.queryProfileCustomRules(profile.id).getSingle()).value,
-      updated.customRules.single.value,
-    );
-    expect(
       (await db.rulesDao.allGlobalAddedRules().getSingle()).value,
       'RULE-SET,Renamed,REJECT',
     );

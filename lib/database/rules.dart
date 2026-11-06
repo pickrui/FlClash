@@ -35,86 +35,6 @@ class Rules extends Table {
 class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
   RulesDao(super.attachedDatabase);
 
-  Selectable<Rule> queryProfileCustomRules(int profileId) {
-    final query =
-        select(rules).join([
-            innerJoin(
-              profileRuleLinks,
-              profileRuleLinks.ruleId.equalsExp(rules.id),
-            ),
-          ])
-          ..where(
-            profileRuleLinks.profileId.equals(profileId) &
-                profileRuleLinks.scene.equalsValue(RuleScene.custom),
-          )
-          ..orderBy([OrderingTerm.asc(profileRuleLinks.order)]);
-    return query.map(
-      (row) => row
-          .readTable(rules)
-          .toRule(row.read(profileRuleLinks.order))
-          .copyWith(
-            id: row.read(profileRuleLinks.sourceId) ?? row.read(rules.id)!,
-          ),
-    );
-  }
-
-  Future<void> replaceCustomWithBatch(Batch batch, Profile profile) async {
-    final links =
-        await (select(profileRuleLinks)..where(
-              (row) =>
-                  row.profileId.equals(profile.id) &
-                  row.scene.equalsValue(RuleScene.custom),
-            ))
-            .get();
-    final bySourceId = <int?, RawProfileRuleLink>{};
-    for (final link in links) {
-      bySourceId.putIfAbsent(link.sourceId, () => link);
-    }
-    final keys = indexing.generateNKeys(profile.customRules.length);
-    batch.deleteWhere(
-      profileRuleLinks,
-      (row) =>
-          row.profileId.equals(profile.id) &
-          row.scene.equalsValue(RuleScene.custom),
-    );
-    for (var index = 0; index < profile.customRules.length; index++) {
-      final rule = profile.customRules[index];
-      final old = bySourceId[rule.id];
-      final internalId = old?.ruleId ?? snowflake.id;
-      batch.insertAllOnConflictUpdate(rules, [
-        rule.copyWith(id: internalId).toCompanion(),
-      ]);
-      batch.insert(
-        profileRuleLinks,
-        ProfileRuleLink(
-          profileId: profile.id,
-          ruleId: internalId,
-          scene: RuleScene.custom,
-          order: keys[index],
-        ).toCompanion().copyWith(sourceId: Value(rule.id)),
-      );
-    }
-    final linkedIds = selectOnly(profileRuleLinks)
-      ..addColumns([profileRuleLinks.ruleId]);
-    final oldRuleIds = links.map((link) => link.ruleId);
-    for (final ruleIds in oldRuleIds.slices(_maxInValues)) {
-      batch.deleteWhere(
-        rules,
-        (row) => row.id.isIn(ruleIds) & row.id.isNotInQuery(linkedIds),
-      );
-    }
-  }
-
-  Future<void> setCustomRules(int profileId, List<Rule> rules) =>
-      attachedDatabase.transaction(() async {
-        final profile = await (attachedDatabase.select(
-          attachedDatabase.profiles,
-        )..where((row) => row.id.equals(profileId))).getSingle();
-        await attachedDatabase.putProfile(
-          profile.toProfile().copyWith(customRules: rules),
-        );
-      });
-
   /// Null when no stored rule routes to [target]; a global rule, listed
   /// first, has no profile.
   Future<({int? profileId})?> findRuleTarget(String target) async {
@@ -152,12 +72,34 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
         profileRuleLinks.profileId.isIn(excludingProfiles) &
             profileRuleLinks.scene.equalsValue(RuleScene.disabled).not(),
       );
-    final query = select(rules)
+    await _rewriteTargets(
+      names,
+      (rule) => rule.ruleTarget.isIn(names.keys) & rule.id.isNotInQuery(owned),
+    );
+  }
+
+  Future<void> renameProfileRuleTargets(
+    int profileId,
+    Map<String, String> names,
+  ) async {
+    if (names.isEmpty) return;
+    final owned = selectOnly(profileRuleLinks)
+      ..addColumns([profileRuleLinks.ruleId])
       ..where(
-        (rule) =>
-            rule.ruleTarget.isIn(names.keys) & rule.id.isNotInQuery(owned),
+        profileRuleLinks.profileId.equals(profileId) &
+            profileRuleLinks.scene.equalsValue(RuleScene.added),
       );
-    for (final row in await query.get()) {
+    await _rewriteTargets(
+      names,
+      (rule) => rule.ruleTarget.isIn(names.keys) & rule.id.isInQuery(owned),
+    );
+  }
+
+  Future<void> _rewriteTargets(
+    Map<String, String> names,
+    Expression<bool> Function($RulesTable rule) filter,
+  ) async {
+    for (final row in await (select(rules)..where(filter)).get()) {
       final next = names[row.ruleTarget];
       if (next == null) continue;
       await (update(rules)..whereSamePrimaryKey(row)).write(

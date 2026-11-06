@@ -145,14 +145,12 @@ void main() {
             .toSet();
     const expected = {
       'idx_rule_target',
-      'idx_profile_name_order',
       'last_accessed_url',
       'idx_rule_link_rule',
     };
 
     final upgraded = Database(NativeDatabase(file));
     expect(await indexes(upgraded), containsAll(expected));
-    await upgraded.customStatement('DROP INDEX idx_profile_name_order');
     await upgraded.customStatement('DROP INDEX last_accessed_url');
     await upgraded.customStatement('DROP INDEX idx_rule_link_rule');
     await upgraded.close();

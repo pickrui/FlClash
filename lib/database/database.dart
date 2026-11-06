@@ -18,7 +18,6 @@ part 'generated/database.g.dart';
 part 'converter.dart';
 part 'clash_providers.dart';
 part 'custom_proxies.dart';
-part 'groups.dart';
 part 'icons.dart';
 part 'links.dart';
 part 'mitm_modules.dart';
@@ -27,7 +26,7 @@ part 'rules.dart';
 part 'scripts.dart';
 part 'schema.dart';
 
-const currentDatabaseSchemaVersion = 11;
+const currentDatabaseSchemaVersion = 12;
 
 @DriftDatabase(
   tables: [
@@ -35,7 +34,6 @@ const currentDatabaseSchemaVersion = 11;
     Scripts,
     Rules,
     ProfileRuleLinks,
-    ProxyGroups,
     IconRecords,
     ClashProviders,
     IconSets,
@@ -46,7 +44,6 @@ const currentDatabaseSchemaVersion = 11;
     ProfilesDao,
     ScriptsDao,
     RulesDao,
-    ProxyGroupsDao,
     IconRecordsDao,
     ClashProvidersDao,
     IconSetsDao,
@@ -80,10 +77,6 @@ class Database extends _$Database {
         await rulesDao.repairOrders();
         // createTable skips declared indexes, so tables the v4 upgrade added
         // have none; those databases never run that upgrade step again.
-        await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_profile_name_order '
-          'ON proxy_groups (profile_id, name, "order")',
-        );
         await customStatement(
           'CREATE INDEX IF NOT EXISTS last_accessed_url '
           'ON icon_records (last_accessed, url)',
@@ -143,7 +136,6 @@ class Database extends _$Database {
           if (profileColumns.add('match_target')) {
             await m.addColumn(profiles, profiles.matchTarget);
           }
-          await m.createTable(proxyGroups);
           await m.createTable(iconRecords);
           final ruleColumns = (await customSelect(
             'PRAGMA table_info(rules)',
@@ -161,12 +153,6 @@ class Database extends _$Database {
               await m.addColumn(rules, column);
             }
           }
-          final linkColumns = (await customSelect(
-            'PRAGMA table_info(profile_rule_mapping)',
-          ).get()).map((row) => row.read<String>('name')).toSet();
-          if (!linkColumns.contains('source_id')) {
-            await m.addColumn(profileRuleLinks, profileRuleLinks.sourceId);
-          }
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_rule_target ON rules(rule_target)',
           );
@@ -174,13 +160,6 @@ class Database extends _$Database {
             await into(rules)
                 .insertOnConflictUpdate(rule.toRule().toCompanion());
           }
-          final existing = await profilesDao.all().get();
-          await batch((batch) async {
-            for (final profile in existing) {
-              await proxyGroupsDao.replaceWithBatch(batch, profile);
-              await rulesDao.replaceCustomWithBatch(batch, profile);
-            }
-          });
         }
         if (from < 11) {
           final merged = mergeProfileProxies(await profilesDao.all().get());
@@ -189,36 +168,46 @@ class Database extends _$Database {
             await putProfile(profile);
           }
         }
+        if (from < 12) {
+          // Groups and custom rules live in the profile row; nothing read these
+          // mirrors of them.
+          await customStatement('DROP TABLE IF EXISTS proxy_groups');
+          await customStatement(
+            "DELETE FROM profile_rule_mapping WHERE scene = 'custom'",
+          );
+          final linkColumns = await customSelect(
+            'PRAGMA table_info(profile_rule_mapping)',
+          ).get();
+          if (linkColumns.any(
+            (row) => row.read<String>('name') == 'source_id',
+          )) {
+            await customStatement(
+              'ALTER TABLE profile_rule_mapping DROP COLUMN source_id',
+            );
+          }
+          // An alias no longer rewrites a rule at apply time when a real node
+          // holds its name, so a profile's own rules move to the node they meant.
+          for (final profile in await profilesDao.all().get()) {
+            if (profile.isoixCloudProfile) continue;
+            await rulesDao.renameProfileRuleTargets(profile.id, {
+              for (final entry in profile.proxyAliases.entries)
+                if (entry.key != entry.value) entry.key: entry.value,
+            });
+          }
+        }
       }),
     );
   }
 
-  /// The profile snapshot keeps older JSON backups compatible. Normalized groups
-  /// are replaced in the same transaction, so UI queries never see a half-write.
-  Future<void> putProfile(Profile profile, {bool existingOnly = false}) =>
-      transaction(() async {
-        final previous = await (select(
-          profiles,
-        )..where((row) => row.id.equals(profile.id))).getSingleOrNull();
-        if (existingOnly && previous == null) return;
-        await into(profiles).insertOnConflictUpdate(profile.toCompanion());
-        await batch((batch) async {
-          if (previous == null ||
-              !proxyGroupsEquality.equals(
-                previous.customProxyGroups,
-                profile.customProxyGroups,
-              )) {
-            await proxyGroupsDao.replaceWithBatch(batch, profile);
-          }
-          if (previous == null ||
-              !ruleListEquality.equals(
-                previous.customRules,
-                profile.customRules,
-              )) {
-            await rulesDao.replaceCustomWithBatch(batch, profile);
-          }
-        });
-      });
+  Future<void> putProfile(Profile profile, {bool existingOnly = false}) async {
+    if (!existingOnly) {
+      await into(profiles).insertOnConflictUpdate(profile.toCompanion());
+      return;
+    }
+    await (update(
+      profiles,
+    )..where((row) => row.id.equals(profile.id))).write(profile.toCompanion());
+  }
 
   Future<Set<String>> _profileColumnNames() async {
     final rows = await customSelect('PRAGMA table_info("profiles")').get();
@@ -300,12 +289,6 @@ class Database extends _$Database {
             profileRuleLinks,
             links.map((item) => item.toCompanion()),
           );
-        }
-      });
-      await batch((b) async {
-        for (final profile in profiles) {
-          await proxyGroupsDao.replaceWithBatch(b, profile);
-          await rulesDao.replaceCustomWithBatch(b, profile);
         }
       });
       await clashProvidersDao.restore(clashProviders, replace: isOverride);

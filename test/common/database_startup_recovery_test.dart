@@ -153,7 +153,6 @@ void main() {
     'DROP TABLE icon_records',
     'DROP TABLE clash_providers',
     'ALTER TABLE profiles DROP COLUMN age_secret_key',
-    'ALTER TABLE profile_rule_mapping DROP COLUMN source_id',
   ]) {
     test(
       'incomplete current schema is rejected before migration: $mutation',
