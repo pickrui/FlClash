@@ -591,6 +591,34 @@ void main() {
     },
   );
 
+  test('the connection budget starts once the launcher returns', () async {
+    final transport = FakeDesktopCoreTransport();
+    final launcher = FakeLauncher(owner: CoreProcessOwner.direct, pid: 42)
+      ..startGate = Completer<void>();
+    final lifecycle = DesktopCoreLifecycle(
+      transportFactory: () => transport,
+      launcherResolver: MutableLauncherResolver(launcher),
+      sessionIdFactory: () => _sessionId,
+      verifyPeerPid: true,
+      timeouts: const DesktopCoreTimeouts(
+        ready: Duration(seconds: 1),
+        connection: Duration(milliseconds: 10),
+        disconnection: Duration(seconds: 1),
+      ),
+    );
+
+    final start = lifecycle.start();
+    transport.ready();
+    await launcher.started;
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+    launcher.startGate!.complete();
+    await Future<void>.delayed(Duration.zero);
+    transport.connect(pid: 42, generation: 1);
+
+    expect((await start).session?.connectionGeneration, 1);
+    await lifecycle.close();
+  });
+
   test(
     'confirmed exit without disconnect replaces transport before restart',
     () async {

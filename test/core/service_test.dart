@@ -193,15 +193,11 @@ void main() {
       ),
     ).thenAnswer((_) => Completer<bool?>().future);
 
-    Object? failure;
-    unawaited(
-      service
-          .shutdown(true)
-          .then<void>((_) {}, onError: (Object error) => failure = error),
-    );
+    bool? stopped;
+    unawaited(service.shutdown(true).then((value) => stopped = value));
     await tester.pump(coreShutdownTimeout + const Duration(seconds: 1));
 
-    expect(failure, isA<CoreMethodException>());
+    expect(stopped, isTrue);
     verify(() => lifecycle.stop()).called(1);
   });
 
@@ -223,16 +219,7 @@ void main() {
       ),
     ).thenAnswer((_) async => null);
 
-    await expectLater(
-      service.shutdown(true),
-      throwsA(
-        isA<CoreMethodException>().having(
-          (error) => error.code,
-          'code',
-          'empty_result',
-        ),
-      ),
-    );
+    expect(await service.shutdown(true), isTrue);
     verify(() => lifecycle.stop()).called(1);
   });
 

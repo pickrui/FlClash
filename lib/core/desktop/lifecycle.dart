@@ -64,14 +64,15 @@ final class _SessionDisconnect {
 final class _TransportConnectionWaiter {
   final Completer<void> _settled = Completer<void>();
   late final StreamSubscription<DesktopTransportEvent> _subscription;
-  late final Timer _timer;
+  Timer? _timer;
+  final Duration _timeout;
   TransportConnected? _connection;
   Object? _error;
   StackTrace? _stackTrace;
 
   _TransportConnectionWaiter(
     Stream<DesktopTransportEvent> events,
-    Duration timeout,
+    this._timeout,
   ) {
     _subscription = events.listen(
       (event) {
@@ -101,11 +102,16 @@ final class _TransportConnectionWaiter {
         );
       },
     );
-    _timer = Timer(timeout, () {
+  }
+
+  /// A Helper may spend longer than this launching the Core, hashing it and
+  /// releasing the last one, so the wait starts once the launcher has returned.
+  void startTimeout() {
+    _timer = Timer(_timeout, () {
       if (!_settled.isCompleted) {
         _error = TimeoutException(
           'Core transport connection timed out',
-          timeout,
+          _timeout,
         );
         _stackTrace = StackTrace.current;
         _settled.complete();
@@ -135,7 +141,7 @@ final class _TransportConnectionWaiter {
   }
 
   Future<void> cancel() async {
-    _timer.cancel();
+    _timer?.cancel();
     await _subscription.cancel();
   }
 }
@@ -449,6 +455,7 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
         await releaseLease();
         return false;
       }
+      connectionWaiter.startTimeout();
       final connected = await _waitForConnectionWhileWanted(
         connectionWaiter.future,
       );

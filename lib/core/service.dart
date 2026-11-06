@@ -99,15 +99,16 @@ class CoreService extends CoreHandlerInterface {
 
   @override
   Future<bool> shutdown(bool isUser) async {
-    var stopped = true;
     try {
-      if (isConnected) {
-        stopped = await shutdownCore();
-      }
+      if (isConnected) await shutdownCore();
+    } catch (error) {
+      // A wedged Core is what a restart is there to recover from; stop() below
+      // ends it whether or not it answered.
+      debugPrint('Core shutdown request failed: $error');
     } finally {
       await stop();
     }
-    return stopped;
+    return true;
   }
 
   @override

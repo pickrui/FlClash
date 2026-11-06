@@ -36,6 +36,9 @@ void main() {
   setUpAll(() async {
     directory = await Directory.systemTemp.createTemp('profile-persistence-');
     await useAppPaths(directory);
+    // An earlier file in this isolate may have deleted the directory the
+    // global database opened in.
+    await reopenDatabase();
     await mockPreferences();
     registerEnsureCloudReady(() async {});
     registerCanFetchManagedConfig(() => true);
