@@ -51,6 +51,7 @@ class _RawSetupAction extends SetupAction {
   Future<Map<String, dynamic>> getRawProfileConfig(
     int profileId, {
     bool refetchCloud = true,
+    bool applyAliases = true,
   }) async => raw;
 
   @override

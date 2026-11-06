@@ -355,6 +355,7 @@ class Profiles extends _$Profiles {
     List<ProfileProxy> next, {
     Profile? editedProfile,
     List<Profile> editedProfiles = const [],
+    Map<int, Set<String>> groupOwnedNames = const {},
   }) {
     final catalog = ref.read(customProxiesProvider.notifier);
     final previous = catalog.value;
@@ -377,6 +378,7 @@ class Profiles extends _$Profiles {
           (profile.id == editedProfile?.id ? editedProfile : null);
       var changed = edited ?? profile;
       for (final entry in renames.entries) {
+        if (groupOwnedNames[profile.id]?.contains(entry.key) ?? false) continue;
         changed = changed.copyAndRenameOutboundReferences(
           entry.key,
           entry.value,
@@ -417,6 +419,14 @@ class Profiles extends _$Profiles {
     return queueDatabaseWrite(
       () => database.transaction(() async {
         await database.customProxiesDao.setAll(next);
+        await database.rulesDao.renameRuleTargets(
+          renames,
+          excludingProfiles: {
+            for (final profile in profiles)
+              if (profile.isoixCloudProfile) profile.id,
+            ...groupOwnedNames.keys,
+          },
+        );
         for (final profile in changedProfiles) {
           await database.putProfile(
             profile.copyWith(profileProxies: const []),

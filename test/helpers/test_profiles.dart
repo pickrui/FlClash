@@ -41,6 +41,7 @@ class TestProfiles extends Profiles {
     List<ProfileProxy> next, {
     Profile? editedProfile,
     List<Profile> editedProfiles = const [],
+    Map<int, Set<String>> groupOwnedNames = const {},
   }) async {
     final edited = {
       for (final p in editedProfiles) p.id: p,

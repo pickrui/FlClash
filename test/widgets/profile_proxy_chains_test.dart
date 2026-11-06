@@ -29,6 +29,11 @@ import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
 class _SetupAction extends SetupAction {
+  Set<String> ruleTargets = const {};
+
+  @override
+  Future<Set<String>> appliedRuleTargets(int profileId) async => ruleTargets;
+
   final Map<String, dynamic> rawConfig;
   final Map<String, dynamic> chainConfig;
   Object? chainConfigError;
@@ -47,6 +52,7 @@ class _SetupAction extends SetupAction {
   Future<Map<String, dynamic>> getRawProfileConfig(
     int profileId, {
     bool refetchCloud = true,
+    bool applyAliases = true,
   }) async {
     rawLoads++;
     return pendingRaw?.future ?? rawConfig;
@@ -302,6 +308,51 @@ void main() {
       [node],
       [node],
     ]);
+    expect(messages, contains(_l10n.customOutboundInUse('Solo')));
+  });
+
+  testWidgets('a node named like a subscription group can be removed', (
+    tester,
+  ) async {
+    const node = ProfileProxy(id: 11, proxy: {'name': 'HK', 'type': 'direct'});
+    final (profiles, messages) = await _pump(
+      tester,
+      _SetupAction(
+        rawConfig: const {
+          'proxy-groups': [
+            {
+              'name': 'HK',
+              'type': 'select',
+              'proxies': ['DIRECT'],
+            },
+          ],
+          'rules': ['MATCH,HK'],
+        },
+      ),
+      _baseProfile.copyWith(profileProxies: [node]),
+      otherProfiles: [
+        _baseProfile.copyWith(id: 2, profileProxies: [node]),
+      ],
+    );
+    await _deleteFromMenu(tester, 'HK');
+    expect(messages, isEmpty);
+    expect(profiles.state.map((p) => p.profileProxies), [isEmpty, isEmpty]);
+  });
+
+  testWidgets('a node an added rule routes to cannot be removed', (
+    tester,
+  ) async {
+    const node = ProfileProxy(
+      id: 11,
+      proxy: {'name': 'Solo', 'type': 'direct'},
+    );
+    final (profiles, messages) = await _pump(
+      tester,
+      _SetupAction()..ruleTargets = {'Solo'},
+      _baseProfile.copyWith(profileProxies: [node]),
+    );
+    await _deleteFromMenu(tester, 'Solo');
+    expect(profiles.state.single.profileProxies, [node]);
     expect(messages, contains(_l10n.customOutboundInUse('Solo')));
   });
 

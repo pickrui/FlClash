@@ -96,6 +96,50 @@ void main() {
   );
 
   test(
+    'a global rule disabled on a managed profile is still renamed',
+    () async {
+      final db = Database(NativeDatabase.memory());
+      addTearDown(db.close);
+      await db.putProfile(profile(2, node));
+      const rule = Rule(id: 90, value: 'DOMAIN,example.test,Home');
+      await db.rulesDao.putGlobalRule(rule);
+      await db.rulesDao.putDisabledLink(2, rule.id);
+
+      await db.rulesDao.renameRuleTargets(
+        {'Home': 'Away'},
+        excludingProfiles: {2},
+      );
+
+      expect(
+        (await db.rulesDao.allGlobalAddedRules().get()).single.value,
+        'DOMAIN,example.test,Away',
+      );
+    },
+  );
+
+  test('importing a conflicting node again finds its stored copy', () {
+    const stored = ProfileProxy(
+      id: 1,
+      proxy: {'name': 'Home', 'type': 'direct'},
+    );
+    const different = ProfileProxy(
+      id: 2,
+      proxy: {'name': 'Home', 'type': 'socks5', 'server': 'two.test'},
+    );
+    final first = mergeProfileProxies(
+      const [],
+      existing: const [stored],
+      imported: const [different],
+    );
+    final second = mergeProfileProxies(
+      const [],
+      existing: first.proxies,
+      imported: const [different],
+    );
+    expect(second.proxies.map((node) => node.name), ['Home', 'Home (2)']);
+  });
+
+  test(
     'restore merges catalog conflicts and preserves profile chain ownership',
     () async {
       final db = Database(NativeDatabase.memory());

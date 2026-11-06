@@ -243,16 +243,32 @@ void _migrateLegacyProviderFile({
 }
 
 String _renameCustomProxyRule(String rule, Map<String, String> aliases) {
-  for (final entry in aliases.entries) {
-    rule = renameRuleTarget(rule, entry.key, entry.value);
-  }
-  return rule;
+  final target = ruleTarget(rule);
+  final next = aliases[target];
+  return next == null ? rule : renameRuleTarget(rule, target!, next);
+}
+
+/// A name one of the profile's own groups holds stands for that group, so an
+/// alias from or to it would move the profile's routing onto a node.
+Map<String, String> usableCustomProxyAliases(
+  Map source,
+  Map<String, String> aliases,
+) {
+  if (aliases.isEmpty) return aliases;
+  final groups = rawProxyGroupNames(source);
+  return {
+    for (final entry in aliases.entries)
+      if (!groups.contains(entry.key) && !groups.contains(entry.value))
+        entry.key: entry.value,
+  };
 }
 
 Map<String, dynamic> applyCustomProxyAliases(
   Map<String, dynamic> source,
-  Map<String, String> aliases,
-) {
+  Map<String, String> requested, {
+  bool includeResolvers = true,
+}) {
+  final aliases = usableCustomProxyAliases(source, requested);
   if (aliases.isEmpty) return source;
   final result = Map<String, dynamic>.from(source);
   Object? target(Object? value) => aliases[value] ?? value;
@@ -298,6 +314,7 @@ Map<String, dynamic> applyCustomProxyAliases(
       };
     }
   }
+  if (!includeResolvers) return result;
   if (source['ntp'] case final Map ntp) {
     result['ntp'] = {
       ...ntp,
@@ -349,19 +366,24 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     for (final proxy in data.profileProxies)
       if (proxy.isValid) proxy.name,
   };
-  final aliases = {
+  final aliases = usableCustomProxyAliases(rawConfig, {
     for (final entry in data.proxyAliases.entries)
       if (entry.key != entry.value &&
           activeNames.contains(entry.value) &&
           !managedNames.contains(entry.key))
         entry.key: entry.value,
-  };
-  rawConfig = applyCustomProxyAliases(rawConfig, aliases);
+  });
+  // DNS and NTP take theirs below, once their overrides have merged in.
+  rawConfig = applyCustomProxyAliases(
+    rawConfig,
+    aliases,
+    includeResolvers: false,
+  );
   final addedRules = [
     for (final rule in data.addedRules)
       rule.copyWith(value: _renameCustomProxyRule(rule.value, aliases)),
   ];
-  final profileProxies = data.profileProxies
+  var profileProxies = data.profileProxies
       .where((proxy) => !managedNames.contains(proxy.name))
       .toList();
   final customProxyGroups = data.customProxyGroups;
@@ -512,6 +534,16 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       return group.toJson()..removeWhere((_, value) => value == null);
     }).toList();
   }
+  // Nodes are shared by every profile, so one may carry the name of a group in
+  // this one; the profile's own group keeps it, and Core would reject the pair.
+  final groupNames = {
+    if (rawConfig['proxy-groups'] case final List groups)
+      for (final group in groups.whereType<Map>()) group['name'],
+  };
+  profileProxies = [
+    for (final proxy in profileProxies)
+      if (!groupNames.contains(proxy.name)) proxy,
+  ];
   // Read before personal nodes, tailnets and library providers join the config.
   final subscriptionProxyNames = _suppliesProxies(rawConfig)
       ? _proxyNames(rawConfig)

@@ -32,7 +32,16 @@ class SetupAction extends _$SetupAction {
   Future<Map<String, dynamic>> getRawProfileConfig(
     int profileId, {
     bool refetchCloud = true,
-  }) => _controller.getRawProfileConfig(profileId, refetchCloud: refetchCloud);
+    bool applyAliases = true,
+  }) => _controller.getRawProfileConfig(
+    profileId,
+    refetchCloud: refetchCloud,
+    applyAliases: applyAliases,
+  );
+
+  /// The targets of the added rules [profileId] applies.
+  Future<Set<String>> appliedRuleTargets(int profileId) =>
+      database.rulesDao.appliedRuleTargets(profileId);
 
   Future<Map<String, dynamic>> getRoutingProfileConfig(int profileId) async {
     final source = await getRawProfileConfig(profileId);
@@ -342,6 +351,7 @@ extension SetupControllerExt on AppController {
     int profileId, {
     bool validateSnapshot = true,
     bool refetchCloud = true,
+    bool applyAliases = true,
   }) async {
     var profile = _ref.read(profilesProvider).getProfile(profileId);
     if (profile?.type == ProfileType.custom) return <String, dynamic>{};
@@ -366,6 +376,7 @@ extension SetupControllerExt on AppController {
     final path =
         existingPath ?? await appPath.getProfilePath(profileId.toString());
     final source = await coreController.getConfig(path);
+    if (!applyAliases) return source;
     final activeNames = {
       for (final proxy in profile?.profileProxies ?? <ProfileProxy>[])
         if (proxy.isValid) proxy.name,
@@ -749,9 +760,11 @@ extension SetupControllerExt on AppController {
     );
     final appendSystemDns = networkVM2.a;
     final bypassPrivateRoute = networkVM2.b;
+    // The config task applies the aliases itself, after any script has run.
     final configMap = await getRawProfileConfig(
       profileId,
       validateSnapshot: validateSnapshot,
+      applyAliases: false,
     );
     String? scriptContent;
     final List<Rule> addedRules = [];

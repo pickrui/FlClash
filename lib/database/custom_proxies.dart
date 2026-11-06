@@ -85,7 +85,9 @@ class CustomProxiesDao extends DatabaseAccessor<Database>
   };
   ProfileProxy merge(ProfileProxy proxy) {
     final same = proxies.firstWhereOrNull(
-      (item) => item.copyWith(id: 0) == proxy.copyWith(id: 0),
+      (item) =>
+          item.copyWith(id: 0) == proxy.copyWith(id: 0) ||
+          _isStoredCopy(item, proxy),
     );
     if (same != null) return same;
     var name = proxy.name;
@@ -134,4 +136,13 @@ class CustomProxiesDao extends DatabaseAccessor<Database>
     );
   }
   return (proxies: proxies, profiles: migrated);
+}
+
+/// A conflicting node is stored as `name (2)`, and importing the same one again
+/// must find it there rather than add another copy.
+bool _isStoredCopy(ProfileProxy stored, ProfileProxy proxy) {
+  final name = stored.name;
+  if (!name.startsWith('${proxy.name} (') || !name.endsWith(')')) return false;
+  return stored.copyWith(id: 0, proxy: {...stored.proxy, 'name': proxy.name}) ==
+      proxy.copyWith(id: 0);
 }

@@ -135,6 +135,40 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
         : (profileId: row.read(profileRuleLinks.profileId));
   }
 
+  Future<Set<String>> appliedRuleTargets(int profileId) async {
+    final applied = await allAddedRules(profileId).get();
+    return {for (final rule in applied) ?ruleTarget(rule.value)};
+  }
+
+  /// [excludingProfiles] own the old name through their managed snapshot.
+  Future<void> renameRuleTargets(
+    Map<String, String> names, {
+    Set<int> excludingProfiles = const {},
+  }) async {
+    if (names.isEmpty) return;
+    final owned = selectOnly(profileRuleLinks)
+      ..addColumns([profileRuleLinks.ruleId])
+      ..where(
+        profileRuleLinks.profileId.isIn(excludingProfiles) &
+            profileRuleLinks.scene.equalsValue(RuleScene.disabled).not(),
+      );
+    final query = select(rules)
+      ..where(
+        (rule) =>
+            rule.ruleTarget.isIn(names.keys) & rule.id.isNotInQuery(owned),
+      );
+    for (final row in await query.get()) {
+      final next = names[row.ruleTarget];
+      if (next == null) continue;
+      await (update(rules)..whereSamePrimaryKey(row)).write(
+        RulesCompanion(
+          value: Value(renameRuleTarget(row.value, row.ruleTarget!, next)),
+          ruleTarget: Value(next),
+        ),
+      );
+    }
+  }
+
   Selectable<Rule> allGlobalAddedRules() {
     return _get();
   }

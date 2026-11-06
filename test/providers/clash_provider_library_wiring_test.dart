@@ -18,6 +18,7 @@ class _SetupAction extends SetupAction {
   Future<Map<String, dynamic>> getRawProfileConfig(
     int profileId, {
     bool refetchCloud = true,
+    bool applyAliases = true,
   }) async {
     refetches.add(refetchCloud);
     return {};

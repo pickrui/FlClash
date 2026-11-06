@@ -267,6 +267,49 @@ void main() {
     },
   );
 
+  test('a shared node leaves its name to a subscription group', () async {
+    final result = await makeRealProfileTask(
+      overlayState(
+        rawConfig: const {
+          'proxy-groups': [
+            {
+              'name': 'HK',
+              'type': 'select',
+              'proxies': ['DIRECT'],
+            },
+          ],
+          'rules': ['MATCH,HK'],
+        },
+        profileProxies: const [
+          ProfileProxy(id: 1, proxy: {'name': 'HK', 'type': 'direct'}),
+        ],
+      ),
+    );
+    expect((result['proxies'] as List?) ?? const [], isEmpty);
+    expect((result['proxy-groups'] as List).single['proxies'], ['DIRECT']);
+  });
+
+  test('an alias never moves routing from a group onto a node', () async {
+    final result = await makeRealProfileTask(
+      overlayState(
+        rawConfig: const {
+          'proxy-groups': [
+            {
+              'name': 'HK',
+              'type': 'select',
+              'proxies': ['DIRECT'],
+            },
+          ],
+          'rules': ['MATCH,HK'],
+        },
+        profileProxies: const [
+          ProfileProxy(id: 1, proxy: {'name': 'HK-2', 'type': 'direct'}),
+        ],
+      ).copyWith(proxyAliases: const {'HK': 'HK-2'}),
+    );
+    expect(result['rules'], ['MATCH,HK']);
+  });
+
   test('an empty overlay preserves subscription groups and rules', () async {
     const raw = {
       'proxy-groups': [

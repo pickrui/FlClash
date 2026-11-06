@@ -792,14 +792,13 @@ class _ProfileProxyChainsContentState
       return child;
     }
     return PopGuard(
-      onPop: (_) {
-        if (selectedProxyChains.isNotEmpty) {
-          ref.read(selectedItemsProvider(_proxyChainKey).notifier).value = {};
-          return false;
-        }
-        Navigator.of(context).pop();
-        return false;
-      },
+      onPop: selectedProxyChains.isEmpty
+          ? null
+          : (_) {
+              ref.read(selectedItemsProvider(_proxyChainKey).notifier).value =
+                  {};
+              return false;
+            },
       child: child,
     );
   }

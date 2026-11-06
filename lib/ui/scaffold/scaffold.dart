@@ -67,8 +67,9 @@ class ScaffoldKeyword {
   final bool startsSection;
 }
 
-typedef AppBarSearchStateBuilder =
-    AppBarSearchState? Function(AppBarSearchState? state);
+typedef AppBarSearchStateBuilder = AppBarSearchState? Function(
+  AppBarSearchState? state,
+);
 
 class Scaffold extends StatefulWidget {
   final Widget body;
@@ -267,9 +268,8 @@ class ScaffoldState extends State<Scaffold>
     if (event is! KeyDownEvent ||
         _appBarState.value == null ||
         _sorting ||
-        !controlSingleActivator(
-          LogicalKeyboardKey.keyF,
-        ).accepts(event, HardwareKeyboard.instance) ||
+        !controlSingleActivator(LogicalKeyboardKey.keyF)
+            .accepts(event, HardwareKeyboard.instance) ||
         !_isFrontmost) {
       return false;
     }

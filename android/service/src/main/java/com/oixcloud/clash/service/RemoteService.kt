@@ -41,6 +41,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 private const val CALLBACK_ACK_TIMEOUT_MILLIS = 5_000L
 
+// Inside the caller's 60 s, which a start or stop can use most of while the
+// Core's run lock is held, so this error is the one that surfaces.
+private const val SERVICE_LIFECYCLE_TIMEOUT_MILLIS = 55_000L
+
 class RemoteService : Service(),
     CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
     private class EventForwarder(val events: Channel<ByteArray>, val job: Job)
@@ -107,7 +111,9 @@ class RemoteService : Service(),
             runLock.withLock {
                 val currentDelegate = delegate
                 val stopped = when {
-                    currentDelegate != null -> currentDelegate.useService { it.stop() }
+                    currentDelegate != null -> currentDelegate.useService(
+                        timeoutMillis = SERVICE_LIFECYCLE_TIMEOUT_MILLIS,
+                    ) { it.stop() }
                     State.runTime == 0L -> Result.success(Unit)
                     else -> Result.failure(IllegalStateException("Background service is unavailable"))
                 }
@@ -167,7 +173,9 @@ class RemoteService : Service(),
                     if (delegate == null || intent?.filterEquals(nextIntent) != true) {
                         // Finish the previous service before its replacement can
                         // install modules or take ownership of the TUN interface.
-                        delegate?.useService {
+                        delegate?.useService(
+                            timeoutMillis = SERVICE_LIFECYCLE_TIMEOUT_MILLIS,
+                        ) {
                             startingService = it
                             it.stop()
                         }?.getOrThrow()
@@ -188,9 +196,9 @@ class RemoteService : Service(),
                         intent = nextIntent
                         nextDelegate.bind()
                     }
-                    // Inside the caller's 60 s, which a start can use most of
-                    // while the Core's run lock is held, so this error surfaces.
-                    checkNotNull(delegate).useService(timeoutMillis = 55_000) { service ->
+                    checkNotNull(delegate).useService(
+                        timeoutMillis = SERVICE_LIFECYCLE_TIMEOUT_MILLIS,
+                    ) { service ->
                         startingService = service
                         service.start()
                     }.getOrThrow()

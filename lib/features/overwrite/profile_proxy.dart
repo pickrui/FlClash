@@ -335,6 +335,24 @@ Map<String, Object?> parseProfileProxyDefinition(String source) {
   return proxy;
 }
 
+/// The names the raw config can reach a node by: its own, and any alias that
+/// only resolves through the node because no raw proxy holds that name.
+Iterable<String> _rawNamesOf(
+  String name,
+  Profile? profile,
+  Set<String> rawNames,
+) sync* {
+  yield name;
+  for (final entry
+      in profile?.proxyAliases.entries ?? const <MapEntry<String, String>>[]) {
+    if (entry.value == name &&
+        entry.key != name &&
+        !rawNames.contains(entry.key)) {
+      yield entry.key;
+    }
+  }
+}
+
 class CustomProxiesView extends StatefulWidget {
   const CustomProxiesView({super.key});
 
@@ -381,7 +399,13 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
   final _profileProxyKey = uniqueId;
   final _searchTexts = Expando<String>();
   bool _quickEditing = false;
-  List<Profile> _preparedProfiles = const [];
+  ({
+    List<ProfileProxy> nodes,
+    List<Profile> source,
+    List<Profile> profiles,
+    Map<int, Set<String>> groupOwnedNames,
+  })?
+  _prepared;
 
   Profile? get _profile => widget.profileId == null
       ? Profile(
@@ -391,7 +415,25 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         )
       : ref.read(profileProvider(widget.profileId));
 
+  /// Whether an added rule of the profile being edited routes to one of [names].
+  Future<bool> _isAddedRuleTarget(Set<String> names) async {
+    final profileId = widget.profileId;
+    if (profileId == null || names.isEmpty) return false;
+    final profile = _profile;
+    if (profile == null || !profile.appliesAddedRules) return false;
+    final targets = await context.setupAction.appliedRuleTargets(profileId);
+    final used = names.intersection({
+      for (final target in targets) profile.proxyAliases[target] ?? target,
+    });
+    if (used.isEmpty) return false;
+    if (mounted) {
+      context.showNotifier(appLocalizations.customOutboundInUse(used.first));
+    }
+    return true;
+  }
+
   Future<bool> _prepareOtherProfiles(List<ProfileProxy> next) async {
+    _prepared = null;
     final profiles = ref.read(profilesProvider);
     final previous = _profile!.profileProxies;
     final byId = {for (final node in next) node.id: node};
@@ -408,21 +450,56 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       for (final node in previous)
         if (!byId.containsKey(node.id)) node.name,
     };
+    final previousNames = {for (final node in previous) node.name};
+    final added = [
+      for (final node in next)
+        if (!previousNames.contains(node.name)) node,
+    ];
+    // Reading every profile's snapshot costs a parse in the Core per profile,
+    // and a reorder or a changed definition needs nothing from them.
+    if (renamed.isEmpty && removedIds.isEmpty && added.isEmpty) return true;
+    final setupAction = context.setupAction;
     final prepared = <Profile>[];
+    final groupOwnedNames = <int, Set<String>>{};
     try {
       for (final profile in profiles) {
         if (profile.id == widget.profileId) continue;
-        final raw = await context.setupAction.getRawProfileConfig(
-          profile.id,
-          refetchCloud: false,
-        );
+        // Unaliased: an alias stands in for a node only while the node exists,
+        // and these checks are about what remains once it does not.
+        Map<String, dynamic>? raw;
+        try {
+          raw = await setupAction.getRawProfileConfig(
+            profile.id,
+            refetchCloud: false,
+            applyAliases: false,
+          );
+        } catch (error) {
+          // Only the checks that read the snapshot are skipped; setCustomProxies
+          // renames its references and disables its chains through a removed node.
+          commonPrint.log('${profile.realLabel}: ${compactError(error)}');
+        }
         if (!mounted) return false;
-        final rawNames = rawProxyNames(raw);
+        final rawNames = raw == null ? const <String>{} : rawProxyNames(raw);
+        final rawGroups = raw == null
+            ? const <String>{}
+            : rawProxyGroupNames(raw);
         final unavailable = {
           for (final node in previous)
-            if (removedIds.contains(node.id) && !rawNames.contains(node.name))
+            if (removedIds.contains(node.id) &&
+                !rawNames.contains(node.name) &&
+                !rawGroups.contains(node.name))
               node.name,
         };
+        if (unavailable.isNotEmpty && profile.appliesAddedRules) {
+          final targets = await setupAction.appliedRuleTargets(profile.id);
+          if (!mounted) return false;
+          for (final target in targets) {
+            final name = profile.proxyAliases[target] ?? target;
+            if (unavailable.contains(name)) {
+              throw appLocalizations.customOutboundInUse(name);
+            }
+          }
+        }
         for (final name in unavailable) {
           if (profile.hasCustomOutboundReferences(
             name,
@@ -430,25 +507,34 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           )) {
             throw appLocalizations.customOutboundInUse(name);
           }
-          final reference = findRawOutboundReference(
-            raw,
-            name,
-            includeTopLevelRules: profile.overwriteType != OverwriteType.custom,
-            includeProxyGroups: profile.overwriteType != OverwriteType.custom,
-          );
-          if (reference != null) {
-            throw appLocalizations.rawOutboundInUse(name, reference);
+          if (raw == null) continue;
+          for (final referenced in _rawNamesOf(name, profile, rawNames)) {
+            final reference = findRawOutboundReference(
+              raw,
+              referenced,
+              includeTopLevelRules:
+                  profile.overwriteType != OverwriteType.custom,
+              includeProxyGroups: profile.overwriteType != OverwriteType.custom,
+            );
+            if (reference != null) {
+              throw appLocalizations.rawOutboundInUse(name, reference);
+            }
           }
         }
-        var updated = profile;
-        for (final node in next.where((node) => !previous.contains(node))) {
+        for (final node in added) {
           if (hasProfileProxyCustomNameConflict(profile, node) ||
-              hasProfileProxyGroupNameConflict(raw, node) ||
               (profile.isoixCloudProfile && rawNames.contains(node.name))) {
             throw appLocalizations.proxyChainUnavailableNodeTip(node.name);
           }
         }
+        if (raw == null) continue;
+        var updated = profile;
         for (final entry in renamed.entries) {
+          if (rawGroups.contains(entry.key) ||
+              rawGroups.contains(entry.value)) {
+            (groupOwnedNames[profile.id] ??= {}).add(entry.key);
+            continue;
+          }
           final conflict = findProxyChainRenameConflict(
             updated.proxyChains,
             entry.key,
@@ -466,7 +552,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
         }
         var chains = _removeProxiesFromChains(
           updated.proxyChains,
-          deleted.difference(rawNames),
+          deleted.difference(rawNames).difference(rawGroups),
           raw,
         );
         for (final name in unavailable.difference(deleted)) {
@@ -490,7 +576,12 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       if (!identical(profiles, ref.read(profilesProvider))) {
         throw appLocalizations.routingChanged;
       }
-      _preparedProfiles = prepared;
+      _prepared = (
+        nodes: next,
+        source: profiles,
+        profiles: prepared,
+        groupOwnedNames: groupOwnedNames,
+      );
       return true;
     } catch (error) {
       if (mounted) context.showNotifier(compactError(error));
@@ -500,22 +591,31 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
 
   Future<bool> _updateProfile(Profile Function(Profile) builder) async {
     final next = builder(_profile!);
+    final prepared = _prepared;
+    _prepared = null;
+    // Left over from an edit the user cancelled, it would overwrite the other
+    // profiles with a state they never agreed to.
+    final applies =
+        prepared != null &&
+        profileProxyListEquality.equals(prepared.nodes, next.profileProxies);
     try {
+      if (applies && !identical(prepared.source, ref.read(profilesProvider))) {
+        throw appLocalizations.routingChanged;
+      }
       await ref
           .read(profilesProvider.notifier)
           .setCustomProxies(
             next.profileProxies,
             editedProfiles: [
-              ..._preparedProfiles,
+              if (applies) ...prepared.profiles,
               if (widget.profileId != null) next,
             ],
+            groupOwnedNames: applies ? prepared.groupOwnedNames : const {},
           );
       return true;
     } catch (error) {
       if (mounted) context.showNotifier(compactError(error));
       return false;
-    } finally {
-      _preparedProfiles = const [];
     }
   }
 
@@ -526,7 +626,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       final id = widget.profileId;
       return id == null
           ? <String, dynamic>{}
-          : await setupAction.getRawProfileConfig(id);
+          : await setupAction.getRawProfileConfig(id, applyAliases: false);
     } catch (error) {
       if (mounted) {
         context.showNotifier(error.toString());
@@ -540,15 +640,20 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
     Iterable<String> names,
   ) {
     final notCustom = _profile?.overwriteType != OverwriteType.custom;
+    final rawNames = rawProxyNames(rawConfig);
+    final rawGroups = rawProxyGroupNames(rawConfig);
     for (final name in names) {
-      final String? rawReference;
+      if (rawGroups.contains(name)) continue;
+      String? rawReference;
       try {
-        rawReference = findRawOutboundReference(
-          rawConfig,
-          name,
-          includeTopLevelRules: notCustom,
-          includeProxyGroups: notCustom,
-        );
+        for (final referenced in _rawNamesOf(name, _profile, rawNames)) {
+          rawReference ??= findRawOutboundReference(
+            rawConfig,
+            referenced,
+            includeTopLevelRules: notCustom,
+            includeProxyGroups: notCustom,
+          );
+        }
       } catch (error) {
         context.showNotifier(error.toString());
         return true;
@@ -625,9 +730,10 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       context.showNotifier(appLocalizations.routingChanged);
       return null;
     }
-    if (hasProfileProxyGroupNameConflict(rawConfig, res) ||
-        (profile.isoixCloudProfile &&
-            rawProxyNames(rawConfig).contains(res.name))) {
+    if (previous?.name != res.name &&
+        (hasProfileProxyGroupNameConflict(rawConfig, res) ||
+            (profile.isoixCloudProfile &&
+                rawProxyNames(rawConfig).contains(res.name)))) {
       context.showNotifier(
         appLocalizations.proxyChainUnavailableNodeTip(res.name),
       );
@@ -781,6 +887,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       );
       return;
     }
+    if (await _isAddedRuleTarget(removedNames) || !mounted) return;
     var hasRelatedProxyChains =
         currentProfile?.proxyChains.any((chain) {
           return chain.proxies.any(removedNames.contains);
@@ -875,6 +982,7 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
           context.showNotifier(appLocalizations.customOutboundInUse(name));
           return;
         }
+        if (await _isAddedRuleTarget({name}) || !mounted) return;
         if (_isRawReferenced(rawConfig, [name])) {
           return;
         }
@@ -1022,6 +1130,9 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
               .map((node) => node.name)
               .toSet()
               .difference(rawProxyNames(raw));
+          if (await _isAddedRuleTarget(removedNames.toSet())) {
+            throw appLocalizations.routingChanged;
+          }
           for (final name in removedNames) {
             final reference = findRawOutboundReference(
               raw,
@@ -1040,7 +1151,9 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
               throw appLocalizations.customOutboundInUse(name);
             }
           }
+          final previousNames = {for (final node in previous) node.name};
           for (final node in next) {
+            if (previousNames.contains(node.name)) continue;
             if (hasProfileProxyCustomNameConflict(profile, node) ||
                 hasProfileProxyGroupNameConflict(raw, node)) {
               throw appLocalizations.existsTip(appLocalizations.proxies);
@@ -1155,75 +1268,85 @@ class _ProfileProxiesContentState extends ConsumerState<ProfileProxiesContent> {
       );
     }
 
-    return SliverMainAxisGroup(
-      slivers: [
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
-        SliverToBoxAdapter(
-          child: InfoHeader(
-            info: Info(label: appLocalizations.proxyChainCustomNodes),
-            actions: [
-              IconButton(
-                tooltip: appLocalizations.quickEdit,
-                onPressed: _quickEditing ? null : _quickEdit,
-                icon: const GlyphIcon(AppGlyphs.edit),
-              ),
-              if (selectedProfileProxies.isNotEmpty) ...[
-                MinIconButtonTheme(
-                  child: IconButton(
-                    tooltip: context.appLocalizations.delete,
-                    onPressed: visibleSelected.isEmpty
-                        ? null
-                        : () => _handleDeleteProfileProxies(
-                            visibleSelected.cast<int>(),
-                            multiple: true,
-                          ),
-                    icon: const GlyphIcon(AppGlyphs.delete, fill: 1),
-                  ),
+    return PopGuard(
+      onPop: selectedProfileProxies.isEmpty
+          ? null
+          : (_) {
+              ref
+                  .read(selectedItemsProvider(_profileProxyKey).notifier)
+                  .update((_) => {});
+              return false;
+            },
+      child: SliverMainAxisGroup(
+        slivers: [
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          SliverToBoxAdapter(
+            child: InfoHeader(
+              info: Info(label: appLocalizations.proxyChainCustomNodes),
+              actions: [
+                IconButton(
+                  tooltip: appLocalizations.quickEdit,
+                  onPressed: _quickEditing ? null : _quickEdit,
+                  icon: const GlyphIcon(AppGlyphs.edit),
                 ),
-                const SizedBox(width: 8),
+                if (selectedProfileProxies.isNotEmpty) ...[
+                  MinIconButtonTheme(
+                    child: IconButton(
+                      tooltip: context.appLocalizations.delete,
+                      onPressed: visibleSelected.isEmpty
+                          ? null
+                          : () => _handleDeleteProfileProxies(
+                              visibleSelected.cast<int>(),
+                              multiple: true,
+                            ),
+                      icon: const GlyphIcon(AppGlyphs.delete, fill: 1),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                MinFilledButtonTheme(
+                  child: selectedProfileProxies.isNotEmpty
+                      ? FilledButton(
+                          onPressed: () =>
+                              _handleSelectAllProfileProxies(visibleIds),
+                          child: Text(appLocalizations.selectAll),
+                        )
+                      : FilledButton.icon(
+                          onPressed: () {
+                            _handleAddOrUpdateProfileProxy();
+                          },
+                          icon: const GlyphIcon(AppGlyphs.add, fill: 1),
+                          label: Text(appLocalizations.addProxyChainNode),
+                        ),
+                ),
               ],
-              MinFilledButtonTheme(
-                child: selectedProfileProxies.isNotEmpty
-                    ? FilledButton(
-                        onPressed: () =>
-                            _handleSelectAllProfileProxies(visibleIds),
-                        child: Text(appLocalizations.selectAll),
-                      )
-                    : FilledButton.icon(
-                        onPressed: () {
-                          _handleAddOrUpdateProfileProxy();
-                        },
-                        icon: const GlyphIcon(AppGlyphs.add, fill: 1),
-                        label: Text(appLocalizations.addProxyChainNode),
-                      ),
+            ),
+          ),
+          if (visible.isNotEmpty) ...[
+            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+            if (query.isEmpty)
+              SliverPrismReorderableList(
+                itemCount: visible.length,
+                itemBuilder: (_, index) => rowAt(index),
+                proxyDecorator: (child, index, animation) =>
+                    commonProxyDecorator(rowAt(index), index, animation),
+                onReorderItem: _handleReorder,
+              )
+            else
+              SliverPrismList(
+                itemCount: visible.length,
+                itemBuilder: (_, index) => rowAt(index),
               ),
-            ],
-          ),
-        ),
-        if (visible.isNotEmpty) ...[
-          const SliverToBoxAdapter(child: SizedBox(height: 8)),
-          if (query.isEmpty)
-            SliverPrismReorderableList(
-              itemCount: visible.length,
-              itemBuilder: (_, index) => rowAt(index),
-              proxyDecorator: (child, index, animation) =>
-                  commonProxyDecorator(rowAt(index), index, animation),
-              onReorderItem: _handleReorder,
-            )
-          else
-            SliverPrismList(
-              itemCount: visible.length,
-              itemBuilder: (_, index) => rowAt(index),
+          ] else if (query.isNotEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: NullStatus(
+                label: appLocalizations.nullTip(appLocalizations.proxies),
+                illustration: NullStatusIllustration.proxies,
+              ),
             ),
-        ] else if (query.isNotEmpty)
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: NullStatus(
-              label: appLocalizations.nullTip(appLocalizations.proxies),
-              illustration: NullStatusIllustration.proxies,
-            ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
