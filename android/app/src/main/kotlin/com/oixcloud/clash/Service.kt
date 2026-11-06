@@ -28,11 +28,13 @@ import com.oixcloud.clash.service.models.VpnOptions
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.stream.JsonReader
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
+import java.io.StringReader
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
@@ -75,10 +77,21 @@ object Service {
         delegate.unbind()
     }
 
+    // A provider or rule-set call can carry tens of megabytes; the method comes
+    // first and the rest is skipped without building a tree.
+    private fun methodOf(data: String): String? = runCatching {
+        JsonReader(StringReader(data)).use { reader ->
+            reader.beginObject()
+            while (reader.hasNext()) {
+                if (reader.nextName() == "method") return@use reader.nextString()
+                reader.skipValue()
+            }
+            null
+        }
+    }.getOrNull()
+
     suspend fun invokeMethod(data: String, cb: ((result: ByteArray) -> Unit)?): Result<Unit> {
-        val method = runCatching {
-            JsonParser.parseString(data).asJsonObject.getAsJsonPrimitive("method").asString
-        }.getOrNull()
+        val method = methodOf(data)
         if (method in validationMethods) {
             return validationMutex.withLock {
                 invokeValidatorMethod(data, cb)
