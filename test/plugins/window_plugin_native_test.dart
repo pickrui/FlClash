@@ -38,6 +38,7 @@ void main() {
     for (final name in [
       'GetTaskbarList',
       'SetSkipTaskbar',
+      'ReportSizeState',
       ...visibilityNames,
     ]) {
       final method = RegExp(
@@ -129,6 +130,7 @@ endif()
     'startup_hide',
     'startup_show_hidden',
     'startup_show_minimized',
+    'maximized_restore',
     'windows_10_blur_fallback',
     'windows_11_acrylic',
     'effects_without_composition',

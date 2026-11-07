@@ -7,9 +7,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <vector>
 
 using HRESULT = int32_t;
 using HWND = void*;
+using WPARAM = uintptr_t;
+constexpr WPARAM SIZE_RESTORED = 0;
+constexpr WPARAM SIZE_MINIMIZED = 1;
+constexpr WPARAM SIZE_MAXIMIZED = 2;
 constexpr HRESULT kSuccess = 0;
 constexpr HRESULT kFailure = -1;
 constexpr int CLSID_TaskbarList = 1;
@@ -40,6 +45,7 @@ void ShowWindow(HWND, int command) {
   window_visible = command != SW_HIDE;
   window_minimized = command == SW_SHOWMINIMIZED;
 }
+bool IsWindowVisible(HWND) { return window_visible; }
 void SetForegroundWindow(HWND) { ++activation_calls; }
 bool FAILED(HRESULT result) { return result < 0; }
 #define IID_PPV_ARGS(pointer) pointer
@@ -71,8 +77,13 @@ HRESULT CoCreateInstance(int, void*, int, ITaskbarList3** result) {
 
 class WindowController {
  public:
+  enum class WindowState { kNormal, kMaximized, kMinimized };
   HWND hwnd_ = reinterpret_cast<HWND>(1);
   ITaskbarList3* taskbar_ = nullptr;
+  WindowState last_state_ = WindowState::kNormal;
+  std::vector<std::string> events;
+  void emit_event_(const std::string& event) { events.push_back(event); }
+  void ReportSizeState(WPARAM wparam);
   ITaskbarList3* GetTaskbarList();
   void SetSkipTaskbar(bool value);
   void Show(bool inactive = false);
@@ -134,6 +145,15 @@ int main(int argc, char** argv) {
     launcher_show_command = scenario == "startup_show_hidden" ? SW_HIDE : SW_SHOWMINIMIZED;
     manager.Show();
     Require(window_visible && !window_minimized, "Launcher mode overrode manual opening");
+  } else if (scenario == "maximized_restore") {
+    manager.ReportSizeState(SIZE_MAXIMIZED);
+    Require(manager.events == std::vector<std::string>{"maximize"}, "A plain maximize reported a restore");
+    manager.ReportSizeState(SIZE_MINIMIZED);
+    manager.ReportSizeState(SIZE_MAXIMIZED);
+    Require(manager.events == std::vector<std::string>{"maximize", "minimize", "restore", "maximize"}, "Returning maximized did not report the restore");
+    manager.ReportSizeState(SIZE_MINIMIZED);
+    manager.ReportSizeState(SIZE_RESTORED);
+    Require(manager.events.back() == "restore", "Returning normal did not report the restore");
   } else if (scenario == "windows_10_blur_fallback") {
     for (const int build : {0, 17134, 18362, 19045, 21999}) {
       window::windows_build = build;

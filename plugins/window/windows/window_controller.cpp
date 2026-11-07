@@ -63,6 +63,27 @@ void WindowController::PlaceView() const {
   ::MoveWindow(view_, 0, border, client.right, height, TRUE);
 }
 
+void WindowController::ReportSizeState(WPARAM wparam) {
+  if (wparam == SIZE_MAXIMIZED) {
+    if (last_state_ == WindowState::kMinimized) {
+      emit_event_("restore");
+    }
+    emit_event_("maximize");
+    last_state_ = WindowState::kMaximized;
+  } else if (wparam == SIZE_MINIMIZED) {
+    emit_event_("minimize");
+    last_state_ = WindowState::kMinimized;
+  } else if (wparam == SIZE_RESTORED) {
+    if (last_state_ == WindowState::kMaximized) {
+      emit_event_("unmaximize");
+      last_state_ = WindowState::kNormal;
+    } else if (last_state_ == WindowState::kMinimized) {
+      emit_event_("restore");
+      last_state_ = WindowState::kNormal;
+    }
+  }
+}
+
 ITaskbarList3* WindowController::GetTaskbarList() {
   if (taskbar_ != nullptr) return taskbar_;
   ITaskbarList3* taskbar = nullptr;
@@ -88,7 +109,8 @@ void WindowController::Show(bool inactive) {
 }
 
 void WindowController::Hide() {
-  if (hwnd_ == nullptr) return;
+  // A silent launch hides a window never shown; the engine must keep its frames.
+  if (hwnd_ == nullptr || !::IsWindowVisible(hwnd_)) return;
   ::SetWindowPos(hwnd_, nullptr, 0, 0, 0, 0,
                  SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
 }
@@ -348,27 +370,20 @@ std::optional<LRESULT> WindowController::HandleWindowMessage(
     if ((pos->flags & SWP_NOMOVE) == 0 || (pos->flags & SWP_NOSIZE) == 0) {
       ::SetTimer(hwnd, kGeometryTimerId, kGeometrySettleMilliseconds, nullptr);
     }
+    if ((pos->flags & SWP_SHOWWINDOW) != 0) {
+      emit_event_("show");
+    } else if ((pos->flags & SWP_HIDEWINDOW) != 0) {
+      emit_event_("hide");
+    }
   } else if (message == WM_TIMER && wparam == kGeometryTimerId) {
     ::KillTimer(hwnd, kGeometryTimerId);
     emit_event_("geometry-changed");
     return 0;
   } else if (message == WM_SIZE) {
     if (!is_fullscreen_) {
-      if (wparam == SIZE_MAXIMIZED) {
-        emit_event_("maximize");
-        last_state_ = WindowState::kMaximized;
-      } else if (wparam == SIZE_MINIMIZED) {
-        emit_event_("minimize");
-        last_state_ = WindowState::kMinimized;
+      ReportSizeState(wparam);
+      if (wparam == SIZE_MINIMIZED) {
         return 0;
-      } else if (wparam == SIZE_RESTORED) {
-        if (last_state_ == WindowState::kMaximized) {
-          emit_event_("unmaximize");
-          last_state_ = WindowState::kNormal;
-        } else if (last_state_ == WindowState::kMinimized) {
-          emit_event_("restore");
-          last_state_ = WindowState::kNormal;
-        }
       }
     }
     if (view_ == nullptr) {
@@ -423,8 +438,6 @@ std::optional<LRESULT> WindowController::HandleWindowMessage(
     if (is_prevent_close_) {
       return -1;
     }
-  } else if (message == WM_SHOWWINDOW) {
-    emit_event_(wparam == TRUE ? "show" : "hide");
   } else if (message != WM_NULL && message == GetActivateMessage()) {
     emit_event_("activate");
     return 0;

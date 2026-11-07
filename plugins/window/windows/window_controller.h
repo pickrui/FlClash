@@ -92,6 +92,9 @@ class WindowController {
   ITaskbarList3* GetTaskbarList();
   int TopBorderHeight() const;
   void PlaceView() const;
+  // Dart pauses rendering on minimize and resumes it on restore. A restored
+  // window is not always activated again, so focus cannot stand in for restore.
+  void ReportSizeState(WPARAM wparam);
 
   HWND hwnd_ = nullptr;
   HWND view_ = nullptr;

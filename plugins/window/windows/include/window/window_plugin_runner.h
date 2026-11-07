@@ -10,14 +10,26 @@
 #include <windows.h>
 
 // The engine hides the view only once it is sized to zero, and hiding or
-// minimizing the top-level window never resizes it. Call this before
-// HandleTopLevelWindowProc, where the plugin consumes a minimize's WM_SIZE.
+// minimizing the top-level window never resizes it. The plugin's SetWindowPos
+// sends no WM_SHOWWINDOW, so the engine learns about both windows from here.
+// Call this before HandleTopLevelWindowProc, where the plugin consumes a
+// minimize's WM_SIZE.
 inline void WindowPluginForwardVisibility(
-    flutter::FlutterViewController& controller, UINT message, WPARAM wparam,
-    LPARAM lparam) {
-  if (message == WM_SHOWWINDOW || message == WM_SIZE) {
-    controller.engine()->ProcessExternalWindowMessage(
-        controller.view()->GetNativeWindow(), message, wparam, lparam);
+    flutter::FlutterViewController& controller, HWND hwnd, UINT message,
+    WPARAM wparam, LPARAM lparam) {
+  const HWND view = controller.view()->GetNativeWindow();
+  if (message == WM_SIZE) {
+    controller.engine()->ProcessExternalWindowMessage(view, message, wparam,
+                                                      lparam);
+  } else if (message == WM_WINDOWPOSCHANGED) {
+    const UINT flags = reinterpret_cast<const WINDOWPOS*>(lparam)->flags;
+    if ((flags & (SWP_SHOWWINDOW | SWP_HIDEWINDOW)) != 0) {
+      const WPARAM shown = (flags & SWP_SHOWWINDOW) != 0 ? TRUE : FALSE;
+      controller.engine()->ProcessExternalWindowMessage(hwnd, WM_SHOWWINDOW,
+                                                        shown, 0);
+      controller.engine()->ProcessExternalWindowMessage(view, WM_SHOWWINDOW,
+                                                        shown, 0);
+    }
   }
 }
 

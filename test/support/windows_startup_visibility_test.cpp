@@ -32,6 +32,19 @@ class WindowController {
 
 #include "window_plugin_visibility.inc"
 
+int shown_reports = 0;
+int hidden_reports = 0;
+
+LRESULT CALLBACK FixtureWindowProc(HWND window, UINT message, WPARAM wparam,
+                                   LPARAM lparam) {
+  if (message == WM_WINDOWPOSCHANGED) {
+    const UINT flags = reinterpret_cast<const WINDOWPOS*>(lparam)->flags;
+    if ((flags & SWP_SHOWWINDOW) != 0) ++shown_reports;
+    if ((flags & SWP_HIDEWINDOW) != 0) ++hidden_reports;
+  }
+  return DefWindowProcW(window, message, wparam, lparam);
+}
+
 void DrainMessages() {
   MSG message{};
   while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE)) {
@@ -49,7 +62,7 @@ void CheckChild(int show_command) {
           "Missing launcher show command");
 
   WNDCLASSW window_class{};
-  window_class.lpfnWndProc = DefWindowProcW;
+  window_class.lpfnWndProc = FixtureWindowProc;
   window_class.hInstance = GetModuleHandleW(nullptr);
   window_class.lpszClassName = L"FlClashStartupVisibilityFixture";
   Require(RegisterClassW(&window_class) != 0, "RegisterClass failed");
@@ -65,13 +78,16 @@ void CheckChild(int show_command) {
   Require(!IsWindowVisible(window), "First silent hide became visible");
   manager.Hide();
   Require(!IsWindowVisible(window), "Silent launch became visible");
+  Require(hidden_reports == 0, "Silent launch must not report a hide");
   manager.Show();
   manager.Focus();
   DrainMessages();
   Require(IsWindowVisible(window), "Manual opening must show the window");
   Require(!IsIconic(window), "Manual opening must not inherit startup minimization");
+  Require(shown_reports > 0, "Opening must report the show");
   manager.Hide();
   Require(!IsWindowVisible(window), "Closing must hide a visible window");
+  Require(hidden_reports > 0, "Closing must report the hide");
   DestroyWindow(window);
   UnregisterClassW(window_class.lpszClassName, window_class.hInstance);
 }
