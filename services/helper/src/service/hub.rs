@@ -867,6 +867,45 @@ where
     (signal, receiver)
 }
 
+/// warp's acceptor trait is private, and only the credential-checked listeners
+/// know which connections may be served, so this loop stands in for warp's.
+#[cfg(any(all(feature = "windows-service", target_os = "windows"), unix_helper))]
+pub(super) async fn serve_incoming<I, F>(mut incoming: I, shutdown: F)
+where
+    I: tokio_stream::Stream + Unpin,
+    I::Item: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin + Send + 'static,
+    F: Future<Output = ()>,
+{
+    use hyper_util::rt::{TokioExecutor, TokioIo};
+    use hyper_util::server::conn::auto::Builder;
+    use hyper_util::server::graceful::GracefulShutdown;
+    use hyper_util::service::TowerToHyperService;
+    use tokio_stream::StreamExt;
+
+    let service = warp::service(routes());
+    let graceful = GracefulShutdown::new();
+    tokio::pin!(shutdown);
+    loop {
+        let stream = tokio::select! {
+            accepted = incoming.next() => match accepted {
+                Some(stream) => stream,
+                None => break,
+            },
+            () = &mut shutdown => break,
+        };
+        let service = TowerToHyperService::new(service.clone());
+        let watcher = graceful.watcher();
+        tokio::spawn(async move {
+            let builder = Builder::new(TokioExecutor::new());
+            let connection = builder.serve_connection(TokioIo::new(stream), service);
+            let _ = watcher.watch(connection).await;
+        });
+    }
+    // A client arriving during the drain must be refused, not left in the backlog.
+    drop(incoming);
+    graceful.shutdown().await;
+}
+
 pub(super) async fn finish_shutdown(
     server: impl Future<Output = ()>,
     stopping: oneshot::Receiver<()>,
@@ -912,10 +951,14 @@ where
     ensure_core_sha256_configured()?;
 
     let (shutdown, stopping) = shutdown_signal(shutdown);
-    let (_, server) = warp::serve(routes())
-        .try_bind_with_graceful_shutdown(([127, 0, 0, 1], LISTEN_PORT), shutdown)
+    let listener = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, LISTEN_PORT))
+        .await
         .map_err(|error| anyhow::anyhow!("bind helper server: {error}"))?;
     on_started()?;
+    let server = warp::serve(routes())
+        .incoming(listener)
+        .graceful(shutdown)
+        .run();
     finish_shutdown(server, stopping).await
 }
 
@@ -939,6 +982,11 @@ mod tests {
     use std::io::Write;
 
     static PROCESS_STATE: Mutex<()> = Mutex::new(());
+
+    async fn body_bytes(response: warp::reply::Response) -> warp::hyper::body::Bytes {
+        use http_body_util::BodyExt;
+        response.into_body().collect().await.unwrap().to_bytes()
+    }
 
     fn lock_process_state() -> std::sync::MutexGuard<'static, ()> {
         PROCESS_STATE
@@ -1057,13 +1105,17 @@ mod tests {
                 let _ = stopped.await;
             });
             let (observed, observer) = oneshot::channel();
-            let (address, server) = warp::serve(routes()).bind_with_graceful_shutdown(
-                ([127, 0, 0, 1], 0),
-                async move {
+            let listener = tokio::net::TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, 0))
+                .await
+                .unwrap();
+            let address = listener.local_addr().unwrap();
+            let server = warp::serve(routes())
+                .incoming(listener)
+                .graceful(async move {
                     signal.await;
                     let _ = observed.send(());
-                },
-            );
+                })
+                .run();
             let server = tokio::spawn(finish_shutdown(server, stopping));
             let mut client = tokio::net::TcpStream::connect(address).await.unwrap();
             let body = serde_json::to_vec(&StartParams {
@@ -1164,9 +1216,7 @@ mod tests {
             session_id: other.to_string(),
         });
         assert_eq!(failed_start.status(), StatusCode::INTERNAL_SERVER_ERROR);
-        let body = warp::hyper::body::to_bytes(failed_start.into_body())
-            .await
-            .unwrap();
+        let body = body_bytes(failed_start).await;
         let body: serde_json::Value = serde_json::from_slice(&body).unwrap();
         assert_eq!(body["code"], "coreStopFailed");
         {
@@ -1599,9 +1649,7 @@ mod tests {
             session_id: "fedcba9876543210fedcba9876543210".into(),
         });
         assert_eq!(response.status(), StatusCode::CONFLICT);
-        let body = warp::hyper::body::to_bytes(response.into_body())
-            .await
-            .unwrap();
+        let body = body_bytes(response).await;
         let body: serde_json::Value = serde_json::from_slice(&body).unwrap();
         assert_eq!(body["code"], "coreVerificationFailed");
         assert!(MANAGED_CORE.lock().unwrap().is_none());
@@ -1699,9 +1747,7 @@ mod tests {
             session_id: "fedcba9876543210fedcba9876543210".into(),
         });
         assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
-        let body = warp::hyper::body::to_bytes(response.into_body())
-            .await
-            .unwrap();
+        let body = body_bytes(response).await;
         let body: serde_json::Value = serde_json::from_slice(&body).unwrap();
         assert_eq!(body["code"], "coreStopFailed");
         let (signal, stopping) = shutdown_signal(async {});
@@ -2019,12 +2065,7 @@ mod tests {
             response.headers().get(PROTOCOL_VERSION_HEADER).unwrap(),
             PROTOCOL_VERSION
         );
-        assert_eq!(
-            warp::hyper::body::to_bytes(response.into_body())
-                .await
-                .unwrap(),
-            "FlClashHelperService.exe"
-        );
+        assert_eq!(body_bytes(response).await, "FlClashHelperService.exe");
     }
 
     #[tokio::test]
@@ -2037,9 +2078,7 @@ mod tests {
             PROTOCOL_VERSION
         );
         assert_eq!(
-            warp::hyper::body::to_bytes(response.into_body())
-                .await
-                .unwrap(),
+            body_bytes(response).await,
             "Core executable SHA256 mismatch"
         );
     }
@@ -2147,12 +2186,7 @@ mod tests {
 
         assert_eq!(response.status(), StatusCode::CONFLICT);
         assert!(MANAGED_CORE.lock().unwrap().is_none());
-        let body: serde_json::Value = serde_json::from_slice(
-            &warp::hyper::body::to_bytes(response.into_body())
-                .await
-                .unwrap(),
-        )
-        .unwrap();
+        let body: serde_json::Value = serde_json::from_slice(&body_bytes(response).await).unwrap();
         assert_eq!(body["code"], "coreVerificationFailed");
     }
 
@@ -2460,12 +2494,7 @@ mod tests {
         let response = launch_failure_response(&Error::from_raw_os_error(577));
 
         assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
-        let body: serde_json::Value = serde_json::from_slice(
-            &warp::hyper::body::to_bytes(response.into_body())
-                .await
-                .unwrap(),
-        )
-        .unwrap();
+        let body: serde_json::Value = serde_json::from_slice(&body_bytes(response).await).unwrap();
         assert_eq!(body["code"], "processLaunchFailed");
         assert_eq!(body["details"]["osError"], 577);
     }
@@ -2474,12 +2503,7 @@ mod tests {
     async fn a_launch_failure_without_an_os_error_omits_the_details() {
         let response = launch_failure_response(&Error::other("spawn refused"));
 
-        let body: serde_json::Value = serde_json::from_slice(
-            &warp::hyper::body::to_bytes(response.into_body())
-                .await
-                .unwrap(),
-        )
-        .unwrap();
+        let body: serde_json::Value = serde_json::from_slice(&body_bytes(response).await).unwrap();
         assert_eq!(body["message"], "spawn refused");
         assert!(body.get("details").is_none());
     }
