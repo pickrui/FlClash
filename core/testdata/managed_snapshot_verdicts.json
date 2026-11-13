@@ -1,0 +1,4 @@
+{
+  "invalid": "Parse Error: managed configuration is invalid",
+  "unchecked": "Validation Error: managed configuration was not checked"
+}

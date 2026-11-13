@@ -1,0 +1,2839 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of '../state.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(coreOptions)
+final coreOptionsProvider = CoreOptionsProvider._();
+
+final class CoreOptionsProvider
+    extends $FunctionalProvider<CoreOptions, CoreOptions, CoreOptions>
+    with $Provider<CoreOptions> {
+  CoreOptionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'coreOptionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$coreOptionsHash();
+
+  @$internal
+  @override
+  $ProviderElement<CoreOptions> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CoreOptions create(Ref ref) {
+    return coreOptions(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CoreOptions value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CoreOptions>(value),
+    );
+  }
+}
+
+String _$coreOptionsHash() => r'39e1fd5f621d63293ad40109d29bad5629c5519e';
+
+@ProviderFor(updateParams)
+final updateParamsProvider = UpdateParamsProvider._();
+
+final class UpdateParamsProvider
+    extends $FunctionalProvider<UpdateParams, UpdateParams, UpdateParams>
+    with $Provider<UpdateParams> {
+  UpdateParamsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'updateParamsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$updateParamsHash();
+
+  @$internal
+  @override
+  $ProviderElement<UpdateParams> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  UpdateParams create(Ref ref) {
+    return updateParams(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UpdateParams value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UpdateParams>(value),
+    );
+  }
+}
+
+String _$updateParamsHash() => r'0f7f520de0a80a4813f7fa0fa89fe536c6cf1ac9';
+
+@ProviderFor(suspend)
+final suspendProvider = SuspendProvider._();
+
+final class SuspendProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  SuspendProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'suspendProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$suspendHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return suspend(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$suspendHash() => r'29201c3e1766a00b52e1ea0c57ce85d9682cd4bc';
+
+@ProviderFor(proxyState)
+final proxyStateProvider = ProxyStateProvider._();
+
+final class ProxyStateProvider
+    extends $FunctionalProvider<ProxyState, ProxyState, ProxyState>
+    with $Provider<ProxyState> {
+  ProxyStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'proxyStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$proxyStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProxyState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProxyState create(Ref ref) {
+    return proxyState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProxyState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProxyState>(value),
+    );
+  }
+}
+
+String _$proxyStateHash() => r'8ea9a6d176d46966a9e5e790e2613b3d79df469e';
+
+@ProviderFor(trayDelays)
+final trayDelaysProvider = TrayDelaysProvider._();
+
+final class TrayDelaysProvider
+    extends
+        $FunctionalProvider<
+          Map<String, Map<String, int>>,
+          Map<String, Map<String, int>>,
+          Map<String, Map<String, int>>
+        >
+    with $Provider<Map<String, Map<String, int>>> {
+  TrayDelaysProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'trayDelaysProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$trayDelaysHash();
+
+  @$internal
+  @override
+  $ProviderElement<Map<String, Map<String, int>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Map<String, Map<String, int>> create(Ref ref) {
+    return trayDelays(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, Map<String, int>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, Map<String, int>>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$trayDelaysHash() => r'538ecb5ad60190b23341eccce3a651517a95057f';
+
+@ProviderFor(trayState)
+final trayStateProvider = TrayStateProvider._();
+
+final class TrayStateProvider
+    extends $FunctionalProvider<TrayState, TrayState, TrayState>
+    with $Provider<TrayState> {
+  TrayStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'trayStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$trayStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<TrayState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TrayState create(Ref ref) {
+    return trayState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TrayState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TrayState>(value),
+    );
+  }
+}
+
+String _$trayStateHash() => r'b982fab72bb93e2aa4c51fbc7e74e0271090835f';
+
+@ProviderFor(vpnState)
+final vpnStateProvider = VpnStateProvider._();
+
+final class VpnStateProvider
+    extends $FunctionalProvider<VpnState, VpnState, VpnState>
+    with $Provider<VpnState> {
+  VpnStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'vpnStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$vpnStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<VpnState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  VpnState create(Ref ref) {
+    return vpnState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VpnState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VpnState>(value),
+    );
+  }
+}
+
+String _$vpnStateHash() => r'abfe51b04382dcc4feb0dd8988a961f177016794';
+
+@ProviderFor(isStart)
+final isStartProvider = IsStartProvider._();
+
+final class IsStartProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  IsStartProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isStartProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isStartHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return isStart(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$isStartHash() => r'f8bcefa8515c44fbe14876a5fc6676110508e9b2';
+
+@ProviderFor(getHotKeyAction)
+final getHotKeyActionProvider = GetHotKeyActionFamily._();
+
+final class GetHotKeyActionProvider
+    extends $FunctionalProvider<HotKeyAction, HotKeyAction, HotKeyAction>
+    with $Provider<HotKeyAction> {
+  GetHotKeyActionProvider._({
+    required GetHotKeyActionFamily super.from,
+    required HotAction super.argument,
+  }) : super(
+         retry: null,
+         name: r'getHotKeyActionProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$getHotKeyActionHash();
+
+  @override
+  String toString() {
+    return r'getHotKeyActionProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<HotKeyAction> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  HotKeyAction create(Ref ref) {
+    final argument = this.argument as HotAction;
+    return getHotKeyAction(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HotKeyAction value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<HotKeyAction>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetHotKeyActionProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$getHotKeyActionHash() => r'4dc74ea7ffb25624ce70c7c8214806f3ef022223';
+
+final class GetHotKeyActionFamily extends $Family
+    with $FunctionalFamilyOverride<HotKeyAction, HotAction> {
+  GetHotKeyActionFamily._()
+    : super(
+        retry: null,
+        name: r'getHotKeyActionProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  GetHotKeyActionProvider call(HotAction hotAction) =>
+      GetHotKeyActionProvider._(argument: hotAction, from: this);
+
+  @override
+  String toString() => r'getHotKeyActionProvider';
+}
+
+@ProviderFor(checkIp)
+final checkIpProvider = CheckIpProvider._();
+
+final class CheckIpProvider
+    extends
+        $FunctionalProvider<
+          VM3<bool, int, bool>,
+          VM3<bool, int, bool>,
+          VM3<bool, int, bool>
+        >
+    with $Provider<VM3<bool, int, bool>> {
+  CheckIpProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'checkIpProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$checkIpHash();
+
+  @$internal
+  @override
+  $ProviderElement<VM3<bool, int, bool>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  VM3<bool, int, bool> create(Ref ref) {
+    return checkIp(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VM3<bool, int, bool> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VM3<bool, int, bool>>(value),
+    );
+  }
+}
+
+String _$checkIpHash() => r'f2dc3716714cebfc66cbcac341bc65cb3119c363';
+
+@ProviderFor(autoSetSystemDnsState)
+final autoSetSystemDnsStateProvider = AutoSetSystemDnsStateProvider._();
+
+final class AutoSetSystemDnsStateProvider
+    extends
+        $FunctionalProvider<VM2<bool, bool>, VM2<bool, bool>, VM2<bool, bool>>
+    with $Provider<VM2<bool, bool>> {
+  AutoSetSystemDnsStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'autoSetSystemDnsStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$autoSetSystemDnsStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<VM2<bool, bool>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  VM2<bool, bool> create(Ref ref) {
+    return autoSetSystemDnsState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VM2<bool, bool> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VM2<bool, bool>>(value),
+    );
+  }
+}
+
+String _$autoSetSystemDnsStateHash() =>
+    r'6985b471f403f7f7b50bf77657a4227cb8b49f73';
+
+@ProviderFor(sharedState)
+final sharedStateProvider = SharedStateProvider._();
+
+final class SharedStateProvider
+    extends $FunctionalProvider<SharedState, SharedState, SharedState>
+    with $Provider<SharedState> {
+  SharedStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sharedStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sharedStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<SharedState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SharedState create(Ref ref) {
+    return sharedState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SharedState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SharedState>(value),
+    );
+  }
+}
+
+String _$sharedStateHash() => r'72f48f2018b6102f4012e4eb5dea8a76e5edd554';
+
+@ProviderFor(AccessControlState)
+final accessControlStateProvider = AccessControlStateProvider._();
+
+final class AccessControlStateProvider
+    extends $NotifierProvider<AccessControlState, AccessControlProps> {
+  AccessControlStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'accessControlStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$accessControlStateHash();
+
+  @$internal
+  @override
+  AccessControlState create() => AccessControlState();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AccessControlProps value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AccessControlProps>(value),
+    );
+  }
+}
+
+String _$accessControlStateHash() =>
+    r'a496770f99975b1bcd7f3f50c55f50726971c749';
+
+abstract class _$AccessControlState extends $Notifier<AccessControlProps> {
+  AccessControlProps build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AccessControlProps, AccessControlProps>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AccessControlProps, AccessControlProps>,
+              AccessControlProps,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(vpnRouteAddress)
+final vpnRouteAddressProvider = VpnRouteAddressProvider._();
+
+final class VpnRouteAddressProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<String>>,
+          List<String>,
+          FutureOr<List<String>>
+        >
+    with $FutureModifier<List<String>>, $FutureProvider<List<String>> {
+  VpnRouteAddressProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'vpnRouteAddressProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$vpnRouteAddressHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<String>> create(Ref ref) {
+    return vpnRouteAddress(ref);
+  }
+}
+
+String _$vpnRouteAddressHash() => r'35465c216c42064354907e1f1d61565673356251';
+
+@ProviderFor(vpnOptions)
+final vpnOptionsProvider = VpnOptionsProvider._();
+
+final class VpnOptionsProvider
+    extends $FunctionalProvider<VpnOptions?, VpnOptions?, VpnOptions?>
+    with $Provider<VpnOptions?> {
+  VpnOptionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'vpnOptionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$vpnOptionsHash();
+
+  @$internal
+  @override
+  $ProviderElement<VpnOptions?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  VpnOptions? create(Ref ref) {
+    return vpnOptions(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VpnOptions? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VpnOptions?>(value),
+    );
+  }
+}
+
+String _$vpnOptionsHash() => r'4a9b4e35d0511862576e2fec89b195c738bc8f4f';
+
+@ProviderFor(navigationItemsState)
+final navigationItemsStateProvider = NavigationItemsStateProvider._();
+
+final class NavigationItemsStateProvider
+    extends
+        $FunctionalProvider<
+          NavigationItemsState,
+          NavigationItemsState,
+          NavigationItemsState
+        >
+    with $Provider<NavigationItemsState> {
+  NavigationItemsStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'navigationItemsStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$navigationItemsStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<NavigationItemsState> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  NavigationItemsState create(Ref ref) {
+    return navigationItemsState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(NavigationItemsState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<NavigationItemsState>(value),
+    );
+  }
+}
+
+String _$navigationItemsStateHash() =>
+    r'1fc37c14d129f9725b0e62fd53f6b25382f51102';
+
+@ProviderFor(currentNavigationItemsState)
+final currentNavigationItemsStateProvider =
+    CurrentNavigationItemsStateProvider._();
+
+final class CurrentNavigationItemsStateProvider
+    extends
+        $FunctionalProvider<
+          NavigationItemsState,
+          NavigationItemsState,
+          NavigationItemsState
+        >
+    with $Provider<NavigationItemsState> {
+  CurrentNavigationItemsStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentNavigationItemsStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentNavigationItemsStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<NavigationItemsState> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  NavigationItemsState create(Ref ref) {
+    return currentNavigationItemsState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(NavigationItemsState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<NavigationItemsState>(value),
+    );
+  }
+}
+
+String _$currentNavigationItemsStateHash() =>
+    r'06fbdc194f4527b945695fe3b72b16e0585fa440';
+
+@ProviderFor(navigationState)
+final navigationStateProvider = NavigationStateProvider._();
+
+final class NavigationStateProvider
+    extends
+        $FunctionalProvider<NavigationState, NavigationState, NavigationState>
+    with $Provider<NavigationState> {
+  NavigationStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'navigationStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$navigationStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<NavigationState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  NavigationState create(Ref ref) {
+    return navigationState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(NavigationState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<NavigationState>(value),
+    );
+  }
+}
+
+String _$navigationStateHash() => r'ab62ed417008a7a0757097d59d7e9b11a25508ee';
+
+@ProviderFor(contentWidth)
+final contentWidthProvider = ContentWidthProvider._();
+
+final class ContentWidthProvider
+    extends $FunctionalProvider<double, double, double>
+    with $Provider<double> {
+  ContentWidthProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'contentWidthProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$contentWidthHash();
+
+  @$internal
+  @override
+  $ProviderElement<double> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  double create(Ref ref) {
+    return contentWidth(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(double value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<double>(value),
+    );
+  }
+}
+
+String _$contentWidthHash() => r'4710fee8f91b08dc88520798fb6b1d4f61f090e6';
+
+@ProviderFor(dashboardState)
+final dashboardStateProvider = DashboardStateProvider._();
+
+final class DashboardStateProvider
+    extends $FunctionalProvider<DashboardState, DashboardState, DashboardState>
+    with $Provider<DashboardState> {
+  DashboardStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dashboardStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dashboardStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<DashboardState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DashboardState create(Ref ref) {
+    return dashboardState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DashboardState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DashboardState>(value),
+    );
+  }
+}
+
+String _$dashboardStateHash() => r'e8616e327c1b96658d917e4e4950f70ecb099d85';
+
+@ProviderFor(moreToolsSelectorState)
+final moreToolsSelectorStateProvider = MoreToolsSelectorStateProvider._();
+
+final class MoreToolsSelectorStateProvider
+    extends
+        $FunctionalProvider<
+          MoreToolsSelectorState,
+          MoreToolsSelectorState,
+          MoreToolsSelectorState
+        >
+    with $Provider<MoreToolsSelectorState> {
+  MoreToolsSelectorStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'moreToolsSelectorStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$moreToolsSelectorStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<MoreToolsSelectorState> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  MoreToolsSelectorState create(Ref ref) {
+    return moreToolsSelectorState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MoreToolsSelectorState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MoreToolsSelectorState>(value),
+    );
+  }
+}
+
+String _$moreToolsSelectorStateHash() =>
+    r'6329d92652135e2af009dddeac590b4369d2fa04';
+
+@ProviderFor(overlayTopOffset)
+final overlayTopOffsetProvider = OverlayTopOffsetProvider._();
+
+final class OverlayTopOffsetProvider
+    extends $FunctionalProvider<double, double, double>
+    with $Provider<double> {
+  OverlayTopOffsetProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'overlayTopOffsetProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$overlayTopOffsetHash();
+
+  @$internal
+  @override
+  $ProviderElement<double> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  double create(Ref ref) {
+    return overlayTopOffset(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(double value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<double>(value),
+    );
+  }
+}
+
+String _$overlayTopOffsetHash() => r'5be7e2a65878514bc6ecd6531efc503cb10a9387';
+
+@ProviderFor(currentGroupsState)
+final currentGroupsStateProvider = CurrentGroupsStateProvider._();
+
+final class CurrentGroupsStateProvider
+    extends $FunctionalProvider<GroupsState, GroupsState, GroupsState>
+    with $Provider<GroupsState> {
+  CurrentGroupsStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentGroupsStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentGroupsStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<GroupsState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GroupsState create(Ref ref) {
+    return currentGroupsState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GroupsState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GroupsState>(value),
+    );
+  }
+}
+
+String _$currentGroupsStateHash() =>
+    r'962420b058ff8bb463eefa6605c77370860ecb31';
+
+@ProviderFor(delaysAtLastTestBatch)
+final delaysAtLastTestBatchProvider = DelaysAtLastTestBatchProvider._();
+
+final class DelaysAtLastTestBatchProvider
+    extends $FunctionalProvider<DelayMap, DelayMap, DelayMap>
+    with $Provider<DelayMap> {
+  DelaysAtLastTestBatchProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'delaysAtLastTestBatchProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$delaysAtLastTestBatchHash();
+
+  @$internal
+  @override
+  $ProviderElement<DelayMap> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DelayMap create(Ref ref) {
+    return delaysAtLastTestBatch(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DelayMap value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DelayMap>(value),
+    );
+  }
+}
+
+String _$delaysAtLastTestBatchHash() =>
+    r'bb44aa9acbb67ac9f446a32f3d18fc26a13043eb';
+
+@ProviderFor(proxyGroupCounts)
+final proxyGroupCountsProvider = ProxyGroupCountsFamily._();
+
+final class ProxyGroupCountsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, int>>,
+          Map<String, int>,
+          FutureOr<Map<String, int>>
+        >
+    with $FutureModifier<Map<String, int>>, $FutureProvider<Map<String, int>> {
+  ProxyGroupCountsProvider._({
+    required ProxyGroupCountsFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'proxyGroupCountsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$proxyGroupCountsHash();
+
+  @override
+  String toString() {
+    return r'proxyGroupCountsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Map<String, int>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Map<String, int>> create(Ref ref) {
+    final argument = this.argument as String;
+    return proxyGroupCounts(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProxyGroupCountsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$proxyGroupCountsHash() => r'f7ef62eae2bc14872d9f28cb208545b1c2abade7';
+
+final class ProxyGroupCountsFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Map<String, int>>, String> {
+  ProxyGroupCountsFamily._()
+    : super(
+        retry: null,
+        name: r'proxyGroupCountsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ProxyGroupCountsProvider call(String query) =>
+      ProxyGroupCountsProvider._(argument: query, from: this);
+
+  @override
+  String toString() => r'proxyGroupCountsProvider';
+}
+
+@ProviderFor(filterGroupsState)
+final filterGroupsStateProvider = FilterGroupsStateFamily._();
+
+final class FilterGroupsStateProvider
+    extends $FunctionalProvider<GroupsState, GroupsState, GroupsState>
+    with $Provider<GroupsState> {
+  FilterGroupsStateProvider._({
+    required FilterGroupsStateFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'filterGroupsStateProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$filterGroupsStateHash();
+
+  @override
+  String toString() {
+    return r'filterGroupsStateProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<GroupsState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GroupsState create(Ref ref) {
+    final argument = this.argument as String;
+    return filterGroupsState(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GroupsState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GroupsState>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FilterGroupsStateProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$filterGroupsStateHash() => r'c43115c48a34af8dcd6905f975d602106b418191';
+
+final class FilterGroupsStateFamily extends $Family
+    with $FunctionalFamilyOverride<GroupsState, String> {
+  FilterGroupsStateFamily._()
+    : super(
+        retry: null,
+        name: r'filterGroupsStateProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  FilterGroupsStateProvider call(String query) =>
+      FilterGroupsStateProvider._(argument: query, from: this);
+
+  @override
+  String toString() => r'filterGroupsStateProvider';
+}
+
+@ProviderFor(proxiesListState)
+final proxiesListStateProvider = ProxiesListStateProvider._();
+
+final class ProxiesListStateProvider
+    extends
+        $FunctionalProvider<
+          ProxiesListState,
+          ProxiesListState,
+          ProxiesListState
+        >
+    with $Provider<ProxiesListState> {
+  ProxiesListStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'proxiesListStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$proxiesListStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProxiesListState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProxiesListState create(Ref ref) {
+    return proxiesListState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProxiesListState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProxiesListState>(value),
+    );
+  }
+}
+
+String _$proxiesListStateHash() => r'212d21f79e9c149076e13d1d19ccd83ccb4b471b';
+
+@ProviderFor(proxiesTabState)
+final proxiesTabStateProvider = ProxiesTabStateProvider._();
+
+final class ProxiesTabStateProvider
+    extends
+        $FunctionalProvider<ProxiesTabState, ProxiesTabState, ProxiesTabState>
+    with $Provider<ProxiesTabState> {
+  ProxiesTabStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'proxiesTabStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$proxiesTabStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProxiesTabState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProxiesTabState create(Ref ref) {
+    return proxiesTabState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProxiesTabState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProxiesTabState>(value),
+    );
+  }
+}
+
+String _$proxiesTabStateHash() => r'e4eccd77c3848489c8ec620f4e515cec7cdd5a31';
+
+@ProviderFor(proxiesTabControllerState)
+final proxiesTabControllerStateProvider = ProxiesTabControllerStateProvider._();
+
+final class ProxiesTabControllerStateProvider
+    extends
+        $FunctionalProvider<
+          VM2<List<String>, String?>,
+          VM2<List<String>, String?>,
+          VM2<List<String>, String?>
+        >
+    with $Provider<VM2<List<String>, String?>> {
+  ProxiesTabControllerStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'proxiesTabControllerStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$proxiesTabControllerStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<VM2<List<String>, String?>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  VM2<List<String>, String?> create(Ref ref) {
+    return proxiesTabControllerState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VM2<List<String>, String?> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VM2<List<String>, String?>>(value),
+    );
+  }
+}
+
+String _$proxiesTabControllerStateHash() =>
+    r'd9c4eb6771262b2a989b053ce6ad94c307cf43fb';
+
+@ProviderFor(currentGroupDelayTesting)
+final currentGroupDelayTestingProvider = CurrentGroupDelayTestingProvider._();
+
+final class CurrentGroupDelayTestingProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  CurrentGroupDelayTestingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentGroupDelayTestingProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentGroupDelayTestingHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return currentGroupDelayTesting(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$currentGroupDelayTestingHash() =>
+    r'31201ee9149241f7c4c0758a1c349c3f80e5b678';
+
+@ProviderFor(realTestUrl)
+final realTestUrlProvider = RealTestUrlFamily._();
+
+final class RealTestUrlProvider
+    extends $FunctionalProvider<String, String, String>
+    with $Provider<String> {
+  RealTestUrlProvider._({
+    required RealTestUrlFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'realTestUrlProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$realTestUrlHash();
+
+  @override
+  String toString() {
+    return r'realTestUrlProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<String> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  String create(Ref ref) {
+    final argument = this.argument as String?;
+    return realTestUrl(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is RealTestUrlProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$realTestUrlHash() => r'f745d2a962d030f87ca72cfd2f03d5649cd2aa98';
+
+final class RealTestUrlFamily extends $Family
+    with $FunctionalFamilyOverride<String, String?> {
+  RealTestUrlFamily._()
+    : super(
+        retry: null,
+        name: r'realTestUrlProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  RealTestUrlProvider call([String? testUrl]) =>
+      RealTestUrlProvider._(argument: testUrl, from: this);
+
+  @override
+  String toString() => r'realTestUrlProvider';
+}
+
+@ProviderFor(getDelay)
+final getDelayProvider = GetDelayFamily._();
+
+final class GetDelayProvider extends $FunctionalProvider<int?, int?, int?>
+    with $Provider<int?> {
+  GetDelayProvider._({
+    required GetDelayFamily super.from,
+    required ({String proxyName, String? testUrl}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'getDelayProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$getDelayHash();
+
+  @override
+  String toString() {
+    return r'getDelayProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<int?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  int? create(Ref ref) {
+    final argument = this.argument as ({String proxyName, String? testUrl});
+    return getDelay(
+      ref,
+      proxyName: argument.proxyName,
+      testUrl: argument.testUrl,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetDelayProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$getDelayHash() => r'8a5dbd5e7ed66939474462e8bd29589461e53763';
+
+final class GetDelayFamily extends $Family
+    with
+        $FunctionalFamilyOverride<int?, ({String proxyName, String? testUrl})> {
+  GetDelayFamily._()
+    : super(
+        retry: null,
+        name: r'getDelayProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  GetDelayProvider call({required String proxyName, String? testUrl}) =>
+      GetDelayProvider._(
+        argument: (proxyName: proxyName, testUrl: testUrl),
+        from: this,
+      );
+
+  @override
+  String toString() => r'getDelayProvider';
+}
+
+@ProviderFor(getDelayMeasuredAt)
+final getDelayMeasuredAtProvider = GetDelayMeasuredAtFamily._();
+
+final class GetDelayMeasuredAtProvider
+    extends $FunctionalProvider<DateTime?, DateTime?, DateTime?>
+    with $Provider<DateTime?> {
+  GetDelayMeasuredAtProvider._({
+    required GetDelayMeasuredAtFamily super.from,
+    required ({String proxyName, String? testUrl}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'getDelayMeasuredAtProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$getDelayMeasuredAtHash();
+
+  @override
+  String toString() {
+    return r'getDelayMeasuredAtProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<DateTime?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DateTime? create(Ref ref) {
+    final argument = this.argument as ({String proxyName, String? testUrl});
+    return getDelayMeasuredAt(
+      ref,
+      proxyName: argument.proxyName,
+      testUrl: argument.testUrl,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DateTime? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DateTime?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetDelayMeasuredAtProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$getDelayMeasuredAtHash() =>
+    r'b22940db7eb78f0fefb8446369e7e660f58896ad';
+
+final class GetDelayMeasuredAtFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          DateTime?,
+          ({String proxyName, String? testUrl})
+        > {
+  GetDelayMeasuredAtFamily._()
+    : super(
+        retry: null,
+        name: r'getDelayMeasuredAtProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  GetDelayMeasuredAtProvider call({
+    required String proxyName,
+    String? testUrl,
+  }) => GetDelayMeasuredAtProvider._(
+    argument: (proxyName: proxyName, testUrl: testUrl),
+    from: this,
+  );
+
+  @override
+  String toString() => r'getDelayMeasuredAtProvider';
+}
+
+@ProviderFor(getDelayTestPhase)
+final getDelayTestPhaseProvider = GetDelayTestPhaseFamily._();
+
+final class GetDelayTestPhaseProvider
+    extends
+        $FunctionalProvider<DelayTestPhase?, DelayTestPhase?, DelayTestPhase?>
+    with $Provider<DelayTestPhase?> {
+  GetDelayTestPhaseProvider._({
+    required GetDelayTestPhaseFamily super.from,
+    required ({String proxyName, String? testUrl}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'getDelayTestPhaseProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$getDelayTestPhaseHash();
+
+  @override
+  String toString() {
+    return r'getDelayTestPhaseProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<DelayTestPhase?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  DelayTestPhase? create(Ref ref) {
+    final argument = this.argument as ({String proxyName, String? testUrl});
+    return getDelayTestPhase(
+      ref,
+      proxyName: argument.proxyName,
+      testUrl: argument.testUrl,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DelayTestPhase? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DelayTestPhase?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetDelayTestPhaseProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$getDelayTestPhaseHash() => r'cbb1b392128a1fbcacde09190fdbecea98c47e42';
+
+final class GetDelayTestPhaseFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          DelayTestPhase?,
+          ({String proxyName, String? testUrl})
+        > {
+  GetDelayTestPhaseFamily._()
+    : super(
+        retry: null,
+        name: r'getDelayTestPhaseProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  GetDelayTestPhaseProvider call({
+    required String proxyName,
+    String? testUrl,
+  }) => GetDelayTestPhaseProvider._(
+    argument: (proxyName: proxyName, testUrl: testUrl),
+    from: this,
+  );
+
+  @override
+  String toString() => r'getDelayTestPhaseProvider';
+}
+
+@ProviderFor(selectedMap)
+final selectedMapProvider = SelectedMapProvider._();
+
+final class SelectedMapProvider
+    extends
+        $FunctionalProvider<
+          Map<String, String>,
+          Map<String, String>,
+          Map<String, String>
+        >
+    with $Provider<Map<String, String>> {
+  SelectedMapProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedMapProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedMapHash();
+
+  @$internal
+  @override
+  $ProviderElement<Map<String, String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Map<String, String> create(Ref ref) {
+    return selectedMap(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, String>>(value),
+    );
+  }
+}
+
+String _$selectedMapHash() => r'd4438d8d87d0c7ec7d9c5d02f577cdba6ba2a785';
+
+@ProviderFor(unfoldSet)
+final unfoldSetProvider = UnfoldSetProvider._();
+
+final class UnfoldSetProvider
+    extends $FunctionalProvider<Set<String>, Set<String>, Set<String>>
+    with $Provider<Set<String>> {
+  UnfoldSetProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'unfoldSetProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$unfoldSetHash();
+
+  @$internal
+  @override
+  $ProviderElement<Set<String>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Set<String> create(Ref ref) {
+    return unfoldSet(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Set<String>>(value),
+    );
+  }
+}
+
+String _$unfoldSetHash() => r'59a5b417611533069462ddf31eca080ab2f74ac9';
+
+@ProviderFor(realSelectedProxyState)
+final realSelectedProxyStateProvider = RealSelectedProxyStateFamily._();
+
+final class RealSelectedProxyStateProvider
+    extends
+        $FunctionalProvider<
+          SelectedProxyState,
+          SelectedProxyState,
+          SelectedProxyState
+        >
+    with $Provider<SelectedProxyState> {
+  RealSelectedProxyStateProvider._({
+    required RealSelectedProxyStateFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'realSelectedProxyStateProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$realSelectedProxyStateHash();
+
+  @override
+  String toString() {
+    return r'realSelectedProxyStateProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<SelectedProxyState> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SelectedProxyState create(Ref ref) {
+    final argument = this.argument as String;
+    return realSelectedProxyState(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SelectedProxyState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SelectedProxyState>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is RealSelectedProxyStateProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$realSelectedProxyStateHash() =>
+    r'3a07ffb76ab0bc5ea05e6b63e94674a12a43d27a';
+
+final class RealSelectedProxyStateFamily extends $Family
+    with $FunctionalFamilyOverride<SelectedProxyState, String> {
+  RealSelectedProxyStateFamily._()
+    : super(
+        retry: null,
+        name: r'realSelectedProxyStateProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  RealSelectedProxyStateProvider call(String proxyName) =>
+      RealSelectedProxyStateProvider._(argument: proxyName, from: this);
+
+  @override
+  String toString() => r'realSelectedProxyStateProvider';
+}
+
+@ProviderFor(getProxyName)
+final getProxyNameProvider = GetProxyNameFamily._();
+
+final class GetProxyNameProvider
+    extends $FunctionalProvider<String?, String?, String?>
+    with $Provider<String?> {
+  GetProxyNameProvider._({
+    required GetProxyNameFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'getProxyNameProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$getProxyNameHash();
+
+  @override
+  String toString() {
+    return r'getProxyNameProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  String? create(Ref ref) {
+    final argument = this.argument as String;
+    return getProxyName(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetProxyNameProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$getProxyNameHash() => r'204a477ea18c8e1eeef55b3efd3d47e45b0d2350';
+
+final class GetProxyNameFamily extends $Family
+    with $FunctionalFamilyOverride<String?, String> {
+  GetProxyNameFamily._()
+    : super(
+        retry: null,
+        name: r'getProxyNameProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  GetProxyNameProvider call(String groupName) =>
+      GetProxyNameProvider._(argument: groupName, from: this);
+
+  @override
+  String toString() => r'getProxyNameProvider';
+}
+
+@ProviderFor(getSelectedProxyName)
+final getSelectedProxyNameProvider = GetSelectedProxyNameFamily._();
+
+final class GetSelectedProxyNameProvider
+    extends $FunctionalProvider<String?, String?, String?>
+    with $Provider<String?> {
+  GetSelectedProxyNameProvider._({
+    required GetSelectedProxyNameFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'getSelectedProxyNameProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$getSelectedProxyNameHash();
+
+  @override
+  String toString() {
+    return r'getSelectedProxyNameProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  String? create(Ref ref) {
+    final argument = this.argument as String;
+    return getSelectedProxyName(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GetSelectedProxyNameProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$getSelectedProxyNameHash() =>
+    r'83f4ee3a0797653d0eba4608c6b80dbafcfe09b5';
+
+final class GetSelectedProxyNameFamily extends $Family
+    with $FunctionalFamilyOverride<String?, String> {
+  GetSelectedProxyNameFamily._()
+    : super(
+        retry: null,
+        name: r'getSelectedProxyNameProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  GetSelectedProxyNameProvider call(String groupName) =>
+      GetSelectedProxyNameProvider._(argument: groupName, from: this);
+
+  @override
+  String toString() => r'getSelectedProxyNameProvider';
+}
+
+@ProviderFor(needUpdateGroups)
+final needUpdateGroupsProvider = NeedUpdateGroupsProvider._();
+
+final class NeedUpdateGroupsProvider
+    extends
+        $FunctionalProvider<
+          VM3<bool, int, ProxiesSortType>,
+          VM3<bool, int, ProxiesSortType>,
+          VM3<bool, int, ProxiesSortType>
+        >
+    with $Provider<VM3<bool, int, ProxiesSortType>> {
+  NeedUpdateGroupsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'needUpdateGroupsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$needUpdateGroupsHash();
+
+  @$internal
+  @override
+  $ProviderElement<VM3<bool, int, ProxiesSortType>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  VM3<bool, int, ProxiesSortType> create(Ref ref) {
+    return needUpdateGroups(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VM3<bool, int, ProxiesSortType> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VM3<bool, int, ProxiesSortType>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$needUpdateGroupsHash() => r'7913b7b74caf9f2c72fd32729d52b7c6ac9258e8';
+
+/// Lives with the list, as a verdict can rest on a file such as an ssh key.
+
+@ProviderFor(customProxyVerdicts)
+final customProxyVerdictsProvider = CustomProxyVerdictsProvider._();
+
+/// Lives with the list, as a verdict can rest on a file such as an ssh key.
+
+final class CustomProxyVerdictsProvider
+    extends
+        $FunctionalProvider<
+          Map<Map<String, Object?>, String>,
+          Map<Map<String, Object?>, String>,
+          Map<Map<String, Object?>, String>
+        >
+    with $Provider<Map<Map<String, Object?>, String>> {
+  /// Lives with the list, as a verdict can rest on a file such as an ssh key.
+  CustomProxyVerdictsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'customProxyVerdictsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$customProxyVerdictsHash();
+
+  @$internal
+  @override
+  $ProviderElement<Map<Map<String, Object?>, String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Map<Map<String, Object?>, String> create(Ref ref) {
+    return customProxyVerdicts(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<Map<String, Object?>, String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<Map<String, Object?>, String>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$customProxyVerdictsHash() =>
+    r'e53df01a069f194515d9b34b2b9a4e9d8e71aef4';
+
+/// What the Core says is wrong with a shared node, by node id.
+
+@ProviderFor(customProxyCoreErrors)
+final customProxyCoreErrorsProvider = CustomProxyCoreErrorsProvider._();
+
+/// What the Core says is wrong with a shared node, by node id.
+
+final class CustomProxyCoreErrorsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<int, String>>,
+          Map<int, String>,
+          FutureOr<Map<int, String>>
+        >
+    with $FutureModifier<Map<int, String>>, $FutureProvider<Map<int, String>> {
+  /// What the Core says is wrong with a shared node, by node id.
+  CustomProxyCoreErrorsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: _noRetry,
+        name: r'customProxyCoreErrorsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$customProxyCoreErrorsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<Map<int, String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Map<int, String>> create(Ref ref) {
+    return customProxyCoreErrors(ref);
+  }
+}
+
+String _$customProxyCoreErrorsHash() =>
+    r'5a144eec9f294b26782a19d9ea6634addfa052f7';
+
+@ProviderFor(profilesState)
+final profilesStateProvider = ProfilesStateProvider._();
+
+final class ProfilesStateProvider
+    extends $FunctionalProvider<ProfilesState, ProfilesState, ProfilesState>
+    with $Provider<ProfilesState> {
+  ProfilesStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'profilesStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$profilesStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProfilesState> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProfilesState create(Ref ref) {
+    return profilesState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProfilesState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProfilesState>(value),
+    );
+  }
+}
+
+String _$profilesStateHash() => r'6bcfd61de84c930251ade72b9fe804c4f5ac2be9';
+
+@ProviderFor(currentProfile)
+final currentProfileProvider = CurrentProfileProvider._();
+
+final class CurrentProfileProvider
+    extends $FunctionalProvider<Profile?, Profile?, Profile?>
+    with $Provider<Profile?> {
+  CurrentProfileProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentProfileProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentProfileHash();
+
+  @$internal
+  @override
+  $ProviderElement<Profile?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Profile? create(Ref ref) {
+    return currentProfile(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Profile? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Profile?>(value),
+    );
+  }
+}
+
+String _$currentProfileHash() => r'55f3cb9570a0aa6b9e0b83a36693b69d52e753ab';
+
+@ProviderFor(currentSetupState)
+final currentSetupStateProvider = CurrentSetupStateProvider._();
+
+final class CurrentSetupStateProvider
+    extends $FunctionalProvider<SetupState?, SetupState?, SetupState?>
+    with $Provider<SetupState?> {
+  CurrentSetupStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentSetupStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentSetupStateHash();
+
+  @$internal
+  @override
+  $ProviderElement<SetupState?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SetupState? create(Ref ref) {
+    return currentSetupState(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SetupState? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SetupState?>(value),
+    );
+  }
+}
+
+String _$currentSetupStateHash() => r'd687b0563ea8cc8eb1ca345fdfeee3411d67ad47';
+
+@ProviderFor(profile)
+final profileProvider = ProfileFamily._();
+
+final class ProfileProvider
+    extends $FunctionalProvider<Profile?, Profile?, Profile?>
+    with $Provider<Profile?> {
+  ProfileProvider._({
+    required ProfileFamily super.from,
+    required int? super.argument,
+  }) : super(
+         retry: null,
+         name: r'profileProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileHash();
+
+  @override
+  String toString() {
+    return r'profileProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<Profile?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Profile? create(Ref ref) {
+    final argument = this.argument as int?;
+    return profile(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Profile? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Profile?>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProfileProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$profileHash() => r'8de429dc0844c6b6155032ad3c9546231e08cead';
+
+final class ProfileFamily extends $Family
+    with $FunctionalFamilyOverride<Profile?, int?> {
+  ProfileFamily._()
+    : super(
+        retry: null,
+        name: r'profileProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ProfileProvider call(int? profileId) =>
+      ProfileProvider._(argument: profileId, from: this);
+
+  @override
+  String toString() => r'profileProvider';
+}
+
+@ProviderFor(overwriteType)
+final overwriteTypeProvider = OverwriteTypeFamily._();
+
+final class OverwriteTypeProvider
+    extends $FunctionalProvider<OverwriteType, OverwriteType, OverwriteType>
+    with $Provider<OverwriteType> {
+  OverwriteTypeProvider._({
+    required OverwriteTypeFamily super.from,
+    required int? super.argument,
+  }) : super(
+         retry: null,
+         name: r'overwriteTypeProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$overwriteTypeHash();
+
+  @override
+  String toString() {
+    return r'overwriteTypeProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<OverwriteType> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  OverwriteType create(Ref ref) {
+    final argument = this.argument as int?;
+    return overwriteType(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(OverwriteType value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<OverwriteType>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is OverwriteTypeProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$overwriteTypeHash() => r'03a8ab8ddec76935da5fa231270b65baa70fd727';
+
+final class OverwriteTypeFamily extends $Family
+    with $FunctionalFamilyOverride<OverwriteType, int?> {
+  OverwriteTypeFamily._()
+    : super(
+        retry: null,
+        name: r'overwriteTypeProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  OverwriteTypeProvider call(int? profileId) =>
+      OverwriteTypeProvider._(argument: profileId, from: this);
+
+  @override
+  String toString() => r'overwriteTypeProvider';
+}
+
+@ProviderFor(script)
+final scriptProvider = ScriptFamily._();
+
+final class ScriptProvider
+    extends $FunctionalProvider<AsyncValue<Script?>, Script?, FutureOr<Script?>>
+    with $FutureModifier<Script?>, $FutureProvider<Script?> {
+  ScriptProvider._({
+    required ScriptFamily super.from,
+    required int? super.argument,
+  }) : super(
+         retry: null,
+         name: r'scriptProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$scriptHash();
+
+  @override
+  String toString() {
+    return r'scriptProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Script?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Script?> create(Ref ref) {
+    final argument = this.argument as int?;
+    return script(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ScriptProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$scriptHash() => r'b12a6dbe34e08cb1232afafa8b0b0f5363d28bc0';
+
+final class ScriptFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Script?>, int?> {
+  ScriptFamily._()
+    : super(
+        retry: null,
+        name: r'scriptProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ScriptProvider call(int? scriptId) =>
+      ScriptProvider._(argument: scriptId, from: this);
+
+  @override
+  String toString() => r'scriptProvider';
+}
+
+@ProviderFor(setupState)
+final setupStateProvider = SetupStateFamily._();
+
+final class SetupStateProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<SetupState>,
+          SetupState,
+          FutureOr<SetupState>
+        >
+    with $FutureModifier<SetupState>, $FutureProvider<SetupState> {
+  SetupStateProvider._({
+    required SetupStateFamily super.from,
+    required int? super.argument,
+  }) : super(
+         retry: null,
+         name: r'setupStateProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$setupStateHash();
+
+  @override
+  String toString() {
+    return r'setupStateProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<SetupState> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<SetupState> create(Ref ref) {
+    final argument = this.argument as int?;
+    return setupState(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SetupStateProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$setupStateHash() => r'01701ba570ea99b8e7e9ab665ebed1feef395be9';
+
+final class SetupStateFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {
+  SetupStateFamily._()
+    : super(
+        retry: null,
+        name: r'setupStateProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  SetupStateProvider call(int? profileId) =>
+      SetupStateProvider._(argument: profileId, from: this);
+
+  @override
+  String toString() => r'setupStateProvider';
+}
+
+@ProviderFor(genColorScheme)
+final genColorSchemeProvider = GenColorSchemeFamily._();
+
+final class GenColorSchemeProvider
+    extends $FunctionalProvider<ColorScheme, ColorScheme, ColorScheme>
+    with $Provider<ColorScheme> {
+  GenColorSchemeProvider._({
+    required GenColorSchemeFamily super.from,
+    required (Brightness, {Color? color, bool ignoreConfig, bool? pureBlack})
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'genColorSchemeProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$genColorSchemeHash();
+
+  @override
+  String toString() {
+    return r'genColorSchemeProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<ColorScheme> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ColorScheme create(Ref ref) {
+    final argument =
+        this.argument
+            as (Brightness, {Color? color, bool ignoreConfig, bool? pureBlack});
+    return genColorScheme(
+      ref,
+      argument.$1,
+      color: argument.color,
+      ignoreConfig: argument.ignoreConfig,
+      pureBlack: argument.pureBlack,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ColorScheme value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ColorScheme>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is GenColorSchemeProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$genColorSchemeHash() => r'15cdaef31ff187f3942250587ce2932878697725';
+
+final class GenColorSchemeFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          ColorScheme,
+          (Brightness, {Color? color, bool ignoreConfig, bool? pureBlack})
+        > {
+  GenColorSchemeFamily._()
+    : super(
+        retry: null,
+        name: r'genColorSchemeProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  GenColorSchemeProvider call(
+    Brightness brightness, {
+    Color? color,
+    bool ignoreConfig = false,
+    bool? pureBlack,
+  }) => GenColorSchemeProvider._(
+    argument: (
+      brightness,
+      color: color,
+      ignoreConfig: ignoreConfig,
+      pureBlack: pureBlack,
+    ),
+    from: this,
+  );
+
+  @override
+  String toString() => r'genColorSchemeProvider';
+}
+
+@ProviderFor(currentBrightness)
+final currentBrightnessProvider = CurrentBrightnessProvider._();
+
+final class CurrentBrightnessProvider
+    extends $FunctionalProvider<Brightness, Brightness, Brightness>
+    with $Provider<Brightness> {
+  CurrentBrightnessProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentBrightnessProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentBrightnessHash();
+
+  @$internal
+  @override
+  $ProviderElement<Brightness> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Brightness create(Ref ref) {
+    return currentBrightness(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Brightness value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Brightness>(value),
+    );
+  }
+}
+
+String _$currentBrightnessHash() => r'ab56c47af4fcae773c8f9f81c91800c1e1890b70';
+
+@ProviderFor(windowBlurRequest)
+final windowBlurRequestProvider = WindowBlurRequestProvider._();
+
+final class WindowBlurRequestProvider
+    extends
+        $FunctionalProvider<
+          WindowBlurRequest,
+          WindowBlurRequest,
+          WindowBlurRequest
+        >
+    with $Provider<WindowBlurRequest> {
+  WindowBlurRequestProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'windowBlurRequestProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$windowBlurRequestHash();
+
+  @$internal
+  @override
+  $ProviderElement<WindowBlurRequest> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  WindowBlurRequest create(Ref ref) {
+    return windowBlurRequest(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(WindowBlurRequest value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<WindowBlurRequest>(value),
+    );
+  }
+}
+
+String _$windowBlurRequestHash() => r'8d200c430eb194b9f60b97d401ea2c444c1ec253';

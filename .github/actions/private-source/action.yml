@@ -1,0 +1,45 @@
+name: Prepare private build sources
+description: Restore authorized build inputs
+inputs:
+  source-repository:
+    description: The private source repository
+    required: true
+  source-key:
+    description: Read-only key for the private source repository
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Protect Windows checkout credentials
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $owner = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+        $acl = [System.Security.AccessControl.DirectorySecurity]::new()
+        $acl.SetOwner($owner)
+        $acl.SetAccessRuleProtection($true, $false)
+        foreach ($sid in @($owner.Value, 'S-1-5-18', 'S-1-5-32-544')) {
+          $identity = [System.Security.Principal.SecurityIdentifier]::new($sid)
+          $rule = [System.Security.AccessControl.FileSystemAccessRule]::new(
+            $identity, 'FullControl', 'ContainerInherit,ObjectInherit', 'None', 'Allow')
+          $acl.AddAccessRule($rule)
+        }
+        Set-Acl -LiteralPath $env:RUNNER_TEMP -AclObject $acl
+    - name: Require the source repository
+      shell: bash
+      env:
+        SOURCE_REPOSITORY: ${{ inputs.source-repository }}
+      run: |
+        if [ -z "$SOURCE_REPOSITORY" ]; then
+          echo '::error::PRIVATE_SOURCE_REPOSITORY is not set'
+          exit 1
+        fi
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        repository: ${{ inputs.source-repository }}
+        ref: f3368b825b62486b70d1f938e1b6379a7aa1844f
+        path: .private-build
+        ssh-key: ${{ inputs.source-key }}
+        persist-credentials: false
+    - shell: bash
+      run: python .private-build/prepare.py .

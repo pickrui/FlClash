@@ -1,0 +1,15 @@
+[versions]
+minSdk = "24"
+targetSdk = "37"
+compileSdk = "37"
+ndkVersion = "28.2.13676358"
+coreKtx = "1.19.1"
+coreSplashscreen = "1.2.0"
+gson = "2.15.0"
+smaliDexlib2 = "3.0.10"
+
+[libraries]
+androidx-core = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+smali-dexlib2 = { module = "com.android.tools.smali:smali-dexlib2", version.ref = "smaliDexlib2" }

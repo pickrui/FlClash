@@ -1,0 +1,879 @@
+name: build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  IS_STABLE: ${{ !contains(github.ref, '-') }}
+  FLUTTER_VERSION: '3.47.9'
+  GO_VERSION: '1.27.4'
+  MSYS_NO_PATHCONV: 1
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    name: Generate Version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      full_version: ${{ steps.version.outputs.full_version }}
+      flutter_version: ${{ env.FLUTTER_VERSION }}
+      version_number: ${{ steps.version.outputs.version_number }}
+      build_number: ${{ steps.version.outputs.build_number }}
+      build_tool_version: ${{ steps.build_tool.outputs.version }}
+      build_node: ${{ steps.build_tool.outputs.node }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - name: Set up build dependency runtime
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 'lts/*'
+
+      - name: Resolve release dependency version
+        id: build_tool
+        env:
+          BUILD_TOOL_VERSION_OVERRIDE: ${{ vars.BUILD_TOOL_VERSION_OVERRIDE }}
+        run: bash tool/resolve_build_tool_version.sh
+
+      - name: Generate Version
+        id: version
+        env:
+          TZ: Asia/Shanghai
+        run: |
+          set -euo pipefail
+          VERSION_NUMBER=$(grep -E "^version:" pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9.]+).*/\1/')
+          # One actual build date for every platform and architecture in this run.
+          # The checked-in suffix is a snapshot, never a minimum build number.
+          BUILD_NUMBER=$(date '+%Y%m%d%H')
+
+          FULL_VERSION="${VERSION_NUMBER}+${BUILD_NUMBER}"
+          
+          {
+            echo "version_number=$VERSION_NUMBER"
+            echo "build_number=$BUILD_NUMBER"
+            echo "full_version=$FULL_VERSION"
+          } >> "$GITHUB_OUTPUT"
+          
+          echo "Generated version: $FULL_VERSION"
+          echo "  Version number: $VERSION_NUMBER"
+          echo "  Build number: $BUILD_NUMBER"
+
+  test:
+    name: Dart, Rust analyze and tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - name: Prepare isolated installer tests
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fp-compiler
+
+      - name: Validate release checks
+        run: python3 -m unittest discover -s test/ci -v
+
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: false
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check Dart formatting
+        run: python3 tool/check_dart_format.py
+
+      - name: Analyze
+        run: dart analyze
+
+      - name: Analyze bundled plugins
+        run: bash tool/check_plugins.sh
+
+      - name: Check build notices
+        run: bash tool/check_build_notices.sh
+
+      - name: Setup Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+
+      - name: Build routing test tools
+        working-directory: core
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          go build -tags "$GO_TAGS" -trimpath -o "$RUNNER_TEMP/FlClashCore" ./cmd/core
+          go test -tags "$GO_TAGS" -c -o "$RUNNER_TEMP/flclash-routing-checker" .
+
+      - name: Cache Rust
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            plugins/rust_api/rust/target
+            services/helper/target
+          key: ${{ runner.os }}-${{ runner.arch }}-test-cargo-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'plugins/rust_api/rust/rust-toolchain.toml', 'services/helper/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-test-cargo-
+
+      - name: Validate Rust components
+        run: |
+          cargo fmt --manifest-path services/helper/Cargo.toml -- --check
+          cargo test --manifest-path services/helper/Cargo.toml
+          cargo fmt --manifest-path plugins/rust_api/rust/Cargo.toml -- --check
+          cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
+
+      - name: Build native script test library
+        run: cargo build --locked --manifest-path plugins/rust_api/rust/Cargo.toml
+
+      - name: Skip hooks for explicitly built unit-test fixtures
+        run: dart tool/set_native_build_assets.dart false
+
+      - name: Validate build hooks
+        working-directory: plugins/setup/setup_hooks
+        run: dart test
+
+      - name: Run tests
+        env:
+          FLCLASH_TEST_SCRIPT_LIB: ${{ github.workspace }}/plugins/rust_api/rust/target/debug/librust_api.so
+          FLCLASH_TEST_CORE: ${{ runner.temp }}/FlClashCore
+          FLCLASH_TEST_ROUTING_CHECKER: ${{ runner.temp }}/flclash-routing-checker
+        run: dart tool/test.dart test plugins/proxy/test/proxy_test.dart plugins/wifi_ssid/test plugins/tray/test plugins/window/test -- --coverage --reporter expanded
+
+      - name: Coverage floor
+        run: dart tool/check_coverage.dart
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: flutter-coverage
+          path: coverage/lcov.info
+          if-no-files-found: ignore
+
+      - name: Verify isolated desktop safe mode
+        run: flutter test --dart-define=SAFE_MODE=true test/safe_mode
+
+  go-test:
+    name: Go core tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - name: Load shared Go build tags
+        run: grep '^GO_TAGS=' tool/go_build_tags.env >> "$GITHUB_ENV"
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+      - name: Validate Go core
+        working-directory: core
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          go vet -tags "$GO_TAGS" ./...
+          go test -tags "$GO_TAGS" ./...
+          cd Clash.Meta
+          go test -tags "$GO_TAGS" ./component/mmdb ./component/updater ./component/process ./tunnel
+      - name: Check native callback and file ownership races
+        working-directory: core
+        run: |
+          go test -race tun_callbacks.go tun_callbacks_test.go
+          go test -race -count=1 -tags "$GO_TAGS" -run '^(TestReclaim|TestUnprivilegedOwnershipRecovery|TestElevatedSpill)' .
+          go test -race -count=1 -tags "$GO_TAGS" github.com/metacubex/mihomo/adapter/inbound
+
+  android-core-test:
+    name: Android core
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1
+        id: ndk
+        with:
+          ndk-version: r28c
+      - name: Vet and bind the Android core with gomobile
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          bash tool/check_android_core.sh arm64
+
+  android-test:
+    name: Android unit tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+      - uses: nttld/setup-ndk@ed92fe6cadad69be94a966a7ee3271275e62f779 # v1
+        with:
+          ndk-version: r28c
+          link-to-sdk: true
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: false
+      - run: flutter pub get
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Cache Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-v2-${{ hashFiles('android/**/*.gradle*', 'android/gradle/libs.versions.toml', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-v2-
+      - name: Run Android unit tests
+        working-directory: android
+        run: |
+          set -euo pipefail
+          {
+            echo "flutter.sdk=$FLUTTER_ROOT"
+            echo "sdk.dir=$ANDROID_HOME"
+          } > local.properties
+          wrapper="$FLUTTER_ROOT/bin/cache/artifacts/gradle_wrapper"
+          test -d "$wrapper" || flutter precache --android
+          cp -R "$wrapper/." .
+          chmod +x gradlew
+          # No JVM unit test loads the Core, but :core compiles against the gomobile classes, so one ABI is bound.
+          ./gradlew :app:testDebugUnitTest :service:testDebugUnitTest :common:testDebugUnitTest \
+            -Ptarget-platform=android-arm64 \
+            -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug --no-daemon
+
+  windows-helper-test:
+    name: Windows helper test
+    needs: version
+    uses: ./.github/workflows/windows-tests.yaml
+    secrets:
+      PRIVATE_SOURCE_REPOSITORY: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+      PRIVATE_SOURCE_KEY: ${{ secrets.PRIVATE_SOURCE_KEY }}
+    with:
+      flutter-version: ${{ needs.version.outputs.flutter_version }}
+
+  build:
+    name: "Build ${{ matrix.name }}"
+    needs: [version]
+    env:
+      BUILD_TOOL_VERSION: ${{ needs.version.outputs.build_tool_version }}
+      BUILD_TOOL_DIRECTIVES: ${{ vars.BUILD_TOOL_DIRECTIVES }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: android
+            os: ubuntu-24.04
+            arch: arm64
+            name: "Android (arm64)"
+          - platform: android
+            os: ubuntu-24.04
+            arch: arm
+            name: "Android (arm)"
+          - platform: android
+            os: ubuntu-24.04
+            arch: amd64
+            name: "Android (x64)"
+          - platform: windows
+            os: Windows-2022
+            arch: amd64
+            name: "Windows (x64)"
+          - platform: windows
+            os: windows-11-arm
+            arch: arm64
+            name: "Windows (arm64)"
+            flutter-channel: master
+          - platform: macos
+            os: macos-15-intel
+            arch: amd64
+            name: "macOS (Intel x64)"
+          - platform: macos
+            os: macos-latest
+            arch: arm64
+            name: "macOS (Apple Silicon)"
+          - platform: linux
+            os: ubuntu-22.04
+            arch: amd64
+            name: "Linux (x64)"
+          - platform: linux
+            # amd64's glibc baseline: 24.04 builds do not start on Debian 12.
+            os: ubuntu-22.04-arm
+            arch: arm64
+            name: "Linux (arm64)"
+            flutter-channel: master
+
+    steps:
+      - name: Free disk space for Android builds
+        if: matrix.platform == 'android'
+        shell: bash
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - name: Setup rust
+        if: startsWith(matrix.os, 'windows-11-arm')
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://win.rustup.rs/aarch64" -OutFile rustup-init.exe
+          .\rustup-init.exe -y --default-toolchain stable
+          $cargoPath = "$env:USERPROFILE\.cargo\bin"
+          Add-Content $env:GITHUB_PATH $cargoPath
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          submodules: recursive
+
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - name: Setup Node for native protection
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: ${{ needs.version.outputs.build_node }}
+
+      - name: Setup Android Signing
+        if: startsWith(matrix.platform,'android')
+        run: |
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
+          {
+            echo "keyAlias=${{ secrets.KEY_ALIAS }}"
+            echo "storePassword=${{ secrets.STORE_PASSWORD }}"
+            echo "keyPassword=${{ secrets.KEY_PASSWORD }}"
+          } >> android/local.properties
+
+      - name: Setup Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            core/go.sum
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          # Stable publishes no Windows or Linux arm64 archive; master makes the action
+          # clone the SDK at the pinned tag and fetch the host's own Dart SDK.
+          channel: ${{ matrix.flutter-channel || 'stable' }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          # The repository cache is capped at 10 GB. Flutter SDK caches (1-2 GB each,
+          # about a minute saved) pushed out the Go build cache, which saves ~8 minutes.
+          cache: false
+
+      - name: Cache Gradle
+        if: matrix.platform == 'android'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-v2-${{ hashFiles('android/**/*.gradle*', 'android/gradle/libs.versions.toml', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-v2-
+
+      - name: Cache Cargo
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            plugins/rust_api/rust/target
+            services/helper/target
+            .dart_tool/hooks_runner/shared/rust_api/build/*/target
+          key: ${{ runner.os }}-${{ matrix.platform }}-${{ matrix.arch }}-cargo-v2-${{ env.FLUTTER_VERSION }}-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'services/helper/Cargo.lock', '**/rust-toolchain.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.platform }}-${{ matrix.arch }}-cargo-v2-${{ env.FLUTTER_VERSION }}-
+
+      - name: Setup Xcode
+        if: matrix.platform == 'macos'
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.3.app || sudo xcode-select -s /Applications/Xcode_26.2.app
+          xcodebuild -version
+
+      - name: Test macOS window startup
+        if: matrix.platform == 'macos'
+        run: python3 -m unittest discover -s test/ci -p 'test_macos_window_startup.py' -v
+
+      - name: Disable Impeller on Intel macOS
+        if: matrix.platform == 'macos' && matrix.arch == 'amd64'
+        run: plutil -replace FLTEnableImpeller -bool NO macos/Runner/Info.plist
+
+      - name: Cache npm
+        if: matrix.platform == 'macos'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('setup.dart') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Get Flutter Dependency
+        run: |
+          flutter --version
+          flutter pub get
+
+      - name: Setup macOS Signing
+        if: matrix.platform == 'macos'
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERT_PATH="$RUNNER_TEMP/devid_cert.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          # Decode the base64 Developer ID certificate (.p12)
+          printf '%s' "$MACOS_CERTIFICATE" | openssl enc -base64 -d -A > "$CERT_PATH"
+          # Create a dedicated temporary keychain and make it searchable
+          security create-keychain -p "$MACOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$MACOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$MACOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          # Import the Apple Developer ID intermediate CA so the chain is complete (best-effort)
+          curl -fsSL https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer -o "$RUNNER_TEMP/DeveloperIDG2CA.cer" && security import "$RUNNER_TEMP/DeveloperIDG2CA.cer" -k "$KEYCHAIN_PATH" || true
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >/dev/null
+          # Prepend the temp keychain to the search list (keep existing ones)
+          keychains=()
+          while IFS= read -r keychain; do
+            keychains+=("$keychain")
+          done < <(security list-keychains -d user | sed -E 's/^[[:space:]]*"//; s/"[[:space:]]*$//')
+          security list-keychains -d user -s "$KEYCHAIN_PATH" "${keychains[@]}"
+          rm -f "$CERT_PATH"
+          echo "Available Developer ID signing identities:"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+      - name: Test macOS Helper
+        if: matrix.platform == 'macos' && matrix.arch == 'arm64'
+        run: cargo test --locked --manifest-path services/helper/Cargo.toml
+
+      - name: Install Android script binding dependencies
+        if: matrix.platform == 'android'
+        run: sudo apt-get update && sudo apt-get install -y libclang-dev
+
+      # setup.dart stages these same roots as a Flutter asset.
+      # Pinned by hash, so a new bundle from https://curl.se/docs/caextract.html is a reviewed bump.
+      - name: Fetch CA certificates
+        shell: bash
+        env:
+          CA_BUNDLE: cacert-2026-09-25.pem
+          CA_BUNDLE_SHA256: a41b5d356aea97a529fe27e0f7316d2f9d946d75927476cf9cf1b90637d00505
+        run: |
+          bundle=core/Clash.Meta/component/ca/ca-certificates.crt
+          curl -fsSL --retry 3 -o "$bundle" "https://curl.se/ca/$CA_BUNDLE"
+          echo "$CA_BUNDLE_SHA256  $bundle" | sha256sum -c -
+
+      - name: Download Go modules with retries
+        working-directory: core
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            go mod download && exit 0
+            echo "go mod download failed (attempt $attempt)" >&2
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
+          done
+          exit 1
+
+      - name: Build Application
+        id: build
+        shell: bash
+        env:
+          FLCLASH_VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
+          FLCLASH_BUILD_NUMBER: ${{ needs.version.outputs.build_number }}
+          BASE_DOMAIN: ${{ secrets.BASE_DOMAIN }}
+          SPARE_DOMAIN: ${{ secrets.SPARE_DOMAIN }}
+          API_DOMAIN: ${{ secrets.API_DOMAIN }}
+          SPARE_API_DOMAIN: ${{ secrets.SPARE_API_DOMAIN }}
+          FLCLASH_APP_SECRET: ${{ secrets.FLCLASH_APP_SECRET }}
+          DNS_AUTH_PRIVATE_KEY: ${{ secrets.DNS_AUTH_PRIVATE_KEY }}
+          DNS_AUTH_DOMAINS: ${{ secrets.DNS_AUTH_DOMAINS }}
+          DNS_AUTH_DOT_SERVER: ${{ secrets.DNS_AUTH_DOT_SERVER }}
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform == 'macos' && '13.0' || '' }}
+        run: |
+          set -e
+          BUILD_ARGS=("${{ matrix.platform }}")
+          [ -n "${{ matrix.arch }}" ] && BUILD_ARGS+=(--arch "${{ matrix.arch }}")
+          BUILD_ARGS+=(--out app)
+          [ "${{ env.IS_STABLE }}" == "true" ] && BUILD_ARGS+=(--env stable)
+          if [ "${{ matrix.platform }}" == "android" ]; then
+            build_log="$RUNNER_TEMP/android-build.log"
+            set +e
+            dart setup.dart "${BUILD_ARGS[@]}" 2>&1 | tee "$build_log"
+            build_status=${PIPESTATUS[0]}
+            set -e
+            if [ "$build_status" -ne 0 ]; then
+              if ! grep -q 'Could not resolve all files for configuration' "$build_log" ||
+                 ! grep -Eq 'Could not find [^[:space:]]+\.jar ' "$build_log"; then
+                exit "$build_status"
+              fi
+              echo "Retrying Android build once with refreshed Gradle dependency metadata"
+              init_dir="${GRADLE_USER_HOME:-$HOME/.gradle}/init.d"
+              mkdir -p "$init_dir"
+              refresh_init=$(mktemp "$init_dir/flclash-refresh-XXXXXX.gradle")
+              trap 'rm -f "$refresh_init"' EXIT
+              printf '%s\n' 'gradle.startParameter.refreshDependencies = true' > "$refresh_init"
+              dart setup.dart "${BUILD_ARGS[@]}"
+            fi
+          elif [ "${{ matrix.platform }}" == "macos" ]; then
+            build_log="$RUNNER_TEMP/macos-build.log"
+            set +e
+            dart setup.dart "${BUILD_ARGS[@]}" 2>&1 | tee "$build_log"
+            build_status=${PIPESTATUS[0]}
+            set -e
+            if [ "$build_status" -ne 0 ]; then
+              if ! grep -q 'github.com/simolus3/sqlite3.dart/releases/download/' "$build_log" ||
+                 ! grep -q 'Connection closed before full header was received' "$build_log"; then
+                exit "$build_status"
+              fi
+              echo "Retrying macOS build once after the SQLite dependency download was interrupted"
+              dart setup.dart "${BUILD_ARGS[@]}"
+            fi
+          else
+            dart setup.dart "${BUILD_ARGS[@]}"
+          fi
+
+          if [ ! -d ./dist ] || [ -z "$(find ./dist -type f -print -quit)" ]; then
+            echo "Build produced no artifacts in ./dist" >&2
+            exit 1
+          fi
+          
+          find ./dist -name "*.exe" -type f -exec sh -c 'mv "$1" "${1%.exe}-setup.exe"' _ {} \;
+          find ./dist -name "*.appimage" -type f -exec sh -c 'mv "$1" "${1%.appimage}.AppImage"' _ {} \;
+
+      - name: Test macOS Helper installation
+        if: matrix.platform == 'macos'
+        env:
+          FLCLASH_HELPER_TEST_VM: '1'
+        run: |
+          app=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' -print -quit)
+          sh tool/test_macos_helper.sh "$app"
+
+      - name: Verify final Android APK version and alignment
+        if: matrix.platform == 'android'
+        env:
+          RELEASE_VERSION: ${{ needs.version.outputs.version_number }}
+          RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
+          RELEASE_ARCH: ${{ matrix.arch }}
+        run: |
+          python3 tool/check_apk_version.py --version "$RELEASE_VERSION" --build "$RELEASE_BUILD" \
+            --arch "$RELEASE_ARCH" --core-digests build/core/gomobile/release/metadata/core-sha256.json dist/*.apk
+
+      - name: Verify the patched Windows engine
+        if: matrix.platform == 'windows' && matrix.arch == 'amd64'
+        shell: pwsh
+        run: ./windows/patch_flutter_engine.ps1 -Dll build/windows/x64/runner/Release/flutter_windows.dll -Verify
+
+      - name: Verify the Windows ZIP CA bundle
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          $asset = 'data/flutter_assets/assets/data/ca-certificates.crt'
+          $expected = (Get-FileHash -LiteralPath 'core/Clash.Meta/component/ca/ca-certificates.crt').Hash
+          $packages = @(Get-ChildItem -LiteralPath dist -Recurse -File -Filter 'flclash-windows-${{ matrix.arch }}.zip')
+          if ($packages.Count -ne 1) { throw 'Expected one Windows ZIP package' }
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($packages[0].FullName)
+          try {
+            $entries = @($archive.Entries | Where-Object {
+              $_.FullName -eq $asset -or $_.FullName.EndsWith("/$asset")
+            })
+            if ($entries.Count -ne 1) { throw 'Expected one CA bundle in the Windows ZIP' }
+            $stream = $entries[0].Open()
+            try {
+              if ((Get-FileHash -InputStream $stream).Hash -ne $expected) {
+                throw 'The Windows ZIP CA bundle does not match the build input'
+              }
+            } finally { $stream.Dispose() }
+          } finally { $archive.Dispose() }
+
+      - name: Sign desktop updates
+        if: matrix.platform != 'android'
+        env:
+          FLCLASH_OTA_SIGNING_KEY: ${{ secrets.FLCLASH_OTA_SIGNING_KEY }}
+          RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
+        shell: bash
+        run: |
+          if [ -z "$FLCLASH_OTA_SIGNING_KEY" ]; then
+            echo '::warning::OTA signing key is not configured; this release requires a manual download'
+          else
+            dart tool/sign_updates.dart dist "$RELEASE_BUILD"
+          fi
+
+      - name: Upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: artifact-${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) }}
+          path: ./dist
+          overwrite: true
+          if-no-files-found: error
+
+  checks:
+    name: Required release checks
+    if: ${{ always() }}
+    needs: [version, test, go-test, android-core-test, android-test, windows-helper-test]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - name: Require every applicable check to pass
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: python3 tool/release_checks.py gate
+
+  upload:
+    if: ${{ !cancelled() && needs.version.result == 'success' && needs.build.result == 'success' && needs.checks.result == 'success' }}
+    permissions:
+      actions: read
+      contents: write
+    needs: [ version, build, checks ]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - name: Download
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          path: ./dist/
+          pattern: artifact-*
+          merge-multiple: true
+
+      - name: Generate release checksums
+        run: python3 tool/release_checksums.py dist
+
+      - name: Generate release.md
+        run: |
+          tag="${{ github.ref_name }}"
+          out="release.md"
+          awk -v heading="## $tag" '
+            $0 == heading || index($0, heading " (") == 1 { found=1; capture=1; next }
+            capture && /^## / { exit }
+            capture { print }
+            END { if (!found) exit 1 }
+          ' CHANGELOG.md > "$out"
+          if ! grep -q '[^[:space:]]' "$out"; then
+            echo "No changelog entries found for $tag" >&2
+            exit 1
+          fi
+
+      - name: Patch release.md
+        run: |
+          version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+          sed "s|VERSION|$version|g" ./.github/release_template.md >> release.md
+
+      - name: Release
+        if: ${{ env.IS_STABLE == 'true' }}
+        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
+        with:
+          files: ./dist/*
+          body_path: './release.md'
+
+      - name: Update Version via oixCloud API
+        if: success() && env.IS_STABLE == 'true'
+        continue-on-error: true
+        run: |
+          API_KEY="${{ secrets.FLCLASH_KEY }}"
+          API_URL="https://${{ secrets.API_DOMAIN }}/api/v1/version/update"
+          FULL_VERSION="${{ needs.version.outputs.full_version }}"
+          
+          if [ -z "$API_KEY" ]; then
+            echo "⚠️  Skipping version update: API_KEY secret not configured"
+            exit 0
+          fi
+          
+          if [ -z "$FULL_VERSION" ]; then
+            echo "❌ Error: Version number not available"
+            exit 1
+          fi
+          
+          echo "📦 Updating oixCloud version to: $FULL_VERSION"
+          
+          response=$(curl -s -w "\n%{http_code}" -X POST "$API_URL" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode "key=$API_KEY" \
+            --data-urlencode "version=$FULL_VERSION")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          ret_code=$(echo "$body" | grep -oE '"ret"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$' || echo "")
+
+          echo "Response body: $body"
+          echo "HTTP status: $http_code   Business ret: ${ret_code:-<none>}"
+
+          if [ "$http_code" = "200" ] && [ "$ret_code" = "200" ]; then
+            echo "✅ Version updated successfully on oixCloud"
+            echo "   Version: $FULL_VERSION"
+            echo "   API: $API_URL"
+          else
+            echo "❌ Failed to update version"
+            echo "   HTTP Status: $http_code"
+            echo "   Business ret: ${ret_code:-<none>}"
+            echo "   Response: $body"
+            exit 1
+          fi
+
+  aur:
+    name: Publish AUR package
+    if: ${{ !cancelled() && needs.upload.result == 'success' && !contains(github.ref, '-') }}
+    needs: [upload]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/aur.yaml
+    with:
+      tag: ${{ github.ref_name }}
+    secrets:
+      AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+
+  docker:
+    name: Build Docker (amd64/arm64)
+    needs: [version, upload]
+    if: ${{ !cancelled() && needs.upload.result == 'success' && !contains(github.ref, '-') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      packages: write
+    env:
+      FLCLASH_VERSION: ${{ needs.version.outputs.version_number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Wait for release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          VERSION="$FLCLASH_VERSION"
+          TAG="v${VERSION}"
+          API="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}"
+          echo "Checking deb assets on release ${TAG}..."
+          for i in $(seq 1 10); do
+            BODY=$(curl -sSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "$API" || true)
+            if echo "$BODY" | grep -q "flclash-linux-amd64.deb" && echo "$BODY" | grep -q "flclash-linux-arm64.deb"; then
+              echo "Both deb assets are available."
+              exit 0
+            fi
+            echo "Attempt $i/10: assets not visible yet, sleeping 15s..."
+            sleep 15
+          done
+          echo "Timed out waiting for release assets."
+          exit 1
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute tags
+        id: tags
+        run: |
+          VERSION="$FLCLASH_VERSION"
+          OWNER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          TAGS="ghcr.io/${OWNER}/flclash:latest,ghcr.io/${OWNER}/flclash:${VERSION}"
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+          echo "Tags: $TAGS"
+
+      - name: Build and push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: ./docker
+          file: ./docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            FLCLASH_VERSION=${{ needs.version.outputs.version_number }}
+            FLCLASH_REPO=${{ github.repository }}
+          provenance: false

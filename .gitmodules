@@ -1,0 +1,11 @@
+[submodule "core/Clash.Meta"]
+	path = core/Clash.Meta
+	url = https://github.com/pickrui/Clash.Meta.git
+	branch = FlClash
+[submodule "plugins/flutter_distributor"]
+	path = plugins/flutter_distributor
+	url = https://github.com/pickrui/flutter_distributor.git
+	branch = FlClash
+[submodule "plugins/prism_ui"]
+	path = plugins/prism_ui
+	url = https://github.com/pickrui/prism_ui.git
