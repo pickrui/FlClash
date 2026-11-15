@@ -182,7 +182,6 @@ class _ThemeItem extends StatelessWidget {
     return ListItem.open(
       leading: const GlyphIcon(AppGlyphs.palette),
       title: Text(context.appLocalizations.theme),
-      subtitle: Text(context.appLocalizations.themeDesc),
       widget: const ThemeView(),
     );
   }
@@ -210,7 +209,6 @@ class _HotkeyItem extends StatelessWidget {
     return ListItem.open(
       leading: const GlyphIcon(AppGlyphs.keyboard),
       title: Text(context.appLocalizations.hotkeyManagement),
-      subtitle: Text(context.appLocalizations.hotkeyManagementDesc),
       widget: const HotKeyView(),
     );
   }
@@ -251,7 +249,6 @@ class _AdvancedConfigItem extends StatelessWidget {
     return ListItem.open(
       leading: const GlyphIcon(AppGlyphs.wrench),
       title: Text(context.appLocalizations.advancedConfig),
-      subtitle: Text(context.appLocalizations.advancedConfigDesc),
       widget: const AdvancedConfigView(),
     );
   }
