@@ -322,6 +322,7 @@ jobs:
     needs: [version]
     env:
       BUILD_TOOL_VERSION: ${{ needs.version.outputs.build_tool_version }}
+      BUILD_TOOL_NATIVE_SCORE_CAP_VERSION: ${{ github.sha == vars.BUILD_TOOL_NATIVE_SCORE_CAP_SHA && vars.BUILD_TOOL_NATIVE_SCORE_CAP_VERSION || '' }}
       BUILD_TOOL_DIRECTIVES: ${{ vars.BUILD_TOOL_DIRECTIVES }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
