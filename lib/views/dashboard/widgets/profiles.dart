@@ -84,7 +84,7 @@ class ProfilesCard extends ConsumerWidget {
     );
     final usage = _usageOf(profile);
     final expiry = _expiryOf(profile);
-    final updatedAt = profile?.lastUpdateDate;
+    final updatedAt = profile?.lastCheckDate ?? profile?.lastUpdateDate;
     final label = DashboardText.label(context);
     final figure = mobile
         ? AppTextStyle.title3

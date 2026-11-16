@@ -490,7 +490,7 @@ class ProfileItem extends ConsumerWidget {
           ? const ActivityIndicator(key: ValueKey('updating'), size: 24)
           : LastUpdateTimeText(
               key: const ValueKey('lastUpdate'),
-              lastUpdateDate: profile.lastUpdateDate,
+              lastUpdateDate: profile.lastCheckDate ?? profile.lastUpdateDate,
               style: AppTextStyle.footnote.of(context).toLighter,
               compact: true,
             ),

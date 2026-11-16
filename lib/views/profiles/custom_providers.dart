@@ -223,7 +223,7 @@ class _ProxyProviderItem extends ConsumerWidget {
     final kind = source.type == ProfileType.url
         ? appLocalizations.providerSourceSubscription
         : appLocalizations.providerSourceProfile;
-    final lastUpdate = source.lastUpdateDate;
+    final lastUpdate = source.lastCheckDate ?? source.lastUpdateDate;
     return lastUpdate == null
         ? kind
         : '$kind · ${lastUpdate.lastUpdateTimeDesc}';

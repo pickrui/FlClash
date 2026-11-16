@@ -139,7 +139,9 @@ class ProfileDetailSheet extends ConsumerWidget {
                           _InfoRow(
                             label: appLocalizations.lastUpdated,
                             value: Text(
-                              profile.lastUpdateDate?.lastUpdateTimeDesc ?? '—',
+                              (profile.lastCheckDate ?? profile.lastUpdateDate)
+                                      ?.lastUpdateTimeDesc ??
+                                  '—',
                             ),
                           ),
                           _InfoRow(
