@@ -20,6 +20,9 @@ class RecordFeedList<T> extends StatefulWidget {
   final ScrollPhysics? physics;
   final EdgeInsetsGeometry? padding;
   final bool reverse;
+
+  /// Existing rows retain their relative order when the feed trims its head.
+  final bool preserveOrder;
   final bool shrinkWrap;
   final double gap;
   final double estimatedItemExtent;
@@ -34,6 +37,7 @@ class RecordFeedList<T> extends StatefulWidget {
     this.physics,
     this.padding,
     this.reverse = false,
+    this.preserveOrder = false,
     this.shrinkWrap = false,
     this.gap = 0,
   });
@@ -80,7 +84,8 @@ class _RecordFeedListState<T> extends State<RecordFeedList<T>>
   @override
   void didUpdateWidget(RecordFeedList<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (identical(oldWidget.items, widget.items)) {
+    if (identical(oldWidget.items, widget.items) &&
+        oldWidget.preserveOrder == widget.preserveOrder) {
       return;
     }
     _indexes = null;
@@ -88,7 +93,7 @@ class _RecordFeedListState<T> extends State<RecordFeedList<T>>
     _built = {};
     _trimmed = 0;
     final items = widget.items;
-    if (items.isEmpty) {
+    if (items.isEmpty || !widget.preserveOrder) {
       _stripeShift = 0;
       return;
     }

@@ -414,6 +414,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
               _filters.offer(_queries);
             },
             child: RecordFeedList<DnsQuery>(
+              preserveOrder: table == null,
               controller: _scrollController,
               reverse: true,
               shrinkWrap: true,

@@ -16,6 +16,7 @@ void main() {
     return TestApp(
       child: SizedBox.expand(
         child: RecordFeedList<int>(
+          preserveOrder: true,
           items: items,
           keyOf: (item) {
             keyed++;
@@ -45,6 +46,30 @@ void main() {
     expect(keyed, lessThan(100));
     expect(find.text('1 odd'), findsOneWidget);
     expect(find.text('2 even'), findsOneWidget);
+  });
+
+  testWidgets('sorting preserves the state of rows moved behind the new head', (
+    tester,
+  ) async {
+    Widget sorted(List<int> items) => TestApp(
+      child: RecordFeedList<int>(
+        items: items,
+        keyOf: ValueKey.new,
+        estimatedItemExtent: 40,
+        itemBuilder: (item, _, _) => StatefulBuilder(
+          key: ValueKey('row-$item'),
+          builder: (_, _) => SizedBox(height: 40, child: Text('$item')),
+        ),
+      ),
+    );
+    await tester.pumpWidget(sorted([0, 1, 2]));
+    final first = tester.state(find.byKey(const ValueKey('row-0')));
+    final second = tester.state(find.byKey(const ValueKey('row-1')));
+
+    await tester.pumpWidget(sorted([2, 0, 1]));
+
+    expect(tester.state(find.byKey(const ValueKey('row-0'))), same(first));
+    expect(tester.state(find.byKey(const ValueKey('row-1'))), same(second));
   });
 
   testWidgets('a list changed other than at its head still finds its rows', (

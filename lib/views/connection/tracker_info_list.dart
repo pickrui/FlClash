@@ -109,6 +109,7 @@ class TrackerInfoList extends StatelessWidget {
   Widget build(BuildContext context) {
     final table = this.table;
     return RecordFeedList<TrackerInfo>(
+      preserveOrder: table == null,
       reverse: reverse,
       shrinkWrap: shrinkWrap,
       physics: physics,
@@ -119,9 +120,13 @@ class TrackerInfoList extends StatelessWidget {
       gap: table == null ? recordListGap : 0,
       estimatedItemExtent: table?.rowHeight ?? recordListEstimatedExtent,
       itemBuilder: (trackerInfo, striped, latest) => MemoBuilder(
-        inputs: table == null
-            ? [..._shownInList(trackerInfo), detailTitle]
-            : [trackerInfo, table, striped],
+        inputs: [
+          ...table == null
+              ? _shownInList(trackerInfo)
+              : [trackerInfo, table, striped],
+          detailTitle,
+          onClose,
+        ],
         builder: (_) => _buildTrackerInfoItem(
           trackerInfo,
           isLive: false,
@@ -191,9 +196,11 @@ class TrackerInfoAnimatedList extends StatelessWidget {
             // A live row reads its age off the clock, which moves on its own.
             inputs: [
               trackerInfo,
+              detailTitle,
+              onClose,
               actionBuilder,
               ...table == null
-                  ? [detailTitle, trackerInfo.start.compactLastUpdateTimeDesc]
+                  ? [trackerInfo.start.compactLastUpdateTimeDesc]
                   : [table, striped],
             ],
             builder: (_) => _buildTrackerInfoItem(
@@ -292,6 +299,8 @@ class _TrackerInfoGroupedListState
           inputs: [
             ...showsTraffic ? [trackerInfo] : _shownInList(trackerInfo),
             detailTitle,
+            isLive,
+            onClose,
             actionBuilder,
             table,
             striped,

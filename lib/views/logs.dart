@@ -194,6 +194,7 @@ class _LogsViewState extends ConsumerState<LogsView>
           controller: _scrollController,
           enable: state.autoScrollToEnd,
           child: RecordFeedList<Log>(
+            preserveOrder: true,
             physics: _physics,
             reverse: true,
             shrinkWrap: true,

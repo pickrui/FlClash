@@ -6,7 +6,7 @@
 use super::access::{self, SocketFile};
 use super::outbox::Outbox;
 use super::{frame, Event, EventSink};
-use interprocess::local_socket::tokio::{prelude::*, Listener, RecvHalf, SendHalf, Stream};
+use interprocess::local_socket::tokio::{prelude::*, Listener, Stream};
 use interprocess::local_socket::{GenericFilePath, ListenerOptions};
 use std::io;
 use std::sync::{mpsc, Arc, Mutex, MutexGuard, PoisonError};
@@ -176,10 +176,9 @@ async fn accept_peers(listener: &Listener, emit: &EventSink, outbox: &Outbox) {
 }
 
 async fn exchange(stream: Stream, emit: &EventSink, outbox: &Outbox) -> Option<String> {
-    let (reader, writer) = stream.split();
     let result = tokio::select! {
-        result = receive(reader, emit) => result,
-        result = transmit(writer, outbox) => result,
+        result = receive(&stream, emit) => result,
+        result = transmit(&stream, outbox) => result,
     };
     match result {
         Err(error) if !is_peer_gone(&error) => Some(error.to_string()),
@@ -187,7 +186,7 @@ async fn exchange(stream: Stream, emit: &EventSink, outbox: &Outbox) -> Option<S
     }
 }
 
-async fn receive(reader: RecvHalf, emit: &EventSink) -> io::Result<()> {
+async fn receive(reader: &Stream, emit: &EventSink) -> io::Result<()> {
     let mut reader = BufReader::new(reader);
     loop {
         let payload = frame::read(&mut reader).await?;
@@ -197,7 +196,7 @@ async fn receive(reader: RecvHalf, emit: &EventSink) -> io::Result<()> {
     }
 }
 
-async fn transmit(mut writer: SendHalf, outbox: &Outbox) -> io::Result<()> {
+async fn transmit(mut writer: &Stream, outbox: &Outbox) -> io::Result<()> {
     loop {
         let frame = outbox.next().await;
         writer.write_all(&frame).await?;

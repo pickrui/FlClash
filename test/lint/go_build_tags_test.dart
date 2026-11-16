@@ -32,7 +32,39 @@ Iterable<File> _tagConsumers() sync* {
   }
 }
 
+String _single(String path, String pattern) {
+  final match = RegExp(
+    pattern,
+    multiLine: true,
+  ).firstMatch(File(path).readAsStringSync());
+  expect(match, isNotNull, reason: '$path lost /$pattern/');
+  return match!.group(1)!;
+}
+
 void main() {
+  test('local and CI checks use the packaging Go toolchain', () {
+    final toolchain = _single(
+      'plugins/setup/setup_hooks/lib/src/go_builder.dart',
+      r"'GOTOOLCHAIN': 'go([^']+)'",
+    );
+    expect(_single('Makefile', r'GOTOOLCHAIN \?= go([^\s]+)'), toolchain);
+    expect(_single('core/go.mod', r'^go ([^\s]+)'), toolchain);
+    expect(
+      _single('core/Clash.Meta/go.mod', r'^toolchain go([^\s]+)'),
+      toolchain,
+    );
+    for (final workflow in ['build.yaml', 'go-deep-tests.yaml']) {
+      expect(
+        _single('.github/workflows/$workflow', r"GO_VERSION: '([^']+)'"),
+        toolchain,
+      );
+    }
+    expect(
+      _single('.github/workflows/windows-tests.yaml', r"go-version: '([^']+)'"),
+      toolchain,
+    );
+  });
+
   test('the packaging harness ships the shared release build tags', () {
     final tags = _sharedTags();
     final defaults = RegExp(r"tags: '([^']*)'")
@@ -48,26 +80,20 @@ void main() {
   });
 
   test('the Android Core binds like the desktop harness builds', () {
-    String single(String path, String pattern) {
-      final match = RegExp(pattern).firstMatch(File(path).readAsStringSync());
-      expect(match, isNotNull, reason: '$path lost /$pattern/');
-      return match!.group(1)!;
-    }
-
     Map<String, String> pairs(String path, String block, String pair) => {
-      for (final match in RegExp(pair).allMatches(single(path, block)))
+      for (final match in RegExp(pair).allMatches(_single(path, block)))
         match.group(1)!: match.group(2)!,
     };
 
     const secrets = 'plugins/setup/setup_hooks/lib/src/secrets.dart';
     const goBuilder = 'plugins/setup/setup_hooks/lib/src/go_builder.dart';
     expect(
-      single(_androidCoreBuild, r'val goLdflags = "([^"]*)"'),
-      single(_harnessDefaults, r"goLdflags: '([^']*)'"),
+      _single(_androidCoreBuild, r'val goLdflags = "([^"]*)"'),
+      _single(_harnessDefaults, r"goLdflags: '([^']*)'"),
     );
     expect(
-      single(_androidCoreBuild, r'goToolchain\.set\("([^"]+)"\)'),
-      single(goBuilder, r"'GOTOOLCHAIN': '([^']+)'"),
+      _single(_androidCoreBuild, r'goToolchain\.set\("([^"]+)"\)'),
+      _single(goBuilder, r"'GOTOOLCHAIN': '([^']+)'"),
     );
     final symbols = pairs(
       secrets,
