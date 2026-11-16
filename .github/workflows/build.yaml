@@ -669,6 +669,21 @@ jobs:
             dart tool/sign_updates.dart dist "$RELEASE_BUILD"
           fi
 
+      - name: Record native build verification
+        env:
+          RELEASE_VERSION: ${{ needs.version.outputs.version_number }}
+          RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
+          BUILD_TOOL_VERSION: ${{ needs.version.outputs.build_tool_version }}
+        run: python3 tool/collect_build_records.py --platform "${{ matrix.platform }}" --arch "${{ matrix.arch }}" --output build/native-records.json
+
+      - name: Upload build records
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: build-records-${{ matrix.platform }}-${{ matrix.arch }}
+          path: build/native-records.json
+          overwrite: true
+          if-no-files-found: error
+
       - name: Upload
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:

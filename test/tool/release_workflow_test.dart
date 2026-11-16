@@ -52,6 +52,8 @@ void main() {
         'tool/harden_macos_app.dart.private',
         'tool/resolve_build_tool_version.sh.private',
         'tool/test_macos_helper.sh.private',
+        'tool/collect_build_records.py.private',
+        'test/ci/test_build_records.py.private',
       ]) {
         final reference = File(path).readAsStringSync();
         expect(
@@ -74,6 +76,36 @@ void main() {
       );
     },
   );
+
+  test('native build records stay outside public release attachments', () {
+    final steps = (jobs['build']['steps'] as YamlList).cast<YamlMap>();
+    final collect = steps.indexWhere(
+      (step) => '${step['run']}'.contains('tool/collect_build_records.py'),
+    );
+    final records = steps.indexWhere(
+      (step) => '${step['with']?['name']}'.startsWith('build-records-'),
+    );
+    final packages = steps.indexWhere(
+      (step) => '${step['with']?['name']}'.startsWith('artifact-'),
+    );
+    expect(collect, greaterThan(0));
+    expect(records, greaterThan(collect));
+    expect(packages, greaterThan(records));
+    for (final step in [steps[collect], steps[records]]) {
+      expect(step['if'], isNull);
+      expect(step['continue-on-error'], isNull);
+    }
+    expect(steps[records]['with']['path'], 'build/native-records.json');
+    expect(steps[records]['with']['if-no-files-found'], 'error');
+    expect(steps[records]['with']['overwrite'], isTrue);
+    expect(steps[packages]['with']['path'], './dist');
+    final download = (jobs['upload']['steps'] as YamlList)
+        .cast<YamlMap>()
+        .singleWhere(
+          (step) => '${step['uses']}'.startsWith('actions/download-artifact@'),
+        );
+    expect(download['with']['pattern'], 'artifact-*');
+  });
 
   test(
     'the private source repository comes from a secret everywhere',

@@ -156,3 +156,6 @@ devtools_options.yaml
 /core/managed_dns_fallback_test.go
 /core/internal/dnsbootstrap/bootstrap.go
 /core/internal/dnsbootstrap/bootstrap_test.go
+
+/tool/collect_build_records.py
+/test/ci/test_build_records.py
