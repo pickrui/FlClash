@@ -60,6 +60,7 @@ func handleSetNetworkExcluded(excluded bool) bool {
 		updateListeners()
 	}
 	resetDNSConnections()
+	prewarmManagedDNS()
 	return true
 }
 

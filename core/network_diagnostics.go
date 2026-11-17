@@ -25,6 +25,60 @@ import (
 
 var networkDiagnosticBusy atomic.Bool
 
+type managedDNSDiagnosticCounters struct {
+	Lookups                  uint64 `json:"lookups"`
+	Failures                 uint64 `json:"failures"`
+	Timeouts                 uint64 `json:"timeouts"`
+	TotalElapsedMs           int64  `json:"total_elapsed_ms"`
+	MaxElapsedMs             int64  `json:"max_elapsed_ms"`
+	LastElapsedMs            int64  `json:"last_elapsed_ms"`
+	LastPath                 string `json:"last_path"`
+	FreshCacheHits           uint64 `json:"fresh_cache_hits"`
+	StaleCacheHits           uint64 `json:"stale_cache_hits"`
+	RecoveryRemainingSeconds int64  `json:"recovery_remaining_seconds"`
+}
+
+type managedDNSDiagnosticStore struct {
+	sync.Mutex
+	value managedDNSDiagnosticCounters
+}
+
+var managedDNSDiagnostics managedDNSDiagnosticStore
+
+func (store *managedDNSDiagnosticStore) record(started time.Time, path string, failed bool, cause error) {
+	store.Lock()
+	defer store.Unlock()
+	v := &store.value
+	v.Lookups++
+	v.LastElapsedMs = max(0, time.Since(started).Milliseconds())
+	v.TotalElapsedMs += v.LastElapsedMs
+	v.MaxElapsedMs = max(v.MaxElapsedMs, v.LastElapsedMs)
+	v.LastPath = path
+	if failed && cause != context.Canceled {
+		v.Failures++
+		if cause == context.DeadlineExceeded {
+			v.Timeouts++
+		}
+	}
+}
+
+func managedDNSDiagnosticSnapshot() managedDNSDiagnosticCounters {
+	managedDNSDiagnostics.Lock()
+	value := managedDNSDiagnostics.value
+	managedDNSDiagnostics.Unlock()
+	if value.LastPath == "" {
+		value.LastPath = "none"
+	}
+	if wrapped, ok := resolver.ProxyServerHostResolver.Load().(*tokenInjectResolver); ok && wrapped.auth != nil && wrapped.race != nil && wrapped.race.recovery != nil {
+		var hosts []string
+		for _, endpoint := range wrapped.race.endpoints() {
+			hosts = append(hosts, endpoint.host)
+		}
+		value.RecoveryRemainingSeconds = wrapped.race.recovery.RemainingSeconds(hosts)
+	}
+	return value
+}
+
 // DNS names, returned addresses, signed queries and upstream errors stay inside
 // the Core. Only fixed result codes, counts and timings cross the diagnostic RPC.
 type diagnosticDNS struct {
@@ -268,6 +322,7 @@ func handleNetworkDiagnostics() map[string]any {
 	wg.Wait()
 	result["dns"] = general
 	result["oixDns"] = managed
+	result["managed_dns"] = managedDNSDiagnosticSnapshot()
 	runLock.Lock()
 	result["stale"] = currentConfig != configSnapshot || running != (isRunning && !networkExcluded) || currentDNSAuth() != auth
 	runLock.Unlock()

@@ -38,6 +38,41 @@ func TestNetworkDiagnosticManagedHost(t *testing.T) {
 	}
 }
 
+func TestManagedDNSDiagnosticsClassifyOutcomesWithoutIdentifiers(t *testing.T) {
+	var store managedDNSDiagnosticStore
+	for _, sample := range []struct {
+		path   string
+		failed bool
+		cause  error
+	}{
+		{"named_encrypted", false, nil}, {"recovered_encrypted", false, nil},
+		{"domestic_tcp", false, nil}, {"none", true, context.DeadlineExceeded},
+		{"none", true, context.Canceled}, {"named_encrypted", false, context.DeadlineExceeded},
+	} {
+		store.record(time.Now().Add(-20*time.Millisecond), sample.path, sample.failed, sample.cause)
+	}
+	value := store.value
+	if value.Lookups != 6 || value.Failures != 1 || value.Timeouts != 1 || value.TotalElapsedMs < 120 || value.MaxElapsedMs < 20 || value.LastPath != "named_encrypted" {
+		t.Fatalf("diagnostic counters lost outcome semantics: %+v", value)
+	}
+	data, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fields map[string]any
+	if json.Unmarshal(data, &fields) != nil || len(fields) != 10 {
+		t.Fatal("diagnostic snapshot shape changed")
+	}
+	for name, value := range fields {
+		if name == "last_path" {
+			continue
+		}
+		if _, ok := value.(float64); !ok {
+			t.Fatalf("diagnostic field %s can leak text", name)
+		}
+	}
+}
+
 func TestNetworkDiagnosticDNSPartialAndRedaction(t *testing.T) {
 	result := probeDiagnosticDNS(context.Background(), []string{"one.secret.example", "two.secret.example"},
 		diagnosticDNSLookup{Type: "A", Lookup: func(_ context.Context, name string) ([]netip.Addr, error) {

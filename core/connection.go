@@ -50,6 +50,10 @@ func handleCloseConnections(groupName string) bool {
 
 func handleResetConnections() bool {
 	resetDNSConnections()
+	if runLock.TryLock() {
+		prewarmManagedDNS()
+		runLock.Unlock()
+	}
 	return true
 }
 
@@ -58,6 +62,7 @@ func handleClearDnsState() bool {
 	defer runLock.Unlock()
 	dns.ClearAll()
 	clearDNSAuthAnswers()
+	prewarmManagedDNS()
 	return true
 }
 

@@ -278,6 +278,7 @@ class _NetworkDiagnosticsPageState
     for (final check in _checks) ...[
       '\n[${_status(check.status)}] ${check.title}',
       check.detail,
+      if (check.reportData != null) check.reportData!,
       if (check.suggestion != null) check.suggestion!,
     ],
   ].join('\n');
