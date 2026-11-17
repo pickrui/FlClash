@@ -662,7 +662,9 @@ class NetworkDiagnosticService {
         details.join('\n'),
         status == 'ok' || status == 'not_applicable' ? null : hint,
         null,
-        managed && validCore ? managedDNSReportData(core?['managed_dns']) : null,
+        managed && validCore
+            ? managedDNSReportData(core?['managed_dns'])
+            : null,
       );
     }
 
