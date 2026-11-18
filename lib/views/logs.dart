@@ -87,14 +87,14 @@ class _LogsViewState extends ConsumerState<LogsView>
   }
 
   Future<void> _handleExport() async {
-    final commonAction = context.commonAction;
-    final logsAction = context.logsAction;
-
+    if (_exporting) return;
     setState(() => _exporting = true);
-    final res = await commonAction.safeRun<bool>(() async {
-      return logsAction.exportLogs();
-    }, title: appLocalizations.exportLogs);
-    if (mounted) setState(() => _exporting = false);
+    final res = await context.commonAction.safeRun<bool>(
+      context.logsAction.exportLogs,
+      title: appLocalizations.exportLogs,
+    );
+    if (!mounted) return;
+    setState(() => _exporting = false);
     if (res != true) return;
     globalState.showMessage(
       title: appLocalizations.tip,

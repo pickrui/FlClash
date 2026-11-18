@@ -19,6 +19,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:material_ui/material_ui.dart'
     hide FilledButton, IconButton, Scaffold, Switch, TextButton, TextField;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
@@ -46,6 +47,7 @@ class _SetupAction extends SetupAction {
   var autoApplies = 0;
   Completer<Map<String, dynamic>>? pendingRaw;
   Completer<void>? pendingValidation;
+  Completer<bool>? pendingApply;
 
   _SetupAction({this.rawConfig = const {}, this.chainConfig = const {}});
 
@@ -83,6 +85,15 @@ class _SetupAction extends SetupAction {
   }
 
   @override
+  Future<bool> applyProfileSettled({
+    bool silence = false,
+    bool force = false,
+  }) async {
+    applies++;
+    return pendingApply?.future ?? true;
+  }
+
+  @override
   void autoApplyProfile() {
     autoApplies++;
   }
@@ -95,6 +106,43 @@ class _SharedProxies extends CustomProxies {
 }
 
 final class _Core extends Mock implements CoreController {}
+
+class _PendingChainProfiles extends TestProfiles {
+  _PendingChainProfiles(super.initial);
+
+  final write = Completer<void>();
+
+  @override
+  Future<void> updateProfile(
+    int profileId,
+    Profile Function(Profile) builder,
+  ) async {
+    await write.future;
+    await super.updateProfile(profileId, builder);
+  }
+}
+
+class _PendingNodeProfiles extends TestProfiles {
+  _PendingNodeProfiles(super.initial);
+
+  final persistence = Completer<void>();
+  var nodeWrites = 0;
+
+  @override
+  Future<void> updateProfile(
+    int profileId,
+    Profile Function(Profile) builder,
+  ) async {
+    final previous = state.firstWhere((p) => p.id == profileId);
+    final next = builder(previous);
+    if (next.profileProxies.length != previous.profileProxies.length) {
+      nodeWrites++;
+      await persistence.future;
+      return setCustomProxies(next.profileProxies, editedProfile: next);
+    }
+    return super.updateProfile(profileId, builder);
+  }
+}
 
 class _Status extends StatusManager {
   final List<String> messages;
@@ -131,8 +179,9 @@ Future<(TestProfiles, List<String>)> _pump(
   Size viewSize = const Size(800, 600),
   List<Override> overrides = const [],
   List<Profile> otherProfiles = const [],
+  TestProfiles? savedProfiles,
 }) async {
-  final profiles = TestProfiles([profile, ...otherProfiles]);
+  final profiles = savedProfiles ?? TestProfiles([profile, ...otherProfiles]);
   final messages = <String>[];
   await tester.pumpWidget(
     TestApp(
@@ -144,7 +193,7 @@ Future<(TestProfiles, List<String>)> _pump(
         setupActionProvider.overrideWith(() => setupAction),
         ...overrides,
       ],
-      homeBuilder: (child) => _Status(messages: messages, child: child),
+      builder: (_, child) => _Status(messages: messages, child: child!),
       child:
           child ??
           const material.Scaffold(
@@ -164,6 +213,25 @@ Finder _tile(String title) =>
 Finder _switchOf(String title) =>
     find.descendant(of: _tile(title), matching: find.byType(Switch));
 
+Future<void> _openSavedChain(WidgetTester tester, ProxyChain chain) async {
+  await tester.tap(
+    find.descendant(
+      of: _tile(chain.name),
+      matching: find.byTooltip(_l10n.more),
+    ),
+  );
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(_l10n.edit));
+  await tester.pumpAndSettle();
+  expect(
+    tester
+        .widget<ProxyChainEditView>(find.byType(ProxyChainEditView))
+        .proxyChain
+        ?.id,
+    chain.id,
+  );
+}
+
 Future<void> _deleteFromMenu(WidgetTester tester, String title) async {
   await tester.tap(
     find.descendant(of: _tile(title), matching: find.byTooltip(_l10n.more)),
@@ -176,6 +244,119 @@ Future<void> _deleteFromMenu(WidgetTester tester, String title) async {
 }
 
 void main() {
+  const savedChain = ProxyChain(
+    id: 21,
+    name: 'Chain',
+    proxies: ['A', 'B'],
+    enable: true,
+  );
+  for (final applied in [true, false]) {
+    testWidgets('chain save waits for the Core result (applied: $applied)', (
+      tester,
+    ) async {
+      final action = _SetupAction(
+        chainConfig: {
+          'proxies': [
+            for (final name in ['A', 'B']) {'name': name, 'type': 'ss'},
+          ],
+        },
+      )..pendingApply = Completer<bool>();
+      final (_, messages) = await _pump(
+        tester,
+        action,
+        _baseProfile.copyWith(proxyChains: [savedChain]),
+      );
+      await _openSavedChain(tester, savedChain);
+      await tester.tap(find.byTooltip(_l10n.save));
+      await tester.pump();
+      expect(action.applies, 1);
+      expect(messages, isEmpty);
+      action.pendingApply!.complete(applied);
+      await tester.pumpAndSettle();
+      expect(messages, [
+        applied ? _l10n.proxyChainSavedAndApplied : _l10n.routingApplyFailed,
+      ]);
+      expect(find.byType(ProxyChainEditView), findsNothing);
+    });
+  }
+
+  testWidgets('a rejected disable never sends the changed chain to the Core', (
+    tester,
+  ) async {
+    final profile = _baseProfile.copyWith(proxyChains: [savedChain]);
+    final profiles = _PendingChainProfiles([profile]);
+    final action = _SetupAction();
+    final (_, messages) = await _pump(
+      tester,
+      action,
+      profile,
+      savedProfiles: profiles,
+    );
+    await tester.tap(_switchOf(savedChain.name));
+    await tester.pump();
+    expect(action.applies, 0);
+    profiles.write.completeError(StateError('chain write rejected'));
+    await tester.pumpAndSettle();
+    expect(profiles.state.single.proxyChains, [savedChain]);
+    expect(action.applies, 0);
+    expect(messages.single, contains('chain write rejected'));
+  });
+
+  for (final switchProfile in [false, true]) {
+    testWidgets(
+      'leaving a pending chain save applies only its current profile ($switchProfile)',
+      (tester) async {
+        final profile = _baseProfile.copyWith(proxyChains: [savedChain]);
+        final profiles = _PendingChainProfiles([profile]);
+        final action = _SetupAction();
+        final visible = ValueNotifier(true);
+        addTearDown(visible.dispose);
+        final (_, messages) = await _pump(
+          tester,
+          action,
+          profile,
+          savedProfiles: profiles,
+          child: ValueListenableBuilder<bool>(
+            valueListenable: visible,
+            builder: (_, shown, _) => shown
+                ? const material.Scaffold(
+                    body: CustomScrollView(
+                      slivers: [ProfileProxyChainsContent(profileId: 1)],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        );
+        final list = find.byType(ProfileProxyChainsContent);
+        final container = ProviderScope.containerOf(
+          tester.element(list),
+          listen: false,
+        );
+        final currentProfile = container.listen(
+          currentProfileIdProvider,
+          (_, _) {},
+        );
+        addTearDown(currentProfile.close);
+        await tester.tap(_switchOf(savedChain.name));
+        await tester.pump();
+        visible.value = false;
+        await tester.pumpAndSettle();
+        expect(list, findsNothing);
+        if (switchProfile) {
+          container.read(currentProfileIdProvider.notifier).value = 2;
+        }
+        expect(currentProfile.read(), switchProfile ? 2 : 1);
+        expect(action.applies, 0);
+        profiles.write.complete();
+        await tester.pumpAndSettle();
+        expect(profiles.state.single.proxyChains.single.enable, isFalse);
+        expect(action.applies, switchProfile ? 0 : 1);
+        expect(messages, isEmpty);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('global node search keeps hidden selections out of deletion', (
     tester,
   ) async {
@@ -440,6 +621,124 @@ void main() {
       );
       expect(profiles.aliasFreeNames, isEmpty);
     });
+  }
+
+  for (final fails in [false, true]) {
+    testWidgets(
+      'creating a node inside a saved chain: ${fails ? 'write failure' : 'save and reopen'}',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        const original = ProxyChain(
+          id: 37,
+          name: 'Saved chain',
+          proxies: ['A', 'B'],
+        );
+        final profile = _baseProfile.copyWith(proxyChains: [original]);
+        final profiles = _PendingNodeProfiles([
+          profile,
+          _baseProfile.copyWith(id: 2),
+        ]);
+        final action = _SetupAction(
+          chainConfig: {
+            'proxies': [
+              for (final name in ['A', 'B']) {'name': name, 'type': 'ss'},
+            ],
+          },
+        );
+        const uri = 'socks5://fixture.invalid:1080#C';
+        final core = _Core();
+        when(() => core.isCompleted).thenReturn(true);
+        when(() => core.decodeShareLinks(any())).thenAnswer(
+          (_) async => [
+            [
+              {
+                'name': 'C',
+                'type': 'socks5',
+                'server': 'fixture.invalid',
+                'port': 1080,
+              },
+            ],
+          ],
+        );
+        when(() => core.validateProxies(any())).thenAnswer((_) async => {});
+        final (_, messages) = await _pump(
+          tester,
+          action,
+          profile,
+          savedProfiles: profiles,
+          viewSize: const Size(800, 1400),
+          overrides: [coreHandlerProvider.overrideWithValue(core)],
+        );
+        await _openSavedChain(tester, original);
+        await tester.tap(
+          find.descendant(
+            of: find.byType(ProxyChainEditView),
+            matching: find.text(_l10n.addProxyChainNode),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const ValueKey('proxy-share-link')),
+          uri,
+        );
+        await tester.tap(find.byTooltip(_l10n.save).last);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(profiles.nodeWrites, 1);
+        await tester.pump();
+        final chainScaffold = find.descendant(
+          of: find.byType(ProxyChainEditView),
+          matching: find.byType(Scaffold),
+        );
+        expect(
+          tester.widget<Scaffold>(chainScaffold).confirmationAction!.onPressed,
+          isNull,
+        );
+        expect(action.validatedChains, isEmpty);
+        expect(profiles.state.first.proxyChains, [original]);
+        if (fails) {
+          profiles.persistence.completeError(
+            StateError('catalog write failed'),
+          );
+          await tester.pumpAndSettle();
+          expect(messages.last, contains('catalog write failed'));
+          expect(profiles.state.every((p) => p.profileProxies.isEmpty), isTrue);
+          expect(profiles.state.first.proxyChains, [original]);
+          expect(find.byKey(const ValueKey('C')), findsNothing);
+          expect(find.byType(ProxyChainEditView), findsOneWidget);
+          expect(action.applies, 0);
+          return;
+        }
+        profiles.persistence.complete();
+        await tester.pumpAndSettle();
+        final shared = profiles.state.first.profileProxies.single;
+        expect(shared.name, 'C');
+        expect(shared.uri, uri);
+        expect(profiles.state.last.profileProxies.single, shared);
+        expect(messages, contains(_l10n.proxyChainNodeAdded));
+        await tester.tap(find.byTooltip(_l10n.save));
+        await tester.pumpAndSettle();
+        final expected = original.copyWith(proxies: ['A', 'B', 'C']);
+        expect(profiles.state.first.proxyChains, [expected]);
+        expect(action.validatedChains.single, [expected]);
+        await _openSavedChain(tester, original);
+        expect(
+          tester
+              .widget<ProxyChainEditView>(find.byType(ProxyChainEditView))
+              .proxyChain,
+          expected,
+        );
+        for (final (index, name) in expected.proxies.indexed) {
+          final row = find.byKey(ValueKey(name));
+          expect(
+            tester.widget<ReorderableDelayedDragStartListener>(row).index,
+            index,
+          );
+        }
+      },
+    );
   }
 
   testWidgets('a chain cannot add a node under a subscription node name', (
@@ -1452,6 +1751,135 @@ void main() {
       'Two',
     ]);
   });
+
+  for (final (scenario, initial, picked, ordered) in const [
+    ('ordinary hops', ['A', 'B'], 'C', ['A', 'B', 'C']),
+    ('managed prefix', ['M1', 'P'], 'M2', ['M1', 'M2', 'P']),
+    ('missing saved hop', ['A', ' Old '], 'C', ['A', 'C']),
+    ('mixed policy group', ['A', 'Mixed'], 'C', ['A', 'Mixed', 'C']),
+  ]) {
+    testWidgets('editing a saved chain from the list: $scenario', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final original = ProxyChain(
+        id: 37,
+        name: 'Saved chain',
+        proxies: initial,
+      );
+      final action = _SetupAction(
+        chainConfig: {
+          'proxies': [
+            for (final name in ['A', 'B', 'C', 'P', 'M1', 'M2'])
+              {
+                'name': name,
+                'type': 'ss',
+                if (name == 'M1' || name == 'M2') 'oixcloud-managed': true,
+              },
+          ],
+          'proxy-groups': [
+            {
+              'name': 'Mixed',
+              'type': 'select',
+              'proxies': ['M1', 'P'],
+            },
+          ],
+        },
+      );
+      final (profiles, messages) = await _pump(
+        tester,
+        action,
+        _baseProfile.copyWith(proxyChains: [original]),
+        viewSize: const Size(800, 1400),
+      );
+      final editor = find.byType(ProxyChainEditView);
+      Future<void> save() async {
+        await tester.tap(find.byTooltip(_l10n.save));
+        await tester.pumpAndSettle();
+      }
+
+      final scrollable = find
+          .descendant(of: editor, matching: find.byType(Scrollable))
+          .first;
+      Future<void> reveal(Finder row) async {
+        tester.state<ScrollableState>(scrollable).position.jumpTo(0);
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(row, 160, scrollable: scrollable);
+        await Scrollable.ensureVisible(tester.element(row), alignment: 0.5);
+        await tester.pumpAndSettle();
+      }
+
+      Finder selected(String name) => find.byWidgetPredicate(
+        (widget) =>
+            widget is ReorderableDelayedDragStartListener &&
+            widget.key is ValueKey<String> &&
+            (widget.key! as ValueKey<String>).value.trim() == name,
+      );
+
+      await _openSavedChain(tester, original);
+      final candidate = find.byKey(ValueKey('proxy-chain-candidate-$picked'));
+      await reveal(candidate);
+      if (scenario == 'managed prefix') {
+        expect(
+          find.descendant(of: candidate, matching: find.text('M2 → P')),
+          findsOneWidget,
+        );
+      }
+      await tester.tap(candidate);
+      await tester.pumpAndSettle();
+      if (scenario == 'missing saved hop') {
+        await save();
+        expect(editor, findsOneWidget);
+        expect(profiles.state.single.proxyChains, [original]);
+        expect(action.validatedChains, isEmpty);
+        await reveal(selected('Old'));
+        expect(
+          find.descendant(
+            of: selected('Old'),
+            matching: find.textContaining(
+              _l10n.proxyChainUnavailableNodeTip('Old'),
+            ),
+          ),
+          findsOneWidget,
+        );
+        await tester.tap(
+          find.descendant(
+            of: selected('Old'),
+            matching: find.byTooltip(_l10n.delete),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+      final expected = original.copyWith(proxies: ordered);
+      if (scenario == 'mixed policy group') {
+        action.validationError = const FormatException(
+          'Core refused group members',
+        );
+        await save();
+        expect(action.validatedChains.single, [expected]);
+        expect(messages.single, contains('Core refused group members'));
+        expect(profiles.state.single.proxyChains, [original]);
+        expect(editor, findsOneWidget);
+        action.validationError = null;
+      }
+      await save();
+      expect(editor, findsNothing);
+      expect(profiles.state.single.proxyChains, [expected]);
+      expect(action.validatedChains.last, [expected]);
+      expect(action.applies, 1);
+      await _openSavedChain(tester, original);
+      for (final (index, name) in ordered.indexed) {
+        final row = selected(name);
+        await reveal(row);
+        expect(
+          tester.widget<ReorderableDelayedDragStartListener>(row).index,
+          index,
+        );
+      }
+    });
+  }
 
   testWidgets('groups can be picked as intermediate hops', (tester) async {
     ProxyChain? result;

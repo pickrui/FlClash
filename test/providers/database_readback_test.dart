@@ -8,8 +8,11 @@ import 'dart:io';
 
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/database/database.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/database.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -93,6 +96,129 @@ void main() {
         (1, 'Edited'),
         (2, 'Imported'),
       ]);
+    },
+  );
+
+  test('a queued profile edit cannot recreate a deleted row', () async {
+    const original = Profile(
+      id: 1,
+      label: 'Original',
+      autoUpdateDuration: Duration(hours: 1),
+    );
+    await database.putProfile(original);
+    container.listen(profilesProvider, (_, _) {});
+    snapshots.add([original]);
+    await container.read(profilesStreamProvider.future);
+    await container.pump();
+    unawaited(databaseWriteQueue.add(() => releaseWrite.future));
+    var finished = false;
+    final saving = container
+        .read(profilesProvider.notifier)
+        .updateProfile(original.id, (row) => row.copyWith(label: 'Edited'))
+        .then((_) => finished = true);
+    await database.profiles.remove((row) => row.id.equals(original.id));
+    expect(finished, isFalse);
+    releaseWrite.complete();
+    await saving;
+    expect(await database.profilesDao.all().get(), isEmpty);
+  });
+
+  test(
+    'a library save keeps the shared catalog for the next node edit',
+    () async {
+      const a = ProfileProxy(id: 11, proxy: {'name': 'A', 'type': 'direct'});
+      const b = ProfileProxy(id: 12, proxy: {'name': 'B', 'type': 'direct'});
+      const c = ProfileProxy(id: 13, proxy: {'name': 'C', 'type': 'direct'});
+      const chain = ProxyChain(id: 21, enable: true, proxies: ['A', 'B']);
+      final target = Profile.custom(label: 'Target').copyWith(id: 1);
+      final other = target.copyWith(
+        id: 2,
+        label: 'Other',
+        proxyChains: [chain],
+      );
+      await database.putProfile(target);
+      await database.putProfile(other);
+      await database.customProxiesDao.setAll([a, b]);
+      container.listen(profilesProvider, (_, _) {});
+      snapshots.add([target, other]);
+      await container.read(profilesStreamProvider.future);
+      await container.read(customProxiesProvider.future);
+      await container.pump();
+      await container
+          .read(clashProviderLibraryProvider)
+          .save(
+            const ClashProvider(
+              id: 1,
+              kind: ProviderKind.rule,
+              label: 'rules',
+              url: 'https://fixture.invalid/rules',
+            ),
+          );
+      expect(container.read(profilesProvider).first.profileProxies, [a, b]);
+      await container
+          .read(profilesProvider.notifier)
+          .updateProfile(
+            target.id,
+            (profile) => profile.copyWith(
+              profileProxies: [...profile.profileProxies, c],
+            ),
+          );
+      expect(await database.customProxiesDao.all().get(), [a, b, c]);
+      final saved = await database.profilesDao.all().get();
+      expect(saved.singleWhere((row) => row.id == other.id).proxyChains, [
+        chain,
+      ]);
+      expect(container.read(profilesProvider).last.profileProxies, [a, b, c]);
+    },
+  );
+
+  test(
+    'a rejected profile edit restores the row without a stream update',
+    () async {
+      const chain = ProxyChain(id: 21, enable: true, proxies: ['A', 'B']);
+      final original = Profile.custom(label: 'Target')
+          .copyWith(id: 1, proxyChains: [chain]);
+      await database.putProfile(original);
+      container.listen(profilesProvider, (_, _) {});
+      snapshots.add([original]);
+      await container.read(profilesStreamProvider.future);
+      await container.read(customProxiesProvider.future);
+      await container.pump();
+      final restored = Completer<void>();
+      container.listen(profilesProvider, (_, next) {
+        if (next.single.proxyChains.single.enable && !restored.isCompleted) {
+          restored.complete();
+        }
+      });
+      await database.customStatement(
+        "CREATE TRIGGER reject_edit BEFORE UPDATE ON profiles BEGIN SELECT RAISE(ABORT, 'fixture failure'); END",
+      );
+      final onError = FlutterError.onError;
+      final reports = <String?>[];
+      FlutterError.onError = (details) => reports.add(details.library);
+      try {
+        final saving = container
+            .read(profilesProvider.notifier)
+            .updateProfile(
+              1,
+              (profile) => profile.copyWith(
+                proxyChains: [chain.copyWith(enable: false)],
+              ),
+            );
+        expect(
+          container.read(profilesProvider).single.proxyChains.single.enable,
+          isFalse,
+        );
+        await expectLater(saving, throwsA(anything));
+        await expectLater(waitForPendingDatabaseWrites(), throwsA(anything));
+        await restored.future.timeout(const Duration(seconds: 2));
+        expect(reports, ['database']);
+        expect((await database.profilesDao.all().get()).single.proxyChains, [
+          chain,
+        ]);
+      } finally {
+        FlutterError.onError = onError;
+      }
     },
   );
 

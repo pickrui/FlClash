@@ -15,6 +15,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/features/mitm/module_editor.dart';
+import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/mitm_modules.dart';
@@ -78,6 +79,10 @@ class _Actions extends MitmModulesAction {
   void build() {}
 
   @override
+  Future<void> setEnabled(MitmModule reviewed, bool enabled) =>
+      putModule(reviewed.copyWith(enabled: enabled));
+
+  @override
   Future<void> putModule(MitmModule module, {bool first = false}) async {
     final modules = ref.read(mitmModulesProvider).value!;
     ref.read(mitmModulesProvider.notifier).replaceFromDatabase([
@@ -103,6 +108,26 @@ class _Actions extends MitmModulesAction {
       },
     ),
   );
+}
+
+class _DelayedCreate extends _Actions {
+  final created = Completer<MitmModule>();
+
+  @override
+  Future<MitmModule> create(
+    String text, {
+    Map<String, List<int>> attachments = const {},
+  }) => created.future;
+}
+
+class _EditorCommonAction extends CommonAction {
+  @override
+  Future<T?> loadingRun<T>(
+    FutureOr<T> Function() action, {
+    String? title,
+    required LoadingTag? tag,
+    bool silence = false,
+  }) async => action();
 }
 
 class _Messages extends StatefulWidget {
@@ -151,6 +176,7 @@ void main() {
     WidgetTester tester,
     Widget child, {
     CoreHandlerInterface? core,
+    _DelayedCreate? saving,
   }) async {
     tester.view.physicalSize = const Size(1000, 2000);
     tester.view.devicePixelRatio = 1;
@@ -160,7 +186,9 @@ void main() {
     container = ProviderContainer(
       overrides: [
         mitmModulesProvider.overrideWith(_Modules.new),
-        mitmModulesActionProvider.overrideWith(_Actions.new),
+        mitmModulesActionProvider.overrideWith(() => saving ?? _Actions()),
+        if (saving != null)
+          commonActionProvider.overrideWith(_EditorCommonAction.new),
         if (core != null)
           coreHandlerProvider.overrideWithValue(
             CoreController.forTesting(handler: core),
@@ -443,4 +471,52 @@ void main() {
 
     expect(find.text(appLocalizations.mitmNewModule), findsOneWidget);
   });
+
+  testWidgets(
+    'leaving a module editor waits for its save and closes its own route',
+    (tester) async {
+      final saving = _DelayedCreate();
+      await pump(
+        tester,
+        Consumer(
+          builder: (context, ref, _) => TextButton(
+            onPressed: () => openMitmModuleEditor(context, ref),
+            child: const Text('New module'),
+          ),
+        ),
+        saving: saving,
+      );
+      await tester.tap(find.text('New module'));
+      await tester.pumpAndSettle();
+      final editor = find.byType(EditorPage);
+      final context = tester.element(editor);
+      final route = ModalRoute.of(context)!;
+      var finished = false;
+      final closing = tester
+          .widget<EditorPage>(editor)
+          .onPop!(
+            context,
+            'New module',
+            const EditorContent.text('#!name=fixture'),
+          )
+          .then((pop) {
+            finished = true;
+            return pop;
+          });
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(appLocalizations.save));
+      await tester.pumpAndSettle();
+      expect(finished, isFalse);
+      final cover = BaseNavigator.push<void>(context, const Text('Other page'));
+      await tester.pumpAndSettle();
+      saving.created.complete(_remote);
+      await tester.pumpAndSettle();
+      expect(await closing, isFalse);
+      expect(route.isActive, isFalse);
+      expect(find.text('Other page'), findsOneWidget);
+      globalState.navigatorKey.currentState!.pop();
+      await tester.pumpAndSettle();
+      await cover;
+    },
+  );
 }

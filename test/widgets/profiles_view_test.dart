@@ -12,6 +12,7 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/status_manager.dart';
+import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -631,6 +632,38 @@ void main() {
       ], () => CustomProfileView(profileId: created.id, isNew: true));
       return action;
     }
+
+    testWidgets('repeated import commands share one source editor', (
+      tester,
+    ) async {
+      final action = await openEditor(
+        tester,
+        _Profiles([created]),
+        _SetupAction(),
+      );
+      final scaffold = find.byType(Scaffold);
+      final anchor =
+          tester.widget<Scaffold>(scaffold).actions!.single as PopupAnchor;
+      final menu = anchor.popupBuilder(tester.element(scaffold)) as PopupMenu;
+      final edit = menu.items
+          .singleWhere(
+            (item) => item.label == AppLocalizations.current.importText,
+          )
+          .onPressed!;
+      edit();
+      edit();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byType(EditorPage, skipOffstage: false), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(CustomProfileView), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tester.pump(Duration.zero);
+      expect(action.deleted, [created.id]);
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('is discarded when left as created', (tester) async {
       final setup = _SetupAction();

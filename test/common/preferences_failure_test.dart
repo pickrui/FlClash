@@ -126,6 +126,21 @@ void main() {
     expect(await preferences.getConfigMap(), isNull);
   });
 
+  test('interrupted config replacement remains distinguishable from a legacy install', () async {
+    expect(await preferences.getAppliedConfigMd5(), isNull);
+    await preferences.markAndroidConfigPending();
+    await preferences.saveShareState(shared);
+    rejectWrites = true;
+    await expectLater(
+      preferences.saveAppliedConfigMd5('accepted'),
+      throwsStateError,
+    );
+    expect(persisted['flutter.applied_config_md5'], 'pending');
+    rejectWrites = false;
+    await preferences.saveAppliedConfigMd5('accepted');
+    expect(persisted['flutter.applied_config_md5'], 'accepted');
+  });
+
   for (final throws in [false, true]) {
     test(
       'one failed preference removal does not retain other config (throws: $throws)',

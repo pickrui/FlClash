@@ -103,6 +103,7 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
   String? _error;
   bool _batch = false;
   bool _batchAttempted = false;
+  bool _submitted = false;
   ParsedInput<String>? _cachedBatch;
   final _batchText = TextEditingController();
   ParsedInput<String> get _parsed => _cachedBatch ??= parseLinkInput(
@@ -164,6 +165,7 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
   }
 
   void _save() {
+    if (_submitted) return;
     final url = _url.text.trim();
     if (_batch) {
       final parsed = _parsed;
@@ -182,15 +184,14 @@ class _NamedUrlFormState extends State<_NamedUrlForm> {
       return;
     }
     final item = (label: _label.text.trim(), url: url);
-    if (widget.enableBatch) {
-      _finish([item]);
-    } else {
-      Navigator.of(context).pop(item);
-    }
+    _finish([item]);
   }
 
   void _finish(List<NamedUrl> links) {
-    if (widget.withAgeSecretKey) {
+    _submitted = true;
+    if (!widget.enableBatch) {
+      Navigator.of(context).pop(links.single);
+    } else if (widget.withAgeSecretKey) {
       Navigator.of(context).pop<NamedProfileLinks>((
         links: links,
         ageSecretKey: _batch ? '' : _ageSecretKey.text.trim(),

@@ -58,8 +58,14 @@ class _FiltersViewState extends ConsumerState<FiltersView> {
   }
 
   Future<String?> _checkRegex(String regex) async {
-    final errors = await checkFilters(ref, [regex]);
-    return errors?[0];
+    try {
+      final errors = await ref.read(coreHandlerProvider).validateFilters([
+        regex,
+      ]);
+      return errors[0];
+    } catch (_) {
+      return null;
+    }
   }
 
   void _handleDelete(Set<String> labels) {
@@ -225,20 +231,18 @@ class _FilterFormState extends State<_FilterForm> {
     setState(() {
       _checking = true;
     });
-    String? error;
-    try {
-      error = await widget.checkRegex(filter.regex);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _checking = false;
-          _attempted = true;
-          _regexError = error;
-        });
-      }
-    }
-    if (error == null && mounted) {
-      Navigator.of(context).pop(filter);
+    final error = await widget.checkRegex(filter.regex);
+    if (!mounted) return;
+    final sameRegex = _regexController.text.trim() == filter.regex;
+    setState(() {
+      _checking = false;
+      _attempted = true;
+      _regexError = sameRegex ? error : null;
+    });
+    if (sameRegex &&
+        _labelController.text.trim() == filter.label &&
+        error == null) {
+      closePage(context, filter);
     }
   }
 

@@ -161,6 +161,8 @@ class _Writes {
     revision++;
   }
 
+  void requireReadback() => _missed = true;
+
   void finish() {
     _pending--;
     if (_pending == 0 && _missed) {
@@ -258,6 +260,13 @@ class Profiles extends _$Profiles {
     }
     final profiles =
         (changed ? databaseProfiles : null) ?? stateOrNull ?? const <Profile>[];
+    return _withSharedProxies(profiles, proxies);
+  }
+
+  List<Profile> _withSharedProxies(
+    List<Profile> profiles,
+    List<ProfileProxy>? proxies,
+  ) {
     return proxies == null
         ? profiles
         : [
@@ -272,18 +281,17 @@ class Profiles extends _$Profiles {
   }
 
   void _reread() {
+    unawaited(refreshFromDatabase().catchError(_reportReread));
+  }
+
+  Future<void> refreshFromDatabase() async {
+    if (!_writes.admit()) return;
     final revision = _writes.revision;
-    database.profilesDao.all().get().then((rows) {
-      if (ref.mounted && revision == _writes.revision && _writes.admit()) {
-        final proxies = ref.read(customProxiesProvider).value;
-        state = proxies == null
-            ? rows
-            : [
-                for (final profile in rows)
-                  profile.copyWith(profileProxies: proxies),
-              ];
-      }
-    }, onError: _reportReread);
+    final rows = await database.profilesDao.all().get();
+    if (!ref.mounted || revision != _writes.revision) return;
+    await ref.read(customProxiesProvider.future);
+    if (!ref.mounted || revision != _writes.revision) return;
+    state = _withSharedProxies(rows, ref.read(customProxiesProvider).value);
   }
 
   Future<void> _queueWrite(
@@ -293,7 +301,7 @@ class Profiles extends _$Profiles {
     _writes.start();
     return queueDatabaseWrite(
       action,
-      onError: () => reloadProviderAfterDatabaseError(ref),
+      onError: _writes.requireReadback,
       reportOnWait: reportOnWait,
       onFinished: _writes.finish,
     );
@@ -454,10 +462,13 @@ class Profiles extends _$Profiles {
     );
   }
 
-  void updateProfile(int profileId, Profile Function(Profile profile) builder) {
+  Future<void> updateProfile(
+    int profileId,
+    Profile Function(Profile profile) builder,
+  ) {
     final index = state.indexWhere((element) => element.id == profileId);
     if (index == -1) {
-      return;
+      return Future.value();
     }
     final List<Profile> profilesTemp = List.from(state);
     final previous = profilesTemp[index];
@@ -466,15 +477,18 @@ class Profiles extends _$Profiles {
       previous.profileProxies,
       newProfile.profileProxies,
     )) {
-      unawaited(
-        setCustomProxies(newProfile.profileProxies, editedProfile: newProfile),
+      return setCustomProxies(
+        newProfile.profileProxies,
+        editedProfile: newProfile,
       );
-      return;
     }
     profilesTemp[index] = newProfile;
     state = profilesTemp;
-    _queueWrite(
-      () => database.putProfile(newProfile.copyWith(profileProxies: const [])),
+    return _queueWrite(
+      () => database.putProfile(
+        newProfile.copyWith(profileProxies: const []),
+        existingOnly: true,
+      ),
     );
   }
 

@@ -243,9 +243,17 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
       l.tailscaleAuthKey,
   ];
 
+  bool get _hasKeyForControlUrl {
+    final saved = _saved;
+    return _hasSavedAuthKey == true &&
+        saved != null &&
+        saved.effectiveControlUrl ==
+            saved.copyWith(controlUrl: _controlUrl.text).effectiveControlUrl;
+  }
+
   bool get _needsAuthKey =>
       _loginMethod == TailscaleLoginMethod.authKey &&
-      _hasSavedAuthKey == false &&
+      !_hasKeyForControlUrl &&
       _authKey.text.trim().isEmpty;
 
   Future<void> _showError(String message, {String? title}) {
@@ -277,24 +285,21 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     if (!_isPageActive || _busy || !_authKeyStateReady) return null;
     if (_invalidFields(context.appLocalizations).isNotEmpty) return null;
     final action = _action;
+    final keepSavedKey = _hasKeyForControlUrl;
+    final key = _authKey.text.trim();
     setState(() => _busy = true);
     try {
       final saved = await action.saveNetwork(
         _draft(),
-        authKey: _loginMethod == TailscaleLoginMethod.authKey
-            ? _authKey.text
-            : null,
+        authKey: _loginMethod == TailscaleLoginMethod.authKey ? key : null,
       );
       if (!mounted || !_isPageActive) return saved;
-      final keyEntered = _authKey.text.trim().isNotEmpty;
       setState(() {
         _authKeyLoadRevision++;
         _authKeyLoadError = null;
-        if (_loginMethod == TailscaleLoginMethod.interactive) {
-          _hasSavedAuthKey = false;
-        } else if (keyEntered) {
-          _hasSavedAuthKey = true;
-        }
+        _hasSavedAuthKey =
+            saved.loginMethod == TailscaleLoginMethod.authKey &&
+            (keepSavedKey || key.isNotEmpty);
         _authKey.clear();
       });
       startPolling();
@@ -622,7 +627,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
                   ),
               ],
             ),
-            if (_hasSavedAuthKey == true) _footnote(l.tailscaleAuthKeySaved),
+            if (_hasKeyForControlUrl) _footnote(l.tailscaleAuthKeySaved),
             if (!_authKeyValid)
               _footnote(l.tailscaleAuthKeyInvalid, color: error),
           ],

@@ -43,6 +43,7 @@ void main() {
   test('retains both the source and runtime copy of active profiles', () {
     write(profiles, '1.yaml');
     write(profiles, '.1.yaml');
+    write(profiles, '1.yaml.http-cache.json');
     write(scripts, '3.js');
     write(p.join(providers, '1'), 'proxy.yaml');
     expect(scan(), isEmpty);
@@ -51,6 +52,7 @@ void main() {
   test('collects obsolete profiles, runtime copies, scripts and provider directories', () {
     final old = write(profiles, '2.yaml');
     final runtime = write(profiles, '.2.yaml');
+    final cache = write(profiles, '2.yaml.http-cache.json');
     final script = write(scripts, '4.js');
     write(p.join(providers, '2'), 'proxy.yaml');
     expect(
@@ -58,6 +60,7 @@ void main() {
       unorderedEquals([
         old.path,
         runtime.path,
+        cache.path,
         script.path,
         p.join(providers, '2'),
       ]),
@@ -67,6 +70,8 @@ void main() {
   test('preserves recovery artifacts and unrecognized user files', () {
     write(profiles, '1.yaml.write-backup-fixture');
     write(profiles, 'notes.txt');
+    write(profiles, '.2.yaml.http-cache.json');
+    write(profiles, '2.yaml.http-cache.json.bak');
     write(profiles, '99999999999999999999999999.yaml');
     write(scripts, '.script-delete-3.js');
     write(scripts, 'custom.js');
@@ -83,6 +88,20 @@ void main() {
       Link(p.join(providers, '2')).createSync(root.path);
       expect(scan(), isEmpty);
       expect(outside.readAsStringSync(), 'fixture');
+    },
+    skip: Platform.isWindows ? 'creating symlinks requires privileges' : false,
+  );
+
+  test(
+    'skips profile and script directories redirected through links',
+    () {
+      final outside = p.join(root.path, 'moved');
+      write(outside, '2.yaml.http-cache.json');
+      write(outside, '4.js');
+      write(p.join(outside, 'providers', '2'), 'proxy.yaml');
+      Link(profiles).createSync(outside);
+      Link(scripts).createSync(outside);
+      expect(scan(libraryCacheKeys: {}), isEmpty);
     },
     skip: Platform.isWindows ? 'creating symlinks requires privileges' : false,
   );

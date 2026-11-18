@@ -91,6 +91,38 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a replaced document ignores a late read error', (tester) async {
+    final old = Completer<CodeForgeDocument>();
+    final actions = _CommonAction();
+    final content = ValueNotifier<String?>(null);
+    addTearDown(content.dispose);
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          commonActionProvider.overrideWith(() => actions),
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
+        ],
+        child: ValueListenableBuilder<String?>(
+          valueListenable: content,
+          builder: (_, value, _) => EditorPage(
+            title: 'Editor',
+            load: value == null ? () => old.future : null,
+            content: value,
+          ),
+        ),
+      ),
+    );
+    content.value = 'new document';
+    await settle(tester);
+    old.completeError(StateError('old read failed'));
+    await settle(tester);
+    expect(actions.errors, isEmpty);
+    expect(
+      tester.widget<CodeForge>(find.byType(CodeForge)).controller.text,
+      'new document',
+    );
+  });
+
   testWidgets('an edit handed to the page opens to save, and undoes', (
     tester,
   ) async {
@@ -128,6 +160,31 @@ void main() {
     await settle(tester, 12);
     expect(controller.text, 'mode: rule');
     expect(controller.isModified, isFalse);
+  });
+
+  testWidgets('a pending initial edit preserves newer typing', (tester) async {
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
+        ],
+        child: EditorPage(
+          title: 'Editor',
+          content: 'original',
+          edit: (text) {
+            scheduleMicrotask(() {
+              final editor = tester.widget<CodeForge>(find.byType(CodeForge));
+              editor.controller.replaceRange(0, 0, 'typed ');
+            });
+            return 'transformed $text';
+          },
+          onSave: (_, _, _) {},
+        ),
+      ),
+    );
+    await settle(tester);
+    final editor = tester.widget<CodeForge>(find.byType(CodeForge));
+    expect(editor.controller.text, 'typed original');
   });
 
   testWidgets('mounts the editor only once loaded content arrives', (

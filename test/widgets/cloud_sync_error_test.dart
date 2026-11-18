@@ -419,6 +419,55 @@ void main() {
     );
   }
 
+  for (final outcome in ['expired', 'replaced', 'replaced during sync']) {
+    testWidgets('node filter recovery cancels when the session is $outcome', (
+      tester,
+    ) async {
+      final service = CloudApiService()..setToken('original-session');
+      addTearDown(() => service.setToken(null));
+      final account = _RecoveryAccount()
+        ..syncGate = Completer<void>()
+        ..initialProfile = _profile();
+      final api = _RecoveryNodeFilterApi()
+        ..onRecovery = () {
+          if (outcome == 'expired') {
+            service.setToken(null);
+            throw const CloudApiException('Unauthorized');
+          }
+          service.setToken('replacement-session');
+          throw const CloudApiStaleSessionException();
+        };
+      var checks = 0;
+      await _pumpCloudPage(
+        tester,
+        () async {
+          if (++checks == 1) throw _certificateError();
+        },
+        account: account,
+        nodeFilterApi: api,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Allow Temporarily and Sync'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Allow Temporarily'));
+      await tester.pump();
+      if (outcome == 'replaced during sync') {
+        service.setToken('replacement-session');
+      }
+      account.syncGate!.complete();
+      await tester.pumpAndSettle();
+      expect(
+        api.attempts.where((temporary) => temporary),
+        hasLength(outcome == 'replaced during sync' ? 0 : 1),
+      );
+      expect(account.unauthorized, outcome == 'expired' ? 1 : 0);
+      expect(
+        find.textContaining(AppLocalizations.current.cloudApiRequestCanceled),
+        findsOneWidget,
+      );
+    });
+  }
+
   testWidgets('a logged-out certificate retry only checks the API', (
     tester,
   ) async {
@@ -645,6 +694,10 @@ class _RecoveryAccount extends _FailedAccount {
   String? refreshError;
   CloudProfile? initialProfile;
   bool returnEmptyProfile = false;
+  var unauthorized = 0;
+
+  @override
+  Future<void> handleUnauthorized() async => unauthorized++;
 
   @override
   CloudAccountState build() => super.build().copyWith(profile: initialProfile);
@@ -686,11 +739,13 @@ CloudProfile _profile() => CloudProfile(
 
 class _RecoveryNodeFilterApi implements CloudNodeFilterApi {
   final attempts = <bool>[];
+  void Function()? onRecovery;
 
   @override
   Future<NodeFilterCatalog> fetchNodeFilter() async {
     attempts.add(FlClashTemporaryTls.allowBadCertificate);
     if (!FlClashTemporaryTls.allowBadCertificate) throw _certificateError();
+    onRecovery?.call();
     return NodeFilterCatalog.fromJson({
       'available': true,
       'customized': false,

@@ -61,6 +61,29 @@ void main() {
   );
 
   testRunStateWidgets(
+    'a clock rollback keeps the acknowledged service running',
+    (tester) async {
+      final started = DateTime.now().add(const Duration(hours: 1));
+      await globalState.syncServiceRunState(
+        query: () async => ServiceRunState(startTime: started),
+        tasks: [],
+      );
+      expect(globalState.isStart, isTrue);
+      expect(globalState.startTime, started);
+      expect(container.read(runTimeProvider), 0);
+    },
+  );
+
+  test('clearing a crashed run also clears its traffic', () {
+    const traffic = Traffic(up: 100, down: 200);
+    container.read(trafficsProvider.notifier).addTraffic(traffic);
+    container.read(totalTrafficProvider.notifier).value = traffic;
+    globalState.clearRunState();
+    expect(container.read(trafficsProvider).list, isEmpty);
+    expect(container.read(totalTrafficProvider), const Traffic());
+  });
+
+  testRunStateWidgets(
     'resume recovers a running native session after a lost event',
     (tester) async {
       final started = DateTime.now().subtract(const Duration(minutes: 1));
@@ -187,12 +210,27 @@ void main() {
       expect(listenerStates, [true, false]);
     });
 
-    test('keeps the listeners of a service that was already running', () async {
-      globalState.startTime = DateTime.now().subtract(
-        const Duration(minutes: 1),
-      );
-      await expectLater(globalState.handleStart([]), throwsStateError);
-      expect(listenerStates, [true]);
+    test(
+      'keeps the acknowledged state of a service that was already running',
+      () async {
+        final started = DateTime.now().subtract(const Duration(minutes: 1));
+        await globalState.syncServiceRunState(
+          query: () async =>
+              ServiceRunState(startTime: started, vpnOptions: _options),
+        );
+        await expectLater(globalState.handleStart([]), throwsStateError);
+        expect(listenerStates, [true]);
+        expect(globalState.startTime, started);
+        expect(container.read(runningVpnOptionsProvider)?.options, _options);
+      },
+    );
+
+    test('a stopped response closes listeners opened for that start', () async {
+      globalState.startService = () async => const ServiceRunState();
+      await globalState.handleStart([]);
+      expect(listenerStates, [true, false]);
+      expect(globalState.startTime, isNull);
+      expect(container.read(runTimeProvider), isNull);
     });
 
     test('leaves the listeners to a stop that superseded it', () async {

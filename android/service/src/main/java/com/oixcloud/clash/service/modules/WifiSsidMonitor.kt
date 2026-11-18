@@ -28,10 +28,9 @@ class WifiSsidMonitor(private val context: Context, private val onChange: () -> 
     private val lock = Any()
     private val names = mutableMapOf<Network, String?>()
     private var callback: ConnectivityManager.NetworkCallback? = null
-    private var active = false
     private val poll = object : Runnable {
         override fun run(): Unit = synchronized(lock) {
-            if (!active) return
+            if (callback == null) return
             onChange()
             handler.postDelayed(this, 10_000)
         }
@@ -53,19 +52,18 @@ class WifiSsidMonitor(private val context: Context, private val onChange: () -> 
     }
 
     fun start(): Unit = synchronized(lock) {
-        if (active) return
-        active = true
+        if (callback != null) return
         val listener = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             object : ConnectivityManager.NetworkCallback(ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
-                override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) = changed(network, caps)
-                override fun onLost(network: Network) = lost(network)
-                override fun onLinkPropertiesChanged(network: Network, properties: LinkProperties) = linksChanged()
+                override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) = changed(this, network, caps)
+                override fun onLost(network: Network) = lost(this, network)
+                override fun onLinkPropertiesChanged(network: Network, properties: LinkProperties) = linksChanged(this)
             }
         } else {
             object : ConnectivityManager.NetworkCallback() {
-                override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) = changed(network, caps)
-                override fun onLost(network: Network) = lost(network)
-                override fun onLinkPropertiesChanged(network: Network, properties: LinkProperties) = linksChanged()
+                override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) = changed(this, network, caps)
+                override fun onLost(network: Network) = lost(this, network)
+                override fun onLinkPropertiesChanged(network: Network, properties: LinkProperties) = linksChanged(this)
             }
         }
         callback = listener
@@ -108,29 +106,29 @@ class WifiSsidMonitor(private val context: Context, private val onChange: () -> 
         }.getOrDefault(false)
     }
 
-    private fun linksChanged() = synchronized(lock) {
-        if (active) onChange()
+    private fun linksChanged(listener: ConnectivityManager.NetworkCallback) = synchronized(lock) {
+        if (callback === listener) onChange()
     }
 
-    private fun changed(network: Network, caps: NetworkCapabilities): Unit = synchronized(lock) {
-        if (!active) return
+    private fun changed(listener: ConnectivityManager.NetworkCallback, network: Network, caps: NetworkCapabilities): Unit = synchronized(lock) {
+        if (callback !== listener) return
         names[network] = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             normalizeSsid((caps.transportInfo as? WifiInfo)?.ssid)
         } else null
         onChange()
     }
 
-    private fun lost(network: Network): Unit = synchronized(lock) {
-        if (!active) return
+    private fun lost(listener: ConnectivityManager.NetworkCallback, network: Network): Unit = synchronized(lock) {
+        if (callback !== listener) return
         names.remove(network)
         onChange()
     }
 
     fun stop() = synchronized(lock) {
-        active = false
         handler.removeCallbacks(poll)
-        callback?.let { runCatching { connectivity?.unregisterNetworkCallback(it) } }
+        val listener = callback
         callback = null
+        listener?.let { runCatching { connectivity?.unregisterNetworkCallback(it) } }
         names.clear()
     }
 }

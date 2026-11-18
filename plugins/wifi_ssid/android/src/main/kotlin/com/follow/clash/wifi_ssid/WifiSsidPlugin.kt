@@ -29,7 +29,6 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener
-import java.util.concurrent.ConcurrentHashMap
 
 class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var channel: MethodChannel
@@ -41,10 +40,8 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var pendingPermissionResult: Result? = null
     private var rationaleBeforeRequest: Map<String, Boolean> = emptyMap()
     private var wifiNetworkCallback: ConnectivityManager.NetworkCallback? = null
-    private val wifiInfoByNetwork = ConcurrentHashMap<Network, WifiInfo>()
+    private val wifiInfoByNetwork = mutableMapOf<Network, WifiInfo>()
     private val pendingSsidResults = mutableListOf<Result>()
-    @Volatile
-    private var hasPendingSsid = false
     private val mainHandler = Handler(Looper.getMainLooper())
     private var ssidTimeout: Runnable? = null
 
@@ -153,7 +150,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             result.error(ERROR_UNAVAILABLE, "Context not available", null)
             return
         }
-        refreshWifiNetworkCallback()
+        registerWifiNetworkCallback()
         forgetGrantedDenials(ctx)
         result.success(
             when {
@@ -174,7 +171,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             return
         }
         if (missingPermission(ctx) == null) {
-            refreshWifiNetworkCallback()
+            registerWifiNetworkCallback()
             forgetGrantedDenials(ctx)
             result.success(PERMISSION_GRANTED)
             return
@@ -231,7 +228,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private fun settleRequest(activity: Activity): Int {
         val rationaleBefore = rationaleBeforeRequest
         rationaleBeforeRequest = emptyMap()
-        refreshWifiNetworkCallback()
+        registerWifiNetworkCallback()
         forgetGrantedDenials(activity)
         val missing = missingPermission(activity) ?: return PERMISSION_GRANTED
         if (missing == Manifest.permission.ACCESS_BACKGROUND_LOCATION) {
@@ -309,7 +306,6 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 return
             }
             pendingSsidResults.add(result)
-            hasPendingSsid = true
             if (!registerWifiNetworkCallback()) {
                 completePendingSsidResults(ssid = null)
                 return
@@ -340,11 +336,6 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
     }
 
-    private fun refreshWifiNetworkCallback() {
-        unregisterWifiNetworkCallback()
-        registerWifiNetworkCallback()
-    }
-
     private fun registerWifiNetworkCallback(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             return false
@@ -363,30 +354,26 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 network: Network,
                 capabilities: NetworkCapabilities,
             ) {
+                if (wifiNetworkCallback !== this) return
                 val wifiInfo = capabilities.transportInfo as? WifiInfo
                 if (wifiInfo == null) {
                     wifiInfoByNetwork.remove(network)
                 } else {
                     wifiInfoByNetwork[network] = wifiInfo
                 }
-                if (!hasPendingSsid) {
-                    return
-                }
-                currentSsid()?.let { ssid ->
-                    mainHandler.post {
-                        completePendingSsidResults(ssid = ssid)
-                    }
+                if (pendingSsidResults.isNotEmpty()) {
+                    currentSsid()?.let { completePendingSsidResults(ssid = it) }
                 }
             }
 
             override fun onLost(network: Network) {
-                wifiInfoByNetwork.remove(network)
+                if (wifiNetworkCallback === this) wifiInfoByNetwork.remove(network)
             }
         }
         val request = NetworkRequest.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             .build()
-        return runCatching { cm.registerNetworkCallback(request, callback) }
+        return runCatching { cm.registerNetworkCallback(request, callback, mainHandler) }
             .onSuccess { wifiNetworkCallback = callback }
             .isSuccess
     }
@@ -414,7 +401,6 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         val results = pendingSsidResults.toList()
         pendingSsidResults.clear()
-        hasPendingSsid = false
         results.forEach { result ->
             if (errorMessage == null) {
                 result.success(ssid)

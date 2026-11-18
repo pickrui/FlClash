@@ -8,7 +8,6 @@ import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/theme_manager.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/ui.dart';
-import 'package:fl_clash/providers/action.dart';
 import 'package:material_ui/material_ui.dart' hide Theme, ThemeData, ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -102,13 +101,4 @@ Widget wrapAppScopes(
             ),
     ),
   );
-}
-
-class TestBackBlockAction extends BackBlockAction {
-  @override
-  void build() {}
-  @override
-  void backBlock() {}
-  @override
-  void unBackBlock() {}
 }

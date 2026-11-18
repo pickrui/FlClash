@@ -23,6 +23,7 @@ import com.oixcloud.clash.service.RemoteService
 import com.oixcloud.clash.service.models.NotificationParams
 import com.oixcloud.clash.service.models.VpnOptions
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -41,6 +42,30 @@ import org.robolectric.shadows.ShadowVpnService
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], manifest = Config.NONE, application = Application::class)
 class TempActivityTest {
+    @Test
+    fun coldStartsKeepLegacySettingsAndRejectInterruptedConfigWrites() = runBlocking {
+        val app = RuntimeEnvironment.getApplication()
+        GlobalState.init(app)
+        val store = app.getSharedPreferences("FlutterSharedPreferences", Application.MODE_PRIVATE)
+        val original = State.sharedState
+        val json = """{"currentProfileName":"accepted","vpnOptions":{"enable":true}}"""
+        try {
+            store.edit().putString("flutter.sharedState", json).commit()
+            assertEquals(true, app.sharedState.vpnOptions?.enable)
+            store.edit().putString("flutter.applied_config_md5", "pending").commit()
+            assertEquals("accepted", app.sharedState.currentProfileName)
+            assertEquals(null, app.sharedState.vpnOptions)
+            assertTrue(runCatching { State.handleStartServiceAction() }.exceptionOrNull() is IllegalStateException)
+            assertTrue(runCatching { State.handleSystemVpnStart() }.exceptionOrNull() is IllegalStateException)
+            assertEquals(RunState.STOP, State.runStateFlow.value)
+            store.edit().putString("flutter.applied_config_md5", "accepted-hash").commit()
+            assertEquals(true, app.sharedState.vpnOptions?.enable)
+        } finally {
+            State.sharedState = original
+            store.edit().remove("flutter.applied_config_md5").remove("flutter.sharedState").commit()
+        }
+    }
+
     @Test
     fun initializationAcceptsOnlyAnExplicitNullCommandReply() {
         val check = Service::class.java.getDeclaredMethod("isSuccessfulCommand", String::class.java).apply { isAccessible = true }

@@ -224,11 +224,7 @@ void main() {
   testWidgets('escape closes search before returning from a page', (
     tester,
   ) async {
-    final container = ProviderContainer(
-      overrides: [
-        backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-      ],
-    );
+    final container = ProviderContainer();
     addTearDown(container.dispose);
     await tester.pumpWidget(
       UncontrolledProviderScope(

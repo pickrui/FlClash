@@ -149,11 +149,9 @@ void main() {
     final columns = _columns(0);
     const ascending = (columnId: 'size', descending: false);
 
-    expect(sorter.sort([c, a, b], columns, ascending), [a, b, c]);
-    expect(
-      RecordSorter<_Row>().sort([c, a, b], columns, ascending, reverse: true),
-      [c, a, b],
-    );
+    const rows = [c, a, b];
+    expect(sorter.sort(rows, columns, ascending), [a, b, c]);
+    expect(sorter.sort(rows, columns, ascending, reverse: true), [c, a, b]);
   });
 
   testWidgets('a wide frame sorts by the header tapped and keeps the widths '

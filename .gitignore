@@ -88,6 +88,7 @@ devtools_options.yaml
 /android/app/src/main/kotlin/com/oixcloud/clash/ConfigKeyReader.kt
 /android/app/src/main/kotlin/com/oixcloud/clash/ConfigKeyPolicy.kt
 /android/app/src/test/kotlin/com/oixcloud/clash/ConfigKeyPolicyTest.kt
+/android/core/build.gradle.kts
 /core/action.go
 /core/age.go
 /core/common.go
@@ -123,8 +124,10 @@ devtools_options.yaml
 /lib/state.dart
 /lib/views/about.dart
 /lib/views/cloud/cloud_profile_card.dart
+/plugins/setup/setup_hooks/lib/src/hardening.dart
 /plugins/setup/setup_hooks/lib/src/redaction.dart
 /plugins/setup/setup_hooks/lib/src/secrets.dart
+/plugins/setup/setup_hooks/test/hardening_test.dart
 /plugins/setup/setup_hooks/test/secrets_test.dart
 /setup.dart
 /test/common/bypass_domain_migration_test.dart
@@ -158,4 +161,7 @@ devtools_options.yaml
 /core/internal/dnsbootstrap/bootstrap_test.go
 
 /tool/collect_build_records.py
+/tool/harden_macos_app.dart
+/tool/resolve_build_tool_version.sh
+/tool/test_macos_helper.sh
 /test/ci/test_build_records.py

@@ -37,7 +37,17 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   late final StoreNotifier _store;
   late final CloudAccountNotifier _account;
   late final CloudApiService _api;
-  bool _busy = false;
+  int? _actionSession;
+  bool get _busy => _actionSession != null;
+  bool get _sameSession => _actionSession == _api.sessionRevision;
+
+  CloudApiService get _sessionApi {
+    if (!mounted || !_sameSession) {
+      throw const CloudApiStaleSessionException();
+    }
+    return _api;
+  }
+
   _StoreSection _section = _StoreSection.plans;
 
   @override
@@ -57,6 +67,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       await _store.load();
       return true;
     } catch (e) {
+      if (CloudApiException.isHandledUnauthorized(e)) return false;
       if (!CloudApiException.isUnauthorized(e)) rethrow;
       await _account.handleUnauthorized();
       return false;
@@ -64,7 +75,8 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   }
 
   Future<void> _refresh() async {
-    if (!await _loadStore()) return;
+    if (!_sameSession) return;
+    if (!await _loadStore() || !_sameSession) return;
     // Plan changes must regenerate the managed subscription, not just the card.
     await _account.refreshManagedSubscription();
   }
@@ -74,11 +86,11 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     bool writes = false,
   }) async {
     if (_busy || ref.read(storeProvider).isLoading) return;
-    setState(() => _busy = true);
+    setState(() => _actionSession = _api.sessionRevision);
     try {
       if (await _reportFailures(action, writes: writes)) await _reconcile();
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) setState(() => _actionSession = null);
     }
   }
 
@@ -95,6 +107,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         await _account.handleUnauthorized();
         return false;
       }
+      if (!_sameSession) return false;
       final unsure = writes && CloudApiException.isOutcomeUnknown(e);
       await _showFailure(CloudApiException.clean(e), outcomeUnknown: unsure);
       return unsure;
@@ -252,13 +265,13 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
           message: error,
           onRetry: _busy || state.isLoading || state.isLoadingMore
               ? null
-              : () => _reportFailures(_store.loadMore),
+              : () => _runGuarded(_store.loadMore),
         ),
       if (state.nextBeforeId != null)
         TonalButton(
           onPressed: _busy || state.isLoading || state.isLoadingMore
               ? null
-              : () => _reportFailures(_store.loadMore),
+              : () => _runGuarded(_store.loadMore),
           label: state.isLoadingMore
               ? appLocalizations.loading
               : appLocalizations.more,
@@ -320,7 +333,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
 
   Future<void> _purchaseFlow(StorePlan plan) async {
     final methods = await _purchasePaymentMethods();
-    if (!mounted) return;
+    if (!mounted || !_sameSession) return;
     final choice = await showStorePurchaseSheet(
       context,
       plan: plan,
@@ -330,7 +343,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     if (choice == null) return;
     final method = choice.method;
     if (method == null) {
-      final res = await _api.buyPlanWithBalance(
+      final res = await _sessionApi.buyPlanWithBalance(
         plan.id,
         billingPeriod: choice.billingPeriod,
         coupon: choice.coupon,
@@ -338,7 +351,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       await _finishAction(res, showOrders: true);
       return;
     }
-    final init = await _api.createOrder(
+    final init = await _sessionApi.createOrder(
       shopId: plan.id,
       payment: method.payment,
       billingPeriod: choice.billingPeriod,
@@ -358,7 +371,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       return await _store.ensurePaymentMethods();
     } catch (e) {
       if (CloudApiException.isUnauthorized(e) ||
-          e is CloudApiStaleSessionException) {
+          CloudApiException.isHandledUnauthorized(e)) {
         rethrow;
       }
       return const [];
@@ -367,16 +380,18 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
 
   /// Pass a dialog's context: the page's desktop navigator sits below dialogs.
   Future<bool> _rechargeFlow([BuildContext? from]) async {
+    if (!mounted || !_sameSession) return false;
     final methods = await _store.ensurePaymentMethods();
+    if (!mounted || !_sameSession) return false;
     if (methods.isEmpty) {
       globalState.showNotifier(appLocalizations.noPaymentMethods);
       return false;
     }
     final sheetContext = from ?? context;
-    if (!mounted || !sheetContext.mounted) return false;
+    if (!sheetContext.mounted) return false;
     final choice = await showStoreRechargeSheet(sheetContext, methods: methods);
     if (choice == null) return false;
-    final init = await _api.createRecharge(
+    final init = await _sessionApi.createRecharge(
       payment: choice.method.payment,
       amount: choice.amount,
       type: choice.method.type,
@@ -399,7 +414,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       confirmText: appLocalizations.activate,
     );
     if (ok != true) return;
-    await _finishAction(await _api.activatePlan(bought.id));
+    await _finishAction(await _sessionApi.activatePlan(bought.id));
   }
 
   Future<void> _bindCouponFlow(BoughtRecord bought) async {
@@ -409,12 +424,13 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         couponRequired: true,
         hint: appLocalizations.bindCouponIntro,
         onRecharge: _rechargeForQuote,
-        loadQuote: (coupon) async =>
-            storeBindCouponQuote(await _api.bindCouponCheck(bought.id, coupon)),
+        loadQuote: (coupon) async => storeBindCouponQuote(
+          await _sessionApi.bindCouponCheck(bought.id, coupon),
+        ),
       ),
     );
     if (choice == null) return;
-    final res = await _api.bindCoupon(
+    final res = await _sessionApi.bindCoupon(
       bought.id,
       coupon: choice.coupon,
       authorizedPrice: choice.authorizedPrice,
@@ -432,20 +448,24 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       appLocalizations.selectUpgradeTarget,
       targets,
     );
-    if (target == null) return;
+    if (target == null || !mounted || !_sameSession) return;
 
     final choice = await globalState.showCommonDialog<StoreQuoteChoice>(
       child: StoreQuoteDialog(
         title: appLocalizations.upgradePlan,
         onRecharge: _rechargeForQuote,
         loadQuote: (coupon) async => storeShopQuote(
-          await _api.previewUpgrade(bought.id, target.id, coupon: coupon),
+          await _sessionApi.previewUpgrade(
+            bought.id,
+            target.id,
+            coupon: coupon,
+          ),
         ),
       ),
     );
     if (choice == null) return;
 
-    final res = await _api.upgradePlan(
+    final res = await _sessionApi.upgradePlan(
       bought.id,
       target.id,
       coupon: choice.coupon.isEmpty ? null : choice.coupon,
@@ -461,13 +481,14 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     _ShopActionResult res, {
     bool showOrders = false,
   }) async {
+    if (!_sameSession) return;
     if (!res.success) {
       await _showFailure(res.message);
       return;
     }
     _showSuccess(res.message);
     await _refresh();
-    if (showOrders && mounted) {
+    if (showOrders && mounted && _sameSession) {
       setState(() => _section = _StoreSection.orders);
     }
   }
@@ -477,6 +498,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     required String payment,
     bool showOrders = false,
   }) async {
+    if (!_sameSession) return false;
     switch (init.kind) {
       case PaymentInitiationKind.balanceDone:
         await _finishAction((
@@ -486,14 +508,19 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         return true;
       case PaymentInitiationKind.externalUrl ||
           PaymentInitiationKind.cryptoAddress:
+        if (!mounted) return false;
         if (init.kind == PaymentInitiationKind.externalUrl &&
             init.url == null) {
           return false;
         }
         final paid = await globalState.showCommonDialog<bool>(
-          child: StorePaymentDialog(init: init, payment: payment),
+          child: StorePaymentDialog(
+            init: init,
+            queryPaid: (pid) =>
+                _sessionApi.queryPaymentPaid(pid, payment: payment),
+          ),
         );
-        if (paid != true) return false;
+        if (paid != true || !_sameSession) return false;
         await _finishAction((
           success: true,
           message: appLocalizations.paymentSuccess,

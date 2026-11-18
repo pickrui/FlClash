@@ -82,6 +82,33 @@ void main() {
       expect(networks().single.stateId, isNot('state-a'));
       expect(networks().single.magicDnsSuffix, isEmpty);
     });
+
+    for (final replacement in [null, 'fixture-new-key']) {
+      test(
+        'changing control servers only uses an explicitly supplied key ($replacement)',
+        () async {
+          final keyed = home.copyWith(
+            loginMethod: TailscaleLoginMethod.authKey,
+          );
+          await action.saveNetwork(keyed, authKey: 'fixture-old-key');
+          final saved = await action.saveNetwork(
+            keyed.copyWith(controlUrl: 'https://new.example'),
+            authKey: replacement,
+          );
+          backend.nextStatus = const TailscaleStatus(rawState: 'Idle');
+          if (replacement == null) {
+            await expectLater(
+              action.login(saved),
+              throwsA(isA<TailscaleMissingAuthKeyException>()),
+            );
+            expect(backend.logins, isEmpty);
+          } else {
+            await action.login(saved);
+            expect(backend.logins, [('Home', replacement)]);
+          }
+        },
+      );
+    }
   });
 
   group('login', () {

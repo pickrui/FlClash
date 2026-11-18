@@ -343,26 +343,19 @@ void main() {
   group('installing to the system', () {
     Finder install() => find.text(appLocalizations.installCertificate);
 
-    testWidgets('is offered where FlClash has a trust store', (tester) async {
-      await pumpView(
-        tester,
-        certificate: _certificate,
-        store: _FakeStore(MitmTrust.notInstalled),
-      );
+    testWidgets(
+      'offers installation only when the trust store can be changed',
+      (tester) async {
+        await pumpView(
+          tester,
+          certificate: _certificate,
+          store: _FakeStore(MitmTrust.notInstalled),
+        );
 
-      expect(install(), findsOneWidget);
-      expect(saved().trustedFingerprint, isNull);
-    });
-
-    testWidgets('is never offered in safe mode', (tester) async {
-      await pumpView(
-        tester,
-        certificate: _certificate,
-        store: _FakeStore(MitmTrust.notInstalled),
-      );
-
-      expect(install(), findsNothing);
-    }, skip: !safeModeBuild);
+        expect(install(), safeModeBuild ? findsNothing : findsOneWidget);
+        expect(saved().trustedFingerprint, isNull);
+      },
+    );
 
     testWidgets('elsewhere leaves only the export', (tester) async {
       await pumpView(tester, certificate: _certificate);
@@ -381,7 +374,10 @@ void main() {
       );
 
       expect(install(), findsNothing);
-      expect(find.text(appLocalizations.trustCertificate), findsOneWidget);
+      expect(
+        find.text(appLocalizations.trustCertificate),
+        safeModeBuild ? findsNothing : findsOneWidget,
+      );
     });
 
     testWidgets('records the certificate once the store trusts it', (
@@ -390,6 +386,15 @@ void main() {
       final store = _FakeStore(MitmTrust.notInstalled);
       await pumpView(tester, certificate: _certificate, store: store);
 
+      if (safeModeBuild) {
+        expect(
+          await container.read(mitmTrustStateProvider.notifier).install(),
+          isNull,
+        );
+        expect(store.installed, isEmpty);
+        expect(saved().trustedFingerprint, isNull);
+        return;
+      }
       await tester.tap(install());
       await tester.pumpAndSettle();
 
@@ -415,7 +420,7 @@ void main() {
     expect(json['decrypt-tls'], isTrue);
   });
 
-  testWidgets('regenerating swaps the trusted certificate', (tester) async {
+  testWidgets('regeneration honors the system trust policy', (tester) async {
     final store = _FakeStore(MitmTrust.ready);
     await pumpView(tester, certificate: _certificate, store: store);
     when(() => core.generateMitmCertificate())
@@ -426,6 +431,17 @@ void main() {
     await tester.tap(button(appLocalizations.confirm));
     await tester.pumpAndSettle();
 
+    if (safeModeBuild) {
+      expect(store.removed, isEmpty);
+      expect(store.installed, isEmpty);
+      expect(
+        find.text(
+          appLocalizations.mitmOldCertificateLeftTip(_certificate.subject),
+        ),
+        findsOneWidget,
+      );
+      return;
+    }
     expect(store.removed, [_certificate]);
     expect(store.installed, [_renewed]);
     expect(find.text(_renewed.subject), findsOneWidget);
@@ -442,29 +458,6 @@ void main() {
 
     expect(store.checks, before + 1);
   });
-
-  testWidgets('regenerating in safe mode leaves the trust store alone', (
-    tester,
-  ) async {
-    final store = _FakeStore(MitmTrust.ready);
-    await pumpView(tester, certificate: _certificate, store: store);
-    when(() => core.generateMitmCertificate())
-        .thenAnswer((_) async => _renewed);
-
-    await tester.tap(find.text(appLocalizations.regenerateCertificate));
-    await tester.pumpAndSettle();
-    await tester.tap(button(appLocalizations.confirm));
-    await tester.pumpAndSettle();
-
-    expect(store.removed, isEmpty);
-    expect(store.installed, isEmpty);
-    expect(
-      find.text(
-        appLocalizations.mitmOldCertificateLeftTip(_certificate.subject),
-      ),
-      findsOneWidget,
-    );
-  }, skip: !safeModeBuild);
 
   testWidgets('the hostname list counts and marks the lines the Core skips', (
     tester,

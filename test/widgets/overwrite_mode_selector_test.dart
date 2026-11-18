@@ -403,7 +403,10 @@ class _TestProfiles extends Profiles {
   Profile get profile => state.single;
 
   @override
-  void updateProfile(int profileId, Profile Function(Profile) builder) {
+  Future<void> updateProfile(
+    int profileId,
+    Profile Function(Profile) builder,
+  ) async {
     writes++;
     state = [
       for (final profile in state)

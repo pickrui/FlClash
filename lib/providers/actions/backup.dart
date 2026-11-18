@@ -5,6 +5,34 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 part of '../action.dart';
 
+class RestoreCoreIntent {
+  RestoreCoreIntent({required this.wasRunning, required this.generation})
+    : _expectedGeneration = generation();
+
+  final bool wasRunning;
+  final int Function() generation;
+  int _expectedGeneration;
+
+  bool get shouldResume => wasRunning && generation() == _expectedGeneration;
+
+  Future<void> stopForRestore(Future<void> Function() stop) async {
+    if (!wasRunning) return;
+    _expectedGeneration++;
+    await stop();
+  }
+
+  Future<bool> activate({
+    required Future<bool> Function() start,
+    required Future<bool> Function() applyStopped,
+  }) async {
+    if (shouldResume) {
+      final started = await start();
+      if (shouldResume) return started;
+    }
+    return applyStopped();
+  }
+}
+
 Future<void> deleteApplicationSupportData(
   String homePath, {
   required Set<String> preservePaths,
@@ -155,7 +183,10 @@ extension BackupControllerExt on AppController {
       appSettingProvider.select((state) => state.restoreStrategy),
     );
     final isOverride = restoreStrategy == RestoreStrategy.override;
-    final wasRunning = _ref.read(isStartProvider);
+    final runIntent = RestoreCoreIntent(
+      wasRunning: _ref.read(isStartProvider),
+      generation: () => _startIntentGeneration,
+    );
     final wasCoreConnected = coreController.isCompleted;
     int? restoredProfileId;
     int? previousProfileId;
@@ -192,9 +223,10 @@ extension BackupControllerExt on AppController {
               ? Config.fromJson(configMap)
               : null;
           await ensureCoreReadyOrThrow();
+          final profilesPath = await appPath.profilesPath;
           await validateRestoredProfileFiles(
             migrationData.fileMigrations,
-            await appPath.profilesPath,
+            profilesPath,
             coreController.validateConfig,
           );
           final profileRawNames =
@@ -203,6 +235,7 @@ extension BackupControllerExt on AppController {
               : await restoredProfileRawNames(
                   migrationData.profiles,
                   migrationData.fileMigrations,
+                  profilesPath,
                   coreController.getConfig,
                 );
           final previousConfig = config;
@@ -265,6 +298,7 @@ extension BackupControllerExt on AppController {
               deletePaths.addAll([
                 await appPath.getProfilePath('.${profile.id}'),
                 await appPath.getProvidersDirPath(profile.id.toString()),
+                '$profilePath.http-cache.json',
               ]);
               if (!restoredProfileFiles.contains(
                 p.absolute(p.normalize(profilePath)),
@@ -284,9 +318,7 @@ extension BackupControllerExt on AppController {
             }
           }
           coreQuiesced = true;
-          if (wasRunning) {
-            await updateStatus(false);
-          }
+          await runIntent.stopForRestore(() => updateStatus(false));
           if (!await stopSystemProxyIfNeeded()) {
             throw StateError('failed to restore system proxy');
           }
@@ -322,7 +354,7 @@ extension BackupControllerExt on AppController {
                   final profileIds = (await database.profilesDao.all().get())
                       .map((profile) => profile.id)
                       .toSet();
-                  if (wasRunning && profileIds.isEmpty) {
+                  if (runIntent.shouldResume && profileIds.isEmpty) {
                     throw StateError(
                       'cannot restore an empty profile set while the core is running',
                     );
@@ -502,16 +534,16 @@ extension BackupControllerExt on AppController {
       recoveryRequired = restoreJournal?.hasPendingRollback == true;
     }
     Object? coreRecoveryError;
-    if (!recoveryRequired && coreQuiesced && (wasCoreConnected || wasRunning)) {
+    if (!recoveryRequired &&
+        coreQuiesced &&
+        (wasCoreConnected || runIntent.wasRunning)) {
       try {
         if (!restoreCommitted) {
           _ref.read(currentProfileIdProvider.notifier).value =
               previousProfileId;
         }
-        if (!coreController.isCompleted) {
-          await _connectCore();
-        }
-        if (!coreController.isCompleted) {
+        if (!_ref.read(coreHandlerProvider).isCompleted &&
+            !await _connectCore()) {
           throw _coreDisconnectedMessage;
         }
         await _initCore();
@@ -519,17 +551,17 @@ extension BackupControllerExt on AppController {
           final profileId = restoreCommitted
               ? restoredProfileId
               : previousProfileId;
-          if (profileId == null && wasRunning) {
+          if (profileId == null && runIntent.shouldResume) {
             throw StateError('no profile is available after restore');
           }
           if (profileId != null) {
-            bool activated;
-            if (wasRunning) {
-              await updateStatus(true, isInit: true);
-              activated = _ref.read(isStartProvider);
-            } else {
-              activated = await applyProfileSettled(force: true);
-            }
+            final activated = await runIntent.activate(
+              start: () async {
+                await updateStatus(true, isInit: true);
+                return _ref.read(isStartProvider);
+              },
+              applyStopped: () => applyProfileSettled(force: true),
+            );
             if (!activated) {
               throw appLocalizations.restoreException;
             }

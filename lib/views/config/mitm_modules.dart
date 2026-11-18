@@ -32,18 +32,16 @@ MitmModule? _moduleOf(WidgetRef ref, int id) => ref.watch(
   ),
 );
 
-Future<void> _putModule(WidgetRef ref, MitmModule module) => ref
-    .read(commonActionProvider.notifier)
-    .safeRun(
-      () => ref.read(mitmModulesActionProvider.notifier).putModule(module),
-      silence: false,
-    );
-
 Future<void> _setEnabled(WidgetRef ref, MitmModule module, bool enabled) async {
+  final action = ref.read(mitmModulesActionProvider.notifier);
+  final common = ref.read(commonActionProvider.notifier);
   if (enabled && module.scripts > 0 && !await acceptMitmScripts()) {
     return;
   }
-  await _putModule(ref, module.copyWith(enabled: enabled));
+  await common.safeRun(
+    () => action.setEnabled(module, enabled),
+    silence: false,
+  );
 }
 
 /// Runs a cron, event or generic script line now; any other line, any while

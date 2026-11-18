@@ -28,7 +28,6 @@ void main() {
       await tester.pumpWidget(
         TestApp(
           overrides: [
-            backBlockActionProvider.overrideWith(TestBackBlockAction.new),
             viewSizeProvider.overrideWithBuild((_, _) => Size(width, 900)),
           ],
           locale: const Locale('zh', 'CN'),

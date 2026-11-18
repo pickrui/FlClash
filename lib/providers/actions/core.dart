@@ -121,27 +121,28 @@ extension CoreControllerExt on AppController {
 
   Future<void> _initCoreInner() async {
     final version = _ref.read(versionProvider);
-    if (!await coreController.init(version)) {
+    if (!await _ref.read(coreHandlerProvider).init(version)) {
       throw _coreDisconnectedMessage;
     }
     onCoreInitialized?.call();
   }
 
-  Future<void> _connectCore() async {
+  Future<bool> _connectCore() async {
     _ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
-    final result = await Future.wait([
-      coreController.preload(),
-      if (!system.isAndroid) Future.delayed(const Duration(milliseconds: 300)),
-    ]);
-    final String message = result[0];
-    if (message.isNotEmpty) {
-      _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
-      if (_context.mounted) {
+    final core = _ref.read(coreHandlerProvider);
+    var connected = false;
+    try {
+      final message = await core.preload();
+      connected = message.isEmpty && core.isCompleted;
+      if (message.isNotEmpty && _context.mounted) {
         _context.showNotifier(message, level: MessageLevel.error);
       }
-      return;
+      return connected;
+    } finally {
+      _ref.read(coreStatusProvider.notifier).value = connected
+          ? CoreStatus.connected
+          : CoreStatus.disconnected;
     }
-    _ref.read(coreStatusProvider.notifier).value = CoreStatus.connected;
   }
 
   Future<bool> ensureCoreReady() {
@@ -155,24 +156,27 @@ extension CoreControllerExt on AppController {
   }
 
   Future<bool> _ensureCoreReady() async {
-    try {
-      if (await _isCoreInitialized()) return true;
-    } catch (error) {
-      commonPrint.log(
-        'Core initialization probe failed: $error',
-        logLevel: LogLevel.warning,
-      );
-      await coreController.shutdown();
-    }
-    if (coreController.isCompleted) {
-      await _initCore();
-      return _reinitializedCoreReady();
+    final core = _ref.read(coreHandlerProvider);
+    if (core.isCompleted) {
+      bool? initialized;
+      try {
+        initialized = await core.isInit;
+      } catch (error) {
+        commonPrint.log(
+          'Core initialization probe failed: $error',
+          logLevel: LogLevel.warning,
+        );
+      }
+      if (initialized == true) return true;
+      if (initialized == false && core.isCompleted) {
+        await _initCore();
+        return _reinitializedCoreReady();
+      }
     }
     commonPrint.log('Core disconnected, reconnecting');
     _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
-    await coreController.shutdown();
-    await _connectCore();
-    if (!coreController.isCompleted) return false;
+    await core.shutdown();
+    if (!await _connectCore()) return false;
     await _initCore();
     return _reinitializedCoreReady();
   }
@@ -288,23 +292,33 @@ extension CoreControllerExt on AppController {
       if (!start) return;
       startupRecovery.resumeAutomaticSetup();
     }
-    await restartCoreOrStop(
-      restart: () => _serializeCoreLifecycle(() async {
-        _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
-        clearDelay();
-        await coreController.shutdown();
-        await _connectCore();
-        if (!coreController.isCompleted) throw _coreDisconnectedMessage;
-        await _initCore();
-      }),
-      isRunning: () => _ref.read(isStartProvider),
-      stop: () => updateStatus(false),
-    );
-    if (start || _ref.read(isStartProvider)) {
-      await updateStatus(true, isInit: true);
-    } else {
-      await applyProfile(force: true);
-    }
+    final startGeneration = _startIntentGeneration;
+    await _serializeCoreLifecycle(() async {
+      await restartCoreOrStop(
+        restart: () async {
+          _ref.read(coreStatusProvider.notifier).value =
+              CoreStatus.disconnected;
+          clearDelay();
+          final core = _ref.read(coreHandlerProvider);
+          var stopped = false;
+          try {
+            stopped = await core.shutdown();
+          } finally {
+            if (stopped || !core.isCompleted) _setAppliedSetupState(null);
+          }
+          if (!await _connectCore()) throw _coreDisconnectedMessage;
+          await _initCore();
+        },
+        isRunning: () => _ref.read(isStartProvider),
+        stop: () => updateStatus(false),
+      );
+      if (startGeneration == _startIntentGeneration &&
+          (start || _ref.read(isStartProvider))) {
+        await updateStatus(true, isInit: true);
+      } else {
+        await applyProfile(force: true);
+      }
+    });
   }
 
   Future<void> cleanupAfterCoreCrash() =>
@@ -313,7 +327,7 @@ extension CoreControllerExt on AppController {
             _ref.read(coreStatusProvider) == CoreStatus.disconnected,
         cleanup: () => runCleanupActions([
           stopSystemProxyIfNeeded,
-          () => coreController.shutdown(),
+          () => _ref.read(coreHandlerProvider).shutdown(),
         ]),
       );
 
@@ -326,11 +340,12 @@ extension CoreControllerExt on AppController {
         if (changed) addCheckIp();
       });
 
-  Future<bool> tryStartCore([bool start = false]) async {
-    if (coreController.isCompleted) {
-      return false;
-    }
-    await restartCore(start);
-    return true;
+  Future<bool> tryStartCore([bool start = false]) {
+    final startGeneration = _startIntentGeneration;
+    return _serializeCoreLifecycle(() async {
+      if (_ref.read(coreHandlerProvider).isCompleted) return false;
+      await restartCore(start && startGeneration == _startIntentGeneration);
+      return true;
+    });
   }
 }

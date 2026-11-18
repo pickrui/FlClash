@@ -169,14 +169,11 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
     }
   }
 
-  bool get _isEmpty {
-    final profile = ref.read(profileProvider(widget.profileId));
-    return profile == null ||
-        profile.customProxyGroups.isEmpty &&
-            profile.customRules.isEmpty &&
-            profile.proxyChains.isEmpty &&
-            profile.overrides == const ProfileOverrides();
-  }
+  bool _hasCustomSettings(Profile profile) =>
+      profile.customProxyGroups.isNotEmpty ||
+      profile.customRules.isNotEmpty ||
+      profile.proxyChains.isNotEmpty ||
+      profile.overrides != const ProfileOverrides();
 
   /// Asks for the source first, so the download or read runs as the import.
   Future<Future<Uint8List> Function()?> _importReader(
@@ -218,7 +215,7 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
               final bytes = await content.readBytes();
               if (!editorContext.mounted) return;
               data = bytes;
-              Navigator.of(editorContext).pop();
+              closePage(editorContext);
             },
           ),
         );
@@ -229,12 +226,14 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
 
   Future<void> _import(CustomImportSource source) async {
     if (_importing) return;
+    setState(() => _importing = true);
     try {
       final read = await _importReader(source);
       if (read == null || !mounted) return;
-      setState(() => _importing = true);
       final bytes = await read();
+      if (!mounted) return;
       final providers = await ref.read(clashProvidersProvider.future);
+      if (!mounted) return;
       final CustomProfileImport config;
       try {
         config = await compute(readCustomProfileImport, (
@@ -245,13 +244,16 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
           ),
         ));
       } on CustomImportException {
+        if (!mounted) return;
         if (!await _addShareLinks(utf8.decode(bytes, allowMalformed: true))) {
           throw appLocalizations.importConfigInvalid;
         }
         return;
       }
       if (!mounted) return;
-      if (!_isEmpty) {
+      final profile = ref.read(profileProvider(widget.profileId));
+      if (profile == null) return;
+      if (_hasCustomSettings(profile)) {
         final replace = await globalState.showMessage(
           message: TextSpan(text: appLocalizations.importConfigReplaceTip),
           confirmText: appLocalizations.replace,
@@ -259,8 +261,9 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
         if (replace != true || !mounted) return;
       }
       final report = await _applyImport(config, providers.length);
+      if (!mounted) return;
       final lines = customImportReportLines(appLocalizations, report);
-      if (lines.isNotEmpty && mounted) {
+      if (lines.isNotEmpty) {
         unawaited(
           globalState.showMessage(
             title: appLocalizations.customImportNotImported,
@@ -292,7 +295,7 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
       ];
     }
     if (!mounted) return true;
-    ref
+    await ref
         .read(profilesProvider.notifier)
         .updateProfile(
           widget.profileId,
@@ -309,6 +312,7 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
             ],
           ),
         );
+    if (!mounted) return true;
     final invalid = links.invalid + links.nodes.length - nodes.length;
     context.showNotifier(
       [
@@ -325,7 +329,11 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
     int order,
   ) async {
     final library = ref.read(clashProviderLibraryProvider);
-    final profiles = ref.read(profilesProvider.notifier);
+    final container = ProviderScope.containerOf(context, listen: false);
+    final profileId = widget.profileId;
+    if (container.read(profileProvider(profileId)) == null) {
+      return config.report;
+    }
     final failed = <String>[];
     for (final (index, provider) in config.providers.indexed) {
       try {
@@ -345,32 +353,32 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
         failed.add(provider.label);
       }
     }
-    final current = ref.read(profileProvider(widget.profileId))!;
-    final imported = current.copyWith(
-      customProxyGroups: config.proxyGroups,
-      customRules: [for (final rule in config.rules) Rule.value(rule)],
-      profileProxies: [
-        for (final proxy in config.proxies)
-          ProfileProxy.create(uri: '', proxy: proxy),
-      ],
-      proxyChains: [
-        for (final proxies in config.proxyChains)
-          ProxyChain.create(proxies: proxies),
-      ],
-      overrides: config.overrides,
-    );
-    final merged = mergeProfileProxies(
-      [imported],
-      existing: current.profileProxies,
-      reservedNames: {
-        for (final profile in ref.read(profilesProvider))
-          for (final group in profile.customProxyGroups) group.name,
-      },
-    );
-    profiles.updateProfile(
-      widget.profileId,
-      (_) => merged.profiles.single.copyWith(profileProxies: merged.proxies),
-    );
+    await container.read(profilesProvider.notifier).updateProfile(profileId, (
+      current,
+    ) {
+      final imported = current.copyWith(
+        customProxyGroups: config.proxyGroups,
+        customRules: [for (final rule in config.rules) Rule.value(rule)],
+        profileProxies: [
+          for (final proxy in config.proxies)
+            ProfileProxy.create(uri: '', proxy: proxy),
+        ],
+        proxyChains: [
+          for (final proxies in config.proxyChains)
+            ProxyChain.create(proxies: proxies),
+        ],
+        overrides: config.overrides,
+      );
+      final merged = mergeProfileProxies(
+        [imported],
+        existing: current.profileProxies,
+        reservedNames: {
+          for (final profile in container.read(profilesProvider))
+            for (final group in profile.customProxyGroups) group.name,
+        },
+      );
+      return merged.profiles.single.copyWith(profileProxies: merged.proxies);
+    });
     return config.report.withProviders(failed);
   }
 
@@ -378,15 +386,14 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
     final profile = ref.read(profileProvider(widget.profileId));
     return profile != null &&
         profile.label == _initialLabel &&
-        profile.customProxyGroups.isEmpty &&
-        profile.customRules.isEmpty &&
-        profile.proxyChains.isEmpty &&
-        profile.overrides == const ProfileOverrides();
+        !_hasCustomSettings(profile);
   }
 
   Future<bool> _nameBeforeLeaving(BuildContext context) async {
     final profile = ref.read(profileProvider(widget.profileId));
-    if (profile != null && profile.label == _initialLabel && !_isUntouched) {
+    if (profile != null &&
+        profile.label == _initialLabel &&
+        _hasCustomSettings(profile)) {
       await showRenameProfileDialog(
         context,
         ref,

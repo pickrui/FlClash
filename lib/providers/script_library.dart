@@ -64,9 +64,8 @@ final scriptLibraryProvider = Provider<ScriptLibrary>((ref) {
       if (!ref.mounted) return;
       ref.read(scriptsProvider.notifier).replaceFromDatabase(scripts);
       if (removed) {
-        final profiles = await database.profilesDao.all().get();
+        await ref.read(profilesProvider.notifier).refreshFromDatabase();
         if (!ref.mounted) return;
-        ref.read(profilesProvider.notifier).replaceFromDatabase(profiles);
         ref.read(appSettingProvider.notifier).update((state) {
           final options = Map<String, Map<String, bool>>.from(
             state.scriptOptions,

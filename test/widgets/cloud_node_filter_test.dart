@@ -143,6 +143,8 @@ class _Account extends CloudAccountNotifier {
 
   @override
   Future<void> handleUnauthorized() async => unauthorized++;
+
+  void signOutLocally() => state = const CloudAccountState();
 }
 
 class _Route {
@@ -301,6 +303,50 @@ void main() {
   });
 
   group('node filter editor', () {
+    testWidgets('a replacement session cannot submit the previous draft', (
+      tester,
+    ) async {
+      final api = _FakeApi(_catalog(const NodeFilter()));
+      final account = _Account();
+      final route = await _pumpEditor(tester, api, account);
+      await tester.tap(find.text('GIA'));
+      await tester.pumpAndSettle();
+      final service = CloudApiService()..setToken('replacement-session');
+      addTearDown(() => service.setToken(null));
+      await tester.tap(_barButton('Save'));
+      await tester.pumpAndSettle();
+
+      expect(api.saves, isEmpty);
+      expect(api.resets, 0);
+      expect(route.popped, isTrue);
+      expect(route.result, isNull);
+      expect(account.refreshes, 0);
+    });
+
+    testWidgets('a late save cannot refresh a replacement account', (
+      tester,
+    ) async {
+      final pending = Completer<NodeFilterCatalog?>();
+      final api = _FakeApi(_catalog(const NodeFilter()))..pendingSave = pending;
+      final account = _Account();
+      final route = await _pumpEditor(tester, api, account);
+      await tester.tap(find.text('GIA'));
+      await tester.pumpAndSettle();
+      await tester.tap(_barButton('Save'));
+      await tester.pump();
+      final service = CloudApiService()..setToken('replacement-session');
+      addTearDown(() => service.setToken(null));
+      account.signOutLocally();
+      await tester.pumpAndSettle();
+      expect(route.popped, isTrue);
+      expect(route.result, isNull);
+
+      pending.complete(_catalog(api.saves.single));
+      await tester.pumpAndSettle();
+      expect(account.refreshes, 0);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('unavailable previews cannot supply counts or enable save', (
       tester,
     ) async {

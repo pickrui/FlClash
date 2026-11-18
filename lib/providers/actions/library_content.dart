@@ -30,6 +30,10 @@ extension _LibraryContentActions on AppController {
     ClashProvider next,
   ) async {
     if (!isAttach || !_context.mounted || !_ref.read(initProvider)) return null;
+    if (_androidSetupPersistence.isPending ||
+        _androidSetupPersistence.needsRuntimeSetup) {
+      return null;
+    }
     final applied = globalState.lastSetupState;
     final config = _appliedProfileConfig;
     final params = _appliedSetupParams;
@@ -42,11 +46,11 @@ extension _LibraryContentActions on AppController {
       return null;
     }
     final generation = _profileApplyGeneration;
-    bool isCurrent() =>
+    bool isCurrent([Map<String, dynamic>? expectedConfig]) =>
         _context.mounted &&
         generation == _profileApplyGeneration &&
         profileId == _ref.read(currentProfileIdProvider) &&
-        identical(config, _appliedProfileConfig);
+        identical(expectedConfig ?? config, _appliedProfileConfig);
     void requireCurrent() {
       if (!isCurrent()) throw const ProviderLibraryException('changed');
     }
@@ -140,11 +144,25 @@ extension _LibraryContentActions on AppController {
       previousDigest: ProviderContentFiles.digest(previous.content),
       digest: ProviderContentFiles.digest(next.content),
     );
+    String? previousAndroidDigest;
+    var androidPending = false;
     return createProviderLibraryChange(
       requireCurrent: requireCurrent,
       beforeApply: () async {
-        if (system.isAndroid) await preferences.saveAppliedConfigMd5(null);
+        if (system.isAndroid) {
+          previousAndroidDigest = await preferences.getAppliedConfigMd5();
+          await preferences.markAndroidConfigPending();
+          _androidSetupPersistence.invalidateRuntime();
+          androidPending = true;
+        }
       },
+      afterRollback: system.isAndroid
+          ? () async {
+              if (!androidPending || !isCurrent()) return;
+              await preferences.saveAppliedConfigMd5(previousAndroidDigest);
+              _androidSetupPersistence.clear();
+            }
+          : null,
       changeCore: (rollback) async {
         await coreController.replaceProviderFile(change, rollback: rollback);
       },
@@ -180,7 +198,9 @@ extension _LibraryContentActions on AppController {
                 ),
               ),
             );
-            await _androidSetupPersistence.save(isCurrent: isCurrent);
+            await _androidSetupPersistence.save(
+              isCurrent: () => isCurrent(nextConfig),
+            );
           } catch (error) {
             commonPrint.log(
               'Provider content resume digest: ${errorLabel(error)}',

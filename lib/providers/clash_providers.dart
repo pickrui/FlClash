@@ -184,9 +184,9 @@ final clashProviderLibraryProvider = Provider<ClashProviderLibrary>((ref) {
         .read(proxiesActionProvider.notifier)
         .prepareLibraryContent(previous, next),
     onChanged: () async {
-      final profiles = await database.profilesDao.all().get();
       if (!ref.mounted) return;
-      ref.read(profilesProvider.notifier).replaceFromDatabase(profiles);
+      await ref.read(profilesProvider.notifier).refreshFromDatabase();
+      if (!ref.mounted) return;
       ref.invalidate(clashProvidersProvider);
     },
   );
@@ -567,17 +567,17 @@ class ProviderConfigReplacement {
   final Uint8List previous, next;
   bool _attempted = false;
 
+  Future<bool> matchesPrevious() async =>
+      ProviderContentFiles.digest(
+        await ProviderContentFiles.read(path, ProviderContentFiles.configLimit),
+      ) ==
+      ProviderContentFiles.digest(previous);
+
   Future<void> apply() async {
     if (isEncryptedProfileBytes(previous) && !isEncryptedProfileBytes(next)) {
       throw const ProviderLibraryException('content');
     }
-    if (ProviderContentFiles.digest(
-          await ProviderContentFiles.read(
-            path,
-            ProviderContentFiles.configLimit,
-          ),
-        ) !=
-        ProviderContentFiles.digest(previous)) {
+    if (!await matchesPrevious()) {
       throw const ProviderLibraryException('changed');
     }
     _attempted = true;
@@ -603,6 +603,7 @@ ProviderLibraryChange createProviderLibraryChange({
   required Future<void> Function() committed,
   required Future<void> Function() recover,
   Future<void> Function()? beforeApply,
+  Future<void> Function()? afterRollback,
   ProviderConfigReplacement? config,
 }) {
   var attempted = false;
@@ -634,6 +635,10 @@ ProviderLibraryChange createProviderLibraryChange({
       if (failure != null) {
         await recover();
         throw failure;
+      }
+      if (afterRollback != null &&
+          (config == null || await config.matchesPrevious())) {
+        await afterRollback();
       }
     },
     committed: committed,

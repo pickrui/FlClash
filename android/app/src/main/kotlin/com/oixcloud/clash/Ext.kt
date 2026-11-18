@@ -31,9 +31,12 @@ private const val ICON_TTL_DAYS = 1L
 val Application.sharedState: SharedState
     get() {
         try {
-            val sp = getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE)
-            val res = sp.getString("flutter.sharedState", "")
-            return Gson().fromJson(res, SharedState::class.java) ?: SharedState()
+            val stored = getSharedPreferences("FlutterSharedPreferences", MODE_PRIVATE).all
+            val res = stored["flutter.sharedState"] as? String
+            val state = Gson().fromJson(res, SharedState::class.java) ?: SharedState()
+            return if (stored["flutter.applied_config_md5"] == "pending") {
+                state.copy(vpnOptions = null)
+            } else state
         } catch (_: Exception) {
             return SharedState()
         }

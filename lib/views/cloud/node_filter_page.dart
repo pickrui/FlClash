@@ -42,6 +42,7 @@ class CloudNodeFilterPage extends ConsumerStatefulWidget {
 class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
   late final CloudNodeFilterApi _api;
   late final CloudAccountNotifier _account;
+  late final int _session;
   final _matchController = TextEditingController();
   final _nomatchController = TextEditingController();
   final _searchController = TextEditingController();
@@ -62,6 +63,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     super.initState();
     _api = ref.read(cloudNodeFilterApiProvider);
     _account = ref.read(cloudAccountProvider.notifier);
+    _session = CloudApiService().sessionRevision;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _load();
     });
@@ -76,7 +78,14 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     super.dispose();
   }
 
+  bool _checkSession() {
+    if (_session == CloudApiService().sessionRevision) return true;
+    if (mounted) closePage(context);
+    return false;
+  }
+
   Future<void> _load() async {
+    if (!_checkSession()) return;
     _previewTimer?.cancel();
     _previewRequest++;
     setState(() {
@@ -85,7 +94,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     });
     try {
       final catalog = await _api.fetchNodeFilter();
-      if (!mounted) return;
+      if (!mounted || !_checkSession()) return;
       _matchController.text = catalog.filter.match;
       _nomatchController.text = catalog.filter.nomatch;
       setState(() {
@@ -97,7 +106,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
       });
     } catch (e) {
       await _handleUnauthorized(e);
-      if (mounted) setState(() => _loadError = e);
+      if (mounted && _checkSession()) setState(() => _loadError = e);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -123,11 +132,12 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
   }
 
   Future<void> _runPreview() async {
+    if (!mounted || !_checkSession()) return;
     final filter = _draft;
     final request = ++_previewRequest;
     try {
       final catalog = await _api.previewNodeFilter(filter);
-      if (!mounted || request != _previewRequest) return;
+      if (!mounted || !_checkSession() || request != _previewRequest) return;
       if (!catalog.available) {
         throw CloudApiException(context.appLocalizations.nodeFilterUnavailable);
       }
@@ -136,9 +146,8 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
         _previewFilter = filter;
       });
     } catch (e) {
-      if (!mounted || request != _previewRequest) return;
       final handled = await _handleUnauthorized(e);
-      if (!mounted || request != _previewRequest) return;
+      if (!mounted || !_checkSession() || request != _previewRequest) return;
       setState(() {
         _previewError = handled ? null : CloudApiException.clean(e);
       });
@@ -168,7 +177,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
   }
 
   Future<void> _submit() async {
-    if (!_canSave) return;
+    if (!_canSave || !_checkSession()) return;
     _previewTimer?.cancel();
     _previewRequest++;
     setState(() => _submitting = true);
@@ -176,13 +185,14 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
       final catalog = _draft.isEmpty
           ? await _api.resetNodeFilter()
           : await _api.saveNodeFilter(_draft);
+      if (!_checkSession()) return;
       unawaited(_account.refreshManagedSubscription());
       if (!mounted) return;
       closePage(context, catalog);
     } catch (e) {
-      if (await _handleUnauthorized(e)) return;
+      if (await _handleUnauthorized(e) || !mounted || !_checkSession()) return;
       globalState.showNotifier(CloudApiException.clean(e));
-      if (e is NodeFilterBindingChangedException && mounted) unawaited(_load());
+      if (e is NodeFilterBindingChangedException) unawaited(_load());
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -190,6 +200,12 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(cloudAccountProvider, (_, account) {
+      if (!account.isLoggedIn ||
+          _session != CloudApiService().sessionRevision) {
+        closePage(context);
+      }
+    });
     final l10n = context.appLocalizations;
     final ready = !_loading && _loadError == null && _base?.available == true;
     return Scaffold(

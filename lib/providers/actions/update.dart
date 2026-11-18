@@ -204,9 +204,9 @@ extension InitControllerExt on AppController {
       // A Start tapped during launch must queue behind this Core, not stop it
       // as disconnected while it is still starting.
       connect: () => _serializeCoreLifecycle(() async {
-        await _connectCore();
+        final connected = await _connectCore();
         if (!startupRecovery.isCurrent(bootAttempt)) return false;
-        if (!coreController.isCompleted) throw _coreDisconnectedMessage;
+        if (!connected) throw _coreDisconnectedMessage;
         await _initCore();
         return true;
       }),

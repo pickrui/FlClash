@@ -18,20 +18,36 @@ class AndroidSetupPersistence {
   final Future<void> Function(SharedState) saveState;
   final Future<void> Function(String) saveDigest;
   String? _pendingDigest;
+  bool _needsRuntimeSetup = false;
 
   bool get isPending => _pendingDigest != null;
+  bool get needsRuntimeSetup => _needsRuntimeSetup;
 
-  void stage(String digest) => _pendingDigest = digest;
+  void invalidateRuntime() {
+    _pendingDigest = null;
+    _needsRuntimeSetup = true;
+  }
 
-  void clear() => _pendingDigest = null;
+  void stage(String digest) {
+    _pendingDigest = digest;
+    _needsRuntimeSetup = false;
+  }
+
+  void clear() {
+    _pendingDigest = null;
+    _needsRuntimeSetup = false;
+  }
 
   Future<bool> save({required bool Function() isCurrent}) async {
     final digest = _pendingDigest;
     if (digest == null) return true;
     final state = await readState();
-    if (!isCurrent()) return false;
+    bool current() => _pendingDigest == digest && isCurrent();
+    if (!current()) return false;
     await saveState(state);
+    if (!current()) return false;
     await saveDigest(digest);
+    if (!current()) return false;
     _pendingDigest = null;
     return true;
   }
@@ -43,6 +59,47 @@ Profile mergeRefreshedProfile(Profile current, Profile refreshed) {
     lastUpdateDate: refreshed.lastUpdateDate,
     lastCheckDate: refreshed.lastCheckDate,
     subscriptionInfo: refreshed.subscriptionInfo,
+  );
+}
+
+bool _sameProfileDownloadSource(Profile? current, Profile? original) =>
+    current?.id == original?.id &&
+    current?.type == original?.type &&
+    current?.url == original?.url &&
+    current?.ageSecretKey == original?.ageSecretKey;
+
+final androidServiceStateProvider = Provider<SharedState?>((ref) {
+  final controller = ref.watch(actionControllerProvider);
+  final params = controller._appliedSetupParams;
+  if (params == null) return null;
+  final applied = controller._appliedAndroidProfile;
+  return androidServiceStateForProfile(
+    ref.watch(sharedStateProvider),
+    params,
+    applied,
+    ref.watch(profileProvider(applied?.id)),
+  );
+});
+
+@visibleForTesting
+SharedState androidServiceStateForProfile(
+  SharedState state,
+  SetupParams params,
+  Profile? applied,
+  Profile? latest,
+) {
+  final profile =
+      _sameProfileDownloadSource(latest, applied) &&
+          latest?.lastUpdateDate == applied?.lastUpdateDate
+      ? latest
+      : applied;
+  return state.copyWith(
+    currentProfileName: profile?.label ?? '',
+    setupParams: SetupParams(
+      selectedMap: profile?.selectedMap ?? params.selectedMap,
+      options: params.options,
+      suspendOnIdle: params.suspendOnIdle,
+    ),
   );
 }
 

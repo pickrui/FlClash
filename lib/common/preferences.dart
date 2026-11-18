@@ -133,6 +133,10 @@ class Preferences {
   Future<String?> getAppliedConfigMd5() async =>
       (await _loadSharedPreferences())?.getString('applied_config_md5');
 
+  // A missing digest belongs to older installs. Android cold starts only
+  // reject this explicit value while config.yaml is awaiting acceptance.
+  Future<void> markAndroidConfigPending() => saveAppliedConfigMd5('pending');
+
   Future<void> saveAppliedConfigMd5(String? md5) async {
     final store = await _loadSharedPreferences();
     try {

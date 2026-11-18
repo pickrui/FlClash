@@ -13,7 +13,6 @@ import 'package:fl_clash/models/core.dart';
 import 'package:fl_clash/models/state.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 
-import 'desktop/model.dart';
 import 'event.dart';
 import 'interface.dart';
 import 'method.dart';
@@ -22,19 +21,19 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
   static CoreLib? _instance;
 
   Completer<bool> _connectedCompleter = Completer<bool>();
-  Future<CoreLifecycleResult>? _startOperation;
-  Future<CoreLifecycleResult>? _closeOperation;
-  int _lifecycleRevision = 0;
+  final _operations = AsyncStorageLock();
+  Future<void>? _startOperation;
+  Future<bool>? _closeOperation;
   int _methodCallId = 0;
   bool _closed = false;
   final Set<Completer<CoreMethodResponse?>> _pendingCalls = {};
 
   final Service? _service;
-  final FutureOr<SharedState> Function() _readSharedState;
+  final FutureOr<SharedState?> Function() _readSharedState;
 
   CoreLib._internal()
     : _service = service,
-      _readSharedState = (() => appController.sharedState) {
+      _readSharedState = (() => appController.androidServiceState) {
     _service?.addListener(this);
   }
 
@@ -50,7 +49,7 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
   /// here as the desktop transport does instead of waiting for the timeout.
   @override
   void onServiceCrash(String message) {
-    ++_lifecycleRevision;
+    _startOperation = null;
     _disconnect(details: message, cancelConnecting: true);
     final disconnected = _connectedCompleter;
     coreEventManager.sendEvent(
@@ -88,13 +87,18 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
 
   @override
   Future<String> preload() async {
+    if (_closed) return StateError('Core lifecycle is closed').toString();
+    final start = _startOperation ??= _operations.synchronized(
+      _start,
+      reentrant: false,
+    );
     try {
-      await (_startOperation ??= _start().whenComplete(() {
-        _startOperation = null;
-      }));
+      await start;
       return '';
     } catch (error) {
       return error.toString();
+    } finally {
+      if (identical(_startOperation, start)) _startOperation = null;
     }
   }
 
@@ -104,65 +108,56 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
   }
 
   @override
-  Future<bool> destroy() async {
-    await (_closeOperation ??= _close());
-    return true;
+  Future<bool> destroy() {
+    _closed = true;
+    return _closeOperation ??= _operations.synchronized(() async {
+      try {
+        await _stop();
+        return true;
+      } finally {
+        _service?.removeListener(this);
+      }
+    }, reentrant: false);
   }
 
   @override
-  Future<bool> shutdown() async {
-    if (!_connectedCompleter.isCompleted) {
-      return false;
-    }
-    var coreStopped = true;
-    Object? actionError;
-    StackTrace? actionStackTrace;
-    try {
-      coreStopped = await shutdownCore();
-    } catch (error, stackTrace) {
-      actionError = error;
-      actionStackTrace = stackTrace;
-    } finally {
-      await _stop();
-    }
-    if (actionError != null) {
-      Error.throwWithStackTrace(
-        actionError,
-        actionStackTrace ?? StackTrace.current,
-      );
-    }
-    return coreStopped;
+  Future<bool> shutdown() {
+    _startOperation = null;
+    return _operations.synchronized(() async {
+      if (!isConnected || _closed) return false;
+      try {
+        return await shutdownCore();
+      } finally {
+        await _stop();
+      }
+    }, reentrant: false);
   }
 
-  Future<CoreLifecycleResult> _start() async {
+  Future<void> _start() async {
     if (_closed) {
       throw StateError('Core lifecycle is closed');
     }
-    final revision = ++_lifecycleRevision;
-    if (_connectedCompleter.isCompleted) {
-      return CoreLifecycleResult(
-        revision: revision,
-        outcome: CoreLifecycleOutcome.coalesced,
-      );
-    }
-    final initializationError = await _service?.init() ?? '';
-    if (initializationError.isNotEmpty) {
-      throw StateError(initializationError);
-    }
-    if (revision != _lifecycleRevision) {
-      throw StateError('Android Core service disconnected during startup');
-    }
-    _connectedCompleter.complete(true);
-    try {
-      final shared = await _readSharedState();
-      if (revision != _lifecycleRevision) {
+    if (isConnected) return;
+    final connection = _connectedCompleter;
+    void checkConnection() {
+      if (!identical(connection, _connectedCompleter)) {
         throw StateError('Android Core service disconnected during startup');
       }
+    }
+
+    try {
+      final initializationError = await _service?.init() ?? '';
+      if (initializationError.isNotEmpty) {
+        throw StateError(initializationError);
+      }
+      checkConnection();
+      connection.complete(true);
+      final shared = await _readSharedState();
+      checkConnection();
+      if (shared == null) return;
       final syncError = await _service?.syncState(shared) ?? '';
       if (syncError.isNotEmpty) throw StateError(syncError);
-      if (revision != _lifecycleRevision) {
-        throw StateError('Android Core service disconnected during startup');
-      }
+      checkConnection();
     } catch (_) {
       _disconnect();
       try {
@@ -174,43 +169,16 @@ class CoreLib extends CoreHandlerInterface with ServiceListener {
       }
       rethrow;
     }
-    return CoreLifecycleResult(
-      revision: revision,
-      outcome: CoreLifecycleOutcome.applied,
-    );
   }
 
-  /// A connect that joins an in-flight start must not get one a stop undid.
-  Future<CoreLifecycleResult> _stop({bool allowClosed = false}) async {
-    if (_closed && !allowClosed) {
-      throw StateError('Core lifecycle is closed');
-    }
-    try {
-      await _startOperation;
-    } catch (_) {}
-    final revision = ++_lifecycleRevision;
-    final wasConnected = _connectedCompleter.isCompleted;
+  Future<void> _stop() async {
+    final wasConnected = isConnected;
     _disconnect(cancelConnecting: _closed);
-    if (!wasConnected) {
-      return CoreLifecycleResult(
-        revision: revision,
-        outcome: CoreLifecycleOutcome.coalesced,
-      );
-    }
+    if (!wasConnected) return;
     final stopped = await _service?.shutdown() ?? true;
     if (!stopped) {
       throw StateError('Android Core service shutdown failed');
     }
-    return CoreLifecycleResult(
-      revision: revision,
-      outcome: CoreLifecycleOutcome.applied,
-    );
-  }
-
-  Future<CoreLifecycleResult> _close() async {
-    _closed = true;
-    _service?.removeListener(this);
-    return _stop(allowClosed: true);
   }
 
   @override

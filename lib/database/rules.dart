@@ -212,9 +212,11 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
     }
   }
 
-  Future<void> delRules(Iterable<int> ruleIds) {
-    return _delAll(ruleIds);
-  }
+  Future<void> delRules(Iterable<int> ruleIds) => batch((b) {
+    for (final ids in ruleIds.slices(_maxInValues)) {
+      b.deleteWhere(rules, (row) => row.id.isIn(ids));
+    }
+  });
 
   Future<void> putGlobalRule(Rule rule) {
     return _put(rule);
@@ -403,10 +405,6 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
         link.copyWith(order: order).toCompanion(),
       );
     });
-  }
-
-  Future<void> _delAll(Iterable<int> ruleIds) async {
-    await rules.deleteWhere((t) => t.id.isIn(ruleIds));
   }
 }
 

@@ -19,14 +19,17 @@ Map<String, dynamic> createBackupConfigMap(Config config, int version) {
 Future<Map<int, Set<String>>> restoredProfileRawNames(
   List<Profile> profiles,
   List<VM2<String, String>> migrations,
+  String profilesPath,
   Future<Map<String, dynamic>> Function(String path) read,
 ) async {
   final sources = {
-    for (final migration in migrations) p.basename(migration.b): migration.a,
+    for (final migration in migrations)
+      p.absolute(p.normalize(migration.b)): migration.a,
   };
+  final directory = p.absolute(p.normalize(profilesPath));
   final names = <int, Set<String>>{};
   for (final profile in profiles) {
-    final source = sources[profile.fileName];
+    final source = sources[p.join(directory, profile.fileName)];
     if (source == null) continue;
     final raw = await read(source);
     names[profile.id] = {...rawProxyNames(raw), ...rawProxyGroupNames(raw)};

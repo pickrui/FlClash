@@ -57,7 +57,10 @@ class _Profiles extends Profiles {
   Profile get profile => state.single;
   void replace(Profile next) => state = [next];
   @override
-  void updateProfile(int profileId, Profile Function(Profile) builder) {
+  Future<void> updateProfile(
+    int profileId,
+    Profile Function(Profile) builder,
+  ) async {
     writes++;
     replace(builder(profile));
   }

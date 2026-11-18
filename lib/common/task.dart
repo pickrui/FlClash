@@ -1492,34 +1492,40 @@ List<String> collectUnusedProfilePaths({
   final profiles = profileIds.toSet();
   final scripts = scriptIds.toSet();
   final targets = <String>[];
+  bool realDirectory(String path) =>
+      FileSystemEntity.typeSync(path, followLinks: false) ==
+      FileSystemEntityType.directory;
   void scan(
     String path,
     Set<int> ids,
     RegExp pattern, {
     bool directories = false,
+    RegExp? sidecar,
   }) {
-    final directory = Directory(path);
-    if (!directory.existsSync()) return;
-    for (final entry in directory.listSync(followLinks: false)) {
+    for (final entry in Directory(path).listSync(followLinks: false)) {
       if (directories ? entry is! Directory : entry is! File) continue;
-      final match = pattern.firstMatch(basename(entry.path));
+      final name = basename(entry.path);
+      final match = pattern.firstMatch(name) ?? sidecar?.firstMatch(name);
       if (match == null) continue;
       final id = int.tryParse(match.group(1)!);
       if (id != null && !ids.contains(id)) targets.add(entry.path);
     }
   }
 
-  scan(profilesPath, profiles, RegExp(r'^\.?([0-9]+)\.yaml$'));
-  scan(scriptsPath, scripts, RegExp(r'^([0-9]+)\.js$'));
+  if (realDirectory(scriptsPath)) {
+    scan(scriptsPath, scripts, RegExp(r'^([0-9]+)\.js$'));
+  }
+  if (!realDirectory(profilesPath)) return targets;
+  scan(
+    profilesPath,
+    profiles,
+    RegExp(r'^\.?([0-9]+)\.yaml$'),
+    sidecar: RegExp(r'^([0-9]+)\.yaml\.http-cache\.json$'),
+  );
+  if (!realDirectory(providersPath)) return targets;
   scan(providersPath, profiles, RegExp(r'^([0-9]+)$'), directories: true);
   final libraryPath = join(providersPath, 'app');
-  bool realDirectory(String path) =>
-      FileSystemEntity.typeSync(path, followLinks: false) ==
-      FileSystemEntityType.directory;
-  if (libraryCacheKeys != null &&
-      realDirectory(profilesPath) &&
-      realDirectory(providersPath) &&
-      realDirectory(libraryPath)) {
+  if (libraryCacheKeys != null && realDirectory(libraryPath)) {
     for (final kind in ProviderKind.values) {
       final directory = Directory(join(libraryPath, kind.name));
       if (!realDirectory(directory.path)) continue;

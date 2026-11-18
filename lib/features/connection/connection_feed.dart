@@ -177,16 +177,17 @@ class ConnectionFeed with CoreEventListener {
     }
   }
 
-  void _accept(Map<String, dynamic> delta) {
+  bool _accept(Map<String, dynamic> delta) {
     final sequence = delta['sequence'] as int;
-    if (_needsReset || sequence <= _sequence) return;
+    if (_needsReset || sequence <= _sequence) return false;
     if (sequence != _sequence + 1) {
       _needsReset = true;
-      return;
+      return false;
     }
     _sequence = sequence;
     _receivedAt = _now();
     _apply(delta);
+    return !_needsReset;
   }
 
   @override
@@ -200,8 +201,7 @@ class ConnectionFeed with CoreEventListener {
       }
       return;
     }
-    _accept(delta);
-    if (!_needsReset) onSnapshot(_connections.values.toList());
+    if (_accept(delta)) onSnapshot(_connections.values.toList());
   }
 
   void _cancel(String id) {

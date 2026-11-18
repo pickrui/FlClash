@@ -208,59 +208,83 @@ void main() {
     );
   }
 
-  for (final stage in ['active', 'removing', 'disposed']) {
-    final removed = stage != 'active';
-    testWidgets('clipboard import respects its owning page (stage: $stage)', (
-      tester,
-    ) async {
-      final clipboard = Completer<Map<String, dynamic>?>();
-      var reads = 0;
-      final messenger = tester.binding.defaultBinaryMessenger;
-      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
-        if (call.method != 'Clipboard.getData') return null;
-        reads++;
-        return clipboard.future;
-      });
-      addTearDown(
-        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
-      );
-      final api = InstalledAppsFake()
-        ..packages = [installedPackage('fixture.app')];
-      final commonAction = _CommonAction();
-      final container = await openAccess(
-        tester,
-        api,
-        asRoute: true,
-        commonAction: commonAction,
-      );
-      container.listen(accessControlStateProvider, (_, _) {});
-      final route = ModalRoute.of(tester.element(find.byType(AccessView)))!;
-      final l10n = AppLocalizations.current;
-      await tester.tap(find.byTooltip(l10n.more));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(l10n.action));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(l10n.clipboardImport));
-      await tester.pumpAndSettle();
-      expect(reads, 1);
-      if (removed) {
-        route.navigator!.pop();
-        if (stage == 'disposed') await tester.pumpAndSettle();
-      }
-      clipboard.complete({'text': 'fixture.app'});
-      await tester.pumpAndSettle();
-      expect(commonAction.errors, isEmpty);
-      expect(find.byType(AlertDialog), findsNothing);
-      expect(
-        container.read(accessControlStateProvider).rejectList,
-        removed ? isEmpty : ['fixture.app'],
-      );
-      expect(
-        container.read(vpnSettingProvider).accessControlProps.rejectList,
-        isEmpty,
-      );
-      expect(tester.takeException(), isNull);
-    });
+  for (final stage in [
+    'active',
+    'removing',
+    'disposed',
+    'switched',
+    'edited',
+  ]) {
+    testWidgets(
+      'clipboard import respects its originating draft (stage: $stage)',
+      (tester) async {
+        final clipboard = Completer<Map<String, dynamic>?>();
+        var reads = 0;
+        final messenger = tester.binding.defaultBinaryMessenger;
+        messenger.setMockMethodCallHandler(SystemChannels.platform, (
+          call,
+        ) async {
+          if (call.method != 'Clipboard.getData') return null;
+          reads++;
+          return clipboard.future;
+        });
+        addTearDown(
+          () =>
+              messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+        );
+        final api = InstalledAppsFake()
+          ..packages = [installedPackage('fixture.app')];
+        final commonAction = _CommonAction();
+        final container = await openAccess(
+          tester,
+          api,
+          asRoute: true,
+          commonAction: commonAction,
+        );
+        container.listen(accessControlStateProvider, (_, _) {});
+        final route = ModalRoute.of(tester.element(find.byType(AccessView)))!;
+        final l10n = AppLocalizations.current;
+        await tester.tap(find.byTooltip(l10n.more));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(l10n.action));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(l10n.clipboardImport));
+        await tester.pumpAndSettle();
+        expect(reads, 1);
+        if (stage == 'removing' || stage == 'disposed') {
+          route.navigator!.pop();
+          if (stage == 'disposed') await tester.pumpAndSettle();
+        } else if (stage == 'switched') {
+          container
+              .read(accessControlStateProvider.notifier)
+              .update(
+                (state) =>
+                    state.copyWith(mode: AccessControlMode.acceptSelected),
+              );
+        } else if (stage == 'edited') {
+          await tester.tap(find.byType(Checkbox).first);
+          await tester.pumpAndSettle();
+        }
+        clipboard.complete({'text': 'pasted.app'});
+        await tester.pumpAndSettle();
+        expect(commonAction.errors, isEmpty);
+        expect(find.byType(AlertDialog), findsNothing);
+        expect(
+          container.read(accessControlStateProvider).rejectList,
+          switch (stage) {
+            'active' => ['pasted.app'],
+            'edited' => ['fixture.app'],
+            _ => isEmpty,
+          },
+        );
+        expect(container.read(accessControlStateProvider).acceptList, isEmpty);
+        expect(
+          container.read(vpnSettingProvider).accessControlProps.rejectList,
+          isEmpty,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   testWidgets(

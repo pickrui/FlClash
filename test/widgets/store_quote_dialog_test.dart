@@ -102,35 +102,40 @@ VoidCallback? _action(WidgetTester tester, String label) =>
     tester.widget<TextButton>(find.widgetWithText(TextButton, label)).onPressed;
 
 void main() {
-  testWidgets('expired quote closes only its own route under a newer dialog', (
-    tester,
-  ) async {
-    final panel = _Panel();
-    final results = await _open(tester, panel);
-    final pending = panel.pendingQuote = Completer<StoreQuote>();
-    await tester.tap(find.widgetWithText(TextButton, 'Verify'));
-    await tester.pump();
-    final context = tester.element(find.byType(StoreQuoteDialog));
-    final navigator = Navigator.of(context);
-    unawaited(
-      showDialog<void>(
-        context: context,
-        builder: (_) =>
-            const material.AlertDialog(content: Text('Newer dialog')),
-      ),
-    );
-    await tester.pump();
+  for (final error in [
+    const CloudApiException('Unauthorized'),
+    const CloudApiStaleSessionException(),
+  ]) {
+    testWidgets('a quote closes only its own route on ${error.runtimeType}', (
+      tester,
+    ) async {
+      final panel = _Panel();
+      final results = await _open(tester, panel);
+      final pending = panel.pendingQuote = Completer<StoreQuote>();
+      await tester.tap(find.widgetWithText(TextButton, 'Verify'));
+      await tester.pump();
+      final context = tester.element(find.byType(StoreQuoteDialog));
+      final navigator = Navigator.of(context);
+      unawaited(
+        showDialog<void>(
+          context: context,
+          builder: (_) =>
+              const material.AlertDialog(content: Text('Newer dialog')),
+        ),
+      );
+      await tester.pump();
 
-    pending.completeError(const CloudApiException('Unauthorized'));
-    await tester.pumpAndSettle();
+      pending.completeError(error);
+      await tester.pumpAndSettle();
 
-    expect(find.text('Newer dialog'), findsOneWidget);
-    expect(results, [null]);
-    navigator.pop();
-    await tester.pumpAndSettle();
-    expect(find.byType(StoreQuoteDialog), findsNothing);
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.text('Newer dialog'), findsOneWidget);
+      expect(results, [null]);
+      navigator.pop();
+      await tester.pumpAndSettle();
+      expect(find.byType(StoreQuoteDialog), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('long quote labels and amounts fit narrow enlarged text', (
     tester,

@@ -32,8 +32,11 @@ void main() {
         );
         var desired = reconnect ? applied.copyWith(mtu: 1400) : applied;
         final notices = <String>[];
+        final setup = _SetupAction();
+        late VoidCallback restart;
         final container = ProviderContainer(
           overrides: [
+            setupActionProvider.overrideWith(() => setup),
             sharedStateProvider.overrideWith(
               (_) => SharedState(
                 vpnOptions: desired,
@@ -62,6 +65,7 @@ void main() {
             container: container,
             child: _Messages(
               notices: notices,
+              onRestart: (callback) => restart = callback,
               child: const TestApp(child: VpnManager(child: SizedBox())),
             ),
           ),
@@ -80,12 +84,16 @@ void main() {
           await tester.pump();
         }
         expect(notices, [appLocalizations.vpnConfigChangeDetected]);
+        restart();
+        expect(setup.restarts, 1);
         throttler.cancel(FunctionTag.vpnTip);
         notices.clear();
         desired = applied.copyWith(excludeSSIDs: ['Home']);
         container.invalidate(sharedStateProvider);
         await tester.pump();
         expect(notices, isEmpty);
+        restart();
+        expect(setup.restarts, 1);
         container.read(runningVpnOptionsProvider.notifier).value = null;
         desired = applied.copyWith(mtu: 1500);
         container.invalidate(sharedStateProvider);
@@ -109,15 +117,31 @@ void main() {
         }
         throttler.cancel(FunctionTag.vpnTip);
         await tester.pumpWidget(const SizedBox());
+        restart();
+        expect(tester.takeException(), isNull);
+        expect(setup.restarts, 1);
       },
     );
   }
 }
 
+class _SetupAction extends SetupAction {
+  int restarts = 0;
+  @override
+  void build() {}
+  @override
+  Future<void> restartVpn() async => restarts++;
+}
+
 class _Messages extends StatefulWidget {
   final List<String> notices;
+  final ValueChanged<VoidCallback> onRestart;
   final Widget child;
-  const _Messages({required this.notices, required this.child});
+  const _Messages({
+    required this.notices,
+    required this.onRestart,
+    required this.child,
+  });
   @override
   State<_Messages> createState() => _MessagesState();
 }
@@ -128,7 +152,11 @@ class _MessagesState extends MessageHostState<_Messages> {
     String text, {
     MessageLevel level = MessageLevel.info,
     VoidCallback? onTap,
-  }) => widget.notices.add(text);
+  }) {
+    widget.notices.add(text);
+    if (onTap != null) widget.onRestart(onTap);
+  }
+
   @override
   Widget build(BuildContext context) => widget.child;
 }

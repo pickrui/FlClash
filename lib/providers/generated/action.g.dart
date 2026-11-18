@@ -298,7 +298,7 @@ final class SetupActionProvider extends $NotifierProvider<SetupAction, void> {
   }
 }
 
-String _$setupActionHash() => r'b3842e39aec3e5a3268e996437cdfd5e3cab1363';
+String _$setupActionHash() => r'5c76e9a6e04deef3876d724ce7383ad656d9d333';
 
 abstract class _$SetupAction extends $Notifier<void> {
   void build();
@@ -544,61 +544,9 @@ final class MitmModulesActionProvider
   }
 }
 
-String _$mitmModulesActionHash() => r'6a753af4a9a95a68adfb2bdf14c7e44192ef88c6';
+String _$mitmModulesActionHash() => r'e437613ccd69c4781b95003e9ddcad8e0b3d2435';
 
 abstract class _$MitmModulesAction extends $Notifier<void> {
-  void build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(BackBlockAction)
-final backBlockActionProvider = BackBlockActionProvider._();
-
-final class BackBlockActionProvider
-    extends $NotifierProvider<BackBlockAction, void> {
-  BackBlockActionProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'backBlockActionProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$backBlockActionHash();
-
-  @$internal
-  @override
-  BackBlockAction create() => BackBlockAction();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
-    );
-  }
-}
-
-String _$backBlockActionHash() => r'019ed804da5f13baeffae1733add09955e345bde';
-
-abstract class _$BackBlockAction extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

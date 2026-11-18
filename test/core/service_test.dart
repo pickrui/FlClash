@@ -13,6 +13,8 @@ import 'package:fl_clash/core/desktop/rpc_client.dart';
 import 'package:fl_clash/core/event.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/core/service.dart';
+import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -40,7 +42,14 @@ void main() {
     crashes = StreamController<DesktopCoreFailure>.broadcast();
     when(() => lifecycle.crashEvents).thenAnswer((_) => crashes.stream);
     when(() => lifecycle.start()).thenAnswer((_) async => result);
-    when(() => lifecycle.stop()).thenAnswer((_) async => result);
+    when(() => lifecycle.stop(beforeStop: any(named: 'beforeStop'))).thenAnswer(
+      (invocation) async {
+        final beforeStop =
+            invocation.namedArguments[#beforeStop] as Future<void> Function()?;
+        await beforeStop?.call();
+        return result;
+      },
+    );
     when(() => lifecycle.close()).thenAnswer((_) async => result);
     when(() => rpcClient.close()).thenAnswer((_) async {});
     service = CoreService.forTesting(
@@ -57,8 +66,9 @@ void main() {
   test(
     'delegates lifecycle commands without owning platform details',
     () async {
-      expect(await service.start(), same(result));
-      expect(await service.stop(), same(result));
+      when(() => lifecycle.state).thenReturn(const DesktopCoreIdle());
+      expect(await service.preload(), isEmpty);
+      expect(await service.shutdown(), isTrue);
 
       verify(() => lifecycle.start()).called(1);
       verify(() => lifecycle.stop()).called(1);
@@ -78,6 +88,19 @@ void main() {
       await service.invokeMethod<bool>(method: CoreMethod.getIsInit),
       isTrue,
     );
+  });
+
+  test('a superseded lifecycle command does not report success', () async {
+    const superseded = CoreLifecycleResult(
+      revision: 2,
+      outcome: CoreLifecycleOutcome.superseded,
+    );
+    when(() => lifecycle.start()).thenAnswer((_) async => superseded);
+    when(() => lifecycle.stop()).thenAnswer((_) async => superseded);
+    when(() => lifecycle.state).thenReturn(const DesktopCoreIdle());
+    final strings = await AppLocalizations.load(const Locale('en'));
+    expect(await service.preload(), strings.coreNotConnected);
+    expect(await service.shutdown(), isFalse);
   });
 
   test('forwards lifecycle crash events once', () async {
@@ -195,7 +218,8 @@ void main() {
     await tester.pump(coreShutdownTimeout + const Duration(seconds: 1));
 
     expect(stopped, isTrue);
-    verify(() => lifecycle.stop()).called(1);
+    verify(() => lifecycle.stop(beforeStop: any(named: 'beforeStop')))
+        .called(1);
   });
 
   test('missing shutdown response still stops the owned process', () async {
@@ -217,7 +241,8 @@ void main() {
     ).thenAnswer((_) async => null);
 
     expect(await service.shutdown(), isTrue);
-    verify(() => lifecycle.stop()).called(1);
+    verify(() => lifecycle.stop(beforeStop: any(named: 'beforeStop')))
+        .called(1);
   });
 
   test('close coalesces lifecycle and RPC cleanup', () async {

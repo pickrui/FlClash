@@ -244,6 +244,39 @@ void main() {
     await lifecycle.close();
   });
 
+  test('a start during graceful shutdown waits for a fresh session', () async {
+    final transport = FakeDesktopCoreTransport();
+    final first = FakeLauncher(owner: CoreProcessOwner.direct, pid: 42);
+    final next = FakeLauncher(owner: CoreProcessOwner.direct, pid: 84);
+    final resolver = MutableLauncherResolver(first);
+    final lifecycle = _createLifecycle(
+      transport: transport,
+      resolver: resolver,
+    );
+    await _startConnected(lifecycle, transport, first, pid: 42);
+    resolver.launcher = next;
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    final stop = lifecycle.stop(
+      beforeStop: () {
+        entered.complete();
+        return release.future;
+      },
+    );
+    await entered.future;
+    expect(lifecycle.state, isA<DesktopCoreStopping>());
+    final start = lifecycle.start();
+    expect(next.startCount, 0);
+    transport.disconnect(1);
+    release.complete();
+    await next.started;
+    transport.connect(pid: 84, generation: 2);
+    expect((await start).session?.connectionGeneration, 2);
+    expect((await stop).outcome, CoreLifecycleOutcome.superseded);
+    expect(first.lease.stopCount, 1);
+    await _closeRunning(lifecycle, transport, next.lease, 2);
+  });
+
   test('start queued behind a failing stop keeps one Core', () async {
     final transport = FakeDesktopCoreTransport();
     final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 42);

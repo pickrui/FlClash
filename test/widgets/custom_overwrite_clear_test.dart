@@ -366,7 +366,10 @@ class _TestProfiles extends Profiles {
   Profile get otherProfile => state.firstWhere((profile) => profile.id == 2);
 
   @override
-  void updateProfile(int profileId, Profile Function(Profile) builder) {
+  Future<void> updateProfile(
+    int profileId,
+    Profile Function(Profile) builder,
+  ) async {
     writes++;
     state = [
       for (final profile in state)

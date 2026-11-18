@@ -53,11 +53,11 @@ void main() {
     }
 
     Future<void> save() async {
-      final text = find.text('Save');
-      await tester.tap(
-        text.evaluate().isNotEmpty ? text : find.byTooltip('Save'),
-      );
+      final submit = tester.widget<FormPage>(find.byType(FormPage)).onSave;
+      submit();
+      submit();
       await tester.pumpAndSettle();
+      expect(find.text('open'), findsOneWidget);
     }
 
     await open();

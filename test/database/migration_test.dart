@@ -93,6 +93,26 @@ const _localIconSet = IconSet(
 
 void main() {
   test(
+    'a downgraded v10 database retains its shared nodes and aliases',
+    () async {
+      final directory = await Directory.systemTemp.createTemp('schema-v10-');
+      addTearDown(() => directory.delete(recursive: true));
+      final file = File('${directory.path}/database.sqlite');
+      final source = Database(NativeDatabase(file));
+      final nodes = _v6Profiles.first.profileProxies;
+      final profile = _migratedV6Profiles.first;
+      await source.putProfile(profile);
+      await source.customProxiesDao.setAll(nodes);
+      await source.customStatement('PRAGMA user_version = 10');
+      await source.close();
+      final upgraded = Database(NativeDatabase(file));
+      addTearDown(upgraded.close);
+      expect(await upgraded.profilesDao.all().getSingle(), profile);
+      expect(await upgraded.customProxiesDao.all().get(), nodes);
+    },
+  );
+
+  test(
     'schema v12 adds the check timestamp without changing profile state',
     () async {
       final directory = await Directory.systemTemp.createTemp('schema-v12-');

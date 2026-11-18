@@ -71,23 +71,25 @@ class RecordSorter<T> {
     if (sort == null || sortKey == null) {
       return items;
     }
-    if (identical(_source, items) && _sortedBy == sort) {
+    final storedOrder = (
+      columnId: sort.columnId,
+      descending: sort.descending != reverse,
+    );
+    if (identical(_source, items) && _sortedBy == storedOrder) {
       return _sorted;
     }
-    final shown = reverse ? items.reversed.toList() : items;
-    final keys = [for (final item in shown) sortKey(item)];
-    final direction = sort.descending ? -1 : 1;
+    final keys = [for (final item in items) sortKey(item)];
+    final direction = storedOrder.descending ? -1 : 1;
     // Sorting indexes keeps ties in their shown order; collection's
     // mergeSort is stable too but measured over ten times slower.
-    final order = List.generate(shown.length, (index) => index)
+    final order = List.generate(items.length, (index) => index)
       ..sort((a, b) {
         final compared = keys[a].compareTo(keys[b]);
         return compared != 0 ? direction * compared : a - b;
       });
-    final sorted = [for (final index in order) shown[index]];
     _source = items;
-    _sortedBy = sort;
-    return _sorted = reverse ? sorted.reversed.toList() : sorted;
+    _sortedBy = storedOrder;
+    return _sorted = [for (final index in order) items[index]];
   }
 }
 

@@ -179,7 +179,9 @@ jobs:
           if-no-files-found: ignore
 
       - name: Verify isolated desktop safe mode
-        run: flutter test --dart-define=SAFE_MODE=true test/safe_mode
+        env:
+          FLCLASH_TEST_SCRIPT_LIB: ${{ github.workspace }}/plugins/rust_api/rust/target/debug/librust_api.so
+        run: make test-safe
 
   go-test:
     name: Go core tests

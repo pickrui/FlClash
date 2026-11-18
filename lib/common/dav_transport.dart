@@ -103,18 +103,23 @@ class DavTransport extends WdDio {
 
   bool _adoptChallenge(Headers headers) {
     final values = headers[Headers.wwwAuthenticateHeader] ?? const [];
+    var offersBasic = false;
     for (final value in values) {
-      final digest = _DigestChallenge.parse(value);
-      if (digest == null) continue;
-      if (_digest?.nonce != digest.nonce || _digest?.realm != digest.realm) {
-        _nonceCount = 0;
+      for (final match in _challengeOrQuotedString.allMatches(value)) {
+        final scheme = match[1]?.toLowerCase();
+        if (scheme == 'basic') offersBasic = true;
+        if (scheme != 'digest') continue;
+        final digest = _DigestChallenge.parse(value, match.end);
+        if (digest == null) continue;
+        if (_digest?.nonce != digest.nonce || _digest?.realm != digest.realm) {
+          _nonceCount = 0;
+        }
+        _digest = digest;
+        _basic = false;
+        return true;
       }
-      _digest = digest;
-      _basic = false;
-      return true;
     }
-    if (_digest == null &&
-        values.any((value) => _basicChallenge.hasMatch(value))) {
+    if (_digest == null && offersBasic) {
       _basic = true;
       return true;
     }
@@ -122,8 +127,10 @@ class DavTransport extends WdDio {
   }
 }
 
-final _basicChallenge = RegExp(r'(?:^|,)\s*Basic\s', caseSensitive: false);
-final _digestChallenge = RegExp(r'(?:^|,)\s*Digest\s+', caseSensitive: false);
+final _challengeOrQuotedString = RegExp(
+  r'"(?:\\.|[^"\\])*"|(?:^|,)\s*(Basic|Digest)\s+',
+  caseSensitive: false,
+);
 final _authParameter = RegExp(
   r'\s*,?\s*(\w+)\s*=\s*(?:"((?:\\.|[^"\\])*)"|([^\s,]+))',
 );
@@ -154,14 +161,10 @@ class _DigestChallenge {
     required this.algorithm,
   });
 
-  static _DigestChallenge? parse(String header) {
-    final start = _digestChallenge.firstMatch(header);
-    if (start == null) return null;
-    final parameters = header.substring(start.end);
+  static _DigestChallenge? parse(String header, int offset) {
     final values = <String, String>{};
-    var offset = 0;
-    while (offset < parameters.length) {
-      final match = _authParameter.matchAsPrefix(parameters, offset);
+    while (offset < header.length) {
+      final match = _authParameter.matchAsPrefix(header, offset);
       if (match == null) break;
       values[match[1]!.toLowerCase()] = (match[2] ?? match[3]!)
           .replaceAllMapped(_quotedEscape, (match) => match[1]!);

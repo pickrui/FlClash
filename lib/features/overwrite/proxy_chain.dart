@@ -81,7 +81,6 @@ List<String> _addUniqueProxyNames(Set<String> seen, Iterable<String> proxies) {
 ProxyChainRawContext buildProxyChainRawContext({
   required Map<String, dynamic> rawConfig,
   Iterable<ProfileProxy> profileProxies = const [],
-  Iterable<String> extra = const [],
   String? customNodesLabel,
   String? otherNodesLabel,
   String? policyGroupsLabel,
@@ -163,7 +162,7 @@ ProxyChainRawContext buildProxyChainRawContext({
   addSection(
     otherNodesLabel ?? appLocalizations.proxyChainOtherNodes,
     AppGlyphs.more,
-    [...targetNames, ...extra],
+    targetNames,
   );
   return ProxyChainRawContext(
     sections: sections,
@@ -433,10 +432,7 @@ class _ProfileProxyChainsContentState
       rawConfig: rawConfig,
       profileProxies: profileProxies,
     );
-    Profile? validatedProfile;
-    ({bool hasDisabledConflicts, List<ProxyChain> proxyChains})? validated;
-
-    final res = await showOverwriteSheet<ProxyChain>(
+    await showOverwriteSheet<ProxyChain>(
       context: context,
       builder: (_) => ProxyChainEditView(
         profileId: widget.profileId,
@@ -480,51 +476,72 @@ class _ProfileProxyChainsContentState
           )) {
             return false;
           }
-          validatedProfile = profile;
-          validated = candidate;
-          return true;
+          return _putProxyChains(
+            profile,
+            candidate.proxyChains,
+            announceApplied: true,
+            disabledConflicts: candidate.hasDisabledConflicts,
+          );
         },
       ),
     );
-    if (res == null) {
-      return;
-    }
-    if (!mounted) {
-      return;
-    }
-    if (ref.read(profileProvider(widget.profileId)) != validatedProfile) {
+  }
+
+  Future<bool> _putProxyChains(
+    Profile original,
+    List<ProxyChain> proxyChains, {
+    bool announceApplied = false,
+    bool disabledConflicts = false,
+  }) async {
+    if (!mounted) return false;
+    final profileId = original.id;
+    final container = ProviderScope.containerOf(context, listen: false);
+    if (container.read(profileProvider(profileId)) != original) {
       context.showNotifier(appLocalizations.routingChanged);
-      return;
+      return false;
     }
-    final resolved = validated!;
-    _putProxyChains(resolved.proxyChains);
-    _applyProfileChanges();
-    if (_isCurrentProfile) {
-      context.showNotifier(appLocalizations.proxyChainSavedAndApplied);
+    try {
+      await container
+          .read(profilesProvider.notifier)
+          .updateProfile(
+            profileId,
+            (profile) => profile.copyWith(proxyChains: proxyChains),
+          );
+    } catch (error) {
+      if (mounted) context.showNotifier(error.toString());
+      return false;
     }
-    if (resolved.hasDisabledConflicts) {
-      context.showNotifier(appLocalizations.proxyChainRelatedChainsUpdated);
+    bool stillSaved() => const ListEquality<ProxyChain>().equals(
+      container.read(profileProvider(profileId))?.proxyChains,
+      proxyChains,
+    );
+    bool current() => container.read(currentProfileIdProvider) == profileId;
+    try {
+      if (!stillSaved()) return true;
+      if (mounted && disabledConflicts) {
+        context.showNotifier(appLocalizations.proxyChainRelatedChainsUpdated);
+      }
+      if (!current()) return true;
+      final applied = await container
+          .read(setupActionProvider.notifier)
+          .applyProfileSettled(silence: true, force: true);
+      if (mounted &&
+          stillSaved() &&
+          current() &&
+          (!applied || announceApplied)) {
+        context.showNotifier(
+          applied
+              ? appLocalizations.proxyChainSavedAndApplied
+              : appLocalizations.routingApplyFailed,
+        );
+      }
+    } catch (error) {
+      if (mounted && stillSaved() && current()) {
+        context.showNotifier(error.toString());
+      }
     }
+    return true;
   }
-
-  void _putProxyChains(List<ProxyChain> proxyChains) {
-    ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
-      state,
-    ) {
-      return state.copyWith(proxyChains: proxyChains);
-    });
-  }
-
-  void _applyProfileChanges() {
-    final setupAction = context.setupAction;
-
-    if (_isCurrentProfile) {
-      setupAction.applyProfileDebounce(silence: true);
-    }
-  }
-
-  bool get _isCurrentProfile =>
-      ref.read(currentProfileIdProvider) == widget.profileId;
 
   Future<bool> _canPutProxyChains(
     Profile profile,
@@ -600,15 +617,13 @@ class _ProfileProxyChainsContentState
     if (res != true || !mounted) {
       return;
     }
-    ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
-      state,
-    ) {
-      return state.copyWith(
-        proxyChains: state.proxyChains
-            .where((item) => !targetProxyChainIds.contains(item.id))
-            .toList(),
-      );
-    });
+    final profile = ref.read(profileProvider(widget.profileId));
+    if (profile == null) return;
+    final saved = await _putProxyChains(profile, [
+      for (final item in profile.proxyChains)
+        if (!targetProxyChainIds.contains(item.id)) item,
+    ]);
+    if (!saved || !mounted) return;
     ref.read(selectedItemsProvider(_proxyChainKey).notifier).update((
       selectedProxyChains,
     ) {
@@ -616,7 +631,6 @@ class _ProfileProxyChainsContentState
           .where((item) => !targetProxyChainIds.contains(item))
           .toSet();
     });
-    _applyProfileChanges();
   }
 
   Future<void> _handleProxyChainToggle(
@@ -624,18 +638,12 @@ class _ProfileProxyChainsContentState
     bool value,
   ) async {
     if (!value) {
-      ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
-        state,
-      ) {
-        return state.copyWith(
-          proxyChains: state.proxyChains.map((item) {
-            return item.id == proxyChain.id
-                ? item.copyWith(enable: false)
-                : item;
-          }).toList(),
-        );
-      });
-      _applyProfileChanges();
+      final profile = ref.read(profileProvider(widget.profileId));
+      if (profile == null) return;
+      await _putProxyChains(profile, [
+        for (final item in profile.proxyChains)
+          item.id == proxyChain.id ? item.copyWith(enable: false) : item,
+      ]);
       return;
     }
     if (!proxyChain.copyWith(enable: true).isValid) {
@@ -680,23 +688,20 @@ class _ProfileProxyChainsContentState
     )) {
       return;
     }
-    if (!mounted) return;
-    _putProxyChains(nextProxyChains.proxyChains);
-    _applyProfileChanges();
-    if (nextProxyChains.hasDisabledConflicts) {
-      context.showNotifier(appLocalizations.proxyChainRelatedChainsUpdated);
-    }
+    await _putProxyChains(
+      profile,
+      nextProxyChains.proxyChains,
+      disabledConflicts: nextProxyChains.hasDisabledConflicts,
+    );
   }
 
-  void _handleProxyChainReorder(int oldIndex, int newIndex) {
-    ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
-      state,
-    ) {
-      return state.copyWith(
-        proxyChains: state.proxyChains.copyAndReorder(oldIndex, newIndex),
-      );
-    });
-    _applyProfileChanges();
+  Future<void> _handleProxyChainReorder(int oldIndex, int newIndex) async {
+    final profile = ref.read(profileProvider(widget.profileId));
+    if (profile == null) return;
+    await _putProxyChains(
+      profile,
+      profile.proxyChains.copyAndReorder(oldIndex, newIndex),
+    );
   }
 
   @override
@@ -840,7 +845,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     super.initState();
     final proxyChain = widget.proxyChain;
     _nameController.text = proxyChain?.name ?? '';
-    _proxies = List<String>.from(proxyChain?.proxies ?? []);
+    _proxies = proxyChain?.normalizedProxies ?? [];
     _rawConfig = widget.rawConfig;
     _refreshRawContext();
     _origin = _snapshot;
@@ -853,12 +858,13 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
   }
 
   bool _containsProxy(String proxyName) {
-    return normalizeProxyChainProxies(_proxies).contains(proxyName.trim());
+    return _proxies.contains(proxyName.trim());
   }
 
-  bool _validateProxies(List<String> proxies) {
+  bool _validateProxies(List<String> proxies, {bool draft = false}) {
     final invalidProxyName = _rawContext.nameScope.getInvalidName(proxies);
     if (invalidProxyName != null) {
+      if (draft) return true;
       context.showNotifier(
         _rawContext.groupNames.contains(invalidProxyName)
             ? appLocalizations.proxyChainUnsupportedGroupTip
@@ -866,7 +872,10 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       );
       return false;
     }
-    final refused = _rawContext.managedHops?.refusedHop(proxies);
+    // Chains through a policy group are checked per member by the Core.
+    final refused = proxies.any(_rawContext.groupNames.contains)
+        ? null
+        : _rawContext.managedHops?.refusedHop(proxies);
     if (refused != null) {
       context.showNotifier(
         appLocalizations.proxyChainUnavailableNodeTip(refused),
@@ -885,32 +894,24 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     return true;
   }
 
-  void _appendProxy(String proxyName) {
-    _proxies = [..._proxies, proxyName];
+  int _insertionIndex(String candidate) {
+    final managed = _rawContext.managedHops;
+    if (managed != null &&
+        managed.carriesManaged(candidate) &&
+        (!_rawContext.groupNames.contains(candidate) ||
+            managed.onlyManaged(candidate))) {
+      final first = _proxies.indexWhere((hop) => !managed.onlyManaged(hop));
+      if (first >= 0) return first;
+    }
+    return _proxies.length;
   }
 
-  bool _addProxy(String value) {
-    final proxyName = value.trim();
-    if (proxyName.isEmpty) {
-      return false;
-    }
-    if (_containsProxy(proxyName)) {
-      context.showNotifier(
-        appLocalizations.existsTip(appLocalizations.proxies),
-      );
-      return false;
-    }
-    if (!_validateProxies([..._proxies, proxyName])) {
-      return false;
-    }
-    _appendProxy(proxyName);
+  bool _handleAdd(String name) {
+    if (_containsProxy(name)) return false;
+    final next = [..._proxies]..insert(_insertionIndex(name), name);
+    if (!_validateProxies(next, draft: true)) return false;
+    setState(() => _proxies = next);
     return true;
-  }
-
-  void _handleAdd(String value) {
-    if (_addProxy(value)) {
-      setState(() {});
-    }
   }
 
   void _refreshRawContext() {
@@ -918,7 +919,6 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
       rawConfig: _rawConfig,
       profileProxies:
           ref.read(profileProvider(widget.profileId))?.profileProxies ?? [],
-      extra: _proxies,
     );
   }
 
@@ -934,29 +934,37 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     if (res == null || !mounted) {
       return;
     }
-    final proxyName = res.name;
-    ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
-      state,
-    ) {
-      return state.copyWith(
-        profileProxies: state.profileProxies.copyAndPut(res),
-      );
-    });
-    _appendProxy(proxyName);
+    setState(() => _saving = true);
     try {
-      final config = await setupAction.getProxyChainProfileConfig(
-        widget.profileId,
-      );
+      await ref
+          .read(profilesProvider.notifier)
+          .updateProfile(
+            widget.profileId,
+            (profile) => profile.copyWith(
+              profileProxies: profile.profileProxies.copyAndPut(res),
+            ),
+          );
+      setupAction.applyProfileDebounce(silence: true);
       if (!mounted) return;
-      _rawConfig = config;
+      try {
+        final config = await setupAction.getProxyChainProfileConfig(
+          widget.profileId,
+        );
+        if (!mounted) return;
+        _rawConfig = config;
+      } catch (error) {
+        if (!mounted) return;
+        context.showNotifier(error.toString());
+      }
+      _refreshRawContext();
+      if (_handleAdd(res.name)) {
+        context.showNotifier(appLocalizations.proxyChainNodeAdded);
+      }
     } catch (error) {
-      if (!mounted) return;
-      context.showNotifier(error.toString());
+      if (mounted) context.showNotifier(error.toString());
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
-    _refreshRawContext();
-    setState(() {});
-    setupAction.applyProfileDebounce(silence: true);
-    context.showNotifier(appLocalizations.proxyChainNodeAdded);
   }
 
   bool _canAddProfileProxy(ProfileProxy res) {
@@ -992,9 +1000,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     return true;
   }
 
-  void _handleDelete(String value) {
-    _proxies = _proxies.where((item) => item.trim() != value).toList();
-    setState(() {});
+  void _handleDelete(int index) {
+    setState(() => _proxies.removeAt(index));
   }
 
   void _handleClear() {
@@ -1006,7 +1013,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     final proxies = List<String>.from(_proxies);
     final proxy = proxies.removeAt(oldIndex);
     proxies.insert(newIndex, proxy);
-    if (!_validateProxies(proxies)) return;
+    if (!_validateProxies(proxies, draft: true)) return;
     _proxies = proxies;
     setState(() {});
   }
@@ -1081,9 +1088,17 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
         ? appLocalizations.proxyChainExit
         : null;
     final nodeType = nodeInfo?.type;
-    final meta = [?role, if (nodeType?.isNotEmpty == true) nodeType!];
+    final meta = [
+      ?role,
+      if (!_rawContext.nameScope.names.contains(proxy))
+        appLocalizations.proxyChainUnavailableNodeTip(proxy)
+      else if (nodeType?.isNotEmpty == true)
+        nodeType!,
+    ];
     return ReorderableDelayedDragStartListener(
-      key: ValueKey(proxy),
+      key: _proxies.indexOf(proxy) == index
+          ? ValueKey(proxy)
+          : ValueKey((proxy, index)),
       index: index,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1135,7 +1150,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
                     onPressed: isDecorator
                         ? null
                         : () {
-                            _handleDelete(proxy);
+                            _handleDelete(index);
                           },
                     style: ButtonStyle.from(
                       foregroundColor: context.colorScheme.error,
@@ -1193,6 +1208,7 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
     required int index,
     required int totalLength,
   }) {
+    final position = _insertionIndex(proxy);
     return ItemPositionProvider(
       position: ItemPosition.get(index, totalLength),
       child: DecorationListItem(
@@ -1205,7 +1221,9 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
           overflow: TextOverflow.ellipsis,
           style: AppTextStyle.subheadline.of(context).toJetBrainsMono,
         ),
-        subtitle: _rawContext.groupNames.contains(proxy)
+        subtitle: position < _proxies.length
+            ? Text('$proxy → ${_proxies[position]}')
+            : _rawContext.groupNames.contains(proxy)
             ? Text(_rawContext.nodeInfoMap[proxy]?.type ?? '')
             : null,
         trailing: const GlyphIcon(AppGlyphs.add),
@@ -1214,15 +1232,13 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
   }
 
   List<ProxyChainCandidateSection> _getVisibleCandidateSections(
-    List<String> selectedProxies,
+    Set<String> selectedProxies,
   ) {
     return _rawContext.sections
         .map((section) {
-          final proxies = section.proxies.where((item) {
-            return !selectedProxies.contains(item) &&
-                _rawContext.nameScope.isValid([...selectedProxies, item]) &&
-                _rawContext.managedHops?.refuses(selectedProxies, item) != true;
-          }).toList();
+          final proxies = section.proxies
+              .where((item) => !selectedProxies.contains(item))
+              .toList();
           return ProxyChainCandidateSection(
             label: section.label,
             glyph: section.glyph,
@@ -1235,9 +1251,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedProxies = normalizeProxyChainProxies(_proxies);
-    final candidateSections = _getVisibleCandidateSections(selectedProxies);
-    final canSubmit = selectedProxies.length >= 2 && !_saving;
+    final candidateSections = _getVisibleCandidateSections(_proxies.toSet());
+    final canSubmit = _proxies.length >= 2 && !_saving;
     return OverwriteExitGuard(
       isDirty: () => !const ListEquality().equals(_origin, _snapshot),
       save: _handleSubmit,

@@ -6,7 +6,6 @@
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/logs.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -175,11 +174,7 @@ void main() {
   testWidgets('system back exits search without reaching the root fallback', (
     tester,
   ) async {
-    final container = ProviderContainer(
-      overrides: [
-        backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-      ],
-    );
+    final container = ProviderContainer();
     addTearDown(container.dispose);
     globalState.container = container;
     var rootBackCount = 0;
@@ -224,11 +219,7 @@ void main() {
   testWidgets('inactive page scope exits the kept search layer', (
     tester,
   ) async {
-    final container = ProviderContainer(
-      overrides: [
-        backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-      ],
-    );
+    final container = ProviderContainer();
     addTearDown(container.dispose);
     globalState.container = container;
     final isActive = ValueNotifier(true);

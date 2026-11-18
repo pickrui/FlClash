@@ -266,7 +266,7 @@ void main() {
   test(
     'redirects only send ETags to the exact previously cached target',
     () async {
-      var target = '/a';
+      var target = '/a?token=fixture-one';
       onRequest = (incoming) async {
         if (incoming.uri.path == '/profile') {
           incoming.response.statusCode = HttpStatus.found;
@@ -282,11 +282,19 @@ void main() {
         await incoming.response.close();
       };
       await install();
+      final cache = File('${snapshot.path}.http-cache.json');
+      final encoded = await cache.readAsString();
+      expect(encoded, isNot(contains('fixture-one')));
+      final legacy = jsonDecode(encoded) as Map<String, dynamic>;
+      legacy.remove('uriDigest');
+      legacy['uri'] = Uri.parse(url).resolve(target).toString();
+      await cache.writeAsString(jsonEncode(legacy));
       expect((await install()).notModified, isTrue);
+      expect(await cache.readAsString(), isNot(contains('fixture-one')));
       expect(requests.sublist(2), [('/profile', null), ('/a', tag)]);
-      target = '/b';
+      target = '/a?token=fixture-two';
       expect((await install()).notModified, isFalse);
-      expect(requests.sublist(4), [('/profile', null), ('/b', null)]);
+      expect(requests.sublist(4), [('/profile', null), ('/a', null)]);
       expect(validations, 2);
     },
   );

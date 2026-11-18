@@ -347,8 +347,7 @@ extension ProfilesControllerExt on AppController {
         }
         // A URL edit during the download invalidates its content; never save
         // an old subscription under the newly edited URL or revive a deletion.
-        if (latest.url != current.url ||
-            latest.ageSecretKey != current.ageSecretKey) {
+        if (!_sameProfileDownloadSource(latest, current)) {
           throw StateError('profile URL changed during download');
         }
         return saveProfileRefresh(
@@ -356,7 +355,9 @@ extension ProfilesControllerExt on AppController {
           currentSetup: await _currentSetupState(),
           validate: _validateSetupConfig,
         );
-      }, preserveCurrentState: preserveCurrentState);
+      }, preserveCurrentState: preserveCurrentState).whenComplete(
+        prepared.discard,
+      );
     }
 
     return _runWithCertificateRetry(

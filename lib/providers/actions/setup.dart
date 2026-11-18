@@ -29,6 +29,14 @@ class SetupAction extends _$SetupAction {
   Future<void> updateStatus(bool isStart, {bool isInit = false}) =>
       _controller.updateStatus(isStart, isInit: isInit);
 
+  Future<void> restartVpn() async {
+    final generation = _controller._startIntentGeneration + 1;
+    await updateStatus(false);
+    if (generation == _controller._startIntentGeneration) {
+      await updateStatus(true);
+    }
+  }
+
   Future<Map<String, dynamic>> getRawProfileConfig(
     int profileId, {
     bool refetchCloud = true,
@@ -185,7 +193,12 @@ extension SetupControllerExt on AppController {
     if (!shouldContinue()) return Future.value(false);
     return _listenerStartFuture ??= startCoreWithPortRecovery(
       shouldContinue: shouldContinue,
-      start: () => globalState.handleStart([updateRunTime, updateTraffic]),
+      start: () async {
+        await globalState.handleStart([updateRunTime, updateTraffic]);
+        if (globalState.startTime == null) {
+          throw const _CoreStartCancelledException();
+        }
+      },
       resolveConflict: () async {
         final patchConfig = _ref.read(patchClashConfigProvider);
         final otherPorts = [
@@ -292,12 +305,10 @@ extension SetupControllerExt on AppController {
       try {
         await globalState.handleStop();
       } finally {
-        _ref.read(trafficsProvider.notifier).clear();
-        _ref.read(totalTrafficProvider.notifier).value = const Traffic();
-        _ref.read(runTimeProvider.notifier).value = null;
         addCheckIp();
-        if (coreController.isCompleted) {
-          coreController.resetTraffic();
+        final core = _ref.read(coreHandlerProvider);
+        if (!globalState.isStart && core.isCompleted) {
+          core.resetTraffic();
         }
       }
     }
@@ -461,7 +472,8 @@ extension SetupControllerExt on AppController {
           rethrow;
         }
         if (system.isAndroid) {
-          await preferences.saveShareState(await this.sharedState);
+          final state = await androidServiceState;
+          if (state != null) await preferences.saveShareState(state);
         }
         // A later user Stop must win over this settings-triggered restart.
         if (restart && generation == _startIntentGeneration) {
@@ -615,15 +627,35 @@ extension SetupControllerExt on AppController {
     final run = _serializeCoreLifecycle(() async {
       _runningProfileApplies++;
       try {
-        final result = await _applyProfileUnlocked(
-          generation: generation,
-          silence: silence,
-          preloadInvoke: _profileApplyIntent.preloadInvoke,
-        );
-        if (result != _ProfileApplyResult.superseded) {
-          _coreReloadPending = false;
+        await autoUpdateIpv6();
+        final profileId = _ref.read(currentProfileIdProvider);
+        final startGeneration = _startIntentGeneration;
+        bool currentRequest() =>
+            generation == _profileApplyGeneration &&
+            profileId == _ref.read(currentProfileIdProvider);
+        Profile? currentSource() =>
+            _ref.read(profilesProvider).getProfile(profileId);
+        while (currentRequest()) {
+          final source = currentSource();
+          final result = await _applyProfileUnlocked(
+            profileId: profileId,
+            source: source,
+            silence: silence,
+            isCurrentApply: () =>
+                currentRequest() &&
+                _sameProfileDownloadSource(currentSource(), source),
+            preloadInvoke: _profileApplyIntent.preloadInvoke,
+          );
+          if (result != _ProfileApplyResult.superseded) {
+            _coreReloadPending = false;
+            return result;
+          }
+          if (startGeneration != _startIntentGeneration ||
+              currentSource() == null) {
+            break;
+          }
         }
-        return result;
+        return _ProfileApplyResult.superseded;
       } finally {
         _runningProfileApplies--;
       }
@@ -637,20 +669,16 @@ extension SetupControllerExt on AppController {
   }
 
   Future<_ProfileApplyResult> _applyProfileUnlocked({
-    required int generation,
+    required int? profileId,
+    required Profile? source,
+    required bool Function() isCurrentApply,
     required bool silence,
     FutureOr<void> Function()? preloadInvoke,
   }) async {
-    await autoUpdateIpv6();
-    final profileId = _ref.read(currentProfileIdProvider);
-    bool isCurrentApply() {
-      return generation == _profileApplyGeneration &&
-          profileId == _ref.read(currentProfileIdProvider);
-    }
-
-    if (!isCurrentApply()) return _ProfileApplyResult.superseded;
     final requiresSetup =
-        _profileApplyIntent.requiresForce || await needSetup();
+        _profileApplyIntent.requiresForce ||
+        _androidSetupPersistence.needsRuntimeSetup ||
+        await needSetup();
     if (!isCurrentApply()) return _ProfileApplyResult.superseded;
     if (!requiresSetup) {
       if (_androidSetupPersistence.isPending) {
@@ -676,8 +704,7 @@ extension SetupControllerExt on AppController {
         try {
           if (!await withGeoRecovery(
             action: () => _setupConfig(
-              profileId,
-              generation,
+              source,
               preloadInvoke: preloadInvoke,
               onPrepared: () =>
                   keepCurrentCore = globalState.lastSetupState != null,
@@ -685,7 +712,7 @@ extension SetupControllerExt on AppController {
                 setupAttempted = true;
                 keepCurrentCore = false;
               },
-              shouldContinue: canRecover,
+              isCurrentApply: canRecover,
               resume: _profileApplyIntent.resume,
             ),
             shouldContinue: canRecover,
@@ -764,13 +791,20 @@ extension SetupControllerExt on AppController {
       silence: true,
       tag: !silence ? LoadingTag.proxies : null,
     );
-    if (!isCurrentApply()) return _ProfileApplyResult.superseded;
+    if (!isCurrentApply()) {
+      if (setupAttempted && !coreSetupSucceeded) {
+        _profileApplyIntent.merge(force: true);
+      }
+      return _ProfileApplyResult.superseded;
+    }
     // needSetup skips a null applied state, so only a forced apply sets it.
     _profileApplyIntent.clear(keepForce: globalState.lastSetupState == null);
+    final retainedConfig =
+        keepCurrentCore && globalState.lastSetupState != null;
     if (res != true &&
         shouldStopCoreAfterApplyFailure(
           isRunning: _ref.read(isStartProvider),
-          preserveCurrentCore: keepCurrentCore,
+          preserveCurrentCore: retainedConfig,
           coreSetupSucceeded: coreSetupSucceeded,
         )) {
       await updateStatus(false);
@@ -780,7 +814,7 @@ extension SetupControllerExt on AppController {
     }
     return res == true || coreSetupSucceeded
         ? _ProfileApplyResult.succeeded
-        : keepCurrentCore && globalState.lastSetupState != null
+        : retainedConfig
         ? _ProfileApplyResult.incomplete
         : _ProfileApplyResult.failed;
   }
@@ -1036,55 +1070,48 @@ extension SetupControllerExt on AppController {
   }
 
   Future<bool> _setupConfig(
-    int? profileId,
-    int generation, {
+    Profile? source, {
     FutureOr<void> Function()? preloadInvoke,
     required VoidCallback onPrepared,
     required VoidCallback onApply,
-    required bool Function() shouldContinue,
+    required bool Function() isCurrentApply,
     bool resume = false,
   }) async {
-    bool isCurrentApply() {
-      return shouldContinue() &&
-          generation == _profileApplyGeneration &&
-          profileId == _ref.read(currentProfileIdProvider);
-    }
-
-    commonPrint.log('setup ===>');
-    if (!await ensureCoreReady()) {
+    if (!await ensureCoreReady() || !isCurrentApply()) {
       return false;
     }
-    var profile = _ref.read(profilesProvider).getProfile(profileId);
-    await waitForCloudBootstrapBeforeUpdate(profile);
+    final profileId = source?.id;
+    if (profileId != _ref.read(currentProfileIdProvider)) return false;
+    Profile? currentProfile() =>
+        _ref.read(profilesProvider).getProfile(profileId);
+    await waitForCloudBootstrapBeforeUpdate(source);
+    if (!isCurrentApply()) return false;
     // Outside storageLock: a 401 awaits account cleanup, which needs that lock.
-    final prepared = await _prepareMissingSnapshotWithCertificateRetry(profile);
-    profile = _ref.read(profilesProvider).getProfile(profileId);
+    final prepared = await _prepareMissingSnapshotWithCertificateRetry(source);
     if (prepared != null) {
       await storageLock.synchronized(() async {
+        if (!isCurrentApply()) {
+          prepared.discard();
+          return;
+        }
         final Profile nextProfile;
         try {
           nextProfile = await prepared.save();
         } on StateError {
           return;
         }
-        if (!isCurrentApply()) {
-          return;
-        }
-        final currentProfile = _ref
-            .read(profilesProvider)
-            .getProfile(profileId);
-        if (currentProfile == null) {
-          return;
-        }
-        profile = mergeRefreshedProfile(currentProfile, nextProfile);
+        final current = currentProfile();
+        if (!isCurrentApply() || current == null) return;
         await _ref
             .read(profilesProvider.notifier)
-            .put(profile!, reportOnWait: false);
+            .put(
+              mergeRefreshedProfile(current, nextProfile),
+              reportOnWait: false,
+            );
       });
     }
-    if (!isCurrentApply()) {
-      return false;
-    }
+    if (!isCurrentApply()) return false;
+    final profile = currentProfile();
     final patchConfig = _ref.read(patchClashConfigProvider);
     final authorization = await _requestAdmin(
       patchConfig.tun.enable,
@@ -1143,20 +1170,23 @@ extension SetupControllerExt on AppController {
       await _validateConfigYaml(yamlString, setupState);
       if (!isCurrentApply()) return false;
       onPrepared();
-      if (appliedDigest != null) await preferences.saveAppliedConfigMd5(null);
-      final configFilePath = await appPath.configFilePath;
-      if (isoixCloud && system.isAndroid) {
-        final encryptedBytes = await coreController.sealRuntimeConfig(
-          yamlString,
-          snapshotPath,
-        );
+      if (!isoixCloud || system.isAndroid) {
+        final configFilePath = await appPath.configFilePath;
+        final bytes = isoixCloud
+            ? await coreController.sealRuntimeConfig(yamlString, snapshotPath)
+            : utf8.encode(yamlString);
         if (!isCurrentApply()) return false;
-        await writeEncryptedProfileSnapshot(configFilePath, encryptedBytes);
-        runtimeConfigDigest = ProviderContentFiles.digest(encryptedBytes);
-      } else if (!isoixCloud) {
-        await durableCreateDirectory(File(configFilePath).parent.path);
-        final bytes = utf8.encode(yamlString);
-        await durableWriteBytes(configFilePath, bytes);
+        if (appliedDigest != null) {
+          await preferences.markAndroidConfigPending();
+          _androidSetupPersistence.invalidateRuntime();
+          if (!isCurrentApply()) return false;
+        }
+        if (isoixCloud) {
+          await writeEncryptedProfileSnapshot(configFilePath, bytes);
+        } else {
+          await durableCreateDirectory(File(configFilePath).parent.path);
+          await durableWriteBytes(configFilePath, bytes);
+        }
         runtimeConfigDigest = ProviderContentFiles.digest(bytes);
       }
     }
@@ -1180,7 +1210,14 @@ extension SetupControllerExt on AppController {
               .read(coreHandlerProvider)
               .setupConfig(
                 params: updatedSetupParams,
-                preloadInvoke: preloadInvoke,
+                preloadInvoke: preloadInvoke == null
+                    ? null
+                    : () {
+                        if (!isCurrentApply()) {
+                          throw const _CoreStartCancelledException();
+                        }
+                        return preloadInvoke();
+                      },
               ),
         );
         _profileApplyScheduler.recordPush(watch.elapsed);
@@ -1196,6 +1233,7 @@ extension SetupControllerExt on AppController {
     }
     _appliedProfileConfig = config;
     _appliedSetupParams = updatedSetupParams;
+    if (system.isAndroid) _appliedAndroidProfile = latestProfile;
     _appliedRuntimeConfigDigest = runtimeConfigDigest;
     _setAppliedSetupState(setupState);
     _ref.read(appliedConfigCountsProvider.notifier).applied(profileId, config);

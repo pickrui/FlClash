@@ -315,6 +315,60 @@ void main() {
       tester.widget<FilledButton>(_filledButton('Activate')).onPressed;
 
   testWidgets(
+    'switching accounts invalidates an open activation confirmation',
+    (tester) async {
+      final (adapter, _, account) = await openPurchased(
+        tester,
+        (_) => {'ret': 1},
+      );
+      await tester.tap(_filledButton('Activate'));
+      await settle(tester);
+      tester
+          .widget<CloudStorePage>(find.byType(CloudStorePage))
+          .api!
+          .setToken('replacement');
+      await tester.tap(find.widgetWithText(TextButton, 'Activate'));
+      await settle(tester);
+      expect(adapter.paths, isEmpty);
+      expect(account.managedRefreshes, 0);
+      expect(activatePressed(tester), isNotNull);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'a pending store refresh cannot refresh the replacement account',
+    (tester) async {
+      final (adapter, store, account) = await openPurchased(
+        tester,
+        (_) => {'ret': 1},
+      );
+      final reload = store.loadGate = Completer<void>();
+      final previousLoads = store.loads;
+      final refresh = tester
+          .widget<RefreshIndicator>(find.byType(RefreshIndicator))
+          .onRefresh();
+      await settle(tester);
+      expect(store.loads, previousLoads + 1);
+      tester
+          .widget<CloudStorePage>(find.byType(CloudStorePage))
+          .api!
+          .setToken('replacement');
+      reload.complete();
+      await refresh;
+      await settle(tester);
+      expect(account.managedRefreshes, 0);
+      expect(adapter.paths, isEmpty);
+      await tester
+          .widget<RefreshIndicator>(find.byType(RefreshIndicator))
+          .onRefresh();
+      expect(account.managedRefreshes, 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
     'a write losing its response headers is checked against the panel first',
     (tester) async {
       final (adapter, store, account) = await openPurchased(

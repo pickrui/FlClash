@@ -14,10 +14,13 @@ class AppController {
   Map<String, dynamic>? _appliedProfileConfig;
   List<String> _reportedRefusedHops = const [];
   SetupParams? _appliedSetupParams;
+  Profile? _appliedAndroidProfile;
   String? _appliedRuntimeConfigDigest;
   late AndroidSetupPersistence _androidSetupPersistence =
       AndroidSetupPersistence(
-        readState: () => this.sharedState,
+        readState: () async =>
+            await androidServiceState ??
+            (throw StateError('No applied Android configuration')),
         saveState: preferences.saveShareState,
         saveDigest: preferences.saveAppliedConfigMd5,
       );
@@ -138,11 +141,13 @@ class AppController {
     if (value == null) {
       _appliedProfileConfig = null;
       _appliedSetupParams = null;
+      _appliedAndroidProfile = null;
       _appliedRuntimeConfigDigest = null;
       _androidSetupPersistence.clear();
     }
     globalState.lastSetupState = value;
     _ref.read(appliedSetupStateProvider.notifier).value = value;
+    if (system.isAndroid) _ref.invalidate(androidServiceStateProvider);
   }
 
   void _synchronizeRestoredState({

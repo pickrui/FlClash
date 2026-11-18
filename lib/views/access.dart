@@ -15,6 +15,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/installed_apps.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -253,11 +254,17 @@ class _AccessViewState extends ConsumerState<AccessView>
     final commonAction = context.commonAction;
     final route = ModalRoute.of(context);
     final l10n = context.appLocalizations;
+    final target = ref.read(accessControlStateProvider);
 
     await commonAction.safeRun(() async {
       final data = await Clipboard.getData('text/plain');
       final text = data?.text;
       if (!mounted || route?.isActive == false || text == null) return;
+      final current = ref.read(accessControlStateProvider);
+      if (current.mode != target.mode ||
+          !listEquals(current.currentList, target.currentList)) {
+        return;
+      }
       final list = parsePackageNames(text);
       if (list.isEmpty) throw l10n.clipboardNoPackageNames;
       ref

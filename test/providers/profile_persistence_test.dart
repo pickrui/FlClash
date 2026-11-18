@@ -10,9 +10,12 @@ import 'dart:typed_data';
 import 'package:fl_clash/common/file.dart';
 import 'package:fl_clash/common/lock.dart';
 import 'package:fl_clash/common/path.dart';
+import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/database/database.dart' hide Profiles;
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/providers/action.dart';
+import 'package:fl_clash/providers/app.dart';
+import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/services/age_crypto.dart';
@@ -28,6 +31,13 @@ class _Profiles extends Profiles {
   List<Profile> build() => const [
     Profile(id: 42, autoUpdateDuration: Duration(hours: 1)),
   ];
+}
+
+class _ReadyCore extends Fake implements CoreController {
+  @override
+  bool get isCompleted => true;
+  @override
+  Future<bool> get isInit async => true;
 }
 
 void main() {
@@ -206,6 +216,66 @@ void main() {
       identity.publicKeyBytes,
     );
   }
+
+  testWidgets(
+    'switching profiles discards a pending managed snapshot before writing',
+    (tester) async {
+      const profile = Profile(
+        id: 77,
+        url: 'oixcloud://managed',
+        autoUpdateDuration: Duration(hours: 1),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(_Profiles.new),
+          currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
+          networkSettingProvider.overrideWithBuild(
+            (_, _) => const NetworkProps(autoSetIpv6: false),
+          ),
+          coreHandlerProvider.overrideWithValue(_ReadyCore()),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(currentProfileIdProvider, (_, _) {});
+      container.read(profilesProvider.notifier).replaceFromDatabase([profile]);
+      late WidgetRef appRef;
+      late BuildContext appContext;
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: Consumer(
+            builder: (context, ref, _) {
+              appRef = ref;
+              appContext = context;
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      await tester.runAsync(() async {
+        final file = File(await appPath.getProfilePath('${profile.id}'));
+        final bytes = await encryptedBytes(7);
+        final entered = Completer<void>();
+        final release = Completer<void>();
+        registerFetchManagedConfig((_, {required sealer}) async {
+          entered.complete();
+          await release.future;
+          return (bytes, null);
+        });
+        final controller = AppController.forTesting(appContext, appRef);
+        final apply = controller.applyProfile(force: true, silence: true);
+        try {
+          await entered.future.timeout(const Duration(seconds: 5));
+          container.read(currentProfileIdProvider.notifier).value = 42;
+        } finally {
+          release.complete();
+        }
+        expect(await apply, isFalse);
+        expect(await file.exists(), isFalse);
+        expect(container.read(profilesProvider).single.lastUpdateDate, isNull);
+      });
+    },
+  );
 
   test('an older download cannot overwrite a newer saved snapshot', () async {
     const profile = Profile(

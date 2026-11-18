@@ -243,8 +243,11 @@ class _EditorPageState extends ConsumerState<EditorPage>
     CodeForgeController controller,
     String Function(String text) edit,
   ) async {
+    final version = controller.contentVersion;
     final document = await CodeForgeDocument.fromText(edit(controller.text));
-    if (mounted && _editor?.controller == controller) {
+    if (mounted &&
+        _editor?.controller == controller &&
+        controller.contentVersion == version) {
       controller.replaceDocument(document);
     }
     document.dispose();
@@ -269,7 +272,9 @@ class _EditorPageState extends ConsumerState<EditorPage>
       try {
         return await open();
       } catch (_) {
-        if (!mounted || !_isRouteActive) return null;
+        if (!mounted || !_isRouteActive || generation != _openGeneration) {
+          return null;
+        }
         rethrow;
       }
     }, silence: false);
@@ -783,7 +788,7 @@ class _CodeEditorState extends ConsumerState<_CodeEditor> {
       _textStyle = textStyle;
     }
     _lineNumberStyle = TextStyle(
-      fontSize: 12,
+      fontSize: 11,
       fontFamily: appFont.fontFamily,
       fontFamilyFallback: appFont.fontFamilyFallback,
       fontFeatures: const [FontFeature.tabularFigures()],

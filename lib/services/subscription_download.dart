@@ -31,7 +31,7 @@ class SubscriptionDownload {
   final Uint8List? bytes;
   final Headers headers;
   final File _snapshot;
-  final String _digest;
+  final String? _digest;
   final File _cache;
   final Map<String, String>? _metadata;
 
@@ -48,8 +48,13 @@ class SubscriptionDownload {
     }
   }
 
-  Future<bool> matchesSnapshot() async =>
-      await _fileDigest(_snapshot) == _digest;
+  static String _uriDigest(String uri) =>
+      sha256.convert(utf8.encode(uri)).toString();
+
+  Future<bool> matchesSnapshot() async {
+    final expected = _digest ?? await compute(_contentDigest, bytes!);
+    return await _fileDigest(_snapshot) == expected;
+  }
 
   static Future<SubscriptionDownload> fetch({
     required Request client,
@@ -77,16 +82,21 @@ class SubscriptionDownload {
       if (value
           case {
             'source': final String origin,
-            'uri': final String uri,
             'etag': final String etag,
             'digest': final String savedDigest,
           }
           when origin == source && _etagPattern.hasMatch(etag)) {
-        final target = Uri.tryParse(uri);
-        if (target != null &&
-            (target.isScheme('http') || target.isScheme('https')) &&
+        final targetDigest = switch (value) {
+          {'uriDigest': final String hash} => hash,
+          {'uri': final String legacy} => _uriDigest(legacy),
+          _ => null,
+        };
+        if (targetDigest != null &&
             await _fileDigest(snapshot) == savedDigest) {
-          validator = (uri: target, value: etag);
+          validator = (
+            matchesUri: (uri) => _uriDigest(uri.toString()) == targetDigest,
+            value: etag,
+          );
           digest = savedDigest;
         }
       }
@@ -114,12 +124,10 @@ class SubscriptionDownload {
     final bytes = notModified
         ? null
         : configs[response.data!] ?? response.data!;
-    final contentDigest = notModified
-        ? digest!
-        : await compute<Uint8List, String>(_contentDigest, bytes!);
-    final etag =
-        response.headers.map[HttpHeaders.etagHeader]?.singleOrNull ??
-        (notModified ? validator?.value : null);
+    final tags = response.headers.map[HttpHeaders.etagHeader];
+    final etag = tags == null && notModified
+        ? validator?.value
+        : tags?.singleOrNull;
     final noStore =
         (response.headers.map[HttpHeaders.cacheControlHeader] ??
                 const <String>[])
@@ -129,20 +137,22 @@ class SubscriptionDownload {
         (response.headers.map[HttpHeaders.varyHeader] ?? const <String>[])
             .expand((value) => value.split(','))
             .any((value) => value.trim() == '*');
+    Map<String, String>? metadata;
+    if (etag != null && _etagPattern.hasMatch(etag) && !noStore && !varyAll) {
+      metadata = {
+        'source': source,
+        'uriDigest': _uriDigest(response.requestOptions.uri.toString()),
+        'etag': etag,
+        'digest': notModified ? digest! : await compute(_contentDigest, bytes!),
+      };
+    }
     return SubscriptionDownload._(
       bytes,
       response.headers,
       snapshot,
-      contentDigest,
+      notModified ? digest! : metadata?['digest'],
       cache,
-      etag != null && _etagPattern.hasMatch(etag) && !noStore && !varyAll
-          ? {
-              'source': source,
-              'uri': response.requestOptions.uri.toString(),
-              'etag': etag,
-              'digest': contentDigest,
-            }
-          : null,
+      metadata,
     );
   }
 

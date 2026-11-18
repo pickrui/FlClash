@@ -48,10 +48,7 @@ Future<List<bool?>> _open(
   await tester.pumpWidget(
     TestApp(
       locale: const Locale('en'),
-      overrides: [
-        cloudAccountProvider.overrideWith(() => account),
-        paymentStatusQueryProvider.overrideWithValue(payments.query),
-      ],
+      overrides: [cloudAccountProvider.overrideWith(() => account)],
       child: Builder(
         builder: (context) => material.Scaffold(
           body: TextButton(
@@ -65,7 +62,8 @@ Future<List<bool?>> _open(
                     url: 'https://example.test/payment',
                     renderQrcode: renderQrcode,
                   ),
-                  payment: 'fixture-gateway',
+                  queryPaid: (pid) =>
+                      payments.query(pid, payment: 'fixture-gateway'),
                 ),
               ),
             ),

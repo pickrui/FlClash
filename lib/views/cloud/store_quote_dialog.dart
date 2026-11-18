@@ -153,6 +153,10 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
         _quotedCoupon = coupon;
       });
     } catch (e) {
+      if (CloudApiException.isHandledUnauthorized(e)) {
+        if (mounted) closePage(context);
+        return;
+      }
       if (CloudApiException.isUnauthorized(e)) {
         if (mounted) closePage(context);
         await accountNotifier.handleUnauthorized();
@@ -221,6 +225,9 @@ class _StoreQuoteDialogState extends ConsumerState<StoreQuoteDialog> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(cloudAccountProvider.select((s) => s.isLoggedIn), (_, loggedIn) {
+      if (!loggedIn) closePage(context);
+    });
     final coupon = _controller.text.trim();
     final quote = _quote;
     final quoted = quote != null && coupon == _quotedCoupon;

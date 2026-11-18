@@ -859,6 +859,134 @@ void main() {
     );
   }
 
+  testWidgets('queued resume checks keep a Core that just reconnected', (
+    tester,
+  ) async {
+    final handler = _CoreHandler();
+    var connected = false;
+    when(() => handler.isConnected).thenAnswer((_) => connected);
+    final controller = await pumpController(
+      tester,
+      Future.value(appliedState),
+      handler: handler,
+    );
+    final reconnect = Completer<void>();
+    final recovery = controller.serializeCoreLifecycleForTesting(() async {
+      await reconnect.future;
+      connected = true;
+    });
+    final first = controller.tryStartCore();
+    final second = controller.tryStartCore();
+    reconnect.complete();
+    await recovery;
+    expect(await Future.wait([first, second]), [false, false]);
+    verifyNever(handler.shutdown);
+    verifyNever(handler.preload);
+  });
+
+  for (final (shutdownResult, disconnected) in [
+    (true, true),
+    (false, false),
+    (null, true),
+  ]) {
+    testWidgets(
+      'restart retains the applied config only while the old Core is available '
+      '(shutdown: $shutdownResult, disconnected: $disconnected)',
+      (tester) async {
+        final handler = _CoreHandler();
+        final shutdown = Completer<bool>();
+        var connected = true;
+        when(() => handler.isConnected).thenAnswer((_) => connected);
+        when(handler.shutdown).thenAnswer((_) => shutdown.future);
+        when(handler.preload).thenAnswer((_) async => throw StateError('bind'));
+        late ProviderContainer container;
+        final controller = await pumpController(
+          tester,
+          Future.value(appliedState),
+          handler: handler,
+          onCreated: (value) => container = value,
+        );
+        globalState.lastSetupState = appliedState;
+        container.read(appliedSetupStateProvider.notifier).value = appliedState;
+        final restart = expectLater(controller.restartCore(), throwsStateError);
+        await tester.pump();
+        verify(handler.shutdown).called(1);
+        expect(globalState.lastSetupState, appliedState);
+        expect(container.read(appliedSetupStateProvider), appliedState);
+
+        connected = !disconnected;
+        if (shutdownResult == null) {
+          shutdown.completeError(StateError('shutdown'));
+        } else {
+          shutdown.complete(shutdownResult);
+        }
+        await restart;
+        final retained = disconnected ? null : appliedState;
+        expect(globalState.lastSetupState, retained);
+        expect(container.read(appliedSetupStateProvider), retained);
+      },
+    );
+  }
+
+  for (final throws in [false, true]) {
+    testWidgets('failed reconnect resets Core status (throws: $throws)', (
+      tester,
+    ) async {
+      final handler = _CoreHandler();
+      when(() => handler.isConnected).thenReturn(false);
+      when(handler.shutdown).thenAnswer((_) async => true);
+      when(handler.preload).thenAnswer((_) async {
+        if (throws) throw StateError('bind failed');
+        return '';
+      });
+      late ProviderContainer container;
+      final controller = await pumpController(
+        tester,
+        Future.value(appliedState),
+        handler: handler,
+        onCreated: (value) => container = value,
+      );
+      final states = <CoreStatus>[];
+      container.listen(coreStatusProvider, (_, state) => states.add(state));
+      if (throws) {
+        await expectLater(controller.ensureCoreReady(), throwsStateError);
+      } else {
+        expect(await controller.ensureCoreReady(), isFalse);
+      }
+      expect(
+        states,
+        containsAllInOrder([CoreStatus.connecting, CoreStatus.disconnected]),
+      );
+      expect(container.read(coreStatusProvider), CoreStatus.disconnected);
+      verify(handler.shutdown).called(1);
+    });
+  }
+
+  testWidgets('a source edit during apply settles on the current source', (
+    tester,
+  ) async {
+    final setup = Completer<SetupState>();
+    const profile = Profile(
+      id: 1,
+      url: 'https://one.invalid',
+      autoUpdateDuration: Duration.zero,
+    );
+    late TestProfiles profiles;
+    final controller = await pumpController(
+      tester,
+      setup.future,
+      onCreated: (container) {
+        profiles = container.read(profilesProvider.notifier) as TestProfiles;
+        profiles.replace([profile]);
+      },
+    );
+    final apply = controller.applyProfileSettled();
+    await tester.pump();
+    profiles.replace([profile.copyWith(url: 'https://two.invalid')]);
+    setup.complete(appliedState);
+    expect(await apply, isTrue);
+  });
+
   for (final (started, settled) in [
     (false, false),
     (true, false),

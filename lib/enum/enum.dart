@@ -651,9 +651,9 @@ enum CoreStatus { connecting, connected, disconnected }
 enum RuleScene { added, disabled }
 
 enum EditorFontSize {
-  standard(14),
-  large(16),
-  extraLarge(18);
+  standard(12),
+  large(14),
+  extraLarge(16);
 
   final double value;
   const EditorFontSize(this.value);

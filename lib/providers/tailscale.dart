@@ -118,8 +118,10 @@ class TailscaleAction {
       await _ensureUnreferenced(previous.name);
     }
     var next = network;
-    if (previous != null &&
-        previous.effectiveControlUrl != network.effectiveControlUrl) {
+    final controlChanged =
+        previous != null &&
+        previous.effectiveControlUrl != network.effectiveControlUrl;
+    if (controlChanged) {
       // A node identity belongs to the control server that registered it.
       await _forgetState(previous);
       next = network.copyWith(stateId: uuidV4, magicDnsSuffix: '');
@@ -127,8 +129,9 @@ class TailscaleAction {
     final key = authKey?.trim() ?? '';
     if (next.loginMethod == TailscaleLoginMethod.authKey && key.isNotEmpty) {
       await _backend.writeAuthKey(next.authKeyStorageKey, key);
-    } else if (next.loginMethod == TailscaleLoginMethod.interactive &&
-        previous?.loginMethod == TailscaleLoginMethod.authKey) {
+    } else if (previous?.loginMethod == TailscaleLoginMethod.authKey &&
+        (controlChanged ||
+            next.loginMethod == TailscaleLoginMethod.interactive)) {
       await _backend.deleteAuthKey(next.authKeyStorageKey);
     }
     if (previous != next) {

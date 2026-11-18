@@ -38,6 +38,7 @@ void main() {
   late Uint8List originalConfig, nextConfig;
   late bool current, failCore, failFile, failCommit, failRollback, failDigest;
   late int prepares, commits, recoveries;
+  late String digest;
   late List<bool> operations;
   Future<void> Function()? onApply;
 
@@ -77,6 +78,7 @@ void main() {
     current = true;
     failCore = failFile = failCommit = failRollback = failDigest = false;
     prepares = commits = recoveries = 0;
+    digest = 'previous';
     operations = [];
     onApply = null;
     final lock = AsyncStorageLock();
@@ -97,6 +99,10 @@ void main() {
           },
           beforeApply: () async {
             if (failDigest) throw StateError('digest invalidation failed');
+            digest = 'pending';
+          },
+          afterRollback: () async {
+            if (current) digest = 'previous';
           },
           changeCore: (rollback) async {
             operations.add(rollback);
@@ -123,6 +129,7 @@ void main() {
                 ),
           committed: () async {
             commits++;
+            digest = 'next';
           },
           recover: () async {
             recoveries++;
@@ -152,6 +159,7 @@ void main() {
       expect(await db.clashProvidersDao.all().getSingle(), next);
       expect(operations, [false]);
       expect(commits, 1);
+      expect(digest, 'next');
       expect(activePath, nextPath);
       expect(await File(previousPath).readAsBytes(), previous.content);
       expect(await File(nextPath).readAsBytes(), next.content);
@@ -181,6 +189,7 @@ void main() {
         );
         expect(operations, phase == 'digest' ? <bool>[] : [false, true]);
         expect(recoveries, 0);
+        expect(digest, 'previous');
         await expectPrevious();
       },
     );
@@ -255,6 +264,7 @@ void main() {
         throwsA(isA<ProviderLibraryException>()),
       );
       expect(await File(runtimePath).readAsString(), 'unrelated');
+      expect(digest, 'pending');
       expect(await db.clashProvidersDao.all().getSingle(), previous);
       expect(activePath, previousPath);
       expect(commits, 0);

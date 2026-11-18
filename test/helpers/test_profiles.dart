@@ -57,7 +57,10 @@ class TestProfiles extends Profiles {
   }
 
   @override
-  void updateProfile(int profileId, Profile Function(Profile profile) builder) {
+  Future<void> updateProfile(
+    int profileId,
+    Profile Function(Profile profile) builder,
+  ) async {
     final index = state.indexWhere((item) => item.id == profileId);
     if (index == -1) return;
     final next = List<Profile>.from(state);

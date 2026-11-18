@@ -1044,6 +1044,90 @@ void main() {
   });
 
   group('commitRestoredFiles', () {
+    for (final rollback in [false, true]) {
+      final outcome = rollback ? 'rollback' : 'commit';
+      test(
+        'a user stop keeps the recovered profile stopped after $outcome',
+        () async {
+          final temp = await Directory.systemTemp.createTemp('restore_stop_');
+          addTearDown(() => temp.delete(recursive: true));
+          final staged = File('${temp.path}/staged')..writeAsStringSync('new');
+          final live = File('${temp.path}/live')..writeAsStringSync('old');
+          var generation = 2;
+          final intent = RestoreCoreIntent(
+            wasRunning: true,
+            generation: () => generation,
+          );
+          Future<void> stop() async => generation++;
+          if (!rollback) await stop();
+          await intent.stopForRestore(stop);
+          final commit = commitRestoredFiles(
+            [VM2(staged.path, live.path)],
+            () async {
+              if (rollback) {
+                await stop();
+                throw StateError('database failed');
+              }
+            },
+          );
+          if (rollback) {
+            await expectLater(commit, throwsStateError);
+          } else {
+            await commit;
+          }
+
+          String? applied;
+          expect(
+            await intent.activate(
+              start: () => fail('the user stopped the service'),
+              applyStopped: () async {
+                applied = await live.readAsString();
+                return true;
+              },
+            ),
+            isTrue,
+          );
+          expect(applied, rollback ? 'old' : 'new');
+        },
+      );
+    }
+
+    test(
+      'only the restore stop permits restarting the previous session',
+      () async {
+        var generation = 0;
+        final intent = RestoreCoreIntent(
+          wasRunning: true,
+          generation: () => generation,
+        );
+        await intent.stopForRestore(() async => generation++);
+        expect(
+          await intent.activate(
+            start: () async => true,
+            applyStopped: () => fail('should restart'),
+          ),
+          isTrue,
+        );
+        expect(
+          await intent.activate(
+            start: () async => false,
+            applyStopped: () => fail('startup failure must be reported'),
+          ),
+          isFalse,
+        );
+        var applied = false;
+        final starting = Completer<bool>();
+        final activation = intent.activate(
+          start: () => starting.future,
+          applyStopped: () async => applied = true,
+        );
+        generation++;
+        starting.complete(false);
+        expect(await activation, isTrue);
+        expect(applied, isTrue);
+      },
+    );
+
     test('commits staged files before database commit', () async {
       final tempDir = await Directory.systemTemp.createTemp('restore_commit_');
       addTearDown(() => tempDir.delete(recursive: true));
@@ -1209,14 +1293,22 @@ void main() {
           Profile(id: 1, autoUpdateDuration: Duration.zero),
           Profile(id: 2, autoUpdateDuration: Duration.zero),
         ],
-        const [VM2('/restore/1.yaml', '/profiles/1.yaml')],
-        (path) async => {
-          'proxies': [
-            {'name': 'Node'},
-          ],
-          'proxy-groups': [
-            {'name': 'Group'},
-          ],
+        const [
+          VM2('/restore/1.yaml', '/profiles/1.yaml'),
+          VM2('/restore/resources/1.yaml', '/mitm/resources/1.yaml'),
+          VM2('/restore/resources/2.yaml', '/mitm/resources/2.yaml'),
+        ],
+        '/profiles',
+        (path) async {
+          expect(path, '/restore/1.yaml');
+          return {
+            'proxies': [
+              {'name': 'Node'},
+            ],
+            'proxy-groups': [
+              {'name': 'Group'},
+            ],
+          };
         },
       );
       expect(names, {

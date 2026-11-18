@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/manager/hotkey_manager.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart' hide Scaffold, TextField;
@@ -50,9 +49,6 @@ void main() {
       addTearDown(query.dispose);
       await tester.pumpWidget(
         TestApp(
-          overrides: [
-            backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-          ],
           child: ValueListenableBuilder<String?>(
             valueListenable: query,
             builder: (_, value, _) => Scaffold(
@@ -80,9 +76,7 @@ void main() {
     String query = '';
     await tester.pumpWidget(
       TestApp(
-        overrides: [
-          backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-        ],
+        wrapInProviderScope: true,
         builder: (_, child) => HotKeyManager(
           registerHotKeys: ({required specs}) async => [],
           hotKeyEventSource: () => const Stream.empty(),
@@ -116,13 +110,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      TestApp(
-        wrapInProviderScope: true,
-        overrides: [
-          backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-        ],
-        child: _page(onSearch: (_) {}),
-      ),
+      TestApp(wrapInProviderScope: true, child: _page(onSearch: (_) {})),
     );
 
     await _sendFind(tester);
@@ -144,15 +132,7 @@ void main() {
   testWidgets('the find shortcut leaves a page without search alone', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      TestApp(
-        wrapInProviderScope: true,
-        overrides: [
-          backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-        ],
-        child: _page(),
-      ),
-    );
+    await tester.pumpWidget(TestApp(wrapInProviderScope: true, child: _page()));
 
     await _sendFind(tester);
 
@@ -163,13 +143,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      TestApp(
-        wrapInProviderScope: true,
-        overrides: [
-          backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-        ],
-        child: _page(onSearch: (_) {}),
-      ),
+      TestApp(wrapInProviderScope: true, child: _page(onSearch: (_) {})),
     );
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
 
@@ -193,9 +167,6 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        overrides: [
-          backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-        ],
         child: PageActivityScope(
           isActive: false,
           child: _page(onSearch: searches.add),
@@ -215,9 +186,6 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        overrides: [
-          backBlockActionProvider.overrideWith(TestBackBlockAction.new),
-        ],
         child: _page(
           onSearch: (_) {},
           actions: const [Text('page action')],

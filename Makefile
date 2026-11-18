@@ -42,7 +42,7 @@ test:
 	dart tool/run_tests.dart $(FLUTTER_TEST_ARGS)
 
 test-safe:
-	dart tool/run_tests.dart --dart-define=SAFE_MODE=true test/safe_mode test/common/safe_mode_profile_test.dart
+	dart tool/run_tests.dart --dart-define=SAFE_MODE=true test/safe_mode test/common/safe_mode_profile_test.dart test/views/mitm_view_test.dart
 
 test-macos-isolated:
 	python3 tool/run_macos_isolated.py --app "$(APP)" $(MACOS_TEST_ARGS)

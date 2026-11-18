@@ -29,6 +29,78 @@ void main() {
     onlyStatisticsProxy: true,
   );
 
+  test(
+    'Android service metadata follows the accepted subscription and options',
+    () {
+      const applied = Profile(
+        id: 7,
+        label: 'Applied',
+        url: 'https://old.example/config',
+        selectedMap: {'Group': 'Old'},
+        autoUpdateDuration: Duration.zero,
+      );
+      const params = SetupParams(
+        selectedMap: {'Group': 'Old'},
+        options: CoreOptions(testUrl: 'old'),
+      );
+      final desired = shared.copyWith(
+        currentProfileName: 'Candidate',
+        setupParams: params.copyWith.options(testUrl: 'new'),
+      );
+      final changed = applied.copyWith(
+        label: 'Renamed',
+        selectedMap: {'Group': 'Next'},
+      );
+      for (final stale in [
+        changed.copyWith(id: 8),
+        changed.copyWith(url: 'https://new.example/config'),
+        changed.copyWith(ageSecretKey: 'new-key'),
+        changed.copyWith(lastUpdateDate: DateTime.utc(2026)),
+        null,
+      ]) {
+        final published = androidServiceStateForProfile(
+          desired,
+          params,
+          applied,
+          stale,
+        );
+        expect(published.currentProfileName, 'Applied');
+        expect(published.setupParams, params);
+      }
+      final renamed = androidServiceStateForProfile(
+        desired,
+        params,
+        applied,
+        changed,
+      );
+      expect(renamed.currentProfileName, 'Renamed');
+      expect(
+        renamed.setupParams,
+        params.copyWith(selectedMap: {'Group': 'Next'}),
+      );
+    },
+  );
+
+  test(
+    'replacing runtime bytes cancels a pending acceptance of the old file',
+    () async {
+      final writes = <String>[];
+      final persistence = AndroidSetupPersistence(
+        readState: () async => shared,
+        saveState: (_) async {},
+        saveDigest: (digest) async => writes.add(digest),
+      )..stage('old');
+      persistence.invalidateRuntime();
+      expect(persistence.needsRuntimeSetup, isTrue);
+      await persistence.save(isCurrent: () => true);
+      expect(writes, isEmpty);
+      persistence.stage('accepted');
+      expect(persistence.needsRuntimeSetup, isFalse);
+      await persistence.save(isCurrent: () => true);
+      expect(writes, ['accepted']);
+    },
+  );
+
   for (final phase in ['shared state', 'digest']) {
     testWidgets('$phase failure is retried without reapplying the Core', (
       tester,
@@ -141,6 +213,39 @@ void main() {
     expect(saved, ['new-digest']);
     expect(persistence.isPending, isFalse);
   });
+
+  for (final phase in ['state', 'digest']) {
+    test(
+      'a superseded $phase write preserves the replacement digest',
+      () async {
+        final writing = Completer<void>();
+        final release = Completer<void>();
+        final saved = <String>[];
+        Future<void> block(String step) async {
+          if (step != phase || writing.isCompleted) return;
+          writing.complete();
+          await release.future;
+        }
+
+        final persistence = AndroidSetupPersistence(
+          readState: () async => shared,
+          saveState: (_) => block('state'),
+          saveDigest: (digest) async {
+            saved.add(digest);
+            await block('digest');
+          },
+        )..stage('first');
+        final first = persistence.save(isCurrent: () => true);
+        await writing.future;
+        persistence.stage('second');
+        release.complete();
+        expect(await first, isFalse);
+        expect(persistence.isPending, isTrue);
+        expect(await persistence.save(isCurrent: () => true), isTrue);
+        expect(saved, [if (phase == 'digest') 'first', 'second']);
+      },
+    );
+  }
 
   test(
     'a superseded read cannot save old state or mark it persisted',

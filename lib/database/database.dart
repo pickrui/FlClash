@@ -91,7 +91,9 @@ class Database extends _$Database {
 
         if (from < 11) {
           await m.createTable(customProxies);
-          await m.addColumn(profiles, profiles.proxyAliases);
+          if (profileColumns.add('proxy_aliases')) {
+            await m.addColumn(profiles, profiles.proxyAliases);
+          }
         }
         if (from < 6) {
           final columns = (await customSelect(
@@ -167,7 +169,10 @@ class Database extends _$Database {
           }
         }
         if (from < 11) {
-          final merged = mergeProfileProxies(await profilesDao.all().get());
+          final merged = mergeProfileProxies(
+            await profilesDao.all().get(),
+            existing: await customProxiesDao.all().get(),
+          );
           await customProxiesDao.setAll(merged.proxies);
           for (final profile in merged.profiles) {
             await putProfile(profile);

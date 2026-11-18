@@ -29,6 +29,25 @@ void main() {
     await database.close();
   });
 
+  test(
+    'bulk deletion spans the SQLite bind limit and preserves other rules',
+    () async {
+      const keep = Rule(id: 40000, value: 'MATCH,REJECT');
+      const first = Rule(id: 1, value: 'MATCH,DIRECT');
+      const last = Rule(id: 33000, value: 'MATCH,REJECT');
+      await database.rulesDao.putGlobalRule(first);
+      await database.rulesDao.putGlobalRule(last);
+      await database.rulesDao.putGlobalRule(keep);
+      await database.rulesDao.delRules(Iterable<int>.generate(last.id + 1));
+      expect(
+        (await database.rulesDao.allGlobalAddedRules().get()).map(
+          (rule) => rule.id,
+        ),
+        [keep.id],
+      );
+    },
+  );
+
   for (final profileId in [null, 1]) {
     test(
       'presets preserve selection order and deduplicate for $profileId',

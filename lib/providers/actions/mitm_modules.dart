@@ -101,7 +101,10 @@ class MitmModulesAction extends _$MitmModulesAction {
     );
   }
 
-  Future<MitmModule> create(String text) {
+  Future<MitmModule> create(
+    String text, {
+    Map<String, List<int>> attachments = const {},
+  }) {
     return _save(
       MitmModule(
         id: snowflake.id,
@@ -112,11 +115,16 @@ class MitmModulesAction extends _$MitmModulesAction {
       added: true,
       first: true,
       edited: true,
+      attachments: attachments,
     );
   }
 
-  Future<MitmModule> edit(MitmModule module, String text) {
-    return _save(module, text, edited: true);
+  Future<MitmModule> edit(
+    MitmModule module,
+    String text, {
+    Map<String, List<int>> attachments = const {},
+  }) {
+    return _save(module, text, edited: true, attachments: attachments);
   }
 
   Future<MitmModule> updateModule(MitmModule module) {
@@ -151,6 +159,13 @@ class MitmModulesAction extends _$MitmModulesAction {
       storageLock.synchronized(() async {
         await ref.read(mitmModulesProvider.future);
         await ref.read(mitmModulesProvider.notifier).put(module, first: first);
+      });
+
+  Future<void> setEnabled(MitmModule reviewed, bool enabled) =>
+      storageLock.synchronized(() async {
+        final current = await _current(reviewed.id);
+        if (current == null || (enabled && current != reviewed)) return;
+        await putModule(current.copyWith(enabled: enabled));
       });
 
   Future<MitmModule?> setArguments(
@@ -204,9 +219,6 @@ class MitmModulesAction extends _$MitmModulesAction {
     String fileName,
     List<int> bytes,
   ) async {
-    if (bytes.length > maxMitmResourceSize) {
-      throw const MitmModuleException('size');
-    }
     final name = await _storeResource(fileName, bytes);
     try {
       final current = await _current(module.id);
@@ -259,6 +271,7 @@ class MitmModulesAction extends _$MitmModulesAction {
     bool added = false,
     bool first = false,
     bool edited = false,
+    Map<String, List<int>> attachments = const {},
   }) async {
     final content = await compute(_parseMitmModule, (text, module.arguments));
     if (content.isEmpty && !edited) {
@@ -272,6 +285,11 @@ class MitmModulesAction extends _$MitmModulesAction {
         previous: module.resources,
         held: held,
       );
+      for (final MapEntry(key: fileName, value: bytes) in attachments.entries) {
+        final name = await _storeResource(fileName, bytes);
+        held.add(name);
+        resources[fileName] = name;
+      }
       if (!ref.mounted) {
         return module;
       }
@@ -389,6 +407,9 @@ class MitmModulesAction extends _$MitmModulesAction {
   }
 
   Future<String> _storeResource(String source, List<int> bytes) async {
+    if (bytes.length > maxMitmResourceSize) {
+      throw const MitmModuleException('size');
+    }
     final name = mitmResourceName(source, bytes);
     await storageLock.synchronized(() async {
       final directory = await appPath.mitmResourcesDirPath;

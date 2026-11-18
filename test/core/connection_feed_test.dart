@@ -136,6 +136,8 @@ void main() {
     expect(snapshots.last.single.upload, 4096);
     expect(snapshots.last.single.metadata.host, 'fixture.test');
     expect(snapshots.last.single.chains, ['group', 'node']);
+    feed.onConnections({'subscription': '1', 'sequence': 1});
+    expect(snapshots, hasLength(2));
     feed.onConnections({'subscription': '1', 'sequence': 3});
     await feed.maintain();
     expect(starts, ['1', '2']);

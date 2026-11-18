@@ -187,8 +187,11 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
 
   Future<String?> _syncSubscription() async {
     final notifier = ref.read(cloudAccountProvider.notifier);
+    final sessionRevision = CloudApiService().sessionRevision;
     await notifier.refreshManagedSubscription();
-    if (!mounted) return AppLocalizations.current.cloudApiRequestCanceled;
+    if (!mounted || !notifier.isCurrentAccountSession(sessionRevision)) {
+      return AppLocalizations.current.cloudApiRequestCanceled;
+    }
     final account = ref.read(cloudAccountProvider);
     if (!account.isLoggedIn) {
       return AppLocalizations.current.cloudApiRequestCanceled;
@@ -202,7 +205,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       return AppLocalizations.current.cloudConfigSyncIncomplete;
     }
     if (!profile.offersNodeFilter) return null;
-    final sessionRevision = CloudApiService().sessionRevision;
+    final filterSession = CloudApiService().sessionRevision;
     setState(
       () => _nodeFilterRecovery = (
         profile: profile,
@@ -213,10 +216,6 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       ref.read(cloudNodeFilterApiProvider).fetchNodeFilter,
     );
     if (!mounted) return AppLocalizations.current.cloudApiRequestCanceled;
-    if (CloudApiService().sessionRevision != sessionRevision ||
-        !ref.read(cloudAccountProvider).isLoggedIn) {
-      return AppLocalizations.current.cloudApiRequestCanceled;
-    }
     if (result case AsyncError(:final error)) {
       if (CloudApiException.isUnauthorized(error)) {
         await notifier.handleUnauthorized();
@@ -225,6 +224,10 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
       if (CloudApiException.isHandledUnauthorized(error)) {
         return AppLocalizations.current.cloudApiRequestCanceled;
       }
+    }
+    if (CloudApiService().sessionRevision != filterSession ||
+        !ref.read(cloudAccountProvider).isLoggedIn) {
+      return AppLocalizations.current.cloudApiRequestCanceled;
     }
     setState(() => _nodeFilterRecovery = (profile: profile, result: result));
     return null;
@@ -674,11 +677,12 @@ class _CloudNodeFilterEntryState extends ConsumerState<CloudNodeFilterEntry> {
   Future<void> _open() async {
     final builder = cloudNodeFilterPageBuilder;
     if (builder == null) return;
+    final session = CloudApiService().sessionRevision;
     final result = await BaseNavigator.push<NodeFilterCatalog>(
       context,
       Builder(builder: builder),
     );
-    if (!mounted) return;
+    if (!mounted || CloudApiService().sessionRevision != session) return;
     if (result == null) {
       await _load();
       return;

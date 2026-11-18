@@ -9,6 +9,7 @@ import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/core.dart';
 import 'package:flutter/foundation.dart';
 
@@ -83,15 +84,13 @@ class CoreService extends CoreHandlerInterface {
   @override
   bool get isConnected => _lifecycle.state is DesktopCoreRunning;
 
-  Future<CoreLifecycleResult> start() => _lifecycle.start();
-
-  Future<CoreLifecycleResult> stop() => _lifecycle.stop();
-
   @override
   Future<String> preload() async {
     try {
-      await start();
-      return '';
+      final result = await _lifecycle.start();
+      return result.outcome == CoreLifecycleOutcome.superseded
+          ? AppLocalizations.current.coreNotConnected
+          : '';
     } catch (error) {
       return coreLaunchBlockedMessage(error, null) ?? error.toString();
     }
@@ -99,16 +98,18 @@ class CoreService extends CoreHandlerInterface {
 
   @override
   Future<bool> shutdown() async {
+    final result = await _lifecycle.stop(
+      beforeStop: isConnected ? _requestShutdown : null,
+    );
+    return result.outcome != CoreLifecycleOutcome.superseded;
+  }
+
+  Future<void> _requestShutdown() async {
     try {
-      if (isConnected) await shutdownCore();
+      await shutdownCore();
     } catch (error) {
-      // A wedged Core is what a restart is there to recover from; stop() below
-      // ends it whether or not it answered.
       debugPrint('Core shutdown request failed: $error');
-    } finally {
-      await stop();
     }
-    return true;
   }
 
   @override
@@ -125,8 +126,7 @@ class CoreService extends CoreHandlerInterface {
     try {
       return await _lifecycle.close();
     } finally {
-      await _rpcClient.close();
-      await _crashSubscription.cancel();
+      await Future.wait([_crashSubscription.cancel(), _rpcClient.close()]);
     }
   }
 

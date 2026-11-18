@@ -37,35 +37,30 @@ class _VpnContainerState extends ConsumerState<VpnManager> {
     });
   }
 
-  void _checkOptions() {
-    if (!ref.read(isStartProvider)) return;
+  bool get _needsRestart {
+    if (!ref.read(isStartProvider)) return false;
     final running = ref.read(runningVpnOptionsProvider);
     var desired = ref.read(sharedStateProvider).vpnOptions;
-    if (running == null || desired == null) return;
+    if (running == null || desired == null) return false;
     if (!running.localNetworkAccess &&
         desired.enable &&
         const {'system', 'mixed'}.contains(desired.stack)) {
       desired = desired.copyWith(stack: 'gvisor');
     }
-    if (running.options.effective != desired.effective) {
-      showTip();
-    }
+    return running.options.effective != desired.effective;
   }
 
-  void showTip() {
+  void _checkOptions() {
+    if (!_needsRestart) return;
     throttler.call(
       FunctionTag.vpnTip,
       () {
-        if (!ref.read(isStartProvider)) {
-          return;
-        }
         globalState.showNotifier(
           appLocalizations.vpnConfigChangeDetected,
           level: MessageLevel.warning,
           onTap: () async {
-            if (!ref.read(isStartProvider)) return;
-            await globalState.handleStop();
-            await appController.updateStatus(true);
+            if (!mounted || !_needsRestart) return;
+            await ref.read(setupActionProvider.notifier).restartVpn();
           },
         );
       },

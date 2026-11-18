@@ -17,18 +17,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final paymentStatusQueryProvider = Provider(
-  (_) => CloudApiService().queryPaymentPaid,
-);
-
 class StorePaymentDialog extends ConsumerStatefulWidget {
   final PaymentInitiation init;
-  final String payment;
+  final Future<bool> Function(String pid) queryPaid;
 
   const StorePaymentDialog({
     super.key,
     required this.init,
-    required this.payment,
+    required this.queryPaid,
   });
 
   @override
@@ -80,10 +76,7 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
       }
     });
     try {
-      final paid = await ref.read(paymentStatusQueryProvider)(
-        pid,
-        payment: widget.payment,
-      );
+      final paid = await widget.queryPaid(pid);
       if (!mounted) return;
       if (paid) {
         _close(true);
@@ -93,12 +86,12 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
     } catch (e) {
       if (CloudApiException.isHandledUnauthorized(e)) {
         _timer?.cancel();
-        _close(false);
+        if (mounted) closePage(context, false);
         return;
       }
       if (CloudApiException.isUnauthorized(e)) {
         _timer?.cancel();
-        _close(false);
+        if (mounted) closePage(context, false);
         await accountNotifier.handleUnauthorized();
         return;
       }
@@ -115,6 +108,9 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(cloudAccountProvider.select((s) => s.isLoggedIn), (_, loggedIn) {
+      if (!loggedIn) closePage(context, false);
+    });
     final init = widget.init;
     final isUrl = init.kind == PaymentInitiationKind.externalUrl;
     final hasPaymentId = init.pid != null && init.pid!.isNotEmpty;

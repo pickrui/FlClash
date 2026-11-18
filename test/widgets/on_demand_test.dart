@@ -251,7 +251,6 @@ void main() {
     (tester) async {
       final c = ProviderContainer(
         overrides: [
-          backBlockActionProvider.overrideWith(TestBackBlockAction.new),
           viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 600)),
         ],
       );

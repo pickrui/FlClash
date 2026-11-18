@@ -121,7 +121,7 @@ void main() {
     );
     addTearDown(container.dispose);
     container.read(cloudAccountProvider);
-    final refreshing = notifier.refreshProfile(force: true);
+    final refreshing = notifier.refreshManagedSubscription();
     await notifier.started.future;
 
     await clearUserPreferences(const []);
@@ -131,6 +131,7 @@ void main() {
 
     expect(secureValues.containsKey('cloud_token'), isFalse);
     expect(service.sessionRevision, revision);
+    expect(notifier.syncs, 0);
     expect(
       (await SharedPreferences.getInstance()).getBool(
         SafeStorage.deletionMarkerKey('cloud_token'),
@@ -138,6 +139,29 @@ void main() {
       isTrue,
     );
   }, skip: Platform.isWindows);
+
+  test(
+    'a managed refresh continues after its own client token exchange',
+    () async {
+      final service = CloudApiService()..setToken('other-client-token');
+      final revision = service.sessionRevision;
+      final notifier = _DelayedTokenExchange();
+      final container = ProviderContainer(
+        overrides: [cloudAccountProvider.overrideWith(() => notifier)],
+      );
+      addTearDown(container.dispose);
+      container.read(cloudAccountProvider);
+      final refreshing = notifier.refreshManagedSubscription();
+      await notifier.started.future;
+      notifier.response.complete('flclash-token');
+      await refreshing;
+
+      expect(secureValues['cloud_token'], 'flclash-token');
+      expect(service.sessionRevision, greaterThan(revision));
+      expect(notifier.syncs, 1);
+    },
+    skip: Platform.isWindows,
+  );
 
   for (final platform in [TargetPlatform.android, TargetPlatform.linux]) {
     test(
@@ -293,6 +317,10 @@ void main() {
 class _DelayedTokenExchange extends CloudAccountNotifier {
   final started = Completer<void>();
   final response = Completer<String>();
+  var syncs = 0;
+
+  @override
+  Future<void> syncManagedConfig() async => syncs++;
 
   @override
   CloudAccountState build() => const CloudAccountState(isLoggedIn: true);

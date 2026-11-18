@@ -79,13 +79,16 @@ void main() {
           return readAdapter((options) async {
             final authorization = options.headers['authorization'] as String?;
             if (authorization == null) {
+              final prefix = mode == 'combined'
+                  ? 'Digest realm="modern", nonce="first", algorithm=SHA-256, '
+                  : '';
               return ResponseBody.fromString(
                 '',
                 401,
                 headers: {
                   'www-authenticate': [
                     if (mode == 'multiple') 'Basic realm="unused"',
-                    'Digest realm="backup", nonce="fixture", '
+                    '${prefix}Digest realm="backup", nonce="fixture", '
                         '${mode == 'legacy' ? '' : 'qop="auth,auth-int", '}'
                         'opaque="dav,fixture", algorithm=${mode == 'md5-sess' ? 'MD5-sess' : 'MD5'}'
                         '${mode == 'combined' ? ', Basic realm="unused"' : ''}',
@@ -168,7 +171,8 @@ void main() {
           401,
           headers: {
             'www-authenticate': [
-              'Digest realm="fixture", nonce="fixture", algorithm=SHA-256',
+              'Digest realm="fixture, Basic realm", nonce="fixture", '
+                  'algorithm=SHA-256',
             ],
           },
         );

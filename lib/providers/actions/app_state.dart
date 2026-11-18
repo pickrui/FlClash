@@ -46,9 +46,9 @@ extension StateControllerExt on AppController {
     return _ref.read(realTestUrlProvider(url));
   }
 
-  Future<SharedState> get sharedState async {
+  Future<SharedState?> get androidServiceState async {
     await _ref.read(vpnRouteAddressProvider.future);
-    return _ref.read(sharedStateProvider);
+    return _ref.read(androidServiceStateProvider);
   }
 
   String? getCurrentGroupName() {

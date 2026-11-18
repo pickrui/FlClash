@@ -232,6 +232,30 @@ Extra = type=http-response,pattern=^https://b,script-path=${urlOf('/extra.js')},
     },
   );
 
+  test('script confirmation only enables the reviewed revision', () async {
+    final reviewed = MitmModule(
+      id: 1,
+      name: 'Script',
+      order: 0,
+      enabled: false,
+      scripts: 1,
+      resources: const {'own.js': 'old.js'},
+      lastUpdateTime: DateTime(2026, 10, 24),
+    );
+    await action().putModule(reviewed);
+    final revised = reviewed.copyWith(resources: const {'own.js': 'new.js'});
+    await action().putModule(revised);
+    await action().setEnabled(reviewed, true);
+    expect((await stored()).single, revised);
+    await action().setEnabled(revised, true);
+    expect((await stored()).single, revised.copyWith(enabled: true));
+    await action().setEnabled(reviewed, false);
+    expect((await stored()).single, revised);
+    await action().deleteModule(revised);
+    await action().setEnabled(revised, true);
+    expect(await stored(), isEmpty);
+  });
+
   test('an update that brings more scripts turns the module off', () async {
     bodies = {'/ads.sgmodule': module('Ads'), '/blank.json': '{}'};
     await action().addFromUrl(urlOf('/ads.sgmodule'));
@@ -373,6 +397,73 @@ Ads = type=http-response,pattern=$pattern,script-path=${urlOf('/ads.js')}
       '#!name=Mine\n[URL Rewrite]\n',
     );
   });
+
+  for (final existing in [false, true]) {
+    test(
+      'a failed ${existing ? "edit" : "create"} attachment can be retried without a partial module',
+      () async {
+        const oldText = '#!name=Original\n';
+        const newText =
+            '#!name=Edited\n[Map Local]\n^https://example.test data="body.json"\n';
+        if (existing) {
+          await action().create(
+            oldText,
+            attachments: {
+              'old.txt': [0],
+            },
+          );
+        }
+        final before = await stored();
+        final attachments = {
+          'first.txt': [1],
+          'body.json': [2],
+        };
+        Future<MitmModule> save() => existing
+            ? action().edit(before.single, newText, attachments: attachments)
+            : action().create(newText, attachments: attachments);
+
+        final dir = await appPath.mitmResourcesDirPath;
+        final blocked = Directory(
+          join(dir, mitmResourceName('body.json', [2])),
+        );
+        await blocked.create(recursive: true);
+        await expectLater(save(), throwsA(isA<FileSystemException>()));
+        expect(await stored(), before);
+        expect(
+          await File(join(dir, mitmResourceName('first.txt', [1]))).exists(),
+          isFalse,
+        );
+        if (existing) {
+          expect(
+            await File(
+              join(await appPath.mitmModulesDirPath, before.single.fileName),
+            ).readAsString(),
+            oldText,
+          );
+          expect(
+            await File(join(dir, before.single.resources['old.txt']!))
+                .readAsBytes(),
+            [0],
+          );
+        }
+        await blocked.delete();
+        final saved = await save();
+        final row = (await stored()).single;
+        expect(row.id, existing ? before.single.id : saved.id);
+        expect(
+          await File(join(await appPath.mitmModulesDirPath, row.fileName))
+              .readAsString(),
+          newText,
+        );
+        for (final entry in attachments.entries) {
+          expect(
+            await File(join(dir, row.resources[entry.key]!)).readAsBytes(),
+            entry.value,
+          );
+        }
+      },
+    );
+  }
 
   test('an attachment outlasts an edit until it is removed', () async {
     final local = await action().create('#!name=Mine\n');

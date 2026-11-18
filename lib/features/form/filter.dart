@@ -5,23 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-Future<Map<int, String>?> checkFilters(
-  WidgetRef ref,
-  List<String> filters,
-) async {
-  if (filters.every((filter) => filter.isEmpty)) {
-    return const {};
-  }
-  try {
-    return await ref.read(coreHandlerProvider).validateFilters(filters);
-  } catch (_) {
-    return null;
-  }
-}
 
 // mihomo splits `filter` and `exclude-filter` on backticks and matches each
 // part as its own regex, so a filter is applied by adding its parts.

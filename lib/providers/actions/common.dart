@@ -110,18 +110,11 @@ extension CommonControllerExt on AppController {
   }
 
   void updateRunTime() {
-    final startTime = globalState.startTime;
     if (!globalState.isUiVisible &&
-        (startTime != null) == (_ref.read(runTimeProvider) != null)) {
+        globalState.isStart == (_ref.read(runTimeProvider) != null)) {
       return;
     }
-    if (startTime != null) {
-      final startTimeStamp = startTime.millisecondsSinceEpoch;
-      final nowTimeStamp = DateTime.now().millisecondsSinceEpoch;
-      _ref.read(runTimeProvider.notifier).value = nowTimeStamp - startTimeStamp;
-    } else {
-      _ref.read(runTimeProvider.notifier).value = null;
-    }
+    _ref.read(runTimeProvider.notifier).value = globalState.runTime;
   }
 
   Future<void> updateTraffic() async {

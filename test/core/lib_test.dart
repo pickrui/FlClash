@@ -16,6 +16,55 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'attaching before profile acceptance keeps the native service state',
+    () async {
+      final service = _Service();
+      final core = CoreLib.forTesting(
+        service: service,
+        readSharedState: () => null,
+      );
+      addTearDown(core.destroy);
+      expect(await core.preload(), isEmpty);
+      expect(core.isConnected, isTrue);
+      expect(service.syncs, 0);
+    },
+  );
+
+  for (final throws in [false, true]) {
+    test(
+      'failed Android binding is released before retry (throws: $throws)',
+      () async {
+        final binding = Completer<String>();
+        final service = _Service()
+          ..initResult = binding.future
+          ..shutdownError = PlatformException(code: 'cleanup_failed');
+        final core = CoreLib.forTesting(
+          service: service,
+          readSharedState: () => _sharedState,
+        );
+        addTearDown(core.destroy);
+        final start = core.preload();
+        await Future<void>.delayed(Duration.zero);
+        if (throws) {
+          binding.completeError(PlatformException(code: 'bind_failed'));
+        } else {
+          binding.complete('bind_failed');
+        }
+        expect(await start, contains('bind_failed'));
+        expect(core.isConnected, isFalse);
+        expect(service.shutdowns, 1);
+        expect(service.syncs, 0);
+
+        service.initResult = null;
+        service.shutdownError = null;
+        expect(await core.preload(), isEmpty);
+        expect(service.starts, 2);
+        expect(service.syncs, 1);
+      },
+    );
+  }
+
   for (final syncThrows in [false, true]) {
     for (final cleanupThrows in [false, true]) {
       test(
@@ -392,19 +441,22 @@ void main() {
         service: service,
         readSharedState: () => _sharedState,
       );
-      addTearDown(core.destroy);
-      final failure = expectLater(
-        core.invokeMethod<bool>(
-          method: CoreMethod.getIsInit,
-          timeout: const Duration(milliseconds: 50),
-        ),
-        throwsA(isA<TimeoutException>()),
-      );
-      await tester.pump(const Duration(milliseconds: 51));
-      await failure;
-      expect(await core.preload(), isEmpty);
-      await tester.pump();
-      expect(service.calls, isEmpty);
+      try {
+        final failure = expectLater(
+          core.invokeMethod<bool>(
+            method: CoreMethod.getIsInit,
+            timeout: const Duration(milliseconds: 50),
+          ),
+          throwsA(isA<TimeoutException>()),
+        );
+        await tester.pump(const Duration(milliseconds: 51));
+        await failure;
+        expect(await core.preload(), isEmpty);
+        await tester.pump();
+        expect(service.calls, isEmpty);
+      } finally {
+        await core.destroy();
+      }
     },
   );
 
@@ -440,6 +492,45 @@ void main() {
     expect(core.isConnected, isTrue);
     expect(await core.preload(), isEmpty);
     expect(service.starts, 1);
+  });
+
+  test('stop during binding waits for and shuts down that service', () async {
+    final binding = Completer<String>();
+    final service = _Service()..initResult = binding.future;
+    final core = CoreLib.forTesting(
+      service: service,
+      readSharedState: () => _sharedState,
+    );
+    addTearDown(core.destroy);
+    final start = core.preload();
+    await pumpEventQueue();
+    expect(service.starts, 1);
+    final stop = core.shutdown();
+    service.invocation.complete(const CoreMethodResponse(result: true));
+    binding.complete('');
+    expect(await start, isEmpty);
+    expect(await stop, isTrue);
+    expect(core.isConnected, isFalse);
+    expect(service.shutdowns, 1);
+  });
+
+  test('a start queued after stop binds a fresh service', () async {
+    final service = _Service();
+    final core = CoreLib.forTesting(
+      service: service,
+      readSharedState: () => _sharedState,
+    );
+    addTearDown(core.destroy);
+    expect(await core.preload(), isEmpty);
+    final stop = core.shutdown();
+    await pumpEventQueue();
+    final restart = core.preload();
+    service.invocation.complete(const CoreMethodResponse(result: true));
+    expect(await stop, isTrue);
+    expect(await restart, isEmpty);
+    expect(core.isConnected, isTrue);
+    expect(service.starts, 2);
+    expect(service.shutdowns, 1);
   });
 }
 

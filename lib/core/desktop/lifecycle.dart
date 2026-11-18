@@ -20,7 +20,7 @@ abstract interface class DesktopCoreLifecycleController {
 
   Future<CoreLifecycleResult> restart();
 
-  Future<CoreLifecycleResult> stop();
+  Future<CoreLifecycleResult> stop({Future<void> Function()? beforeStop});
 
   Future<CoreLifecycleResult> close();
 }
@@ -33,7 +33,9 @@ final class _LifecycleIntent {
   final int revision;
   final _LifecycleTarget target;
 
-  const _LifecycleIntent(this.revision, this.target);
+  final Future<void> Function()? beforeStop;
+
+  const _LifecycleIntent(this.revision, this.target, [this.beforeStop]);
 }
 
 final class _PendingLifecycleCommand {
@@ -222,7 +224,8 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
   Future<CoreLifecycleResult> restart() => _submit(_LifecycleTarget.restarted);
 
   @override
-  Future<CoreLifecycleResult> stop() => _submit(_LifecycleTarget.stopped);
+  Future<CoreLifecycleResult> stop({Future<void> Function()? beforeStop}) =>
+      _submit(_LifecycleTarget.stopped, beforeStop: beforeStop);
 
   @override
   Future<CoreLifecycleResult> close() {
@@ -235,7 +238,10 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     return result;
   }
 
-  Future<CoreLifecycleResult> _submit(_LifecycleTarget target) {
+  Future<CoreLifecycleResult> _submit(
+    _LifecycleTarget target, {
+    Future<void> Function()? beforeStop,
+  }) {
     if (_terminalRequested) {
       return Future.error(
         DesktopCoreFailure(
@@ -248,7 +254,7 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     if (target == _LifecycleTarget.closed) {
       _terminalRequested = true;
     }
-    final intent = _LifecycleIntent(++_revision, target);
+    final intent = _LifecycleIntent(++_revision, target, beforeStop);
     final command = _PendingLifecycleCommand(intent);
     _pending.add(command);
     _desired = intent;
@@ -367,6 +373,7 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
             session,
             intent.revision,
             allowUnconfirmedExit: false,
+            beforeStop: intent.beforeStop,
           );
         }
         if (_desired.target == _LifecycleTarget.stopped) {
@@ -618,10 +625,12 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     DesktopCoreSession session,
     int revision, {
     required bool allowUnconfirmedExit,
+    Future<void> Function()? beforeStop,
   }) async {
     _publish(DesktopCoreStopping(revision: revision, session: session));
     final disconnected = _disconnectFor(session);
     try {
+      if (beforeStop != null) await beforeStop();
       final stopResult = await session.lease.stop(timeouts.disconnection);
       if (!stopResult.exitConfirmed) {
         if (!allowUnconfirmedExit) {
