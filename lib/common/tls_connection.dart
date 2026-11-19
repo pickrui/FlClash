@@ -8,6 +8,18 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+enum HttpConnectionStage {
+  dispatch,
+  dns,
+  tcp,
+  proxyTcp,
+  proxyConnect,
+  nativeProxyRequest,
+  tls,
+  http,
+  response,
+}
+
 /// Retains the raw TCP socket through TLS negotiation. SecureSocket.secure()
 /// detaches its input Socket, whose destroy() then cannot cancel the handshake.
 Future<ConnectionTask<Socket>> startTlsConnection(
@@ -17,11 +29,13 @@ Future<ConnectionTask<Socket>> startTlsConnection(
   SecurityContext? context,
   bool Function(X509Certificate)? onBadCertificate,
   void Function(String)? keyLog,
+  void Function()? onHandshake,
 }) async {
   final tcp = await RawSocket.startConnect(address, port);
   return _secureRawConnection(
     tcp.socket,
     cancelConnect: tcp.cancel,
+    onHandshake: onHandshake,
     host: host,
     context: context,
     onBadCertificate: onBadCertificate,
@@ -91,6 +105,7 @@ Future<ConnectionTask<Socket>> secureConnection(
 ConnectionTask<Socket> _secureRawConnection(
   Future<RawSocket> connection, {
   required void Function() cancelConnect,
+  void Function()? onHandshake,
   required String host,
   StreamSubscription<RawSocketEvent>? subscription,
   SecurityContext? context,
@@ -105,6 +120,7 @@ ConnectionTask<Socket> _secureRawConnection(
     try {
       final socket = raw = await connection;
       if (canceled) throw const SocketException('Connection attempt cancelled');
+      onHandshake?.call();
       final tls = await RawSecureSocket.secure(
         socket,
         subscription: subscription,

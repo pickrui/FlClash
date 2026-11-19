@@ -43,6 +43,7 @@ class HttpReadHeldRefusal implements Exception {
 Future<T> raceHttpReads<T>(
   Iterable<Future<T> Function(CancelToken token)> reads, {
   required Duration timeout,
+  void Function()? onDeadline,
   CancelToken? cancelToken,
   bool Function(Object error)? isTerminalError,
   bool Function(Object error)? retainError,
@@ -55,6 +56,7 @@ Future<T> raceHttpReads<T>(
   final cancelled = cancelToken?.cancelError;
   if (cancelled != null) throw cancelled;
   if (timeout <= Duration.zero) {
+    onDeadline?.call();
     throw HttpReadTimeoutException(timeout);
   }
   final result = Completer<T>();
@@ -107,7 +109,11 @@ Future<T> raceHttpReads<T>(
     }
   }
 
-  final deadline = Timer(timeout, endWithoutAnswer);
+  final deadline = Timer(timeout, () {
+    if (result.isCompleted) return;
+    onDeadline?.call();
+    endWithoutAnswer();
+  });
   final cancellation = cancelToken?.whenCancel.asStream().listen((error) {
     if (!result.isCompleted) result.completeError(error);
   });

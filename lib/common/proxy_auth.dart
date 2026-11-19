@@ -62,6 +62,7 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
   final HttpClient Function() _create;
   List<Uri>? Function(Uri uri)? _tunnelTargets;
   final SecurityContext? _securityContext;
+  void Function(HttpConnectionStage)? _onStage;
   bool Function(X509Certificate, String, int)? _badCertificateCallback;
   Function(String)? _keyLog;
   Future<ConnectionTask<Socket>> Function(Uri, String?, int?)?
@@ -80,14 +81,17 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
     required this._read,
     this._securityContext,
     this._tunnelTargets,
+    this._onStage,
   });
 
   static HttpClient wrap(
     HttpClient first,
     ProxyAuthenticationState? Function() read, {
     List<Uri>? Function(Uri uri)? tunnelTargets,
+    void Function(HttpConnectionStage)? onStage,
   }) {
     if (first is ProxyAuthenticatedHttpClient) {
+      first._onStage = onStage ?? first._onStage;
       first._tunnelTargets = tunnelTargets ?? first._tunnelTargets;
       return first;
     }
@@ -100,6 +104,7 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
       },
       read: read,
       tunnelTargets: tunnelTargets,
+      onStage: onStage,
     );
   }
 
@@ -234,6 +239,7 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
                               ));
                       return ConnectionTask.fromSocket(
                         directTask!.socket.then((socket) {
+                          _onStage?.call(HttpConnectionStage.proxyConnect);
                           tunnelSocket = socket;
                           return socket;
                         }),
@@ -291,6 +297,7 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
               }
               if (uri.scheme == 'https' && connected is! SecureSocket) {
                 final certificateCallback = _badCertificateCallback;
+                _onStage?.call(HttpConnectionStage.tls);
                 directTask = await secureConnection(
                   connected!,
                   host: uri.host,
@@ -311,6 +318,7 @@ class ProxyAuthenticatedHttpClient implements HttpClient {
                 connected?.destroy();
                 throw const HttpException('Connection canceled');
               }
+              _onStage?.call(HttpConnectionStage.http);
               return connected!;
             } on SocketException catch (error) {
               connected?.destroy();

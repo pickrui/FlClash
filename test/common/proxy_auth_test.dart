@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fl_clash/common/proxy_auth.dart';
+import 'package:fl_clash/common/tls_connection.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -324,7 +325,9 @@ void main() {
       attempts++;
       if (!arrived.isCompleted) arrived.complete();
     });
+    final stages = <HttpConnectionStage>[];
     final client = ProxyAuthenticatedHttpClient(
+      onStage: stages.add,
       create: () => _DirectHttpOverrides().createHttpClient(null),
       read: () => (
         port: proxy.port,
@@ -340,6 +343,7 @@ void main() {
       throwsA(isA<Exception>()),
     );
     await arrived.future.timeout(const Duration(seconds: 2));
+    expect(stages.last, HttpConnectionStage.proxyConnect);
     client.close(force: true);
     await result.timeout(const Duration(seconds: 2));
     expect(attempts, 1);
