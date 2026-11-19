@@ -67,10 +67,30 @@ func TestUDPProbeTimeoutClosesItsSocket(t *testing.T) {
 	result := probeDiagnosticUDP(ctx, "fixture", func(context.Context, string) (net.Conn, error) {
 		return conn, nil
 	})
-	if result.Status != "timeout" {
+	if result.Status != "timeout" || result.Phase != "receive" {
 		t.Fatalf("unexpected result: %+v", result)
 	}
 	if _, err := conn.Write([]byte{1}); err == nil {
 		t.Fatal("probe socket remained open")
+	}
+}
+
+func TestUDPProbeConnectDeadline(t *testing.T) {
+	result := probeDiagnosticUDP(context.Background(), "fixture", func(context.Context, string) (net.Conn, error) {
+		return nil, &net.OpError{Op: "dial", Net: "udp", Err: context.DeadlineExceeded}
+	})
+	if result.Status != "timeout" || result.Phase != "connect" {
+		t.Fatalf("unexpected result: %+v", result)
+	}
+}
+
+func TestUDPProbeSendDeadline(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
+	defer cancel()
+	writer, unreadPeer := net.Pipe()
+	defer unreadPeer.Close()
+	result := probeDiagnosticUDP(ctx, "fixture", func(context.Context, string) (net.Conn, error) { return writer, nil })
+	if result.Status != "timeout" || result.Phase != "send" {
+		t.Fatalf("unexpected result: %+v", result)
 	}
 }

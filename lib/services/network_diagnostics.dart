@@ -760,15 +760,18 @@ class NetworkDiagnosticService {
               if (samples.isNotEmpty)
                 l.diagProbeSummary(passed, samples.length),
               for (final (index, sample) in samples.indexed)
-                l.diagProbeResult(
-                  index + 1,
-                  sample['status'] == 'ok'
-                      ? l.diagUdpReady
-                      : sample['status'] == 'unsupported'
-                      ? l.diagUdpUnsupported
-                      : l.diagUdpUnknown,
-                  sample['elapsedMs'] as int,
-                ),
+                l.diagProbeResult(index + 1, switch ((
+                  sample['status'],
+                  sample['phase'],
+                )) {
+                  ('ok', _) => l.diagUdpReady,
+                  ('unsupported', _) => l.diagUdpUnsupported,
+                  ('timeout', 'connect') => l.cloudApiConnectTimeout,
+                  ('timeout', 'send') => l.cloudApiSendTimeout,
+                  ('timeout', 'receive') => l.cloudApiReceiveTimeout,
+                  ('timeout', _) => l.cloudApiTimeout,
+                  _ => l.diagUdpUnknown,
+                }, sample['elapsedMs'] as int),
             ].join('\n'),
             l.diagUdpHint,
           ),

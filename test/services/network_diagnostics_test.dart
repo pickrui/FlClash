@@ -188,6 +188,24 @@ void main() {
       final timedOut = (await run(backend))['udp']!;
       expect(timedOut.status, DiagnosticStatus.unknown);
       expect(timedOut.fix, isNull);
+      final l = AppLocalizations.current;
+      expect(timedOut.detail, contains(l.cloudApiTimeout));
+      backend.udpResult = {
+        'samples': [
+          {'status': 'timeout', 'phase': 'connect', 'elapsedMs': 4000},
+          {'status': 'timeout', 'phase': 'receive', 'elapsedMs': 4000},
+        ],
+      };
+      final phased = (await run(backend))['udp']!;
+      expect(phased.status, DiagnosticStatus.unknown);
+      expect(
+        phased.detail,
+        contains(l.diagProbeResult(1, l.cloudApiConnectTimeout, 4000)),
+      );
+      expect(
+        phased.detail,
+        contains(l.diagProbeResult(2, l.cloudApiReceiveTimeout, 4000)),
+      );
       backend.udpResult = {
         'stale': true,
         'samples': [

@@ -8,6 +8,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"net"
 	"strings"
 	"sync"
@@ -21,10 +22,16 @@ import (
 
 type diagnosticUDPProbe struct {
 	Status    string `json:"status"`
+	Phase     string `json:"phase,omitempty"`
 	ElapsedMs int64  `json:"elapsedMs"`
 }
 
 type diagnosticUDPDial func(context.Context, string) (net.Conn, error)
+
+func udpProbeTimedOut(ctx context.Context, err error) bool {
+	var timeout net.Error
+	return errors.Is(ctx.Err(), context.DeadlineExceeded) || (errors.As(err, &timeout) && timeout.Timeout())
+}
 
 func probeDiagnosticUDP(ctx context.Context, server string, dial diagnosticUDPDial) diagnosticUDPProbe {
 	started := time.Now()
@@ -33,6 +40,8 @@ func probeDiagnosticUDP(ctx context.Context, server string, dial diagnosticUDPDi
 	if err != nil {
 		if strings.Contains(err.Error(), "UDP is not supported") {
 			result.Status = "unsupported"
+		} else if udpProbeTimedOut(ctx, err) {
+			result.Status, result.Phase = "timeout", "connect"
 		}
 		result.ElapsedMs = time.Since(started).Milliseconds()
 		return result
@@ -44,16 +53,17 @@ func probeDiagnosticUDP(ctx context.Context, server string, dial diagnosticUDPDi
 		_ = conn.SetDeadline(deadline)
 	}
 	transaction := stun.NewTxID()
-	if _, err := conn.Write(stun.Request(transaction)); err == nil {
+	if _, err := conn.Write(stun.Request(transaction)); err != nil {
+		if udpProbeTimedOut(ctx, err) {
+			result.Status, result.Phase = "timeout", "send"
+		}
+	} else {
 		buffer := make([]byte, 2048)
 		for {
 			n, err := conn.Read(buffer)
 			if err != nil {
-				if ctx.Err() != nil {
-					result.Status = "timeout"
-				}
-				if timeout, ok := err.(net.Error); ok && timeout.Timeout() {
-					result.Status = "timeout"
+				if udpProbeTimedOut(ctx, err) {
+					result.Status, result.Phase = "timeout", "receive"
 				}
 				break
 			}

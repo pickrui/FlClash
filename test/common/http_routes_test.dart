@@ -14,7 +14,11 @@ void main() {
       'tls://dot.example.invalid:853',
       'https://doh.example.invalid/dns-query',
     ]);
-    final findProxy = FlClashHttpOverrides.pinnedRoute('PROXY localhost:7890');
+    final choices = <(String, String)>[];
+    final findProxy = FlClashHttpOverrides.pinnedRoute(
+      'PROXY localhost:7890',
+      onSelected: (route, reason) => choices.add((route, reason)),
+    );
     expect(
       findProxy(Uri.parse('https://doh.example.invalid/dns-query')),
       'DIRECT',
@@ -23,6 +27,7 @@ void main() {
       findProxy(Uri.parse('https://other.example.invalid')),
       'PROXY localhost:7890',
     );
+    expect(choices, [('direct', 'resolver'), ('proxy', 'requested')]);
   });
 
   test('splitRoutes trims and de-duplicates find-proxy entries', () {
