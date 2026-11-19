@@ -536,6 +536,28 @@ void main() {
   });
 
   test(
+    'listener start signals recovery only for an occupied mixed port',
+    () async {
+      final handler = _FakeCoreHandler();
+      expect(await handler.startListener(), isTrue);
+      handler.failure = const CoreMethodException(
+        code: 'mixed_port_in_use',
+        message: 'listen tcp: address already in use',
+      );
+      expect(await handler.startListener(), isFalse);
+      handler.failure = const CoreMethodException(
+        code: 'core_error',
+        message:
+            'Core listener could not start: no configuration has been applied',
+      );
+      await expectLater(
+        handler.startListener(),
+        throwsA(same(handler.failure)),
+      );
+    },
+  );
+
+  test(
     'commands accept null replies and propagate structured failures',
     () async {
       final handler = _FakeCoreHandler();

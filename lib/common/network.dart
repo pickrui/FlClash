@@ -236,8 +236,15 @@ Future<int?> findAvailablePort(
 // Loopback only: a wildcard bind would raise the OS firewall prompt.
 Future<bool> isLoopbackPortAvailable(int port) async {
   try {
-    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, port);
+    final address = InternetAddress.loopbackIPv4;
+    final server = await ServerSocket.bind(address, port);
     await server.close();
+    final udp = await RawDatagramSocket.bind(
+      address,
+      port,
+      reuseAddress: false,
+    );
+    udp.close();
     return true;
   } catch (_) {
     return false;

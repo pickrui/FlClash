@@ -7,11 +7,14 @@
 package core
 
 import (
-	"github.com/metacubex/mihomo/config"
-	"github.com/metacubex/mihomo/listener"
 	"net"
 	"strconv"
+	"strings"
 	"testing"
+
+	"github.com/metacubex/mihomo/config"
+	"github.com/metacubex/mihomo/constant/features"
+	"github.com/metacubex/mihomo/listener"
 )
 
 // freeMixedPort finds a loopback port free for TCP and UDP; the mixed listener binds both.
@@ -77,5 +80,64 @@ func TestNetworkExclusionPreservesRunIntentAcrossConfigAndManualStop(t *testing.
 	handleSetNetworkExcluded(false)
 	if isRunning || listener.GetPorts().MixedPort != 0 {
 		t.Fatal("network change undid manual stop")
+	}
+}
+
+func TestDesktopListenerStartFailureReasons(t *testing.T) {
+	if features.Android {
+		t.Skip("desktop listener contract")
+	}
+	resetSuspendTestState(t)
+	oldExcluded, oldExiting := networkExcluded, exiting.Load()
+	networkExcluded = false
+	exiting.Store(false)
+	t.Cleanup(func() {
+		handleStopListener()
+		networkExcluded = oldExcluded
+		exiting.Store(oldExiting)
+	})
+	assertFailure := func(t *testing.T, code, reason string) {
+		t.Helper()
+		failure := startListener()
+		if failure == nil || failure.Code != code || !strings.Contains(failure.Message, reason) || isRunning {
+			t.Fatalf("start returned %+v (running %v), want %s with %q", failure, isRunning, code, reason)
+		}
+	}
+	isInit.Store(false)
+	assertFailure(t, "core_error", "not initialized")
+	exiting.Store(true)
+	assertFailure(t, "core_error", "shutting down")
+	exiting.Store(false)
+	isInit.Store(true)
+	assertFailure(t, "core_error", "no configuration")
+
+	currentConfig = &config.Config{General: &config.General{MixedPort: 65536}}
+	assertFailure(t, "core_error", "invalid port")
+
+	for _, network := range []string{"tcp", "udp"} {
+		t.Run(network, func(t *testing.T) {
+			port := freeMixedPort(t)
+			addr := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
+			if network == "tcp" {
+				busy, err := net.Listen(network, addr)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer busy.Close()
+			} else {
+				busy, err := net.ListenPacket(network, addr)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer busy.Close()
+			}
+			currentConfig.General.MixedPort = port
+			assertFailure(t, "mixed_port_in_use", network+" "+addr)
+			currentConfig.General.MixedPort = freeMixedPort(t)
+			if failure := startListener(); failure != nil || listener.GetPorts().MixedPort != currentConfig.General.MixedPort {
+				t.Fatalf("retry on a free port failed: %+v", failure)
+			}
+			handleStopListener()
+		})
 	}
 }

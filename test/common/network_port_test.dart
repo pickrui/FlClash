@@ -46,4 +46,16 @@ void main() {
       await server.close();
     }
   });
+  test('a UDP-only listener excludes a suggested mixed port', () async {
+    final socket = await RawDatagramSocket.bind(
+      InternetAddress.loopbackIPv4,
+      0,
+      reuseAddress: false,
+    );
+    try {
+      expect(await isLoopbackPortAvailable(socket.port), isFalse);
+    } finally {
+      socket.close();
+    }
+  });
 }

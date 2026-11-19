@@ -783,8 +783,13 @@ abstract class CoreHandlerInterface with CoreInterface {
 
   @override
   Future<bool> startListener() async {
-    await _command(CoreMethod.startListener);
-    return true;
+    try {
+      await _command(CoreMethod.startListener);
+      return true;
+    } on CoreMethodException catch (error) {
+      if (error.code == 'mixed_port_in_use') return false;
+      rethrow;
+    }
   }
 
   @override

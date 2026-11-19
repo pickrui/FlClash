@@ -100,7 +100,7 @@ func (response MethodResponse) validationResult(message string) {
 	}
 }
 
-func (response MethodResponse) providerResult(err *MethodError) {
+func (response MethodResponse) methodResult(err *MethodError) {
 	if err != nil {
 		response.failure(err.Code, err.Message, err.Details)
 	} else {
@@ -495,20 +495,20 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 	case updateExternalProviderMethod:
 		params := ExternalProviderRequest{}
 		if decodeMethodArguments(call, response, &params) {
-			handleUpdateExternalProvider(params.Name, params.Type, response.providerResult)
+			handleUpdateExternalProvider(params.Name, params.Type, response.methodResult)
 		}
 	case replaceProviderFileMethod:
 		params := ProviderFileChange{}
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		response.providerResult(handleReplaceProviderFile(params))
+		response.methodResult(handleReplaceProviderFile(params))
 	case sideLoadExternalProviderMethod:
 		params := map[string]string{}
 		if !decodeMethodArguments(call, response, &params) {
 			return
 		}
-		handleSideLoadExternalProvider(params["name"], params["type"], []byte(params["data"]), response.providerResult)
+		handleSideLoadExternalProvider(params["name"], params["type"], []byte(params["data"]), response.methodResult)
 	case startLogMethod:
 		handleStartLog()
 		response.success(nil)
@@ -524,11 +524,7 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 		}
 		response.success(handleSetNetworkExcluded(params.Excluded))
 	case startListenerMethod:
-		if handleStartListener() {
-			response.success(nil)
-		} else {
-			response.failure("core_error", "Core listener could not start", nil)
-		}
+		response.methodResult(startListener())
 	case stopListenerMethod:
 		handleStopListener()
 		response.success(nil)
