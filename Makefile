@@ -6,7 +6,7 @@ GOTOOLCHAIN ?= go1.27.4
 .PHONY: help submodules hooks analyze format lint test test-safe test-macos-isolated test-go test-tailscale test-rust test-all
 
 help:
-	@echo 'make submodules     # update git submodules (Clash.Meta core, flutter_distributor)'
+	@echo 'make submodules     # update git submodules (Clash.Meta core, prism_ui)'
 	@echo 'make hooks          # install the pre-commit, pre-push and commit-msg hooks'
 	@echo 'make analyze        # dart analyze lib test tool'
 	@echo 'make format         # format owned Dart sources'
