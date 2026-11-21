@@ -311,7 +311,11 @@ class _TabExtents {
       for (final (name, fixed) in labels)
         max(
           minWidth,
-          (EmojiText.widthOf(context, name, style) + (fixed ? lock : 0))
+          (min(
+                        EmojiText.widthOf(context, name, style),
+                        PopupMenu.labelMaxWidth,
+                      ) +
+                      (fixed ? lock : 0))
                   .ceilToDouble() +
               padding,
         ),
@@ -425,7 +429,13 @@ class _GroupTabState extends State<_GroupTab> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(child: EmojiText(widget.name, maxLines: 1)),
+            Flexible(
+              child: EmojiText(
+                widget.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             if (widget.isFixed)
               Padding(
                 padding: const EdgeInsetsDirectional.only(start: _lockGap),
