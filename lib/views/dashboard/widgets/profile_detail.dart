@@ -28,7 +28,7 @@ Future<void> syncProfile(WidgetRef ref, Profile profile) async {
 }
 
 void showProfileDetailSheet(BuildContext context) {
-  showSheet<void>(context: context, builder: (_) => const ProfileDetailSheet());
+  showNestedSheet<void>(context, builder: (_) => const ProfileDetailSheet());
 }
 
 typedef ProfileStats = ({int groups, int proxies, int rules, int providers});

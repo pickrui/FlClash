@@ -118,8 +118,8 @@ class _ProfilesViewState extends State<ProfilesView> {
             IconButtonData(
               tooltip: context.appLocalizations.sort,
               onPressed: () {
-                showSheet(
-                  context: context,
+                showNestedSheet(
+                  context,
                   builder: (_) => ReorderableProfilesSheet(profiles: profiles),
                 );
               },
@@ -416,7 +416,10 @@ class ProfileItem extends ConsumerWidget {
   }
 
   void _handleShowEditExtendPage(BuildContext context) {
-    showExtend(context, builder: (_) => EditProfileView(profile: profile));
+    showNestedExtend(
+      context,
+      builder: (_) => EditProfileView(profile: profile),
+    );
   }
 
   Future<void> _handleCopyLink(BuildContext context) async {

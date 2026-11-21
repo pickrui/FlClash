@@ -208,7 +208,7 @@ void main() {
     await teardownCard(tester);
   });
 
-  testWidgets('closing request details returns to the dashboard list sheet', (
+  testWidgets('request details open as the dashboard list sheet\'s next page', (
     tester,
   ) async {
     container.read(requestsProvider.notifier).addRequest(_request(0));
@@ -223,8 +223,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(TrackerInfoDetailView), findsOneWidget);
     expect(container.read(currentPageLabelProvider), page);
-    expect(find.byType(NestedPagedSheet), findsNWidgets(2));
-    await tester.tap(find.byTooltip('Close').last);
+    expect(find.byType(NestedPagedSheet), findsOneWidget);
+    await tester.tap(find.byTooltip('Back').hitTestable());
     await tester.pumpAndSettle();
     expect(find.byType(TrackerInfoDetailView), findsNothing);
     expect(find.byType(NestedPagedSheet), findsOneWidget);

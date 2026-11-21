@@ -114,7 +114,7 @@ class _DnsResult extends StatelessWidget {
 }
 
 void _showDnsQueryDetail(BuildContext context, DnsQuery query) {
-  showInSheet<void>(
+  showNestedSheet<void>(
     context,
     builder: (_) {
       return Scaffold(
