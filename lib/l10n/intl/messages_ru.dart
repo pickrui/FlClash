@@ -455,6 +455,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Добавить в пользовательские узлы",
     ),
     "addedRules": MessageLookupByLibrary.simpleMessage("Добавленные правила"),
+    "addedRulesAfterScript": MessageLookupByLibrary.simpleMessage(
+      "Добавляются после выполнения скрипта, перед правилами профиля",
+    ),
     "addedToLocalProxies": m1,
     "additionalParameters": MessageLookupByLibrary.simpleMessage(
       "Дополнительные параметры",
@@ -3385,9 +3388,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptFullConfig": MessageLookupByLibrary.simpleMessage(
       "Вся конфигурация",
     ),
-    "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
-      "Режим скрипта, использование внешних расширяющих скриптов, предоставление возможности переопределения конфигурации одним кликом",
-    ),
     "scriptOptions": MessageLookupByLibrary.simpleMessage("Параметры скрипта"),
     "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage(
       "В этом скрипте нет настраиваемых переключателей",
@@ -3515,7 +3515,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "stackTrace": MessageLookupByLibrary.simpleMessage("Трассировка стека"),
     "standard": MessageLookupByLibrary.simpleMessage("Стандартный"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
-      "Стандартный режим, переопределение базовой конфигурации, предоставление возможности простого добавления правил",
+      "Стандартный режим, при необходимости запускает скрипт переопределения, затем добавляет правила поверх конфигурации",
     ),
     "start": MessageLookupByLibrary.simpleMessage("Старт"),
     "startCorePromptContent": MessageLookupByLibrary.simpleMessage(

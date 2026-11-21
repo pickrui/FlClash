@@ -110,10 +110,10 @@ void main() {
             .onPressed,
         isNull,
       );
-      for (final type in OverwriteType.values) {
+      for (final type in _modes) {
         expect(_modeCard(tester, type).onPressed, isNull);
       }
-      await _tapMode(tester, OverwriteType.script);
+      await _tapMode(tester, OverwriteType.standard);
       expect(profiles.writes, 0);
 
       validation.complete('');
@@ -133,7 +133,7 @@ void main() {
           isNotNull,
         );
       }
-      for (final type in OverwriteType.values) {
+      for (final type in _modes) {
         expect(_modeCard(tester, type).onPressed, isNotNull);
       }
       expect(tester.takeException(), isNull);
@@ -177,7 +177,7 @@ void main() {
   });
 
   final changedProfiles = <String, Profile>{
-    'mode': _profile.copyWith(overwriteType: OverwriteType.script),
+    'mode': _profile.copyWith(overwriteType: OverwriteType.merge),
     'groups': _profile.copyWith(customProxyGroups: []),
     'rules': _profile.copyWith(customRules: []),
     'subscription URL': _profile.copyWith(url: 'https://example.com/new'),
@@ -279,22 +279,21 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final mode in [OverwriteType.standard, OverwriteType.script]) {
-    testWidgets('$mode preserves immediate switching behavior', (tester) async {
-      final profiles = await _pumpSelector(
-        tester,
-        _profile.copyWith(overwriteType: OverwriteType.custom),
-        validator: (_, _) async => throw StateError('Should not validate'),
-      );
-      await _tapMode(tester, mode);
-      await tester.pumpAndSettle();
+  testWidgets('standard switches at once and drops the script', (tester) async {
+    final profiles = await _pumpSelector(
+      tester,
+      _profile.copyWith(overwriteType: OverwriteType.custom, scriptId: 7),
+      validator: (_, _) async => throw StateError('Should not validate'),
+    );
+    await _tapMode(tester, OverwriteType.standard);
+    await tester.pumpAndSettle();
 
-      expect(profiles.profile.overwriteType, mode);
-      expect(profiles.writes, 1);
-      expect(find.byType(AlertDialog), findsNothing);
-      expect(tester.takeException(), isNull);
-    });
-  }
+    expect(profiles.profile.overwriteType, OverwriteType.standard);
+    expect(profiles.profile.scriptId, isNull);
+    expect(profiles.writes, 1);
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 
   for (final locale in const [
     Locale('en'),
@@ -327,6 +326,12 @@ void main() {
     );
   }
 }
+
+const _modes = [
+  OverwriteType.standard,
+  OverwriteType.merge,
+  OverwriteType.custom,
+];
 
 Finder _card(OverwriteType type) =>
     find.byKey(ValueKey('overwrite-mode-${type.name}'));

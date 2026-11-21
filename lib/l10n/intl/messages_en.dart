@@ -448,6 +448,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Add to custom nodes",
     ),
     "addedRules": MessageLookupByLibrary.simpleMessage("Added rules"),
+    "addedRulesAfterScript": MessageLookupByLibrary.simpleMessage(
+      "Inserted after the script runs, ahead of the profile\'s rules",
+    ),
     "addedToLocalProxies": m1,
     "additionalParameters": MessageLookupByLibrary.simpleMessage(
       "Additional parameters",
@@ -3233,9 +3236,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptChangesModified": m126,
     "scriptChangesRemoved": m127,
     "scriptFullConfig": MessageLookupByLibrary.simpleMessage("Full config"),
-    "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
-      "Script mode, use external extension scripts, provide one-click override configuration capability",
-    ),
     "scriptOptions": MessageLookupByLibrary.simpleMessage("Script options"),
     "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage(
       "This script does not expose configurable switches",
@@ -3355,7 +3355,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "stackTrace": MessageLookupByLibrary.simpleMessage("Stack trace"),
     "standard": MessageLookupByLibrary.simpleMessage("Standard"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
-      "Standard mode, override basic configuration, provide simple rule addition capability",
+      "Standard mode, optionally runs an override script, then adds rules on top of the configuration",
     ),
     "start": MessageLookupByLibrary.simpleMessage("Start"),
     "startCorePromptContent": MessageLookupByLibrary.simpleMessage(

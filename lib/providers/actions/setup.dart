@@ -856,18 +856,17 @@ extension SetupControllerExt on AppController {
     final List<ProxyGroup> customProxyGroups = [];
     final List<Rule> customRules = [];
     final proxyChains = List<ProxyChain>.from(setupState.proxyChains);
+    // The script runs first; added rules go ahead of the rules it returns.
     if (setupState.overwriteType == OverwriteType.script) {
       scriptContent = await setupState.script?.content;
-    } else {
-      if (setupState.overwriteType == OverwriteType.custom ||
-          setupState.overwriteType == OverwriteType.merge) {
-        customProxyGroups.addAll(setupState.customProxyGroups);
-        customRules.addAll(setupState.customRules);
-      }
-      if (setupState.overwriteType == OverwriteType.standard ||
-          setupState.overwriteType == OverwriteType.merge) {
-        addedRules.addAll(setupState.addedRules);
-      }
+    }
+    if (setupState.overwriteType == OverwriteType.custom ||
+        setupState.overwriteType == OverwriteType.merge) {
+      customProxyGroups.addAll(setupState.customProxyGroups);
+      customRules.addAll(setupState.customRules);
+    }
+    if (setupState.overwriteType != OverwriteType.custom) {
+      addedRules.addAll(setupState.addedRules);
     }
     final realPatchConfig = patchConfig.copyWith(
       allowLan: system.isDocker || patchConfig.allowLan,

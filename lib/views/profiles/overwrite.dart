@@ -250,8 +250,8 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
 
   String _getTitle(OverwriteType type) {
     return switch (type) {
-      OverwriteType.standard => appLocalizations.standard,
-      OverwriteType.script => appLocalizations.script,
+      OverwriteType.standard ||
+      OverwriteType.script => appLocalizations.standard,
       OverwriteType.custom => appLocalizations.overwriteTypeCustom,
       OverwriteType.merge => appLocalizations.overwriteTypeMerge,
     };
@@ -259,8 +259,7 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
 
   Glyph _getIcon(OverwriteType type) {
     return switch (type) {
-      OverwriteType.standard => AppGlyphs.star,
-      OverwriteType.script => AppGlyphs.code,
+      OverwriteType.standard || OverwriteType.script => AppGlyphs.star,
       OverwriteType.custom => AppGlyphs.customize,
       OverwriteType.merge => AppGlyphs.layers,
     };
@@ -268,8 +267,8 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
 
   String _getDesc(OverwriteType type) {
     return switch (type) {
-      OverwriteType.standard => appLocalizations.standardModeDesc,
-      OverwriteType.script => appLocalizations.scriptModeDesc,
+      OverwriteType.standard ||
+      OverwriteType.script => appLocalizations.standardModeDesc,
       OverwriteType.custom => appLocalizations.overwriteTypeCustomDesc,
       OverwriteType.merge => appLocalizations.overwriteTypeMergeDesc,
     };
@@ -288,7 +287,7 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
     final original = ref.read(profileProvider(profileId));
     if (_checkingType != null ||
         original == null ||
-        original.overwriteType == type) {
+        original.overwriteType.family == type) {
       return;
     }
     final validationId = ++_validationId;
@@ -319,14 +318,17 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
         }
       }
     }
+    // Only a standard profile runs its script.
     ref.read(profilesProvider.notifier).updateProfile(profileId, (state) {
-      return state.copyWith(overwriteType: type);
+      return state.copyWith(overwriteType: type, scriptId: null);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final overwriteType = ref.watch(overwriteTypeProvider(widget.profileId));
+    final overwriteType = ref
+        .watch(overwriteTypeProvider(widget.profileId))
+        .family;
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +344,6 @@ class _OverwriteModeSelectorState extends ConsumerState<OverwriteModeSelector> {
                   OverwriteType.standard,
                   OverwriteType.merge,
                   OverwriteType.custom,
-                  OverwriteType.script,
                 ])
                   Card(
                     key: ValueKey('overwrite-mode-${type.name}'),
@@ -416,8 +417,9 @@ class _Content extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final overwriteType = ref.watch(overwriteTypeProvider(profileId));
     return switch (overwriteType) {
-      OverwriteType.standard => _StandardContent(profileId),
-      OverwriteType.script => _ScriptContent(profileId),
+      OverwriteType.standard || OverwriteType.script => SliverMainAxisGroup(
+        slivers: [_ScriptContent(profileId), _StandardContent(profileId)],
+      ),
       OverwriteType.custom => CustomOverwriteContent(profileId: profileId),
       OverwriteType.merge => SliverMainAxisGroup(
         slivers: [
@@ -672,6 +674,20 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
               ],
             ),
           ),
+          if (profile?.overwriteType == OverwriteType.script)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  appLocalizations.addedRulesAfterScript,
+                  style: AppTextStyle.footnote
+                      .of(context)
+                      .copyWith(
+                        color: context.colorScheme.onSurfaceVariant.opacity80,
+                      ),
+                ),
+              ),
+            ),
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
           _librarySliver(
             state: rulesState,
@@ -743,10 +759,13 @@ class _ScriptContent extends ConsumerWidget {
 
   const _ScriptContent(this.profileId);
 
-  void _handleChange(WidgetRef ref, int scriptId) {
+  void _handleChange(WidgetRef ref, int? scriptId) {
     ref.read(profilesProvider.notifier).updateProfile(profileId, (state) {
       return state.copyWith(
-        scriptId: state.scriptId == scriptId ? null : scriptId,
+        overwriteType: scriptId == null
+            ? OverwriteType.standard
+            : OverwriteType.script,
+        scriptId: scriptId,
       );
     });
   }
@@ -757,7 +776,10 @@ class _ScriptContent extends ConsumerWidget {
       profileProvider(profileId).select((state) => state?.scriptId),
     );
     final scriptsState = ref.watch(scriptsProvider);
-    final scripts = scriptsState.value ?? [];
+    final labels = {
+      for (final script in scriptsState.value ?? const <Script>[])
+        script.id: script.label,
+    };
     return SliverMainAxisGroup(
       slivers: [
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -765,25 +787,31 @@ class _ScriptContent extends ConsumerWidget {
           child: InfoHeader(info: Info(label: appLocalizations.overrideScript)),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 8)),
-        _librarySliver(
-          state: scriptsState,
-          onRetry: () => ref.invalidate(scriptsProvider),
-          emptyLabel: appLocalizations.nullTip(appLocalizations.script),
-          child: SliverToBoxAdapter(
+        if (scriptsState.hasError)
+          _librarySliver(
+            state: scriptsState,
+            onRetry: () => ref.invalidate(scriptsProvider),
+            emptyLabel: '',
+            child: const SliverToBoxAdapter(),
+          )
+        else
+          SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: generateGroup([
-                for (final script in scripts)
-                  _ScriptOption(
-                    label: script.label,
-                    isSelected: script.id == scriptId,
-                    onSelected: () => _handleChange(ref, script.id),
-                  ),
+                ListItem<int?>.options(
+                  title: Text(appLocalizations.overrideScript),
+                  options: [null, ...labels.keys],
+                  sectionStarts: {...labels.keys.take(1)},
+                  value: labels.containsKey(scriptId) ? scriptId : null,
+                  textBuilder: (id) => labels[id] ?? appLocalizations.none,
+                  onChanged: scriptsState.isLoading
+                      ? null
+                      : (id) => _handleChange(ref, id),
+                ),
               ]),
             ),
           ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         SliverToBoxAdapter(
           child: MoreActionButton(
             label: appLocalizations.goToConfigureScript,
@@ -791,28 +819,6 @@ class _ScriptContent extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ScriptOption extends StatelessWidget {
-  const _ScriptOption({
-    required this.label,
-    required this.isSelected,
-    required this.onSelected,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecorationListItem(
-      isSelected: isSelected,
-      title: Text(label),
-      trailing: isSelected ? const SelectionCheck() : null,
-      onPressed: onSelected,
     );
   }
 }

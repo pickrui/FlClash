@@ -456,6 +456,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Añadir a nodos personalizados",
     ),
     "addedRules": MessageLookupByLibrary.simpleMessage("Reglas añadidas"),
+    "addedRulesAfterScript": MessageLookupByLibrary.simpleMessage(
+      "Se insertan tras ejecutar el script, antes de las reglas del perfil",
+    ),
     "addedToLocalProxies": m1,
     "additionalParameters": MessageLookupByLibrary.simpleMessage(
       "Parámetros adicionales",
@@ -3438,9 +3441,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptFullConfig": MessageLookupByLibrary.simpleMessage(
       "Configuración completa",
     ),
-    "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
-      "Modo Script: usa un script de extensión para sobrescribir la configuración en una sola acción",
-    ),
     "scriptOptions": MessageLookupByLibrary.simpleMessage(
       "Opciones del script",
     ),
@@ -3572,7 +3572,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "stackTrace": MessageLookupByLibrary.simpleMessage("Seguimiento de pila"),
     "standard": MessageLookupByLibrary.simpleMessage("Estándar"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
-      "Modo Estándar: reemplaza los ajustes básicos y permite añadir reglas fácilmente",
+      "Modo Estándar: ejecuta opcionalmente un script de sobrescritura y luego añade reglas a la configuración",
     ),
     "start": MessageLookupByLibrary.simpleMessage("Iniciar"),
     "startCorePromptContent": MessageLookupByLibrary.simpleMessage(

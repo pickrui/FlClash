@@ -3168,21 +3168,21 @@ class AppLocalizations {
     );
   }
 
-  /// `Standard mode, override basic configuration, provide simple rule addition capability`
+  /// `Standard mode, optionally runs an override script, then adds rules on top of the configuration`
   String get standardModeDesc {
     return Intl.message(
-      'Standard mode, override basic configuration, provide simple rule addition capability',
+      'Standard mode, optionally runs an override script, then adds rules on top of the configuration',
       name: 'standardModeDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Script mode, use external extension scripts, provide one-click override configuration capability`
-  String get scriptModeDesc {
+  /// `Inserted after the script runs, ahead of the profile's rules`
+  String get addedRulesAfterScript {
     return Intl.message(
-      'Script mode, use external extension scripts, provide one-click override configuration capability',
-      name: 'scriptModeDesc',
+      'Inserted after the script runs, ahead of the profile\'s rules',
+      name: 'addedRulesAfterScript',
       desc: '',
       args: [],
     );

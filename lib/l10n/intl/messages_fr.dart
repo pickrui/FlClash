@@ -466,6 +466,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ajouter aux nœuds personnalisés",
     ),
     "addedRules": MessageLookupByLibrary.simpleMessage("Règles ajoutées"),
+    "addedRulesAfterScript": MessageLookupByLibrary.simpleMessage(
+      "Insérées après l\'exécution du script, avant les règles du profil",
+    ),
     "addedToLocalProxies": m1,
     "additionalParameters": MessageLookupByLibrary.simpleMessage(
       "Paramètres supplémentaires",
@@ -3447,9 +3450,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptFullConfig": MessageLookupByLibrary.simpleMessage(
       "Configuration complète",
     ),
-    "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
-      "Mode Script : utilise un script d’extension pour remplacer la configuration en une seule action",
-    ),
     "scriptOptions": MessageLookupByLibrary.simpleMessage("Options du script"),
     "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage(
       "Ce script ne propose aucun interrupteur configurable",
@@ -3583,7 +3583,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "stackTrace": MessageLookupByLibrary.simpleMessage("Trace de pile"),
     "standard": MessageLookupByLibrary.simpleMessage("Standard"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
-      "Mode Standard : remplace les paramètres de base et permet d’ajouter simplement des règles",
+      "Mode Standard : exécute éventuellement un script de remplacement, puis ajoute des règles à la configuration",
     ),
     "start": MessageLookupByLibrary.simpleMessage("Démarrer"),
     "startCorePromptContent": MessageLookupByLibrary.simpleMessage(

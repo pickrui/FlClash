@@ -389,6 +389,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "addSsid": MessageLookupByLibrary.simpleMessage("SSIDを追加"),
     "addToLocalProxies": MessageLookupByLibrary.simpleMessage("カスタムノードに追加"),
     "addedRules": MessageLookupByLibrary.simpleMessage("追加ルール"),
+    "addedRulesAfterScript": MessageLookupByLibrary.simpleMessage(
+      "スクリプトの実行後、プロファイルのルールより前に挿入されます",
+    ),
     "addedToLocalProxies": m1,
     "additionalParameters": MessageLookupByLibrary.simpleMessage("追加パラメータ"),
     "additionalPrefix": MessageLookupByLibrary.simpleMessage("名前のプレフィックス"),
@@ -2755,9 +2758,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptChangesModified": m126,
     "scriptChangesRemoved": m127,
     "scriptFullConfig": MessageLookupByLibrary.simpleMessage("設定全体"),
-    "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
-      "スクリプトモード、外部拡張スクリプトを使用し、ワンクリックで設定を上書きする機能を提供",
-    ),
     "scriptOptions": MessageLookupByLibrary.simpleMessage("スクリプト設定"),
     "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage(
       "このスクリプトには設定可能なスイッチがありません",
@@ -2863,7 +2863,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "stackTrace": MessageLookupByLibrary.simpleMessage("スタックトレース"),
     "standard": MessageLookupByLibrary.simpleMessage("標準"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
-      "標準モード、基本設定を上書きし、シンプルなルール追加機能を提供",
+      "標準モード、上書きスクリプトを任意で実行し、設定の上にルールを追加",
     ),
     "start": MessageLookupByLibrary.simpleMessage("開始"),
     "startCorePromptContent": MessageLookupByLibrary.simpleMessage(

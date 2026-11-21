@@ -400,6 +400,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "addSsid": MessageLookupByLibrary.simpleMessage("SSID 추가"),
     "addToLocalProxies": MessageLookupByLibrary.simpleMessage("사용자 지정 노드에 추가"),
     "addedRules": MessageLookupByLibrary.simpleMessage("추가한 규칙"),
+    "addedRulesAfterScript": MessageLookupByLibrary.simpleMessage(
+      "스크립트 실행 후 프로필 규칙 앞에 삽입됩니다",
+    ),
     "addedToLocalProxies": m1,
     "additionalParameters": MessageLookupByLibrary.simpleMessage("추가 매개변수"),
     "additionalPrefix": MessageLookupByLibrary.simpleMessage("이름 접두사"),
@@ -2707,9 +2710,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptChangesModified": m126,
     "scriptChangesRemoved": m127,
     "scriptFullConfig": MessageLookupByLibrary.simpleMessage("전체 설정"),
-    "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
-      "스크립트 모드: 확장 스크립트로 설정을 한 번에 덮어씁니다",
-    ),
     "scriptOptions": MessageLookupByLibrary.simpleMessage("스크립트 옵션"),
     "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage(
       "이 스크립트에는 설정 가능한 스위치가 없습니다",
@@ -2815,7 +2815,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "stackTrace": MessageLookupByLibrary.simpleMessage("스택 트레이스"),
     "standard": MessageLookupByLibrary.simpleMessage("표준"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
-      "표준 모드: 기본 설정을 덮어쓰고 간단한 규칙 추가 기능을 제공합니다",
+      "표준 모드: 필요하면 덮어쓰기 스크립트를 실행한 뒤 설정 위에 규칙을 추가합니다",
     ),
     "start": MessageLookupByLibrary.simpleMessage("시작"),
     "startCorePromptContent": MessageLookupByLibrary.simpleMessage(

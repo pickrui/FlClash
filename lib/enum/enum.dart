@@ -584,6 +584,12 @@ enum RuleProviderFormat { yaml, text, mrs }
 
 enum OverwriteType { standard, script, custom, merge }
 
+extension OverwriteTypeFamily on OverwriteType {
+  /// A script profile is a standard one that runs its script first.
+  OverwriteType get family =>
+      this == OverwriteType.script ? OverwriteType.standard : this;
+}
+
 enum RuleTarget {
   DIRECT('DIRECT'),
   REJECT('REJECT'),

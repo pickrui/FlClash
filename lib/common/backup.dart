@@ -173,6 +173,7 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
     rules.add(Rule.fromJson(ruleMap));
     links.add(ProfileRuleLink(ruleId: id, order: globalOrders[index]));
   }
+  final globalRuleIds = [for (final rule in rules) rule.id];
   final List rawProfiles = configMap['profiles'] as List<dynamic>? ?? [];
   final List<Profile> profiles = [];
   for (final rawProfile in rawProfiles) {
@@ -196,6 +197,7 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
     profileMap['id'] = profileId;
     final overwrite = profileMap['overwrite'] as Map?;
     if (overwrite != null) {
+      final isScript = overwrite['type'] == OverwriteType.script.name;
       final standardOverwrite = overwrite['standardOverwrite'] as Map?;
       if (standardOverwrite != null) {
         final addedRules = standardOverwrite['addedRules'] as List? ?? [];
@@ -222,7 +224,7 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
           );
         }
         final disabledRuleIds = standardOverwrite['disabledRuleIds'] as List?;
-        if (disabledRuleIds != null) {
+        if (disabledRuleIds != null && !isScript) {
           for (final disabledRuleId in disabledRuleIds) {
             final newDisabledRuleId = idMap[disabledRuleId];
             if (newDisabledRuleId != null) {
@@ -237,9 +239,19 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
           }
         }
       }
-      final scriptOverwrite = overwrite['scriptOverwrite'] as Map?;
-      if (scriptOverwrite != null) {
-        final scriptId = scriptOverwrite['scriptId'] as String?;
+      // A script profile used to skip the global rules it now runs with.
+      if (isScript) {
+        for (final ruleId in globalRuleIds) {
+          links.add(
+            ProfileRuleLink(
+              profileId: profileId,
+              ruleId: ruleId,
+              scene: RuleScene.disabled,
+            ),
+          );
+        }
+        final scriptId =
+            (overwrite['scriptOverwrite'] as Map?)?['scriptId'] as String?;
         profileMap['scriptId'] = scriptId != null ? idMap[scriptId] : null;
       }
       profileMap['overwriteType'] = overwrite['type'];

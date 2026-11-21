@@ -409,6 +409,52 @@ void main() {
     );
   }
 
+  test('v14 keeps each profile on the rules and script it applied', () async {
+    final tempDir = await Directory.systemTemp.createTemp('flclash_v13_');
+    addTearDown(() => tempDir.delete(recursive: true));
+    final file = File('${tempDir.path}/database.sqlite');
+    var database = Database(NativeDatabase(file));
+    const profile = Profile(id: 1, autoUpdateDuration: Duration.zero);
+    await database
+        .into(database.scripts)
+        .insert(
+          Script(
+            id: 7,
+            label: 'S',
+            lastUpdateTime: DateTime(2026),
+          ).toCompanion(),
+        );
+    await database.profilesDao.putAll([
+      profile
+          .copyWith(overwriteType: OverwriteType.script, scriptId: 7)
+          .toCompanion(),
+      profile.copyWith(id: 2, scriptId: 7).toCompanion(),
+      profile
+          .copyWith(id: 3, overwriteType: OverwriteType.script, scriptId: 8)
+          .toCompanion(),
+    ]);
+    await database.rulesDao.putGlobalRule(
+      const Rule(id: 9, value: 'DOMAIN,example.com,DIRECT'),
+    );
+    await database.customStatement('PRAGMA user_version = 13');
+    await database.close();
+
+    database = Database(NativeDatabase(file));
+    addTearDown(database.close);
+    final profiles = await database.profilesDao.all().get();
+
+    expect(
+      profiles.map((profile) => (profile.overwriteType, profile.scriptId)),
+      [
+        (OverwriteType.script, 7),
+        (OverwriteType.standard, null),
+        (OverwriteType.standard, null),
+      ],
+    );
+    expect(await database.rulesDao.allAddedRules(1).get(), isEmpty);
+    expect(await database.rulesDao.allAddedRules(2).get(), hasLength(1));
+  });
+
   test('icon sets restore from a backup, one set per remote url', () async {
     final root = await Directory.systemTemp.createTemp('flclash_v8_backup_');
     addTearDown(() => root.delete(recursive: true));

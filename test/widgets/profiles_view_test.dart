@@ -533,6 +533,8 @@ void main() {
       profilesProvider.overrideWith(() => _Profiles([_first])),
       setupActionProvider.overrideWith(() => setup),
       scriptsProvider.overrideWith(_Scripts.new),
+      profileAddedRulesProvider(1)
+          .overrideWithBuild((_, _) => Stream.value([])),
     ], () => const OverwriteView(profileId: 1));
     expect(find.byType(OverwriteView), findsOneWidget);
 

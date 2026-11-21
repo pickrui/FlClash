@@ -378,6 +378,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "addSsid": MessageLookupByLibrary.simpleMessage("添加SSID"),
     "addToLocalProxies": MessageLookupByLibrary.simpleMessage("添加到自定义节点"),
     "addedRules": MessageLookupByLibrary.simpleMessage("附加规则"),
+    "addedRulesAfterScript": MessageLookupByLibrary.simpleMessage(
+      "在脚本之后插入，排在配置规则前面",
+    ),
     "addedToLocalProxies": m1,
     "additionalParameters": MessageLookupByLibrary.simpleMessage("附加参数"),
     "additionalPrefix": MessageLookupByLibrary.simpleMessage("名称前缀"),
@@ -2447,9 +2450,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "scriptChangesModified": m126,
     "scriptChangesRemoved": m127,
     "scriptFullConfig": MessageLookupByLibrary.simpleMessage("完整配置"),
-    "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
-      "脚本模式，使用外部扩展脚本，提供一键覆写配置的能力",
-    ),
     "scriptOptions": MessageLookupByLibrary.simpleMessage("脚本选项"),
     "scriptOptionsEmpty": MessageLookupByLibrary.simpleMessage("此脚本没有提供可配置的开关"),
     "search": MessageLookupByLibrary.simpleMessage("搜索"),
@@ -2549,7 +2549,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "stackTrace": MessageLookupByLibrary.simpleMessage("堆栈信息"),
     "standard": MessageLookupByLibrary.simpleMessage("标准"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
-      "标准模式，覆写基本配置，提供简单追加规则能力",
+      "标准模式，可先运行覆写脚本，再在配置之上追加规则",
     ),
     "start": MessageLookupByLibrary.simpleMessage("启动"),
     "startCorePromptContent": MessageLookupByLibrary.simpleMessage(

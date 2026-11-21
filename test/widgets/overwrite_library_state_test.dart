@@ -82,6 +82,7 @@ Future<void> _pumpPage(
   OverwriteType mode,
   List<Override> overrides, {
   int? scriptId,
+  bool scripts = true,
   SetupAction? setup,
   Map<String, dynamic> source = const {},
   Map<String, String> proxyAliases = const {},
@@ -107,6 +108,8 @@ Future<void> _pumpPage(
         setupActionProvider.overrideWith(() => setup ?? _SetupAction()),
         viewSizeProvider.overrideWithBuild((_, _) => size),
         routingSourceProvider(1).overrideWith((_) async => source),
+        if (scripts)
+          scriptsProvider.overrideWithBuild((_, _) => Stream.value([])),
         ...overrides,
       ],
       child: const OverwriteView(profileId: 1),
@@ -185,72 +188,57 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final scripts in [false, true]) {
-    testWidgets(
-      '${scripts ? 'scripts' : 'rules'} in overwrite recover from a stream failure',
-      (tester) async {
-        var attempts = 0;
-        final ready = Completer<void>();
-        final recovered = Completer<void>();
-        Stream<List<T>> load<T>() async* {
-          if (++attempts == 1) {
-            await ready.future;
-            throw StateError('Fixture overwrite failure');
-          }
-          await recovered.future;
-          yield [];
-        }
+  testWidgets('rules in overwrite recover from a stream failure', (
+    tester,
+  ) async {
+    var attempts = 0;
+    final ready = Completer<void>();
+    final recovered = Completer<void>();
+    Stream<List<Rule>> load() async* {
+      if (++attempts == 1) {
+        await ready.future;
+        throw StateError('Fixture overwrite failure');
+      }
+      await recovered.future;
+      yield [];
+    }
 
-        await _pumpPage(
-          tester,
-          scripts ? OverwriteType.script : OverwriteType.standard,
-          [
-            if (scripts)
-              scriptsProvider.overrideWithBuild((_, _) => load<Script>())
-            else
-              profileAddedRulesProvider(1)
-                  .overrideWithBuild((_, _) => load<Rule>()),
-          ],
-        );
-        expect(find.byType(ActivityIndicator), findsOneWidget);
-        if (!scripts) {
-          expect(
-            tester
-                .widget<IconButton>(
-                  find.byWidgetPredicate(
-                    (widget) => widget is IconButton && widget.tooltip == 'Add',
-                  ),
-                )
-                .onPressed,
-            isNull,
-          );
-        }
-        ready.complete();
-        await tester.pumpAndSettle();
-        expect(find.byType(ErrorStatus), findsOneWidget);
-        final l10n = AppLocalizations.current;
-        final empty = l10n.nullTip(scripts ? l10n.script : l10n.rule);
-        expect(find.text(empty), findsNothing);
-        await tester.tap(find.text('Refresh'));
-        await tester.pump();
-        expect(
-          tester
-              .widget<FilledButton>(
-                find.widgetWithText(FilledButton, 'Refresh'),
-              )
-              .onPressed,
-          isNull,
-        );
-        recovered.complete();
-        await tester.pumpAndSettle();
-        expect(attempts, 2);
-        expect(find.byType(ErrorStatus), findsNothing);
-        expect(find.text(empty), findsOneWidget);
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox.shrink());
-      },
+    await _pumpPage(tester, OverwriteType.standard, [
+      profileAddedRulesProvider(1).overrideWithBuild((_, _) => load()),
+    ]);
+    expect(find.byType(ActivityIndicator), findsOneWidget);
+    expect(
+      tester
+          .widget<IconButton>(
+            find.byWidgetPredicate(
+              (widget) => widget is IconButton && widget.tooltip == 'Add',
+            ),
+          )
+          .onPressed,
+      isNull,
     );
-  }
+    ready.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(ErrorStatus), findsOneWidget);
+    final l10n = AppLocalizations.current;
+    final empty = l10n.nullTip(l10n.rule);
+    expect(find.text(empty), findsNothing);
+    await tester.tap(find.text('Refresh'));
+    await tester.pump();
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Refresh'))
+          .onPressed,
+      isNull,
+    );
+    recovered.complete();
+    await tester.pumpAndSettle();
+    expect(attempts, 2);
+    expect(find.byType(ErrorStatus), findsNothing);
+    expect(find.text(empty), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets(
     'global rule switches wait for disabled flags and can retry failures',
@@ -300,22 +288,33 @@ void main() {
     },
   );
 
-  testWidgets('only the profile script is checked', (tester) async {
-    await _pumpPage(tester, OverwriteType.script, [
-      scriptsProvider.overrideWithBuild(
-        (_, _) => Stream.value([
-          Script(id: 10, label: 'alpha', lastUpdateTime: DateTime(2026)),
-          Script(id: 11, label: 'beta', lastUpdateTime: DateTime(2026)),
-        ]),
-      ),
-    ], scriptId: 11);
-    await tester.pumpAndSettle();
-    Finder checkIn(String label) => find.descendant(
-      of: find.widgetWithText(DecorationListItem, label),
-      matching: find.byType(SelectionCheck),
+  testWidgets('the script row shows the profile script beside its rules', (
+    tester,
+  ) async {
+    await _pumpPage(
+      tester,
+      OverwriteType.script,
+      [
+        scriptsProvider.overrideWithBuild(
+          (_, _) => Stream.value([
+            Script(id: 10, label: 'alpha', lastUpdateTime: DateTime(2026)),
+            Script(id: 11, label: 'beta', lastUpdateTime: DateTime(2026)),
+          ]),
+        ),
+        profileAddedRulesProvider(1)
+            .overrideWithBuild((_, _) => Stream.value([])),
+      ],
+      scriptId: 11,
+      scripts: false,
     );
-    expect(checkIn('beta'), findsOneWidget);
-    expect(checkIn('alpha'), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.text('beta'), findsOneWidget);
+    expect(find.text('alpha'), findsNothing);
+    expect(
+      find.text(AppLocalizations.current.addedRulesAfterScript),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('added rules flag targets the profile no longer has', (

@@ -26,7 +26,7 @@ part 'rules.dart';
 part 'scripts.dart';
 part 'schema.dart';
 
-const currentDatabaseSchemaVersion = 13;
+const currentDatabaseSchemaVersion = 14;
 
 @DriftDatabase(
   tables: [
@@ -197,7 +197,30 @@ class Database extends _$Database {
           }
           await _moveRulesOffShadowedAliases(await profilesDao.all().get());
         }
+        if (from < 14) await _mergeScriptAndAddedRules();
       }),
+    );
+  }
+
+  /// A profile keeps the rules it applied when it ran a script or added rules.
+  Future<void> _mergeScriptAndAddedRules() async {
+    await customStatement(
+      'INSERT OR IGNORE INTO profile_rule_mapping '
+      '(id, profile_id, rule_id, scene) '
+      "SELECT profiles.id || '_' || links.rule_id || '_disabled', "
+      "profiles.id, links.rule_id, 'disabled' "
+      'FROM profiles JOIN profile_rule_mapping links '
+      'ON links.profile_id IS NULL '
+      "WHERE profiles.overwrite_type = 'script'",
+    );
+    await customStatement(
+      'UPDATE profiles SET script_id = NULL '
+      "WHERE overwrite_type != 'script' "
+      'OR script_id NOT IN (SELECT id FROM scripts)',
+    );
+    await customStatement(
+      "UPDATE profiles SET overwrite_type = 'standard' "
+      "WHERE overwrite_type = 'script' AND script_id IS NULL",
     );
   }
 
@@ -344,6 +367,16 @@ class Database extends _$Database {
                 ..where((table) => table.scriptId.equals(scriptId)))
               .map((row) => row.id)
               .get();
+      await (update(profiles)..where(
+            (table) =>
+                table.scriptId.equals(scriptId) &
+                table.overwriteType.equalsValue(OverwriteType.script),
+          ))
+          .write(
+            const ProfilesCompanion(
+              overwriteType: Value(OverwriteType.standard),
+            ),
+          );
       await (update(profiles)
             ..where((table) => table.scriptId.equals(scriptId)))
           .write(const ProfilesCompanion(scriptId: Value(null)));

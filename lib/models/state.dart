@@ -339,8 +339,7 @@ extension SetupStateExt on SetupState {
       return true;
     }
     if (matchTarget != lastSetupState.matchTarget &&
-        (overwriteType == OverwriteType.standard ||
-            overwriteType == OverwriteType.merge)) {
+        overwriteType != OverwriteType.custom) {
       return true;
     }
     if (!const DeepCollectionEquality().equals(
@@ -363,8 +362,7 @@ extension SetupStateExt on SetupState {
           return true;
         }
       }
-      if (overwriteType == OverwriteType.standard ||
-          overwriteType == OverwriteType.merge) {
+      if (overwriteType != OverwriteType.custom) {
         if (!ruleListEquality.equals(addedRules, lastSetupState.addedRules)) {
           return true;
         }
