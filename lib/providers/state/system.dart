@@ -349,7 +349,7 @@ VpnOptions? vpnOptions(Ref ref) {
 /// Keeps a start on screen for [minimumStart] so a fast restart does not flash.
 @riverpod
 class HeldCoreStatus extends _$HeldCoreStatus {
-  static const minimumStart = Duration(milliseconds: 600);
+  static const minimumStart = Duration(milliseconds: 1500);
 
   Timer? _hold;
 

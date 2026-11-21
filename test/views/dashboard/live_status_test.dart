@@ -58,7 +58,7 @@ void main() {
 
   Future<void> settle(WidgetTester tester) async {
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(HeldCoreStatus.minimumStart);
   }
 
   Future<void> pumpButton(WidgetTester tester) async {
