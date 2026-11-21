@@ -72,7 +72,7 @@ void main() {
       'Essential: no\n'
       'Installed-Size: 6604\n'
       'Description: $_description\n'
-      'Depends: libayatana-appindicator3-1, libsecret-1-0\n',
+      'Depends: libsecret-1-0\n',
     );
     expect(
       files['usr/share/applications/flclash-oixcloud.desktop'],
