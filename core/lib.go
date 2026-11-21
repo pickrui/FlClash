@@ -56,6 +56,7 @@ func (th *TunHandler) start(fd int, stack, address, dns, options string) bool {
 		log.Infoln("TUN address: %v", tunListener.Address())
 		th.listener = tunListener
 		th.lease.activate()
+		socketProtection.activate(th.handleProtect)
 		return true
 	}
 	th.clear()
@@ -66,6 +67,7 @@ func (th *TunHandler) close() { th.clear() }
 
 func (th *TunHandler) clear() {
 	th.lease.close()
+	socketProtection.deactivate()
 	if th.listener != nil {
 		_ = th.listener.Close()
 	}
@@ -102,7 +104,10 @@ func (th *TunHandler) handleResolveProcess(source, target net.Addr) (int, string
 	return uid, result
 }
 
-var activeTunHandler atomic.Pointer[TunHandler]
+var (
+	activeTunHandler atomic.Pointer[TunHandler]
+	socketProtection socketProtector
+)
 
 // Install function pointers before any Core goroutines can read them. Only the
 // active handler changes on start/stop; an old callback cannot clear a new one.
@@ -116,6 +121,7 @@ func init() {
 		}
 		th := activeTunHandler.Load()
 		if th == nil {
+			socketProtection.guard(conn)
 			return nil
 		}
 		return protectSocket(conn, th.handleProtect)

@@ -131,3 +131,44 @@ func TestDialRejectsUnprotectedSockets(t *testing.T) {
 		})
 	}
 }
+
+func TestSocketsOpenedBeforeTheTunAreProtectedWhenItStarts(t *testing.T) {
+	socket := func() (*net.UDPConn, syscall.RawConn, int) {
+		conn, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { _ = conn.Close() })
+		raw, err := conn.SyscallConn()
+		if err != nil {
+			t.Fatal(err)
+		}
+		fd := -1
+		_ = raw.Control(func(f uintptr) { fd = int(f) })
+		return conn, raw, fd
+	}
+	var protected []int
+	accept := func(fd int) error { protected = append(protected, fd); return nil }
+	refuse := func(int) error { return errProtectRefused }
+
+	var p socketProtector
+	_, live, liveFd := socket()
+	closed, gone, _ := socket()
+	p.guard(live)
+	p.guard(gone)
+	_ = closed.Close()
+	p.activate(accept)
+	if len(protected) != 1 || protected[0] != liveFd || len(p.pending) != 0 {
+		t.Fatalf("protected %v and held %d, want only %d", protected, len(p.pending), liveFd)
+	}
+
+	_, refused, refusedFd := socket()
+	p.activate(refuse)
+	p.guard(refused)
+	p.deactivate()
+	protected = nil
+	p.activate(accept)
+	if len(protected) != 1 || protected[0] != refusedFd {
+		t.Fatalf("the next TUN protected %v, want the refused socket %d", protected, refusedFd)
+	}
+}

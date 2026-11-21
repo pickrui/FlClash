@@ -76,3 +76,71 @@ func protectSocket(conn syscall.RawConn, protect func(int) error) error {
 	}
 	return protectErr
 }
+
+// Android routes every socket of this app into the VPN once it is established, those
+// opened before included, so a socket opened while no TUN runs waits for the next one.
+type socketProtector struct {
+	mu         sync.Mutex
+	protect    func(fd int) error
+	generation uint64
+	pending    []syscall.RawConn
+	limit      int
+}
+
+const minPendingSockets = 64
+
+func (p *socketProtector) guard(conn syscall.RawConn) {
+	p.mu.Lock()
+	for {
+		protect, generation := p.protect, p.generation
+		if protect == nil {
+			p.holdLocked(conn)
+			p.mu.Unlock()
+			return
+		}
+		p.mu.Unlock()
+		if err := protectSocket(conn, protect); err == nil ||
+			!errors.Is(err, errTunNotReady) && !errors.Is(err, errProtectRefused) {
+			return
+		}
+		p.mu.Lock()
+		if p.generation == generation {
+			p.holdLocked(conn)
+			p.mu.Unlock()
+			return
+		}
+	}
+}
+
+func (p *socketProtector) holdLocked(conn syscall.RawConn) {
+	if len(p.pending) >= max(p.limit, minPendingSockets) {
+		live := p.pending[:0]
+		for _, held := range p.pending {
+			if held.Control(func(uintptr) {}) == nil {
+				live = append(live, held)
+			}
+		}
+		clear(p.pending[len(live):])
+		p.pending = live
+		p.limit = 2 * len(live)
+	}
+	p.pending = append(p.pending, conn)
+}
+
+func (p *socketProtector) activate(protect func(fd int) error) {
+	p.mu.Lock()
+	p.protect = protect
+	p.generation++
+	pending := p.pending
+	p.pending, p.limit = nil, 0
+	p.mu.Unlock()
+	for _, conn := range pending {
+		p.guard(conn)
+	}
+}
+
+func (p *socketProtector) deactivate() {
+	p.mu.Lock()
+	p.protect = nil
+	p.mu.Unlock()
+}
