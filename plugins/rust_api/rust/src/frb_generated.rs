@@ -3700,6 +3700,7 @@ impl SseDecode for crate::api::tray::TraySignalKind {
             0 => crate::api::tray::TraySignalKind::IconActivated,
             1 => crate::api::tray::TraySignalKind::MenuRequested,
             2 => crate::api::tray::TraySignalKind::ItemSelected,
+            3 => crate::api::tray::TraySignalKind::MenuClosed,
             _ => unreachable!("Invalid variant for TraySignalKind: {}", inner),
         };
     }
@@ -4454,6 +4455,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::tray::TraySignalKind {
             Self::IconActivated => 0.into_dart(),
             Self::MenuRequested => 1.into_dart(),
             Self::ItemSelected => 2.into_dart(),
+            Self::MenuClosed => 3.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -5162,6 +5164,7 @@ impl SseEncode for crate::api::tray::TraySignalKind {
                 crate::api::tray::TraySignalKind::IconActivated => 0,
                 crate::api::tray::TraySignalKind::MenuRequested => 1,
                 crate::api::tray::TraySignalKind::ItemSelected => 2,
+                crate::api::tray::TraySignalKind::MenuClosed => 3,
                 _ => {
                     unimplemented!("");
                 }

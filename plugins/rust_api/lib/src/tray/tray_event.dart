@@ -17,6 +17,11 @@ final class TrayMenuRequested extends TrayEvent {
   const TrayMenuRequested();
 }
 
+/// macOS only: the menu [Tray.openMenu] opened went away.
+final class TrayMenuClosed extends TrayEvent {
+  const TrayMenuClosed();
+}
+
 final class TrayMenuItemSelected extends TrayEvent {
   const TrayMenuItemSelected(this.item);
 

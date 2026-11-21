@@ -56,6 +56,7 @@ pub enum TraySignalKind {
     IconActivated,
     MenuRequested,
     ItemSelected,
+    MenuClosed,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

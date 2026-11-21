@@ -34,11 +34,17 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
         case native.TrayIconActivated():
           window?.show();
         case native.TrayMenuRequested():
+          // A close that never arrived must not keep the next menu shut.
+          _menuClosed?.complete();
+          _menuClosed = null;
           unawaited(
             _openMenu().catchError((Object error) {
               commonPrint.log('Tray menu failed: $error');
             }),
           );
+        case native.TrayMenuClosed():
+          _menuClosed?.complete();
+          _menuClosed = null;
         case native.TrayMenuItemSelected():
           render?.active();
       }
@@ -53,6 +59,8 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
     });
   }
 
+  Completer<void>? _menuClosed;
+
   Future<void> _openMenu() async {
     if (_openingMenu) return;
     _openingMenu = true;
@@ -60,8 +68,13 @@ class _TrayContainerState extends ConsumerState<TrayManager> {
     _refreshTimer = null;
     try {
       await appController.updateTray(includeNodes: true);
-      if (mounted) await native.Tray.instance.openMenu();
+      if (!mounted) return;
+      // The menu stays open after the call; its items must outlive it.
+      final closed = system.isMacOS ? Completer<void>() : null;
+      _menuClosed = closed;
+      if (await native.Tray.instance.openMenu()) await closed?.future;
     } finally {
+      _menuClosed = null;
       _openingMenu = false;
       if (mounted) await appController.updateTray();
     }

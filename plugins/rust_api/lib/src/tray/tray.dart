@@ -90,7 +90,8 @@ final class Tray {
     return _serialize(() async => _hide());
   }
 
-  Future<void> openMenu() {
+  /// Whether a menu was asked to open; it stays up after this returns.
+  Future<bool> openMenu() {
     return _serialize(() async => _openMenu());
   }
 
@@ -177,11 +178,11 @@ final class Tray {
     _host.hide();
   }
 
-  void _openMenu() {
+  bool _openMenu() {
     if (!capabilities.menuControl || !_isVisible) {
-      return;
+      return false;
     }
-    _host.openMenu();
+    return _host.openMenu();
   }
 
   void _listen() {
@@ -194,6 +195,8 @@ final class Tray {
         _events.add(const TrayIconActivated());
       case TraySignalKind.menuRequested:
         _events.add(const TrayMenuRequested());
+      case TraySignalKind.menuClosed:
+        _events.add(const TrayMenuClosed());
       case TraySignalKind.itemSelected:
         final item = _itemsById[signal.itemId];
         if (item == null) {

@@ -327,6 +327,17 @@ void main() {
     );
   });
 
+  test('an opened menu says so and reports its close', () async {
+    final closed = Tray.instance.events.firstWhere(
+      (event) => event is TrayMenuClosed,
+    );
+    expect(await Tray.instance.openMenu(), isFalse);
+    await Tray.instance.show(_spec());
+    expect(await Tray.instance.openMenu(), isTrue);
+    host.emit(TraySignalKind.menuClosed);
+    await closed;
+  });
+
   test('hide reaches the host once and is idempotent', () async {
     await Tray.instance.show(_spec());
     await Tray.instance.hide();

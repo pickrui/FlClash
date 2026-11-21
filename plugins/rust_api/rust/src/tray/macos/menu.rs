@@ -77,6 +77,7 @@ define_class!(
         fn menu_did_close(&self, _menu: &NSMenu) {
             if self.ivars().is_root {
                 super::close_menu();
+                emit(TraySignalKind::MenuClosed, 0);
             }
         }
     }

@@ -156,4 +156,4 @@ class TraySignal {
           itemId == other.itemId;
 }
 
-enum TraySignalKind { iconActivated, menuRequested, itemSelected }
+enum TraySignalKind { iconActivated, menuRequested, itemSelected, menuClosed }
