@@ -8,7 +8,6 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:fl_clash/providers/resources.dart';
-import 'package:fl_clash/features/mitm/module_editor.dart';
 import 'package:fl_clash/ui/ui.dart';
 
 import 'package:fl_clash/providers/icon_sets.dart';
@@ -668,7 +667,8 @@ class _ModuleItem extends ConsumerWidget {
       chip: null,
       lastUpdateTime: module.lastUpdateTime,
       isUpdating: ref.watch(isUpdatingProvider(module.updatingKey)),
-      onSync: () => updateMitmModule(ref, module),
+      onSync: () =>
+          ref.read(mitmModulesActionProvider.notifier).updateModule(module),
     );
   }
 }

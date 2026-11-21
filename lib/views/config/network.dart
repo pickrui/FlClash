@@ -6,9 +6,11 @@
 import 'dart:io';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/mitm_network.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/views/config/override.dart';
@@ -365,8 +367,13 @@ class BypassDomainItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final module = ref
+        .watch(mitmTakeoverProvider)
+        .value
+        ?.keys[MitmNetworkKey.bypassDomain];
     return ConfigListEditItem(
       title: (l) => l.bypassDomain,
+      subtitle: module == null ? null : (l) => l.mitmChangeReplacedBy(module),
       itemMaxLength: TextInputLimits.domain,
       selector: networkSettingProvider.select((state) => state.bypassDomain),
       onChanged: _networkWriter(

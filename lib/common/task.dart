@@ -64,6 +64,47 @@ Map<String, dynamic> safeModeProfile(Map<String, dynamic> config) => {
   'iptables': {'enable': false},
 };
 
+String? lastMatchTarget(List<String> rules) {
+  for (final rule in rules.reversed) {
+    final parsed = ParsedRule.parseString(rule);
+    if (parsed.ruleAction == RuleAction.MATCH) {
+      final target = parsed.ruleTarget;
+      if (target != null && target.isNotEmpty) {
+        return target;
+      }
+    }
+  }
+  return null;
+}
+
+Set<String> outboundNamesOf(Map<dynamic, dynamic> config) => {
+  for (final key in const ['proxies', 'proxy-groups'])
+    if (config[key] case final List<dynamic> items)
+      for (final item in items)
+        if (item case {'name': final String name}) name,
+};
+
+/// mihomo sends DIRECT what no rule matches, MATCH included.
+String Function(String exit) exitTargetResolver({
+  required Map<String, String> targets,
+  required Set<String> outbounds,
+  required String? fallback,
+}) {
+  bool usable(String? target) =>
+      target != null &&
+      (RuleTarget.ruleTargets.contains(target) || outbounds.contains(target));
+  return (exit) {
+    final mapped = targets[exit];
+    if (usable(mapped)) {
+      return mapped!;
+    }
+    if (outbounds.contains(exit)) {
+      return exit;
+    }
+    return fallback ?? RuleTarget.DIRECT.value;
+  };
+}
+
 Map<String, dynamic> inboundConfigOf(
   ClashConfig config, {
   required List<String> authentication,
@@ -412,43 +453,6 @@ Map<String, dynamic> applyCustomProxyAliases(
   return result;
 }
 
-String? lastMatchTarget(List<String> rules) {
-  for (var index = rules.length - 1; index >= 0; index--) {
-    final parsed = ParsedRule.parseString(rules[index]);
-    final target = parsed.ruleTarget;
-    if (parsed.ruleAction == RuleAction.MATCH &&
-        target != null &&
-        target.isNotEmpty) {
-      return target;
-    }
-  }
-  return null;
-}
-
-Set<String> outboundNamesOf(Map<dynamic, dynamic> config) => {
-  for (final key in const ['proxies', 'proxy-groups'])
-    if (config[key] case final List<dynamic> items)
-      for (final item in items)
-        if (item case {'name': final String name}) name,
-};
-
-/// mihomo sends DIRECT what no rule matches, MATCH included.
-String Function(String exit) exitTargetResolver({
-  required Map<String, String> targets,
-  required Set<String> outbounds,
-  required String? fallback,
-}) {
-  bool usable(String? target) =>
-      target != null &&
-      (RuleTarget.ruleTargets.contains(target) || outbounds.contains(target));
-  return (exit) {
-    final mapped = targets[exit];
-    if (usable(mapped)) return mapped!;
-    if (outbounds.contains(exit)) return exit;
-    return fallback ?? RuleTarget.DIRECT.value;
-  };
-}
-
 String _routeExit(String rule, String Function(String exit) targetOf) {
   final parsed = ParsedRule.parseString(rule);
   final exit = parsed.ruleTarget;
@@ -630,6 +634,14 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       ),
   ]);
   rawConfig['mitm'] = realPatchConfig.mitm.coreJson(mitm.mitm);
+  mitm.network.applyToTun(tun);
+  if (mitm.ruleProviders.isNotEmpty) {
+    rawConfig['rule-providers'] = {
+      if (rawConfig['rule-providers'] case final Map providers)
+        ...providers.cast<String, dynamic>(),
+      ...mitm.ruleProviders,
+    };
+  }
   if (rawConfig['profile'] == null) {
     rawConfig['profile'] = {};
   }
@@ -761,6 +773,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   for (final host in realPatchConfig.hosts.entries) {
     rawConfig['hosts'][host.key] = host.value.splitByMultipleSeparators;
   }
+  (rawConfig['hosts'] as Map).addAll(mitm.network.hosts);
   final sourceDns = rawConfig['dns'] is Map
       ? Map<String, dynamic>.from(rawConfig['dns'] as Map)
       : <String, dynamic>{};
@@ -787,6 +800,7 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
     );
     _preserveProxyDnsBootstrap(targetDns, sourceDns);
   }
+  mitm.network.applyToDns(targetDns);
   rawConfig['dns'] = targetDns;
   final ntpOverride = {
     ...realPatchConfig.ntp.overrideJson(realPatchConfig.ntpOverrideKeys),
@@ -849,7 +863,17 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   rawConfig['rules'] = [
     if (blockWebRtc) 'SNIFF-PROTOCOL,stun,REJECT-DROP',
     if (blockQuic) 'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
-    ...mitm.rules,
+    ...mitm.exits.isEmpty
+        ? mitm.rules
+        : mitmRulesWithExits(
+            mitm.rules,
+            mitm.exits,
+            exitTargetResolver(
+              targets: data.exitTargets,
+              outbounds: outboundNamesOf(rawConfig),
+              fallback: lastMatchTarget(rules),
+            ),
+          ),
     ...rules,
   ];
   rawConfig = withProfileProviders(

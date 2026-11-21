@@ -94,10 +94,11 @@ ProxyState proxyState(Ref ref) {
   final mixedPort = ref.watch(
     patchClashConfigProvider.select((state) => state.mixedPort),
   );
+  final moduleBypass = ref.watch(mitmModuleNetworkProvider).value?.bypassDomain;
   return ProxyState(
     isStart: isStart && !ref.watch(suspendProvider),
     systemProxy: !safeModeBuild && vm2.a && !authenticated,
-    bassDomain: vm2.b,
+    bassDomain: moduleBypass?.applyTo(vm2.b) ?? vm2.b,
     port: mixedPort,
   );
 }
@@ -301,10 +302,28 @@ FutureOr<List<String>> vpnRouteAddress(Ref ref) {
       ),
     ),
   );
-  return tun.vpnRouteAddress(
+  FutureOr<List<String>> routesOf(Tun tun) => tun.vpnRouteAddress(
     bypassPrivateRoute: bypassPrivateRoute,
     keepTailnet: keepTailnet,
   );
+  if (!mitmFeature) {
+    return routesOf(tun);
+  }
+  return ref
+      .watch(mitmModuleNetworkProvider.future)
+      .then(
+        (network) => routesOf(
+          tun.copyWith(
+            routeAddress: tun.routeAddress.isEmpty
+                ? const []
+                : {...tun.routeAddress, ...network.routeAddress}.toList(),
+            routeExcludeAddress: {
+              ...tun.routeExcludeAddress,
+              ...?network.routeExcludeAddress?.values,
+            }.toList(),
+          ),
+        ),
+      );
 }
 
 @riverpod
@@ -312,9 +331,16 @@ VpnOptions? vpnOptions(Ref ref) {
   final routes = ref.watch(vpnRouteAddressProvider);
   if (routes.isLoading || routes.hasError) return null;
   final routeAddress = routes.requireValue;
-  final bypassDomain = ref.watch(
+  final userBypass = ref.watch(
     networkSettingProvider.select((state) => state.bypassDomain),
   );
+  final bypassDomain =
+      ref
+          .watch(mitmModuleNetworkProvider)
+          .value
+          ?.bypassDomain
+          ?.applyTo(userBypass) ??
+      userBypass;
   final clashConfigVM2 = ref.watch(
     patchClashConfigProvider.select(
       (state) => VM2(state.tun.stack.name, state.mixedPort),

@@ -21,31 +21,6 @@ class MitmModuleException implements LocalizedException {
 MitmModuleContent _parseMitmModule((String, Map<String, String>) source) =>
     parseMitmModule(source.$1, values: source.$2);
 
-bool _bringsNewScripts(
-  ({
-    String before,
-    Map<String, String> resourcesBefore,
-    String after,
-    Map<String, String> resourcesAfter,
-    Map<String, String> values,
-  })
-  source,
-) {
-  return mitmScriptScope(
-        source.after,
-        values: source.values,
-        resources: source.resourcesAfter,
-      )
-      .difference(
-        mitmScriptScope(
-          source.before,
-          values: source.values,
-          resources: source.resourcesBefore,
-        ),
-      )
-      .isNotEmpty;
-}
-
 String mitmScriptUpdatingKey(String name) => 'mitm_script_$name';
 
 @Riverpod(keepAlive: true)
@@ -168,47 +143,44 @@ class MitmModulesAction extends _$MitmModulesAction {
         await putModule(current.copyWith(enabled: enabled));
       });
 
-  Future<MitmModule?> setArguments(
+  Future<void> setArguments(
     MitmModule module,
     Map<String, String> arguments,
   ) async {
     await putModule(module.copyWith(arguments: arguments));
     final held = <String>[];
-    MitmModule? turnedOff;
     try {
       final text = await File(await _pathOf(module)).readAsString();
       final content = await compute(_parseMitmModule, (text, arguments));
-      if (ref.mounted &&
-          module.enabled &&
-          content.declaredScripts > module.scripts) {
-        turnedOff = (await _current(module.id))
-            ?.copyWith(enabled: false, scripts: content.declaredScripts);
-        if (turnedOff != null && ref.mounted) {
-          await putModule(turnedOff);
-        }
-      }
       final missing = content.resourceUrls.difference({
         ...module.resources.keys,
       });
-      if (missing.isEmpty || !ref.mounted) {
-        return turnedOff;
-      }
-      final fetched = await _download(missing, previous: const {}, held: held);
+      final fetched = missing.isEmpty || !ref.mounted
+          ? const <String, String>{}
+          : await _download(missing, previous: const {}, held: held);
+      final written = await _writeInline({
+        for (final MapEntry(:key, :value) in content.inlineResources.entries)
+          if (!module.resources.containsKey(key)) key: value,
+      }, held);
       final current = await _current(module.id);
-      if (fetched.isNotEmpty && current != null && ref.mounted) {
-        final saved = current.copyWith(
-          resources: {...current.resources, ...fetched},
-        );
-        await putModule(saved);
-        turnedOff = turnedOff == null ? null : saved;
+      if (!ref.mounted ||
+          current == null ||
+          (fetched.isEmpty &&
+              written.isEmpty &&
+              current.scripts == content.declaredScripts)) {
+        return;
       }
-      return turnedOff;
+      await putModule(
+        current.copyWith(
+          resources: {...current.resources, ...fetched, ...written},
+          scripts: content.declaredScripts,
+        ),
+      );
     } on FileSystemException catch (e) {
       commonPrint.log(
         'MITM module ${module.name}: ${compactError(e)}',
         logLevel: LogLevel.warning,
       );
-      return turnedOff;
     } finally {
       held.forEach(_held.remove);
     }
@@ -285,6 +257,7 @@ class MitmModulesAction extends _$MitmModulesAction {
         previous: module.resources,
         held: held,
       );
+      final written = await _writeInline(content.inlineResources, held);
       for (final MapEntry(key: fileName, value: bytes) in attachments.entries) {
         final name = await _storeResource(fileName, bytes);
         held.add(name);
@@ -299,32 +272,15 @@ class MitmModulesAction extends _$MitmModulesAction {
         if (current == null || !ref.mounted) {
           return module;
         }
-        final previous = added || edited ? null : await _readText(current);
-        final merged = {...mitmAttachments(current), ...resources};
-        final bringsNew =
-            previous != null &&
-            current.enabled &&
-            await compute(_bringsNewScripts, (
-              before: previous,
-              resourcesBefore: current.resources,
-              after: text,
-              resourcesAfter: merged,
-              values: current.arguments,
-            ));
-        if (!ref.mounted) {
-          return module;
-        }
         final saved = current.copyWith(
           name: content.name ?? current.name,
           description: content.description ?? '',
           system: content.system,
           enabled: added
-              ? content.declaredScripts == 0
-              : current.enabled &&
-                    !bringsNew &&
-                    content.declaredScripts <= current.scripts,
+              ? content.declaredScripts == 0 && !content.asksConsent
+              : current.enabled,
           scripts: content.declaredScripts,
-          resources: merged,
+          resources: {...mitmAttachments(current), ...resources, ...written},
           lastUpdateTime: DateTime.now(),
         );
         final path = await _pathOf(saved);
@@ -353,14 +309,6 @@ class MitmModulesAction extends _$MitmModulesAction {
           logLevel: LogLevel.warning,
         );
       }
-    }
-  }
-
-  Future<String?> _readText(MitmModule module) async {
-    try {
-      return await File(await _pathOf(module)).readAsString();
-    } on FileSystemException {
-      return null;
     }
   }
 
@@ -404,6 +352,19 @@ class MitmModulesAction extends _$MitmModulesAction {
         }(),
     ]);
     return {for (final (index, url) in urls.indexed) url: ?names[index]};
+  }
+
+  Future<Map<String, String>> _writeInline(
+    Map<String, String> sources,
+    List<String> held,
+  ) async {
+    final written = <String, String>{};
+    for (final MapEntry(:key, :value) in sources.entries) {
+      final name = await _storeResource(key, utf8.encode(value));
+      held.add(name);
+      written[key] = name;
+    }
+    return written;
   }
 
   Future<String> _storeResource(String source, List<int> bytes) async {
@@ -492,13 +453,7 @@ class MitmModulesAction extends _$MitmModulesAction {
           continue;
         }
         try {
-          final updated = await updateModule(module);
-          if (module.enabled && !updated.enabled) {
-            globalState.showNotifier(
-              appLocalizations.mitmModuleScriptsChanged(updated.name),
-              level: MessageLevel.warning,
-            );
-          }
+          await updateModule(module);
         } catch (e) {
           commonPrint.log(
             'auto update ${module.name}: ${compactError(e)}',

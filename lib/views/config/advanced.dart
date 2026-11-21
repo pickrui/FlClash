@@ -5,6 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/config/dns.dart';
 import 'package:fl_clash/views/config/network.dart';
@@ -19,13 +21,17 @@ import 'providers.dart';
 
 import 'rules.dart';
 import 'mitm.dart';
+import 'mitm_modules.dart';
 
 class AdvancedConfigView extends ConsumerWidget {
-  const AdvancedConfigView({super.key});
+  const AdvancedConfigView({super.key, this.isAndroid});
+
+  final bool? isAndroid;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final isAndroid = this.isAndroid ?? system.isAndroid;
     final items = [
       ListItem.open(
         title: Text(appLocalizations.network),
@@ -55,15 +61,10 @@ class AdvancedConfigView extends ConsumerWidget {
         leading: const GlyphIcon(AppGlyphs.code),
         widget: const ScriptsView(),
       ),
-      if (mitmFeature)
-        ListItem.open(
-          title: Text(appLocalizations.mitm),
-          leading: const GlyphIcon(AppGlyphs.lockOpen),
-          widget: MitmView(isAndroid: system.isAndroid),
-        ),
     ];
-    return BaseScaffold(
+    return Scaffold(
       title: appLocalizations.advancedConfig,
+      isLoading: ref.watch(loadingProvider(LoadingTag.mitm)),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
           top: context.sectionsTopPadding,
@@ -96,6 +97,21 @@ class AdvancedConfigView extends ConsumerWidget {
               ),
             ],
           ),
+          if (mitmFeature)
+            generateSection(
+              title: appLocalizations.mitm,
+              footer: isAndroid ? appLocalizations.mitmAndroidRootDesc : null,
+              items: [
+                const MitmEnableItem(),
+                const MitmModulesItem(),
+                const MitmHostnameItem(),
+                ListItem.open(
+                  title: Text(appLocalizations.options),
+                  leading: const GlyphIcon(AppGlyphs.sliders),
+                  widget: MitmOptionsView(isAndroid: isAndroid),
+                ),
+              ],
+            ),
         ],
       ),
     );

@@ -170,7 +170,7 @@ final class ProxyStateProvider
   }
 }
 
-String _$proxyStateHash() => r'8ea9a6d176d46966a9e5e790e2613b3d79df469e';
+String _$proxyStateHash() => r'c6ba8e8685abb1d727910bd2519a15e6216edc11';
 
 @ProviderFor(trayDelays)
 final trayDelaysProvider = TrayDelaysProvider._();
@@ -641,7 +641,7 @@ final class VpnRouteAddressProvider
   }
 }
 
-String _$vpnRouteAddressHash() => r'35465c216c42064354907e1f1d61565673356251';
+String _$vpnRouteAddressHash() => r'af788a70f87695b287c8c4401e25e4b2a7c380bd';
 
 @ProviderFor(vpnOptions)
 final vpnOptionsProvider = VpnOptionsProvider._();
@@ -682,7 +682,7 @@ final class VpnOptionsProvider
   }
 }
 
-String _$vpnOptionsHash() => r'4a9b4e35d0511862576e2fec89b195c738bc8f4f';
+String _$vpnOptionsHash() => r'a264c20e3a96c8032a5381cb68d1021349d6180a';
 
 /// Keeps a start on screen for [minimumStart] so a fast restart does not flash.
 
@@ -2630,6 +2630,88 @@ final class ScriptFamily extends $Family
 
   @override
   String toString() => r'scriptProvider';
+}
+
+@ProviderFor(profileOverrides)
+final profileOverridesProvider = ProfileOverridesFamily._();
+
+final class ProfileOverridesProvider
+    extends
+        $FunctionalProvider<
+          ProfileOverrides,
+          ProfileOverrides,
+          ProfileOverrides
+        >
+    with $Provider<ProfileOverrides> {
+  ProfileOverridesProvider._({
+    required ProfileOverridesFamily super.from,
+    required int? super.argument,
+  }) : super(
+         retry: null,
+         name: r'profileOverridesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileOverridesHash();
+
+  @override
+  String toString() {
+    return r'profileOverridesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<ProfileOverrides> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProfileOverrides create(Ref ref) {
+    final argument = this.argument as int?;
+    return profileOverrides(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProfileOverrides value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProfileOverrides>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProfileOverridesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$profileOverridesHash() => r'16a6ea1763ed4ea631653dd112fdb0fea9577579';
+
+final class ProfileOverridesFamily extends $Family
+    with $FunctionalFamilyOverride<ProfileOverrides, int?> {
+  ProfileOverridesFamily._()
+    : super(
+        retry: null,
+        name: r'profileOverridesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ProfileOverridesProvider call(int? profileId) =>
+      ProfileOverridesProvider._(argument: profileId, from: this);
+
+  @override
+  String toString() => r'profileOverridesProvider';
 }
 
 @ProviderFor(setupState)

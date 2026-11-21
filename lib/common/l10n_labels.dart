@@ -166,6 +166,9 @@ extension MitmListL10n on MitmList {
       MitmList.headerRewrite => l.headerRewrite,
       MitmList.bodyRewrite => l.bodyRewrite,
       MitmList.mapLocal => l.mapLocal,
+      MitmList.requestBodyMock => l.requestBodyMock,
+      MitmList.clientSourceAddress => l.clientSourceAddress,
+      MitmList.skipVerifyHostname => l.skipVerifyHostname,
       MitmList.script => l.script,
     };
   }

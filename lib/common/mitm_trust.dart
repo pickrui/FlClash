@@ -65,7 +65,7 @@ abstract interface class MitmTrustStore {
 
   Future<MitmInstallOutcome> install(MitmCertificate ca);
 
-  Future<bool> remove(MitmCertificate ca);
+  Future<MitmRemoveOutcome> remove(MitmCertificate ca);
 }
 
 MitmTrustStore? mitmTrustStoreForPlatform() {
@@ -214,7 +214,7 @@ class MacOSMitmTrustStore implements MitmTrustStore {
   }
 
   @override
-  Future<bool> remove(MitmCertificate ca) async {
+  Future<MitmRemoveOutcome> remove(MitmCertificate ca) async {
     await _runChecked(run, _security, [
       'delete-certificate',
       '-Z',
@@ -222,7 +222,7 @@ class MacOSMitmTrustStore implements MitmTrustStore {
       '-t',
       _keychain,
     ]);
-    return true;
+    return MitmRemoveOutcome.removed;
   }
 }
 
@@ -257,14 +257,14 @@ class WindowsMitmTrustStore implements MitmTrustStore {
   }
 
   @override
-  Future<bool> remove(MitmCertificate ca) async {
+  Future<MitmRemoveOutcome> remove(MitmCertificate ca) async {
     await _runChecked(run, 'certutil', [
       '-user',
       '-delstore',
       'Root',
       mitmSha1Hex(ca),
     ]);
-    return true;
+    return MitmRemoveOutcome.removed;
   }
 }
 
@@ -604,13 +604,13 @@ fi
   }
 
   @override
-  Future<bool> remove(MitmCertificate ca) async {
+  Future<MitmRemoveOutcome> remove(MitmCertificate ca) async {
     var removed = await _removeFromDatabases(ca);
     if (await inSystemBundle(ca) &&
         !await elevate(['/bin/sh', '-c', removeScript, 'flclash-oixcloud'])) {
       removed = false;
     }
-    return removed;
+    return removed ? MitmRemoveOutcome.removed : MitmRemoveOutcome.failed;
   }
 
   Future<bool> _removeFromDatabases(MitmCertificate ca) async {
@@ -685,13 +685,13 @@ class AndroidMitmTrustStore implements MitmTrustStore {
 
   /// An app cannot remove a user certificate.
   @override
-  Future<bool> remove(MitmCertificate ca) async {
+  Future<MitmRemoveOutcome> remove(MitmCertificate ca) async {
     final der = mitmCertificateDer(ca);
     final found = await platform.locateCaCertificate(der);
     if (found.system &&
         (!found.root || !await platform.removeCaCertificateWithRoot(der))) {
-      return false;
+      return MitmRemoveOutcome.needsRoot;
     }
-    return !found.user;
+    return found.user ? MitmRemoveOutcome.userStore : MitmRemoveOutcome.removed;
   }
 }

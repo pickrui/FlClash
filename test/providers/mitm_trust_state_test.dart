@@ -50,11 +50,11 @@ class _Store implements MitmTrustStore {
   }
 
   @override
-  Future<bool> remove(MitmCertificate ca) async {
+  Future<MitmRemoveOutcome> remove(MitmCertificate ca) async {
     removed.add(ca);
     if (removeFails) throw StateError('fixture removal failure');
     trust = MitmTrust.notInstalled;
-    return true;
+    return MitmRemoveOutcome.removed;
   }
 }
 

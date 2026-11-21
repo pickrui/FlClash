@@ -53,6 +53,36 @@ Future<Script?> script(Ref ref, int? scriptId) async {
 }
 
 @riverpod
+ProfileOverrides profileOverrides(Ref ref, int? profileId) {
+  final own = ref.watch(
+    profileProvider(profileId).select(
+      (profile) => profile?.type == ProfileType.custom
+          ? profile!.overrides
+          : const ProfileOverrides(),
+    ),
+  );
+  return ref.watch(
+    patchClashConfigProvider.select((state) {
+      Map<String, String> policyOf(Dns dns, Set<DnsOverrideKey> keys) =>
+          keys.contains(DnsOverrideKey.nameserverPolicy)
+          ? dns.nameserverPolicy
+          : const {};
+      return own
+          .overAppTun(state.tunOverride, state.tunOverrideKeys)
+          .copyWith(
+            dns: own.dns.copyWith(
+              nameserverPolicy: {
+                ...policyOf(state.dns, state.dnsOverrideKeys),
+                ...policyOf(own.dns, own.dnsOverrideKeys),
+              },
+            ),
+            dnsOverrideKeys: {...state.dnsOverrideKeys, ...own.dnsOverrideKeys},
+          );
+    }),
+  );
+}
+
+@riverpod
 Future<SetupState> setupState(Ref ref, int? profileId) async {
   final profile = ref.watch(profileProvider(profileId));
   final scriptId = profile?.scriptId;

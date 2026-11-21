@@ -24,6 +24,7 @@ import 'clash_providers.dart';
 import 'app.dart';
 import 'config.dart';
 import 'database.dart';
+import 'mitm.dart';
 
 part 'generated/state.g.dart';
 part 'state/navigation.dart';

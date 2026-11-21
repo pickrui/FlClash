@@ -144,6 +144,56 @@ DOMAIN,ads.example.test,REJECT
     },
   );
 
+  test(
+    'MITM module exits, rule sets and network settings reach the config',
+    () async {
+      final result = await makeRealProfileTask(
+        _makeRealProfileState(
+          rawConfig: {
+            'proxy-groups': [
+              for (final name in ['Proxy', 'Media'])
+                {
+                  'name': name,
+                  'type': 'select',
+                  'proxies': ['DIRECT'],
+                },
+            ],
+            'rules': ['MATCH,Proxy'],
+          },
+        ).copyWith(
+          realPatchConfig: const ClashConfig(mitm: Mitm(enable: true)),
+          mitmModules: const [
+            MitmModuleSource(
+              content: '''
+[General]
+dns-server = 1.1.1.1
+[Host]
+ad.test = 0.0.0.0
+[Rule]
+DOMAIN,a.example,Media
+DOMAIN,b.example,PROXY
+RULE-SET,https://example.com/ai.list,AI,no-resolve
+''',
+            ),
+          ],
+        ),
+      );
+      final rules = result['rules'] as List;
+      expect(rules.take(2), [
+        'DOMAIN,a.example,Media',
+        'DOMAIN,b.example,Proxy',
+      ]);
+      expect('${rules[2]}', matches(r'^RULE-SET,mitm-\w+,Proxy,no-resolve$'));
+      final set = '${rules[2]}'.split(',')[1];
+      expect(
+        result['rule-providers'][set]['url'],
+        'https://example.com/ai.list',
+      );
+      expect(result['hosts']['ad.test'], ['0.0.0.0']);
+      expect(result['dns']['nameserver'], ['1.1.1.1']);
+    },
+  );
+
   test('custom UA overrides the profile and survives serialization', () async {
     final patch = ClashConfig.fromJson({
       'global-ua': 'Legacy/1',

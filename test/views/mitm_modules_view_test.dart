@@ -12,6 +12,7 @@ import 'package:fl_clash/common/mitm_module.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/features.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/features/mitm/module_editor.dart';
@@ -38,6 +39,7 @@ hostname = %APPEND% *.example.com
 bad line
 [General]
 skip-proxy = example.com
+hijack-dns = 8.8.8.8:53
 [Script]
 Ads = type=http-response,pattern=^https://example\.com/b,script-path=https://example.com/ads.js
 cron "0 8 * * *" script-path=https://example.com/daily.js, tag=Daily
@@ -177,12 +179,14 @@ void main() {
     Widget child, {
     CoreHandlerInterface? core,
     _DelayedCreate? saving,
+    MitmModuleContent? remoteContent,
   }) async {
     tester.view.physicalSize = const Size(1000, 2000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final content = parseMitmModule(_module, resources: _resources);
+    final content =
+        remoteContent ?? parseMitmModule(_module, resources: _resources);
     container = ProviderContainer(
       overrides: [
         mitmModulesProvider.overrideWith(_Modules.new),
@@ -193,12 +197,16 @@ void main() {
           coreHandlerProvider.overrideWithValue(
             CoreController.forTesting(handler: core),
           ),
+        mitmModuleContentProvider(_remote.id)
+            .overrideWith((_) async => content),
+        mitmModuleContentProvider(_local.id).overrideWith((_) async => null),
         mitmModuleDetailsProvider(_remote.id).overrideWith(
           (_) async => (
             content: content,
             issues: {
               MitmList.urlRewrite: {'bad line': 'unknown type'},
             },
+            views: const <MitmList, Map<String, MitmLineView>>{},
           ),
         ),
         mitmModuleDetailsProvider(_local.id).overrideWith((_) async => null),
@@ -228,7 +236,7 @@ void main() {
         tester,
         Consumer(
           builder: (context, ref, _) => GestureDetector(
-            onTap: () => offerMitmScripts(ref, _local),
+            onTap: () => offerMitmModule(ref, _local),
             child: const Text('Offer scripts'),
           ),
         ),
@@ -296,9 +304,60 @@ void main() {
     await tester.tap(find.text(appLocalizations.mitmIgnoredLines));
     await tester.pumpAndSettle();
 
-    expect(find.text('skip-proxy = example.com'), findsOneWidget);
+    expect(find.text('hijack-dns = 8.8.8.8:53'), findsOneWidget);
+    expect(find.text(currentAppLocalizations.mitmSkipSetting), findsOneWidget);
+  });
+
+  testWidgets('the details list the network settings it changes', (
+    tester,
+  ) async {
+    await pump(tester, MitmModuleView(id: _remote.id));
+
+    expect(find.text(appLocalizations.mitmNetworkChanges), findsOneWidget);
+    expect(find.text(appLocalizations.bypassDomain), findsOneWidget);
     expect(
-      find.text(appLocalizations.mitmSkipSection('General')),
+      find.text(
+        '${appLocalizations.mitmChangeReplace('example.com')}\n'
+        '${appLocalizations.mitmChangeOverridesYours}',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('routing rules read like the rule pages and stay read-only', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      MitmModuleView(id: _remote.id),
+      remoteContent: MitmModuleContent(
+        rules: [
+          'DOMAIN-SUFFIX,ads.example.com,REJECT',
+          'PROTOCOL,UDP,REJECT',
+          'RULE-SET,mitm-0123456789ab,REJECT',
+        ],
+        ruleProviders: {
+          'mitm-0123456789ab': {
+            'type': 'http',
+            'url': 'https://example.com/ads.list',
+          },
+        },
+      ),
+    );
+
+    await tester.tap(find.text(appLocalizations.mitmRoutingRules));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(RuleSummary), findsNWidgets(2));
+    expect(find.text('ads.example.com'), findsOneWidget);
+    expect(find.text('https://example.com/ads.list'), findsOneWidget);
+    expect(find.text('PROTOCOL,UDP,REJECT'), findsOneWidget);
+    expect(find.text(appLocalizations.mitmSkipRule), findsOneWidget);
+
+    await tester.tap(find.text('ads.example.com'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('DOMAIN-SUFFIX,ads.example.com,REJECT', findRichText: true),
       findsOneWidget,
     );
   });
@@ -320,6 +379,8 @@ void main() {
     await tester.longPress(find.textContaining('Ads = '));
     await tester.pumpAndSettle();
     expect(find.text(appLocalizations.mitmRunScript), findsNothing);
+    await tester.tap(find.text(appLocalizations.confirm));
+    await tester.pumpAndSettle();
 
     await tester.longPress(find.textContaining('Daily = '));
     await tester.pumpAndSettle();
