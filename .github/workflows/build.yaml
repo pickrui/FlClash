@@ -605,9 +605,6 @@ jobs:
             echo "Build produced no artifacts in ./dist" >&2
             exit 1
           fi
-          
-          find ./dist -name "*.exe" -type f -exec sh -c 'mv "$1" "${1%.exe}-setup.exe"' _ {} \;
-          find ./dist -name "*.appimage" -type f -exec sh -c 'mv "$1" "${1%.appimage}.AppImage"' _ {} \;
 
       - name: Test macOS Helper installation
         if: matrix.platform == 'macos'
