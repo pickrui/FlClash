@@ -33,11 +33,15 @@ class _MockCore extends Mock implements CoreHandlerInterface {}
 class _FakeStore implements MitmTrustStore {
   _FakeStore(
     this.trust, {
+    this.installTrust = MitmTrust.ready,
+    this.installError,
     this.removeOutcome = MitmRemoveOutcome.removed,
     this.removeError,
   });
 
   MitmTrust trust;
+  final MitmTrust installTrust;
+  final Exception? installError;
   final MitmRemoveOutcome removeOutcome;
   final Exception? removeError;
   var checks = 0;
@@ -56,7 +60,10 @@ class _FakeStore implements MitmTrustStore {
   @override
   Future<MitmInstallOutcome> install(MitmCertificate ca) async {
     installed.add(ca);
-    trust = MitmTrust.ready;
+    trust = installTrust;
+    if (installError case final error?) {
+      throw error;
+    }
     return MitmInstallOutcome.installed;
   }
 
@@ -454,6 +461,28 @@ void main() {
 
     Color successColor(WidgetTester tester) =>
         tester.element(row()).colorScheme.success;
+
+    testWidgets('refreshes trust after a partial installation fails', (
+      tester,
+    ) async {
+      const error = MitmTrustException(installCommand: 'install certutil');
+      final store = _FakeStore(
+        MitmTrust.notInstalled,
+        installTrust: MitmTrust.untrusted,
+        installError: error,
+      );
+      await pumpView(tester, certificate: _certificate, store: store);
+
+      await tester.tap(row());
+      await tester.pumpAndSettle();
+
+      expect(store.installed, [_certificate]);
+      expect(
+        find.text(currentAppLocalizations.mitmTrustUntrusted),
+        findsOneWidget,
+      );
+      expect(saved().trustedFingerprint, isNull);
+    }, skip: safeModeBuild);
 
     testWidgets('installs on tap where FlClash has a trust store', (
       tester,

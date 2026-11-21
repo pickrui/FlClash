@@ -5770,6 +5770,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String mitmUntrustedStores(Object stores) {
+    return 'Installé mais non approuvé dans : $stores';
+  }
+
+  @override
   String get mitmSystemStoreFailed =>
       'Impossible d’ajouter le certificat aux racines de confiance du système';
 

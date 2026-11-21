@@ -5758,6 +5758,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String mitmUntrustedStores(Object stores) {
+    return 'Instalado pero sin confianza en: $stores';
+  }
+
+  @override
   String get mitmSystemStoreFailed =>
       'No se pudo añadir el certificado a las raíces de confianza del sistema';
 

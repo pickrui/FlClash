@@ -120,7 +120,7 @@ final class MitmTrustStateProvider
   MitmTrustState create() => MitmTrustState();
 }
 
-String _$mitmTrustStateHash() => r'27bdeb1684167e6ea5d307a9bb6bf746fdb2138a';
+String _$mitmTrustStateHash() => r'89e844838fda3443d198784e647d1b4cad6d31c2';
 
 abstract class _$MitmTrustState extends $AsyncNotifier<MitmTrustCheck> {
   FutureOr<MitmTrustCheck> build();
