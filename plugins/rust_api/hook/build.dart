@@ -39,7 +39,9 @@ void main(List<String> args) async {
           'MACOSX_DEPLOYMENT_TARGET': '13.0',
         ...pageSize,
         ...trimmedPathEnvironment(
-          checkoutDir: Directory.fromUri(input.packageRoot.resolve('../..')).path,
+          checkoutDir: Directory.fromUri(
+            input.packageRoot.resolve('../..'),
+          ).path,
           toolchainDir: rustDirectory.path,
           targetTriple: rustTargetTriple(input.config.code),
           rustc: rustc,

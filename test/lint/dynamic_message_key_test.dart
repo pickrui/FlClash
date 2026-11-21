@@ -51,9 +51,9 @@ void main() {
   });
 
   test('a message with several placeholders declares them in text order', () {
-    final template =
-        jsonDecode(File('$_arbDir/$_referenceArb').readAsStringSync())
-            as Map<String, Object?>;
+    final template = jsonDecode(
+      File('$_arbDir/$_referenceArb').readAsStringSync(),
+    ) as Map<String, Object?>;
     final placeholder = RegExp(r'\{([A-Za-z_][A-Za-z0-9_]*)');
     final offenders = <String>[];
     for (final MapEntry(:key, :value) in template.entries) {
