@@ -47,8 +47,14 @@ class Proxy extends ProxyPlatform {
     List<String> bypassDomain = const [],
   ]) async {
     return switch (Platform.operatingSystem) {
-      'macos' => await _startProxyWithMacos(port, bypassDomain),
-      'linux' => await _startProxyWithLinux(port, bypassDomain),
+      'macos' => await _startProxyWithMacos(
+          port,
+          withoutWindowsLocal(bypassDomain),
+        ),
+      'linux' => await _startProxyWithLinux(
+          port,
+          withoutWindowsLocal(bypassDomain),
+        ),
       'windows' => await ProxyPlatform.instance.startProxy(
           port,
           windowsBypassList(bypassDomain),

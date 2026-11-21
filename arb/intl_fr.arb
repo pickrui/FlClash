@@ -260,6 +260,7 @@
   "network": "Réseau",
   "bypassDomain": "Domaines contournés",
   "bypassDomainDesc": "Les domaines contournés ne s’appliquent que si le proxy système est activé.",
+  "bypassLocalWindowsOnly": "Windows uniquement : noms d’hôte sans point",
   "resetTip": "Confirmer la réinitialisation",
   "icon": "Icône",
   "noData": "Aucune donnée",

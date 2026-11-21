@@ -998,7 +998,7 @@ class Migration {
   final currentVersion = 2;
 
   /// Apart from [currentVersion], which backups carry and older apps refuse.
-  static const upgradeVersion = 2;
+  static const upgradeVersion = 3;
 
   factory Migration() {
     _instance ??= Migration._internal();
@@ -1029,6 +1029,9 @@ class Migration {
     if (installed) {
       if (from < 1) upgraded = _moveLegacyThemeDefaults(upgraded);
       if (from < 2) upgraded = _followSystemColors(upgraded);
+      if (from < 3 && system.isWindows) {
+        upgraded = keepWindowsLocalBypass(upgraded);
+      }
     }
     if (upgraded != config) {
       await persist(upgraded);
@@ -1144,6 +1147,17 @@ Config _followSystemColors(Config config) {
         },
       ],
     ),
+  );
+}
+
+/// Earlier builds added WinINet's `<local>` to every Windows list when
+/// writing it; the list now goes out as saved, so the entry joins the list.
+@visibleForTesting
+Config keepWindowsLocalBypass(Config config) {
+  final bypass = config.networkProps.bypassDomain;
+  if (bypass.any((entry) => entry.trim() == windowsLocalBypass)) return config;
+  return config.copyWith.networkProps(
+    bypassDomain: [...bypass, windowsLocalBypass],
   );
 }
 

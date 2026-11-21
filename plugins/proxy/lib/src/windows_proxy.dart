@@ -5,8 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+/// WinINet's entry for every host without a dot, like `nas`.
+const windowsLocalBypass = '<local>';
+
 /// WinINet rejects the whole list over one bare IPv6 literal or one entry
-/// ending in `/`; its `<local>` token bypasses single-label hosts like `nas`.
+/// ending in `/`.
 List<String> windowsBypassList(List<String> bypassDomain) {
   final entries = <String>{};
   for (final domain in bypassDomain) {
@@ -16,7 +19,13 @@ List<String> windowsBypassList(List<String> bypassDomain) {
         InternetAddress.tryParse(entry)?.type == InternetAddressType.IPv6;
     entries.add(isBareIPv6 ? '[$entry]' : entry);
   }
-  return {...entries, '<local>'}.toList();
+  return entries.toList();
 }
+
+/// networksetup and the Linux settings would read WinINet's entry as a host.
+List<String> withoutWindowsLocal(List<String> bypassDomain) => [
+      for (final domain in bypassDomain)
+        if (domain.trim() != windowsLocalBypass) domain,
+    ];
 
 final _trailingSlashes = RegExp(r'/+$');

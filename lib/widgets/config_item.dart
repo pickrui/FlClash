@@ -252,12 +252,15 @@ class ConfigListEditItem extends _ConfigItem<List<String>> {
     required super.onChanged,
     this.itemMaxLength,
     this.itemValidator,
+    this.itemSubtitle,
     super.subtitle,
     super.leading,
   });
 
   final int? itemMaxLength;
   final ConfigValidator? itemValidator;
+  final String? Function(String item, AppLocalizations appLocalizations)?
+  itemSubtitle;
 
   @override
   Widget buildItem(
@@ -268,6 +271,7 @@ class ConfigListEditItem extends _ConfigItem<List<String>> {
   ) {
     final label = title(appLocalizations);
     final itemValidator = this.itemValidator;
+    final itemSubtitle = this.itemSubtitle;
     return ListItem.open(
       leading: leading,
       title: Text(label),
@@ -286,6 +290,12 @@ class ConfigListEditItem extends _ConfigItem<List<String>> {
             ? null
             : (item) => itemValidator(item, appLocalizations),
         titleBuilder: (item) => Text(item),
+        subtitleBuilder: itemSubtitle == null
+            ? null
+            : (item) => switch (itemSubtitle(item, appLocalizations)) {
+                final text? => Text(text),
+                null => null,
+              },
       ),
       onChanged: (items) {
         if (items is! List) {

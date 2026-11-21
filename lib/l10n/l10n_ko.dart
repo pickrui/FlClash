@@ -818,6 +818,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get bypassDomainDesc => '우회 도메인은 시스템 프록시가 켜져 있을 때만 적용됩니다.';
 
   @override
+  String get bypassLocalWindowsOnly => 'Windows 전용: 점이 없는 호스트 이름';
+
+  @override
   String get resetTip => '초기화 확인';
 
   @override

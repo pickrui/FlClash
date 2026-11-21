@@ -16,6 +16,15 @@ import 'models.dart';
 part 'generated/config.freezed.dart';
 part 'generated/config.g.dart';
 
+/// WinINet's entry for every host without a dot; the other platforms leave it
+/// out when they write the list.
+const windowsLocalBypass = '<local>';
+
+/// The field default keeps the shared list because it must be const.
+final List<String> platformDefaultBypassDomain = system.isWindows
+    ? const [...defaultBypassDomain, windowsLocalBypass]
+    : defaultBypassDomain;
+
 const defaultBypassDomain = [
   '*zhihu.com',
   '*zhimg.com',
@@ -490,6 +499,7 @@ abstract class Config with _$Config {
         appSettingProps: AppSettingProps(
           dashboardWidgets: platformDefaultDashboardWidgets,
         ),
+        networkProps: NetworkProps(bypassDomain: platformDefaultBypassDomain),
       );
     }
     return Config.fromJson(json);

@@ -847,6 +847,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Los dominios excluidos solo se aplican mientras el proxy del sistema esté activado.';
 
   @override
+  String get bypassLocalWindowsOnly =>
+      'Solo Windows: nombres de host sin punto';
+
+  @override
   String get resetTip => 'Confirmar restablecimiento';
 
   @override

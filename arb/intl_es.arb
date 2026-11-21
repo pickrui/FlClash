@@ -260,6 +260,7 @@
   "network": "Red",
   "bypassDomain": "Dominios excluidos",
   "bypassDomainDesc": "Los dominios excluidos solo se aplican mientras el proxy del sistema esté activado.",
+  "bypassLocalWindowsOnly": "Solo Windows: nombres de host sin punto",
   "resetTip": "Confirmar restablecimiento",
   "icon": "Icono",
   "noData": "Sin datos",

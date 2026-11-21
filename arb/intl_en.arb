@@ -260,6 +260,7 @@
   "network": "Network",
   "bypassDomain": "Bypass domains",
   "bypassDomainDesc": "Bypass domains apply only while the system proxy is on",
+  "bypassLocalWindowsOnly": "Windows only: host names without a dot",
   "resetTip": "Make sure to reset",
   "icon": "Icon",
   "noData": "No data",

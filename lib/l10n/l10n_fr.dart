@@ -850,6 +850,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les domaines contournés ne s’appliquent que si le proxy système est activé.';
 
   @override
+  String get bypassLocalWindowsOnly =>
+      'Windows uniquement : noms d’hôte sans point';
+
+  @override
   String get resetTip => 'Confirmer la réinitialisation';
 
   @override

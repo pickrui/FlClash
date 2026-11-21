@@ -308,7 +308,7 @@ class ListInputPage extends ConsumerStatefulWidget {
   final String title;
   final List<String> items;
   final Widget Function(String item) titleBuilder;
-  final Widget Function(String item)? subtitleBuilder;
+  final Widget? Function(String item)? subtitleBuilder;
   final String? valueLabel;
   final int? itemMaxLength;
   final String? Function(String item)? itemValidator;
