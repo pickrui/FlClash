@@ -196,6 +196,8 @@ extension CoreControllerExt on AppController {
     _ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
     await core.shutdown();
     if (!await _connectCore()) return false;
+    // This reconnect leaves the run stopped; a later restart must not start it.
+    _resumeRunOnCoreRestart = false;
     await _initCore();
     return _reinitializedCoreReady();
   }
