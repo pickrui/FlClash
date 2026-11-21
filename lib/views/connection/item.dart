@@ -11,7 +11,6 @@ import 'package:fl_clash/features/connection/mitm_exchanges.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:fl_clash/widgets/record.dart';
 import 'package:flutter/widgets.dart';
@@ -106,9 +105,8 @@ class TrackerInfoItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final showIcon =
-        ref.watch(effectiveFindProcessModeProvider) == FindProcessMode.always &&
-        system.isAndroid;
+    // Only Android draws the icon of the app behind a connection.
+    final showIcon = system.isAndroid;
     return ContextMenuRegion(
       menuItems: trackerInfoMenuItems(context, trackerInfo, onClose: onClose),
       child: RecordListItem(

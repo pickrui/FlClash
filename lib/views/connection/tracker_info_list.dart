@@ -6,7 +6,6 @@
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
@@ -277,10 +276,7 @@ class _TrackerInfoGroupedListState
       :onClose,
       :actionBuilder,
     ) = widget;
-    final showIcon =
-        grouping == RecordGrouping.app &&
-        ref.watch(effectiveFindProcessModeProvider) == FindProcessMode.always &&
-        system.isAndroid;
+    final showIcon = grouping == RecordGrouping.app && system.isAndroid;
     final showsTraffic = isLive || table != null;
     return RecordGroupedList<TrackerInfo>(
       groups: widget.groups,
