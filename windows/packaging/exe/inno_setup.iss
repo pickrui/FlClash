@@ -726,6 +726,14 @@ english.UninstallHelperFailed=The FlClash helper could not be removed. Uninstall
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+[InstallDelete]
+Type: files; Name: "{app}\window_plugin.dll"
+Type: files; Name: "{app}\tray_plugin.dll"
+Type: files; Name: "{app}\wifi_ssid_plugin.dll"
+Type: files; Name: "{app}\app_links_plugin.dll"
+Type: files; Name: "{app}\screen_retriever_windows_plugin.dll"
+
 [Files]
 Source: "{{SOURCE_DIR}}\\FlClashHelperService.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{{SOURCE_DIR}}\\*"; Excludes: "\FlClashHelperService.exe"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

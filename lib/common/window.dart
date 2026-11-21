@@ -358,7 +358,8 @@ Offset? restoredWindowPosition(
   var visibleWidth = 0.0;
   for (final display in displays) {
     final area = display.workArea;
-    if (titleBar.top < area.top || titleBar.bottom > area.bottom) {
+    // Rescaling a bar flush with an edge can land a rounding step past it.
+    if (titleBar.top < area.top - 0.5 || titleBar.bottom > area.bottom + 0.5) {
       continue;
     }
     visibleWidth += math.max(
