@@ -167,6 +167,16 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 true
             }
 
+            "getDeviceInfo" -> {
+                result.success(
+                    mapOf(
+                        "sdkInt" to Build.VERSION.SDK_INT,
+                        "isTelevision" to isTelevision,
+                        "model" to Build.MODEL,
+                    )
+                )
+            }
+
             "moveTaskToBack" -> {
                 activityRef?.get()?.moveTaskToBack(true)
                 result.success(true)

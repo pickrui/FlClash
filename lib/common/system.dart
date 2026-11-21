@@ -6,7 +6,6 @@
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffi/ffi.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/macos_dns.dart';
@@ -17,18 +16,12 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
+import 'package:rust_api/rust_api.dart' as rust_api;
 
 bool isFlClashDockerEnvironment(Map<String, String> environment) {
   final value = environment['FLCLASH_DOCKER']?.trim().toLowerCase();
   return value == 'true' || value == '1';
 }
-
-bool isAndroidTvFeatures(Iterable<String> features) => features.any(
-  const {
-    'android.hardware.type.television',
-    'android.software.leanback',
-  }.contains,
-);
 
 class System {
   static System? _instance;
@@ -56,31 +49,19 @@ class System {
 
   bool get isTV => _isTV;
 
+  /// The OS major version: the API level on Android, the macOS major
+  /// version, 10 on Windows 10 and 11 alike, and 0 elsewhere.
   Future<int> init() async {
-    final BaseDeviceInfo deviceInfo;
-    try {
-      deviceInfo = await DeviceInfoPlugin().deviceInfo;
-    } on RangeError {
-      // Some Windows installs store an InstallDate outside DateTime's range.
-      if (isWindows) return 0;
-      rethrow;
+    if (isAndroid) {
+      final info = await app!.getDeviceInfo();
+      _isTV = info.isTelevision;
+      return info.sdkInt;
     }
-    _isTV = switch (deviceInfo) {
-      AndroidDeviceInfo(:final systemFeatures) => isAndroidTvFeatures(
-        systemFeatures,
-      ),
-      _ => false,
-    };
-    return switch (Platform.operatingSystem) {
-      'macos' => (deviceInfo as MacOsDeviceInfo).majorVersion,
-      'android' => (deviceInfo as AndroidDeviceInfo).version.sdkInt,
-      'windows' => (deviceInfo as WindowsDeviceInfo).majorVersion,
-      String() => 0,
-    };
+    return rust_api.osMajorVersion();
   }
 
   Future<String> get deviceName async {
-    if (isAndroid) return (await DeviceInfoPlugin().androidInfo).model;
+    if (isAndroid) return (await app!.getDeviceInfo()).model;
     return Platform.localHostname.split('.').first;
   }
 

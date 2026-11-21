@@ -10,13 +10,6 @@ import 'package:fl_clash/core/desktop/unix_helper.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('only TV device features enable remote navigation', () {
-    expect(isAndroidTvFeatures(['android.hardware.type.television']), isTrue);
-    expect(isAndroidTvFeatures(['android.software.leanback']), isTrue);
-    expect(isAndroidTvFeatures(['android.hardware.touchscreen']), isFalse);
-    expect(isAndroidTvFeatures([]), isFalse);
-  });
-
   test('the Windows Helper is installed for the account of this process', () {
     expect(Windows.installArguments(4242), 'install --owner-pid 4242');
   });

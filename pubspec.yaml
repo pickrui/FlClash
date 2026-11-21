@@ -43,7 +43,6 @@ dependencies:
     path: plugins/code_forge
   re_highlight: ^0.0.3
   archive: ^4.6.0
-  device_info_plus: ^13.3.0
   wifi_ssid:
     path: plugins/wifi_ssid
   connectivity_plus: 7.2.0
