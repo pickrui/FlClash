@@ -49,6 +49,22 @@ String normalizeCongestionController(String? value) =>
     : defaultCongestionController;
 
 const defaultMixedPort = 7890;
+
+bool isUsableMixedPort(int port) => port > 0 && port <= 65535;
+
+/// A stored mixed port the Core would read as no mixed listener.
+Object? unusableMixedPort(Object? patchJson) {
+  if (patchJson is! Map) return null;
+  final raw = patchJson['mixed-port'];
+  return raw != null && _mixedPortFromJson(raw) != raw ? raw : null;
+}
+
+int _mixedPortFromJson(Object? value) => switch (value) {
+  final num port
+      when port == port.truncate() && isUsableMixedPort(port.toInt()) =>
+    port.toInt(),
+  _ => defaultMixedPort,
+};
 const defaultKeepAliveInterval = 30;
 const defaultKeepAliveIdle = 15;
 const defaultGeoUpdateInterval = 24;
@@ -1385,7 +1401,9 @@ Map<String, Object?> _withLegacyGeneralOverrides(Map<String, Object?> json) {
 abstract class ClashConfig with _$ClashConfig {
   const factory ClashConfig({
     @JsonKey(name: 'global-ua') String? globalUa,
-    @Default(defaultMixedPort) @JsonKey(name: 'mixed-port') int mixedPort,
+    @Default(defaultMixedPort)
+    @JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson)
+    int mixedPort,
     @Default(0) @JsonKey(name: 'socks-port') int socksPort,
     @Default(0) @JsonKey(name: 'port') int port,
     @Default(0) @JsonKey(name: 'redir-port') int redirPort,

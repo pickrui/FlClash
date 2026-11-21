@@ -5635,4 +5635,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get diagRecorded => '履歴';
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return 'ミックスポートを $value にはできないため、$port に戻しました';
+  }
 }

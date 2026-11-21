@@ -5756,4 +5756,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get diagRecorded => '기록';
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return '혼합 포트는 $value일 수 없어 $port(으)로 되돌렸습니다';
+  }
 }

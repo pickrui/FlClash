@@ -1815,5 +1815,6 @@
       }
     }
   },
-  "diagRecorded": "История"
+  "diagRecorded": "История",
+  "mixedPortReset": "Смешанный порт не может быть {value}, поэтому он возвращён на {port}"
 }

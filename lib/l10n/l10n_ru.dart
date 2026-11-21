@@ -5974,4 +5974,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get diagRecorded => 'История';
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return 'Смешанный порт не может быть $value, поэтому он возвращён на $port';
+  }
 }

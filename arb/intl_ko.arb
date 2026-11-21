@@ -1815,5 +1815,6 @@
       }
     }
   },
-  "diagRecorded": "기록"
+  "diagRecorded": "기록",
+  "mixedPortReset": "혼합 포트는 {value}일 수 없어 {port}(으)로 되돌렸습니다"
 }

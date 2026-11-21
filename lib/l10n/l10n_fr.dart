@@ -6042,4 +6042,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get diagRecorded => 'Historique';
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return 'Le port mixte ne peut pas être $value, il a été remis à $port';
+  }
 }

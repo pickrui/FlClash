@@ -1923,5 +1923,12 @@
       }
     }
   },
-  "diagRecorded": "History"
+  "diagRecorded": "History",
+  "mixedPortReset": "The mixed port cannot be {value}, so it was set back to {port}",
+  "@mixedPortReset": {
+    "placeholders": {
+      "value": {},
+      "port": {}
+    }
+  }
 }

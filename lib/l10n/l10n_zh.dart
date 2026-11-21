@@ -5537,4 +5537,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get diagRecorded => '记录';
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return '混合端口不能是 $value，已恢复为 $port';
+  }
 }

@@ -25,6 +25,18 @@ void main() {
     expect(restored.emptyFallback, 'REJECT');
   });
 
+  test(
+    'a stored mixed port the Core cannot listen on reads as the default',
+    () {
+      for (final port in [0, 7890.5, 70000]) {
+        final config = ClashConfig.fromJson({'mixed-port': port});
+        expect(config.mixedPort, defaultMixedPort);
+        expect(unusableMixedPort({'mixed-port': port}), port);
+      }
+      expect(unusableMixedPort({'mixed-port': 7891}), isNull);
+    },
+  );
+
   test('keep-alive and routing mark persist under mihomo keys', () {
     final saved = jsonDecode(
       jsonEncode(

@@ -10414,6 +10414,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'History'**
   String get diagRecorded;
+
+  /// No description provided for @mixedPortReset.
+  ///
+  /// In en, this message translates to:
+  /// **'The mixed port cannot be {value}, so it was set back to {port}'**
+  String mixedPortReset(Object value, Object port);
 }
 
 class _AppLocalizationsDelegate

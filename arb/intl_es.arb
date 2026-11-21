@@ -1815,5 +1815,6 @@
       }
     }
   },
-  "diagRecorded": "Historial"
+  "diagRecorded": "Historial",
+  "mixedPortReset": "El puerto mixto no puede ser {value}, así que se restableció a {port}"
 }

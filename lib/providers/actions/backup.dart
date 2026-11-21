@@ -222,6 +222,18 @@ extension BackupControllerExt on AppController {
               option == RestoreOption.all && configMap != null
               ? Config.fromJson(configMap)
               : null;
+          final resetPort = restoredConfig == null
+              ? null
+              : unusableMixedPort(configMap?['patchClashConfig']);
+          if (resetPort != null) {
+            globalState.showNotifier(
+              appLocalizations.mixedPortReset(
+                resetPort,
+                restoredConfig!.patchClashConfig.mixedPort,
+              ),
+              level: MessageLevel.warning,
+            );
+          }
           await ensureCoreReadyOrThrow();
           final profilesPath = await appPath.profilesPath;
           await validateRestoredProfileFiles(

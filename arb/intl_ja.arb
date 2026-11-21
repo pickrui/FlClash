@@ -1815,5 +1815,6 @@
       }
     }
   },
-  "diagRecorded": "履歴"
+  "diagRecorded": "履歴",
+  "mixedPortReset": "ミックスポートを {value} にはできないため、{port} に戻しました"
 }
