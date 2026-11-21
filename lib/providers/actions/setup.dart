@@ -827,7 +827,15 @@ extension SetupControllerExt on AppController {
   }) async {
     final profileId = setupState.profileId;
     if (profileId == null) {
-      return safeModeBuild ? safeModeProfile({}) : {};
+      final inbound = inboundConfigOf(
+        patchConfig,
+        authentication: _ref
+            .read(networkSettingProvider)
+            .authentication
+            .credentials,
+        dockerMode: system.isDocker,
+      );
+      return safeModeBuild ? safeModeProfile(inbound) : inbound;
     }
     final defaultUA = globalState.packageInfo.ua;
     final networkVM2 = _ref.read(

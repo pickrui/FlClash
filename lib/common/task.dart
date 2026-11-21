@@ -64,6 +64,23 @@ Map<String, dynamic> safeModeProfile(Map<String, dynamic> config) => {
   'iptables': {'enable': false},
 };
 
+Map<String, dynamic> inboundConfigOf(
+  ClashConfig config, {
+  required List<String> authentication,
+  bool dockerMode = false,
+}) => {
+  'mixed-port': config.mixedPort,
+  'port': config.port,
+  'socks-port': config.socksPort,
+  'redir-port': config.redirPort,
+  'tproxy-port': config.tproxyPort,
+  'allow-lan': dockerMode || config.allowLan,
+  if (dockerMode) 'bind-address': '*',
+  // A profile's skip-auth-prefixes could exempt loopback from authentication.
+  'authentication': authentication,
+  'skip-auth-prefixes': const <String>[],
+};
+
 Future<Map<String, dynamic>> makeRealProfileTask(
   MakeRealProfileState data,
 ) async {
@@ -505,9 +522,6 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
       rawConfig['iptables'] = {'enable': false};
     }
   }
-  // The app owns local inbound auth, including after a profile script has run.
-  rawConfig['authentication'] = data.authentication;
-  rawConfig['skip-auth-prefixes'] = <String>[];
   rawConfig['external-ui'] = '';
   rawConfig['external-ui-url'] = '';
   rawConfig.addAll(realPatchConfig.generalOverrideJson);
@@ -517,16 +531,14 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   rawConfig['keep-alive-idle'] = realPatchConfig.keepAliveIdle;
   rawConfig['disable-keep-alive'] = realPatchConfig.disableKeepAlive;
   rawConfig['routing-mark'] = realPatchConfig.routingMark;
-  rawConfig['mixed-port'] = realPatchConfig.mixedPort;
-  rawConfig['port'] = realPatchConfig.port;
-  rawConfig['socks-port'] = realPatchConfig.socksPort;
-  rawConfig['redir-port'] = realPatchConfig.redirPort;
-  rawConfig['tproxy-port'] = realPatchConfig.tproxyPort;
+  rawConfig.addAll(
+    inboundConfigOf(
+      realPatchConfig,
+      authentication: data.authentication,
+      dockerMode: data.dockerMode,
+    ),
+  );
   rawConfig['find-process-mode'] = realPatchConfig.findProcessMode.name;
-  rawConfig['allow-lan'] = data.dockerMode || realPatchConfig.allowLan;
-  if (data.dockerMode) {
-    rawConfig['bind-address'] = '*';
-  }
   rawConfig['mode'] = realPatchConfig.mode.name;
   final overrides = data.overrides;
   final tunPicks = overrides.overAppTun(

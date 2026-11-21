@@ -1276,6 +1276,44 @@ void main() {
     },
   );
 
+  testWidgets('without a profile the Core still opens the mixed port', (
+    tester,
+  ) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    late AppController controller;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: Consumer(
+          builder: (context, ref, _) {
+            controller = AppController.forTesting(context, ref);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final config = await controller.getProfile(
+      setupState: const SetupState(
+        profileId: null,
+        profileLastUpdateDate: null,
+        overwriteType: OverwriteType.standard,
+        addedRules: [],
+        proxyChains: [],
+        profileProxies: [],
+        customProxyGroups: [],
+        customRules: [],
+        script: null,
+        dns: Dns(),
+      ),
+      patchConfig: const ClashConfig(mixedPort: 7899),
+    );
+
+    expect(config['mixed-port'], 7899);
+    expect(config['skip-auth-prefixes'], isEmpty);
+  });
+
   group('custom node copies', () {
     late _CoreHandler handler;
     late _RawSetupAction setup;
