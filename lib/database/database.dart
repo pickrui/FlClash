@@ -182,6 +182,10 @@ class Database extends _$Database {
                 .insertOnConflictUpdate(rule.toRule().toCompanion());
           }
         }
+        // Ahead of the v11 step, which renames a node in the exits that name it.
+        if (from < 15 && profileColumns.contains('match_target')) {
+          await _matchTargetToExit();
+        }
         if (from < 11) {
           final merged = mergeProfileProxies(
             await profilesDao.all().get(),
@@ -212,13 +216,13 @@ class Database extends _$Database {
           await _moveRulesOffShadowedAliases(await profilesDao.all().get());
         }
         if (from < 14) await _mergeScriptAndAddedRules();
-        if (from < 15) await _matchTargetToExit();
+        if (from < 15) await _matchPlaceholdersToExit();
         if (from < 16) await _recordMitmConsent(m);
       }),
     );
   }
 
-  Future<void> _matchTargetToExit() async {
+  Future<void> _matchPlaceholdersToExit() async {
     final placeholders =
         await (select(rules)..where(
               (rule) =>
@@ -230,6 +234,9 @@ class Database extends _$Database {
       await into(rules)
           .insertOnConflictUpdate(row.toRule().withMatchExit.toCompanion());
     }
+  }
+
+  Future<void> _matchTargetToExit() async {
     await customStatement(
       'UPDATE profiles SET exit_targets = json_set('
       "CASE WHEN json_valid(exit_targets) THEN exit_targets ELSE '{}' END, "

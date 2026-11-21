@@ -511,6 +511,44 @@ void main() {
     );
   });
 
+  test(
+    'a node renamed by the v11 merge keeps the exit that named it',
+    () async {
+      final tempDir = await Directory.systemTemp.createTemp('flclash_v10_');
+      addTearDown(() => tempDir.delete(recursive: true));
+      final file = File('${tempDir.path}/database.sqlite');
+      Profile owner(int id, String uri) => Profile(
+        id: id,
+        autoUpdateDuration: Duration.zero,
+        profileProxies: [
+          ProfileProxy(
+            id: id + 10,
+            uri: uri,
+            proxy: {'name': 'HK', 'type': 'ss', 'server': uri},
+          ),
+        ],
+      );
+      await _createDatabase(file, [
+        owner(1, 'ss://a'),
+        owner(2, 'ss://b'),
+      ], schemaVersion: 10);
+      final raw = sqlite.sqlite3.open(file.path);
+      raw.execute("UPDATE profiles SET match_target = 'HK' WHERE id = 2");
+      raw.close();
+
+      final database = Database(NativeDatabase(file));
+      addTearDown(database.close);
+      final profiles = await database.profilesDao.all().get();
+      final renamed = (await database.customProxiesDao.all().get()).last.name;
+
+      expect(renamed, isNot('HK'));
+      expect(profiles.map((profile) => profile.exitTargets), [
+        <String, String>{},
+        {'MATCH': renamed},
+      ]);
+    },
+  );
+
   test('icon sets restore from a backup, one set per remote url', () async {
     final root = await Directory.systemTemp.createTemp('flclash_v8_backup_');
     addTearDown(() => root.delete(recursive: true));
