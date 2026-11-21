@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 pub mod charset;
 pub mod editor;
+pub mod fonts;
 pub mod hotkey;
 pub mod init;
 pub mod ipc;

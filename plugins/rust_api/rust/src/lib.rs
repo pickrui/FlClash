@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 pub mod api;
 mod editor;
+mod fonts;
 mod frb_generated;
 mod hotkey;
 mod ipc;
