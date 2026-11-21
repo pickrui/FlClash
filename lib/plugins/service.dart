@@ -62,7 +62,11 @@ final class ServiceStartException implements LocalizedException {
   @override
   String messageFor(AppLocalizations localizations) => switch (failure) {
     ServiceStartFailure.vpnPermission => localizations.vpnPermissionNotGranted,
-    ServiceStartFailure.service => localizations.vpnServiceStartFailed,
+    ServiceStartFailure.service => switch (detail?.trim()) {
+      final reason? when reason.isNotEmpty =>
+        '${localizations.vpnServiceStartFailed}: $reason',
+      _ => localizations.vpnServiceStartFailed,
+    },
   };
 
   @override

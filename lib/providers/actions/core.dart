@@ -346,10 +346,13 @@ extension CoreControllerExt on AppController {
     });
   }
 
-  /// A lost Core gets no stop. Its run ends here and the next Core restart
-  /// resumes it, unless a start or stop is asked for first.
+  /// A lost Core gets no stop. Its run ends here and, on desktop, the next
+  /// Core restart resumes it unless a start or stop is asked for first;
+  /// Android reconnects its Core whenever the app comes to the front.
   void endRunAfterCoreLoss() {
-    if (globalState.isStart) _resumeRunOnCoreRestart = true;
+    if (system.isDesktop && globalState.isStart) {
+      _resumeRunOnCoreRestart = true;
+    }
     globalState.clearRunState();
   }
 
