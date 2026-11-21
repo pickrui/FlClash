@@ -5572,8 +5572,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mitmScriptRiskTitle => '运行此模块的脚本？';
 
   @override
+  String get mitmModulesTurnedOff => '模块已关闭';
+
+  @override
+  String mitmModuleTurnedOffDesc(Object name) {
+    return '$name 的更新带来了你未同意过的脚本或网络改动';
+  }
+
+  @override
+  String mitmModulesTurnedOffDesc(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个模块的更新带来了你未同意过的脚本或网络改动',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get mitmScriptRisk =>
       '它的脚本能读取并修改所匹配主机的流量，包括 Cookie 和令牌，还能自行发送请求。只在信任其来源时开启。开启后，它之后的更新会直接生效';
+
+  @override
+  String get mitmModuleUnreadableRisk => '无法读取模块文件，不清楚它会改动什么。只在信任其来源时开启';
 
   @override
   String get skipServerCertVerify => '跳过服务器证书验证';

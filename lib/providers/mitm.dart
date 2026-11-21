@@ -262,6 +262,13 @@ class MitmExportWarned extends _$MitmExportWarned {
   void accept() => state = true;
 }
 
+@riverpod
+List<MitmModule> mitmModulesToAgree(Ref ref) => [
+  for (final module
+      in ref.watch(mitmModulesProvider).value ?? const <MitmModule>[])
+    if (module.awaitsConsent) module,
+];
+
 /// Why the Core skips each of the user's hostnames, by the line.
 @riverpod
 Future<Map<String, String>> mitmHostnameIssues(Ref ref) async {
@@ -484,7 +491,11 @@ Future<MitmModuleDetails?> mitmModuleDetails(Ref ref, int id) async {
   return (content: content, issues: check.issues, views: check.views);
 }
 
-@riverpod
+Duration? _noRetry(int retryCount, Object error) => null;
+
+/// A file that fails to parse fails again until it changes, which rebuilds
+/// this anyway.
+@Riverpod(retry: _noRetry)
 Future<MitmModuleContent?> mitmModuleContent(Ref ref, int id) async {
   final module = ref.watch(
     mitmModulesProvider.select(

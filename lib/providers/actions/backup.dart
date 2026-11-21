@@ -626,6 +626,7 @@ extension BackupControllerExt on AppController {
     }
     if (restoreCommitted) {
       final modules = _ref.read(mitmModulesActionProvider.notifier);
+      await modules.recheckConsent();
       await modules.clean();
       unawaited(modules.autoUpdate());
     }

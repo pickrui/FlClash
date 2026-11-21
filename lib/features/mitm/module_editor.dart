@@ -58,31 +58,41 @@ String mitmNetworkChangeValue(
   ].join('\n');
 }
 
-/// Scripts and network changes reach past the module's own hosts, so either
-/// asks before the module turns on.
-Future<bool> acceptMitmModule(WidgetRef ref, MitmModule module) async {
-  final content = ref.listenManual(
-    mitmModuleContentProvider(module.id).future,
-    (_, _) {},
-  );
-  final MitmModuleContent? read;
-  try {
-    read = await content.read();
-  } finally {
-    content.close();
-  }
-  final changes = read?.network.changes ?? const <MitmNetworkChange>[];
-  final unverified = read?.skipVerifyHostname ?? const <String>[];
-  final sources = read?.clientSourceAddress ?? const <String>[];
-  final scripts = module.scripts > 0;
-  if (!scripts && read?.asksConsent != true) {
-    return true;
-  }
-  final appLocalizations = currentAppLocalizations;
+/// Records the answer on the row the prompt saw; false once dismissed.
+Future<bool> answerMitmModule(WidgetRef ref, MitmModule module) async {
+  final action = ref.read(mitmModulesActionProvider.notifier);
+  final reviewed =
+      ref
+          .read(mitmModulesProvider)
+          .value
+          ?.firstWhereOrNull((item) => item.id == module.id) ??
+      module;
   final overrides = ref.read(
     profileOverridesProvider(ref.read(currentProfileIdProvider)),
   );
   final hosts = ref.read(patchClashConfigProvider).hosts;
+  final content = ref.listenManual(
+    mitmModuleContentProvider(module.id).future,
+    (_, _) {},
+  );
+  MitmModuleContent? read;
+  try {
+    read = await content.read();
+  } catch (_) {
+    read = null;
+  } finally {
+    content.close();
+  }
+  final asksConsent = read?.asksConsent ?? true;
+  if (!reviewed.copyWith(asksConsent: asksConsent).asksBeforeTurningOn) {
+    await action.recordConsent(reviewed, asksConsent: asksConsent);
+    return true;
+  }
+  final changes = read?.network.changes ?? const <MitmNetworkChange>[];
+  final unverified = read?.skipVerifyHostname ?? const <String>[];
+  final sources = read?.clientSourceAddress ?? const <String>[];
+  final scripts = reviewed.scripts > 0;
+  final appLocalizations = currentAppLocalizations;
   String line(MitmNetworkChange change) {
     final title = mitmNetworkChangeTitle(appLocalizations, change);
     final value = mitmNetworkChangeValue(appLocalizations, change);
@@ -93,8 +103,8 @@ Future<bool> acceptMitmModule(WidgetRef ref, MitmModule module) async {
     ].join('\n');
   }
 
-  final accepted = await globalState.showMessage(
-    title: read?.asksConsent == true
+  final agreed = await globalState.showMessage(
+    title: asksConsent
         ? appLocalizations.mitmModuleRiskTitle
         : appLocalizations.mitmScriptRiskTitle,
     message: TextSpan(
@@ -108,6 +118,7 @@ Future<bool> acceptMitmModule(WidgetRef ref, MitmModule module) async {
           ),
         TextSpan(
           text: [
+            if (read == null) appLocalizations.mitmModuleUnreadableRisk,
             if (scripts) appLocalizations.mitmScriptRisk,
             if (sources.isNotEmpty)
               appLocalizations.mitmClientSourceRisk(sources.join(', ')),
@@ -122,19 +133,20 @@ Future<bool> acceptMitmModule(WidgetRef ref, MitmModule module) async {
     ),
     confirmText: appLocalizations.turnOn,
   );
-  return accepted == true;
+  if (agreed == null) {
+    return false;
+  }
+  await action.recordConsent(
+    reviewed,
+    asksConsent: asksConsent,
+    agreed: agreed,
+  );
+  return true;
 }
 
 Future<void> offerMitmModule(WidgetRef ref, MitmModule? module) async {
-  if (module == null || module.enabled || !ref.context.mounted) return;
-  final reviewed = ref
-      .read(mitmModulesProvider)
-      .value
-      ?.firstWhereOrNull((item) => item.id == module.id);
-  if (reviewed == null || reviewed.enabled) return;
-  final action = ref.read(mitmModulesActionProvider.notifier);
-  if (await acceptMitmModule(ref, reviewed)) {
-    await action.setEnabled(reviewed, true);
+  if (module != null && module.awaitsConsent && ref.context.mounted) {
+    await answerMitmModule(ref, module);
   }
 }
 
@@ -167,9 +179,7 @@ Future<void> openMitmModuleEditor(
       return;
     }
     if (context.mounted) closePage(context);
-    if (module == null) {
-      await offerMitmModule(ref, saved);
-    }
+    await offerMitmModule(ref, saved);
   }
 
   if (!context.mounted) {

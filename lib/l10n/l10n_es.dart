@@ -6065,8 +6065,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mitmScriptRiskTitle => '¿Ejecutar los scripts de este módulo?';
 
   @override
+  String get mitmModulesTurnedOff => 'Módulos desactivados';
+
+  @override
+  String mitmModuleTurnedOffDesc(Object name) {
+    return 'Una actualización de $name trajo scripts o cambios de red que no has aceptado';
+  }
+
+  @override
+  String mitmModulesTurnedOffDesc(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Las actualizaciones de $count módulos trajeron scripts o cambios de red que no has aceptado',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get mitmScriptRisk =>
       'Sus scripts leen y modifican el tráfico de los hosts que coinciden, incluidas las cookies y los tokens, y pueden enviar sus propias solicitudes. Actívalo solo si confías en su origen. Una vez activado, sus actualizaciones se aplican sin volver a preguntar.';
+
+  @override
+  String get mitmModuleUnreadableRisk =>
+      'No se pudo leer el archivo del módulo, así que no se sabe qué cambia. Actívalo solo si confías en su origen.';
 
   @override
   String get skipServerCertVerify =>

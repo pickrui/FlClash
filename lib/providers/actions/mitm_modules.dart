@@ -136,51 +136,105 @@ class MitmModulesAction extends _$MitmModulesAction {
         await ref.read(mitmModulesProvider.notifier).put(module, first: first);
       });
 
-  Future<void> setEnabled(MitmModule reviewed, bool enabled) =>
-      storageLock.synchronized(() async {
-        final current = await _current(reviewed.id);
-        if (current == null || (enabled && current != reviewed)) return;
-        await putModule(current.copyWith(enabled: enabled));
-      });
+  /// Agreeing turns on only the revision the user reviewed.
+  Future<void> recordConsent(
+    MitmModule reviewed, {
+    required bool asksConsent,
+    bool? agreed,
+  }) => storageLock.synchronized(() async {
+    final current = await _current(reviewed.id);
+    if (current == null ||
+        !ref.mounted ||
+        (agreed != false && current != reviewed)) {
+      return;
+    }
+    await putModule(
+      current.copyWith(
+        asksConsent: asksConsent,
+        enabled: agreed ?? true,
+        accepted: agreed ?? current.accepted,
+      ),
+    );
+  });
 
-  Future<void> setArguments(
+  /// Turning a module off counts as declining it until it is turned on.
+  Future<void> turnOff(int id) => storageLock.synchronized(() async {
+    final current = await _current(id);
+    if (ref.mounted && current != null) {
+      await putModule(
+        current.copyWith(enabled: false, accepted: current.accepted ?? false),
+      );
+    }
+  });
+
+  /// A restored row may have been judged against another device's files.
+  Future<void> recheckConsent() async {
+    for (final module in await database.mitmModulesDao.query().get()) {
+      bool asksConsent;
+      try {
+        asksConsent = (await _read(module, module.arguments)).asksConsent;
+      } catch (_) {
+        asksConsent = true;
+      }
+      if (!ref.mounted) {
+        return;
+      }
+      await storageLock.synchronized(() async {
+        final current = await _current(module.id);
+        if (current != null && current.asksConsent != asksConsent) {
+          await putModule(current.copyWith(asksConsent: asksConsent));
+        }
+      });
+    }
+  }
+
+  /// Null once the module is gone; a module file that cannot be read throws.
+  Future<MitmModule?> setArguments(
     MitmModule module,
     Map<String, String> arguments,
   ) async {
-    await putModule(module.copyWith(arguments: arguments));
+    final content = await _read(module, arguments);
+    final changed = await storageLock.synchronized(() async {
+      final current = await _current(module.id);
+      if (!ref.mounted || current == null) {
+        return current;
+      }
+      final changed = _withContent(
+        current.copyWith(arguments: arguments),
+        content,
+      );
+      await putModule(changed);
+      return changed;
+    });
+    if (changed == null || !ref.mounted) {
+      return changed;
+    }
     final held = <String>[];
     try {
-      final text = await File(await _pathOf(module)).readAsString();
-      final content = await compute(_parseMitmModule, (text, arguments));
       final missing = content.resourceUrls.difference({
-        ...module.resources.keys,
+        ...changed.resources.keys,
       });
-      final fetched = missing.isEmpty || !ref.mounted
+      final fetched = missing.isEmpty
           ? const <String, String>{}
           : await _download(missing, previous: const {}, held: held);
       final written = await _writeInline({
         for (final MapEntry(:key, :value) in content.inlineResources.entries)
-          if (!module.resources.containsKey(key)) key: value,
+          if (!changed.resources.containsKey(key)) key: value,
       }, held);
-      final current = await _current(module.id);
-      if (!ref.mounted ||
-          current == null ||
-          (fetched.isEmpty &&
-              written.isEmpty &&
-              current.scripts == content.declaredScripts)) {
-        return;
+      if (fetched.isEmpty && written.isEmpty) {
+        return changed;
       }
-      await putModule(
-        current.copyWith(
-          resources: {...current.resources, ...fetched, ...written},
-          scripts: content.declaredScripts,
-        ),
-      );
-    } on FileSystemException catch (e) {
-      commonPrint.log(
-        'MITM module ${module.name}: ${compactError(e)}',
-        logLevel: LogLevel.warning,
-      );
+      return await storageLock.synchronized(() async {
+        final latest = await _current(module.id);
+        if (!ref.mounted || latest == null) {
+          return latest;
+        }
+        final withResources = latest.copyWith(
+          resources: {...latest.resources, ...fetched, ...written},
+        );
+        await putModule(withResources);
+        return withResources;
+      });
     } finally {
       held.forEach(_held.remove);
     }
@@ -232,6 +286,14 @@ class MitmModulesAction extends _$MitmModulesAction {
     return p.join(await appPath.mitmModulesDirPath, module.fileName);
   }
 
+  Future<MitmModuleContent> _read(
+    MitmModule module,
+    Map<String, String> arguments,
+  ) async {
+    final text = await File(await _pathOf(module)).readAsString();
+    return compute(_parseMitmModule, (text, arguments));
+  }
+
   Future<MitmModule?> _current(int id) async =>
       (await ref.read(mitmModulesProvider.future))
           .where((item) => item.id == id)
@@ -272,14 +334,10 @@ class MitmModulesAction extends _$MitmModulesAction {
         if (current == null || !ref.mounted) {
           return module;
         }
-        final saved = current.copyWith(
+        final saved = _withContent(current, content).copyWith(
           name: content.name ?? current.name,
           description: content.description ?? '',
           system: content.system,
-          enabled: added
-              ? content.declaredScripts == 0 && !content.asksConsent
-              : current.enabled,
-          scripts: content.declaredScripts,
           resources: {...mitmAttachments(current), ...resources, ...written},
           lastUpdateTime: DateTime.now(),
         );
@@ -297,6 +355,19 @@ class MitmModulesAction extends _$MitmModulesAction {
         await _cleanAfterSave();
       }
     }
+  }
+
+  MitmModule _withContent(MitmModule current, MitmModuleContent content) {
+    final next = current.copyWith(
+      scripts: content.declaredScripts,
+      asksConsent: content.asksConsent,
+    );
+    if (!current.enabled ||
+        current.accepted == true ||
+        !next.asksBeforeTurningOn) {
+      return next;
+    }
+    return next.copyWith(enabled: false, accepted: null);
   }
 
   Future<void> _cleanAfterSave() async {

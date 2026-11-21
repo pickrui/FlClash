@@ -10464,11 +10464,35 @@ abstract class AppLocalizations {
   /// **'Run this module\'s scripts?'**
   String get mitmScriptRiskTitle;
 
+  /// No description provided for @mitmModulesTurnedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Modules turned off'**
+  String get mitmModulesTurnedOff;
+
+  /// No description provided for @mitmModuleTurnedOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'An update to {name} brought scripts or network changes you have not agreed to'**
+  String mitmModuleTurnedOffDesc(Object name);
+
+  /// No description provided for @mitmModulesTurnedOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count} modules got updates with scripts or network changes you have not agreed to}}'**
+  String mitmModulesTurnedOffDesc(num count);
+
   /// No description provided for @mitmScriptRisk.
   ///
   /// In en, this message translates to:
   /// **'Its scripts read and change the traffic of the hosts they match, cookies and tokens included, and can send requests of their own. Turn it on only if you trust where it comes from. Once on, its updates take effect without asking again.'**
   String get mitmScriptRisk;
+
+  /// No description provided for @mitmModuleUnreadableRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'The module file could not be read, so what it changes is unknown. Turn it on only if you trust where it comes from.'**
+  String get mitmModuleUnreadableRisk;
 
   /// No description provided for @skipServerCertVerify.
   ///

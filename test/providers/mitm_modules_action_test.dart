@@ -14,6 +14,7 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/widgets.dart'
     show Locale, FlutterError, FlutterErrorDetails;
@@ -246,7 +247,7 @@ Extra = type=http-response,pattern=^https://b,script-path=${urlOf('/extra.js')},
       expect(added.scripts, 2);
       expect(added.resources.keys, [urlOf('/ads.js')]);
 
-      await action().putModule(added.copyWith(enabled: true));
+      await action().putModule(added.copyWith(enabled: true, accepted: true));
       await action().setArguments((await stored()).single, const {
         'Extra': 'true',
       });
@@ -259,7 +260,7 @@ Extra = type=http-response,pattern=^https://b,script-path=${urlOf('/extra.js')},
     },
   );
 
-  test('script confirmation only enables the reviewed revision', () async {
+  test('agreeing only enables the reviewed revision', () async {
     final reviewed = MitmModule(
       id: 1,
       name: 'Script',
@@ -272,14 +273,17 @@ Extra = type=http-response,pattern=^https://b,script-path=${urlOf('/extra.js')},
     await action().putModule(reviewed);
     final revised = reviewed.copyWith(resources: const {'own.js': 'new.js'});
     await action().putModule(revised);
-    await action().setEnabled(reviewed, true);
+    await action().recordConsent(reviewed, asksConsent: false, agreed: true);
     expect((await stored()).single, revised);
-    await action().setEnabled(revised, true);
-    expect((await stored()).single, revised.copyWith(enabled: true));
-    await action().setEnabled(reviewed, false);
-    expect((await stored()).single, revised);
+    await action().recordConsent(revised, asksConsent: false, agreed: true);
+    final agreed = revised.copyWith(enabled: true, accepted: true);
+    expect((await stored()).single, agreed);
+    await action().turnOff(revised.id);
+    expect((await stored()).single, agreed.copyWith(enabled: false));
+    await action().recordConsent(reviewed, asksConsent: false, agreed: false);
+    expect((await stored()).single.accepted, isFalse);
     await action().deleteModule(revised);
-    await action().setEnabled(revised, true);
+    await action().recordConsent(revised, asksConsent: false, agreed: true);
     expect(await stored(), isEmpty);
   });
 
@@ -308,21 +312,81 @@ Extra = type=http-response,pattern=^https://b,script-path=${urlOf('/extra.js')},
     },
   );
 
-  test('an update that brings scripts keeps the module on', () async {
+  test('a restore reads what each module asks from its own file', () async {
     bodies = {'/ads.sgmodule': module('Ads'), '/blank.json': '{}'};
-    await action().addFromUrl(urlOf('/ads.sgmodule'));
-    expect((await stored()).single.enabled, isTrue);
-    bodies['/ads.sgmodule'] =
-        '''
+    final added = await action().addFromUrl(urlOf('/ads.sgmodule'));
+    await File(join(await appPath.mitmModulesDirPath, added.fileName))
+        .writeAsString('[General]\ndns-server = 223.5.5.5\n');
+    expect((await stored()).single.asksConsent, isFalse);
+
+    await action().recheckConsent();
+
+    expect((await stored()).single.asksConsent, isTrue);
+  });
+
+  group('an update that brings scripts', () {
+    Future<MitmModule> bringScripts() async {
+      bodies['/ads.sgmodule'] =
+          '''
 ${module('Ads')}[Script]
 Ads = type=http-response,pattern=^https://a,script-path=${urlOf('/ads.js')}
 ''';
-    bodies['/ads.js'] = r'$done({})';
+      bodies['/ads.js'] = r'$done({})';
+      return action().updateModule((await stored()).single);
+    }
 
-    final updated = await action().updateModule((await stored()).single);
+    Set<int> awaitingConsent() => {
+      for (final module in container.read(mitmModulesToAgreeProvider))
+        module.id,
+    };
 
-    expect(updated.enabled, isTrue);
-    expect((await stored()).single.scripts, 1);
+    setUp(() async {
+      bodies = {'/ads.sgmodule': module('Ads'), '/blank.json': '{}'};
+      await action().addFromUrl(urlOf('/ads.sgmodule'));
+    });
+
+    test('turns off a module never agreed to and asks', () async {
+      expect((await stored()).single.accepted, isNull);
+
+      final updated = await bringScripts();
+
+      expect(updated.enabled, isFalse);
+      expect((await stored()).single.scripts, 1);
+      expect(awaitingConsent(), {updated.id});
+    });
+
+    test('keeps a module agreed to on', () async {
+      await action().putModule(
+        (await stored()).single.copyWith(accepted: true),
+      );
+
+      final updated = await bringScripts();
+
+      expect(updated.enabled, isTrue);
+      expect(awaitingConsent(), isEmpty);
+    });
+
+    test('asks again about a module the user once declined', () async {
+      await action().putModule(
+        (await stored()).single.copyWith(accepted: false),
+      );
+
+      final updated = await bringScripts();
+
+      expect(updated.enabled, isFalse);
+      expect(updated.accepted, isNull);
+      expect(awaitingConsent(), {updated.id});
+    });
+
+    test('is told apart from one that only widens the hosts', () async {
+      bodies['/ads.sgmodule'] = module('Ads')
+          .replaceFirst('example.com', 'example.com, *.example.org');
+
+      final updated = await action().updateModule((await stored()).single);
+
+      expect(updated.enabled, isTrue);
+      expect(awaitingConsent(), isEmpty);
+    });
   });
 
   group('an accepted module', () {
@@ -338,7 +402,9 @@ Ads = type=http-response,pattern=$pattern,script-path=${urlOf('/ads.js')}
     Future<MitmModule> accepted() async {
       bodies = {'/ads.sgmodule': scripted('^https://a'), '/ads.js': 'one'};
       await action().addFromUrl(urlOf('/ads.sgmodule'));
-      await action().putModule((await stored()).single.copyWith(enabled: true));
+      await action().putModule(
+        (await stored()).single.copyWith(enabled: true, accepted: true),
+      );
       return (await stored()).single;
     }
 
@@ -369,29 +435,34 @@ Ads = type=http-response,pattern=$pattern,script-path=${urlOf('/ads.js')}
     });
   });
 
-  test('values that declare a new script keep the module on', () async {
-    bodies = {
-      '/q.snippet': '''
+  test(
+    'values that declare a new script turn off a module never agreed to',
+    () async {
+      bodies = {
+        '/q.snippet': '''
 #!arguments=Line:
 [rewrite_local]
 {{{Line}}}
 ^https://a url reject
 ''',
-    };
-    await action().addFromUrl(urlOf('/q.snippet'));
-    final module = (await stored()).single;
-    expect(module.enabled, isTrue);
-    bodies['/a.js'] = 'one';
+      };
+      await action().addFromUrl(urlOf('/q.snippet'));
+      final module = (await stored()).single;
+      expect(module.enabled, isTrue);
+      bodies['/a.js'] = 'one';
 
-    await action().setArguments(module, {
-      'Line': '^https://b url script-response-body ${urlOf('/a.js')}',
-    });
+      final returned = await action().setArguments(module, {
+        'Line': '^https://b url script-response-body ${urlOf('/a.js')}',
+      });
 
-    final changed = (await stored()).single;
-    expect(changed.enabled, isTrue);
-    expect(changed.scripts, 1);
-    expect(changed.resources.keys, [urlOf('/a.js')]);
-  });
+      final changed = (await stored()).single;
+      expect(returned, changed);
+      expect(changed.enabled, isFalse);
+      expect(changed.scripts, 1);
+      expect(changed.resources.keys, [urlOf('/a.js')]);
+      expect(container.read(mitmModulesToAgreeProvider).single.id, changed.id);
+    },
+  );
 
   test('an update keeps what the user changed while it ran', () async {
     bodies = {'/ads.sgmodule': module('Ads'), '/blank.json': '{}'};
@@ -500,7 +571,6 @@ Ads = type=http-response,pattern=$pattern,script-path=${urlOf('/ads.js')}
     final edited = (await stored()).single;
     expect(mitmAttachments(edited).keys, ['own.js']);
     expect(edited.scripts, 1);
-    expect(edited.enabled, isTrue);
 
     await action().detach(edited, 'own.js');
     await action().clean();

@@ -80,9 +80,35 @@ class _Actions extends MitmModulesAction {
   @override
   void build() {}
 
+  MitmModule _row(int id) =>
+      ref.read(mitmModulesProvider).value!.firstWhere((row) => row.id == id);
+
+  // The real ones queue on the global storage lock, whose chain would carry
+  // over from one widget test's fake clock into the next.
   @override
-  Future<void> setEnabled(MitmModule reviewed, bool enabled) =>
-      putModule(reviewed.copyWith(enabled: enabled));
+  Future<void> recordConsent(
+    MitmModule reviewed, {
+    required bool asksConsent,
+    bool? agreed,
+  }) async {
+    final current = _row(reviewed.id);
+    if (agreed != false && current != reviewed) return;
+    await putModule(
+      current.copyWith(
+        asksConsent: asksConsent,
+        enabled: agreed ?? true,
+        accepted: agreed ?? current.accepted,
+      ),
+    );
+  }
+
+  @override
+  Future<void> turnOff(int id) async {
+    final current = _row(id);
+    await putModule(
+      current.copyWith(enabled: false, accepted: current.accepted ?? false),
+    );
+  }
 
   @override
   Future<void> putModule(MitmModule module, {bool first = false}) async {
@@ -180,6 +206,7 @@ void main() {
     CoreHandlerInterface? core,
     _DelayedCreate? saving,
     MitmModuleContent? remoteContent,
+    MitmModuleContent? localContent,
   }) async {
     tester.view.physicalSize = const Size(1000, 2000);
     tester.view.devicePixelRatio = 1;
@@ -199,7 +226,8 @@ void main() {
           ),
         mitmModuleContentProvider(_remote.id)
             .overrideWith((_) async => content),
-        mitmModuleContentProvider(_local.id).overrideWith((_) async => null),
+        mitmModuleContentProvider(_local.id)
+            .overrideWith((_) async => localContent),
         mitmModuleDetailsProvider(_remote.id).overrideWith(
           (_) async => (
             content: content,
@@ -275,7 +303,11 @@ void main() {
   });
 
   testWidgets('a module with scripts asks before it turns on', (tester) async {
-    await pump(tester, const MitmModulesView());
+    await pump(
+      tester,
+      const MitmModulesView(),
+      localContent: MitmModuleContent(),
+    );
 
     await tester.tap(find.byType(Switch).last);
     await tester.pumpAndSettle();
@@ -283,12 +315,34 @@ void main() {
     await tester.tap(find.text(appLocalizations.cancel));
     await tester.pumpAndSettle();
     expect((await stored()).last.enabled, isFalse);
+    expect((await stored()).last.accepted, isFalse);
 
     await tester.tap(find.byType(Switch).last);
     await tester.pumpAndSettle();
     await tester.tap(find.text(appLocalizations.turnOn));
     await tester.pumpAndSettle();
     expect((await stored()).last.enabled, isTrue);
+    expect((await stored()).last.accepted, isTrue);
+  });
+
+  testWidgets('turning on asks when the module file cannot be read', (
+    tester,
+  ) async {
+    await pump(tester, const MitmModulesView());
+    await container
+        .read(mitmModulesActionProvider.notifier)
+        .putModule(_local.copyWith(scripts: 0));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(Switch).last);
+    await tester.pumpAndSettle();
+
+    expect(find.text(appLocalizations.mitmModuleRiskTitle), findsOneWidget);
+    expect(
+      find.text(appLocalizations.mitmModuleUnreadableRisk, findRichText: true),
+      findsOneWidget,
+    );
+    expect((await stored()).last.enabled, isFalse);
   });
 
   testWidgets('the details show what the module adds and leaves out', (

@@ -82,6 +82,7 @@ bool hasCompatibleDatabaseSchema(
         'system',
         'scripts',
         'last_update_time',
+        if (version >= 16) ...{'asks_consent', 'accepted'},
       },
     if (version >= 11)
       'custom_proxies': {

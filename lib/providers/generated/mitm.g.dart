@@ -457,6 +457,53 @@ abstract class _$MitmExportWarned extends $Notifier<bool> {
   }
 }
 
+@ProviderFor(mitmModulesToAgree)
+final mitmModulesToAgreeProvider = MitmModulesToAgreeProvider._();
+
+final class MitmModulesToAgreeProvider
+    extends
+        $FunctionalProvider<
+          List<MitmModule>,
+          List<MitmModule>,
+          List<MitmModule>
+        >
+    with $Provider<List<MitmModule>> {
+  MitmModulesToAgreeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mitmModulesToAgreeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$mitmModulesToAgreeHash();
+
+  @$internal
+  @override
+  $ProviderElement<List<MitmModule>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  List<MitmModule> create(Ref ref) {
+    return mitmModulesToAgree(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<MitmModule> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<MitmModule>>(value),
+    );
+  }
+}
+
+String _$mitmModulesToAgreeHash() =>
+    r'b6472c1b0dca198af5710006b265ac11008a0ed7';
+
 /// Why the Core skips each of the user's hostnames, by the line.
 
 @ProviderFor(mitmHostnameIssues)
@@ -843,8 +890,14 @@ final class MitmModuleDetailsFamily extends $Family
   String toString() => r'mitmModuleDetailsProvider';
 }
 
+/// A file that fails to parse fails again until it changes, which rebuilds
+/// this anyway.
+
 @ProviderFor(mitmModuleContent)
 final mitmModuleContentProvider = MitmModuleContentFamily._();
+
+/// A file that fails to parse fails again until it changes, which rebuilds
+/// this anyway.
 
 final class MitmModuleContentProvider
     extends
@@ -856,11 +909,13 @@ final class MitmModuleContentProvider
     with
         $FutureModifier<MitmModuleContent?>,
         $FutureProvider<MitmModuleContent?> {
+  /// A file that fails to parse fails again until it changes, which rebuilds
+  /// this anyway.
   MitmModuleContentProvider._({
     required MitmModuleContentFamily super.from,
     required int super.argument,
   }) : super(
-         retry: null,
+         retry: _noRetry,
          name: r'mitmModuleContentProvider',
          isAutoDispose: true,
          dependencies: null,
@@ -900,18 +955,24 @@ final class MitmModuleContentProvider
   }
 }
 
-String _$mitmModuleContentHash() => r'a3318e2eff474fd737e362bf7864b5d9c6291640';
+String _$mitmModuleContentHash() => r'8d05136558342f475dec4642a78405585a471968';
+
+/// A file that fails to parse fails again until it changes, which rebuilds
+/// this anyway.
 
 final class MitmModuleContentFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<MitmModuleContent?>, int> {
   MitmModuleContentFamily._()
     : super(
-        retry: null,
+        retry: _noRetry,
         name: r'mitmModuleContentProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
+
+  /// A file that fails to parse fails again until it changes, which rebuilds
+  /// this anyway.
 
   MitmModuleContentProvider call(int id) =>
       MitmModuleContentProvider._(argument: id, from: this);

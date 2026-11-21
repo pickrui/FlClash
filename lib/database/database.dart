@@ -10,9 +10,11 @@ import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/mitm_module.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:path/path.dart' show join;
 
 part 'generated/database.g.dart';
 part 'converter.dart';
@@ -26,7 +28,7 @@ part 'rules.dart';
 part 'scripts.dart';
 part 'schema.dart';
 
-const currentDatabaseSchemaVersion = 15;
+const currentDatabaseSchemaVersion = 16;
 
 @DriftDatabase(
   tables: [
@@ -211,6 +213,7 @@ class Database extends _$Database {
         }
         if (from < 14) await _mergeScriptAndAddedRules();
         if (from < 15) await _matchTargetToExit();
+        if (from < 16) await _recordMitmConsent(m);
       }),
     );
   }
@@ -236,6 +239,46 @@ class Database extends _$Database {
     await customStatement(
       'UPDATE profiles SET match_target = NULL WHERE match_target IS NOT NULL',
     );
+  }
+
+  /// On with something to ask about counts as agreed, on with nothing as not
+  /// yet asked, off as declined; an unreadable module file counts as asking.
+  Future<void> _recordMitmConsent(Migrator m) async {
+    final columns = (await customSelect(
+      'PRAGMA table_info(mitm_modules)',
+    ).get()).map((row) => row.read<String>('name')).toSet();
+    for (final column in [mitmModules.asksConsent, mitmModules.accepted]) {
+      if (!columns.contains(column.name)) {
+        await m.addColumn(mitmModules, column);
+      }
+    }
+    final rows = await select(mitmModules).get();
+    if (rows.isEmpty) {
+      return;
+    }
+    for (final row in rows) {
+      bool? fileAsks;
+      try {
+        final directory = await appPath.mitmModulesDirPath;
+        fileAsks = parseMitmModule(
+          await File(join(directory, row.toMitmModule().fileName))
+              .readAsString(),
+          values: row.arguments,
+        ).asksConsent;
+      } catch (_) {}
+      await (update(mitmModules)..where((t) => t.id.equals(row.id))).write(
+        MitmModulesCompanion(
+          asksConsent: Value(fileAsks ?? true),
+          accepted: Value(
+            !row.enabled
+                ? false
+                : row.scripts > 0 || fileAsks == true
+                ? true
+                : null,
+          ),
+        ),
+      );
+    }
   }
 
   /// A profile keeps the rules it applied when it ran a script or added rules.

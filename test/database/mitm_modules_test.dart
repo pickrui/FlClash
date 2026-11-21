@@ -6,9 +6,12 @@
 import 'dart:io';
 
 import 'package:drift/native.dart';
+import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
+
+import '../helpers/app_paths.dart';
 
 MitmModule module(int id, {int? order}) => MitmModule(
   id: id,
@@ -85,7 +88,9 @@ void main() {
         expect(await upgraded.profilesDao.all().get(), [profile]);
         expect(
           await upgraded.mitmModulesDao.query().get(),
-          existingTable ? [module(1)] : isEmpty,
+          existingTable
+              ? [module(1).copyWith(asksConsent: true, accepted: false)]
+              : isEmpty,
         );
         final version = await upgraded
             .customSelect('PRAGMA user_version')
@@ -94,6 +99,40 @@ void main() {
       },
     );
   }
+
+  test('v16 settles each module\'s consent from its file', () async {
+    final directory = await Directory.systemTemp.createTemp('mitm-consent-');
+    addTearDown(() => directory.delete(recursive: true));
+    await useAppPaths(directory);
+    final modulesDir = Directory(await appPath.mitmModulesDirPath);
+    await modulesDir.create(recursive: true);
+    final file = File('${directory.path}/db.sqlite');
+    final old = Database(NativeDatabase(file));
+    final rows = [
+      module(1).copyWith(enabled: true),
+      module(2).copyWith(enabled: true, scripts: 0),
+      module(3).copyWith(enabled: true, scripts: 0),
+      module(4).copyWith(scripts: 0),
+    ];
+    await old.mitmModulesDao.putAll(rows.map((row) => row.toCompanion()));
+    await File('${modulesDir.path}/${rows[1].fileName}')
+        .writeAsString('[General]\ndns-server = 223.5.5.5\n');
+    await File('${modulesDir.path}/${rows[2].fileName}')
+        .writeAsString('[URL Rewrite]\n^https://a - reject\n');
+    await old.customStatement('ALTER TABLE mitm_modules DROP COLUMN accepted');
+    await old.customStatement('PRAGMA user_version = 14');
+    await old.close();
+
+    final upgraded = Database(NativeDatabase(file));
+    addTearDown(upgraded.close);
+    expect(
+      [
+        for (final row in await upgraded.mitmModulesDao.query().get())
+          (row.asksConsent, row.accepted),
+      ],
+      [(true, true), (true, true), (false, null), (true, false)],
+    );
+  });
 
   test(
     'schema validation requires complete module columns only from v10',
