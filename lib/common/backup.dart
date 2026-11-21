@@ -254,7 +254,9 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
             (overwrite['scriptOverwrite'] as Map?)?['scriptId'] as String?;
         profileMap['scriptId'] = scriptId != null ? idMap[scriptId] : null;
       }
-      profileMap['overwriteType'] = overwrite['type'];
+      profileMap['overwriteType'] = isScript && profileMap['scriptId'] == null
+          ? OverwriteType.standard.name
+          : overwrite['type'];
     }
 
     final targetFilePath = _getProfilePath(targetPath, profileId.toString());

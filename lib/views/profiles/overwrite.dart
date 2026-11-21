@@ -450,7 +450,7 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
     final profile = ref.read(profileProvider(widget.profileId));
     if (profile == null) return;
     final raw = await commonAction.safeRun(
-      () => setupAction.getRawProfileConfig(widget.profileId),
+      () => setupAction.getRoutingProfileConfig(widget.profileId),
     );
     if (!mounted || raw == null) return;
     final names = customRoutingTargets(

@@ -215,7 +215,7 @@ extension InitControllerExt on AppController {
     );
     if (!startupRecovery.isCurrent(bootAttempt)) return;
     for (final notice in globalState.startupNotices) {
-      globalState.showNotifier(notice, level: MessageLevel.warning);
+      globalState.showNotifier(notice(), level: MessageLevel.warning);
     }
     globalState.startupNotices.clear();
     if (startupRecovery.automaticSetupPaused) {
