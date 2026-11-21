@@ -16,7 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
     hide FilledButton, Scaffold, TextField;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
-import 'package:wifi_ssid/wifi_ssid.dart';
+import 'package:fl_clash/plugins/wifi_ssid.dart';
 
 import '../helpers/test_app.dart';
 

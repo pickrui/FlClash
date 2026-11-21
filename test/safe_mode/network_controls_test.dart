@@ -24,6 +24,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' hide Scaffold, Switch;
 import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
+import '../helpers/wifi_ssid_host.dart';
 import '../helpers/test_app.dart';
 
 void main() {
@@ -40,6 +41,7 @@ void main() {
     addTearDown(events.close);
     final calls = <String>[];
     const channel = MethodChannel('wifi_ssid');
+    useWifiSsidChannel(channel);
     final messenger = tester.binding.defaultBinaryMessenger;
     messenger.setMockMethodCallHandler(channel, (call) async {
       calls.add(call.method);

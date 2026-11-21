@@ -11,6 +11,9 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/wifi_ssid_host.dart';
+
 import 'package:flutter/services.dart';
 
 void main() {
@@ -178,6 +181,7 @@ void main() {
       var requests = 0;
       var ssidReads = 0;
       const channel = MethodChannel('wifi_ssid');
+      useWifiSsidChannel(channel);
       final messenger = tester.binding.defaultBinaryMessenger;
       messenger.setMockMethodCallHandler(channel, (call) async {
         if (call.method == 'checkPermission') return 1;
@@ -248,6 +252,7 @@ void main() {
       var ssidReads = 0;
       final pending = Completer<int>();
       const channel = MethodChannel('wifi_ssid');
+      useWifiSsidChannel(channel);
       final messenger = tester.binding.defaultBinaryMessenger;
       messenger.setMockMethodCallHandler(channel, (call) async {
         if (call.method == 'checkPermission') return 1;
@@ -317,6 +322,7 @@ void main() {
       final pending = Completer<int>();
       final calls = <String>[];
       const channel = MethodChannel('wifi_ssid');
+      useWifiSsidChannel(channel);
       final messenger = tester.binding.defaultBinaryMessenger;
       messenger.setMockMethodCallHandler(channel, (call) async {
         calls.add(call.method);

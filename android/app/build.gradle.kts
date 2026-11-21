@@ -122,6 +122,7 @@ flutter {
 dependencies {
     implementation(project(":service"))
     implementation(project(":common"))
+    implementation(libs.androidx.core)
     implementation(project(":flutter_secure_storage"))
     implementation(libs.core.splashscreen)
     implementation(libs.gson)

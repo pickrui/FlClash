@@ -10,6 +10,7 @@ import com.oixcloud.clash.plugins.AppPlugin
 import com.oixcloud.clash.plugins.LinkPlugin
 import com.oixcloud.clash.plugins.ServicePlugin
 import com.oixcloud.clash.plugins.TilePlugin
+import com.oixcloud.clash.plugins.WifiSsidPlugin
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
@@ -23,6 +24,7 @@ class MainActivity : FlutterActivity() {
         flutterEngine.plugins.add(LinkPlugin())
         flutterEngine.plugins.add(ServicePlugin())
         flutterEngine.plugins.add(TilePlugin())
+        flutterEngine.plugins.add(WifiSsidPlugin())
         ownedEngine = flutterEngine
         State.flutterEngine = flutterEngine
     }

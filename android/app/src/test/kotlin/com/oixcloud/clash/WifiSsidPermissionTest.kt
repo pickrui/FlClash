@@ -8,7 +8,7 @@ package com.oixcloud.clash
 import android.Manifest
 import android.net.ConnectivityManager
 import android.net.LinkProperties
-import com.follow.clash.wifi_ssid.WifiSsidPlugin
+import com.oixcloud.clash.plugins.WifiSsidPlugin
 import com.oixcloud.clash.service.modules.WifiSsidMonitor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

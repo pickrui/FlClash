@@ -12,7 +12,6 @@
 #include <flutter_secure_storage_windows/flutter_secure_storage_windows_plugin.h>
 #include <proxy/proxy_plugin_c_api.h>
 #include <url_launcher_windows/url_launcher_windows.h>
-#include <wifi_ssid/wifi_ssid_plugin_c_api.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
   ConnectivityPlusWindowsPluginRegisterWithRegistrar(
@@ -27,6 +26,4 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("ProxyPluginCApi"));
   UrlLauncherWindowsRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("UrlLauncherWindows"));
-  WifiSsidPluginCApiRegisterWithRegistrar(
-      registry->GetRegistrarForPlugin("WifiSsidPluginCApi"));
 }

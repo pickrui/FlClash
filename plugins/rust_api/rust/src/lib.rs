@@ -13,4 +13,5 @@ mod ipc;
 mod launch;
 mod script;
 mod tray;
+mod wifi;
 mod window;

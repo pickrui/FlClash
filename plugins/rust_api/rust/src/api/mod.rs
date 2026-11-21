@@ -14,4 +14,5 @@ pub mod launch;
 pub mod link;
 pub mod script;
 pub mod tray;
+pub mod wifi;
 pub mod window;

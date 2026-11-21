@@ -10,7 +10,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wifi_ssid/wifi_ssid.dart';
+import 'package:fl_clash/plugins/wifi_ssid.dart';
 
 typedef SsidReader = Future<String?> Function();
 

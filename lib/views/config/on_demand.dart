@@ -13,7 +13,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wifi_ssid/wifi_ssid.dart';
+import 'package:fl_clash/plugins/wifi_ssid.dart';
 
 import 'battery_optimization.dart';
 
