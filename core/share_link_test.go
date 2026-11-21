@@ -146,16 +146,25 @@ func TestShareLinksPreserveEscapedCredentialsAndLegacyTLS(t *testing.T) {
 
 func TestShareLinksKeepHTTPUpgradeTransport(t *testing.T) {
 	opts := map[string]any{"path": "/u", "headers": map[string]any{"Host": "h.example"}, "v2ray-http-upgrade": true}
+	fastOpen := map[string]any{"path": "/u", "headers": map[string]any{"Host": "h.example"}, "v2ray-http-upgrade": true, "v2ray-http-upgrade-fast-open": true}
 	for _, source := range []map[string]any{
-		{"type": "vless", "name": "upgrade", "server": "example.com", "port": 443, "uuid": "fixture", "tls": true, "network": "ws", "ws-opts": opts},
-		{"type": "vmess", "name": "legacy", "server": "example.com", "port": 443, "uuid": "fixture", "alterId": 64, "network": "ws", "ws-opts": opts},
+		{"type": "vless", "name": "upgrade", "server": "example.com", "port": 443, "uuid": "fixture", "tls": true, "network": "ws", "ws-opts": fastOpen},
+		{"type": "vmess", "name": "legacy", "server": "example.com", "port": 443, "uuid": "fixture", "alterId": 64, "network": "ws", "ws-opts": fastOpen},
+		{"type": "trojan", "name": "trojan", "server": "example.com", "port": 443, "password": "p", "network": "ws", "ws-opts": opts},
 	} {
 		t.Run(source["type"].(string), func(t *testing.T) {
 			got := decodeShareLink(handleEncodeShareLinks([]map[string]any{source})[0])
 			wsOpts, _ := got["ws-opts"].(map[string]any)
-			if got["network"] != "ws" || wsOpts["v2ray-http-upgrade"] != true || wsOpts["path"] != "/u" {
+			headers, _ := wsOpts["headers"].(map[string]any)
+			want := source["ws-opts"].(map[string]any)["v2ray-http-upgrade-fast-open"]
+			if got["network"] != "ws" || wsOpts["v2ray-http-upgrade"] != true || wsOpts["path"] != "/u" ||
+				headers["Host"] != "h.example" || wsOpts["v2ray-http-upgrade-fast-open"] != want {
 				t.Fatalf("HTTPUpgrade became %#v", got)
 			}
 		})
+	}
+	trojan := map[string]any{"type": "trojan", "name": "trojan", "server": "example.com", "port": 443, "password": "p", "network": "ws", "ws-opts": fastOpen}
+	if link := handleEncodeShareLinks([]map[string]any{trojan})[0]; link != "" {
+		t.Fatalf("a trojan link cannot carry fast open: %s", link)
 	}
 }
