@@ -140,8 +140,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView>
         RouteMotionHoldMixin<DnsQueriesView>,
         PageFeedHoldMixin<DnsQueriesView> {
   late final ScrollController _scrollController =
-      widget.scrollController ??
-      sheetScrollController(context, initialScrollOffset: double.maxFinite);
+      widget.scrollController ?? sheetScrollController(context);
   Timer? _refreshTimer;
   List<DnsQuery> _queries = [];
   bool _paused = false;

@@ -294,16 +294,7 @@ class _RecentFeedState extends State<_RecentFeed> {
   void initState() {
     super.initState();
     _scrollController =
-        widget.scrollController ??
-        sheetScrollController(context, initialScrollOffset: double.maxFinite);
-    // A sheet's one controller may have been left where the live feed reads.
-    if (widget.scrollController != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _scrollController.hasClients) {
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-        }
-      });
-    }
+        widget.scrollController ?? sheetScrollController(context);
   }
 
   @override
@@ -432,7 +423,6 @@ class _LiveFeedState extends ConsumerState<_LiveFeed>
   int _refreshGeneration = 0;
   final _speedRanker = TrackerSpeedRanker();
   bool _loaded = false;
-  late var _startsAtFarEnd = widget.scrollController != null;
   late final CoreController _core = widget.core;
   late final _feed = ConnectionFeed(
     invoke: (method, id) => _core.connectionStream<Object>(method, id),
@@ -479,14 +469,6 @@ class _LiveFeedState extends ConsumerState<_LiveFeed>
         _speedRanker.rank(trackerInfos, sampledAt),
       );
       widget.filters.offer(widget.listController.value.trackerInfos);
-      if (_startsAtFarEnd) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _startsAtFarEnd && _scrollController.hasClients) {
-            _startsAtFarEnd = false;
-            _scrollController.jumpTo(0);
-          }
-        });
-      }
     }
 
     // Holding the first snapshot would leave the page blank for the whole push.

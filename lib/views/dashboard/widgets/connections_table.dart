@@ -72,9 +72,6 @@ enum DashboardFeed {
 void openDashboardFeed(BuildContext context, DashboardFeed feed) {
   showSnapSheet(
     context,
-    initialScrollOffset: feed == DashboardFeed.connections
-        ? 0
-        : double.maxFinite,
     builder: (_, controller) => NestedPagedSheet(
       builder: (_) => switch (feed) {
         DashboardFeed.connections => RequestsView(

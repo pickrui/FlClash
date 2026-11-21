@@ -51,10 +51,7 @@ class _LogsViewState extends ConsumerState<LogsView>
   void initState() {
     super.initState();
     final logs = ref.read(logsProvider).list;
-    _scrollController = sheetScrollController(
-      context,
-      initialScrollOffset: double.maxFinite,
-    );
+    _scrollController = sheetScrollController(context);
     _logsStateNotifier.value = _logsStateNotifier.value.copyWith(logs: logs);
     _filters.offer(logs);
     ref.listenManual(logsProvider.select((state) => state.revision), (_, _) {
