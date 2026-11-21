@@ -14,7 +14,7 @@ export 'src/rust/api/ipc.dart';
 export 'src/rust/api/launch.dart';
 export 'src/rust/api/script.dart';
 export 'src/rust/api/wifi.dart';
-export 'src/rust/frb_generated.dart' show RustLib;
+export 'src/rust/frb_generated.dart' show RustLib, RustLibApi;
 export 'src/rust/api/hotkey.dart';
 
 bool get isRustLibInitialized => RustLib.instance.initialized;

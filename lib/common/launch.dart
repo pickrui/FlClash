@@ -187,7 +187,7 @@ class _SystemAutostartEntry implements AutostartEntry {
 
   @override
   Future<bool> isEnabled() =>
-      rust_api.isAutostartEnabled(name: appName, executable: _command);
+      rust_api.isAutostartEnabled(id: appName, executable: _command);
 
   @override
   Future<bool> setEnabled(bool enabled) async {
@@ -195,7 +195,8 @@ class _SystemAutostartEntry implements AutostartEntry {
       throw StateError('Login items are disabled in safe mode');
     }
     return rust_api.setAutostart(
-      name: appName,
+      id: appName,
+      displayName: appName,
       executable: _command,
       enabled: enabled,
     );
