@@ -5,8 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/database/database.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/widgets/icon_history.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/ui/ui.dart';
@@ -33,7 +33,7 @@ void main() {
       );
       await tester.pump();
       expect(find.byType(ActivityIndicator), findsOneWidget);
-      expect(find.text(AppLocalizations.current.noSearchResults), findsNothing);
+      expect(find.text(currentAppLocalizations.noSearchResults), findsNothing);
 
       first.completeError(StateError('fixture database unavailable'));
       await tester.pumpAndSettle();
@@ -41,7 +41,7 @@ void main() {
         find.textContaining('fixture database unavailable'),
         findsOneWidget,
       );
-      final retry = find.text(AppLocalizations.current.refresh);
+      final retry = find.text(currentAppLocalizations.refresh);
       await tester.ensureVisible(retry);
       await tester.tap(retry);
       await tester.pumpAndSettle();
@@ -49,9 +49,7 @@ void main() {
       expect(calls, ['', '']);
       expect(
         find.text(
-          AppLocalizations.current.nullTip(
-            AppLocalizations.current.iconHistory,
-          ),
+          currentAppLocalizations.nullTip(currentAppLocalizations.iconHistory),
         ),
         findsOneWidget,
       );
@@ -59,7 +57,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(calls.last, 'missing');
       expect(
-        find.text(AppLocalizations.current.noSearchResults),
+        find.text(currentAppLocalizations.noSearchResults),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -90,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('stale failure'), findsNothing);
-    expect(find.text(AppLocalizations.current.noSearchResults), findsOneWidget);
+    expect(find.text(currentAppLocalizations.noSearchResults), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

@@ -7,11 +7,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/task.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -206,7 +206,7 @@ void main() {
       setup.resume!.complete();
       return validation;
     });
-    expect(result, AppLocalizations.current.routingApplyFailed);
+    expect(result, currentAppLocalizations.routingApplyFailed);
     expect(core.configs, isEmpty);
     expect(tester.takeException(), isNull);
   });

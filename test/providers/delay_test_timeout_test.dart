@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 
-import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -20,7 +20,7 @@ void main() {
   test(
     'timeout reaches live Core updates and persisted Android startup',
     () async {
-      await AppLocalizations.load(const Locale('en'));
+      loadAppLocalizations(const Locale('en'));
       final container = ProviderContainer(
         overrides: [currentProfileProvider.overrideWith((_) => null)],
       );

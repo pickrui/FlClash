@@ -280,12 +280,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip(AppLocalizations.current.delayTest));
+      await tester.tap(find.byTooltip(currentAppLocalizations.delayTest));
       await tester.pumpAndSettle();
       expect(action.delays, ['Tokyo', 'Tokyo hidden']);
       action.delays.clear();
       container.read(queryProvider(QueryTag.proxies).notifier).value = '';
-      await tester.tap(find.byTooltip(AppLocalizations.current.delayTest));
+      await tester.tap(find.byTooltip(currentAppLocalizations.delayTest));
       await tester.pumpAndSettle();
       expect(action.delays, ['Tokyo', 'Tokyo hidden', 'Hong Kong']);
     },
@@ -319,7 +319,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     Finder inMenu(Finder finder) =>
         find.descendant(of: find.byType(PopupMenu), matching: finder);
 
@@ -977,7 +977,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(
-        inBar(find.byTooltip(AppLocalizations.current.delayTest)),
+        inBar(find.byTooltip(currentAppLocalizations.delayTest)),
         findsOneWidget,
       );
       expect(
@@ -1440,10 +1440,10 @@ void main() {
       }
 
       await pumpHeader();
-      await tester.tap(find.byTooltip(AppLocalizations.current.locateSelected));
+      await tester.tap(find.byTooltip(currentAppLocalizations.locateSelected));
       expect(located, 1);
       expect(toggled, 0);
-      await tester.tap(find.byTooltip(AppLocalizations.current.collapseList));
+      await tester.tap(find.byTooltip(currentAppLocalizations.collapseList));
       expect(toggled, 1);
       final running = container.read(delayTestingGroupsProvider.notifier);
       final completion = Completer<void>();
@@ -1463,7 +1463,7 @@ void main() {
         find.byWidgetPredicate(
           (widget) =>
               widget is IconButton &&
-              widget.tooltip == AppLocalizations.current.delayTest,
+              widget.tooltip == currentAppLocalizations.delayTest,
         ),
       );
       expect(delayButton().onPressed, isNull);
@@ -1570,11 +1570,11 @@ class _TestApp extends StatelessWidget {
       navigatorKey: globalState.navigatorKey,
       locale: const Locale('en'),
       localizationsDelegates: const [
-        AppLocalizations.delegate,
+        appLocalizationsDelegate,
         AppUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],
-      supportedLocales: AppLocalizations.delegate.supportedLocales,
+      supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
         return wrapAppScopes(context, child!);
       },

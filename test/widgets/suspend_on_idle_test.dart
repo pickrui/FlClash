@@ -99,15 +99,15 @@ Future<ProviderContainer> _showSetting(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [networkSettingProvider.overrideWithBuild((_, _) => initial)],
-      child: MaterialApp(
-        locale: const Locale('en'),
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
+      child: const MaterialApp(
+        locale: Locale('en'),
+        localizationsDelegates: [
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
-        home: const material.Scaffold(body: SuspendOnIdleItem()),
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: material.Scaffold(body: SuspendOnIdleItem()),
       ),
     ),
   );

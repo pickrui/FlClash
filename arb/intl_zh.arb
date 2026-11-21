@@ -35,7 +35,7 @@
   "zh_CN": "中文简体",
   "theme": "主题",
   "themeDesc": "设置深色模式，调整色彩",
-  "override": "覆写",
+  "overrideLabel": "覆写",
   "allowLan": "局域网代理",
   "tun": "虚拟网卡",
   "tunDesc": "虚拟网卡仅在管理员模式生效",

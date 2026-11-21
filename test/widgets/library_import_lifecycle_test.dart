@@ -8,11 +8,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -233,7 +233,7 @@ void main() {
     await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
     await tester.runAsync(
-      () => tester.tap(find.text(AppLocalizations.current.importFile)),
+      () => tester.tap(find.text(currentAppLocalizations.importFile)),
     );
     for (var frame = 0; frame < 20 && files.calls == callsBefore; frame++) {
       await tester.pump(const Duration(milliseconds: 50));
@@ -245,7 +245,7 @@ void main() {
   Future<void> importUrls(WidgetTester tester, List<String> urls) async {
     await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.importUrl));
+    await tester.tap(find.text(currentAppLocalizations.importUrl));
     for (
       var frame = 0;
       frame < 20 && find.byTooltip('Batch add').evaluate().isEmpty;
@@ -256,7 +256,7 @@ void main() {
     await tester.tap(find.byTooltip('Batch add'));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.enterText(find.byType(TextField), urls.join('\n'));
-    await tester.tap(find.text(AppLocalizations.current.save));
+    await tester.tap(find.text(currentAppLocalizations.save));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
   }
@@ -318,7 +318,7 @@ void main() {
         ),
       );
       await open(tester, false);
-      await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+      await tester.tap(find.text(currentAppLocalizations.ruleProviders));
       await tester.pumpAndSettle();
       final urls = [
         for (var i = 0; i < 6; i++)
@@ -352,14 +352,14 @@ void main() {
         ),
         isTrue,
       );
-      await tester.tap(find.text(AppLocalizations.current.failedCount(2)));
+      await tester.tap(find.text(currentAppLocalizations.failedCount(2)));
       await tester.pumpAndSettle();
       expect(
-        find.text(AppLocalizations.current.ruleSetNeedsConversionTip),
+        find.text(currentAppLocalizations.ruleSetNeedsConversionTip),
         findsOneWidget,
       );
       expect(
-        find.text(AppLocalizations.current.networkTimeoutError),
+        find.text(currentAppLocalizations.networkTimeoutError),
         findsOneWidget,
       );
       expect(find.textContaining('token=private'), findsNothing);
@@ -390,7 +390,7 @@ void main() {
           ),
         );
         await open(tester, false);
-        await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+        await tester.tap(find.text(currentAppLocalizations.ruleProviders));
         await tester.pumpAndSettle();
         await importUrls(tester, [
           for (var i = 0; i < 6; i++) 'https://example.invalid/$i.list',
@@ -454,7 +454,7 @@ void main() {
       await open(tester, isScript, reservedLabel: '订阅');
       await tester.tap(find.byTooltip('Add'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.importUrl));
+      await tester.tap(find.text(currentAppLocalizations.importUrl));
       final fields = find.byType(TextFormField);
       for (var frame = 0; frame < 20 && fields.evaluate().isEmpty; frame++) {
         await tester.pump(const Duration(milliseconds: 50));
@@ -466,8 +466,8 @@ void main() {
       );
       await tester.tap(
         isScript
-            ? find.text(AppLocalizations.current.submit)
-            : find.text(AppLocalizations.current.save),
+            ? find.text(currentAppLocalizations.submit)
+            : find.text(currentAppLocalizations.save),
       );
       await tester.pumpAndSettle();
       final label = isScript

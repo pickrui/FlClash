@@ -201,7 +201,7 @@ class ApplicationState extends ConsumerState<Application> {
           debugShowCheckedModeBanner: false,
           navigatorKey: globalState.navigatorKey,
           localizationsDelegates: const [
-            AppLocalizations.delegate,
+            appLocalizationsDelegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
@@ -220,7 +220,7 @@ class ApplicationState extends ConsumerState<Application> {
               ? appLocalizations.safeModeAppTitle(appName)
               : appName,
           locale: getLocaleForString(locale),
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           themeMode: themeProps.themeMode,
           theme: watchAppTheme(ref, Brightness.light),
           darkTheme: watchAppTheme(ref, Brightness.dark),

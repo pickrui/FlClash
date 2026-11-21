@@ -5,9 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -170,7 +170,7 @@ void main() {
         ),
       );
       await tester.runAsync(() async {
-        await AppLocalizations.load(const Locale('en'));
+        loadAppLocalizations(const Locale('en'));
         expect(await controller.applyProfileSettled(silence: true), isFalse);
         expect(container.read(isStartProvider), isTrue);
         expect(persistence.isPending, isTrue);

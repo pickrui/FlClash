@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -12,7 +13,6 @@ import 'package:fl_clash/providers/state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/overwrite/rule.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -140,7 +140,7 @@ void main() {
     );
     final apply = find.widgetWithText(
       FilledButton,
-      AppLocalizations.current.applyNow,
+      currentAppLocalizations.applyNow,
     );
     expect(apply, findsOneWidget);
     Future<void> start(int count) async {
@@ -220,7 +220,7 @@ void main() {
     ready.complete();
     await tester.pumpAndSettle();
     expect(find.byType(ErrorStatus), findsOneWidget);
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     final empty = l10n.nullTip(l10n.rule);
     expect(find.text(empty), findsNothing);
     await tester.tap(find.text('Refresh'));
@@ -311,7 +311,7 @@ void main() {
     expect(find.text('beta'), findsOneWidget);
     expect(find.text('alpha'), findsNothing);
     expect(
-      find.text(AppLocalizations.current.addedRulesAfterScript),
+      find.text(currentAppLocalizations.addedRulesAfterScript),
       findsOneWidget,
     );
     await tester.pumpWidget(const SizedBox.shrink());

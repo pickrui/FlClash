@@ -5,8 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/javascript.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/views/profiles/script_config_preview.dart';
@@ -57,7 +57,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(
-          find.text(AppLocalizations.current.scriptChangesAdded(1)),
+          find.text(currentAppLocalizations.scriptChangesAdded(1)),
           findsOneWidget,
         );
         await tester.scrollUntilVisible(
@@ -67,7 +67,7 @@ void main() {
         );
         expect(find.text('removed-field'), findsOneWidget);
         expect(
-          find.text(AppLocalizations.current.scriptChangesRemoved(1)),
+          find.text(currentAppLocalizations.scriptChangesRemoved(1)),
           findsOneWidget,
         );
         expect(tester.takeException(), isNull);
@@ -91,11 +91,11 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(
-        find.text(AppLocalizations.current.scriptChangesEmpty),
+        find.text(currentAppLocalizations.scriptChangesEmpty),
         findsOneWidget,
       );
       await tester.tap(
-        find.byTooltip(AppLocalizations.current.scriptFullConfig),
+        find.byTooltip(currentAppLocalizations.scriptFullConfig),
       );
       await tester.pumpAndSettle();
       final editor = tester.widget<EditorPage>(find.byType(EditorPage));

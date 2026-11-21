@@ -7,8 +7,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:dio/dio.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/services/network_diagnostic_platform.dart';
 import 'package:fl_clash/services/network_diagnostics.dart';
 import 'package:fl_clash/services/diagnostic_timeline.dart';
@@ -128,7 +128,7 @@ void main() {
     );
     expect(managedDNSReportData(null), isNull);
   });
-  setUpAll(() => AppLocalizations.load(const Locale('en')));
+  setUpAll(() => loadAppLocalizations(const Locale('en')));
   Future<Map<String, NetworkDiagnosticCheck>> run(
     FakeBackend backend, {
     NetworkDiagnosticSnapshot input = snapshot,
@@ -188,7 +188,7 @@ void main() {
       final timedOut = (await run(backend))['udp']!;
       expect(timedOut.status, DiagnosticStatus.unknown);
       expect(timedOut.fix, isNull);
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       expect(timedOut.detail, contains(l.cloudApiTimeout));
       backend.udpResult = {
         'samples': [
@@ -471,8 +471,8 @@ void main() {
       expect(
         checks['systemProxy']!.suggestion,
         proxy == DiagnosticProxyState.automatic
-            ? AppLocalizations.current.diagProxyAutomaticHint
-            : AppLocalizations.current.diagProxyHint,
+            ? currentAppLocalizations.diagProxyAutomaticHint
+            : currentAppLocalizations.diagProxyHint,
       );
     }
   });
@@ -517,7 +517,7 @@ void main() {
       FakeBackend()..state['oixDns'] = {'status': 'future_status'},
     );
     expect(checks['oixDns']!.status, DiagnosticStatus.unknown);
-    expect(checks['oixDns']!.detail, AppLocalizations.current.diagUnknown);
+    expect(checks['oixDns']!.detail, currentAppLocalizations.diagUnknown);
   });
   test('managed DNS failures remain distinct from general DNS', () async {
     final checks = await run(
@@ -525,7 +525,7 @@ void main() {
     );
     expect(checks['coreDns']!.status, DiagnosticStatus.passed);
     expect(checks['oixDns']!.status, DiagnosticStatus.failed);
-    expect(checks['oixDns']!.detail, AppLocalizations.current.diagDnsNoAnswer);
+    expect(checks['oixDns']!.detail, currentAppLocalizations.diagDnsNoAnswer);
     expect(checks['oixDns']!.suggestion, isNotEmpty);
   });
   test(
@@ -554,11 +554,11 @@ void main() {
       expect(checks['systemDns']!.detail, contains('11001'));
       expect(
         checks['systemDns']!.suggestion,
-        AppLocalizations.current.diagSystemDnsHint,
+        currentAppLocalizations.diagSystemDnsHint,
       );
       expect(
         checks['coreDns']!.suggestion,
-        AppLocalizations.current.diagDnsHint,
+        currentAppLocalizations.diagDnsHint,
       );
       expect(checks['coreDns']!.status, DiagnosticStatus.warning);
     },
@@ -614,7 +614,7 @@ void main() {
   test(
     'DNS samples retain family causes and timings without endpoint data',
     () async {
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       final backend = FakeBackend()
         ..state['oixDns'] = {
           'status': 'partial',
@@ -687,7 +687,7 @@ void main() {
   test(
     'new DNS error categories stay distinct and unknown codes stay private',
     () async {
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       for (final (status, message) in [
         ('tls', l.cloudApiTlsFailed),
         ('server_failure', l.diagDnsServerFailed),
@@ -728,7 +728,7 @@ void main() {
   test(
     'HTTPS and system DNS keep each anonymous sample instead of deduplicating',
     () async {
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       final checks = await run(
         FakeBackend()
           ..proxyWeb = DiagnosticWebResult(
@@ -795,7 +795,7 @@ void main() {
           'connection terminated during handshake private.example:8853',
         ),
       ),
-      AppLocalizations.current.cloudApiTlsInterrupted,
+      currentAppLocalizations.cloudApiTlsInterrupted,
     );
   });
   test('cancel does not wait for a stalled core response', () async {

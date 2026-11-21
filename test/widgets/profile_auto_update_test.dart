@@ -267,11 +267,11 @@ Future<void> _openProfile(
       child: MaterialApp(
         locale: const Locale('en'),
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) => wrapAppScopes(context, child!),
         home: material.Scaffold(body: EditProfileView(profile: profile)),
       ),

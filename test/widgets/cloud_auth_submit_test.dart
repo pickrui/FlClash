@@ -6,9 +6,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/cloud_account_provider.dart';
@@ -153,7 +153,7 @@ void main() {
         );
         await tester.tap(find.text('open'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text(AppLocalizations.current.emailPassword));
+        await tester.tap(find.text(currentAppLocalizations.emailPassword));
         await tester.pumpAndSettle();
         final fields = find.byType(TextFormField);
         await tester.enterText(fields.at(0), 'fixture@example.test');
@@ -417,11 +417,11 @@ void main() {
         final displayedLateUi =
             find.text('Allow Temporarily').evaluate().isNotEmpty ||
             find
-                .text(AppLocalizations.current.loginFailed)
+                .text(currentAppLocalizations.loginFailed)
                 .evaluate()
                 .isNotEmpty;
         if (find.text('Allow Temporarily').evaluate().isNotEmpty) {
-          await tester.tap(find.text(AppLocalizations.current.cancel));
+          await tester.tap(find.text(currentAppLocalizations.cancel));
           await tester.pumpAndSettle();
         }
         navigator.popUntil((route) => route.isFirst);

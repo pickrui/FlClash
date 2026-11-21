@@ -7,9 +7,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:drift/native.dart';
 import 'package:dio/dio.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -109,7 +109,7 @@ void main() {
           Intl.defaultLocale = previousLocale;
         });
         mitmFeature = feature;
-        await AppLocalizations.load(const Locale('en'));
+        loadAppLocalizations(const Locale('en'));
         final modules = [
           MitmModule(id: 1, name: 'Local', lastUpdateTime: DateTime(2026)),
           MitmModule(
@@ -298,7 +298,7 @@ void main() {
   test('bulk failures translate network and library errors without replacing cache', () async {
     final previousLocale = Intl.defaultLocale;
     addTearDown(() => Intl.defaultLocale = previousLocale);
-    final l = await AppLocalizations.load(const Locale('en'));
+    final l = loadAppLocalizations(const Locale('en'));
     final file = File(await item.resourcePath);
     await file.parent.create(recursive: true);
     await file.writeAsBytes(valid);

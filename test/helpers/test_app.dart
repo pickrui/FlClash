@@ -55,11 +55,11 @@ class TestApp extends StatelessWidget {
       textScale: textScaler?.scale(1),
       emojiFont: (family: FontFamily.twEmoji.value, pattern: emojiPattern),
       localizationsDelegates: const [
-        AppLocalizations.delegate,
+        appLocalizationsDelegate,
         AppUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],
-      supportedLocales: AppLocalizations.delegate.supportedLocales,
+      supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
         final wrapped = wrapAppScopes(
           context,

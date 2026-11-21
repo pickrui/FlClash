@@ -5,11 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/ui.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
@@ -120,19 +120,19 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     bool isActive() => mounted && (route?.isActive ?? true);
     final email = _emailController.text.trim();
     if (email.isEmpty || !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
-      globalState.showNotifier(AppLocalizations.current.emailFormatValidation);
+      globalState.showNotifier(currentAppLocalizations.emailFormatValidation);
       return;
     }
     setState(() => _sendingCode = true);
     try {
       await CloudApiService().sendEmailVerify(email);
       if (!isActive()) return;
-      globalState.showNotifier(AppLocalizations.current.codeSent);
+      globalState.showNotifier(currentAppLocalizations.codeSent);
       _startResendCountdown();
     } catch (e) {
       if (!isActive()) return;
       globalState.showMessage(
-        title: AppLocalizations.current.registerFailed,
+        title: currentAppLocalizations.registerFailed,
         message: TextSpan(text: CloudApiException.clean(e)),
       );
     } finally {
@@ -153,7 +153,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     try {
       final registered = await submitCloudAuth(
         submit,
-        errorTitle: AppLocalizations.current.registerFailed,
+        errorTitle: currentAppLocalizations.registerFailed,
         isActive: () => mounted && (route?.isActive ?? true),
       );
       if (registered && mounted) closePage(context);
@@ -184,7 +184,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
 
   /// The first field the register form cannot send yet, and why.
   ({_RegisterField field, String message})? _issue() {
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     final config = _config;
     final email = _emailController.text.trim();
     if (_nicknameController.text.trim().isEmpty) {
@@ -238,7 +238,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
   Widget build(BuildContext context) {
     final accountState = ref.watch(cloudAccountProvider);
     final isLoading = accountState.isLoading || _isSubmitting;
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     final config = _config;
     final canRegister =
         !_loadingConfig &&
@@ -295,7 +295,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
             TonalButton(
               size: TonalButtonSize.bar,
               glyph: AppGlyphs.refresh,
-              label: AppLocalizations.current.refresh,
+              label: currentAppLocalizations.refresh,
               onPressed: _loadConfig,
             ),
         ],
@@ -304,7 +304,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
   }
 
   List<Widget> _buildForm(CloudRegisterConfig config, bool isLoading) {
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     final issue = _attempted ? _issue() : null;
     bool invalid(_RegisterField field) => issue?.field == field;
     return [
@@ -442,7 +442,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
   }
 
   Widget _buildSendCodeButton(bool isLoading) {
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     if (_sendingCode) {
       return const SizedBox(
         width: 32,

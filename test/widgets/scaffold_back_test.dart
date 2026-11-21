@@ -185,11 +185,11 @@ void main() {
         child: MaterialApp(
           builder: (context, child) => wrapAppScopes(context, child!),
           localizationsDelegates: const [
-            AppLocalizations.delegate,
+            appLocalizationsDelegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: PopGuard(
             onPop: (_) {
               rootBackCount++;
@@ -231,11 +231,11 @@ void main() {
         child: MaterialApp(
           builder: (context, child) => wrapAppScopes(context, child!),
           localizationsDelegates: const [
-            AppLocalizations.delegate,
+            appLocalizationsDelegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: _PageActivityTestScope(
             isActive: isActive,
             child: const LogsView(),

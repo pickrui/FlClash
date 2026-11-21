@@ -36,11 +36,11 @@ void main() {
       PrismApp(
         locale: const Locale('zh', 'CN'),
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: InitErrorScreen(
           error: StateError('early startup failure'),
           stack: StackTrace.empty,

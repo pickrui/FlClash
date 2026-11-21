@@ -64,14 +64,14 @@ void main() {
       final profiles = await _pumpContent(tester, original, draftView: true);
 
       expect(
-        find.text(AppLocalizations.current.editCustomRouting),
+        find.text(currentAppLocalizations.editCustomRouting),
         findsOneWidget,
       );
       expect(
-        find.text(AppLocalizations.current.customRoutingDraftHint),
+        find.text(currentAppLocalizations.customRoutingDraftHint),
         findsOneWidget,
       );
-      expect(find.text(AppLocalizations.current.quickFill), findsOneWidget);
+      expect(find.text(currentAppLocalizations.quickFill), findsOneWidget);
       expect(profiles.profile, original);
       expect(profiles.otherProfile, _otherProfile);
       expect(profiles.writes, 0);
@@ -94,7 +94,7 @@ void main() {
       expect(profiles.profile, original);
       expect(profiles.writes, 0);
       expect(
-        find.text(AppLocalizations.current.confirmClearCustomRouting),
+        find.text(currentAppLocalizations.confirmClearCustomRouting),
         findsOneWidget,
       );
       await _confirmClear(tester);
@@ -134,7 +134,7 @@ void main() {
       await _openClear(tester);
       expect(tester.takeException(), isNull);
       await tester.tap(
-        find.widgetWithText(TextButton, AppLocalizations.current.cancel),
+        find.widgetWithText(TextButton, currentAppLocalizations.cancel),
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
@@ -257,7 +257,7 @@ void main() {
     tester,
   ) async {
     final profiles = await _pumpContent(tester, _profile);
-    await tester.tap(find.text(AppLocalizations.current.quickFill));
+    await tester.tap(find.text(currentAppLocalizations.quickFill));
     await tester.pumpAndSettle();
     final changed = _profile.copyWith(customProxyGroups: [], customRules: []);
     profiles.replaceFromDatabase([changed, _otherProfile]);
@@ -285,7 +285,7 @@ Future<void> _confirmClear(WidgetTester tester) async {
       of: find.byType(AlertDialog),
       matching: find.widgetWithText(
         TextButton,
-        AppLocalizations.current.clearCustomRouting,
+        currentAppLocalizations.clearCustomRouting,
       ),
     ),
   );
@@ -315,11 +315,11 @@ Future<_TestProfiles> _pumpContent(
         locale: locale,
         navigatorKey: globalState.navigatorKey,
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) {
           return wrapAppScopes(
             context,

@@ -50,7 +50,7 @@ void main() {
     expect(profiles.writes, 0);
     expect(_modeCard(tester, OverwriteType.standard).isSelected, isTrue);
     expect(
-      find.text(AppLocalizations.current.emptyCustomOverwrite),
+      find.text(currentAppLocalizations.emptyCustomOverwrite),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -77,7 +77,7 @@ void main() {
       expect(profiles.writes, 0);
       expect(_modeCard(tester, OverwriteType.standard).isSelected, isTrue);
       expect(
-        find.text(AppLocalizations.current.relayGroupUnsupported),
+        find.text(currentAppLocalizations.relayGroupUnsupported),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -214,10 +214,7 @@ void main() {
 
       expect(profiles.profile, entry.value);
       expect(profiles.writes, 0);
-      expect(
-        find.text(AppLocalizations.current.routingChanged),
-        findsOneWidget,
-      );
+      expect(find.text(currentAppLocalizations.routingChanged), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }
@@ -240,7 +237,7 @@ void main() {
 
     expect(profiles.entries, isEmpty);
     expect(profiles.writes, 0);
-    expect(find.text(AppLocalizations.current.routingChanged), findsOneWidget);
+    expect(find.text(currentAppLocalizations.routingChanged), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -315,7 +312,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          find.text(AppLocalizations.current.emptyCustomOverwrite),
+          find.text(currentAppLocalizations.emptyCustomOverwrite),
           findsOneWidget,
         );
         final bounds = tester.getRect(find.byType(AlertDialog));
@@ -365,11 +362,11 @@ Future<_TestProfiles> _pumpSelector(
         locale: locale,
         navigatorKey: globalState.navigatorKey,
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) {
           return wrapAppScopes(
             context,

@@ -559,7 +559,7 @@ class ProfileItem extends ConsumerWidget {
       ] else
         PopupMenuItem(
           glyph: AppGlyphs.puzzle,
-          label: appLocalizations.override,
+          label: appLocalizations.overrideLabel,
           onPressed: () => _handlePushGenProfilePage(context, profile.id),
         ),
       if (isUrl)

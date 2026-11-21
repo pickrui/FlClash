@@ -35,7 +35,7 @@
   "zh_CN": "Chino simplificado",
   "theme": "Tema",
   "themeDesc": "Configurar el modo oscuro y los colores",
-  "override": "Sobrescritura",
+  "overrideLabel": "Sobrescritura",
   "allowLan": "Permitir LAN",
   "tun": "TUN",
   "tunDesc": "TUN solo funciona en modo administrador.",

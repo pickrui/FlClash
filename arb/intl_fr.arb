@@ -35,7 +35,7 @@
   "zh_CN": "Chinois simplifié",
   "theme": "Thème",
   "themeDesc": "Configurer le mode sombre et les couleurs",
-  "override": "Remplacement",
+  "overrideLabel": "Remplacement",
   "allowLan": "Autoriser le LAN",
   "tun": "TUN",
   "tunDesc": "TUN ne fonctionne qu’en mode administrateur.",

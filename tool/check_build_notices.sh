@@ -30,7 +30,7 @@ done < <(
   git -C "$ROOT" ls-files -z -- \
     '*.dart' '*.go' '*.kt' '*.kts' '*.java' '*.swift' '*.c' '*.cc' '*.cpp' '*.h' '*.hpp' \
     '*.m' '*.mm' '*.rs' '*.js' '*.mjs' '*.ts' '*.sh' '*.py' '*.ps1' '*Dockerfile*' '*.private' |
-    grep -zvE '\.(g|freezed|gr|mocks)\.dart$|^lib/l10n/intl/|^lib/l10n/l10n\.dart$|/generated/|frb_generated|/Clash\.Meta/'
+    grep -zvE '\.(g|freezed|gr|mocks)\.dart$|^lib/l10n/l10n(_[a-z]+)?\.dart$|/generated/|frb_generated|/Clash\.Meta/'
 )
 
 if (( ${#missing[@]} > 0 )); then

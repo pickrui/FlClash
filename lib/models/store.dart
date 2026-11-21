@@ -5,8 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:collection/collection.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 
 class BillingPeriod {
   final String key;
@@ -474,7 +474,7 @@ class PaymentInitiation {
     if (decoded is! Map) {
       return PaymentInitiation(
         kind: PaymentInitiationKind.error,
-        message: AppLocalizations.current.paymentUnknownResponse,
+        message: currentAppLocalizations.paymentUnknownResponse,
       );
     }
 
@@ -527,7 +527,7 @@ class PaymentInitiation {
         kind: PaymentInitiationKind.balanceDone,
         message:
             decoded['msg']?.toString() ??
-            AppLocalizations.current.operationSuccess,
+            currentAppLocalizations.operationSuccess,
       );
     }
 
@@ -535,7 +535,7 @@ class PaymentInitiation {
         ?.toString();
     return PaymentInitiation(
       kind: PaymentInitiationKind.error,
-      message: msg ?? AppLocalizations.current.paymentRequestFailed,
+      message: msg ?? currentAppLocalizations.paymentRequestFailed,
     );
   }
 }

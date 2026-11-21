@@ -6,10 +6,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/javascript.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -147,7 +147,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ScriptOptionsPage), findsOneWidget);
     expect(
-      find.text(AppLocalizations.current.routingApplyFailed),
+      find.text(currentAppLocalizations.routingApplyFailed),
       findsOneWidget,
     );
     expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
@@ -305,7 +305,7 @@ void main() {
         expect(find.byType(ActivityIndicator), findsNothing);
         if (empty) {
           expect(
-            find.text(AppLocalizations.current.scriptOptionsEmpty),
+            find.text(currentAppLocalizations.scriptOptionsEmpty),
             findsOneWidget,
           );
           expect(find.byTooltip('Save'), findsNothing);

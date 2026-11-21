@@ -6,10 +6,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/features/form/form_page.dart';
 import 'package:fl_clash/features/overwrite/profile_proxy.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/widgets/input.dart';
@@ -82,7 +82,7 @@ void main() {
       'vless://original',
     );
     await tester.enterText(input, 'vless://edited');
-    await tester.tap(find.byTooltip(AppLocalizations.current.save));
+    await tester.tap(find.byTooltip(currentAppLocalizations.save));
     await tester.pumpAndSettle();
     expect(saved?.id, 1);
     expect(saved?.enable, false);
@@ -143,7 +143,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.text('current error', skipOffstage: false), findsOneWidget);
-    expect(find.text(AppLocalizations.current.proxyType), findsOneWidget);
+    expect(find.text(currentAppLocalizations.proxyType), findsOneWidget);
     expect(find.text('UDP'), findsOneWidget);
     await tester.enterText(name, 'Third');
     await tester.pumpWidget(const SizedBox());
@@ -186,10 +186,10 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.requestHeaders));
+    await tester.tap(find.text(currentAppLocalizations.requestHeaders));
     await tester.pumpAndSettle();
     expect(find.byType(MapInputPage), findsOneWidget);
-    await tester.tap(find.byTooltip(AppLocalizations.current.quickEdit));
+    await tester.tap(find.byTooltip(currentAppLocalizations.quickEdit));
     await tester.pumpAndSettle();
     final input = find.descendant(
       of: find.byType(FormPage),
@@ -201,10 +201,10 @@ void main() {
     tester.widget<FormPage>(find.byType(FormPage)).onSave();
     await tester.pumpAndSettle();
     expect(find.byType(FormPage), findsNothing);
-    await tester.tap(find.byTooltip(AppLocalizations.current.save));
+    await tester.tap(find.byTooltip(currentAppLocalizations.save));
     await tester.pumpAndSettle();
     expect(find.byType(MapInputPage), findsNothing);
-    await tester.tap(find.byTooltip(AppLocalizations.current.save));
+    await tester.tap(find.byTooltip(currentAppLocalizations.save));
     await tester.pumpAndSettle();
 
     expect(saved?.proxy['headers'], {'X-A': '2', 'Accept': '*/*'});
@@ -264,7 +264,7 @@ void main() {
       matching: find.byType(TextField),
     );
     await tester.enterText(name, 'Taken');
-    final save = find.byTooltip(AppLocalizations.current.save);
+    final save = find.byTooltip(currentAppLocalizations.save);
 
     await tester.tap(save);
     await tester.pumpAndSettle();
@@ -392,7 +392,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(saved, isNull);
 
-      await openField(AppLocalizations.current.transportHeaders('HTTP'));
+      await openField(currentAppLocalizations.transportHeaders('HTTP'));
       expect(find.byType(MapInputPage), findsOneWidget);
       expect(find.text('Host'), findsNothing);
       await tester.tap(find.text('Accept'));
@@ -401,7 +401,7 @@ void main() {
       await confirmMap();
       expect(find.byType(TextField), findsNWidgets(2));
       expect(
-        find.text(AppLocalizations.current.existsTip('Key')),
+        find.text(currentAppLocalizations.existsTip('Key')),
         findsOneWidget,
       );
       await tester.enterText(find.byType(TextField).first, 'accept');
@@ -522,9 +522,9 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.text('YAML').hitTestable());
         await tester.pumpAndSettle();
-        await tester.tap(find.text(AppLocalizations.current.nodeQuickFields));
+        await tester.tap(find.text(currentAppLocalizations.nodeQuickFields));
         await tester.pumpAndSettle();
-        await tester.tap(find.byTooltip(AppLocalizations.current.save));
+        await tester.tap(find.byTooltip(currentAppLocalizations.save));
         await tester.pumpAndSettle();
         expect(result?.enable, isFalse);
         expect(result?.name, longName);

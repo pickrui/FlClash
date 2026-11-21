@@ -17,7 +17,7 @@ void main() {
     final previousLocale = Intl.getCurrentLocale();
     final previousDefault = Intl.defaultLocale;
     addTearDown(() async {
-      await AppLocalizations.load(Locale(previousLocale));
+      loadAppLocalizations(Locale(previousLocale));
       Intl.defaultLocale = previousDefault;
     });
   });
@@ -25,7 +25,7 @@ void main() {
   testWidgets(
     'publishes the resolved locale and refreshes native-facing labels',
     (tester) async {
-      await AppLocalizations.load(const Locale('en'));
+      loadAppLocalizations(const Locale('en'));
       final container = ProviderContainer(
         overrides: [
           currentProfileProvider.overrideWith((_) => null),
@@ -43,9 +43,9 @@ void main() {
             container: container,
             child: MaterialApp(
               locale: locale,
-              supportedLocales: AppLocalizations.delegate.supportedLocales,
+              supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: const [
-                AppLocalizations.delegate,
+                appLocalizationsDelegate,
                 AppUiLocalizations.delegate,
                 ...GlobalMaterialLocalizations.delegates,
               ],
@@ -56,18 +56,18 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      await AppLocalizations.load(const Locale('en'));
+      loadAppLocalizations(const Locale('en'));
       await show(const Locale('en'));
       final english = container.read(sharedStateProvider).stopText;
       expect(container.read(loadedLocaleProvider), const Locale('en'));
       await show(const Locale('zh', 'CN'));
-      expect(container.read(loadedLocaleProvider), const Locale('zh', 'CN'));
+      expect(container.read(loadedLocaleProvider), const Locale('zh'));
       expect(
         container.read(sharedStateProvider).stopText,
-        AppLocalizations.current.stop,
+        currentAppLocalizations.stop,
       );
       expect(container.read(sharedStateProvider).stopText, isNot(english));
-      expect(container.read(trayStateProvider).locale, 'zh-CN');
+      expect(container.read(trayStateProvider).locale, 'zh');
       for (final (requested, resolved, stopText) in const [
         (Locale('fr', 'FR'), Locale('fr'), 'Arrêter'),
         (Locale('es', 'MX'), Locale('es'), 'Detener'),

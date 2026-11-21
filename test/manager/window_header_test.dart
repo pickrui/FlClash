@@ -63,7 +63,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() async {
-    await AppLocalizations.load(const Locale('en'));
+    loadAppLocalizations(const Locale('en'));
   });
 
   group('showsWindowHeader', () {
@@ -372,7 +372,7 @@ void main() {
       expect(_glyph(CaptionGlyph.maximize), findsNothing);
       expect(_glyph(CaptionGlyph.restore), findsOneWidget);
       expect(
-        find.byTooltip(AppLocalizations.current.unmaximize),
+        find.byTooltip(currentAppLocalizations.unmaximize),
         findsOneWidget,
       );
     });
@@ -555,11 +555,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: const [
-            AppLocalizations.delegate,
+            appLocalizationsDelegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (_, child) => WindowHeaderLayout(
             height: _windowsHeaderHeight,
             header: WindowHeaderBar(
@@ -604,7 +604,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      expect(find.text(AppLocalizations.current.close), findsOneWidget);
+      expect(find.text(currentAppLocalizations.close), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

@@ -7,11 +7,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http.dart';
 import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/common/network_error.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/state.dart';
@@ -238,7 +238,7 @@ void main() {
         () async {
           final previousLocale = Intl.defaultLocale;
           addTearDown(() => Intl.defaultLocale = previousLocale);
-          final strings = await AppLocalizations.load(const Locale('en'));
+          final strings = loadAppLocalizations(const Locale('en'));
           final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
           addTearDown(() => server.close(force: true));
           server.listen((incoming) async {

@@ -5,10 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/common/picker.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
@@ -80,7 +80,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final previousLocale = Intl.defaultLocale;
   tearDownAll(() => Intl.defaultLocale = previousLocale);
-  setUpAll(() => AppLocalizations.load(const Locale('en')));
+  setUpAll(() => loadAppLocalizations(const Locale('en')));
 
   test('platform bytes work for content URIs without a local path', () async {
     final bytes = Uint8List.fromList([1, 2, 3]);
@@ -169,7 +169,7 @@ void main() {
             decoding,
             outcome == 'failed'
                 ? throwsA(same(failure))
-                : throwsA(AppLocalizations.current.pleaseUploadValidQrcode),
+                : throwsA(currentAppLocalizations.pleaseUploadValidQrcode),
           );
         }
         expect(scanner.analyses, outcome == 'cancelled' ? 0 : 1);

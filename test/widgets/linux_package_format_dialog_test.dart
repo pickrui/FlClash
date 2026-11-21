@@ -30,11 +30,11 @@ Future<List<LinuxPackageFormat?>> _openDialog(
       child: MaterialApp(
         locale: const Locale('en'),
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) =>
             AlertScope(presenter: const AppAlertPresenter(), child: child!),
         home: material.Scaffold(
@@ -64,7 +64,7 @@ void main() {
   ) async {
     await _openDialog(tester, linuxPackageFormatsFor(Abi.linuxArm64));
     expect(
-      find.text(AppLocalizations.current.updatePackageFormat),
+      find.text(currentAppLocalizations.updatePackageFormat),
       findsOneWidget,
     );
     expect(find.text(LinuxPackageFormat.deb.extension), findsOneWidget);
@@ -82,7 +82,7 @@ void main() {
 
   testWidgets('cancelling leaves the question unanswered', (tester) async {
     final answers = await _openDialog(tester, LinuxPackageFormat.values);
-    await tester.tap(find.text(AppLocalizations.current.cancel));
+    await tester.tap(find.text(currentAppLocalizations.cancel));
     await tester.pumpAndSettle();
     expect(find.byType(LinuxPackageFormatDialog), findsNothing);
     expect(answers, [null]);

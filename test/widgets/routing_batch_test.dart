@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/core/controller.dart';
@@ -13,7 +14,6 @@ import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
 import 'package:fl_clash/features/overwrite/routing_target_picker.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -147,9 +147,9 @@ Future<_Profiles> _open(
 Future<void> _selectBoth(WidgetTester tester) async {
   await tester.tap(find.byType(Checkbox).first);
   await tester.pumpAndSettle();
-  await tester.tap(find.byTooltip(AppLocalizations.current.selectAll));
+  await tester.tap(find.byTooltip(currentAppLocalizations.selectAll));
   await tester.pumpAndSettle();
-  await tester.tap(find.byTooltip(AppLocalizations.current.delete).first);
+  await tester.tap(find.byTooltip(currentAppLocalizations.delete).first);
   await tester.pumpAndSettle();
 }
 
@@ -220,7 +220,7 @@ void main() {
         }
         await tester.pumpAndSettle();
         final saveDraft = find.byTooltip(
-          AppLocalizations.current.saveRoutingDraft,
+          currentAppLocalizations.saveRoutingDraft,
         );
         if (saveDraft.evaluate().isNotEmpty) {
           await tester.tap(saveDraft);
@@ -237,7 +237,7 @@ void main() {
         expect(find.byType(ProxyGroupDialog), findsOneWidget);
         expect(
           find.text(
-            AppLocalizations.current.existsTip(AppLocalizations.current.name),
+            currentAppLocalizations.existsTip(currentAppLocalizations.name),
           ),
           findsOneWidget,
         );
@@ -263,8 +263,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text(AppLocalizations.current.basicStrategy), findsOneWidget);
-      expect(find.text(AppLocalizations.current.proxyGroup), findsOneWidget);
+      expect(find.text(currentAppLocalizations.basicStrategy), findsOneWidget);
+      expect(find.text(currentAppLocalizations.proxyGroup), findsOneWidget);
       expect(
         tester.widget<ListItem>(find.widgetWithText(ListItem, 'Missing')).onTap,
         isNull,
@@ -294,14 +294,14 @@ void main() {
         '/test/profiles',
       );
       expect(sources, {
-        'Subscription': AppLocalizations.current.providerSourceSubscription,
-        'Library': AppLocalizations.current.providerSourceApp,
+        'Subscription': currentAppLocalizations.providerSourceSubscription,
+        'Library': currentAppLocalizations.providerSourceApp,
       });
       expect(
         routingProviderSources(_profile, {
           'proxy-providers': {'Local': {}},
         }, '/test')['Local'],
-        AppLocalizations.current.providerSourceProfile,
+        currentAppLocalizations.providerSourceProfile,
       );
       expect(
         routingProviderSources(
@@ -323,8 +323,8 @@ void main() {
           ],
         ),
         {
-          'Remote': AppLocalizations.current.providerSourceSubscription,
-          'File': AppLocalizations.current.providerSourceProfile,
+          'Remote': currentAppLocalizations.providerSourceSubscription,
+          'File': currentAppLocalizations.providerSourceProfile,
         },
       );
     },
@@ -350,7 +350,7 @@ void main() {
     final profiles = await _open(tester, groups: true);
     await tester.longPress(find.text('First'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.copy));
+    await tester.tap(find.text(currentAppLocalizations.copy));
     await tester.pumpAndSettle();
     expect(
       [for (final group in profiles.profile.customProxyGroups) group.name],
@@ -364,7 +364,7 @@ void main() {
     final profiles = await _open(tester);
     await tester.longPress(find.text('first.example'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.copy));
+    await tester.tap(find.text(currentAppLocalizations.copy));
     await tester.pumpAndSettle();
     final rules = profiles.profile.customRules;
     expect(

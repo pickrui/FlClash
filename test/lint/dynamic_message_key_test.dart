@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _arbDir = 'arb';
@@ -47,6 +48,37 @@ void main() {
             'key present in only one locale renders as the raw key elsewhere.',
       );
     }
+  });
+
+  test('a message with several placeholders declares them in text order', () {
+    final template =
+        jsonDecode(File('$_arbDir/$_referenceArb').readAsStringSync())
+            as Map<String, Object?>;
+    final placeholder = RegExp(r'\{([A-Za-z_][A-Za-z0-9_]*)');
+    final offenders = <String>[];
+    for (final MapEntry(:key, :value) in template.entries) {
+      if (key.startsWith('@') || value is! String) continue;
+      final names = {
+        for (final match in placeholder.allMatches(value)) match.group(1)!,
+      }.toList();
+      if (names.length < 2) continue;
+      final metadata = template['@$key'] as Map<String, Object?>?;
+      final declared = (metadata?['placeholders'] as Map<String, Object?>?)
+          ?.keys
+          .toList();
+      if (declared == null || !listEquals(declared, names)) {
+        offenders.add('$key: declare $names');
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'gen-l10n orders undeclared placeholders alphabetically, and the '
+          'parameters are Objects, so a call written in text order passes '
+          'them swapped:\n  ${offenders.join('\n  ')}',
+    );
   });
 
   test('handwritten code uses generated localization getters', () {

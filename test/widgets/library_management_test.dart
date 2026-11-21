@@ -5,11 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:code_forge/code_forge.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/form/named_url_form.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
@@ -89,7 +89,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(ErrorStatus), findsOneWidget);
         expect(find.textContaining('Fixture library failure'), findsOneWidget);
-        final l10n = AppLocalizations.current;
+        final l10n = currentAppLocalizations;
         final empty = l10n.nullTip(
           rules
               ? l10n.rule
@@ -150,12 +150,12 @@ void main() {
       find.byType(TextField).last,
       'https://example.invalid/config.yaml',
     );
-    await tester.tap(find.text(AppLocalizations.current.save));
+    await tester.tap(find.text(currentAppLocalizations.save));
     await tester.pumpAndSettle();
     expect(find.text('Duplicate name'), findsOneWidget);
     expect(result, isNull);
     await tester.enterText(find.byType(TextField).first, '');
-    await tester.tap(find.text(AppLocalizations.current.save));
+    await tester.tap(find.text(currentAppLocalizations.save));
     await tester.pumpAndSettle();
     expect(result, (label: '', url: 'https://example.invalid/config.yaml'));
   });
@@ -184,18 +184,18 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+      await tester.tap(find.text(currentAppLocalizations.ruleProviders));
       await tester.pumpAndSettle();
       await tester.longPress(find.text('Local MRS'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.preview));
+      await tester.tap(find.text(currentAppLocalizations.preview));
       await settle(tester, 24);
       expect(core.calls, hasLength(1));
       expect(core.calls.single.$1, [1, 2, 3]);
       expect(core.calls.single.$2, 'domain');
       final editor = tester.widget<CodeForge>(find.byType(CodeForge));
       expect(editor.controller.text, '+.example.com\n');
-      expect(find.byTooltip(AppLocalizations.current.save), findsNothing);
+      expect(find.byTooltip(currentAppLocalizations.save), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -220,9 +220,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.longPress(find.text('Remote script'));
     await tester.pumpAndSettle();
-    expect(find.text(AppLocalizations.current.sync), findsOneWidget);
-    expect(find.text(AppLocalizations.current.url), findsOneWidget);
-    expect(find.text(AppLocalizations.current.scriptOptions), findsOneWidget);
+    expect(find.text(currentAppLocalizations.sync), findsOneWidget);
+    expect(find.text(currentAppLocalizations.url), findsOneWidget);
+    expect(find.text(currentAppLocalizations.scriptOptions), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

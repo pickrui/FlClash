@@ -86,7 +86,7 @@ void main() {
     var submitted = false;
     await _openDialog(tester, onResult: (_) => submitted = true);
 
-    final localizations = AppLocalizations.current;
+    final localizations = currentAppLocalizations;
     final cases = {
       '': localizations.emptyTip(localizations.mixedPort),
       '0': localizations.portTip(localizations.mixedPort),
@@ -150,11 +150,11 @@ Future<void> _openDialog(
       child: MaterialApp(
         locale: const Locale('en'),
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) =>
             AlertScope(presenter: const AppAlertPresenter(), child: child!),
         home: material.Scaffold(

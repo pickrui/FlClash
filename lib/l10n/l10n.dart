@@ -1,15233 +1,10468 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'dart:async';
 
-import 'intl/messages_all.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
 
-// **************************************************************************
-// Generator: Flutter Intl IDE plugin
-// Made by Localizely
-// **************************************************************************
+import 'l10n_en.dart';
+import 'l10n_es.dart';
+import 'l10n_fr.dart';
+import 'l10n_ja.dart';
+import 'l10n_ko.dart';
+import 'l10n_ru.dart';
+import 'l10n_zh.dart';
 
-// ignore_for_file: non_constant_identifier_names, lines_longer_than_80_chars
-// ignore_for_file: join_return_with_assignment, prefer_final_in_for_each
-// ignore_for_file: avoid_redundant_argument_values, avoid_escaping_inner_quotes
+// ignore_for_file: type=lint
 
-class AppLocalizations {
-  AppLocalizations();
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'l10n/l10n.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
-  static AppLocalizations? _current;
-
-  static AppLocalizations get current {
-    assert(
-      _current != null,
-      'No instance of AppLocalizations was loaded. Try to initialize the AppLocalizations delegate before accessing AppLocalizations.current.',
-    );
-    return _current!;
-  }
-
-  static const AppLocalizationDelegate delegate = AppLocalizationDelegate();
-
-  static Future<AppLocalizations> load(Locale locale) {
-    final name = (locale.countryCode?.isEmpty ?? false)
-        ? locale.languageCode
-        : locale.toString();
-    final localeName = Intl.canonicalizedLocale(name);
-    return initializeMessages(localeName).then((_) {
-      Intl.defaultLocale = localeName;
-      final instance = AppLocalizations();
-      AppLocalizations._current = instance;
-
-      return instance;
-    });
-  }
+  final String localeName;
 
   static AppLocalizations of(BuildContext context) {
-    final instance = AppLocalizations.maybeOf(context);
-    assert(
-      instance != null,
-      'No instance of AppLocalizations present in the widget tree. Did you add AppLocalizations.delegate in localizationsDelegates?',
-    );
-    return instance!;
-  }
-
-  static AppLocalizations? maybeOf(BuildContext context) {
-    return Localizations.of<AppLocalizations>(context, AppLocalizations);
-  }
-
-  /// `Apply now`
-  String get applyNow {
-    return Intl.message('Apply now', name: 'applyNow', desc: '', args: []);
-  }
-
-  /// `Rule`
-  String get rule {
-    return Intl.message('Rule', name: 'rule', desc: '', args: []);
-  }
-
-  /// `Global`
-  String get global {
-    return Intl.message('Global', name: 'global', desc: '', args: []);
-  }
-
-  /// `Direct`
-  String get direct {
-    return Intl.message('Direct', name: 'direct', desc: '', args: []);
-  }
-
-  /// `Dashboard`
-  String get dashboard {
-    return Intl.message('Dashboard', name: 'dashboard', desc: '', args: []);
-  }
-
-  /// `Proxies`
-  String get proxies {
-    return Intl.message('Proxies', name: 'proxies', desc: '', args: []);
-  }
-
-  /// `Profile`
-  String get profile {
-    return Intl.message('Profile', name: 'profile', desc: '', args: []);
-  }
-
-  /// `Profiles`
-  String get profiles {
-    return Intl.message('Profiles', name: 'profiles', desc: '', args: []);
-  }
-
-  /// `Tools`
-  String get tools {
-    return Intl.message('Tools', name: 'tools', desc: '', args: []);
-  }
-
-  /// `Logs`
-  String get logs {
-    return Intl.message('Logs', name: 'logs', desc: '', args: []);
-  }
-
-  /// `Log capture records`
-  String get logsDesc {
-    return Intl.message(
-      'Log capture records',
-      name: 'logsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Resources`
-  String get resources {
-    return Intl.message('Resources', name: 'resources', desc: '', args: []);
-  }
-
-  /// `External resource related info`
-  String get resourcesDesc {
-    return Intl.message(
-      'External resource related info',
-      name: 'resourcesDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Traffic usage`
-  String get trafficUsage {
-    return Intl.message(
-      'Traffic usage',
-      name: 'trafficUsage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network speed`
-  String get networkSpeed {
-    return Intl.message(
-      'Network speed',
-      name: 'networkSpeed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Outbound mode`
-  String get outboundMode {
-    return Intl.message(
-      'Outbound mode',
-      name: 'outboundMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network detection`
-  String get networkDetection {
-    return Intl.message(
-      'Network detection',
-      name: 'networkDetection',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Upload`
-  String get upload {
-    return Intl.message('Upload', name: 'upload', desc: '', args: []);
-  }
-
-  /// `Download`
-  String get download {
-    return Intl.message('Download', name: 'download', desc: '', args: []);
-  }
-
-  /// `No proxy`
-  String get noProxy {
-    return Intl.message('No proxy', name: 'noProxy', desc: '', args: []);
-  }
-
-  /// `No profile, Please add a profile`
-  String get nullProfileDesc {
-    return Intl.message(
-      'No profile, Please add a profile',
-      name: 'nullProfileDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Settings`
-  String get settings {
-    return Intl.message('Settings', name: 'settings', desc: '', args: []);
-  }
-
-  /// `Language`
-  String get language {
-    return Intl.message('Language', name: 'language', desc: '', args: []);
-  }
-
-  /// `Default`
-  String get defaultText {
-    return Intl.message('Default', name: 'defaultText', desc: '', args: []);
-  }
-
-  /// `More`
-  String get more {
-    return Intl.message('More', name: 'more', desc: '', args: []);
-  }
-
-  /// `Other`
-  String get other {
-    return Intl.message('Other', name: 'other', desc: '', args: []);
-  }
-
-  /// `About`
-  String get about {
-    return Intl.message('About', name: 'about', desc: '', args: []);
-  }
-
-  /// `English`
-  String get en {
-    return Intl.message('English', name: 'en', desc: '', args: []);
-  }
-
-  /// `Japanese`
-  String get ja {
-    return Intl.message('Japanese', name: 'ja', desc: '', args: []);
-  }
-
-  /// `Russian`
-  String get ru {
-    return Intl.message('Russian', name: 'ru', desc: '', args: []);
-  }
-
-  /// `French`
-  String get fr {
-    return Intl.message('French', name: 'fr', desc: '', args: []);
-  }
-
-  /// `Spanish`
-  String get es {
-    return Intl.message('Spanish', name: 'es', desc: '', args: []);
-  }
-
-  /// `Korean`
-  String get ko {
-    return Intl.message('Korean', name: 'ko', desc: '', args: []);
-  }
-
-  /// `Simplified Chinese`
-  String get zh_CN {
-    return Intl.message(
-      'Simplified Chinese',
-      name: 'zh_CN',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Theme`
-  String get theme {
-    return Intl.message('Theme', name: 'theme', desc: '', args: []);
-  }
-
-  /// `Set dark mode,adjust the color`
-  String get themeDesc {
-    return Intl.message(
-      'Set dark mode,adjust the color',
-      name: 'themeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Override`
-  String get override {
-    return Intl.message('Override', name: 'override', desc: '', args: []);
-  }
-
-  /// `Allow LAN`
-  String get allowLan {
-    return Intl.message('Allow LAN', name: 'allowLan', desc: '', args: []);
-  }
-
-  /// `TUN`
-  String get tun {
-    return Intl.message('TUN', name: 'tun', desc: '', args: []);
-  }
-
-  /// `TUN works only in administrator mode`
-  String get tunDesc {
-    return Intl.message(
-      'TUN works only in administrator mode',
-      name: 'tunDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Minimize on exit`
-  String get minimizeOnExit {
-    return Intl.message(
-      'Minimize on exit',
-      name: 'minimizeOnExit',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auto launch`
-  String get autoLaunch {
-    return Intl.message('Auto launch', name: 'autoLaunch', desc: '', args: []);
-  }
-
-  /// `Silent launch`
-  String get silentLaunch {
-    return Intl.message(
-      'Silent launch',
-      name: 'silentLaunch',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Start in the background`
-  String get silentLaunchDesc {
-    return Intl.message(
-      'Start in the background',
-      name: 'silentLaunchDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auto run`
-  String get autoRun {
-    return Intl.message('Auto run', name: 'autoRun', desc: '', args: []);
-  }
-
-  /// `Auto run when the application is opened`
-  String get autoRunDesc {
-    return Intl.message(
-      'Auto run when the application is opened',
-      name: 'autoRunDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Logcat`
-  String get logcat {
-    return Intl.message('Logcat', name: 'logcat', desc: '', args: []);
-  }
-
-  /// `Disabling will hide the log entry`
-  String get logcatDesc {
-    return Intl.message(
-      'Disabling will hide the log entry',
-      name: 'logcatDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `AccessControl`
-  String get accessControl {
-    return Intl.message(
-      'AccessControl',
-      name: 'accessControl',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Configure application access proxy`
-  String get accessControlDesc {
-    return Intl.message(
-      'Configure application access proxy',
-      name: 'accessControlDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Application`
-  String get application {
-    return Intl.message('Application', name: 'application', desc: '', args: []);
-  }
-
-  /// `Edit`
-  String get edit {
-    return Intl.message('Edit', name: 'edit', desc: '', args: []);
-  }
-
-  /// `Confirm`
-  String get confirm {
-    return Intl.message('Confirm', name: 'confirm', desc: '', args: []);
-  }
-
-  /// `Update`
-  String get update {
-    return Intl.message('Update', name: 'update', desc: '', args: []);
-  }
-
-  /// `Add`
-  String get add {
-    return Intl.message('Add', name: 'add', desc: '', args: []);
-  }
-
-  /// `Save`
-  String get save {
-    return Intl.message('Save', name: 'save', desc: '', args: []);
-  }
-
-  /// `Delete`
-  String get delete {
-    return Intl.message('Delete', name: 'delete', desc: '', args: []);
-  }
-
-  /// `Hours`
-  String get hours {
-    return Intl.message('Hours', name: 'hours', desc: '', args: []);
-  }
-
-  /// `Seconds`
-  String get seconds {
-    return Intl.message('Seconds', name: 'seconds', desc: '', args: []);
-  }
-
-  /// `QR code`
-  String get qrcode {
-    return Intl.message('QR code', name: 'qrcode', desc: '', args: []);
-  }
-
-  /// `Scan QR code to obtain profile`
-  String get qrcodeDesc {
-    return Intl.message(
-      'Scan QR code to obtain profile',
-      name: 'qrcodeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `URL`
-  String get url {
-    return Intl.message('URL', name: 'url', desc: '', args: []);
-  }
-
-  /// `File`
-  String get file {
-    return Intl.message('File', name: 'file', desc: '', args: []);
-  }
-
-  /// `Name`
-  String get name {
-    return Intl.message('Name', name: 'name', desc: '', args: []);
-  }
-
-  /// `Please input the profile name`
-  String get profileNameNullValidationDesc {
-    return Intl.message(
-      'Please input the profile name',
-      name: 'profileNameNullValidationDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please input the profile URL`
-  String get profileUrlNullValidationDesc {
-    return Intl.message(
-      'Please input the profile URL',
-      name: 'profileUrlNullValidationDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please input a valid profile URL`
-  String get profileUrlInvalidValidationDesc {
-    return Intl.message(
-      'Please input a valid profile URL',
-      name: 'profileUrlInvalidValidationDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auto update`
-  String get autoUpdate {
-    return Intl.message('Auto update', name: 'autoUpdate', desc: '', args: []);
-  }
-
-  /// `Auto update interval`
-  String get autoUpdateInterval {
-    return Intl.message(
-      'Auto update interval',
-      name: 'autoUpdateInterval',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter the auto update interval time`
-  String get profileAutoUpdateIntervalNullValidationDesc {
-    return Intl.message(
-      'Please enter the auto update interval time',
-      name: 'profileAutoUpdateIntervalNullValidationDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please input a valid interval time format`
-  String get profileAutoUpdateIntervalInvalidValidationDesc {
-    return Intl.message(
-      'Please input a valid interval time format',
-      name: 'profileAutoUpdateIntervalInvalidValidationDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Theme mode`
-  String get themeMode {
-    return Intl.message('Theme mode', name: 'themeMode', desc: '', args: []);
-  }
-
-  /// `Theme color`
-  String get themeColor {
-    return Intl.message('Theme color', name: 'themeColor', desc: '', args: []);
-  }
-
-  /// `Preview`
-  String get preview {
-    return Intl.message('Preview', name: 'preview', desc: '', args: []);
-  }
-
-  /// `Auto`
-  String get auto {
-    return Intl.message('Auto', name: 'auto', desc: '', args: []);
-  }
-
-  /// `Light`
-  String get light {
-    return Intl.message('Light', name: 'light', desc: '', args: []);
-  }
-
-  /// `Dark`
-  String get dark {
-    return Intl.message('Dark', name: 'dark', desc: '', args: []);
-  }
-
-  /// `Submit`
-  String get submit {
-    return Intl.message('Submit', name: 'submit', desc: '', args: []);
-  }
-
-  /// `Do you want to create a profile from {url}?`
-  String createProfileFromUrlTip(Object url) {
-    return Intl.message(
-      'Do you want to create a profile from $url?',
-      name: 'createProfileFromUrlTip',
-      desc: '',
-      args: [url],
-    );
-  }
-
-  /// `Create`
-  String get create {
-    return Intl.message('Create', name: 'create', desc: '', args: []);
-  }
-
-  /// `Please upload a valid QR code`
-  String get pleaseUploadValidQrcode {
-    return Intl.message(
-      'Please upload a valid QR code',
-      name: 'pleaseUploadValidQrcode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Blacklist mode`
-  String get blacklistMode {
-    return Intl.message(
-      'Blacklist mode',
-      name: 'blacklistMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Whitelist mode`
-  String get whitelistMode {
-    return Intl.message(
-      'Whitelist mode',
-      name: 'whitelistMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Select all`
-  String get selectAll {
-    return Intl.message('Select all', name: 'selectAll', desc: '', args: []);
-  }
-
-  /// `Cancel select all`
-  String get cancelSelectAll {
-    return Intl.message(
-      'Cancel select all',
-      name: 'cancelSelectAll',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `App access control`
-  String get appAccessControl {
-    return Intl.message(
-      'App access control',
-      name: 'appAccessControl',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only selected apps go through the VPN`
-  String get accessControlAllowDesc {
-    return Intl.message(
-      'Only selected apps go through the VPN',
-      name: 'accessControlAllowDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Selected apps are excluded from the VPN`
-  String get accessControlNotAllowDesc {
-    return Intl.message(
-      'Selected apps are excluded from the VPN',
-      name: 'accessControlNotAllowDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `App access control is disabled`
-  String get accessControlDisabledDesc {
-    return Intl.message(
-      'App access control is disabled',
-      name: 'accessControlDisabledDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count, plural, other{{count} selected}}`
-  String accessControlSelectedCount(num count) {
-    return Intl.plural(
-      count,
-      other: '$count selected',
-      name: 'accessControlSelectedCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Profile parse error`
-  String get profileParseErrorDesc {
-    return Intl.message(
-      'Profile parse error',
-      name: 'profileParseErrorDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `ProxyPort`
-  String get proxyPort {
-    return Intl.message('ProxyPort', name: 'proxyPort', desc: '', args: []);
-  }
-
-  /// `Port`
-  String get port {
-    return Intl.message('Port', name: 'port', desc: '', args: []);
-  }
-
-  /// `Log level`
-  String get logLevel {
-    return Intl.message('Log level', name: 'logLevel', desc: '', args: []);
-  }
-
-  /// `Show`
-  String get show {
-    return Intl.message('Show', name: 'show', desc: '', args: []);
-  }
-
-  /// `Hide`
-  String get hide {
-    return Intl.message('Hide', name: 'hide', desc: '', args: []);
-  }
-
-  /// `Exit`
-  String get exit {
-    return Intl.message('Exit', name: 'exit', desc: '', args: []);
-  }
-
-  /// `System proxy`
-  String get systemProxy {
-    return Intl.message(
-      'System proxy',
-      name: 'systemProxy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Custom`
-  String get custom {
-    return Intl.message('Custom', name: 'custom', desc: '', args: []);
-  }
-
-  /// `Project`
-  String get project {
-    return Intl.message('Project', name: 'project', desc: '', args: []);
-  }
-
-  /// `Core`
-  String get core {
-    return Intl.message('Core', name: 'core', desc: '', args: []);
-  }
-
-  /// `Reverse engineering, decompilation, disassembly, or AI-assisted analysis of this application is strictly prohibited.`
-  String get reverseEngineeringNotice {
-    return Intl.message(
-      'Reverse engineering, decompilation, disassembly, or AI-assisted analysis of this application is strictly prohibited.',
-      name: 'reverseEngineeringNotice',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Tab animation`
-  String get tabAnimation {
-    return Intl.message(
-      'Tab animation',
-      name: 'tabAnimation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.`
-  String get desc {
-    return Intl.message(
-      'A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.',
-      name: 'desc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Starting VPN...`
-  String get startVpn {
-    return Intl.message(
-      'Starting VPN...',
-      name: 'startVpn',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Stopping VPN...`
-  String get stopVpn {
-    return Intl.message('Stopping VPN...', name: 'stopVpn', desc: '', args: []);
-  }
-
-  /// `Discovery a new version`
-  String get discovery {
-    return Intl.message(
-      'Discovery a new version',
-      name: 'discovery',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Compatibility mode`
-  String get compatible {
-    return Intl.message(
-      'Compatibility mode',
-      name: 'compatible',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The current proxy group cannot be selected.`
-  String get notSelectedTip {
-    return Intl.message(
-      'The current proxy group cannot be selected.',
-      name: 'notSelectedTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `tip`
-  String get tip {
-    return Intl.message('tip', name: 'tip', desc: '', args: []);
-  }
-
-  /// `Account`
-  String get account {
-    return Intl.message('Account', name: 'account', desc: '', args: []);
-  }
-
-  /// `Backup`
-  String get backup {
-    return Intl.message('Backup', name: 'backup', desc: '', args: []);
-  }
-
-  /// `Backup success`
-  String get backupSuccess {
-    return Intl.message(
-      'Backup success',
-      name: 'backupSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No info`
-  String get noInfo {
-    return Intl.message('No info', name: 'noInfo', desc: '', args: []);
-  }
-
-  /// `Please bind WebDAV`
-  String get pleaseBindWebDAV {
-    return Intl.message(
-      'Please bind WebDAV',
-      name: 'pleaseBindWebDAV',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Bind`
-  String get bind {
-    return Intl.message('Bind', name: 'bind', desc: '', args: []);
-  }
-
-  /// `Connectivity：`
-  String get connectivity {
-    return Intl.message(
-      'Connectivity：',
-      name: 'connectivity',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `WebDAV configuration`
-  String get webDAVConfiguration {
-    return Intl.message(
-      'WebDAV configuration',
-      name: 'webDAVConfiguration',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Address`
-  String get address {
-    return Intl.message('Address', name: 'address', desc: '', args: []);
-  }
-
-  /// `WebDAV server address`
-  String get addressHelp {
-    return Intl.message(
-      'WebDAV server address',
-      name: 'addressHelp',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter a valid WebDAV address`
-  String get addressTip {
-    return Intl.message(
-      'Please enter a valid WebDAV address',
-      name: 'addressTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Password`
-  String get password {
-    return Intl.message('Password', name: 'password', desc: '', args: []);
-  }
-
-  /// `Check for updates`
-  String get checkUpdate {
-    return Intl.message(
-      'Check for updates',
-      name: 'checkUpdate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The current application is already the latest version`
-  String get checkUpdateError {
-    return Intl.message(
-      'The current application is already the latest version',
-      name: 'checkUpdateError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failed to check for updates. Please check your network and try again`
-  String get checkUpdateFailed {
-    return Intl.message(
-      'Failed to check for updates. Please check your network and try again',
-      name: 'checkUpdateFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Unknown`
-  String get unknown {
-    return Intl.message('Unknown', name: 'unknown', desc: '', args: []);
-  }
-
-  /// `Search`
-  String get search {
-    return Intl.message('Search', name: 'search', desc: '', args: []);
-  }
-
-  /// `Allow apps to bypass VPN`
-  String get allowBypass {
-    return Intl.message(
-      'Allow apps to bypass VPN',
-      name: 'allowBypass',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `External controller`
-  String get externalController {
-    return Intl.message(
-      'External controller',
-      name: 'externalController',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The external controller lets you control the core on the configured address`
-  String get externalControllerDesc {
-    return Intl.message(
-      'The external controller lets you control the core on the configured address',
-      name: 'externalControllerDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Open dashboard`
-  String get openDashboard {
-    return Intl.message(
-      'Open dashboard',
-      name: 'openDashboard',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `IPv6 traffic is received only while IPv6 is on`
-  String get ipv6Desc {
-    return Intl.message(
-      'IPv6 traffic is received only while IPv6 is on',
-      name: 'ipv6Desc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auto IPv6`
-  String get autoIpv6 {
-    return Intl.message('Auto IPv6', name: 'autoIpv6', desc: '', args: []);
-  }
-
-  /// `Auto IPv6 turns IPv6 on or off by whether the local network supports it`
-  String get autoIpv6Desc {
-    return Intl.message(
-      'Auto IPv6 turns IPv6 on or off by whether the local network supports it',
-      name: 'autoIpv6Desc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `App`
-  String get app {
-    return Intl.message('App', name: 'app', desc: '', args: []);
-  }
-
-  /// `Unified delay`
-  String get unifiedDelay {
-    return Intl.message(
-      'Unified delay',
-      name: 'unifiedDelay',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TCP concurrent`
-  String get tcpConcurrent {
-    return Intl.message(
-      'TCP concurrent',
-      name: 'tcpConcurrent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Geo low-memory mode`
-  String get geodataLoader {
-    return Intl.message(
-      'Geo low-memory mode',
-      name: 'geodataLoader',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Requests`
-  String get requests {
-    return Intl.message('Requests', name: 'requests', desc: '', args: []);
-  }
-
-  /// `View recent requests and live connections`
-  String get requestsDesc {
-    return Intl.message(
-      'View recent requests and live connections',
-      name: 'requestsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Find process`
-  String get findProcessMode {
-    return Intl.message(
-      'Find process',
-      name: 'findProcessMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Init`
-  String get init {
-    return Intl.message('Init', name: 'init', desc: '', args: []);
-  }
-
-  /// `Long term effective`
-  String get infiniteTime {
-    return Intl.message(
-      'Long term effective',
-      name: 'infiniteTime',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connections`
-  String get connections {
-    return Intl.message('Connections', name: 'connections', desc: '', args: []);
-  }
-
-  /// `Intranet IP`
-  String get intranetIP {
-    return Intl.message('Intranet IP', name: 'intranetIP', desc: '', args: []);
-  }
-
-  /// `View`
-  String get view {
-    return Intl.message('View', name: 'view', desc: '', args: []);
-  }
-
-  /// `Cut`
-  String get cut {
-    return Intl.message('Cut', name: 'cut', desc: '', args: []);
-  }
-
-  /// `Copy`
-  String get copy {
-    return Intl.message('Copy', name: 'copy', desc: '', args: []);
-  }
-
-  /// `Paste`
-  String get paste {
-    return Intl.message('Paste', name: 'paste', desc: '', args: []);
-  }
-
-  /// `User-Agent`
-  String get userAgent {
-    return Intl.message('User-Agent', name: 'userAgent', desc: '', args: []);
-  }
-
-  /// `Test URL`
-  String get testUrl {
-    return Intl.message('Test URL', name: 'testUrl', desc: '', args: []);
-  }
-
-  /// `Delay test timeout`
-  String get delayTestTimeout {
-    return Intl.message(
-      'Delay test timeout',
-      name: 'delayTestTimeout',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sync`
-  String get sync {
-    return Intl.message('Sync', name: 'sync', desc: '', args: []);
-  }
-
-  /// `Hide from recent tasks`
-  String get exclude {
-    return Intl.message(
-      'Hide from recent tasks',
-      name: 'exclude',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Compact`
-  String get compact {
-    return Intl.message('Compact', name: 'compact', desc: '', args: []);
-  }
-
-  /// `Filter`
-  String get filter {
-    return Intl.message('Filter', name: 'filter', desc: '', args: []);
-  }
-
-  /// `Tab`
-  String get tab {
-    return Intl.message('Tab', name: 'tab', desc: '', args: []);
-  }
-
-  /// `List`
-  String get list {
-    return Intl.message('List', name: 'list', desc: '', args: []);
-  }
-
-  /// `Delay`
-  String get delay {
-    return Intl.message('Delay', name: 'delay', desc: '', args: []);
-  }
-
-  /// `Style`
-  String get style {
-    return Intl.message('Style', name: 'style', desc: '', args: []);
-  }
-
-  /// `Size`
-  String get size {
-    return Intl.message('Size', name: 'size', desc: '', args: []);
-  }
-
-  /// `Sort`
-  String get sort {
-    return Intl.message('Sort', name: 'sort', desc: '', args: []);
-  }
-
-  /// `Columns`
-  String get columns {
-    return Intl.message('Columns', name: 'columns', desc: '', args: []);
-  }
-
-  /// `Proxy group`
-  String get proxyGroup {
-    return Intl.message('Proxy group', name: 'proxyGroup', desc: '', args: []);
-  }
-
-  /// `Go`
-  String get go {
-    return Intl.message('Go', name: 'go', desc: '', args: []);
-  }
-
-  /// `External link`
-  String get externalLink {
-    return Intl.message(
-      'External link',
-      name: 'externalLink',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auto close connections`
-  String get autoCloseConnections {
-    return Intl.message(
-      'Auto close connections',
-      name: 'autoCloseConnections',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `After switching nodes, close all connections or only those passing through the changed proxy group, including nested groups`
-  String get autoCloseConnectionsDesc {
-    return Intl.message(
-      'After switching nodes, close all connections or only those passing through the changed proxy group, including nested groups',
-      name: 'autoCloseConnectionsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection closing scope`
-  String get connectionCloseScope {
-    return Intl.message(
-      'Connection closing scope',
-      name: 'connectionCloseScope',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only the current proxy group`
-  String get closeCurrentGroupConnections {
-    return Intl.message(
-      'Only the current proxy group',
-      name: 'closeCurrentGroupConnections',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only count proxy traffic`
-  String get onlyStatisticsProxy {
-    return Intl.message(
-      'Only count proxy traffic',
-      name: 'onlyStatisticsProxy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pure black mode`
-  String get pureBlackMode {
-    return Intl.message(
-      'Pure black mode',
-      name: 'pureBlackMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TCP keep-alive interval`
-  String get keepAliveIntervalDesc {
-    return Intl.message(
-      'TCP keep-alive interval',
-      name: 'keepAliveIntervalDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// ` entries`
-  String get entries {
-    return Intl.message(' entries', name: 'entries', desc: '', args: []);
-  }
-
-  /// `{count} seconds`
-  String secondsCount(Object count) {
-    return Intl.message(
-      '$count seconds',
-      name: 'secondsCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, =1{1 item} other{{count} items}}`
-  String itemsCount(num count) {
-    return Intl.plural(
-      count,
-      one: '1 item',
-      other: '$count items',
-      name: 'itemsCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Auto Update`
-  String get geoAutoUpdate {
-    return Intl.message(
-      'Auto Update',
-      name: 'geoAutoUpdate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auto Update Interval`
-  String get geoAutoUpdateInterval {
-    return Intl.message(
-      'Auto Update Interval',
-      name: 'geoAutoUpdateInterval',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auto update interval must be between 1 and 8760 hours`
-  String get geoAutoUpdateIntervalTip {
-    return Intl.message(
-      'Auto update interval must be between 1 and 8760 hours',
-      name: 'geoAutoUpdateIntervalTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Geo Resources`
-  String get geoResources {
-    return Intl.message(
-      'Geo Resources',
-      name: 'geoResources',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Updating {name}...`
-  String geoUpdating(Object name) {
-    return Intl.message(
-      'Updating $name...',
-      name: 'geoUpdating',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `{name} skipped`
-  String geoSkipped(Object name) {
-    return Intl.message(
-      '$name skipped',
-      name: 'geoSkipped',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `{name} updated`
-  String geoUpdated(Object name) {
-    return Intl.message(
-      '$name updated',
-      name: 'geoUpdated',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Local`
-  String get local {
-    return Intl.message('Local', name: 'local', desc: '', args: []);
-  }
-
-  /// `Remote`
-  String get remote {
-    return Intl.message('Remote', name: 'remote', desc: '', args: []);
-  }
-
-  /// `Backup local data to WebDAV`
-  String get remoteBackupDesc {
-    return Intl.message(
-      'Backup local data to WebDAV',
-      name: 'remoteBackupDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup local data to local`
-  String get localBackupDesc {
-    return Intl.message(
-      'Backup local data to local',
-      name: 'localBackupDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Mode`
-  String get mode {
-    return Intl.message('Mode', name: 'mode', desc: '', args: []);
-  }
-
-  /// `Time`
-  String get time {
-    return Intl.message('Time', name: 'time', desc: '', args: []);
-  }
-
-  /// `Source`
-  String get source {
-    return Intl.message('Source', name: 'source', desc: '', args: []);
-  }
-
-  /// `Action`
-  String get action {
-    return Intl.message('Action', name: 'action', desc: '', args: []);
-  }
-
-  /// `Intelligent selection`
-  String get intelligentSelected {
-    return Intl.message(
-      'Intelligent selection',
-      name: 'intelligentSelected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No package names found in the clipboard`
-  String get clipboardNoPackageNames {
-    return Intl.message(
-      'No package names found in the clipboard',
-      name: 'clipboardNoPackageNames',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Import from clipboard`
-  String get clipboardImport {
-    return Intl.message(
-      'Import from clipboard',
-      name: 'clipboardImport',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Export to clipboard`
-  String get clipboardExport {
-    return Intl.message(
-      'Export to clipboard',
-      name: 'clipboardExport',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Layout`
-  String get layout {
-    return Intl.message('Layout', name: 'layout', desc: '', args: []);
-  }
-
-  /// `Tight`
-  String get tight {
-    return Intl.message('Tight', name: 'tight', desc: '', args: []);
-  }
-
-  /// `Standard`
-  String get standard {
-    return Intl.message('Standard', name: 'standard', desc: '', args: []);
-  }
-
-  /// `Loose`
-  String get loose {
-    return Intl.message('Loose', name: 'loose', desc: '', args: []);
-  }
-
-  /// `Profiles sort`
-  String get profilesSort {
-    return Intl.message(
-      'Profiles sort',
-      name: 'profilesSort',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Start`
-  String get start {
-    return Intl.message('Start', name: 'start', desc: '', args: []);
-  }
-
-  /// `Stop`
-  String get stop {
-    return Intl.message('Stop', name: 'stop', desc: '', args: []);
-  }
-
-  /// `Key`
-  String get key {
-    return Intl.message('Key', name: 'key', desc: '', args: []);
-  }
-
-  /// `Value`
-  String get value {
-    return Intl.message('Value', name: 'value', desc: '', args: []);
-  }
-
-  /// `Changes take effect after restarting the VPN`
-  String get vpnTip {
-    return Intl.message(
-      'Changes take effect after restarting the VPN',
-      name: 'vpnTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `VPN routes all system traffic through VpnService automatically`
-  String get vpnEnableDesc {
-    return Intl.message(
-      'VPN routes all system traffic through VpnService automatically',
-      name: 'vpnEnableDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Options`
-  String get options {
-    return Intl.message('Options', name: 'options', desc: '', args: []);
-  }
-
-  /// `UWP loopback exemption`
-  String get loopback {
-    return Intl.message(
-      'UWP loopback exemption',
-      name: 'loopback',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Providers`
-  String get providers {
-    return Intl.message('Providers', name: 'providers', desc: '', args: []);
-  }
-
-  /// `Proxy providers`
-  String get proxyProviders {
-    return Intl.message(
-      'Proxy providers',
-      name: 'proxyProviders',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Rule providers`
-  String get ruleProviders {
-    return Intl.message(
-      'Rule providers',
-      name: 'ruleProviders',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Status`
-  String get status {
-    return Intl.message('Status', name: 'status', desc: '', args: []);
-  }
-
-  /// `With DNS off, the system DNS is used`
-  String get statusDesc {
-    return Intl.message(
-      'With DNS off, the system DNS is used',
-      name: 'statusDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Prefer HTTP/3 tries HTTP/3 first for DoH servers`
-  String get preferH3Desc {
-    return Intl.message(
-      'Prefer HTTP/3 tries HTTP/3 first for DoH servers',
-      name: 'preferH3Desc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Respect rules`
-  String get respectRules {
-    return Intl.message(
-      'Respect rules',
-      name: 'respectRules',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Respect rules routes DNS connections by the rules and needs a proxy nameserver`
-  String get respectRulesDesc {
-    return Intl.message(
-      'Respect rules routes DNS connections by the rules and needs a proxy nameserver',
-      name: 'respectRulesDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `DNS mode`
-  String get dnsMode {
-    return Intl.message('DNS mode', name: 'dnsMode', desc: '', args: []);
-  }
-
-  /// `Fake-IP range`
-  String get fakeipRange {
-    return Intl.message(
-      'Fake-IP range',
-      name: 'fakeipRange',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Fake-IP filter`
-  String get fakeipFilter {
-    return Intl.message(
-      'Fake-IP filter',
-      name: 'fakeipFilter',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Default nameserver`
-  String get defaultNameserver {
-    return Intl.message(
-      'Default nameserver',
-      name: 'defaultNameserver',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Resolves the hostnames of the other DNS servers. Use IP addresses only.`
-  String get defaultNameserverDesc {
-    return Intl.message(
-      'Resolves the hostnames of the other DNS servers. Use IP addresses only.',
-      name: 'defaultNameserverDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Nameserver`
-  String get nameserver {
-    return Intl.message('Nameserver', name: 'nameserver', desc: '', args: []);
-  }
-
-  /// `The default DNS servers, such as 223.5.5.5, tls://1.1.1.1 or https://dns.google/dns-query.`
-  String get nameserverDesc {
-    return Intl.message(
-      'The default DNS servers, such as 223.5.5.5, tls://1.1.1.1 or https://dns.google/dns-query.',
-      name: 'nameserverDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use hosts`
-  String get useHosts {
-    return Intl.message('Use hosts', name: 'useHosts', desc: '', args: []);
-  }
-
-  /// `Use system hosts`
-  String get useSystemHosts {
-    return Intl.message(
-      'Use system hosts',
-      name: 'useSystemHosts',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Nameserver policy`
-  String get nameserverPolicy {
-    return Intl.message(
-      'Nameserver policy',
-      name: 'nameserverPolicy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Matching domains use the DNS server given here instead of Nameserver and Fallback.`
-  String get nameserverPolicyDesc {
-    return Intl.message(
-      'Matching domains use the DNS server given here instead of Nameserver and Fallback.',
-      name: 'nameserverPolicyDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy nameserver`
-  String get proxyNameserver {
-    return Intl.message(
-      'Proxy nameserver',
-      name: 'proxyNameserver',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Fallback`
-  String get fallback {
-    return Intl.message('Fallback', name: 'fallback', desc: '', args: []);
-  }
-
-  /// `Used instead of Nameserver when the fallback filter treats its answer as polluted.`
-  String get fallbackDesc {
-    return Intl.message(
-      'Used instead of Nameserver when the fallback filter treats its answer as polluted.',
-      name: 'fallbackDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Prefer HTTP/3`
-  String get preferH3 {
-    return Intl.message('Prefer HTTP/3', name: 'preferH3', desc: '', args: []);
-  }
-
-  /// `Lazy fallback query`
-  String get fallbackLazyQuery {
-    return Intl.message(
-      'Lazy fallback query',
-      name: 'fallbackLazyQuery',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy nameserver policy`
-  String get proxyNameserverPolicy {
-    return Intl.message(
-      'Proxy nameserver policy',
-      name: 'proxyNameserverPolicy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Direct nameserver`
-  String get directNameserver {
-    return Intl.message(
-      'Direct nameserver',
-      name: 'directNameserver',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Direct nameserver follows policy`
-  String get directNameserverFollowPolicy {
-    return Intl.message(
-      'Direct nameserver follows policy',
-      name: 'directNameserverFollowPolicy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Fallback filter`
-  String get fallbackFilter {
-    return Intl.message(
-      'Fallback filter',
-      name: 'fallbackFilter',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Geoip code`
-  String get geoipCode {
-    return Intl.message('Geoip code', name: 'geoipCode', desc: '', args: []);
-  }
-
-  /// `Ipcidr`
-  String get ipcidr {
-    return Intl.message('Ipcidr', name: 'ipcidr', desc: '', args: []);
-  }
-
-  /// `Domain`
-  String get domain {
-    return Intl.message('Domain', name: 'domain', desc: '', args: []);
-  }
-
-  /// `Reset`
-  String get reset {
-    return Intl.message('Reset', name: 'reset', desc: '', args: []);
-  }
-
-  /// `Show/Hide`
-  String get action_view {
-    return Intl.message('Show/Hide', name: 'action_view', desc: '', args: []);
-  }
-
-  /// `Start/Stop`
-  String get action_start {
-    return Intl.message('Start/Stop', name: 'action_start', desc: '', args: []);
-  }
-
-  /// `Switch mode`
-  String get action_mode {
-    return Intl.message('Switch mode', name: 'action_mode', desc: '', args: []);
-  }
-
-  /// `System proxy`
-  String get action_proxy {
-    return Intl.message(
-      'System proxy',
-      name: 'action_proxy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TUN`
-  String get action_tun {
-    return Intl.message('TUN', name: 'action_tun', desc: '', args: []);
-  }
-
-  /// `Hotkey Management`
-  String get hotkeyManagement {
-    return Intl.message(
-      'Hotkey Management',
-      name: 'hotkeyManagement',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use keyboard to control applications`
-  String get hotkeyManagementDesc {
-    return Intl.message(
-      'Use keyboard to control applications',
-      name: 'hotkeyManagementDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please press the keyboard.`
-  String get pressKeyboard {
-    return Intl.message(
-      'Please press the keyboard.',
-      name: 'pressKeyboard',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remove`
-  String get remove {
-    return Intl.message('Remove', name: 'remove', desc: '', args: []);
-  }
-
-  /// `No network`
-  String get noNetwork {
-    return Intl.message('No network', name: 'noNetwork', desc: '', args: []);
-  }
-
-  /// `With IPv6 on, the VPN allows IPv6 inbound`
-  String get ipv6InboundDesc {
-    return Intl.message(
-      'With IPv6 on, the VPN allows IPv6 inbound',
-      name: 'ipv6InboundDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Export logs`
-  String get exportLogs {
-    return Intl.message('Export logs', name: 'exportLogs', desc: '', args: []);
-  }
-
-  /// `Export Success`
-  String get exportSuccess {
-    return Intl.message(
-      'Export Success',
-      name: 'exportSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Icon style`
-  String get iconStyle {
-    return Intl.message('Icon style', name: 'iconStyle', desc: '', args: []);
-  }
-
-  /// `Filled`
-  String get iconStyleFilled {
-    return Intl.message('Filled', name: 'iconStyleFilled', desc: '', args: []);
-  }
-
-  /// `Plain`
-  String get iconStylePlain {
-    return Intl.message('Plain', name: 'iconStylePlain', desc: '', args: []);
-  }
-
-  /// `Hidden`
-  String get iconStyleHidden {
-    return Intl.message('Hidden', name: 'iconStyleHidden', desc: '', args: []);
-  }
-
-  /// `Stack mode`
-  String get stackMode {
-    return Intl.message('Stack mode', name: 'stackMode', desc: '', args: []);
-  }
-
-  /// `Network`
-  String get network {
-    return Intl.message('Network', name: 'network', desc: '', args: []);
-  }
-
-  /// `Bypass domains`
-  String get bypassDomain {
-    return Intl.message(
-      'Bypass domains',
-      name: 'bypassDomain',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Bypass domains apply only while the system proxy is on`
-  String get bypassDomainDesc {
-    return Intl.message(
-      'Bypass domains apply only while the system proxy is on',
-      name: 'bypassDomainDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Make sure to reset`
-  String get resetTip {
-    return Intl.message(
-      'Make sure to reset',
-      name: 'resetTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Icon`
-  String get icon {
-    return Intl.message('Icon', name: 'icon', desc: '', args: []);
-  }
-
-  /// `No data`
-  String get noData {
-    return Intl.message('No data', name: 'noData', desc: '', args: []);
-  }
-
-  /// `Font family`
-  String get fontFamily {
-    return Intl.message('Font family', name: 'fontFamily', desc: '', args: []);
-  }
-
-  /// `Installed fonts`
-  String get installedFonts {
-    return Intl.message(
-      'Installed fonts',
-      name: 'installedFonts',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Toggle`
-  String get toggle {
-    return Intl.message('Toggle', name: 'toggle', desc: '', args: []);
-  }
-
-  /// `System`
-  String get system {
-    return Intl.message('System', name: 'system', desc: '', args: []);
-  }
-
-  /// `Bypass private addresses`
-  String get bypassPrivateRoute {
-    return Intl.message(
-      'Bypass private addresses',
-      name: 'bypassPrivateRoute',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `With Bypass private addresses on, LAN, loopback and multicast addresses skip TUN`
-  String get bypassPrivateRouteDesc {
-    return Intl.message(
-      'With Bypass private addresses on, LAN, loopback and multicast addresses skip TUN',
-      name: 'bypassPrivateRouteDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Route addresses`
-  String get routeAddress {
-    return Intl.message(
-      'Route addresses',
-      name: 'routeAddress',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter the admin password`
-  String get pleaseInputAdminPassword {
-    return Intl.message(
-      'Please enter the admin password',
-      name: 'pleaseInputAdminPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TUN could not be enabled because administrator authorization was denied. Allow the system permission prompt and try again.`
-  String get tunAuthorizationFailed {
-    return Intl.message(
-      'TUN could not be enabled because administrator authorization was denied. Allow the system permission prompt and try again.',
-      name: 'tunAuthorizationFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TUN could not be enabled: Helper installation or startup failed. Check that the app installation is complete and the system service is working, then try again.`
-  String get tunHelperInstallFailed {
-    return Intl.message(
-      'TUN could not be enabled: Helper installation or startup failed. Check that the app installation is complete and the system service is working, then try again.',
-      name: 'tunHelperInstallFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.`
-  String get tunAdminAccountRequired {
-    return Intl.message(
-      'TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.',
-      name: 'tunAdminAccountRequired',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Copying environment variables`
-  String get copyEnvVar {
-    return Intl.message(
-      'Copying environment variables',
-      name: 'copyEnvVar',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Memory info`
-  String get memoryInfo {
-    return Intl.message('Memory info', name: 'memoryInfo', desc: '', args: []);
-  }
-
-  /// `Dialog`
-  String get dialog {
-    return Intl.message('Dialog', name: 'dialog', desc: '', args: []);
-  }
-
-  /// `Cancel`
-  String get cancel {
-    return Intl.message('Cancel', name: 'cancel', desc: '', args: []);
-  }
-
-  /// `The file has been modified. Do you want to save the changes?`
-  String get fileIsUpdate {
-    return Intl.message(
-      'The file has been modified. Do you want to save the changes?',
-      name: 'fileIsUpdate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The profile has been modified. Do you want to disable auto update?`
-  String get profileHasUpdate {
-    return Intl.message(
-      'The profile has been modified. Do you want to disable auto update?',
-      name: 'profileHasUpdate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Copy success`
-  String get copySuccess {
-    return Intl.message(
-      'Copy success',
-      name: 'copySuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Copy link`
-  String get copyLink {
-    return Intl.message('Copy link', name: 'copyLink', desc: '', args: []);
-  }
-
-  /// `Export file`
-  String get exportFile {
-    return Intl.message('Export file', name: 'exportFile', desc: '', args: []);
-  }
-
-  /// `The cache is corrupt. Do you want to clear it?`
-  String get cacheCorrupt {
-    return Intl.message(
-      'The cache is corrupt. Do you want to clear it?',
-      name: 'cacheCorrupt',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Listen`
-  String get listen {
-    return Intl.message('Listen', name: 'listen', desc: '', args: []);
-  }
-
-  /// `undo`
-  String get undo {
-    return Intl.message('undo', name: 'undo', desc: '', args: []);
-  }
-
-  /// `redo`
-  String get redo {
-    return Intl.message('redo', name: 'redo', desc: '', args: []);
-  }
-
-  /// `None`
-  String get none {
-    return Intl.message('None', name: 'none', desc: '', args: []);
-  }
-
-  /// `Required`
-  String get required {
-    return Intl.message('Required', name: 'required', desc: '', args: []);
-  }
-
-  /// `Advanced configuration`
-  String get advancedConfig {
-    return Intl.message(
-      'Advanced configuration',
-      name: 'advancedConfig',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Provide diverse configuration options`
-  String get advancedConfigDesc {
-    return Intl.message(
-      'Provide diverse configuration options',
-      name: 'advancedConfigDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add rule`
-  String get addRule {
-    return Intl.message('Add rule', name: 'addRule', desc: '', args: []);
-  }
-
-  /// `Rule name`
-  String get ruleName {
-    return Intl.message('Rule name', name: 'ruleName', desc: '', args: []);
-  }
-
-  /// `Content`
-  String get content {
-    return Intl.message('Content', name: 'content', desc: '', args: []);
-  }
-
-  /// `Sub rule`
-  String get subRule {
-    return Intl.message('Sub rule', name: 'subRule', desc: '', args: []);
-  }
-
-  /// `Rule target`
-  String get ruleTarget {
-    return Intl.message('Rule target', name: 'ruleTarget', desc: '', args: []);
-  }
-
-  /// `Source IP`
-  String get sourceIp {
-    return Intl.message('Source IP', name: 'sourceIp', desc: '', args: []);
-  }
-
-  /// `No resolve IP`
-  String get noResolve {
-    return Intl.message('No resolve IP', name: 'noResolve', desc: '', args: []);
-  }
-
-  /// `Do you want to save the changes?`
-  String get saveChanges {
-    return Intl.message(
-      'Do you want to save the changes?',
-      name: 'saveChanges',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Process rules look up the process only when they are checked`
-  String get findProcessModeAutomaticDesc {
-    return Intl.message(
-      'Process rules look up the process only when they are checked',
-      name: 'findProcessModeAutomaticDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Monochrome`
-  String get monochromeScheme {
-    return Intl.message(
-      'Monochrome',
-      name: 'monochromeScheme',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Color style`
-  String get colorStyle {
-    return Intl.message('Color style', name: 'colorStyle', desc: '', args: []);
-  }
-
-  /// `Vivid`
-  String get vividStyle {
-    return Intl.message('Vivid', name: 'vividStyle', desc: '', args: []);
-  }
-
-  /// `Tinted`
-  String get tintedStyle {
-    return Intl.message('Tinted', name: 'tintedStyle', desc: '', args: []);
-  }
-
-  /// `Soft`
-  String get softStyle {
-    return Intl.message('Soft', name: 'softStyle', desc: '', args: []);
-  }
-
-  /// `Custom color`
-  String get customColor {
-    return Intl.message(
-      'Custom color',
-      name: 'customColor',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Grid`
-  String get grid {
-    return Intl.message('Grid', name: 'grid', desc: '', args: []);
-  }
-
-  /// `Spectrum`
-  String get spectrum {
-    return Intl.message('Spectrum', name: 'spectrum', desc: '', args: []);
-  }
-
-  /// `Sliders`
-  String get sliders {
-    return Intl.message('Sliders', name: 'sliders', desc: '', args: []);
-  }
-
-  /// `Hue`
-  String get hue {
-    return Intl.message('Hue', name: 'hue', desc: '', args: []);
-  }
-
-  /// `Saturation`
-  String get saturation {
-    return Intl.message('Saturation', name: 'saturation', desc: '', args: []);
-  }
-
-  /// `Brightness`
-  String get brightness {
-    return Intl.message('Brightness', name: 'brightness', desc: '', args: []);
-  }
-
-  /// `Hex`
-  String get hex {
-    return Intl.message('Hex', name: 'hex', desc: '', args: []);
-  }
-
-  /// `Liquid Glass`
-  String get liquidGlass {
-    return Intl.message(
-      'Liquid Glass',
-      name: 'liquidGlass',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Ultra`
-  String get ultra {
-    return Intl.message('Ultra', name: 'ultra', desc: '', args: []);
-  }
-
-  /// `Developer mode`
-  String get developerMode {
-    return Intl.message(
-      'Developer mode',
-      name: 'developerMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Developer mode is enabled.`
-  String get developerModeEnableTip {
-    return Intl.message(
-      'Developer mode is enabled.',
-      name: 'developerModeEnableTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Message test`
-  String get messageTest {
-    return Intl.message(
-      'Message test',
-      name: 'messageTest',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This is a message.`
-  String get messageTestTip {
-    return Intl.message(
-      'This is a message.',
-      name: 'messageTestTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Crash test`
-  String get crashTest {
-    return Intl.message('Crash test', name: 'crashTest', desc: '', args: []);
-  }
-
-  /// `Clear Data`
-  String get clearData {
-    return Intl.message('Clear Data', name: 'clearData', desc: '', args: []);
-  }
-
-  /// `Text Scaling`
-  String get textScale {
-    return Intl.message('Text Scaling', name: 'textScale', desc: '', args: []);
-  }
-
-  /// `Internet`
-  String get internet {
-    return Intl.message('Internet', name: 'internet', desc: '', args: []);
-  }
-
-  /// `System APP`
-  String get systemApp {
-    return Intl.message('System APP', name: 'systemApp', desc: '', args: []);
-  }
-
-  /// `No network APP`
-  String get noNetworkApp {
-    return Intl.message(
-      'No network APP',
-      name: 'noNetworkApp',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore strategy`
-  String get restoreStrategy {
-    return Intl.message(
-      'Restore strategy',
-      name: 'restoreStrategy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Override`
-  String get restoreStrategy_override {
-    return Intl.message(
-      'Override',
-      name: 'restoreStrategy_override',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Compatible`
-  String get restoreStrategy_compatible {
-    return Intl.message(
-      'Compatible',
-      name: 'restoreStrategy_compatible',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Logs test`
-  String get logsTest {
-    return Intl.message('Logs test', name: 'logsTest', desc: '', args: []);
-  }
-
-  /// `{label} cannot be empty`
-  String emptyTip(Object label) {
-    return Intl.message(
-      '$label cannot be empty',
-      name: 'emptyTip',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `{label} must be a url`
-  String urlTip(Object label) {
-    return Intl.message(
-      '$label must be a url',
-      name: 'urlTip',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `{label} must be a number`
-  String numberTip(Object label) {
-    return Intl.message(
-      '$label must be a number',
-      name: 'numberTip',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `Interval`
-  String get interval {
-    return Intl.message('Interval', name: 'interval', desc: '', args: []);
-  }
-
-  /// `Current {label} already exists`
-  String existsTip(Object label) {
-    return Intl.message(
-      'Current $label already exists',
-      name: 'existsTip',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `Are you sure you want to delete the current {label}?`
-  String deleteTip(Object label) {
-    return Intl.message(
-      'Are you sure you want to delete the current $label?',
-      name: 'deleteTip',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `Are you sure you want to delete the selected {label}?`
-  String deleteMultipTip(Object label) {
-    return Intl.message(
-      'Are you sure you want to delete the selected $label?',
-      name: 'deleteMultipTip',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `No {label} yet`
-  String nullTip(Object label) {
-    return Intl.message(
-      'No $label yet',
-      name: 'nullTip',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `Script`
-  String get script {
-    return Intl.message('Script', name: 'script', desc: '', args: []);
-  }
-
-  /// `Color`
-  String get color {
-    return Intl.message('Color', name: 'color', desc: '', args: []);
-  }
-
-  /// `Rename`
-  String get rename {
-    return Intl.message('Rename', name: 'rename', desc: '', args: []);
-  }
-
-  /// `Unnamed`
-  String get unnamed {
-    return Intl.message('Unnamed', name: 'unnamed', desc: '', args: []);
-  }
-
-  /// `Mixed port`
-  String get mixedPort {
-    return Intl.message('Mixed port', name: 'mixedPort', desc: '', args: []);
-  }
-
-  /// `SOCKS port`
-  String get socksPort {
-    return Intl.message('SOCKS port', name: 'socksPort', desc: '', args: []);
-  }
-
-  /// `Redir port`
-  String get redirPort {
-    return Intl.message('Redir port', name: 'redirPort', desc: '', args: []);
-  }
-
-  /// `TProxy port`
-  String get tproxyPort {
-    return Intl.message('TProxy port', name: 'tproxyPort', desc: '', args: []);
-  }
-
-  /// `{label} must be between 1024 and 49151`
-  String portTip(Object label) {
-    return Intl.message(
-      '$label must be between 1024 and 49151',
-      name: 'portTip',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `Please enter a different port`
-  String get portConflictTip {
-    return Intl.message(
-      'Please enter a different port',
-      name: 'portConflictTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Port unavailable`
-  String get portUnavailableTitle {
-    return Intl.message(
-      'Port unavailable',
-      name: 'portUnavailableTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The mixed port {port} could not start listening and may be in use by another application. Change the port to retry immediately.`
-  String portUnavailableMessage(Object port) {
-    return Intl.message(
-      'The mixed port $port could not start listening and may be in use by another application. Change the port to retry immediately.',
-      name: 'portUnavailableMessage',
-      desc: '',
-      args: [port],
-    );
-  }
-
-  /// `Save and retry`
-  String get saveAndRetry {
-    return Intl.message(
-      'Save and retry',
-      name: 'saveAndRetry',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Suggested port {port} has been filled in.`
-  String portSuggestionTip(Object port) {
-    return Intl.message(
-      'Suggested port $port has been filled in.',
-      name: 'portSuggestionTip',
-      desc: '',
-      args: [port],
-    );
-  }
-
-  /// `If another proxy app is running, close it first.`
-  String get portProxyAppTip {
-    return Intl.message(
-      'If another proxy app is running, close it first.',
-      name: 'portProxyAppTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Import`
-  String get import {
-    return Intl.message('Import', name: 'import', desc: '', args: []);
-  }
-
-  /// `Import from file`
-  String get importFile {
-    return Intl.message(
-      'Import from file',
-      name: 'importFile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Import from URL`
-  String get importUrl {
-    return Intl.message(
-      'Import from URL',
-      name: 'importUrl',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auto-set system DNS`
-  String get autoSetSystemDns {
-    return Intl.message(
-      'Auto-set system DNS',
-      name: 'autoSetSystemDns',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pause proxy when idle`
-  String get suspendOnIdle {
-    return Intl.message(
-      'Pause proxy when idle',
-      name: 'suspendOnIdle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pause proxy when idle stops traffic forwarding and health checks while the screen is off and the system is idle, which may disconnect calls and live audio and delay push notifications`
-  String get suspendOnIdleDesc {
-    return Intl.message(
-      'Pause proxy when idle stops traffic forwarding and health checks while the screen is off and the system is idle, which may disconnect calls and live audio and delay push notifications',
-      name: 'suspendOnIdleDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{label} details`
-  String details(Object label) {
-    return Intl.message(
-      '$label details',
-      name: 'details',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `Creation time`
-  String get creationTime {
-    return Intl.message(
-      'Creation time',
-      name: 'creationTime',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Process`
-  String get process {
-    return Intl.message('Process', name: 'process', desc: '', args: []);
-  }
-
-  /// `Host`
-  String get host {
-    return Intl.message('Host', name: 'host', desc: '', args: []);
-  }
-
-  /// `Destination`
-  String get destination {
-    return Intl.message('Destination', name: 'destination', desc: '', args: []);
-  }
-
-  /// `Destination GeoIP`
-  String get destinationGeoIP {
-    return Intl.message(
-      'Destination GeoIP',
-      name: 'destinationGeoIP',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Destination IPASN`
-  String get destinationIPASN {
-    return Intl.message(
-      'Destination IPASN',
-      name: 'destinationIPASN',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Special proxy`
-  String get specialProxy {
-    return Intl.message(
-      'Special proxy',
-      name: 'specialProxy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `special rules`
-  String get specialRules {
-    return Intl.message(
-      'special rules',
-      name: 'specialRules',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remote destination`
-  String get remoteDestination {
-    return Intl.message(
-      'Remote destination',
-      name: 'remoteDestination',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network type`
-  String get networkType {
-    return Intl.message(
-      'Network type',
-      name: 'networkType',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy chains`
-  String get proxyChains {
-    return Intl.message(
-      'Proxy chains',
-      name: 'proxyChains',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy chaining can significantly reduce network speed. Keep it disabled unless you clearly need it.`
-  String get proxyChainWarning {
-    return Intl.message(
-      'Proxy chaining can significantly reduce network speed. Keep it disabled unless you clearly need it.',
-      name: 'proxyChainWarning',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose hops from entry to exit. Nodes or policy groups can occupy any hop. Concrete group members use the preceding hop; nested groups and DIRECT/REJECT stay unchanged. After saving, the chain appears under its name as a policy group in the proxy list and rule targets. Delays in this editor are per-hop references; test the chain's group to measure the effective route.`
-  String get proxyChainInstruction {
-    return Intl.message(
-      'Choose hops from entry to exit. Nodes or policy groups can occupy any hop. Concrete group members use the preceding hop; nested groups and DIRECT/REJECT stay unchanged. After saving, the chain appears under its name as a policy group in the proxy list and rule targets. Delays in this editor are per-hop references; test the chain\'s group to measure the effective route.',
-      name: 'proxyChainInstruction',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A proxy chain needs an entry and an exit`
-  String get proxyChainMinimumNodes {
-    return Intl.message(
-      'A proxy chain needs an entry and an exit',
-      name: 'proxyChainMinimumNodes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose an exit node or policy group.`
-  String get proxyChainMinimumNodesHint {
-    return Intl.message(
-      'Choose an exit node or policy group.',
-      name: 'proxyChainMinimumNodesHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Policy groups`
-  String get proxyChainPolicyGroups {
-    return Intl.message(
-      'Policy groups',
-      name: 'proxyChainPolicyGroups',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only select, url-test, fallback, and load-balance groups can be used in a chain.`
-  String get proxyChainUnsupportedGroupTip {
-    return Intl.message(
-      'Only select, url-test, fallback, and load-balance groups can be used in a chain.',
-      name: 'proxyChainUnsupportedGroupTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Entry`
-  String get proxyChainEntry {
-    return Intl.message('Entry', name: 'proxyChainEntry', desc: '', args: []);
-  }
-
-  /// `Exit`
-  String get proxyChainExit {
-    return Intl.message('Exit', name: 'proxyChainExit', desc: '', args: []);
-  }
-
-  /// `Clear chain config`
-  String get clearProxyChain {
-    return Intl.message(
-      'Clear chain config',
-      name: 'clearProxyChain',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Custom nodes`
-  String get proxyChainCustomNodes {
-    return Intl.message(
-      'Custom nodes',
-      name: 'proxyChainCustomNodes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Custom node`
-  String get proxyChainCustomNode {
-    return Intl.message(
-      'Custom node',
-      name: 'proxyChainCustomNode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add`
-  String get addProxyChainNode {
-    return Intl.message('Add', name: 'addProxyChainNode', desc: '', args: []);
-  }
-
-  /// `Other nodes`
-  String get proxyChainOtherNodes {
-    return Intl.message(
-      'Other nodes',
-      name: 'proxyChainOtherNodes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy chain saved and applied. Select it by its name in rules or in the proxy list.`
-  String get proxyChainSavedAndApplied {
-    return Intl.message(
-      'Proxy chain saved and applied. Select it by its name in rules or in the proxy list.',
-      name: 'proxyChainSavedAndApplied',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy {name} conflicts with another enabled chain or creates a loop`
-  String proxyChainConflictTip(Object name) {
-    return Intl.message(
-      'Proxy $name conflicts with another enabled chain or creates a loop',
-      name: 'proxyChainConflictTip',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Proxy {name} is not available in this position`
-  String proxyChainUnavailableNodeTip(Object name) {
-    return Intl.message(
-      'Proxy $name is not available in this position',
-      name: 'proxyChainUnavailableNodeTip',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Proxy chain “{chainName}” references an unavailable node or policy group “{nodeName}”. Select it again in “Proxy chains”, or disable this chain.`
-  String proxyChainUnavailableReference(Object chainName, Object nodeName) {
-    return Intl.message(
-      'Proxy chain “$chainName” references an unavailable node or policy group “$nodeName”. Select it again in “Proxy chains”, or disable this chain.',
-      name: 'proxyChainUnavailableReference',
-      desc: '',
-      args: [chainName, nodeName],
-    );
-  }
-
-  /// `Related proxy chains updated`
-  String get proxyChainRelatedChainsUpdated {
-    return Intl.message(
-      'Related proxy chains updated',
-      name: 'proxyChainRelatedChainsUpdated',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy chain`
-  String get proxyChainSelectedNodes {
-    return Intl.message(
-      'Proxy chain',
-      name: 'proxyChainSelectedNodes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Available nodes and groups`
-  String get proxyChainAvailableNodes {
-    return Intl.message(
-      'Available nodes and groups',
-      name: 'proxyChainAvailableNodes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No nodes in the proxy chain`
-  String get proxyChainEmpty {
-    return Intl.message(
-      'No nodes in the proxy chain',
-      name: 'proxyChainEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Node added to proxy chain`
-  String get proxyChainNodeAdded {
-    return Intl.message(
-      'Node added to proxy chain',
-      name: 'proxyChainNodeAdded',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Supported formats: ss://, ssr://, vmess://, vless://, trojan://, anytls://, hysteria:// / hy://, hysteria2:// / hy2://, tuic://, wireguard:// / wg://, http(s)://, socks(5)://`
-  String get proxyChainUriNodeSupportedFormats {
-    return Intl.message(
-      'Supported formats: ss://, ssr://, vmess://, vless://, trojan://, anytls://, hysteria:// / hy://, hysteria2:// / hy2://, tuic://, wireguard:// / wg://, http(s)://, socks(5)://',
-      name: 'proxyChainUriNodeSupportedFormats',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Log`
-  String get log {
-    return Intl.message('Log', name: 'log', desc: '', args: []);
-  }
-
-  /// `Connection`
-  String get connection {
-    return Intl.message('Connection', name: 'connection', desc: '', args: []);
-  }
-
-  /// `Request`
-  String get request {
-    return Intl.message('Request', name: 'request', desc: '', args: []);
-  }
-
-  /// `Connected`
-  String get connected {
-    return Intl.message('Connected', name: 'connected', desc: '', args: []);
-  }
-
-  /// `Disconnected`
-  String get disconnected {
-    return Intl.message(
-      'Disconnected',
-      name: 'disconnected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connecting...`
-  String get connecting {
-    return Intl.message(
-      'Connecting...',
-      name: 'connecting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Are you sure you want to restart the core?`
-  String get restartCoreTip {
-    return Intl.message(
-      'Are you sure you want to restart the core?',
-      name: 'restartCoreTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Are you sure you want to force restart the core?`
-  String get forceRestartCoreTip {
-    return Intl.message(
-      'Are you sure you want to force restart the core?',
-      name: 'forceRestartCoreTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `DNS hijacking`
-  String get dnsHijacking {
-    return Intl.message(
-      'DNS hijacking',
-      name: 'dnsHijacking',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Core status`
-  String get coreStatus {
-    return Intl.message('Core status', name: 'coreStatus', desc: '', args: []);
-  }
-
-  /// `Core is not connected`
-  String get coreNotConnected {
-    return Intl.message(
-      'Core is not connected',
-      name: 'coreNotConnected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Append system DNS`
-  String get appendSystemDns {
-    return Intl.message(
-      'Append system DNS',
-      name: 'appendSystemDns',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Block QUIC`
-  String get blockQuic {
-    return Intl.message('Block QUIC', name: 'blockQuic', desc: '', args: []);
-  }
-
-  /// `Reject UDP 443 traffic to force connections back to TCP`
-  String get blockQuicDesc {
-    return Intl.message(
-      'Reject UDP 443 traffic to force connections back to TCP',
-      name: 'blockQuicDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Block WebRTC`
-  String get blockWebRtc {
-    return Intl.message(
-      'Block WebRTC',
-      name: 'blockWebRtc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reject STUN traffic to reduce WebRTC IP leaks.`
-  String get blockWebRtcDesc {
-    return Intl.message(
-      'Reject STUN traffic to reduce WebRTC IP leaks.',
-      name: 'blockWebRtcDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Edit rule`
-  String get editRule {
-    return Intl.message('Edit rule', name: 'editRule', desc: '', args: []);
-  }
-
-  /// `Override mode`
-  String get overrideMode {
-    return Intl.message(
-      'Override mode',
-      name: 'overrideMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Standard mode, optionally runs an override script, then adds rules on top of the configuration`
-  String get standardModeDesc {
-    return Intl.message(
-      'Standard mode, optionally runs an override script, then adds rules on top of the configuration',
-      name: 'standardModeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Inserted after the script runs, ahead of the profile's rules`
-  String get addedRulesAfterScript {
-    return Intl.message(
-      'Inserted after the script runs, ahead of the profile\'s rules',
-      name: 'addedRulesAfterScript',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Added rules`
-  String get addedRules {
-    return Intl.message('Added rules', name: 'addedRules', desc: '', args: []);
-  }
-
-  /// `Control global added rules`
-  String get controlGlobalAddedRules {
-    return Intl.message(
-      'Control global added rules',
-      name: 'controlGlobalAddedRules',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Override script`
-  String get overrideScript {
-    return Intl.message(
-      'Override script',
-      name: 'overrideScript',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Go to configure script`
-  String get goToConfigureScript {
-    return Intl.message(
-      'Go to configure script',
-      name: 'goToConfigureScript',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Edit global rules`
-  String get editGlobalRules {
-    return Intl.message(
-      'Edit global rules',
-      name: 'editGlobalRules',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Are you sure you want to force crash the core?`
-  String get confirmForceCrashCore {
-    return Intl.message(
-      'Are you sure you want to force crash the core?',
-      name: 'confirmForceCrashCore',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Are you sure you want to clear all data?`
-  String get confirmClearAllData {
-    return Intl.message(
-      'Are you sure you want to clear all data?',
-      name: 'confirmClearAllData',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Loading...`
-  String get loading {
-    return Intl.message('Loading...', name: 'loading', desc: '', args: []);
-  }
-
-  /// `{count, plural, =1{1 year ago} other{{count} years ago}}`
-  String yearsAgo(num count) {
-    return Intl.plural(
-      count,
-      one: '1 year ago',
-      other: '$count years ago',
-      name: 'yearsAgo',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, =1{1 month ago} other{{count} months ago}}`
-  String monthsAgo(num count) {
-    return Intl.plural(
-      count,
-      one: '1 month ago',
-      other: '$count months ago',
-      name: 'monthsAgo',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, =1{1 day ago} other{{count} days ago}}`
-  String daysAgo(num count) {
-    return Intl.plural(
-      count,
-      one: '1 day ago',
-      other: '$count days ago',
-      name: 'daysAgo',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, =1{1 hour ago} other{{count} hours ago}}`
-  String hoursAgo(num count) {
-    return Intl.plural(
-      count,
-      one: '1 hour ago',
-      other: '$count hours ago',
-      name: 'hoursAgo',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, =1{1 minute ago} other{{count} minutes ago}}`
-  String minutesAgo(num count) {
-    return Intl.plural(
-      count,
-      one: '1 minute ago',
-      other: '$count minutes ago',
-      name: 'minutesAgo',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Just now`
-  String get justNow {
-    return Intl.message('Just now', name: 'justNow', desc: '', args: []);
-  }
-
-  /// `Turn On`
-  String get turnOn {
-    return Intl.message('Turn On', name: 'turnOn', desc: '', args: []);
-  }
-
-  /// `Turn Off`
-  String get turnOff {
-    return Intl.message('Turn Off', name: 'turnOff', desc: '', args: []);
-  }
-
-  /// `VPN settings changed. Tap to restart`
-  String get vpnConfigChangeDetected {
-    return Intl.message(
-      'VPN settings changed. Tap to restart',
-      name: 'vpnConfigChangeDetected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restart`
-  String get restart {
-    return Intl.message('Restart', name: 'restart', desc: '', args: []);
-  }
-
-  /// `Speed statistics`
-  String get speedStatistics {
-    return Intl.message(
-      'Speed statistics',
-      name: 'speedStatistics',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The current page has changes. Are you sure you want to reset?`
-  String get resetPageChangesTip {
-    return Intl.message(
-      'The current page has changes. Are you sure you want to reset?',
-      name: 'resetPageChangesTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Custom`
-  String get overwriteTypeCustom {
-    return Intl.message(
-      'Custom',
-      name: 'overwriteTypeCustom',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Custom mode, fully customize proxy groups and rules`
-  String get overwriteTypeCustomDesc {
-    return Intl.message(
-      'Custom mode, fully customize proxy groups and rules',
-      name: 'overwriteTypeCustomDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Custom override is empty. Use Quick fill or add rules and proxy groups first. To keep subscription content, use Overlay mode.`
-  String get emptyCustomOverwrite {
-    return Intl.message(
-      'Custom override is empty. Use Quick fill or add rules and proxy groups first. To keep subscription content, use Overlay mode.',
-      name: 'emptyCustomOverwrite',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy group is empty`
-  String get proxyGroupEmpty {
-    return Intl.message(
-      'Proxy group is empty',
-      name: 'proxyGroupEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy group name cannot be empty`
-  String get proxyGroupNameEmpty {
-    return Intl.message(
-      'Proxy group name cannot be empty',
-      name: 'proxyGroupNameEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Rule is empty`
-  String get ruleEmpty {
-    return Intl.message('Rule is empty', name: 'ruleEmpty', desc: '', args: []);
-  }
-
-  /// `Existing data will be overwritten after confirmation`
-  String get confirmOverwriteTip {
-    return Intl.message(
-      'Existing data will be overwritten after confirmation',
-      name: 'confirmOverwriteTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Data detected in configuration`
-  String get configDataDetected {
-    return Intl.message(
-      'Data detected in configuration',
-      name: 'configDataDetected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Quick fill`
-  String get quickFill {
-    return Intl.message('Quick fill', name: 'quickFill', desc: '', args: []);
-  }
-
-  /// `Clear all`
-  String get clearCustomRouting {
-    return Intl.message(
-      'Clear all',
-      name: 'clearCustomRouting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Clear this profile’s custom proxy groups and rules? Subscription content, added rules, proxy chains, and custom nodes will be kept.`
-  String get confirmClearCustomRouting {
-    return Intl.message(
-      'Clear this profile’s custom proxy groups and rules? Subscription content, added rules, proxy chains, and custom nodes will be kept.',
-      name: 'confirmClearCustomRouting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add proxy group`
-  String get addProxyGroup {
-    return Intl.message(
-      'Add proxy group',
-      name: 'addProxyGroup',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Edit proxy group`
-  String get editProxyGroup {
-    return Intl.message(
-      'Edit proxy group',
-      name: 'editProxyGroup',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Lazy loading`
-  String get lazy {
-    return Intl.message('Lazy loading', name: 'lazy', desc: '', args: []);
-  }
-
-  /// `Proxy filter`
-  String get proxyFilter {
-    return Intl.message(
-      'Proxy filter',
-      name: 'proxyFilter',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exclude proxy filter`
-  String get excludeProxyFilter {
-    return Intl.message(
-      'Exclude proxy filter',
-      name: 'excludeProxyFilter',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exclude type`
-  String get excludeType {
-    return Intl.message(
-      'Exclude type',
-      name: 'excludeType',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Expected status`
-  String get expectedStatus {
-    return Intl.message(
-      'Expected status',
-      name: 'expectedStatus',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Max failed times`
-  String get maxFailedTimes {
-    return Intl.message(
-      'Max failed times',
-      name: 'maxFailedTimes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Timeout`
-  String get timeout {
-    return Intl.message('Timeout', name: 'timeout', desc: '', args: []);
-  }
-
-  /// `Strategy`
-  String get strategy {
-    return Intl.message('Strategy', name: 'strategy', desc: '', args: []);
-  }
-
-  /// `Icon URL`
-  String get iconUrl {
-    return Intl.message('Icon URL', name: 'iconUrl', desc: '', args: []);
-  }
-
-  /// `Disable UDP`
-  String get disableUDP {
-    return Intl.message('Disable UDP', name: 'disableUDP', desc: '', args: []);
-  }
-
-  /// `Hide from list`
-  String get hideFromList {
-    return Intl.message(
-      'Hide from list',
-      name: 'hideFromList',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Include all proxies and providers`
-  String get includeAll {
-    return Intl.message(
-      'Include all proxies and providers',
-      name: 'includeAll',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Include all proxies`
-  String get includeAllProxies {
-    return Intl.message(
-      'Include all proxies',
-      name: 'includeAllProxies',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Include all proxy providers`
-  String get includeAllProxyProviders {
-    return Intl.message(
-      'Include all proxy providers',
-      name: 'includeAllProxyProviders',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add a proxy, provider, or include-all option`
-  String get proxyGroupMembersEmpty {
-    return Intl.message(
-      'Add a proxy, provider, or include-all option',
-      name: 'proxyGroupMembersEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Tolerance`
-  String get tolerance {
-    return Intl.message('Tolerance', name: 'tolerance', desc: '', args: []);
-  }
-
-  /// `{name} is still referenced by a group, rule, or proxy chain`
-  String customOutboundInUse(Object name) {
-    return Intl.message(
-      '$name is still referenced by a group, rule, or proxy chain',
-      name: 'customOutboundInUse',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Relay groups were removed by the core. Choose another type.`
-  String get relayGroupUnsupported {
-    return Intl.message(
-      'Relay groups were removed by the core. Choose another type.',
-      name: 'relayGroupUnsupported',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{name} is referenced by the original configuration at {path}`
-  String rawOutboundInUse(Object name, Object path) {
-    return Intl.message(
-      '$name is referenced by the original configuration at $path',
-      name: 'rawOutboundInUse',
-      desc: '',
-      args: [name, path],
-    );
-  }
-
-  /// `Unknown network error`
-  String get unknownNetworkError {
-    return Intl.message(
-      'Unknown network error',
-      name: 'unknownNetworkError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recovery exception`
-  String get restoreException {
-    return Intl.message(
-      'Recovery exception',
-      name: 'restoreException',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network exception, please check your connection and try again`
-  String get networkException {
-    return Intl.message(
-      'Network exception, please check your connection and try again',
-      name: 'networkException',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Invalid backup file`
-  String get invalidBackupFile {
-    return Intl.message(
-      'Invalid backup file',
-      name: 'invalidBackupFile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This backup comes from a newer version of the app. Update the app before restoring it`
-  String get backupFromNewerVersion {
-    return Intl.message(
-      'This backup comes from a newer version of the app. Update the app before restoring it',
-      name: 'backupFromNewerVersion',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Prune cache`
-  String get pruneCache {
-    return Intl.message('Prune cache', name: 'pruneCache', desc: '', args: []);
-  }
-
-  /// `Backup and Restore`
-  String get backupAndRestore {
-    return Intl.message(
-      'Backup and Restore',
-      name: 'backupAndRestore',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sync data via WebDAV or files`
-  String get backupAndRestoreDesc {
-    return Intl.message(
-      'Sync data via WebDAV or files',
-      name: 'backupAndRestoreDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore`
-  String get restore {
-    return Intl.message('Restore', name: 'restore', desc: '', args: []);
-  }
-
-  /// `Restore Default`
-  String get restoreDefault {
-    return Intl.message(
-      'Restore Default',
-      name: 'restoreDefault',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore success`
-  String get restoreSuccess {
-    return Intl.message(
-      'Restore success',
-      name: 'restoreSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore data via WebDAV`
-  String get restoreFromWebDAVDesc {
-    return Intl.message(
-      'Restore data via WebDAV',
-      name: 'restoreFromWebDAVDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore data via file`
-  String get restoreFromFileDesc {
-    return Intl.message(
-      'Restore data via file',
-      name: 'restoreFromFileDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore configuration files only`
-  String get restoreOnlyConfig {
-    return Intl.message(
-      'Restore configuration files only',
-      name: 'restoreOnlyConfig',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore all data`
-  String get restoreAllData {
-    return Intl.message(
-      'Restore all data',
-      name: 'restoreAllData',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backups to keep`
-  String get backupRetention {
-    return Intl.message(
-      'Backups to keep',
-      name: 'backupRetention',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Each backup removes this device's older WebDAV backups`
-  String get backupRetentionDesc {
-    return Intl.message(
-      'Each backup removes this device\'s older WebDAV backups',
-      name: 'backupRetentionDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Select a backup`
-  String get selectBackup {
-    return Intl.message(
-      'Select a backup',
-      name: 'selectBackup',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No backups on WebDAV`
-  String get noRemoteBackup {
-    return Intl.message(
-      'No backups on WebDAV',
-      name: 'noRemoteBackup',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Delete this backup from WebDAV?`
-  String get deleteBackupTip {
-    return Intl.message(
-      'Delete this backup from WebDAV?',
-      name: 'deleteBackupTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add Profile`
-  String get addProfile {
-    return Intl.message('Add Profile', name: 'addProfile', desc: '', args: []);
-  }
-
-  /// `Edit Profile`
-  String get editProfile {
-    return Intl.message(
-      'Edit Profile',
-      name: 'editProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Delay Test`
-  String get delayTest {
-    return Intl.message('Delay Test', name: 'delayTest', desc: '', args: []);
-  }
-
-  /// `User Center`
-  String get userCenter {
-    return Intl.message('User Center', name: 'userCenter', desc: '', args: []);
-  }
-
-  /// `User Center (Backup)`
-  String get userCenterFallback {
-    return Intl.message(
-      'User Center (Backup)',
-      name: 'userCenterFallback',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `User Guide`
-  String get userGuide {
-    return Intl.message('User Guide', name: 'userGuide', desc: '', args: []);
-  }
-
-  /// `oixCloud`
-  String get oixCloud {
-    return Intl.message('oixCloud', name: 'oixCloud', desc: '', args: []);
-  }
-
-  /// `Register`
-  String get register {
-    return Intl.message('Register', name: 'register', desc: '', args: []);
-  }
-
-  /// `Create Account`
-  String get registerTitle {
-    return Intl.message(
-      'Create Account',
-      name: 'registerTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Registration failed`
-  String get registerFailed {
-    return Intl.message(
-      'Registration failed',
-      name: 'registerFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Registration is currently closed`
-  String get registerClosed {
-    return Intl.message(
-      'Registration is currently closed',
-      name: 'registerClosed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Already have an account?`
-  String get haveAccountAlready {
-    return Intl.message(
-      'Already have an account?',
-      name: 'haveAccountAlready',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Log in`
-  String get goLogin {
-    return Intl.message('Log in', name: 'goLogin', desc: '', args: []);
-  }
-
-  /// `Nickname`
-  String get nicknameLabel {
-    return Intl.message('Nickname', name: 'nicknameLabel', desc: '', args: []);
-  }
-
-  /// `Letters and numbers, up to 12 characters`
-  String get nicknameHint {
-    return Intl.message(
-      'Letters and numbers, up to 12 characters',
-      name: 'nicknameHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter a nickname`
-  String get nicknameValidation {
-    return Intl.message(
-      'Please enter a nickname',
-      name: 'nicknameValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Confirm Password`
-  String get confirmPasswordLabel {
-    return Intl.message(
-      'Confirm Password',
-      name: 'confirmPasswordLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Re-enter your password`
-  String get confirmPasswordHint {
-    return Intl.message(
-      'Re-enter your password',
-      name: 'confirmPasswordHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please confirm your password`
-  String get confirmPasswordValidation {
-    return Intl.message(
-      'Please confirm your password',
-      name: 'confirmPasswordValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Passwords do not match`
-  String get passwordMismatch {
-    return Intl.message(
-      'Passwords do not match',
-      name: 'passwordMismatch',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `10-36 chars incl. upper/lowercase, number and symbol`
-  String get passwordRuleHint {
-    return Intl.message(
-      '10-36 chars incl. upper/lowercase, number and symbol',
-      name: 'passwordRuleHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Invite Code`
-  String get inviteCodeLabel {
-    return Intl.message(
-      'Invite Code',
-      name: 'inviteCodeLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter invite code`
-  String get inviteCodeHint {
-    return Intl.message(
-      'Enter invite code',
-      name: 'inviteCodeHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter the invite code`
-  String get inviteCodeValidation {
-    return Intl.message(
-      'Please enter the invite code',
-      name: 'inviteCodeValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Email Code`
-  String get emailCodeLabel {
-    return Intl.message(
-      'Email Code',
-      name: 'emailCodeLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter the 6-digit code`
-  String get emailCodeHint {
-    return Intl.message(
-      'Enter the 6-digit code',
-      name: 'emailCodeHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter the email code`
-  String get emailCodeValidation {
-    return Intl.message(
-      'Please enter the email code',
-      name: 'emailCodeValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Send Code`
-  String get sendCode {
-    return Intl.message('Send Code', name: 'sendCode', desc: '', args: []);
-  }
-
-  /// `Resend in {seconds}s`
-  String resendCodeIn(Object seconds) {
-    return Intl.message(
-      'Resend in ${seconds}s',
-      name: 'resendCodeIn',
-      desc: '',
-      args: [seconds],
-    );
-  }
-
-  /// `Verification code sent`
-  String get codeSent {
-    return Intl.message(
-      'Verification code sent',
-      name: 'codeSent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `oixCloud`
-  String get loggedOutViewTitle {
-    return Intl.message(
-      'oixCloud',
-      name: 'loggedOutViewTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Login to view account info and manage subscriptions`
-  String get loggedOutViewDesc {
-    return Intl.message(
-      'Login to view account info and manage subscriptions',
-      name: 'loggedOutViewDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sign in with Google`
-  String get signInWithGoogle {
-    return Intl.message(
-      'Sign in with Google',
-      name: 'signInWithGoogle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Complete Google sign-in in your browser`
-  String get googleLoginWaiting {
-    return Intl.message(
-      'Complete Google sign-in in your browser',
-      name: 'googleLoginWaiting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Could not open Google sign-in. Please try again.`
-  String get googleLoginUnavailable {
-    return Intl.message(
-      'Could not open Google sign-in. Please try again.',
-      name: 'googleLoginUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Google sign-in timed out. Please try again.`
-  String get googleLoginTimedOut {
-    return Intl.message(
-      'Google sign-in timed out. Please try again.',
-      name: 'googleLoginTimedOut',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Could not verify Google sign-in. Please try again.`
-  String get googleLoginInvalidCallback {
-    return Intl.message(
-      'Could not verify Google sign-in. Please try again.',
-      name: 'googleLoginInvalidCallback',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Login`
-  String get loginTitle {
-    return Intl.message('Login', name: 'loginTitle', desc: '', args: []);
-  }
-
-  /// `Prompt`
-  String get startCorePromptTitle {
-    return Intl.message(
-      'Prompt',
-      name: 'startCorePromptTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Profile has been successfully imported. Do you want to start the core now?`
-  String get startCorePromptContent {
-    return Intl.message(
-      'Profile has been successfully imported. Do you want to start the core now?',
-      name: 'startCorePromptContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Logout`
-  String get logoutTitle {
-    return Intl.message('Logout', name: 'logoutTitle', desc: '', args: []);
-  }
-
-  /// `Sign out?`
-  String get logoutContent {
-    return Intl.message('Sign out?', name: 'logoutContent', desc: '', args: []);
-  }
-
-  /// `Login Successful`
-  String get loginSuccess {
-    return Intl.message(
-      'Login Successful',
-      name: 'loginSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Profile imported successfully`
-  String get getProfileSuccess {
-    return Intl.message(
-      'Profile imported successfully',
-      name: 'getProfileSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Started successfully`
-  String get startSuccess {
-    return Intl.message(
-      'Started successfully',
-      name: 'startSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Login Failed`
-  String get loginFailed {
-    return Intl.message(
-      'Login Failed',
-      name: 'loginFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Certificate Verification Failed`
-  String get invalidCertificateTitle {
-    return Intl.message(
-      'Certificate Verification Failed',
-      name: 'invalidCertificateTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Certificate has expired`
-  String get certificateExpired {
-    return Intl.message(
-      'Certificate has expired',
-      name: 'certificateExpired',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Certificate is not yet valid`
-  String get certificateNotYetValid {
-    return Intl.message(
-      'Certificate is not yet valid',
-      name: 'certificateNotYetValid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Certificate does not match the requested domain`
-  String get certificateHostnameMismatch {
-    return Intl.message(
-      'Certificate does not match the requested domain',
-      name: 'certificateHostnameMismatch',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Certificate chain is not trusted`
-  String get certificateUntrusted {
-    return Intl.message(
-      'Certificate chain is not trusted',
-      name: 'certificateUntrusted',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `First synchronize the system date and time. If the time is correct, the server certificate needs to be fixed.`
-  String get certificateValidityHint {
-    return Intl.message(
-      'First synchronize the system date and time. If the time is correct, the server certificate needs to be fixed.',
-      name: 'certificateValidityHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The server certificate could not be verified. Skipping verification means the server may be impersonated, and any account credentials or subscription data you send or receive could be stolen or altered.\n\nProceed only if you trust this network and server. This exception applies only to this retry with the same server and certificate, and is removed when the operation ends.`
-  String get invalidCertificateContent {
-    return Intl.message(
-      'The server certificate could not be verified. Skipping verification means the server may be impersonated, and any account credentials or subscription data you send or receive could be stolen or altered.\n\nProceed only if you trust this network and server. This exception applies only to this retry with the same server and certificate, and is removed when the operation ends.',
-      name: 'invalidCertificateContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Allow Temporarily`
-  String get allowTemporarily {
-    return Intl.message(
-      'Allow Temporarily',
-      name: 'allowTemporarily',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Temporarily Check API`
-  String get retryWithoutCertificateVerification {
-    return Intl.message(
-      'Temporarily Check API',
-      name: 'retryWithoutCertificateVerification',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The API was reachable with a temporary certificate exception. No account or node configuration was synced. Fix the certificate issue, then check again.`
-  String get apiAvailableWithCertificateException {
-    return Intl.message(
-      'The API was reachable with a temporary certificate exception. No account or node configuration was synced. Fix the certificate issue, then check again.',
-      name: 'apiAvailableWithCertificateException',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Try a different network, such as a phone hotspot, and check for system updates. If antivirus software or a company network inspects HTTPS, ask its administrator to check it. If the problem persists, contact the service provider to check the certificate chain.`
-  String get certificateUntrustedHint {
-    return Intl.message(
-      'Try a different network, such as a phone hotspot, and check for system updates. If antivirus software or a company network inspects HTTPS, ask its administrator to check it. If the problem persists, contact the service provider to check the certificate chain.',
-      name: 'certificateUntrustedHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Try a different network and complete any Wi-Fi sign-in first. If the problem persists, contact the service provider to check that the certificate matches the server domain.`
-  String get certificateHostnameHint {
-    return Intl.message(
-      'Try a different network and complete any Wi-Fi sign-in first. If the problem persists, contact the service provider to check that the certificate matches the server domain.',
-      name: 'certificateHostnameHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Contact the service provider to replace the revoked certificate. Retrying or changing the system time will not fix a revoked certificate.`
-  String get certificateRevokedHint {
-    return Intl.message(
-      'Contact the service provider to replace the revoked certificate. Retrying or changing the system time will not fix a revoked certificate.',
-      name: 'certificateRevokedHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check the system date and time, then try a different network. If verification still fails, send this error to the service provider for help.`
-  String get certificateUnknownHint {
-    return Intl.message(
-      'Check the system date and time, then try a different network. If verification still fails, send this error to the service provider for help.',
-      name: 'certificateUnknownHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This action only checks API connectivity. It does not sign in or download node configurations.`
-  String get certificateCheckOnlyHint {
-    return Intl.message(
-      'This action only checks API connectivity. It does not sign in or download node configurations.',
-      name: 'certificateCheckOnlyHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `After confirmation, this attempt checks the connection, refreshes your account, and downloads the node configuration. The certificate exception ends when this sync finishes.`
-  String get certificateSyncRetryDescription {
-    return Intl.message(
-      'After confirmation, this attempt checks the connection, refreshes your account, and downloads the node configuration. The certificate exception ends when this sync finishes.',
-      name: 'certificateSyncRetryDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Allow Temporarily and Sync`
-  String get retryCloudSyncWithCertificateException {
-    return Intl.message(
-      'Allow Temporarily and Sync',
-      name: 'retryCloudSyncWithCertificateException',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Account and configuration sync completed with a temporary certificate exception. Verification is now restored; resolve the certificate issue before the next sync.`
-  String get cloudSyncedWithCertificateException {
-    return Intl.message(
-      'Account and configuration sync completed with a temporary certificate exception. Verification is now restored; resolve the certificate issue before the next sync.',
-      name: 'cloudSyncedWithCertificateException',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The API check passed, but account or node configuration sync failed: `
-  String get cloudCertificateSyncFailed {
-    return Intl.message(
-      'The API check passed, but account or node configuration sync failed: ',
-      name: 'cloudCertificateSyncFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The node configuration was not downloaded. Resolve the download error and sync again.`
-  String get cloudConfigSyncIncomplete {
-    return Intl.message(
-      'The node configuration was not downloaded. Resolve the download error and sync again.',
-      name: 'cloudConfigSyncIncomplete',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Email & Password`
-  String get emailPassword {
-    return Intl.message(
-      'Email & Password',
-      name: 'emailPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Access Token`
-  String get accessToken {
-    return Intl.message(
-      'Access Token',
-      name: 'accessToken',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Email`
-  String get emailLabel {
-    return Intl.message('Email', name: 'emailLabel', desc: '', args: []);
-  }
-
-  /// `Enter email address`
-  String get emailHint {
-    return Intl.message(
-      'Enter email address',
-      name: 'emailHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter email`
-  String get emailValidation {
-    return Intl.message(
-      'Please enter email',
-      name: 'emailValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Invalid email format`
-  String get emailFormatValidation {
-    return Intl.message(
-      'Invalid email format',
-      name: 'emailFormatValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Password`
-  String get passwordLabel {
-    return Intl.message('Password', name: 'passwordLabel', desc: '', args: []);
-  }
-
-  /// `Forgot password?`
-  String get forgotPassword {
-    return Intl.message(
-      'Forgot password?',
-      name: 'forgotPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reset password`
-  String get resetPasswordTitle {
-    return Intl.message(
-      'Reset password',
-      name: 'resetPasswordTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Send reset email`
-  String get sendResetEmail {
-    return Intl.message(
-      'Send reset email',
-      name: 'sendResetEmail',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reset email sent. Paste the reset link or code from the email below.`
-  String get resetEmailSent {
-    return Intl.message(
-      'Reset email sent. Paste the reset link or code from the email below.',
-      name: 'resetEmailSent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reset link or code`
-  String get resetTokenLabel {
-    return Intl.message(
-      'Reset link or code',
-      name: 'resetTokenLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter the reset link or code`
-  String get resetTokenValidation {
-    return Intl.message(
-      'Please enter the reset link or code',
-      name: 'resetTokenValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `New password`
-  String get newPasswordLabel {
-    return Intl.message(
-      'New password',
-      name: 'newPasswordLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Password has been reset, please sign in with your new password`
-  String get resetPasswordSuccess {
-    return Intl.message(
-      'Password has been reset, please sign in with your new password',
-      name: 'resetPasswordSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter password`
-  String get passwordValidation {
-    return Intl.message(
-      'Please enter password',
-      name: 'passwordValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Access Token`
-  String get tokenLabel {
-    return Intl.message('Access Token', name: 'tokenLabel', desc: '', args: []);
-  }
-
-  /// `Please enter Access Token`
-  String get tokenValidation {
-    return Intl.message(
-      'Please enter Access Token',
-      name: 'tokenValidation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Expires: {date}`
-  String expireDate(Object date) {
-    return Intl.message(
-      'Expires: $date',
-      name: 'expireDate',
-      desc: '',
-      args: [date],
-    );
-  }
-
-  /// `Today's Usage`
-  String get todayUsed {
-    return Intl.message(
-      'Today\'s Usage',
-      name: 'todayUsed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remaining: {value}`
-  String remaining(Object value) {
-    return Intl.message(
-      'Remaining: $value',
-      name: 'remaining',
-      desc: '',
-      args: [value],
-    );
-  }
-
-  /// `Balance`
-  String get balance {
-    return Intl.message('Balance', name: 'balance', desc: '', args: []);
-  }
-
-  /// `Commission`
-  String get commission {
-    return Intl.message('Commission', name: 'commission', desc: '', args: []);
-  }
-
-  /// `Points`
-  String get points {
-    return Intl.message('Points', name: 'points', desc: '', args: []);
-  }
-
-  /// `Announcement`
-  String get announcement {
-    return Intl.message(
-      'Announcement',
-      name: 'announcement',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Read full announcement`
-  String get readFullAnnouncement {
-    return Intl.message(
-      'Read full announcement',
-      name: 'readFullAnnouncement',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Service Check Failed`
-  String get serviceCheckFailed {
-    return Intl.message(
-      'Service Check Failed',
-      name: 'serviceCheckFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `API service is operational`
-  String get apiAvailable {
-    return Intl.message(
-      'API service is operational',
-      name: 'apiAvailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check API`
-  String get checkApi {
-    return Intl.message('Check API', name: 'checkApi', desc: '', args: []);
-  }
-
-  /// `Refresh`
-  String get refresh {
-    return Intl.message('Refresh', name: 'refresh', desc: '', args: []);
-  }
-
-  /// `Node Filter`
-  String get nodeFilter {
-    return Intl.message('Node Filter', name: 'nodeFilter', desc: '', args: []);
-  }
-
-  /// `Smart Selection`
-  String get nodeFilterSmartSelection {
-    return Intl.message(
-      'Smart Selection',
-      name: 'nodeFilterSmartSelection',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Customized`
-  String get nodeFilterCustomized {
-    return Intl.message(
-      'Customized',
-      name: 'nodeFilterCustomized',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{kept} of {total} nodes kept`
-  String nodeFilterKept(Object kept, Object total) {
-    return Intl.message(
-      '$kept of $total nodes kept',
-      name: 'nodeFilterKept',
-      desc: '',
-      args: [kept, total],
-    );
-  }
-
-  /// `Lines`
-  String get nodeFilterLines {
-    return Intl.message('Lines', name: 'nodeFilterLines', desc: '', args: []);
-  }
-
-  /// `Regions`
-  String get nodeFilterRegions {
-    return Intl.message(
-      'Regions',
-      name: 'nodeFilterRegions',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Name contains`
-  String get nodeFilterNameContains {
-    return Intl.message(
-      'Name contains',
-      name: 'nodeFilterNameContains',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Name excludes`
-  String get nodeFilterNameExcludes {
-    return Intl.message(
-      'Name excludes',
-      name: 'nodeFilterNameExcludes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Preview`
-  String get nodeFilterPreview {
-    return Intl.message(
-      'Preview',
-      name: 'nodeFilterPreview',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Search nodes`
-  String get nodeFilterSearch {
-    return Intl.message(
-      'Search nodes',
-      name: 'nodeFilterSearch',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Any`
-  String get nodeFilterAny {
-    return Intl.message('Any', name: 'nodeFilterAny', desc: '', args: []);
-  }
-
-  /// `Only`
-  String get nodeFilterOnly {
-    return Intl.message('Only', name: 'nodeFilterOnly', desc: '', args: []);
-  }
-
-  /// `Exclude`
-  String get nodeFilterExclude {
-    return Intl.message(
-      'Exclude',
-      name: 'nodeFilterExclude',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Keep at least one node`
-  String get nodeFilterKeepOne {
-    return Intl.message(
-      'Keep at least one node',
-      name: 'nodeFilterKeepOne',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{name}, kept`
-  String nodeFilterNodeKept(Object name) {
-    return Intl.message(
-      '$name, kept',
-      name: 'nodeFilterNodeKept',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `{name}, excluded`
-  String nodeFilterNodeExcluded(Object name) {
-    return Intl.message(
-      '$name, excluded',
-      name: 'nodeFilterNodeExcluded',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Retry`
-  String get nodeFilterRetry {
-    return Intl.message('Retry', name: 'nodeFilterRetry', desc: '', args: []);
-  }
-
-  /// `Saved to your account and applies to every device signed in to this app.`
-  String get nodeFilterAccountNote {
-    return Intl.message(
-      'Saved to your account and applies to every device signed in to this app.',
-      name: 'nodeFilterAccountNote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Node filters are available once you have a plan`
-  String get nodeFilterUnavailable {
-    return Intl.message(
-      'Node filters are available once you have a plan',
-      name: 'nodeFilterUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Minimal Configuration`
-  String get minimalConfiguration {
-    return Intl.message(
-      'Minimal Configuration',
-      name: 'minimalConfiguration',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use a simplified rule set to generate a smaller profile`
-  String get minimalConfigurationDesc {
-    return Intl.message(
-      'Use a simplified rule set to generate a smaller profile',
-      name: 'minimalConfigurationDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TCP Fast Open`
-  String get tcpFastOpen {
-    return Intl.message(
-      'TCP Fast Open',
-      name: 'tcpFastOpen',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enable this option to accelerate TCP connection establishment`
-  String get tcpFastOpenDesc {
-    return Intl.message(
-      'Enable this option to accelerate TCP connection establishment',
-      name: 'tcpFastOpenDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Store`
-  String get store {
-    return Intl.message('Store', name: 'store', desc: '', args: []);
-  }
-
-  /// `Recharge`
-  String get recharge {
-    return Intl.message('Recharge', name: 'recharge', desc: '', args: []);
-  }
-
-  /// `Choose a Plan`
-  String get availablePlans {
-    return Intl.message(
-      'Choose a Plan',
-      name: 'availablePlans',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No plans available`
-  String get noAvailablePlans {
-    return Intl.message(
-      'No plans available',
-      name: 'noAvailablePlans',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Purchased Plans`
-  String get myOrders {
-    return Intl.message(
-      'Purchased Plans',
-      name: 'myOrders',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No purchased plans yet`
-  String get noPurchaseRecords {
-    return Intl.message(
-      'No purchased plans yet',
-      name: 'noPurchaseRecords',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Balance`
-  String get accountBalance {
-    return Intl.message('Balance', name: 'accountBalance', desc: '', args: []);
-  }
-
-  /// `Commission {value}`
-  String commissionBalance(Object value) {
-    return Intl.message(
-      'Commission $value',
-      name: 'commissionBalance',
-      desc: '',
-      args: [value],
-    );
-  }
-
-  /// `Sold out`
-  String get soldOut {
-    return Intl.message('Sold out', name: 'soldOut', desc: '', args: []);
-  }
-
-  /// `Only {count} left`
-  String remainingStock(Object count) {
-    return Intl.message(
-      'Only $count left',
-      name: 'remainingStock',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `May not be suitable for networks in mainland China`
-  String get mainlandNetworkWarning {
-    return Intl.message(
-      'May not be suitable for networks in mainland China',
-      name: 'mainlandNetworkWarning',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `In use`
-  String get planInUse {
-    return Intl.message('In use', name: 'planInUse', desc: '', args: []);
-  }
-
-  /// `Pending activation`
-  String get planNotActivated {
-    return Intl.message(
-      'Pending activation',
-      name: 'planNotActivated',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Ended`
-  String get planEnded {
-    return Intl.message('Ended', name: 'planEnded', desc: '', args: []);
-  }
-
-  /// `Awaiting auto-renewal`
-  String get planAwaitingAutoRenewal {
-    return Intl.message(
-      'Awaiting auto-renewal',
-      name: 'planAwaitingAutoRenewal',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Queued after your other plans; renews automatically once they are used up`
-  String get planAwaitingAutoRenewalNote {
-    return Intl.message(
-      'Queued after your other plans; renews automatically once they are used up',
-      name: 'planAwaitingAutoRenewalNote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Queued after your other plans; ends once they are used up`
-  String get planAutoRenewalOffNote {
-    return Intl.message(
-      'Queued after your other plans; ends once they are used up',
-      name: 'planAutoRenewalOffNote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Plan #{id}`
-  String planNumber(Object id) {
-    return Intl.message('Plan #$id', name: 'planNumber', desc: '', args: [id]);
-  }
-
-  /// `Activate`
-  String get activate {
-    return Intl.message('Activate', name: 'activate', desc: '', args: []);
-  }
-
-  /// `Upgrade plan`
-  String get upgradePlan {
-    return Intl.message(
-      'Upgrade plan',
-      name: 'upgradePlan',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No payment methods available`
-  String get noPaymentMethods {
-    return Intl.message(
-      'No payment methods available',
-      name: 'noPaymentMethods',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Activate plan`
-  String get activatePlanTitle {
-    return Intl.message(
-      'Activate plan',
-      name: 'activatePlanTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Activate this plan? It will become your active plan.`
-  String get activatePlanConfirm {
-    return Intl.message(
-      'Activate this plan? It will become your active plan.',
-      name: 'activatePlanConfirm',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No upgradable plans`
-  String get noUpgradablePlans {
-    return Intl.message(
-      'No upgradable plans',
-      name: 'noUpgradablePlans',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Select upgrade target`
-  String get selectUpgradeTarget {
-    return Intl.message(
-      'Select upgrade target',
-      name: 'selectUpgradeTarget',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `After payment, pull down to refresh and check the result`
-  String get refreshAfterPayment {
-    return Intl.message(
-      'After payment, pull down to refresh and check the result',
-      name: 'refreshAfterPayment',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Discount code (optional)`
-  String get discountCodeOptional {
-    return Intl.message(
-      'Discount code (optional)',
-      name: 'discountCodeOptional',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Apply coupon`
-  String get bindCoupon {
-    return Intl.message('Apply coupon', name: 'bindCoupon', desc: '', args: []);
-  }
-
-  /// `Enter an official coupon code. The difference is settled for the remaining plan duration, and a recurring coupon also updates the renewal price.`
-  String get bindCouponIntro {
-    return Intl.message(
-      'Enter an official coupon code. The difference is settled for the remaining plan duration, and a recurring coupon also updates the renewal price.',
-      name: 'bindCouponIntro',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Verify`
-  String get verifyCoupon {
-    return Intl.message('Verify', name: 'verifyCoupon', desc: '', args: []);
-  }
-
-  /// `Discount code`
-  String get discountCode {
-    return Intl.message(
-      'Discount code',
-      name: 'discountCode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter a discount code`
-  String get discountCodeRequired {
-    return Intl.message(
-      'Enter a discount code',
-      name: 'discountCodeRequired',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Discounted price`
-  String get discountedPriceLabel {
-    return Intl.message(
-      'Discounted price',
-      name: 'discountedPriceLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Amount due`
-  String get amountDueLabel {
-    return Intl.message(
-      'Amount due',
-      name: 'amountDueLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Refund`
-  String get refundAmountLabel {
-    return Intl.message(
-      'Refund',
-      name: 'refundAmountLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Future automatic renewals keep this discount`
-  String get recurringRenewalHint {
-    return Intl.message(
-      'Future automatic renewals keep this discount',
-      name: 'recurringRenewalHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Insufficient balance. Top up before continuing.`
-  String get insufficientBalanceHint {
-    return Intl.message(
-      'Insufficient balance. Top up before continuing.',
-      name: 'insufficientBalanceHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Amount payable`
-  String get amountPayable {
-    return Intl.message(
-      'Amount payable',
-      name: 'amountPayable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Renewal price`
-  String get renewalPriceLabel {
-    return Intl.message(
-      'Renewal price',
-      name: 'renewalPriceLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Calculating…`
-  String get calculatingQuote {
-    return Intl.message(
-      'Calculating…',
-      name: 'calculatingQuote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Payment method`
-  String get paymentMethod {
-    return Intl.message(
-      'Payment method',
-      name: 'paymentMethod',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pay`
-  String get goPay {
-    return Intl.message('Pay', name: 'goPay', desc: '', args: []);
-  }
-
-  /// `Confirm purchase`
-  String get confirmPurchase {
-    return Intl.message(
-      'Confirm purchase',
-      name: 'confirmPurchase',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recharge amount (¥)`
-  String get rechargeAmount {
-    return Intl.message(
-      'Recharge amount (¥)',
-      name: 'rechargeAmount',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter a valid amount`
-  String get invalidAmount {
-    return Intl.message(
-      'Please enter a valid amount',
-      name: 'invalidAmount',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Scan / Transfer payment`
-  String get scanOrTransferPay {
-    return Intl.message(
-      'Scan / Transfer payment',
-      name: 'scanOrTransferPay',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Close`
-  String get close {
-    return Intl.message('Close', name: 'close', desc: '', args: []);
-  }
-
-  /// `Checking...`
-  String get checkingPayment {
-    return Intl.message(
-      'Checking...',
-      name: 'checkingPayment',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Payment has not been received yet. Please check again shortly.`
-  String get paymentPending {
-    return Intl.message(
-      'Payment has not been received yet. Please check again shortly.',
-      name: 'paymentPending',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `I have paid`
-  String get iHavePaid {
-    return Intl.message('I have paid', name: 'iHavePaid', desc: '', args: []);
-  }
-
-  /// `Open in browser`
-  String get openInBrowser {
-    return Intl.message(
-      'Open in browser',
-      name: 'openInBrowser',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Unable to open the link. Check that a browser is installed and try again.`
-  String get openLinkFailed {
-    return Intl.message(
-      'Unable to open the link. Check that a browser is installed and try again.',
-      name: 'openLinkFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Scan with Alipay / WeChat to pay`
-  String get scanToPayNotice {
-    return Intl.message(
-      'Scan with Alipay / WeChat to pay',
-      name: 'scanToPayNotice',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Payment amount`
-  String get paymentAmount {
-    return Intl.message(
-      'Payment amount',
-      name: 'paymentAmount',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Receiving address`
-  String get receivingAddress {
-    return Intl.message(
-      'Receiving address',
-      name: 'receivingAddress',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Address copied`
-  String get addressCopied {
-    return Intl.message(
-      'Address copied',
-      name: 'addressCopied',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The system will confirm automatically after the transfer is completed, and the selected plan will be activated.`
-  String get transferConfirmNotice {
-    return Intl.message(
-      'The system will confirm automatically after the transfer is completed, and the selected plan will be activated.',
-      name: 'transferConfirmNotice',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Operation successful`
-  String get operationSuccess {
-    return Intl.message(
-      'Operation successful',
-      name: 'operationSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Operation failed`
-  String get operationFailed {
-    return Intl.message(
-      'Operation failed',
-      name: 'operationFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Payment successful`
-  String get paymentSuccess {
-    return Intl.message(
-      'Payment successful',
-      name: 'paymentSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Payment request failed`
-  String get paymentRequestFailed {
-    return Intl.message(
-      'Payment request failed',
-      name: 'paymentRequestFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failed to load plans`
-  String get fetchPlansFailed {
-    return Intl.message(
-      'Failed to load plans',
-      name: 'fetchPlansFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Purchase, renew, and upgrade plans`
-  String get storeSubtitle {
-    return Intl.message(
-      'Purchase, renew, and upgrade plans',
-      name: 'storeSubtitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Payment endpoint returned an unknown format`
-  String get paymentUnknownResponse {
-    return Intl.message(
-      'Payment endpoint returned an unknown format',
-      name: 'paymentUnknownResponse',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Buy`
-  String get buy {
-    return Intl.message('Buy', name: 'buy', desc: '', args: []);
-  }
-
-  /// `Pay with balance`
-  String get payWithBalance {
-    return Intl.message(
-      'Pay with balance',
-      name: 'payWithBalance',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Available {value}`
-  String availableBalance(Object value) {
-    return Intl.message(
-      'Available $value',
-      name: 'availableBalance',
-      desc: '',
-      args: [value],
-    );
-  }
-
-  /// `Unavailable`
-  String get planUnavailable {
-    return Intl.message(
-      'Unavailable',
-      name: 'planUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Purchases use your balance first, then commission for any shortfall.`
-  String get balanceDeductionHint {
-    return Intl.message(
-      'Purchases use your balance first, then commission for any shortfall.',
-      name: 'balanceDeductionHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Allowed range {min} – {max}`
-  String rechargeAllowedRange(Object min, Object max) {
-    return Intl.message(
-      'Allowed range $min – $max',
-      name: 'rechargeAllowedRange',
-      desc: '',
-      args: [min, max],
-    );
-  }
-
-  /// `The amount is outside the range allowed by this payment method`
-  String get rechargeAmountOutOfRange {
-    return Intl.message(
-      'The amount is outside the range allowed by this payment method',
-      name: 'rechargeAmountOutOfRange',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recharge and try again.`
-  String get insufficientBalanceRecharge {
-    return Intl.message(
-      'Recharge and try again.',
-      name: 'insufficientBalanceRecharge',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The request may still have gone through. Check Purchased Plans before trying again.`
-  String get storeOutcomeUnknown {
-    return Intl.message(
-      'The request may still have gone through. Check Purchased Plans before trying again.',
-      name: 'storeOutcomeUnknown',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The configuration format is invalid at line {line}.`
-  String configParseErrorAtLine(Object line) {
-    return Intl.message(
-      'The configuration format is invalid at line $line.',
-      name: 'configParseErrorAtLine',
-      desc: '',
-      args: [line],
-    );
-  }
-
-  /// `Expected {expected}, but found {actual}.`
-  String configTypeMismatch(Object expected, Object actual) {
-    return Intl.message(
-      'Expected $expected, but found $actual.',
-      name: 'configTypeMismatch',
-      desc: '',
-      args: [expected, actual],
-    );
-  }
-
-  /// `Check the indentation and "-" list markers near this line.`
-  String get configYamlFormatHint {
-    return Intl.message(
-      'Check the indentation and "-" list markers near this line.',
-      name: 'configYamlFormatHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `a list`
-  String get configValueTypeList {
-    return Intl.message(
-      'a list',
-      name: 'configValueTypeList',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `an object`
-  String get configValueTypeObject {
-    return Intl.message(
-      'an object',
-      name: 'configValueTypeObject',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `text`
-  String get configValueTypeText {
-    return Intl.message(
-      'text',
-      name: 'configValueTypeText',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `a boolean`
-  String get configValueTypeBoolean {
-    return Intl.message(
-      'a boolean',
-      name: 'configValueTypeBoolean',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `an integer`
-  String get configValueTypeInteger {
-    return Intl.message(
-      'an integer',
-      name: 'configValueTypeInteger',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `a number`
-  String get configValueTypeNumber {
-    return Intl.message(
-      'a number',
-      name: 'configValueTypeNumber',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `an empty value`
-  String get configValueTypeNull {
-    return Intl.message(
-      'an empty value',
-      name: 'configValueTypeNull',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recover local configuration`
-  String get configRecoveryTitle {
-    return Intl.message(
-      'Recover local configuration',
-      name: 'configRecoveryTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Local configuration is temporarily unavailable. Your existing data has been kept. Unlock your device and retry, or reopen the app later.`
-  String get configRecoveryMessage {
-    return Intl.message(
-      'Local configuration is temporarily unavailable. Your existing data has been kept. Unlock your device and retry, or reopen the app later.',
-      name: 'configRecoveryMessage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Retry`
-  String get configRecoveryRetry {
-    return Intl.message(
-      'Retry',
-      name: 'configRecoveryRetry',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `GEO download failed`
-  String get geoDownloadFailed {
-    return Intl.message(
-      'GEO download failed',
-      name: 'geoDownloadFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Not downloaded`
-  String get geoFileMissing {
-    return Intl.message(
-      'Not downloaded',
-      name: 'geoFileMissing',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Could not read resource file`
-  String get geoFileReadFailed {
-    return Intl.message(
-      'Could not read resource file',
-      name: 'geoFileReadFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Download uses the current network rules, or a direct connection when the proxy is unavailable. Retry the current address, choose another source, or enter a custom URL. After validation, the operation will continue automatically.`
-  String get geoDownloadRecoveryHint {
-    return Intl.message(
-      'Download uses the current network rules, or a direct connection when the proxy is unavailable. Retry the current address, choose another source, or enter a custom URL. After validation, the operation will continue automatically.',
-      name: 'geoDownloadRecoveryHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Current address`
-  String get geoOriginalSource {
-    return Intl.message(
-      'Current address',
-      name: 'geoOriginalSource',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup CDN`
-  String get geoBackupSource {
-    return Intl.message(
-      'Backup CDN',
-      name: 'geoBackupSource',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Download URL`
-  String get geoDownloadUrl {
-    return Intl.message(
-      'Download URL',
-      name: 'geoDownloadUrl',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter a valid HTTP or HTTPS URL`
-  String get geoInvalidDownloadUrl {
-    return Intl.message(
-      'Enter a valid HTTP or HTTPS URL',
-      name: 'geoInvalidDownloadUrl',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Purchase time`
-  String get purchasedAtLabel {
-    return Intl.message(
-      'Purchase time',
-      name: 'purchasedAtLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Purchase price`
-  String get purchasePriceLabel {
-    return Intl.message(
-      'Purchase price',
-      name: 'purchasePriceLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Billing period`
-  String get billingPeriodLabel {
-    return Intl.message(
-      'Billing period',
-      name: 'billingPeriodLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remaining time`
-  String get remainingTimeLabel {
-    return Intl.message(
-      'Remaining time',
-      name: 'remainingTimeLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remaining traffic`
-  String get remainingTrafficLabel {
-    return Intl.message(
-      'Remaining traffic',
-      name: 'remainingTrafficLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Expires at`
-  String get expiresAtLabel {
-    return Intl.message(
-      'Expires at',
-      name: 'expiresAtLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Used traffic`
-  String get usedTrafficLabel {
-    return Intl.message(
-      'Used traffic',
-      name: 'usedTrafficLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Total traffic`
-  String get purchaseTotalTrafficLabel {
-    return Intl.message(
-      'Total traffic',
-      name: 'purchaseTotalTrafficLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auto-renew`
-  String get purchaseAutoRenewLabel {
-    return Intl.message(
-      'Auto-renew',
-      name: 'purchaseAutoRenewLabel',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count}d`
-  String purchaseDays(Object count) {
-    return Intl.message(
-      '${count}d',
-      name: 'purchaseDays',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count}h`
-  String purchaseHours(Object count) {
-    return Intl.message(
-      '${count}h',
-      name: 'purchaseHours',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count}m`
-  String purchaseMinutes(Object count) {
-    return Intl.message(
-      '${count}m',
-      name: 'purchaseMinutes',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `On`
-  String get purchaseRenewOn {
-    return Intl.message('On', name: 'purchaseRenewOn', desc: '', args: []);
-  }
-
-  /// `Off`
-  String get purchaseRenewOff {
-    return Intl.message('Off', name: 'purchaseRenewOff', desc: '', args: []);
-  }
-
-  /// `Overlay`
-  String get overwriteTypeMerge {
-    return Intl.message(
-      'Overlay',
-      name: 'overwriteTypeMerge',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Keep subscription rules and groups, then add your own. Personal rules take priority over subscription rules; existing added rules keep their priority.`
-  String get overwriteTypeMergeDesc {
-    return Intl.message(
-      'Keep subscription rules and groups, then add your own. Personal rules take priority over subscription rules; existing added rules keep their priority.',
-      name: 'overwriteTypeMergeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Personal routing`
-  String get personalRouting {
-    return Intl.message(
-      'Personal routing',
-      name: 'personalRouting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Saved separately from the subscription and reapplied after updates. New groups block connections when no members match.`
-  String get overlayHint {
-    return Intl.message(
-      'Saved separately from the subscription and reapplied after updates. New groups block connections when no members match.',
-      name: 'overlayHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The name "{name}" is already used. Rename the personal group to keep both.`
-  String overlayNameConflict(Object name) {
-    return Intl.message(
-      'The name "$name" is already used. Rename the personal group to keep both.',
-      name: 'overlayNameConflict',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Unavailable in this configuration. Remove or replace it.`
-  String get outboundUnavailable {
-    return Intl.message(
-      'Unavailable in this configuration. Remove or replace it.',
-      name: 'outboundUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Selection order is the fallback order. Remove and reselect a member to move it to the end.`
-  String get memberOrderHint {
-    return Intl.message(
-      'Selection order is the fallback order. Remove and reselect a member to move it to the end.',
-      name: 'memberOrderHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Circular group reference: {name}. Choose a different member.`
-  String groupCycleError(Object name) {
-    return Intl.message(
-      'Circular group reference: $name. Choose a different member.',
-      name: 'groupCycleError',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Personal routing rules take effect in Rule mode.`
-  String get rulesRequireRuleMode {
-    return Intl.message(
-      'Personal routing rules take effect in Rule mode.',
-      name: 'rulesRequireRuleMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check configuration`
-  String get checkRouting {
-    return Intl.message(
-      'Check configuration',
-      name: 'checkRouting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Configuration is valid. Personal settings are saved for this profile.`
-  String get routingChecked {
-    return Intl.message(
-      'Configuration is valid. Personal settings are saved for this profile.',
-      name: 'routingChecked',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Personal settings applied.`
-  String get routingApplied {
-    return Intl.message(
-      'Personal settings applied.',
-      name: 'routingApplied',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Changes were saved but could not be applied. Check the configuration and retry.`
-  String get routingApplyFailed {
-    return Intl.message(
-      'Changes were saved but could not be applied. Check the configuration and retry.',
-      name: 'routingApplyFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Form`
-  String get customRuleForm {
-    return Intl.message('Form', name: 'customRuleForm', desc: '', args: []);
-  }
-
-  /// `Rule text`
-  String get customRuleRaw {
-    return Intl.message('Rule text', name: 'customRuleRaw', desc: '', args: []);
-  }
-
-  /// `Enter one complete rule. Advanced expressions are preserved.`
-  String get customRuleRawHint {
-    return Intl.message(
-      'Enter one complete rule. Advanced expressions are preserved.',
-      name: 'customRuleRawHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This rule uses advanced syntax. Edit the rule text to preserve all options.`
-  String get customRuleFormUnavailable {
-    return Intl.message(
-      'This rule uses advanced syntax. Edit the rule text to preserve all options.',
-      name: 'customRuleFormUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter one complete rule with a valid type, content and target.`
-  String get customRuleInvalidSyntax {
-    return Intl.message(
-      'Enter one complete rule with a valid type, content and target.',
-      name: 'customRuleInvalidSyntax',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check the content for this rule type. Example: {example}`
-  String customRuleInvalidContent(Object example) {
-    return Intl.message(
-      'Check the content for this rule type. Example: $example',
-      name: 'customRuleInvalidContent',
-      desc: '',
-      args: [example],
-    );
-  }
-
-  /// `{name} is unavailable. Choose a target from this configuration.`
-  String customRuleUnavailableTarget(Object name) {
-    return Intl.message(
-      '$name is unavailable. Choose a target from this configuration.',
-      name: 'customRuleUnavailableTarget',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `{name} is unavailable. Choose an existing rule provider.`
-  String customRuleUnavailableProvider(Object name) {
-    return Intl.message(
-      '$name is unavailable. Choose an existing rule provider.',
-      name: 'customRuleUnavailableProvider',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Choose a target`
-  String get customRuleChooseTarget {
-    return Intl.message(
-      'Choose a target',
-      name: 'customRuleChooseTarget',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose a rule provider`
-  String get customRuleChooseProvider {
-    return Intl.message(
-      'Choose a rule provider',
-      name: 'customRuleChooseProvider',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Matches all remaining traffic. Rules below it will not be reached.`
-  String get customRuleMatchHint {
-    return Intl.message(
-      'Matches all remaining traffic. Rules below it will not be reached.',
-      name: 'customRuleMatchHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match known IP addresses without resolving domain names.`
-  String get customRuleNoResolveHint {
-    return Intl.message(
-      'Match known IP addresses without resolving domain names.',
-      name: 'customRuleNoResolveHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Save draft`
-  String get saveRoutingDraft {
-    return Intl.message(
-      'Save draft',
-      name: 'saveRoutingDraft',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Save a draft to fix other items. Settings are applied only after the full configuration passes validation.`
-  String get routingDraftHint {
-    return Intl.message(
-      'Save a draft to fix other items. Settings are applied only after the full configuration passes validation.',
-      name: 'routingDraftHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Filters automatically included and provider nodes. Manually selected members are always kept.`
-  String get groupFilterHint {
-    return Intl.message(
-      'Filters automatically included and provider nodes. Manually selected members are always kept.',
-      name: 'groupFilterHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Manual selection`
-  String get groupTypeSelect {
-    return Intl.message(
-      'Manual selection',
-      name: 'groupTypeSelect',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Automatic selection`
-  String get groupTypeUrlTest {
-    return Intl.message(
-      'Automatic selection',
-      name: 'groupTypeUrlTest',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failover`
-  String get groupTypeFallback {
-    return Intl.message(
-      'Failover',
-      name: 'groupTypeFallback',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Load balancing`
-  String get groupTypeLoadBalance {
-    return Intl.message(
-      'Load balancing',
-      name: 'groupTypeLoadBalance',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose the active member on the Proxies page.`
-  String get groupTypeSelectHint {
-    return Intl.message(
-      'Choose the active member on the Proxies page.',
-      name: 'groupTypeSelectHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Periodically test members and select a low-latency node.`
-  String get groupTypeUrlTestHint {
-    return Intl.message(
-      'Periodically test members and select a low-latency node.',
-      name: 'groupTypeUrlTestHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Try members in order and switch when the current member fails.`
-  String get groupTypeFallbackHint {
-    return Intl.message(
-      'Try members in order and switch when the current member fails.',
-      name: 'groupTypeFallbackHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Distribute connections across available members.`
-  String get groupTypeLoadBalanceHint {
-    return Intl.message(
-      'Distribute connections across available members.',
-      name: 'groupTypeLoadBalanceHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Group type`
-  String get routingGroupType {
-    return Intl.message(
-      'Group type',
-      name: 'routingGroupType',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Rule type`
-  String get customRuleType {
-    return Intl.message(
-      'Rule type',
-      name: 'customRuleType',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This configuration changed while it was being edited or checked. Reopen the editor or check it again.`
-  String get routingChanged {
-    return Intl.message(
-      'This configuration changed while it was being edited or checked. Reopen the editor or check it again.',
-      name: 'routingChanged',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Edit custom routing`
-  String get editCustomRouting {
-    return Intl.message(
-      'Edit custom routing',
-      name: 'editCustomRouting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode.`
-  String get customRoutingDraftHint {
-    return Intl.message(
-      'Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode.',
-      name: 'customRoutingDraftHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Windows blocked the proxy core from starting (system error {code}). Check Protection history in Windows Security and your app control policy, and verify the installer source and signature.`
-  String coreBlockedByPolicyTip(int code) {
-    return Intl.message(
-      'Windows blocked the proxy core from starting (system error $code). Check Protection history in Windows Security and your app control policy, and verify the installer source and signature.',
-      name: 'coreBlockedByPolicyTip',
-      desc: '',
-      args: [code],
-    );
-  }
-
-  /// `Startup recovery`
-  String get startupRecoveryTitle {
-    return Intl.message(
-      'Startup recovery',
-      name: 'startupRecoveryTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The previous startup did not finish. Automatic configuration setup and VPN startup are paused for this launch. Your selected profile and settings are unchanged. Check the configuration and tap Start to retry; an already running VPN will stay connected.`
-  String get startupRecoveryTip {
-    return Intl.message(
-      'The previous startup did not finish. Automatic configuration setup and VPN startup are paused for this launch. Your selected profile and settings are unchanged. Check the configuration and tap Start to retry; an already running VPN will stay connected.',
-      name: 'startupRecoveryTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Startup failed`
-  String get initFailed {
-    return Intl.message(
-      'Startup failed',
-      name: 'initFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The application encountered a critical error during startup and cannot continue.`
-  String get initFailedTip {
-    return Intl.message(
-      'The application encountered a critical error during startup and cannot continue.',
-      name: 'initFailedTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.`
-  String get startupTimeoutTip {
-    return Intl.message(
-      'Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.',
-      name: 'startupTimeoutTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Startup diagnostics`
-  String get startupDiagnostics {
-    return Intl.message(
-      'Startup diagnostics',
-      name: 'startupDiagnostics',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Error details`
-  String get errorDetails {
-    return Intl.message(
-      'Error details',
-      name: 'errorDetails',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Stack trace`
-  String get stackTrace {
-    return Intl.message('Stack trace', name: 'stackTrace', desc: '', args: []);
-  }
-
-  /// `Local proxy authentication`
-  String get authentication {
-    return Intl.message(
-      'Local proxy authentication',
-      name: 'authentication',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Local proxy authentication asks for a username and password on the HTTP and SOCKS ports. While it is on, the system HTTP proxy is not set; TUN and VPN keep working`
-  String get authenticationDesc {
-    return Intl.message(
-      'Local proxy authentication asks for a username and password on the HTTP and SOCKS ports. While it is on, the system HTTP proxy is not set; TUN and VPN keep working',
-      name: 'authenticationDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The system proxy is not applied while local proxy authentication is on`
-  String get authenticationSystemProxyDesc {
-    return Intl.message(
-      'The system proxy is not applied while local proxy authentication is on',
-      name: 'authenticationSystemProxyDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use 1–255 UTF-8 bytes, without colons or control characters`
-  String get authenticationUsernameInvalid {
-    return Intl.message(
-      'Use 1–255 UTF-8 bytes, without colons or control characters',
-      name: 'authenticationUsernameInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use 1–255 UTF-8 bytes, without control characters`
-  String get authenticationPasswordInvalid {
-    return Intl.message(
-      'Use 1–255 UTF-8 bytes, without control characters',
-      name: 'authenticationPasswordInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Could not apply authentication settings`
-  String get authenticationApplyFailed {
-    return Intl.message(
-      'Could not apply authentication settings',
-      name: 'authenticationApplyFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Installed apps permission required`
-  String get installedAppsPermissionRequired {
-    return Intl.message(
-      'Installed apps permission required',
-      name: 'installedAppsPermissionRequired',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Allow access to the installed app list to choose which apps use the VPN.`
-  String get installedAppsPermissionDesc {
-    return Intl.message(
-      'Allow access to the installed app list to choose which apps use the VPN.',
-      name: 'installedAppsPermissionDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Permission was not granted. You can enable it in system settings.`
-  String get installedAppsPermissionDeniedMessage {
-    return Intl.message(
-      'Permission was not granted. You can enable it in system settings.',
-      name: 'installedAppsPermissionDeniedMessage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Allow access`
-  String get installedAppsPermissionGrant {
-    return Intl.message(
-      'Allow access',
-      name: 'installedAppsPermissionGrant',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Could not load installed apps. Please try again.`
-  String get installedAppsLoadFailed {
-    return Intl.message(
-      'Could not load installed apps. Please try again.',
-      name: 'installedAppsLoadFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The encryption key for your existing configuration is missing or invalid. Try the original system account on the original device or restore a backup. Retrying cannot recreate a lost key.`
-  String get configRecoveryMissingKey {
-    return Intl.message(
-      'The encryption key for your existing configuration is missing or invalid. Try the original system account on the original device or restore a backup. Retrying cannot recreate a lost key.',
-      name: 'configRecoveryMissingKey',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The local database cannot be accessed right now. Your files have been kept. Check permissions for this app’s data folder and whether another process is using the database, then retry.`
-  String get configRecoveryDatabaseUnavailable {
-    return Intl.message(
-      'The local database cannot be accessed right now. Your files have been kept. Check permissions for this app’s data folder and whether another process is using the database, then retry.',
-      name: 'configRecoveryDatabaseUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The database in this app’s data folder is incompatible or damaged. Your files have been kept. Restore a compatible backup, or back up and reset to set up this app again. Data belonging to other apps will not be accessed.`
-  String get configRecoveryIncompatibleDatabase {
-    return Intl.message(
-      'The database in this app’s data folder is incompatible or damaged. Your files have been kept. Restore a compatible backup, or back up and reset to set up this app again. Data belonging to other apps will not be accessed.',
-      name: 'configRecoveryIncompatibleDatabase',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The local configuration cannot be decrypted or is damaged. Existing files have been kept. Restore the matching key and configuration backup, or back up and reset.`
-  String get configRecoveryUnreadable {
-    return Intl.message(
-      'The local configuration cannot be decrypted or is damaged. Existing files have been kept. Restore the matching key and configuration backup, or back up and reset.',
-      name: 'configRecoveryUnreadable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The local configuration or its encryption key could not be read or saved. Check access to the application data folder and the system secure storage, then retry.`
-  String get configRecoveryStorage {
-    return Intl.message(
-      'The local configuration or its encryption key could not be read or saved. Check access to the application data folder and the system secure storage, then retry.',
-      name: 'configRecoveryStorage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Back up and reset`
-  String get configRecoveryReset {
-    return Intl.message(
-      'Back up and reset',
-      name: 'configRecoveryReset',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Create an encrypted backup of all local settings, subscriptions, rules and account data, then reset the application? You will need to sign in again and restore or import your subscriptions and settings. The backup is protected by this Windows account; it cannot recover a lost encryption key.`
-  String get configRecoveryResetConfirm {
-    return Intl.message(
-      'Create an encrypted backup of all local settings, subscriptions, rules and account data, then reset the application? You will need to sign in again and restore or import your subscriptions and settings. The backup is protected by this Windows account; it cannot recover a lost encryption key.',
-      name: 'configRecoveryResetConfirm',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `An encrypted backup of your original data has been saved in the folder below. Exit and reopen the application to set it up again.`
-  String get configRecoveryResetDone {
-    return Intl.message(
-      'An encrypted backup of your original data has been saved in the folder below. Exit and reopen the application to set it up again.',
-      name: 'configRecoveryResetDone',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The encrypted backup and reset could not be completed. Surviving original data will not be removed without a verified backup. Retry this operation, or exit and reopen the application to finish it.`
-  String get configRecoveryResetFailed {
-    return Intl.message(
-      'The encrypted backup and reset could not be completed. Surviving original data will not be removed without a verified backup. Retry this operation, or exit and reopen the application to finish it.',
-      name: 'configRecoveryResetFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The system keyring (Secret Service) could not be accessed. Enable and unlock KDE Wallet or GNOME Keyring in your system settings, then retry.`
-  String get configRecoveryKeyring {
-    return Intl.message(
-      'The system keyring (Secret Service) could not be accessed. Enable and unlock KDE Wallet or GNOME Keyring in your system settings, then retry.',
-      name: 'configRecoveryKeyring',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use local file storage`
-  String get configRecoveryUseLocalStorage {
-    return Intl.message(
-      'Use local file storage',
-      name: 'configRecoveryUseLocalStorage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Store encryption keys and account credentials in a file in the application data folder that only your user account can open, instead of the system keyring? Any program running as your user can read them and decrypt the local configuration. This choice stays in effect from now on.`
-  String get configRecoveryUseLocalStorageConfirm {
-    return Intl.message(
-      'Store encryption keys and account credentials in a file in the application data folder that only your user account can open, instead of the system keyring? Any program running as your user can read them and decrypt the local configuration. This choice stays in effect from now on.',
-      name: 'configRecoveryUseLocalStorageConfirm',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Wi-Fi networks that pause the proxy`
-  String get excludeSsids {
-    return Intl.message(
-      'Wi-Fi networks that pause the proxy',
-      name: 'excludeSsids',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pause proxying on the listed Wi-Fi networks; resume after leaving only while the app remains started.`
-  String get excludeSsidsDesc {
-    return Intl.message(
-      'Pause proxying on the listed Wi-Fi networks; resume after leaving only while the app remains started.',
-      name: 'excludeSsidsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Allow all the time`
-  String get allowBackgroundLocation {
-    return Intl.message(
-      'Allow all the time',
-      name: 'allowBackgroundLocation',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Location permission`
-  String get locationPermission {
-    return Intl.message(
-      'Location permission',
-      name: 'locationPermission',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Location permission required`
-  String get locationPermissionRequired {
-    return Intl.message(
-      'Location permission required',
-      name: 'locationPermissionRequired',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `1. Open System Settings > Privacy & Security\n2. Choose Location Services\n3. Find and check {appName} in the list\n\nWhen you are done, return to the app to continue. Thank you for your cooperation.`
-  String locationPermissionGuide(Object appName) {
-    return Intl.message(
-      '1. Open System Settings > Privacy & Security\n2. Choose Location Services\n3. Find and check $appName in the list\n\nWhen you are done, return to the app to continue. Thank you for your cooperation.',
-      name: 'locationPermissionGuide',
-      desc: '',
-      args: [appName],
-    );
-  }
-
-  /// `Allow location access to read Wi-Fi names. On Android, allow precise location all the time and enable system location services.`
-  String get ssidPermissionGuide {
-    return Intl.message(
-      'Allow location access to read Wi-Fi names. On Android, allow precise location all the time and enable system location services.',
-      name: 'ssidPermissionGuide',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Allow this app to use Location Services in System Settings to read Wi-Fi names.`
-  String get ssidPermissionMacosGuide {
-    return Intl.message(
-      'Allow this app to use Location Services in System Settings to read Wi-Fi names.',
-      name: 'ssidPermissionMacosGuide',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match target`
-  String get matchTargetTitle {
-    return Intl.message(
-      'Match target',
-      name: 'matchTargetTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `MATCH-TARGET`
-  String get matchTarget {
-    return Intl.message(
-      'MATCH-TARGET',
-      name: 'matchTarget',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Follow profile`
-  String get followProfile {
-    return Intl.message(
-      'Follow profile',
-      name: 'followProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recent icons`
-  String get iconHistory {
-    return Intl.message(
-      'Recent icons',
-      name: 'iconHistory',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exit full screen`
-  String get exitFullScreen {
-    return Intl.message(
-      'Exit full screen',
-      name: 'exitFullScreen',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restore down`
-  String get unmaximize {
-    return Intl.message('Restore down', name: 'unmaximize', desc: '', args: []);
-  }
-
-  /// `Maximize`
-  String get maximize {
-    return Intl.message('Maximize', name: 'maximize', desc: '', args: []);
-  }
-
-  /// `Unpin window`
-  String get unpinWindow {
-    return Intl.message(
-      'Unpin window',
-      name: 'unpinWindow',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pin window`
-  String get pinWindow {
-    return Intl.message('Pin window', name: 'pinWindow', desc: '', args: []);
-  }
-
-  /// `Minimize`
-  String get minimize {
-    return Intl.message('Minimize', name: 'minimize', desc: '', args: []);
-  }
-
-  /// `DNS lookup failed`
-  String get cloudApiDnsFailed {
-    return Intl.message(
-      'DNS lookup failed',
-      name: 'cloudApiDnsFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `DNS returned no address, possibly blocked or a broken system resolver`
-  String get cloudApiDnsEmpty {
-    return Intl.message(
-      'DNS returned no address, possibly blocked or a broken system resolver',
-      name: 'cloudApiDnsEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `DNS could not find this domain`
-  String get cloudApiDnsUnknownHost {
-    return Intl.message(
-      'DNS could not find this domain',
-      name: 'cloudApiDnsUnknownHost',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection timed out`
-  String get cloudApiConnectTimeout {
-    return Intl.message(
-      'Connection timed out',
-      name: 'cloudApiConnectTimeout',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sending the request timed out`
-  String get cloudApiSendTimeout {
-    return Intl.message(
-      'Sending the request timed out',
-      name: 'cloudApiSendTimeout',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Waiting for the response timed out`
-  String get cloudApiReceiveTimeout {
-    return Intl.message(
-      'Waiting for the response timed out',
-      name: 'cloudApiReceiveTimeout',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TLS handshake failed`
-  String get cloudApiTlsFailed {
-    return Intl.message(
-      'TLS handshake failed',
-      name: 'cloudApiTlsFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection refused`
-  String get cloudApiConnectionRefused {
-    return Intl.message(
-      'Connection refused',
-      name: 'cloudApiConnectionRefused',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection reset`
-  String get cloudApiConnectionReset {
-    return Intl.message(
-      'Connection reset',
-      name: 'cloudApiConnectionReset',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network unreachable`
-  String get cloudApiNetworkUnreachable {
-    return Intl.message(
-      'Network unreachable',
-      name: 'cloudApiNetworkUnreachable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network access denied`
-  String get cloudApiAccessDenied {
-    return Intl.message(
-      'Network access denied',
-      name: 'cloudApiAccessDenied',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection failed`
-  String get cloudApiConnectionFailed {
-    return Intl.message(
-      'Connection failed',
-      name: 'cloudApiConnectionFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy connection failed`
-  String get cloudApiProxyFailed {
-    return Intl.message(
-      'Proxy connection failed',
-      name: 'cloudApiProxyFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy authentication failed (HTTP 407)`
-  String get cloudApiProxyAuthFailed {
-    return Intl.message(
-      'Proxy authentication failed (HTTP 407)',
-      name: 'cloudApiProxyAuthFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Server returned HTTP {status}`
-  String cloudApiHttpError(Object status) {
-    return Intl.message(
-      'Server returned HTTP $status',
-      name: 'cloudApiHttpError',
-      desc: '',
-      args: [status],
-    );
-  }
-
-  /// `Certificate has been revoked`
-  String get certificateRevoked {
-    return Intl.message(
-      'Certificate has been revoked',
-      name: 'certificateRevoked',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Server rejected the request as invalid`
-  String get cloudApiBadRequest {
-    return Intl.message(
-      'Server rejected the request as invalid',
-      name: 'cloudApiBadRequest',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Access forbidden`
-  String get cloudApiForbidden {
-    return Intl.message(
-      'Access forbidden',
-      name: 'cloudApiForbidden',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Requested API or resource was not found`
-  String get cloudApiNotFound {
-    return Intl.message(
-      'Requested API or resource was not found',
-      name: 'cloudApiNotFound',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Request method is not allowed`
-  String get cloudApiMethodNotAllowed {
-    return Intl.message(
-      'Request method is not allowed',
-      name: 'cloudApiMethodNotAllowed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Server timed out receiving the request`
-  String get cloudApiServerRequestTimeout {
-    return Intl.message(
-      'Server timed out receiving the request',
-      name: 'cloudApiServerRequestTimeout',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Request exceeds the server size limit`
-  String get cloudApiRequestTooLarge {
-    return Intl.message(
-      'Request exceeds the server size limit',
-      name: 'cloudApiRequestTooLarge',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Too many requests; try again later`
-  String get cloudApiRateLimited {
-    return Intl.message(
-      'Too many requests; try again later',
-      name: 'cloudApiRateLimited',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Internal server error`
-  String get cloudApiServerError {
-    return Intl.message(
-      'Internal server error',
-      name: 'cloudApiServerError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Gateway received an invalid upstream response`
-  String get cloudApiBadGateway {
-    return Intl.message(
-      'Gateway received an invalid upstream response',
-      name: 'cloudApiBadGateway',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Service is temporarily unavailable`
-  String get cloudApiServiceUnavailable {
-    return Intl.message(
-      'Service is temporarily unavailable',
-      name: 'cloudApiServiceUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Gateway timed out waiting for the upstream server`
-  String get cloudApiGatewayTimeout {
-    return Intl.message(
-      'Gateway timed out waiting for the upstream server',
-      name: 'cloudApiGatewayTimeout',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This network requires sign-in before access`
-  String get cloudApiNetworkAuthRequired {
-    return Intl.message(
-      'This network requires sign-in before access',
-      name: 'cloudApiNetworkAuthRequired',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Server response exceeds the allowed size`
-  String get cloudApiResponseTooLarge {
-    return Intl.message(
-      'Server response exceeds the allowed size',
-      name: 'cloudApiResponseTooLarge',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Incompatible TLS protocol or invalid TLS response`
-  String get cloudApiTlsProtocolFailed {
-    return Intl.message(
-      'Incompatible TLS protocol or invalid TLS response',
-      name: 'cloudApiTlsProtocolFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TLS cryptographic algorithm negotiation failed`
-  String get cloudApiTlsAlgorithmFailed {
-    return Intl.message(
-      'TLS cryptographic algorithm negotiation failed',
-      name: 'cloudApiTlsAlgorithmFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection closed before the TLS handshake completed`
-  String get cloudApiTlsInterrupted {
-    return Intl.message(
-      'Connection closed before the TLS handshake completed',
-      name: 'cloudApiTlsInterrupted',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Server redirects form a loop`
-  String get cloudApiRedirectLoop {
-    return Intl.message(
-      'Server redirects form a loop',
-      name: 'cloudApiRedirectLoop',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Too many server redirects`
-  String get cloudApiRedirectLimit {
-    return Intl.message(
-      'Too many server redirects',
-      name: 'cloudApiRedirectLimit',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Server redirect is invalid`
-  String get cloudApiRedirectInvalid {
-    return Intl.message(
-      'Server redirect is invalid',
-      name: 'cloudApiRedirectInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection closed before the full response was received`
-  String get cloudApiResponseInterrupted {
-    return Intl.message(
-      'Connection closed before the full response was received',
-      name: 'cloudApiResponseInterrupted',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection aborted`
-  String get cloudApiConnectionAborted {
-    return Intl.message(
-      'Connection aborted',
-      name: 'cloudApiConnectionAborted',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network address is unavailable`
-  String get cloudApiAddressUnavailable {
-    return Intl.message(
-      'Network address is unavailable',
-      name: 'cloudApiAddressUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network address or port is already in use`
-  String get cloudApiAddressInUse {
-    return Intl.message(
-      'Network address or port is already in use',
-      name: 'cloudApiAddressInUse',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Insufficient system network resources`
-  String get cloudApiNetworkResourcesExhausted {
-    return Intl.message(
-      'Insufficient system network resources',
-      name: 'cloudApiNetworkResourcesExhausted',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The device clock is too far from the server. Turn on automatic date and time, then retry.`
-  String get cloudApiClockSkew {
-    return Intl.message(
-      'The device clock is too far from the server. Turn on automatic date and time, then retry.',
-      name: 'cloudApiClockSkew',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The server rejected this app’s signature. Reinstall the latest official build.`
-  String get cloudApiSignatureRejected {
-    return Intl.message(
-      'The server rejected this app’s signature. Reinstall the latest official build.',
-      name: 'cloudApiSignatureRejected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The server has no key configured for this app. Contact support.`
-  String get cloudApiServerUnconfigured {
-    return Intl.message(
-      'The server has no key configured for this app. Contact support.',
-      name: 'cloudApiServerUnconfigured',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The server rejected this device’s configuration key. Reinstall the latest official build.`
-  String get cloudApiConfigKeyRejected {
-    return Intl.message(
-      'The server rejected this device’s configuration key. Reinstall the latest official build.',
-      name: 'cloudApiConfigKeyRejected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This account has been disabled. Contact support.`
-  String get cloudApiAccountDisabled {
-    return Intl.message(
-      'This account has been disabled. Contact support.',
-      name: 'cloudApiAccountDisabled',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This account needs verification. Complete it on the website, then retry.`
-  String get cloudApiAccountAnomaly {
-    return Intl.message(
-      'This account needs verification. Complete it on the website, then retry.',
-      name: 'cloudApiAccountAnomaly',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This account no longer exists. Sign in again.`
-  String get cloudApiAccountNotFound {
-    return Intl.message(
-      'This account no longer exists. Sign in again.',
-      name: 'cloudApiAccountNotFound',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Invalid server response`
-  String get cloudApiInvalidResponse {
-    return Intl.message(
-      'Invalid server response',
-      name: 'cloudApiInvalidResponse',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Request canceled`
-  String get cloudApiRequestCanceled {
-    return Intl.message(
-      'Request canceled',
-      name: 'cloudApiRequestCanceled',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `System error {code}`
-  String cloudApiSystemError(Object code) {
-    return Intl.message(
-      'System error $code',
-      name: 'cloudApiSystemError',
-      desc: '',
-      args: [code],
-    );
-  }
-
-  /// `Request timed out`
-  String get cloudApiTimeout {
-    return Intl.message(
-      'Request timed out',
-      name: 'cloudApiTimeout',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Direct: {error}`
-  String cloudApiRouteDirect(Object error) {
-    return Intl.message(
-      'Direct: $error',
-      name: 'cloudApiRouteDirect',
-      desc: '',
-      args: [error],
-    );
-  }
-
-  /// `Local proxy: {error}`
-  String cloudApiRouteProxy(Object error) {
-    return Intl.message(
-      'Local proxy: $error',
-      name: 'cloudApiRouteProxy',
-      desc: '',
-      args: [error],
-    );
-  }
-
-  /// `Network self-check`
-  String get diagTitle {
-    return Intl.message(
-      'Network self-check',
-      name: 'diagTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check the core, system proxy, TUN and DNS`
-  String get diagEntryHint {
-    return Intl.message(
-      'Check the core, system proxy, TUN and DNS',
-      name: 'diagEntryHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Checks the current connection using a small sample. The system network path may also pass through TUN. Results do not cover every app or node.`
-  String get diagScope {
-    return Intl.message(
-      'Checks the current connection using a small sample. The system network path may also pass through TUN. Results do not cover every app or node.',
-      name: 'diagScope',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Run self-check`
-  String get diagRun {
-    return Intl.message('Run self-check', name: 'diagRun', desc: '', args: []);
-  }
-
-  /// `Copy diagnostic report`
-  String get diagCopy {
-    return Intl.message(
-      'Copy diagnostic report',
-      name: 'diagCopy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check canceled; results are incomplete`
-  String get diagCanceled {
-    return Intl.message(
-      'Check canceled; results are incomplete',
-      name: 'diagCanceled',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Applying the fix, then checking again`
-  String get diagFixing {
-    return Intl.message(
-      'Applying the fix, then checking again',
-      name: 'diagFixing',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The fix could not be applied. Follow the suggestion above.`
-  String get diagFixFailed {
-    return Intl.message(
-      'The fix could not be applied. Follow the suggestion above.',
-      name: 'diagFixFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Apply configuration`
-  String get diagFixApplyProfile {
-    return Intl.message(
-      'Apply configuration',
-      name: 'diagFixApplyProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Start connection`
-  String get diagFixStart {
-    return Intl.message(
-      'Start connection',
-      name: 'diagFixStart',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restart core`
-  String get diagFixRestartCore {
-    return Intl.message(
-      'Restart core',
-      name: 'diagFixRestartCore',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reconnect`
-  String get diagFixRestartConnection {
-    return Intl.message(
-      'Reconnect',
-      name: 'diagFixRestartConnection',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reapply system proxy`
-  String get diagFixSystemProxy {
-    return Intl.message(
-      'Reapply system proxy',
-      name: 'diagFixSystemProxy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enable system proxy`
-  String get diagFixEnableSystemProxy {
-    return Intl.message(
-      'Enable system proxy',
-      name: 'diagFixEnableSystemProxy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Re-enable TUN`
-  String get diagFixTun {
-    return Intl.message(
-      'Re-enable TUN',
-      name: 'diagFixTun',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Retest nodes`
-  String get diagFixRetest {
-    return Intl.message(
-      'Retest nodes',
-      name: 'diagFixRetest',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Passed`
-  String get diagPassed {
-    return Intl.message('Passed', name: 'diagPassed', desc: '', args: []);
-  }
-
-  /// `Needs attention`
-  String get diagWarning {
-    return Intl.message(
-      'Needs attention',
-      name: 'diagWarning',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failed`
-  String get diagFailed {
-    return Intl.message('Failed', name: 'diagFailed', desc: '', args: []);
-  }
-
-  /// `Could not confirm`
-  String get diagUnknown {
-    return Intl.message(
-      'Could not confirm',
-      name: 'diagUnknown',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Skipped`
-  String get diagSkipped {
-    return Intl.message('Skipped', name: 'diagSkipped', desc: '', args: []);
-  }
-
-  /// `This option is not enabled`
-  String get diagDisabled {
-    return Intl.message(
-      'This option is not enabled',
-      name: 'diagDisabled',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Applied configuration`
-  String get diagProfile {
-    return Intl.message(
-      'Applied configuration',
-      name: 'diagProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The selected configuration has been applied`
-  String get diagProfileReady {
-    return Intl.message(
-      'The selected configuration has been applied',
-      name: 'diagProfileReady',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The selected configuration has not been applied`
-  String get diagProfileMissing {
-    return Intl.message(
-      'The selected configuration has not been applied',
-      name: 'diagProfileMissing',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Select a valid configuration and start the connection before checking again.`
-  String get diagProfileHint {
-    return Intl.message(
-      'Select a valid configuration and start the connection before checking again.',
-      name: 'diagProfileHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Core response`
-  String get diagCore {
-    return Intl.message('Core response', name: 'diagCore', desc: '', args: []);
-  }
-
-  /// `The core responded and reports active listeners`
-  String get diagCoreReady {
-    return Intl.message(
-      'The core responded and reports active listeners',
-      name: 'diagCoreReady',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The core diagnostic response is unavailable or the configuration changed`
-  String get diagCoreUnknown {
-    return Intl.message(
-      'The core diagnostic response is unavailable or the configuration changed',
-      name: 'diagCoreUnknown',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The core reports that traffic forwarding is stopped`
-  String get diagCoreStopped {
-    return Intl.message(
-      'The core reports that traffic forwarding is stopped',
-      name: 'diagCoreStopped',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Traffic forwarding is paused by the current Wi-Fi exclusion setting`
-  String get diagSuspended {
-    return Intl.message(
-      'Traffic forwarding is paused by the current Wi-Fi exclusion setting',
-      name: 'diagSuspended',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check the connection switch and Wi-Fi exclusions. If the core cannot respond, restart it and use a matching current client/core version.`
-  String get diagCoreHint {
-    return Intl.message(
-      'Check the connection switch and Wi-Fi exclusions. If the core cannot respond, restart it and use a matching current client/core version.',
-      name: 'diagCoreHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Local proxy entry`
-  String get diagListener {
-    return Intl.message(
-      'Local proxy entry',
-      name: 'diagListener',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The expected port responded to the proxy protocol`
-  String get diagListenerReady {
-    return Intl.message(
-      'The expected port responded to the proxy protocol',
-      name: 'diagListenerReady',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The expected proxy port did not respond or differs from the core port`
-  String get diagListenerFailed {
-    return Intl.message(
-      'The expected proxy port did not respond or differs from the core port',
-      name: 'diagListenerFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check for port conflicts or a stopped listener. Reconnect first; if it still fails, open Ports and authentication to check or change the mixed port.`
-  String get diagListenerHint {
-    return Intl.message(
-      'Check for port conflicts or a stopped listener. Reconnect first; if it still fails, open Ports and authentication to check or change the mixed port.',
-      name: 'diagListenerHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `System proxy settings`
-  String get diagSystemProxy {
-    return Intl.message(
-      'System proxy settings',
-      name: 'diagSystemProxy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `HTTP and HTTPS proxy settings point to the expected local port`
-  String get diagProxyReady {
-    return Intl.message(
-      'HTTP and HTTPS proxy settings point to the expected local port',
-      name: 'diagProxyReady',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The app requested a system proxy, but the OS reports it disabled`
-  String get diagProxyDisabled {
-    return Intl.message(
-      'The app requested a system proxy, but the OS reports it disabled',
-      name: 'diagProxyDisabled',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The OS proxy does not match the app port`
-  String get diagProxyDifferent {
-    return Intl.message(
-      'The OS proxy does not match the app port',
-      name: 'diagProxyDifferent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Automatic proxy configuration is present; its effective route was not verified`
-  String get diagProxyAutomatic {
-    return Intl.message(
-      'Automatic proxy configuration is present; its effective route was not verified',
-      name: 'diagProxyAutomatic',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Open Troubleshoot and manual setup to compare the system proxy address and port. If settings keep reverting, check other proxy apps or device management policies.`
-  String get diagProxyHint {
-    return Intl.message(
-      'Open Troubleshoot and manual setup to compare the system proxy address and port. If settings keep reverting, check other proxy apps or device management policies.',
-      name: 'diagProxyHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A PAC script or auto-discovery may choose a different proxy for each website. This does not necessarily mean the connection is broken. Check who provided the configuration before changing it.`
-  String get diagProxyAutomaticHint {
-    return Intl.message(
-      'A PAC script or auto-discovery may choose a different proxy for each website. This does not necessarily mean the connection is broken. Check who provided the configuration before changing it.',
-      name: 'diagProxyAutomaticHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Try another network and check the DNS servers for the active connection in your operating system. Changing only the client DNS overrides may not fix system lookups.`
-  String get diagSystemDnsHint {
-    return Intl.message(
-      'Try another network and check the DNS servers for the active connection in your operating system. Changing only the client DNS overrides may not fix system lookups.',
-      name: 'diagSystemDnsHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Turn off inactive local proxy`
-  String get diagProxyRecover {
-    return Intl.message(
-      'Turn off inactive local proxy',
-      name: 'diagProxyRecover',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Stop the connection first. This turns off a manual proxy pointing to the current local port only when no service is listening. Other proxy addresses, ports and automatic settings are kept.`
-  String get diagProxyRecoverHint {
-    return Intl.message(
-      'Stop the connection first. This turns off a manual proxy pointing to the current local port only when no service is listening. Other proxy addresses, ports and automatic settings are kept.',
-      name: 'diagProxyRecoverHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Troubleshoot and manual setup`
-  String get diagProxyGuide {
-    return Intl.message(
-      'Troubleshoot and manual setup',
-      name: 'diagProxyGuide',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check again`
-  String get diagRecheck {
-    return Intl.message('Check again', name: 'diagRecheck', desc: '', args: []);
-  }
-
-  /// `Ports and authentication`
-  String get diagOpenPortSettings {
-    return Intl.message(
-      'Ports and authentication',
-      name: 'diagOpenPortSettings',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network and TUN settings`
-  String get diagOpenNetworkSettings {
-    return Intl.message(
-      'Network and TUN settings',
-      name: 'diagOpenNetworkSettings',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `DNS override settings`
-  String get diagOpenDnsSettings {
-    return Intl.message(
-      'DNS override settings',
-      name: 'diagOpenDnsSettings',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Open system settings`
-  String get diagOpenSystemSettings {
-    return Intl.message(
-      'Open system settings',
-      name: 'diagOpenSystemSettings',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Could not open system settings. Follow the path above to open them manually.`
-  String get diagOpenSettingsFailed {
-    return Intl.message(
-      'Could not open system settings. Follow the path above to open them manually.',
-      name: 'diagOpenSettingsFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Copy proxy address`
-  String get diagCopyProxyAddress {
-    return Intl.message(
-      'Copy proxy address',
-      name: 'diagCopyProxyAddress',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `1. Check the local proxy first`
-  String get diagProxyGuidePrepareTitle {
-    return Intl.message(
-      '1. Check the local proxy first',
-      name: 'diagProxyGuidePrepareTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Select a valid profile, start the connection in FlClash, and make sure Local proxy listener passes before entering the proxy address.\nQuit other proxy apps that may keep changing system settings. If your company or school manages the settings, or they are locked or keep reverting, check with the administrator.`
-  String get diagProxyGuidePrepare {
-    return Intl.message(
-      'Select a valid profile, start the connection in FlClash, and make sure Local proxy listener passes before entering the proxy address.\nQuit other proxy apps that may keep changing system settings. If your company or school manages the settings, or they are locked or keep reverting, check with the administrator.',
-      name: 'diagProxyGuidePrepare',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `2. Check or enter the proxy settings`
-  String get diagProxyGuideManualTitle {
-    return Intl.message(
-      '2. Check or enter the proxy settings',
-      name: 'diagProxyGuideManualTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Settings → Network & internet → Proxy\nIf automatic settings are left over from another app and your network no longer needs them, turn off Use setup script and Automatically detect settings.\nUnder Manual proxy setup, enable Use a proxy server, enter the address and port below in their separate fields, and save. Do not prefix the address with http://. Keep any exceptions your network needs.`
-  String get diagProxyGuideWindows {
-    return Intl.message(
-      'Settings → Network & internet → Proxy\nIf automatic settings are left over from another app and your network no longer needs them, turn off Use setup script and Automatically detect settings.\nUnder Manual proxy setup, enable Use a proxy server, enter the address and port below in their separate fields, and save. Do not prefix the address with http://. Keep any exceptions your network needs.',
-      name: 'diagProxyGuideWindows',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `System Settings → Network → active Wi-Fi or Ethernet service → Details → Proxies\nmacOS 12: System Preferences → Network → active service → Advanced → Proxies\nIf automatic settings are left over from another app and your network no longer needs them, turn off Auto proxy discovery and Automatic proxy configuration.\nEnable Web proxy (HTTP) and Secure web proxy (HTTPS). Enter the address and port below for both, then save. Keep any bypass entries your network needs.`
-  String get diagProxyGuideMacos {
-    return Intl.message(
-      'System Settings → Network → active Wi-Fi or Ethernet service → Details → Proxies\nmacOS 12: System Preferences → Network → active service → Advanced → Proxies\nIf automatic settings are left over from another app and your network no longer needs them, turn off Auto proxy discovery and Automatic proxy configuration.\nEnable Web proxy (HTTP) and Secure web proxy (HTTPS). Enter the address and port below for both, then save. Keep any bypass entries your network needs.',
-      name: 'diagProxyGuideMacos',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Open your desktop settings → Network → Network Proxy and select Manual (names vary by desktop).\nEnter the address and port below for both HTTP and HTTPS, then apply. If there is no system proxy panel, configure the target app instead.\nBefore replacing an automatic configuration, check its source and whether your network still needs it.`
-  String get diagProxyGuideLinux {
-    return Intl.message(
-      'Open your desktop settings → Network → Network Proxy and select Manual (names vary by desktop).\nEnter the address and port below for both HTTP and HTTPS, then apply. If there is no system proxy panel, configure the target app instead.\nBefore replacing an automatic configuration, check its source and whether your network still needs it.',
-      name: 'diagProxyGuideLinux',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `On this device, open the target app’s proxy settings, choose HTTP or SOCKS5, and enter the address and port below.\nAndroid provides the system proxy through the VPN service. For VPN access, check the VPN switch and app access control in FlClash network settings.`
-  String get diagProxyGuideApp {
-    return Intl.message(
-      'On this device, open the target app’s proxy settings, choose HTTP or SOCKS5, and enter the address and port below.\nAndroid provides the system proxy through the VPN service. For VPN access, check the VPN switch and app access control in FlClash network settings.',
-      name: 'diagProxyGuideApp',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Local proxy authentication is enabled, so FlClash does not apply a system proxy automatically.\nIn an app that supports proxy authentication, choose HTTP or SOCKS5 and enter the address and port below. Use the username and password from FlClash → Override → General → Inbound → Authentication.\nDo not include credentials in diagnostic reports.`
-  String get diagProxyGuideAuthenticated {
-    return Intl.message(
-      'Local proxy authentication is enabled, so FlClash does not apply a system proxy automatically.\nIn an app that supports proxy authentication, choose HTTP or SOCKS5 and enter the address and port below. Use the username and password from FlClash → Override → General → Inbound → Authentication.\nDo not include credentials in diagnostic reports.',
-      name: 'diagProxyGuideAuthenticated',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Local address: 127.0.0.1\nMixed port (current configuration): {port}\nUse this mixed port for HTTP, HTTPS website proxying, or SOCKS5 on this device only.`
-  String diagProxyGuideValues(Object port) {
-    return Intl.message(
-      'Local address: 127.0.0.1\nMixed port (current configuration): $port\nUse this mixed port for HTTP, HTTPS website proxying, or SOCKS5 on this device only.',
-      name: 'diagProxyGuideValues',
-      desc: '',
-      args: [port],
-    );
-  }
-
-  /// `The mixed port is unavailable. Set a valid port in Ports and authentication, then start the connection.`
-  String get diagProxyGuideInvalidPort {
-    return Intl.message(
-      'The mixed port is unavailable. Set a valid port in Ports and authentication, then start the connection.',
-      name: 'diagProxyGuideInvalidPort',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `3. Save and verify the actual app`
-  String get diagProxyGuideVerifyTitle {
-    return Intl.message(
-      '3. Save and verify the actual app',
-      name: 'diagProxyGuideVerifyTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Return and select Check again, then retry in the browser or app you use.\nIf the local proxy check passes but an app still fails, check its system proxy, custom proxy, or proxy extension settings. System proxy settings do not capture every app.\nYou may need to turn off a manually configured proxy or restore its previous settings when stopping FlClash to keep internet access.`
-  String get diagProxyGuideVerify {
-    return Intl.message(
-      'Return and select Check again, then retry in the browser or app you use.\nIf the local proxy check passes but an app still fails, check its system proxy, custom proxy, or proxy extension settings. System proxy settings do not capture every app.\nYou may need to turn off a manually configured proxy or restore its previous settings when stopping FlClash to keep internet access.',
-      name: 'diagProxyGuideVerify',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TUN interface and route`
-  String get diagTun {
-    return Intl.message(
-      'TUN interface and route',
-      name: 'diagTun',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The core TUN interface was not found in an active state`
-  String get diagTunMissing {
-    return Intl.message(
-      'The core TUN interface was not found in an active state',
-      name: 'diagTunMissing',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The core TUN interface is active and the sampled IPv4 route uses it`
-  String get diagTunReady {
-    return Intl.message(
-      'The core TUN interface is active and the sampled IPv4 route uses it',
-      name: 'diagTunReady',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TUN is active, but the sampled IPv4 route uses another interface`
-  String get diagTunRouteMismatch {
-    return Intl.message(
-      'TUN is active, but the sampled IPv4 route uses another interface',
-      name: 'diagTunRouteMismatch',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TUN is active; its IPv4 route could not be verified`
-  String get diagTunRouteUnknown {
-    return Intl.message(
-      'TUN is active; its IPv4 route could not be verified',
-      name: 'diagTunRouteUnknown',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Turn TUN off and on and complete system authorization. If the route differs, check other VPNs. IPv6, UDP and app-specific exclusions need separate checks.`
-  String get diagTunHint {
-    return Intl.message(
-      'Turn TUN off and on and complete system authorization. If the route differs, check other VPNs. IPv6, UDP and app-specific exclusions need separate checks.',
-      name: 'diagTunHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Possible proxy conflict`
-  String get proxyConflictTitle {
-    return Intl.message(
-      'Possible proxy conflict',
-      name: 'proxyConflictTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Before starting, the system proxy pointed to {address}.`
-  String proxyConflictSystemProxy(Object address) {
-    return Intl.message(
-      'Before starting, the system proxy pointed to $address.',
-      name: 'proxyConflictSystemProxy',
-      desc: '',
-      args: [address],
-    );
-  }
-
-  /// `Before starting, the system proxy used an automatic configuration script.`
-  String get proxyConflictAutoConfig {
-    return Intl.message(
-      'Before starting, the system proxy used an automatic configuration script.',
-      name: 'proxyConflictAutoConfig',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Before starting, traffic was routed through another VPN or virtual adapter: {name}.`
-  String proxyConflictVpn(Object name) {
-    return Intl.message(
-      'Before starting, traffic was routed through another VPN or virtual adapter: $name.',
-      name: 'proxyConflictVpn',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `If this belongs to another proxy app or VPN, close it; running both can break the connection.`
-  String get proxyConflictHint {
-    return Intl.message(
-      'If this belongs to another proxy app or VPN, close it; running both can break the connection.',
-      name: 'proxyConflictHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Traffic capture`
-  String get diagTrafficCapture {
-    return Intl.message(
-      'Traffic capture',
-      name: 'diagTrafficCapture',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Neither system proxy nor TUN is enabled`
-  String get diagNoCapture {
-    return Intl.message(
-      'Neither system proxy nor TUN is enabled',
-      name: 'diagNoCapture',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enable system proxy or TUN, or configure the affected app to use the local proxy.`
-  String get diagCaptureHint {
-    return Intl.message(
-      'Enable system proxy or TUN, or configure the affected app to use the local proxy.',
-      name: 'diagCaptureHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `System DNS`
-  String get diagSystemDns {
-    return Intl.message(
-      'System DNS',
-      name: 'diagSystemDns',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Core DNS`
-  String get diagCoreDns {
-    return Intl.message('Core DNS', name: 'diagCoreDns', desc: '', args: []);
-  }
-
-  /// `{passed}/{total} samples passed`
-  String diagProbeSummary(int passed, int total) {
-    return Intl.message(
-      '$passed/$total samples passed',
-      name: 'diagProbeSummary',
-      desc: '',
-      args: [passed, total],
-    );
-  }
-
-  /// `Sample {index}: {result} · {milliseconds} ms`
-  String diagProbeResult(int index, String result, int milliseconds) {
-    return Intl.message(
-      'Sample $index: $result · $milliseconds ms',
-      name: 'diagProbeResult',
-      desc: '',
-      args: [index, result, milliseconds],
-    );
-  }
-
-  /// `DNS upstream returned a server failure`
-  String get diagDnsServerFailed {
-    return Intl.message(
-      'DNS upstream returned a server failure',
-      name: 'diagDnsServerFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sampled names resolved successfully`
-  String get diagDnsReady {
-    return Intl.message(
-      'Sampled names resolved successfully',
-      name: 'diagDnsReady',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only some sampled names resolved`
-  String get diagDnsPartial {
-    return Intl.message(
-      'Only some sampled names resolved',
-      name: 'diagDnsPartial',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No managed node hostname was available for this sample`
-  String get diagOixDnsNoSample {
-    return Intl.message(
-      'No managed node hostname was available for this sample',
-      name: 'diagOixDnsNoSample',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The managed DNS signing function is not ready`
-  String get diagOixDnsAuthMissing {
-    return Intl.message(
-      'The managed DNS signing function is not ready',
-      name: 'diagOixDnsAuthMissing',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `DNS returned no usable address; this alone does not prove an authentication failure`
-  String get diagDnsNoAnswer {
-    return Intl.message(
-      'DNS returned no usable address; this alone does not prove an authentication failure',
-      name: 'diagDnsNoAnswer',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The DNS request was refused`
-  String get diagDnsRefused {
-    return Intl.message(
-      'The DNS request was refused',
-      name: 'diagDnsRefused',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check DNS overrides and try another network. If system DNS works but core DNS fails, inspect the configuration DNS settings.`
-  String get diagDnsHint {
-    return Intl.message(
-      'Check DNS overrides and try another network. If system DNS works but core DNS fails, inspect the configuration DNS settings.',
-      name: 'diagDnsHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check the client version and system time, then refresh the subscription. If resolution still fails, share this diagnostic report with support.`
-  String get diagOixDnsHint {
-    return Intl.message(
-      'Check the client version and system time, then refresh the subscription. If resolution still fails, share this diagnostic report with support.',
-      name: 'diagOixDnsHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `System network path`
-  String get diagSystemPath {
-    return Intl.message(
-      'System network path',
-      name: 'diagSystemPath',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Through the local proxy`
-  String get diagProxyPath {
-    return Intl.message(
-      'Through the local proxy',
-      name: 'diagProxyPath',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count} of 2 independent HTTPS checks passed`
-  String diagWebResult(Object count) {
-    return Intl.message(
-      '$count of 2 independent HTTPS checks passed',
-      name: 'diagWebResult',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `This path does not explicitly use the app HTTP proxy, but may use TUN. A failed sample may be caused by DNS, filtering or the test site; compare the local proxy result.`
-  String get diagSystemPathHint {
-    return Intl.message(
-      'This path does not explicitly use the app HTTP proxy, but may use TUN. A failed sample may be caused by DNS, filtering or the test site; compare the local proxy result.',
-      name: 'diagSystemPathHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `If the system path works, check the selected node, routing rules and core DNS. Failure at one test site does not mean every node is unusable.`
-  String get diagProxyPathHint {
-    return Intl.message(
-      'If the system path works, check the selected node, routing rules and core DNS. Failure at one test site does not mean every node is unusable.',
-      name: 'diagProxyPathHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `System time comparison`
-  String get diagClock {
-    return Intl.message(
-      'System time comparison',
-      name: 'diagClock',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Not enough uncached HTTPS responses to compare time`
-  String get diagClockUnknown {
-    return Intl.message(
-      'Not enough uncached HTTPS responses to compare time',
-      name: 'diagClockUnknown',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Two independent responses indicate a possible time difference of at least five minutes`
-  String get diagClockSkew {
-    return Intl.message(
-      'Two independent responses indicate a possible time difference of at least five minutes',
-      name: 'diagClockSkew',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No consistent large time difference was found in this sample`
-  String get diagClockReady {
-    return Intl.message(
-      'No consistent large time difference was found in this sample',
-      name: 'diagClockReady',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enable automatic system date and time, then retry. A clock error can affect certificates and oixCloud DNS signatures.`
-  String get diagClockHint {
-    return Intl.message(
-      'Enable automatic system date and time, then retry. A clock error can affect certificates and oixCloud DNS signatures.',
-      name: 'diagClockHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Every node tested in this group failed. The test URL may also be unreachable. Run a network self-check?`
-  String get diagAllFailed {
-    return Intl.message(
-      'Every node tested in this group failed. The test URL may also be unreachable. Run a network self-check?',
-      name: 'diagAllFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Download in background`
-  String get updateDownloadBackground {
-    return Intl.message(
-      'Download in background',
-      name: 'updateDownloadBackground',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Update ready to install`
-  String get updateReady {
-    return Intl.message(
-      'Update ready to install',
-      name: 'updateReady',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Update and relaunch`
-  String get updateRestart {
-    return Intl.message(
-      'Update and relaunch',
-      name: 'updateRestart',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The app will close, update in place, and reopen. Your settings will be preserved.`
-  String get updateRestartHint {
-    return Intl.message(
-      'The app will close, update in place, and reopen. Your settings will be preserved.',
-      name: 'updateRestartHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Preparing the update`
-  String get updatePreparing {
-    return Intl.message(
-      'Preparing the update',
-      name: 'updatePreparing',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Verifying update package`
-  String get updateVerifying {
-    return Intl.message(
-      'Verifying update package',
-      name: 'updateVerifying',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Checking the installer`
-  String get updateCheckingInstaller {
-    return Intl.message(
-      'Checking the installer',
-      name: 'updateCheckingInstaller',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Closing and restarting`
-  String get updateRestarting {
-    return Intl.message(
-      'Closing and restarting',
-      name: 'updateRestarting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Automatic update did not complete. Retry or update from the download page.`
-  String get updateApplyFailed {
-    return Intl.message(
-      'Automatic update did not complete. Retry or update from the download page.',
-      name: 'updateApplyFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The update has been downloaded. Install when convenient.`
-  String get updateReadyHint {
-    return Intl.message(
-      'The update has been downloaded. Install when convenient.',
-      name: 'updateReadyHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Install update`
-  String get updateInstall {
-    return Intl.message(
-      'Install update',
-      name: 'updateInstall',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Downloading update`
-  String get updateDownloading {
-    return Intl.message(
-      'Downloading update',
-      name: 'updateDownloading',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Update download failed`
-  String get updateDownloadFailed {
-    return Intl.message(
-      'Update download failed',
-      name: 'updateDownloadFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Download in browser`
-  String get updateDownloadBrowser {
-    return Intl.message(
-      'Download in browser',
-      name: 'updateDownloadBrowser',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose the package format`
-  String get updatePackageFormat {
-    return Intl.message(
-      'Choose the package format',
-      name: 'updatePackageFormat',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `How this build was installed could not be determined. Pick the format that matches it.`
-  String get updatePackageFormatTip {
-    return Intl.message(
-      'How this build was installed could not be determined. Pick the format that matches it.',
-      name: 'updatePackageFormatTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.`
-  String get updateAppImageTip {
-    return Intl.message(
-      'An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.',
-      name: 'updateAppImageTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This build was installed by a package manager; upgrade it the same way you installed it.`
-  String get updatePackageManagerTip {
-    return Intl.message(
-      'This build was installed by a package manager; upgrade it the same way you installed it.',
-      name: 'updatePackageManagerTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Default: 9000; alternatives: 1480 or 4064. Restart the Android VPN to apply`
-  String get tunMtuDesc {
-    return Intl.message(
-      'Default: 9000; alternatives: 1480 or 4064. Restart the Android VPN to apply',
-      name: 'tunMtuDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter an integer from 1280 to 65535`
-  String get tunMtuInvalid {
-    return Intl.message(
-      'Enter an integer from 1280 to 65535',
-      name: 'tunMtuInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Script options`
-  String get scriptOptions {
-    return Intl.message(
-      'Script options',
-      name: 'scriptOptions',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This script does not expose configurable switches`
-  String get scriptOptionsEmpty {
-    return Intl.message(
-      'This script does not expose configurable switches',
-      name: 'scriptOptionsEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Script changes`
-  String get scriptChanges {
-    return Intl.message(
-      'Script changes',
-      name: 'scriptChanges',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Full config`
-  String get scriptFullConfig {
-    return Intl.message(
-      'Full config',
-      name: 'scriptFullConfig',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Top-level configuration fields added, modified or removed by the script. The full configuration also includes app settings.`
-  String get scriptChangesDescription {
-    return Intl.message(
-      'Top-level configuration fields added, modified or removed by the script. The full configuration also includes app settings.',
-      name: 'scriptChangesDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The script did not change the configuration`
-  String get scriptChangesEmpty {
-    return Intl.message(
-      'The script did not change the configuration',
-      name: 'scriptChangesEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Added ({count})`
-  String scriptChangesAdded(int count) {
-    return Intl.message(
-      'Added ($count)',
-      name: 'scriptChangesAdded',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Modified ({count})`
-  String scriptChangesModified(int count) {
-    return Intl.message(
-      'Modified ($count)',
-      name: 'scriptChangesModified',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Removed ({count})`
-  String scriptChangesRemoved(int count) {
-    return Intl.message(
-      'Removed ($count)',
-      name: 'scriptChangesRemoved',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Pause proxy by IP or gateway`
-  String get excludeNetworks {
-    return Intl.message(
-      'Pause proxy by IP or gateway',
-      name: 'excludeNetworks',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pause on matching Wi-Fi/Ethernet IPv4 addresses, subnets or gateways; resume after leaving. Comma-separated, e.g. 192.168.1.0/24,gateway:192.168.1.1`
-  String get excludeNetworksDesc {
-    return Intl.message(
-      'Pause on matching Wi-Fi/Ethernet IPv4 addresses, subnets or gateways; resume after leaving. Comma-separated, e.g. 192.168.1.0/24,gateway:192.168.1.1',
-      name: 'excludeNetworksDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Up to 16 rules; enter valid IPv4, CIDR or gateway:address`
-  String get excludeNetworksInvalid {
-    return Intl.message(
-      'Up to 16 rules; enter valid IPv4, CIDR or gateway:address',
-      name: 'excludeNetworksInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Concurrent batch latency tests`
-  String get delayConcurrency {
-    return Intl.message(
-      'Concurrent batch latency tests',
-      name: 'delayConcurrency',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failed`
-  String get delayTestFailed {
-    return Intl.message('Failed', name: 'delayTestFailed', desc: '', args: []);
-  }
-
-  /// `Release notes`
-  String get updateReleaseNotes {
-    return Intl.message(
-      'Release notes',
-      name: 'updateReleaseNotes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Download update`
-  String get updateDownloadConfirm {
-    return Intl.message(
-      'Download update',
-      name: 'updateDownloadConfirm',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Later`
-  String get updateLater {
-    return Intl.message('Later', name: 'updateLater', desc: '', args: []);
-  }
-
-  /// `Cancel download`
-  String get updateCancelDownload {
-    return Intl.message(
-      'Cancel download',
-      name: 'updateCancelDownload',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `New version detected`
-  String get updateNotice {
-    return Intl.message(
-      'New version detected',
-      name: 'updateNotice',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Version: {version}`
-  String updateVersionNumber(String version) {
-    return Intl.message(
-      'Version: $version',
-      name: 'updateVersionNumber',
-      desc: '',
-      args: [version],
-    );
-  }
-
-  /// `Build: {build}`
-  String updateBuildNumber(String build) {
-    return Intl.message(
-      'Build: $build',
-      name: 'updateBuildNumber',
-      desc: '',
-      args: [build],
-    );
-  }
-
-  /// `Could not load release notes. Please try again.`
-  String get updateReleaseNotesFailed {
-    return Intl.message(
-      'Could not load release notes. Please try again.',
-      name: 'updateReleaseNotesFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Access the devices in your tailnet`
-  String get tailscaleEntryHint {
-    return Intl.message(
-      'Access the devices in your tailnet',
-      name: 'tailscaleEntryHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Access your tailnet`
-  String get tailscaleEmptyTitle {
-    return Intl.message(
-      'Access your tailnet',
-      name: 'tailscaleEmptyTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add a network, sign in on this device, then start the proxy to reach your devices.`
-  String get tailscaleEmptyDesc {
-    return Intl.message(
-      'Add a network, sign in on this device, then start the proxy to reach your devices.',
-      name: 'tailscaleEmptyDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add network`
-  String get tailscaleAddNetwork {
-    return Intl.message(
-      'Add network',
-      name: 'tailscaleAddNetwork',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Networks`
-  String get tailscaleNetworks {
-    return Intl.message(
-      'Networks',
-      name: 'tailscaleNetworks',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Guide`
-  String get tailscaleGuide {
-    return Intl.message('Guide', name: 'tailscaleGuide', desc: '', args: []);
-  }
-
-  /// `This device`
-  String get tailscaleThisDevice {
-    return Intl.message(
-      'This device',
-      name: 'tailscaleThisDevice',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Status`
-  String get tailscaleStatus {
-    return Intl.message('Status', name: 'tailscaleStatus', desc: '', args: []);
-  }
-
-  /// `Device name`
-  String get tailscaleDeviceName {
-    return Intl.message(
-      'Device name',
-      name: 'tailscaleDeviceName',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Devices ({count})`
-  String tailscaleDevices(Object count) {
-    return Intl.message(
-      'Devices ($count)',
-      name: 'tailscaleDevices',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Network name`
-  String get tailscaleNetworkName {
-    return Intl.message(
-      'Network name',
-      name: 'tailscaleNetworkName',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This name is already in use`
-  String get tailscaleNameInUse {
-    return Intl.message(
-      'This name is already in use',
-      name: 'tailscaleNameInUse',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Login method`
-  String get tailscaleLoginMethod {
-    return Intl.message(
-      'Login method',
-      name: 'tailscaleLoginMethod',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Interactive`
-  String get tailscaleInteractiveLogin {
-    return Intl.message(
-      'Interactive',
-      name: 'tailscaleInteractiveLogin',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Auth key`
-  String get tailscaleAuthKey {
-    return Intl.message(
-      'Auth key',
-      name: 'tailscaleAuthKey',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `An auth key is saved on this device. Enter a new one to replace it.`
-  String get tailscaleAuthKeySaved {
-    return Intl.message(
-      'An auth key is saved on this device. Enter a new one to replace it.',
-      name: 'tailscaleAuthKeySaved',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sign in once per network on this device.`
-  String get tailscaleLoginFooter {
-    return Intl.message(
-      'Sign in once per network on this device.',
-      name: 'tailscaleLoginFooter',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Automatic routing`
-  String get tailscaleAutoRoute {
-    return Intl.message(
-      'Automatic routing',
-      name: 'tailscaleAutoRoute',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Route peer addresses, MagicDNS names and approved subnets through this network`
-  String get tailscaleAutoRouteDesc {
-    return Intl.message(
-      'Route peer addresses, MagicDNS names and approved subnets through this network',
-      name: 'tailscaleAutoRouteDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exit node`
-  String get tailscaleExitNode {
-    return Intl.message(
-      'Exit node',
-      name: 'tailscaleExitNode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Leave empty for none, or use auto, a peer name or a peer IP address.`
-  String get tailscaleExitNodeDesc {
-    return Intl.message(
-      'Leave empty for none, or use auto, a peer name or a peer IP address.',
-      name: 'tailscaleExitNodeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Available exit nodes`
-  String get tailscaleAvailableExitNodes {
-    return Intl.message(
-      'Available exit nodes',
-      name: 'tailscaleAvailableExitNodes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Allow local network access`
-  String get tailscaleExitNodeAllowLan {
-    return Intl.message(
-      'Allow local network access',
-      name: 'tailscaleExitNodeAllowLan',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Advanced`
-  String get tailscaleAdvanced {
-    return Intl.message(
-      'Advanced',
-      name: 'tailscaleAdvanced',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Control URL`
-  String get tailscaleControlUrl {
-    return Intl.message(
-      'Control URL',
-      name: 'tailscaleControlUrl',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Authentication and device identity stay on this device.`
-  String get tailscaleCredentialsFooter {
-    return Intl.message(
-      'Authentication and device identity stay on this device.',
-      name: 'tailscaleCredentialsFooter',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Account`
-  String get tailscaleAccount {
-    return Intl.message(
-      'Account',
-      name: 'tailscaleAccount',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Save and log in`
-  String get tailscaleSaveAndLogin {
-    return Intl.message(
-      'Save and log in',
-      name: 'tailscaleSaveAndLogin',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Open login page`
-  String get tailscaleOpenLoginPage {
-    return Intl.message(
-      'Open login page',
-      name: 'tailscaleOpenLoginPage',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Open the login page or scan the code. Sign-in completes automatically after approval.`
-  String get tailscaleLoginWaiting {
-    return Intl.message(
-      'Open the login page or scan the code. Sign-in completes automatically after approval.',
-      name: 'tailscaleLoginWaiting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Signing in`
-  String get tailscaleSigningIn {
-    return Intl.message(
-      'Signing in',
-      name: 'tailscaleSigningIn',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Signed in`
-  String get tailscaleSignedIn {
-    return Intl.message(
-      'Signed in',
-      name: 'tailscaleSignedIn',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Log out`
-  String get tailscaleLogout {
-    return Intl.message('Log out', name: 'tailscaleLogout', desc: '', args: []);
-  }
-
-  /// `Tailscale login failed`
-  String get tailscaleLoginFailed {
-    return Intl.message(
-      'Tailscale login failed',
-      name: 'tailscaleLoginFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sign-in was not completed within five minutes. Try again.`
-  String get tailscaleLoginTimeout {
-    return Intl.message(
-      'Sign-in was not completed within five minutes. Try again.',
-      name: 'tailscaleLoginTimeout',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Signing in authorizes this device. Start the proxy to use the network.`
-  String get tailscaleLoginHint {
-    return Intl.message(
-      'Signing in authorizes this device. Start the proxy to use the network.',
-      name: 'tailscaleLoginHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter the auth key to log in on this device.`
-  String get tailscaleEnterAuthKey {
-    return Intl.message(
-      'Enter the auth key to log in on this device.',
-      name: 'tailscaleEnterAuthKey',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check these settings: {fields}`
-  String tailscaleCheckSettings(Object fields) {
-    return Intl.message(
-      'Check these settings: $fields',
-      name: 'tailscaleCheckSettings',
-      desc: '',
-      args: [fields],
-    );
-  }
-
-  /// `Not applied`
-  String get tailscaleNotApplied {
-    return Intl.message(
-      'Not applied',
-      name: 'tailscaleNotApplied',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The network is not part of the running configuration. Select a profile and make sure none of its nodes uses the same name.`
-  String get tailscaleNotAppliedHint {
-    return Intl.message(
-      'The network is not part of the running configuration. Select a profile and make sure none of its nodes uses the same name.',
-      name: 'tailscaleNotAppliedHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Not signed in`
-  String get tailscaleNotSignedIn {
-    return Intl.message(
-      'Not signed in',
-      name: 'tailscaleNotSignedIn',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Login required`
-  String get tailscaleNeedsLogin {
-    return Intl.message(
-      'Login required',
-      name: 'tailscaleNeedsLogin',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Node key has expired`
-  String get tailscaleKeyExpired {
-    return Intl.message(
-      'Node key has expired',
-      name: 'tailscaleKeyExpired',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Device approval is pending`
-  String get tailscaleNeedsApproval {
-    return Intl.message(
-      'Device approval is pending',
-      name: 'tailscaleNeedsApproval',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connecting`
-  String get tailscaleConnecting {
-    return Intl.message(
-      'Connecting',
-      name: 'tailscaleConnecting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connected`
-  String get tailscaleConnected {
-    return Intl.message(
-      'Connected',
-      name: 'tailscaleConnected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Stopped`
-  String get tailscaleStopped {
-    return Intl.message(
-      'Stopped',
-      name: 'tailscaleStopped',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection unavailable`
-  String get tailscaleUnavailable {
-    return Intl.message(
-      'Connection unavailable',
-      name: 'tailscaleUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Online`
-  String get tailscaleOnline {
-    return Intl.message('Online', name: 'tailscaleOnline', desc: '', args: []);
-  }
-
-  /// `Offline`
-  String get tailscaleOffline {
-    return Intl.message(
-      'Offline',
-      name: 'tailscaleOffline',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remove network`
-  String get tailscaleRemoveNetwork {
-    return Intl.message(
-      'Remove network',
-      name: 'tailscaleRemoveNetwork',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This device will leave {name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.`
-  String tailscaleRemoveConfirm(Object name) {
-    return Intl.message(
-      'This device will leave $name and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.',
-      name: 'tailscaleRemoveConfirm',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `{name} is still used by a rule or group in profile {profile}`
-  String tailscaleNetworkInUse(Object name, Object profile) {
-    return Intl.message(
-      '$name is still used by a rule or group in profile $profile',
-      name: 'tailscaleNetworkInUse',
-      desc: '',
-      args: [name, profile],
-    );
-  }
-
-  /// `Get started`
-  String get tailscaleGuideGetStarted {
-    return Intl.message(
-      'Get started',
-      name: 'tailscaleGuideGetStarted',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add a network and choose "Save and log in". Open the login page and authorize this device; sign-in completes on its own.\nTo sign in with an auth key, choose "Auth key" and enter it. No browser is needed.\nThe network carries traffic only while the proxy runs. Signing in alone routes nothing.`
-  String get tailscaleGuideGetStartedBody {
-    return Intl.message(
-      'Add a network and choose "Save and log in". Open the login page and authorize this device; sign-in completes on its own.\nTo sign in with an auth key, choose "Auth key" and enter it. No browser is needed.\nThe network carries traffic only while the proxy runs. Signing in alone routes nothing.',
-      name: 'tailscaleGuideGetStartedBody',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Devices and MagicDNS`
-  String get tailscaleGuideDevices {
-    return Intl.message(
-      'Devices and MagicDNS',
-      name: 'tailscaleGuideDevices',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Automatic routing sends the addresses and MagicDNS names of known peers, and the subnets approved in your tailnet, into this network. Other traffic follows your rules.\nIt applies after your added and custom rules and before the profile's own rules.\nWith a custom control server domain, only known device names are routed, so the domain's public sites stay reachable.\nSubnet addresses inside the local network this device is on stay local. To reach a remote subnet with the same addresses, add a rule that points to this network.\nA hostname that resolves into an approved subnet also goes through this network. If the profile hands such a name straight to a proxy, add a domain rule that points to this network.`
-  String get tailscaleGuideDevicesBody {
-    return Intl.message(
-      'Automatic routing sends the addresses and MagicDNS names of known peers, and the subnets approved in your tailnet, into this network. Other traffic follows your rules.\nIt applies after your added and custom rules and before the profile\'s own rules.\nWith a custom control server domain, only known device names are routed, so the domain\'s public sites stay reachable.\nSubnet addresses inside the local network this device is on stay local. To reach a remote subnet with the same addresses, add a rule that points to this network.\nA hostname that resolves into an approved subnet also goes through this network. If the profile hands such a name straight to a proxy, add a domain rule that points to this network.',
-      name: 'tailscaleGuideDevicesBody',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exit nodes`
-  String get tailscaleGuideExitNodes {
-    return Intl.message(
-      'Exit nodes',
-      name: 'tailscaleGuideExitNodes',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `With an exit node, the network appears in the profile's selector groups. Traffic uses the exit node only after you select the network there or point a rule to it.\nLeave the field empty to use no exit node. auto picks an available exit node; a device name or address picks that device.`
-  String get tailscaleGuideExitNodesBody {
-    return Intl.message(
-      'With an exit node, the network appears in the profile\'s selector groups. Traffic uses the exit node only after you select the network there or point a rule to it.\nLeave the field empty to use no exit node. auto picks an available exit node; a device name or address picks that device.',
-      name: 'tailscaleGuideExitNodesBody',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sign-in and backup`
-  String get tailscaleGuideSignIn {
-    return Intl.message(
-      'Sign-in and backup',
-      name: 'tailscaleGuideSignIn',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network settings are included in backups. Auth keys and the device identity stay on this device, so sign in again after restoring on another device.\nWhen the node key expires, choose "Save and log in" again. Device approval and access are managed in your tailnet.\nRemoving a network signs this device out and deletes its identity from this device.`
-  String get tailscaleGuideSignInBody {
-    return Intl.message(
-      'Network settings are included in backups. Auth keys and the device identity stay on this device, so sign in again after restoring on another device.\nWhen the node key expires, choose "Save and log in" again. Device approval and access are managed in your tailnet.\nRemoving a network signs this device out and deletes its identity from this device.',
-      name: 'tailscaleGuideSignInBody',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Troubleshooting`
-  String get tailscaleGuideTroubleshooting {
-    return Intl.message(
-      'Troubleshooting',
-      name: 'tailscaleGuideTroubleshooting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Check that the proxy is running, this device is approved and the peer is online. For subnets or the Internet, also check route approval and the exit node.\n"Not applied" means the running configuration lacks the network: select a profile and make sure none of its nodes uses the same name.\nThis app only connects out to your tailnet. It accepts no inbound connections and never offers this device as a subnet router or exit node.`
-  String get tailscaleGuideTroubleshootingBody {
-    return Intl.message(
-      'Check that the proxy is running, this device is approved and the peer is online. For subnets or the Internet, also check route approval and the exit node.\n"Not applied" means the running configuration lacks the network: select a profile and make sure none of its nodes uses the same name.\nThis app only connects out to your tailnet. It accepts no inbound connections and never offers this device as a subnet router or exit node.',
-      name: 'tailscaleGuideTroubleshootingBody',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use up to 64 characters without commas`
-  String get tailscaleNameInvalid {
-    return Intl.message(
-      'Use up to 64 characters without commas',
-      name: 'tailscaleNameInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Use lowercase letters, digits and hyphens, up to 63 characters`
-  String get tailscaleHostnameInvalid {
-    return Intl.message(
-      'Use lowercase letters, digits and hyphens, up to 63 characters',
-      name: 'tailscaleHostnameInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This does not look like an auth key`
-  String get tailscaleAuthKeyInvalid {
-    return Intl.message(
-      'This does not look like an auth key',
-      name: 'tailscaleAuthKeyInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Direct`
-  String get tailscaleDirect {
-    return Intl.message('Direct', name: 'tailscaleDirect', desc: '', args: []);
-  }
-
-  /// `Relay {region}`
-  String tailscaleRelay(Object region) {
-    return Intl.message(
-      'Relay $region',
-      name: 'tailscaleRelay',
-      desc: '',
-      args: [region],
-    );
-  }
-
-  /// `Exit node in use`
-  String get tailscaleExitNodeActive {
-    return Intl.message(
-      'Exit node in use',
-      name: 'tailscaleExitNodeActive',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Quick add`
-  String get quickAdd {
-    return Intl.message('Quick add', name: 'quickAdd', desc: '', args: []);
-  }
-
-  /// `Block QUIC`
-  String get rulePresetBlockQuic {
-    return Intl.message(
-      'Block QUIC',
-      name: 'rulePresetBlockQuic',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Block STUN`
-  String get rulePresetBlockStun {
-    return Intl.message(
-      'Block STUN',
-      name: 'rulePresetBlockStun',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Block DNS over TLS`
-  String get rulePresetBlockDot {
-    return Intl.message(
-      'Block DNS over TLS',
-      name: 'rulePresetBlockDot',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Block proxy loopback`
-  String get rulePresetBlockLoopback {
-    return Intl.message(
-      'Block proxy loopback',
-      name: 'rulePresetBlockLoopback',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `LAN direct`
-  String get rulePresetLanDirect {
-    return Intl.message(
-      'LAN direct',
-      name: 'rulePresetLanDirect',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Apple and Microsoft direct`
-  String get rulePresetSystemServicesDirect {
-    return Intl.message(
-      'Apple and Microsoft direct',
-      name: 'rulePresetSystemServicesDirect',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `BitTorrent direct`
-  String get rulePresetBittorrentDirect {
-    return Intl.message(
-      'BitTorrent direct',
-      name: 'rulePresetBittorrentDirect',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add selected presets before existing rules. Identical rules are not added again.`
-  String get rulePresetInsertHint {
-    return Intl.message(
-      'Add selected presets before existing rules. Identical rules are not added again.',
-      name: 'rulePresetInsertHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The name is empty`
-  String get overwriteIssueEmptyName {
-    return Intl.message(
-      'The name is empty',
-      name: 'overwriteIssueEmptyName',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{name} is a built-in policy name and cannot be used here`
-  String overwriteIssueReservedName(Object name) {
-    return Intl.message(
-      '$name is a built-in policy name and cannot be used here',
-      name: 'overwriteIssueReservedName',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `The name {name} is already used by another proxy or proxy group`
-  String overwriteIssueDuplicateName(Object name) {
-    return Intl.message(
-      'The name $name is already used by another proxy or proxy group',
-      name: 'overwriteIssueDuplicateName',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `No proxies or proxy providers are selected, so the core rejects this group`
-  String get overwriteIssueNoProxySource {
-    return Intl.message(
-      'No proxies or proxy providers are selected, so the core rejects this group',
-      name: 'overwriteIssueNoProxySource',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `These proxies or policies do not exist: {names}`
-  String overwriteIssueMissingProxies(Object names) {
-    return Intl.message(
-      'These proxies or policies do not exist: $names',
-      name: 'overwriteIssueMissingProxies',
-      desc: '',
-      args: [names],
-    );
-  }
-
-  /// `These proxy providers do not exist: {names}`
-  String overwriteIssueMissingProviders(Object names) {
-    return Intl.message(
-      'These proxy providers do not exist: $names',
-      name: 'overwriteIssueMissingProviders',
-      desc: '',
-      args: [names],
-    );
-  }
-
-  /// `The empty-group fallback must be an existing node or built-in outbound, not a proxy group: {name}`
-  String overwriteIssueEmptyFallback(Object name) {
-    return Intl.message(
-      'The empty-group fallback must be an existing node or built-in outbound, not a proxy group: $name',
-      name: 'overwriteIssueEmptyFallback',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Proxy groups reference each other in a loop: {path}`
-  String overwriteIssueGroupLoop(Object path) {
-    return Intl.message(
-      'Proxy groups reference each other in a loop: $path',
-      name: 'overwriteIssueGroupLoop',
-      desc: '',
-      args: [path],
-    );
-  }
-
-  /// `{target} is an invalid policy`
-  String invalidPolicy(Object target) {
-    return Intl.message(
-      '$target is an invalid policy',
-      name: 'invalidPolicy',
-      desc: '',
-      args: [target],
-    );
-  }
-
-  /// `{ruleSet} is an invalid rule set`
-  String invalidRuleSet(Object ruleSet) {
-    return Intl.message(
-      '$ruleSet is an invalid rule set',
-      name: 'invalidRuleSet',
-      desc: '',
-      args: [ruleSet],
-    );
-  }
-
-  /// `{subRule} is an invalid SUB_RULE`
-  String invalidSubRule(Object subRule) {
-    return Intl.message(
-      '$subRule is an invalid SUB_RULE',
-      name: 'invalidSubRule',
-      desc: '',
-      args: [subRule],
-    );
-  }
-
-  /// `Safe mode`
-  String get safeMode {
-    return Intl.message('Safe mode', name: 'safeMode', desc: '', args: []);
-  }
-
-  /// `{appName} (Safe mode)`
-  String safeModeAppTitle(Object appName) {
-    return Intl.message(
-      '$appName (Safe mode)',
-      name: 'safeModeAppTitle',
-      desc: '',
-      args: [appName],
-    );
-  }
-
-  /// `Hide failed nodes`
-  String get hideTimeoutProxies {
-    return Intl.message(
-      'Hide failed nodes',
-      name: 'hideTimeoutProxies',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Queued`
-  String get delayTestQueued {
-    return Intl.message('Queued', name: 'delayTestQueued', desc: '', args: []);
-  }
-
-  /// `Testing`
-  String get delayTestRunning {
-    return Intl.message(
-      'Testing',
-      name: 'delayTestRunning',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `DNS queries`
-  String get dnsQueries {
-    return Intl.message('DNS queries', name: 'dnsQueries', desc: '', args: []);
-  }
-
-  /// `View the latest 500 resolver queries`
-  String get dnsQueriesDesc {
-    return Intl.message(
-      'View the latest 500 resolver queries',
-      name: 'dnsQueriesDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Cached`
-  String get dnsQueryCached {
-    return Intl.message('Cached', name: 'dnsQueryCached', desc: '', args: []);
-  }
-
-  /// `Upstream`
-  String get dnsQueryUpstream {
-    return Intl.message(
-      'Upstream',
-      name: 'dnsQueryUpstream',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Answers`
-  String get dnsQueryAnswers {
-    return Intl.message('Answers', name: 'dnsQueryAnswers', desc: '', args: []);
-  }
-
-  /// `Response code`
-  String get dnsQueryRcode {
-    return Intl.message(
-      'Response code',
-      name: 'dnsQueryRcode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Query type`
-  String get dnsQueryType {
-    return Intl.message('Query type', name: 'dnsQueryType', desc: '', args: []);
-  }
-
-  /// `Pause updates`
-  String get pauseUpdates {
-    return Intl.message(
-      'Pause updates',
-      name: 'pauseUpdates',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Resume updates`
-  String get resumeUpdates {
-    return Intl.message(
-      'Resume updates',
-      name: 'resumeUpdates',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `All queries`
-  String get dnsQueryAll {
-    return Intl.message('All queries', name: 'dnsQueryAll', desc: '', args: []);
-  }
-
-  /// `Failed queries`
-  String get dnsQueryFailures {
-    return Intl.message(
-      'Failed queries',
-      name: 'dnsQueryFailures',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Application`
-  String get dnsQueryInitiatorApp {
-    return Intl.message(
-      'Application',
-      name: 'dnsQueryInitiatorApp',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Rule matching`
-  String get dnsQueryInitiatorRule {
-    return Intl.message(
-      'Rule matching',
-      name: 'dnsQueryInitiatorRule',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Direct connection`
-  String get dnsQueryInitiatorDirect {
-    return Intl.message(
-      'Direct connection',
-      name: 'dnsQueryInitiatorDirect',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy connection`
-  String get dnsQueryInitiatorProxy {
-    return Intl.message(
-      'Proxy connection',
-      name: 'dnsQueryInitiatorProxy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Other`
-  String get dnsQueryInitiatorOther {
-    return Intl.message(
-      'Other',
-      name: 'dnsQueryInitiatorOther',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Rule mode`
-  String get action_ruleMode {
-    return Intl.message(
-      'Rule mode',
-      name: 'action_ruleMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Global mode`
-  String get action_globalMode {
-    return Intl.message(
-      'Global mode',
-      name: 'action_globalMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Direct mode`
-  String get action_directMode {
-    return Intl.message(
-      'Direct mode',
-      name: 'action_directMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Test node latency`
-  String get action_delayTest {
-    return Intl.message(
-      'Test node latency',
-      name: 'action_delayTest',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Update profiles`
-  String get action_updateProfiles {
-    return Intl.message(
-      'Update profiles',
-      name: 'action_updateProfiles',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Copy proxy environment variables`
-  String get action_copyEnv {
-    return Intl.message(
-      'Copy proxy environment variables',
-      name: 'action_copyEnv',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exit`
-  String get action_exit {
-    return Intl.message('Exit', name: 'action_exit', desc: '', args: []);
-  }
-
-  /// `Shortcut unavailable`
-  String get hotkeyUnavailable {
-    return Intl.message(
-      'Shortcut unavailable',
-      name: 'hotkeyUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Uptime`
-  String get runTime {
-    return Intl.message('Uptime', name: 'runTime', desc: '', args: []);
-  }
-
-  /// `Floating navigation`
-  String get floatingNavigationBar {
-    return Intl.message(
-      'Floating navigation',
-      name: 'floatingNavigationBar',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable`
-  String get localNetworkTip {
-    return Intl.message(
-      'Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable',
-      name: 'localNetworkTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Sidebar`
-  String get sidebar {
-    return Intl.message('Sidebar', name: 'sidebar', desc: '', args: []);
-  }
-
-  /// `Background blur`
-  String get backgroundBlur {
-    return Intl.message(
-      'Background blur',
-      name: 'backgroundBlur',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Background blur lets the desktop behind the window show through the sidebar.`
-  String get sidebarBlurDesc {
-    return Intl.message(
-      'Background blur lets the desktop behind the window show through the sidebar.',
-      name: 'sidebarBlurDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Format`
-  String get format {
-    return Intl.message('Format', name: 'format', desc: '', args: []);
-  }
-
-  /// `Behavior`
-  String get behavior {
-    return Intl.message('Behavior', name: 'behavior', desc: '', args: []);
-  }
-
-  /// `Provider library`
-  String get appProviderLibrary {
-    return Intl.message(
-      'Provider library',
-      name: 'appProviderLibrary',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Local file`
-  String get providerLocal {
-    return Intl.message(
-      'Local file',
-      name: 'providerLocal',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remote URL`
-  String get providerRemote {
-    return Intl.message(
-      'Remote URL',
-      name: 'providerRemote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Resource content`
-  String get providerContent {
-    return Intl.message(
-      'Resource content',
-      name: 'providerContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The resource content or format is invalid`
-  String get providerContentInvalid {
-    return Intl.message(
-      'The resource content or format is invalid',
-      name: 'providerContentInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The resource exceeds 32 MiB`
-  String get providerContentTooLarge {
-    return Intl.message(
-      'The resource exceeds 32 MiB',
-      name: 'providerContentTooLarge',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The resource changed while editing; reopen it and try again`
-  String get providerChanged {
-    return Intl.message(
-      'The resource changed while editing; reopen it and try again',
-      name: 'providerChanged',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter a name without commas or line breaks`
-  String get providerNameInvalid {
-    return Intl.message(
-      'Enter a name without commas or line breaks',
-      name: 'providerNameInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This resource is still used by {profiles}`
-  String providerInUse(String profiles) {
-    return Intl.message(
-      'This resource is still used by $profiles',
-      name: 'providerInUse',
-      desc: '',
-      args: [profiles],
-    );
-  }
-
-  /// `Renaming would change subscription resource references in {profiles}`
-  String providerRenameShadowed(String profiles) {
-    return Intl.message(
-      'Renaming would change subscription resource references in $profiles',
-      name: 'providerRenameShadowed',
-      desc: '',
-      args: [profiles],
-    );
-  }
-
-  /// `Enter an HTTP or HTTPS URL without embedded credentials`
-  String get providerUrlTip {
-    return Intl.message(
-      'Enter an HTTP or HTTPS URL without embedded credentials',
-      name: 'providerUrlTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Edit references in the source profile before renaming: {profiles}`
-  String providerSourceReference(String profiles) {
-    return Intl.message(
-      'Edit references in the source profile before renaming: $profiles',
-      name: 'providerSourceReference',
-      desc: '',
-      args: [profiles],
-    );
-  }
-
-  /// `Cannot read these profiles to check references: {profiles}`
-  String providerSourceUnavailable(String profiles) {
-    return Intl.message(
-      'Cannot read these profiles to check references: $profiles',
-      name: 'providerSourceUnavailable',
-      desc: '',
-      args: [profiles],
-    );
-  }
-
-  /// `Node definition`
-  String get nodeDefinition {
-    return Intl.message(
-      'Node definition',
-      name: 'nodeDefinition',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Quick edit`
-  String get nodeQuickFields {
-    return Intl.message(
-      'Quick edit',
-      name: 'nodeQuickFields',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Start the Core before validating this node`
-  String get nodeCoreValidationUnavailable {
-    return Intl.message(
-      'Start the Core before validating this node',
-      name: 'nodeCoreValidationUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter one complete proxy definition with a name and type`
-  String get nodeInvalidDefinition {
-    return Intl.message(
-      'Enter one complete proxy definition with a name and type',
-      name: 'nodeInvalidDefinition',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Release memory`
-  String get releaseMemory {
-    return Intl.message(
-      'Release memory',
-      name: 'releaseMemory',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Heap in use`
-  String get memoryCoreHeapInuse {
-    return Intl.message(
-      'Heap in use',
-      name: 'memoryCoreHeapInuse',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Heap idle`
-  String get memoryCoreHeapIdle {
-    return Intl.message(
-      'Heap idle',
-      name: 'memoryCoreHeapIdle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Goroutine stacks`
-  String get memoryCoreStack {
-    return Intl.message(
-      'Goroutine stacks',
-      name: 'memoryCoreStack',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Runtime overhead`
-  String get memoryCoreRuntime {
-    return Intl.message(
-      'Runtime overhead',
-      name: 'memoryCoreRuntime',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Core is not running`
-  String get memoryCoreNotRunning {
-    return Intl.message(
-      'Core is not running',
-      name: 'memoryCoreNotRunning',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Resident memory`
-  String get memoryAppResident {
-    return Intl.message(
-      'Resident memory',
-      name: 'memoryAppResident',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `App & shared`
-  String get memoryAppShared {
-    return Intl.message(
-      'App & shared',
-      name: 'memoryAppShared',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Estimated from process resident memory; it may differ from what the system reports.`
-  String get memoryEstimateDesc {
-    return Intl.message(
-      'Estimated from process resident memory; it may differ from what the system reports.',
-      name: 'memoryEstimateDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The Core runs inside the app process. Its share is estimated from runtime stats, and the rest counts as app and shared memory.`
-  String get memoryEstimateSharedDesc {
-    return Intl.message(
-      'The Core runs inside the app process. Its share is estimated from runtime stats, and the rest counts as app and shared memory.',
-      name: 'memoryEstimateSharedDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Memory released`
-  String get memoryReleased {
-    return Intl.message(
-      'Memory released',
-      name: 'memoryReleased',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Released {size}`
-  String memoryReleasedSize(Object size) {
-    return Intl.message(
-      'Released $size',
-      name: 'memoryReleasedSize',
-      desc: '',
-      args: [size],
-    );
-  }
-
-  /// `Failed to release memory`
-  String get releaseMemoryFailed {
-    return Intl.message(
-      'Failed to release memory',
-      name: 'releaseMemoryFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Total`
-  String get total {
-    return Intl.message('Total', name: 'total', desc: '', args: []);
-  }
-
-  /// `Stop button in notification`
-  String get showNotificationStopAction {
-    return Intl.message(
-      'Stop button in notification',
-      name: 'showNotificationStopAction',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Interface name`
-  String get interfaceName {
-    return Intl.message(
-      'Interface name',
-      name: 'interfaceName',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Outbound interface`
-  String get interfaceNameMode {
-    return Intl.message(
-      'Outbound interface',
-      name: 'interfaceNameMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Interface name is the network interface outbound connections use`
-  String get interfaceNameDesc {
-    return Intl.message(
-      'Interface name is the network interface outbound connections use',
-      name: 'interfaceNameDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Follow profile`
-  String get interfaceFollowProfile {
-    return Intl.message(
-      'Follow profile',
-      name: 'interfaceFollowProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Clear override (automatic interface)`
-  String get interfaceAutomatic {
-    return Intl.message(
-      'Clear override (automatic interface)',
-      name: 'interfaceAutomatic',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Hide IP`
-  String get hideIp {
-    return Intl.message('Hide IP', name: 'hideIp', desc: '', args: []);
-  }
-
-  /// `Camera permission required`
-  String get cameraPermissionRequired {
-    return Intl.message(
-      'Camera permission required',
-      name: 'cameraPermissionRequired',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Allow camera access in system settings to scan QR codes, or choose a QR code image from the album.`
-  String get cameraPermissionDesc {
-    return Intl.message(
-      'Allow camera access in system settings to scan QR codes, or choose a QR code image from the album.',
-      name: 'cameraPermissionDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Camera unavailable`
-  String get cameraUnavailable {
-    return Intl.message(
-      'Camera unavailable',
-      name: 'cameraUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This QR code doesn't contain a profile link`
-  String get invalidProfileQrcode {
-    return Intl.message(
-      'This QR code doesn\'t contain a profile link',
-      name: 'invalidProfileQrcode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose from album`
-  String get pickFromAlbum {
-    return Intl.message(
-      'Choose from album',
-      name: 'pickFromAlbum',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Retry`
-  String get retry {
-    return Intl.message('Retry', name: 'retry', desc: '', args: []);
-  }
-
-  /// `Toggle flashlight`
-  String get toggleFlashlight {
-    return Intl.message(
-      'Toggle flashlight',
-      name: 'toggleFlashlight',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The request timed out. Check your network or proxy, then try again`
-  String get networkTimeoutError {
-    return Intl.message(
-      'The request timed out. Check your network or proxy, then try again',
-      name: 'networkTimeoutError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Couldn't resolve the server address. Check that the URL is correct and DNS is working`
-  String get networkHostLookupError {
-    return Intl.message(
-      'Couldn\'t resolve the server address. Check that the URL is correct and DNS is working',
-      name: 'networkHostLookupError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Monochrome icon`
-  String get monochromeIcon {
-    return Intl.message(
-      'Monochrome icon',
-      name: 'monochromeIcon',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Couldn't connect to the server. Check your network connection or proxy settings`
-  String get networkConnectionError {
-    return Intl.message(
-      'Couldn\'t connect to the server. Check your network connection or proxy settings',
-      name: 'networkConnectionError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Secure connection failed. The server's certificate may be invalid, or the connection is being intercepted`
-  String get networkTlsError {
-    return Intl.message(
-      'Secure connection failed. The server\'s certificate may be invalid, or the connection is being intercepted',
-      name: 'networkTlsError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The request was cancelled`
-  String get networkCancelledError {
-    return Intl.message(
-      'The request was cancelled',
-      name: 'networkCancelledError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The server denied access (HTTP {code}). The link may have expired, or the credentials are wrong`
-  String networkAccessDeniedError(Object code) {
-    return Intl.message(
-      'The server denied access (HTTP $code). The link may have expired, or the credentials are wrong',
-      name: 'networkAccessDeniedError',
-      desc: '',
-      args: [code],
-    );
-  }
-
-  /// `Nothing was found at this address (HTTP {code}). Check that the URL is correct`
-  String networkNotFoundError(Object code) {
-    return Intl.message(
-      'Nothing was found at this address (HTTP $code). Check that the URL is correct',
-      name: 'networkNotFoundError',
-      desc: '',
-      args: [code],
-    );
-  }
-
-  /// `Too many requests (HTTP 429). Wait a moment and try again`
-  String get networkRateLimitedError {
-    return Intl.message(
-      'Too many requests (HTTP 429). Wait a moment and try again',
-      name: 'networkRateLimitedError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The server ran into a problem (HTTP {code}). Try again later`
-  String networkServerError(Object code) {
-    return Intl.message(
-      'The server ran into a problem (HTTP $code). Try again later',
-      name: 'networkServerError',
-      desc: '',
-      args: [code],
-    );
-  }
-
-  /// `The server rejected the request (HTTP {code})`
-  String networkBadResponseError(Object code) {
-    return Intl.message(
-      'The server rejected the request (HTTP $code)',
-      name: 'networkBadResponseError',
-      desc: '',
-      args: [code],
-    );
-  }
-
-  /// `Couldn't copy to the clipboard. The selection may be too large`
-  String get clipboardWriteFailed {
-    return Intl.message(
-      'Couldn\'t copy to the clipboard. The selection may be too large',
-      name: 'clipboardWriteFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Word wrap`
-  String get lineWrap {
-    return Intl.message('Word wrap', name: 'lineWrap', desc: '', args: []);
-  }
-
-  /// `Previous match`
-  String get previousMatch {
-    return Intl.message(
-      'Previous match',
-      name: 'previousMatch',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Next match`
-  String get nextMatch {
-    return Intl.message('Next match', name: 'nextMatch', desc: '', args: []);
-  }
-
-  /// `Editor unavailable`
-  String get editorUnavailable {
-    return Intl.message(
-      'Editor unavailable',
-      name: 'editorUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Replace all`
-  String get replaceAll {
-    return Intl.message('Replace all', name: 'replaceAll', desc: '', args: []);
-  }
-
-  /// `Size`
-  String get fontSize {
-    return Intl.message('Size', name: 'fontSize', desc: '', args: []);
-  }
-
-  /// `Replace`
-  String get replace {
-    return Intl.message('Replace', name: 'replace', desc: '', args: []);
-  }
-
-  /// `Locate selected node`
-  String get locateSelected {
-    return Intl.message(
-      'Locate selected node',
-      name: 'locateSelected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Expand`
-  String get expandList {
-    return Intl.message('Expand', name: 'expandList', desc: '', args: []);
-  }
-
-  /// `Collapse`
-  String get collapseList {
-    return Intl.message('Collapse', name: 'collapseList', desc: '', args: []);
-  }
-
-  /// `Clear search`
-  String get clearSearch {
-    return Intl.message(
-      'Clear search',
-      name: 'clearSearch',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Close all connections`
-  String get closeAllConnections {
-    return Intl.message(
-      'Close all connections',
-      name: 'closeAllConnections',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Expand`
-  String get showMore {
-    return Intl.message('Expand', name: 'showMore', desc: '', args: []);
-  }
-
-  /// `Collapse`
-  String get showLess {
-    return Intl.message('Collapse', name: 'showLess', desc: '', args: []);
-  }
-
-  /// `Show password`
-  String get showPassword {
-    return Intl.message(
-      'Show password',
-      name: 'showPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Hide password`
-  String get hidePassword {
-    return Intl.message(
-      'Hide password',
-      name: 'hidePassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Switch profile`
-  String get switchProfile {
-    return Intl.message(
-      'Switch profile',
-      name: 'switchProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Subscription info`
-  String get subscriptionInfo {
-    return Intl.message(
-      'Subscription info',
-      name: 'subscriptionInfo',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Last updated`
-  String get lastUpdated {
-    return Intl.message(
-      'Last updated',
-      name: 'lastUpdated',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count, plural, =1{1 proxy} other{{count} proxies}}`
-  String proxiesCount(num count) {
-    return Intl.plural(
-      count,
-      one: '1 proxy',
-      other: '$count proxies',
-      name: 'proxiesCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, =1{1 rule} other{{count} rules}}`
-  String rulesCount(num count) {
-    return Intl.plural(
-      count,
-      one: '1 rule',
-      other: '$count rules',
-      name: 'rulesCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Back`
-  String get back {
-    return Intl.message('Back', name: 'back', desc: '', args: []);
-  }
-
-  /// `No matching results`
-  String get noSearchResults {
-    return Intl.message(
-      'No matching results',
-      name: 'noSearchResults',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy node`
-  String get proxyNode {
-    return Intl.message('Proxy node', name: 'proxyNode', desc: '', args: []);
-  }
-
-  /// `Rules`
-  String get rules {
-    return Intl.message('Rules', name: 'rules', desc: '', args: []);
-  }
-
-  /// `Add override entry`
-  String get addOverrideEntry {
-    return Intl.message(
-      'Add override entry',
-      name: 'addOverrideEntry',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Batch add`
-  String get batchAdd {
-    return Intl.message('Batch add', name: 'batchAdd', desc: '', args: []);
-  }
-
-  /// `One item per line, or separated by commas`
-  String get batchListInputTip {
-    return Intl.message(
-      'One item per line, or separated by commas',
-      name: 'batchListInputTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `One entry per line: key, a space, then value`
-  String get batchMapInputTip {
-    return Intl.message(
-      'One entry per line: key, a space, then value',
-      name: 'batchMapInputTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count} to add, {skipped} skipped as existing`
-  String batchPreviewTip(Object count, Object skipped) {
-    return Intl.message(
-      '$count to add, $skipped skipped as existing',
-      name: 'batchPreviewTip',
-      desc: '',
-      args: [count, skipped],
-    );
-  }
-
-  /// `Cache algorithm`
-  String get cacheAlgorithm {
-    return Intl.message(
-      'Cache algorithm',
-      name: 'cacheAlgorithm',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Cache size`
-  String get cacheMaxSize {
-    return Intl.message('Cache size', name: 'cacheMaxSize', desc: '', args: []);
-  }
-
-  /// `Dialer proxy`
-  String get dialerProxy {
-    return Intl.message(
-      'Dialer proxy',
-      name: 'dialerProxy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Dialer proxy is the outbound used to reach the NTP server`
-  String get dialerProxyDesc {
-    return Intl.message(
-      'Dialer proxy is the outbound used to reach the NTP server',
-      name: 'dialerProxyDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Dialing through {name} leads back to the proxy that uses it, so the connection was stopped`
-  String dialerProxyLoopStopped(Object name) {
-    return Intl.message(
-      'Dialing through $name leads back to the proxy that uses it, so the connection was stopped',
-      name: 'dialerProxyLoopStopped',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Discard the changes?`
-  String get discardChanges {
-    return Intl.message(
-      'Discard the changes?',
-      name: 'discardChanges',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Fake-IP filter mode`
-  String get fakeipFilterMode {
-    return Intl.message(
-      'Fake-IP filter mode',
-      name: 'fakeipFilterMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `In Fake-IP filter mode, blacklist excludes matches, whitelist fakes only matches, and rule matches as rules`
-  String get fakeipFilterModeDesc {
-    return Intl.message(
-      'In Fake-IP filter mode, blacklist excludes matches, whitelist fakes only matches, and rule matches as rules',
-      name: 'fakeipFilterModeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Fake-IP range (IPv6)`
-  String get fakeipRange6 {
-    return Intl.message(
-      'Fake-IP range (IPv6)',
-      name: 'fakeipRange6',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Fake-IP TTL`
-  String get fakeipTtl {
-    return Intl.message('Fake-IP TTL', name: 'fakeipTtl', desc: '', args: []);
-  }
-
-  /// `IPv6 timeout (ms)`
-  String get ipv6Timeout {
-    return Intl.message(
-      'IPv6 timeout (ms)',
-      name: 'ipv6Timeout',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Line {line}: {message}`
-  String lineIssueTip(Object line, Object message) {
-    return Intl.message(
-      'Line $line: $message',
-      name: 'lineIssueTip',
-      desc: '',
-      args: [line, message],
-    );
-  }
-
-  /// `Listen routing mark`
-  String get listenRoutingMark {
-    return Intl.message(
-      'Listen routing mark',
-      name: 'listenRoutingMark',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Listen routing mark works only on Linux`
-  String get listenRoutingMarkDesc {
-    return Intl.message(
-      'Listen routing mark works only on Linux',
-      name: 'listenRoutingMarkDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{label} must be at most {max} characters`
-  String maxLengthTip(Object label, Object max) {
-    return Intl.message(
-      '$label must be at most $max characters',
-      name: 'maxLengthTip',
-      desc: '',
-      args: [label, max],
-    );
-  }
-
-  /// `Sync interval (minutes)`
-  String get ntpInterval {
-    return Intl.message(
-      'Sync interval (minutes)',
-      name: 'ntpInterval',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `NTP takes the time from an NTP server instead of the system clock`
-  String get ntpStatusDesc {
-    return Intl.message(
-      'NTP takes the time from an NTP server instead of the system clock',
-      name: 'ntpStatusDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Override entries`
-  String get overrideEntries {
-    return Intl.message(
-      'Override entries',
-      name: 'overrideEntries',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Quick edit`
-  String get quickEdit {
-    return Intl.message('Quick edit', name: 'quickEdit', desc: '', args: []);
-  }
-
-  /// `Server`
-  String get server {
-    return Intl.message('Server', name: 'server', desc: '', args: []);
-  }
-
-  /// `Single add`
-  String get singleAdd {
-    return Intl.message('Single add', name: 'singleAdd', desc: '', args: []);
-  }
-
-  /// `{label} must be a single item`
-  String singleValueTip(Object label) {
-    return Intl.message(
-      '$label must be a single item',
-      name: 'singleValueTip',
-      desc: '',
-      args: [label],
-    );
-  }
-
-  /// `Write to system`
-  String get writeToSystem {
-    return Intl.message(
-      'Write to system',
-      name: 'writeToSystem',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Write to system also sets the system clock; Android ignores it`
-  String get writeToSystemDesc {
-    return Intl.message(
-      'Write to system also sets the system clock; Android ignores it',
-      name: 'writeToSystemDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Basic info`
-  String get basicInfo {
-    return Intl.message('Basic info', name: 'basicInfo', desc: '', args: []);
-  }
-
-  /// `Match an IP suffix range`
-  String get ruleActionIpSuffixDesc {
-    return Intl.message(
-      'Match an IP suffix range',
-      name: 'ruleActionIpSuffixDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match a domain suffix`
-  String get ruleActionDomainSuffixDesc {
-    return Intl.message(
-      'Match a domain suffix',
-      name: 'ruleActionDomainSuffixDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match all requests, no conditions needed`
-  String get ruleActionMatchDesc {
-    return Intl.message(
-      'Match all requests, no conditions needed',
-      name: 'ruleActionMatchDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the source IP's country code`
-  String get ruleActionSrcGeoipDesc {
-    return Intl.message(
-      'Match the source IP\'s country code',
-      name: 'ruleActionSrcGeoipDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Wildcard match; only * and ? are supported`
-  String get ruleActionDomainWildcardDesc {
-    return Intl.message(
-      'Wildcard match; only * and ? are supported',
-      name: 'ruleActionDomainWildcardDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Logical rule AND`
-  String get ruleActionAndDesc {
-    return Intl.message(
-      'Logical rule AND',
-      name: 'ruleActionAndDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match an IP address range; IP-CIDR6 is just an alias`
-  String get ruleActionIpCidr6Desc {
-    return Intl.message(
-      'Match an IP address range; IP-CIDR6 is just an alias',
-      name: 'ruleActionIpCidr6Desc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match a domain regex`
-  String get ruleActionDomainRegexDesc {
-    return Intl.message(
-      'Match a domain regex',
-      name: 'ruleActionDomainRegexDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match by process path regex`
-  String get ruleActionProcessPathRegexDesc {
-    return Intl.message(
-      'Match by process path regex',
-      name: 'ruleActionProcessPathRegexDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the destination port range`
-  String get ruleActionDstPortDesc {
-    return Intl.message(
-      'Match the destination port range',
-      name: 'ruleActionDstPortDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the DSCP mark (tproxy UDP inbound only)`
-  String get ruleActionDscpDesc {
-    return Intl.message(
-      'Match the DSCP mark (tproxy UDP inbound only)',
-      name: 'ruleActionDscpDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the inbound port`
-  String get ruleActionInPortDesc {
-    return Intl.message(
-      'Match the inbound port',
-      name: 'ruleActionInPortDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the Linux user ID`
-  String get ruleActionUidDesc {
-    return Intl.message(
-      'Match the Linux user ID',
-      name: 'ruleActionUidDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match an IP address range`
-  String get ruleActionIpCidrDesc {
-    return Intl.message(
-      'Match an IP address range',
-      name: 'ruleActionIpCidrDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reference a rule set; requires rule-providers`
-  String get ruleActionRuleSetDesc {
-    return Intl.message(
-      'Reference a rule set; requires rule-providers',
-      name: 'ruleActionRuleSetDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match domains in Geosite`
-  String get ruleActionGeositeDesc {
-    return Intl.message(
-      'Match domains in Geosite',
-      name: 'ruleActionGeositeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match TCP or UDP`
-  String get ruleActionNetworkDesc {
-    return Intl.message(
-      'Match TCP or UDP',
-      name: 'ruleActionNetworkDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match by the full process path`
-  String get ruleActionProcessPathDesc {
-    return Intl.message(
-      'Match by the full process path',
-      name: 'ruleActionProcessPathDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match by process path wildcard; only * and ? are supported`
-  String get ruleActionProcessPathWildcardDesc {
-    return Intl.message(
-      'Match by process path wildcard; only * and ? are supported',
-      name: 'ruleActionProcessPathWildcardDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the rematch name; separate multiple names with /`
-  String get ruleActionRematchNameDesc {
-    return Intl.message(
-      'Match the rematch name; separate multiple names with /',
-      name: 'ruleActionRematchNameDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match a source IP suffix range`
-  String get ruleActionSrcIpSuffixDesc {
-    return Intl.message(
-      'Match a source IP suffix range',
-      name: 'ruleActionSrcIpSuffixDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the IP's country code`
-  String get ruleActionGeoipDesc {
-    return Intl.message(
-      'Match the IP\'s country code',
-      name: 'ruleActionGeoipDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the inbound username; separate multiple usernames with /`
-  String get ruleActionInUserDesc {
-    return Intl.message(
-      'Match the inbound username; separate multiple usernames with /',
-      name: 'ruleActionInUserDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only tcp or udp is supported`
-  String get invalidNetworkContent {
-    return Intl.message(
-      'Only tcp or udp is supported',
-      name: 'invalidNetworkContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match a domain keyword`
-  String get ruleActionDomainKeywordDesc {
-    return Intl.message(
-      'Match a domain keyword',
-      name: 'ruleActionDomainKeywordDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Logical rule NOT`
-  String get ruleActionNotDesc {
-    return Intl.message(
-      'Logical rule NOT',
-      name: 'ruleActionNotDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the source IP's ASN`
-  String get ruleActionSrcIpAsnDesc {
-    return Intl.message(
-      'Match the source IP\'s ASN',
-      name: 'ruleActionSrcIpAsnDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter numbers or ranges such as 80 or 8000-9000, separated by /`
-  String get invalidRangeContent {
-    return Intl.message(
-      'Enter numbers or ranges such as 80 or 8000-9000, separated by /',
-      name: 'invalidRangeContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match by process name regex; matches the package name on Android`
-  String get ruleActionProcessNameRegexDesc {
-    return Intl.message(
-      'Match by process name regex; matches the package name on Android',
-      name: 'ruleActionProcessNameRegexDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match a source IP address range`
-  String get ruleActionSrcIpCidrDesc {
-    return Intl.message(
-      'Match a source IP address range',
-      name: 'ruleActionSrcIpCidrDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the full domain`
-  String get ruleActionDomainDesc {
-    return Intl.message(
-      'Match the full domain',
-      name: 'ruleActionDomainDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the inbound name`
-  String get ruleActionInNameDesc {
-    return Intl.message(
-      'Match the inbound name',
-      name: 'ruleActionInNameDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A DSCP mark cannot exceed 63`
-  String get invalidDscpContent {
-    return Intl.message(
-      'A DSCP mark cannot exceed 63',
-      name: 'invalidDscpContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter an IP range in CIDR form such as 192.168.0.0/16`
-  String get invalidCidrContent {
-    return Intl.message(
-      'Enter an IP range in CIDR form such as 192.168.0.0/16',
-      name: 'invalidCidrContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter an IPv6 range in CIDR form such as fd00::/8`
-  String get invalidIpv6CidrContent {
-    return Intl.message(
-      'Enter an IPv6 range in CIDR form such as fd00::/8',
-      name: 'invalidIpv6CidrContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter a domain or an IP address`
-  String get invalidHostContent {
-    return Intl.message(
-      'Enter a domain or an IP address',
-      name: 'invalidHostContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter an address and port such as 0.0.0.0:1053`
-  String get invalidListenContent {
-    return Intl.message(
-      'Enter an address and port such as 0.0.0.0:1053',
-      name: 'invalidListenContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the IP's ASN`
-  String get ruleActionIpAsnDesc {
-    return Intl.message(
-      'Match the IP\'s ASN',
-      name: 'ruleActionIpAsnDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the source port range`
-  String get ruleActionSrcPortDesc {
-    return Intl.message(
-      'Match the source port range',
-      name: 'ruleActionSrcPortDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match the inbound type`
-  String get ruleActionInTypeDesc {
-    return Intl.message(
-      'Match the inbound type',
-      name: 'ruleActionInTypeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Logical rule OR`
-  String get ruleActionOrDesc {
-    return Intl.message(
-      'Logical rule OR',
-      name: 'ruleActionOrDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match into a sub-rule; mind the parentheses`
-  String get ruleActionSubRuleDesc {
-    return Intl.message(
-      'Match into a sub-rule; mind the parentheses',
-      name: 'ruleActionSubRuleDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match by process name wildcard; only * and ? are supported`
-  String get ruleActionProcessNameWildcardDesc {
-    return Intl.message(
-      'Match by process name wildcard; only * and ? are supported',
-      name: 'ruleActionProcessNameWildcardDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Match by process name; matches the package name on Android`
-  String get ruleActionProcessNameDesc {
-    return Intl.message(
-      'Match by process name; matches the package name on Android',
-      name: 'ruleActionProcessNameDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `General`
-  String get general {
-    return Intl.message('General', name: 'general', desc: '', args: []);
-  }
-
-  /// `Startup and background`
-  String get startupAndBackground {
-    return Intl.message(
-      'Startup and background',
-      name: 'startupAndBackground',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Inbound`
-  String get inbound {
-    return Intl.message('Inbound', name: 'inbound', desc: '', args: []);
-  }
-
-  /// `Outbound`
-  String get outbound {
-    return Intl.message('Outbound', name: 'outbound', desc: '', args: []);
-  }
-
-  /// `Logs and diagnostics`
-  String get logsAndDiagnostics {
-    return Intl.message(
-      'Logs and diagnostics',
-      name: 'logsAndDiagnostics',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `On demand`
-  String get onDemand {
-    return Intl.message('On demand', name: 'onDemand', desc: '', args: []);
-  }
-
-  /// `On demand pauses and resumes the proxy by Wi-Fi or network conditions`
-  String get onDemandDesc {
-    return Intl.message(
-      'On demand pauses and resumes the proxy by Wi-Fi or network conditions',
-      name: 'onDemandDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Prerequisites`
-  String get prerequisites {
-    return Intl.message(
-      'Prerequisites',
-      name: 'prerequisites',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Suspended…`
-  String get suspended {
-    return Intl.message('Suspended…', name: 'suspended', desc: '', args: []);
-  }
-
-  /// `Enabled`
-  String get enabled {
-    return Intl.message('Enabled', name: 'enabled', desc: '', args: []);
-  }
-
-  /// `Enable on start`
-  String get enabledOnStart {
-    return Intl.message(
-      'Enable on start',
-      name: 'enabledOnStart',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Disabled`
-  String get disabled {
-    return Intl.message('Disabled', name: 'disabled', desc: '', args: []);
-  }
-
-  /// `{count} items have problems, and applying this override may fail`
-  String overwriteIssuesSummary(Object count) {
-    return Intl.message(
-      '$count items have problems, and applying this override may fail',
-      name: 'overwriteIssuesSummary',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Ignore battery optimization`
-  String get ignoreBatteryOptimization {
-    return Intl.message(
-      'Ignore battery optimization',
-      name: 'ignoreBatteryOptimization',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Ignore battery optimization keeps the app running in the background`
-  String get batteryOptimizationDesc {
-    return Intl.message(
-      'Ignore battery optimization keeps the app running in the background',
-      name: 'batteryOptimizationDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Due to system limitations, the battery optimization status cannot be read correctly while running`
-  String get batteryOptimizationStatusTip {
-    return Intl.message(
-      'Due to system limitations, the battery optimization status cannot be read correctly while running',
-      name: 'batteryOptimizationStatusTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Authorized`
-  String get authorized {
-    return Intl.message('Authorized', name: 'authorized', desc: '', args: []);
-  }
-
-  /// `Tap to authorize`
-  String get tapToAuthorize {
-    return Intl.message(
-      'Tap to authorize',
-      name: 'tapToAuthorize',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add SSID`
-  String get addSsid {
-    return Intl.message('Add SSID', name: 'addSsid', desc: '', args: []);
-  }
-
-  /// `Edit SSID`
-  String get editSsid {
-    return Intl.message('Edit SSID', name: 'editSsid', desc: '', args: []);
-  }
-
-  /// `SSIDs are empty`
-  String get ssidsEmpty {
-    return Intl.message(
-      'SSIDs are empty',
-      name: 'ssidsEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Global hotkeys work even while the window is hidden. Tap an action to record its key combination.`
-  String get hotkeyDesc {
-    return Intl.message(
-      'Global hotkeys work even while the window is hidden. Tap an action to record its key combination.',
-      name: 'hotkeyDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Not set`
-  String get hotkeyNotSet {
-    return Intl.message('Not set', name: 'hotkeyNotSet', desc: '', args: []);
-  }
-
-  /// `Include at least one of {modifiers}`
-  String hotkeyNeedsModifier(Object modifiers) {
-    return Intl.message(
-      'Include at least one of $modifiers',
-      name: 'hotkeyNeedsModifier',
-      desc: '',
-      args: [modifiers],
-    );
-  }
-
-  /// `Already used by “{action}”. Saving moves it here.`
-  String hotkeyConflictWith(Object action) {
-    return Intl.message(
-      'Already used by “$action”. Saving moves it here.',
-      name: 'hotkeyConflictWith',
-      desc: '',
-      args: [action],
-    );
-  }
-
-  /// `Are you sure you want to exit the current window?`
-  String get confirmExitWindow {
-    return Intl.message(
-      'Are you sure you want to exit the current window?',
-      name: 'confirmExitWindow',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Data changes detected. Save them?`
-  String get dataChangedSave {
-    return Intl.message(
-      'Data changes detected. Save them?',
-      name: 'dataChangedSave',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Discard`
-  String get discard {
-    return Intl.message('Discard', name: 'discard', desc: '', args: []);
-  }
-
-  /// `Docked`
-  String get docked {
-    return Intl.message('Docked', name: 'docked', desc: '', args: []);
-  }
-
-  /// `Fade`
-  String get fade {
-    return Intl.message('Fade', name: 'fade', desc: '', args: []);
-  }
-
-  /// `Floating`
-  String get floating {
-    return Intl.message('Floating', name: 'floating', desc: '', args: []);
-  }
-
-  /// `Follow system`
-  String get followSystem {
-    return Intl.message(
-      'Follow system',
-      name: 'followSystem',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Bottom bar`
-  String get navigationBarStyle {
-    return Intl.message(
-      'Bottom bar',
-      name: 'navigationBarStyle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pure black`
-  String get pureBlack {
-    return Intl.message('Pure black', name: 'pureBlack', desc: '', args: []);
-  }
-
-  /// `Slide`
-  String get slide {
-    return Intl.message('Slide', name: 'slide', desc: '', args: []);
-  }
-
-  /// `Text in the app will look like this`
-  String get textScalePreview {
-    return Intl.message(
-      'Text in the app will look like this',
-      name: 'textScalePreview',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Basic strategies`
-  String get basicStrategy {
-    return Intl.message(
-      'Basic strategies',
-      name: 'basicStrategy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This external resource is not a text file`
-  String get nonTextProviderFile {
-    return Intl.message(
-      'This external resource is not a text file',
-      name: 'nonTextProviderFile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The script changed or was deleted. Reopen it and try again.`
-  String get scriptChanged {
-    return Intl.message(
-      'The script changed or was deleted. Reopen it and try again.',
-      name: 'scriptChanged',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Start from scratch`
-  String get startFromScratch {
-    return Intl.message(
-      'Start from scratch',
-      name: 'startFromScratch',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Optional`
-  String get optional {
-    return Intl.message('Optional', name: 'optional', desc: '', args: []);
-  }
-
-  /// `Windows blocked FlClashCore.exe, and Smart App Control is enabled. Check the block details in Windows Security → App & browser control, and use a trusted, verified release.`
-  String get coreBlockedBySmartAppControlTip {
-    return Intl.message(
-      'Windows blocked FlClashCore.exe, and Smart App Control is enabled. Check the block details in Windows Security → App & browser control, and use a trusted, verified release.',
-      name: 'coreBlockedBySmartAppControlTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.`
-  String get helperCorruptTip {
-    return Intl.message(
-      'Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.',
-      name: 'helperCorruptTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failed to switch proxy; the previous selection has been restored`
-  String get changeProxyFailedTip {
-    return Intl.message(
-      'Failed to switch proxy; the previous selection has been restored',
-      name: 'changeProxyFailedTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Failed to save the change. Please check the current value and try again.`
-  String get databaseWriteFailedTip {
-    return Intl.message(
-      'Failed to save the change. Please check the current value and try again.',
-      name: 'databaseWriteFailedTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Proxy type`
-  String get proxyType {
-    return Intl.message('Proxy type', name: 'proxyType', desc: '', args: []);
-  }
-
-  /// `Subscription`
-  String get providerSourceSubscription {
-    return Intl.message(
-      'Subscription',
-      name: 'providerSourceSubscription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Profile`
-  String get providerSourceProfile {
-    return Intl.message(
-      'Profile',
-      name: 'providerSourceProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `App library`
-  String get providerSourceApp {
-    return Intl.message(
-      'App library',
-      name: 'providerSourceApp',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Target`
-  String get target {
-    return Intl.message('Target', name: 'target', desc: '', args: []);
-  }
-
-  /// `Exit`
-  String get outboundExit {
-    return Intl.message('Exit', name: 'outboundExit', desc: '', args: []);
-  }
-
-  /// `Protocol`
-  String get protocol {
-    return Intl.message('Protocol', name: 'protocol', desc: '', args: []);
-  }
-
-  /// `Traffic`
-  String get traffic {
-    return Intl.message('Traffic', name: 'traffic', desc: '', args: []);
-  }
-
-  /// `Downloaded`
-  String get totalDownload {
-    return Intl.message(
-      'Downloaded',
-      name: 'totalDownload',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Uploaded`
-  String get totalUpload {
-    return Intl.message('Uploaded', name: 'totalUpload', desc: '', args: []);
-  }
-
-  /// `Duration`
-  String get duration {
-    return Intl.message('Duration', name: 'duration', desc: '', args: []);
-  }
-
-  /// `From`
-  String get initiatorShort {
-    return Intl.message('From', name: 'initiatorShort', desc: '', args: []);
-  }
-
-  /// `Result`
-  String get result {
-    return Intl.message('Result', name: 'result', desc: '', args: []);
-  }
-
-  /// `Took`
-  String get elapsed {
-    return Intl.message('Took', name: 'elapsed', desc: '', args: []);
-  }
-
-  /// `Entries added here replace the TUN settings of every profile; anything not added keeps the profile's own setting. Entries a custom profile adds itself take precedence`
-  String get tunOverrideDesc {
-    return Intl.message(
-      'Entries added here replace the TUN settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence',
-      name: 'tunOverrideDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Entries added here replace the DNS settings of every profile; anything not added keeps the profile's own setting. Entries a custom profile adds itself take precedence`
-  String get dnsOverrideDesc {
-    return Intl.message(
-      'Entries added here replace the DNS settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence',
-      name: 'dnsOverrideDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Entries added here replace the NTP settings of every profile; anything not added keeps the profile's own setting. Entries a custom profile adds itself take precedence`
-  String get ntpOverrideDesc {
-    return Intl.message(
-      'Entries added here replace the NTP settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence',
-      name: 'ntpOverrideDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TCP congestion control`
-  String get congestionController {
-    return Intl.message(
-      'TCP congestion control',
-      name: 'congestionController',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TCP congestion control works only with the mips stack`
-  String get congestionControllerDesc {
-    return Intl.message(
-      'TCP congestion control works only with the mips stack',
-      name: 'congestionControllerDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Strict route`
-  String get strictRoute {
-    return Intl.message(
-      'Strict route',
-      name: 'strictRoute',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Strict route keeps traffic such as DNS from bypassing TUN, and with IPv6 off it blocks this device's IPv6 connections`
-  String get strictRouteDesc {
-    return Intl.message(
-      'Strict route keeps traffic such as DNS from bypassing TUN, and with IPv6 off it blocks this device\'s IPv6 connections',
-      name: 'strictRouteDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Route exclude addresses`
-  String get routeExcludeAddress {
-    return Intl.message(
-      'Route exclude addresses',
-      name: 'routeExcludeAddress',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `UDP timeout`
-  String get udpTimeout {
-    return Intl.message('UDP timeout', name: 'udpTimeout', desc: '', args: []);
-  }
-
-  /// `The UDP timeout is in seconds and works only with the gvisor, system and mixed stacks`
-  String get udpTimeoutDesc {
-    return Intl.message(
-      'The UDP timeout is in seconds and works only with the gvisor, system and mixed stacks',
-      name: 'udpTimeoutDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Without this entry, TUN hijacks every DNS query to port 53 (any:53)`
-  String get dnsHijackDesc {
-    return Intl.message(
-      'Without this entry, TUN hijacks every DNS query to port 53 (any:53)',
-      name: 'dnsHijackDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Disable ICMP forwarding`
-  String get disableIcmpForwarding {
-    return Intl.message(
-      'Disable ICMP forwarding',
-      name: 'disableIcmpForwarding',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `With ICMP forwarding disabled, TUN answers ping itself, so ping no longer shows the real latency`
-  String get disableIcmpForwardingDesc {
-    return Intl.message(
-      'With ICMP forwarding disabled, TUN answers ping itself, so ping no longer shows the real latency',
-      name: 'disableIcmpForwardingDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Included interfaces`
-  String get includeInterface {
-    return Intl.message(
-      'Included interfaces',
-      name: 'includeInterface',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only traffic arriving on included interfaces goes through TUN, and excluded interfaces no longer apply`
-  String get includeInterfaceDesc {
-    return Intl.message(
-      'Only traffic arriving on included interfaces goes through TUN, and excluded interfaces no longer apply',
-      name: 'includeInterfaceDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Excluded interfaces`
-  String get excludeInterface {
-    return Intl.message(
-      'Excluded interfaces',
-      name: 'excludeInterface',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Traffic arriving on excluded interfaces, such as docker0, skips TUN`
-  String get excludeInterfaceDesc {
-    return Intl.message(
-      'Traffic arriving on excluded interfaces, such as docker0, skips TUN',
-      name: 'excludeInterfaceDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Included user IDs`
-  String get includeUid {
-    return Intl.message(
-      'Included user IDs',
-      name: 'includeUid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only traffic from processes of included user IDs goes through TUN`
-  String get includeUidDesc {
-    return Intl.message(
-      'Only traffic from processes of included user IDs goes through TUN',
-      name: 'includeUidDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Excluded user IDs`
-  String get excludeUid {
-    return Intl.message(
-      'Excluded user IDs',
-      name: 'excludeUid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Traffic from processes of excluded user IDs skips TUN`
-  String get excludeUidDesc {
-    return Intl.message(
-      'Traffic from processes of excluded user IDs skips TUN',
-      name: 'excludeUidDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Excluded source ports`
-  String get excludeSrcPort {
-    return Intl.message(
-      'Excluded source ports',
-      name: 'excludeSrcPort',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Traffic from excluded source ports skips TUN`
-  String get excludeSrcPortDesc {
-    return Intl.message(
-      'Traffic from excluded source ports skips TUN',
-      name: 'excludeSrcPortDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Excluded destination ports`
-  String get excludeDstPort {
-    return Intl.message(
-      'Excluded destination ports',
-      name: 'excludeDstPort',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Traffic to excluded destination ports skips TUN`
-  String get excludeDstPortDesc {
-    return Intl.message(
-      'Traffic to excluded destination ports skips TUN',
-      name: 'excludeDstPortDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{label} must be between {min} and {max}`
-  String numberRangeTip(Object label, Object min, Object max) {
-    return Intl.message(
-      '$label must be between $min and $max',
-      name: 'numberRangeTip',
-      desc: '',
-      args: [label, min, max],
-    );
-  }
-
-  /// `Custom profile`
-  String get customProfile {
-    return Intl.message(
-      'Custom profile',
-      name: 'customProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Assemble proxy groups and rules from your own nodes, the provider library and other profiles`
-  String get customProfileDesc {
-    return Intl.message(
-      'Assemble proxy groups and rules from your own nodes, the provider library and other profiles',
-      name: 'customProfileDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add a proxy group or a rule to this custom profile first`
-  String get emptyCustomProfile {
-    return Intl.message(
-      'Add a proxy group or a rule to this custom profile first',
-      name: 'emptyCustomProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Name this custom profile`
-  String get nameCustomProfileTip {
-    return Intl.message(
-      'Name this custom profile',
-      name: 'nameCustomProfileTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This profile is a proxy provider of {profiles}. Remove it there first.`
-  String profileProviderInUse(Object profiles) {
-    return Intl.message(
-      'This profile is a proxy provider of $profiles. Remove it there first.',
-      name: 'profileProviderInUse',
-      desc: '',
-      args: [profiles],
-    );
-  }
-
-  /// `Health check`
-  String get healthCheck {
-    return Intl.message(
-      'Health check',
-      name: 'healthCheck',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Name prefix`
-  String get additionalPrefix {
-    return Intl.message(
-      'Name prefix',
-      name: 'additionalPrefix',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Name suffix`
-  String get additionalSuffix {
-    return Intl.message(
-      'Name suffix',
-      name: 'additionalSuffix',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `IP version`
-  String get ipVersion {
-    return Intl.message('IP version', name: 'ipVersion', desc: '', args: []);
-  }
-
-  /// `Applies to this profile only; anything not added uses its default`
-  String get profileSettingsDesc {
-    return Intl.message(
-      'Applies to this profile only; anything not added uses its default',
-      name: 'profileSettingsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Applies to this profile only and takes precedence over the override entries in the app's DNS and NTP settings; anything not added follows those entries`
-  String get profileOverrideSettingsDesc {
-    return Intl.message(
-      'Applies to this profile only and takes precedence over the override entries in the app\'s DNS and NTP settings; anything not added follows those entries',
-      name: 'profileOverrideSettingsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Applies to this profile only and takes precedence over the TUN override entries in the network settings`
-  String get profileTunSettingsDesc {
-    return Intl.message(
-      'Applies to this profile only and takes precedence over the TUN override entries in the network settings',
-      name: 'profileTunSettingsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `settings`
-  String get settingEntries {
-    return Intl.message('settings', name: 'settingEntries', desc: '', args: []);
-  }
-
-  /// `Add setting`
-  String get addSettingEntry {
-    return Intl.message(
-      'Add setting',
-      name: 'addSettingEntry',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count, plural, =1{1 setting} other{{count} settings}}`
-  String settingsCount(num count) {
-    return Intl.plural(
-      count,
-      one: '1 setting',
-      other: '$count settings',
-      name: 'settingsCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Sniffer`
-  String get sniffer {
-    return Intl.message('Sniffer', name: 'sniffer', desc: '', args: []);
-  }
-
-  /// `The sniffer reads the domain from TLS, HTTP and QUIC traffic so rules can match it`
-  String get snifferStatusDesc {
-    return Intl.message(
-      'The sniffer reads the domain from TLS, HTTP and QUIC traffic so rules can match it',
-      name: 'snifferStatusDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Override destination`
-  String get overrideDestination {
-    return Intl.message(
-      'Override destination',
-      name: 'overrideDestination',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Override destination connects to the sniffed domain instead of the original address`
-  String get overrideDestinationDesc {
-    return Intl.message(
-      'Override destination connects to the sniffed domain instead of the original address',
-      name: 'overrideDestinationDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Force DNS mapping`
-  String get forceDnsMapping {
-    return Intl.message(
-      'Force DNS mapping',
-      name: 'forceDnsMapping',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Force DNS mapping also sniffs connections whose domain came from a DNS mapping`
-  String get forceDnsMappingDesc {
-    return Intl.message(
-      'Force DNS mapping also sniffs connections whose domain came from a DNS mapping',
-      name: 'forceDnsMappingDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Parse pure IP`
-  String get parsePureIp {
-    return Intl.message(
-      'Parse pure IP',
-      name: 'parsePureIp',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Parse pure IP sniffs connections that carry only an IP address`
-  String get parsePureIpDesc {
-    return Intl.message(
-      'Parse pure IP sniffs connections that carry only an IP address',
-      name: 'parsePureIpDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Force domains`
-  String get forceDomain {
-    return Intl.message(
-      'Force domains',
-      name: 'forceDomain',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Force domains are sniffed too; other connections that already have a domain are left alone`
-  String get forceDomainDesc {
-    return Intl.message(
-      'Force domains are sniffed too; other connections that already have a domain are left alone',
-      name: 'forceDomainDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Skip domains`
-  String get skipDomain {
-    return Intl.message('Skip domains', name: 'skipDomain', desc: '', args: []);
-  }
-
-  /// `A sniffed domain on the Skip domains list is not used`
-  String get skipDomainDesc {
-    return Intl.message(
-      'A sniffed domain on the Skip domains list is not used',
-      name: 'skipDomainDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Skip source addresses`
-  String get skipSrcAddress {
-    return Intl.message(
-      'Skip source addresses',
-      name: 'skipSrcAddress',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Skip destination addresses`
-  String get skipDstAddress {
-    return Intl.message(
-      'Skip destination addresses',
-      name: 'skipDstAddress',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Protocols`
-  String get sniffProtocols {
-    return Intl.message(
-      'Protocols',
-      name: 'sniffProtocols',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Ports`
-  String get ports {
-    return Intl.message('Ports', name: 'ports', desc: '', args: []);
-  }
-
-  /// `Enter a port or a range such as 443 or 8000-9000`
-  String get invalidPortRangeContent {
-    return Intl.message(
-      'Enter a port or a range such as 443 or 8000-9000',
-      name: 'invalidPortRangeContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Import config`
-  String get importConfig {
-    return Intl.message(
-      'Import config',
-      name: 'importConfig',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Import from text`
-  String get importText {
-    return Intl.message(
-      'Import from text',
-      name: 'importText',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This is not a config that can be imported`
-  String get importConfigInvalid {
-    return Intl.message(
-      'This is not a config that can be imported',
-      name: 'importConfigInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Importing replaces the nodes, proxy groups, rules and settings this profile has now`
-  String get importConfigReplaceTip {
-    return Intl.message(
-      'Importing replaces the nodes, proxy groups, rules and settings this profile has now',
-      name: 'importConfigReplaceTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `oixCloud addresses cannot be imported into a custom profile`
-  String get customImportCloudRefused {
-    return Intl.message(
-      'oixCloud addresses cannot be imported into a custom profile',
-      name: 'customImportCloudRefused',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Not imported`
-  String get customImportNotImported {
-    return Intl.message(
-      'Not imported',
-      name: 'customImportNotImported',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count, plural, =1{1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules} other{{count} SUB-RULE rules were dropped, since custom profiles do not support sub-rules}}`
-  String customImportDroppedSubRules(num count) {
-    return Intl.plural(
-      count,
-      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
-      other:
-          '$count SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
-      name: 'customImportDroppedSubRules',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, =1{1 proxy had no name or type} other{{count} proxies had no name or type}}`
-  String customImportUnnamedProxies(num count) {
-    return Intl.plural(
-      count,
-      one: '1 proxy had no name or type',
-      other: '$count proxies had no name or type',
-      name: 'customImportUnnamedProxies',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{label}: {message}`
-  String failedItem(Object label, Object message) {
-    return Intl.message(
-      '$label: $message',
-      name: 'failedItem',
-      desc: '',
-      args: [label, message],
-    );
-  }
-
-  /// `{count, plural, =1{1 node was added from the share links} other{{count} nodes were added from the share links}}`
-  String shareLinkNodesAdded(num count) {
-    return Intl.plural(
-      count,
-      one: '1 node was added from the share links',
-      other: '$count nodes were added from the share links',
-      name: 'shareLinkNodesAdded',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, =1{1 link could not be read} other{{count} links could not be read}}`
-  String shareLinksNotRead(num count) {
-    return Intl.plural(
-      count,
-      one: '1 link could not be read',
-      other: '$count links could not be read',
-      name: 'shareLinksNotRead',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Connection stats`
-  String get connectionStats {
-    return Intl.message(
-      'Connection stats',
-      name: 'connectionStats',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Live connections, recent requests and DNS queries`
-  String get connectionStatsDesc {
-    return Intl.message(
-      'Live connections, recent requests and DNS queries',
-      name: 'connectionStatsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Holds the start button and can't be removed`
-  String get currentOutboundDesc {
-    return Intl.message(
-      'Holds the start button and can\'t be removed',
-      name: 'currentOutboundDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Available to add`
-  String get dashboardAddableSection {
-    return Intl.message(
-      'Available to add',
-      name: 'dashboardAddableSection',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Drag cards to reorder; touch and hold first on touchscreens`
-  String get dashboardReorderHint {
-    return Intl.message(
-      'Drag cards to reorder; touch and hold first on touchscreens',
-      name: 'dashboardReorderHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Done`
-  String get done {
-    return Intl.message('Done', name: 'done', desc: '', args: []);
-  }
-
-  /// `Edit dashboard`
-  String get editDashboard {
-    return Intl.message(
-      'Edit dashboard',
-      name: 'editDashboard',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count, plural, =1{1 group} other{{count} groups}}`
-  String groupCount(num count) {
-    return Intl.plural(
-      count,
-      one: '1 group',
-      other: '$count groups',
-      name: 'groupCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `groups`
-  String get groupCountUnit {
-    return Intl.message('groups', name: 'groupCountUnit', desc: '', args: []);
-  }
-
-  /// `{count} timed out`
-  String groupTimeoutCount(Object count) {
-    return Intl.message(
-      '$count timed out',
-      name: 'groupTimeoutCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Type`
-  String get ipType {
-    return Intl.message('Type', name: 'ipType', desc: '', args: []);
-  }
-
-  /// `Live connections`
-  String get liveConnections {
-    return Intl.message(
-      'Live connections',
-      name: 'liveConnections',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Memory the app and the core use`
-  String get memoryInfoDesc {
-    return Intl.message(
-      'Memory the app and the core use',
-      name: 'memoryInfoDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Traffic takeover`
-  String get networkTakeover {
-    return Intl.message(
-      'Traffic takeover',
-      name: 'networkTakeover',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Not running`
-  String get notRunning {
-    return Intl.message('Not running', name: 'notRunning', desc: '', args: []);
-  }
-
-  /// `Port {port}`
-  String portValue(Object port) {
-    return Intl.message(
-      'Port $port',
-      name: 'portValue',
-      desc: '',
-      args: [port],
-    );
-  }
-
-  /// `{days, plural, =1{1 day left} other{{days} days left}}`
-  String profileDaysLeft(num days) {
-    return Intl.plural(
-      days,
-      one: '1 day left',
-      other: '$days days left',
-      name: 'profileDaysLeft',
-      desc: '',
-      args: [days],
-    );
-  }
-
-  /// `Expires {date}, {days, plural, =1{1 day} other{{days} days}} left`
-  String profileExpiresIn(Object date, num days) {
-    return Intl.message(
-      'Expires $date, ${Intl.plural(days, one: '1 day', other: '$days days')} left',
-      name: 'profileExpiresIn',
-      desc: '',
-      args: [date, days],
-    );
-  }
-
-  /// `Updated {time}`
-  String profileUpdatedAt(Object time) {
-    return Intl.message(
-      'Updated $time',
-      name: 'profileUpdatedAt',
-      desc: '',
-      args: [time],
-    );
-  }
-
-  /// `Groups show up here once the core starts`
-  String get proxyGroupsAfterStart {
-    return Intl.message(
-      'Groups show up here once the core starts',
-      name: 'proxyGroupsAfterStart',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Running`
-  String get running {
-    return Intl.message('Running', name: 'running', desc: '', args: []);
-  }
-
-  /// `Check failed`
-  String get serviceFailed {
-    return Intl.message(
-      'Check failed',
-      name: 'serviceFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Tap the icon to retry`
-  String get tapIconToRetry {
-    return Intl.message(
-      'Tap the icon to retry',
-      name: 'tapIconToRetry',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Peak {value}`
-  String trafficPeak(Object value) {
-    return Intl.message(
-      'Peak $value',
-      name: 'trafficPeak',
-      desc: '',
-      args: [value],
-    );
-  }
-
-  /// `Total {value}`
-  String trafficTotal(Object value) {
-    return Intl.message(
-      'Total $value',
-      name: 'trafficTotal',
-      desc: '',
-      args: [value],
-    );
-  }
-
-  /// `used`
-  String get usedShort {
-    return Intl.message('used', name: 'usedShort', desc: '', args: []);
-  }
-
-  /// `Disable TCP keep-alive`
-  String get disableKeepAlive {
-    return Intl.message(
-      'Disable TCP keep-alive',
-      name: 'disableKeepAlive',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `TCP keep-alive idle`
-  String get keepAliveIdle {
-    return Intl.message(
-      'TCP keep-alive idle',
-      name: 'keepAliveIdle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Routing mark`
-  String get routingMark {
-    return Intl.message(
-      'Routing mark',
-      name: 'routingMark',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `minutes`
-  String get minutes {
-    return Intl.message('minutes', name: 'minutes', desc: '', args: []);
-  }
-
-  /// `{count, plural, other{{count}y ago}}`
-  String yearsAgoShort(num count) {
-    return Intl.plural(
-      count,
-      other: '${count}y ago',
-      name: 'yearsAgoShort',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, other{{count}mo ago}}`
-  String monthsAgoShort(num count) {
-    return Intl.plural(
-      count,
-      other: '${count}mo ago',
-      name: 'monthsAgoShort',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, other{{count}d ago}}`
-  String daysAgoShort(num count) {
-    return Intl.plural(
-      count,
-      other: '${count}d ago',
-      name: 'daysAgoShort',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, other{{count}h ago}}`
-  String hoursAgoShort(num count) {
-    return Intl.plural(
-      count,
-      other: '${count}h ago',
-      name: 'hoursAgoShort',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count, plural, other{{count}m ago}}`
-  String minutesAgoShort(num count) {
-    return Intl.plural(
-      count,
-      other: '${count}m ago',
-      name: 'minutesAgoShort',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Expiration time`
-  String get expireTime {
-    return Intl.message(
-      'Expiration time',
-      name: 'expireTime',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Runtime config`
-  String get runtimeConfig {
-    return Intl.message(
-      'Runtime config',
-      name: 'runtimeConfig',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count, plural, =1{1 proxy group} other{{count} proxy groups}}`
-  String proxyGroupsCount(num count) {
-    return Intl.plural(
-      count,
-      one: '1 proxy group',
-      other: '$count proxy groups',
-      name: 'proxyGroupsCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Are you sure you want to delete this proxy group?`
-  String get confirmDeleteProxyGroup {
-    return Intl.message(
-      'Are you sure you want to delete this proxy group?',
-      name: 'confirmDeleteProxyGroup',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{providerName} is an invalid proxy provider`
-  String invalidProxyProvider(Object providerName) {
-    return Intl.message(
-      '$providerName is an invalid proxy provider',
-      name: 'invalidProxyProvider',
-      desc: '',
-      args: [providerName],
-    );
-  }
-
-  /// `{count} items have problems, and applying this profile may fail`
-  String customIssuesSummary(Object count) {
-    return Intl.message(
-      '$count items have problems, and applying this profile may fail',
-      name: 'customIssuesSummary',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `{count} in effect`
-  String sectionsInEffect(Object count) {
-    return Intl.message(
-      '$count in effect',
-      name: 'sectionsInEffect',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Empty fallback`
-  String get emptyFallback {
-    return Intl.message(
-      'Empty fallback',
-      name: 'emptyFallback',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Test interval`
-  String get testInterval {
-    return Intl.message(
-      'Test interval',
-      name: 'testInterval',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Test when used`
-  String get testWhenUsed {
-    return Intl.message(
-      'Test when used',
-      name: 'testWhenUsed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Default selection`
-  String get defaultSelected {
-    return Intl.message(
-      'Default selection',
-      name: 'defaultSelected',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Hash by inbound user`
-  String get hashByInUser {
-    return Intl.message(
-      'Hash by inbound user',
-      name: 'hashByInUser',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Nodes`
-  String get nodes {
-    return Intl.message('Nodes', name: 'nodes', desc: '', args: []);
-  }
-
-  /// `Add nodes`
-  String get addNodes {
-    return Intl.message('Add nodes', name: 'addNodes', desc: '', args: []);
-  }
-
-  /// `Auto-include`
-  String get autoInclude {
-    return Intl.message(
-      'Auto-include',
-      name: 'autoInclude',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Filters`
-  String get filters {
-    return Intl.message('Filters', name: 'filters', desc: '', args: []);
-  }
-
-  /// `Enter the proxy group name`
-  String get inputProxyGroupName {
-    return Intl.message(
-      'Enter the proxy group name',
-      name: 'inputProxyGroupName',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The configuration must be a YAML mapping with a name and a type`
-  String get definitionNotMap {
-    return Intl.message(
-      'The configuration must be a YAML mapping with a name and a type',
-      name: 'definitionNotMap',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Additional parameters`
-  String get additionalParameters {
-    return Intl.message(
-      'Additional parameters',
-      name: 'additionalParameters',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Quick actions`
-  String get quickActions {
-    return Intl.message(
-      'Quick actions',
-      name: 'quickActions',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT`
-  String get ruleListInvalid {
-    return Intl.message(
-      'The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT',
-      name: 'ruleListInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Go to added rules configuration`
-  String get goToConfigureAddedRules {
-    return Intl.message(
-      'Go to added rules configuration',
-      name: 'goToConfigureAddedRules',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Large`
-  String get large {
-    return Intl.message('Large', name: 'large', desc: '', args: []);
-  }
-
-  /// `Extra large`
-  String get extraLarge {
-    return Intl.message('Extra large', name: 'extraLarge', desc: '', args: []);
-  }
-
-  /// `Match case`
-  String get matchCase {
-    return Intl.message('Match case', name: 'matchCase', desc: '', args: []);
-  }
-
-  /// `Regex`
-  String get regex {
-    return Intl.message('Regex', name: 'regex', desc: '', args: []);
-  }
-
-  /// `Yes`
-  String get yes {
-    return Intl.message('Yes', name: 'yes', desc: '', args: []);
-  }
-
-  /// `No`
-  String get no {
-    return Intl.message('No', name: 'no', desc: '', args: []);
-  }
-
-  /// `Error`
-  String get error {
-    return Intl.message('Error', name: 'error', desc: '', args: []);
-  }
-
-  /// `Icon sets`
-  String get iconSets {
-    return Intl.message('Icon sets', name: 'iconSets', desc: '', args: []);
-  }
-
-  /// `Local image`
-  String get localImage {
-    return Intl.message('Local image', name: 'localImage', desc: '', args: []);
-  }
-
-  /// `Label`
-  String get label {
-    return Intl.message('Label', name: 'label', desc: '', args: []);
-  }
-
-  /// `No icon sets yet. Add them in Custom profile resources → Icon sets`
-  String get iconSetsEmptyTip {
-    return Intl.message(
-      'No icon sets yet. Add them in Custom profile resources → Icon sets',
-      name: 'iconSetsEmptyTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Suggested`
-  String get recommendedIcons {
-    return Intl.message(
-      'Suggested',
-      name: 'recommendedIcons',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Custom profile resources`
-  String get customProfileResources {
-    return Intl.message(
-      'Custom profile resources',
-      name: 'customProfileResources',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Import from link`
-  String get importFromLink {
-    return Intl.message(
-      'Import from link',
-      name: 'importFromLink',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Send from phone`
-  String get sendFromPhone {
-    return Intl.message(
-      'Send from phone',
-      name: 'sendFromPhone',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Scan the code with your phone's camera and paste the link on the page that opens. Both devices need to be on the same network.`
-  String get sendFromPhoneTip {
-    return Intl.message(
-      'Scan the code with your phone\'s camera and paste the link on the page that opens. Both devices need to be on the same network.',
-      name: 'sendFromPhoneTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This device is not connected to a local network`
-  String get sendFromPhoneNoNetwork {
-    return Intl.message(
-      'This device is not connected to a local network',
-      name: 'sendFromPhoneNoNetwork',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Receiving a link from your phone needs the Nearby devices permission, which lets FlClash reach the local network. Turn it on in the app's settings.`
-  String get sendFromPhonePermissionDenied {
-    return Intl.message(
-      'Receiving a link from your phone needs the Nearby devices permission, which lets FlClash reach the local network. Turn it on in the app\'s settings.',
-      name: 'sendFromPhonePermissionDenied',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Send a link to FlClash`
-  String get sendFromPhonePageTitle {
-    return Intl.message(
-      'Send a link to FlClash',
-      name: 'sendFromPhonePageTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Subscription link or proxy share link`
-  String get sendFromPhonePageHint {
-    return Intl.message(
-      'Subscription link or proxy share link',
-      name: 'sendFromPhonePageHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Send`
-  String get send {
-    return Intl.message('Send', name: 'send', desc: '', args: []);
-  }
-
-  /// `Sent. Confirm the import on the other device.`
-  String get sendFromPhonePageSent {
-    return Intl.message(
-      'Sent. Confirm the import on the other device.',
-      name: 'sendFromPhonePageSent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Import the link from your phone?`
-  String get sendFromPhoneConfirmTitle {
-    return Intl.message(
-      'Import the link from your phone?',
-      name: 'sendFromPhoneConfirmTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Scan with FlClash on another device to import this profile.`
-  String get shareQrcodeTip {
-    return Intl.message(
-      'Scan with FlClash on another device to import this profile.',
-      name: 'shareQrcodeTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This link is too long for a QR code. Use Copy link instead.`
-  String get qrcodeTooLongTip {
-    return Intl.message(
-      'This link is too long for a QR code. Use Copy link instead.',
-      name: 'qrcodeTooLongTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Not a subscription link or a proxy share link`
-  String get invalidLinkTip {
-    return Intl.message(
-      'Not a subscription link or a proxy share link',
-      name: 'invalidLinkTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `One link per line`
-  String get batchLinkInputTip {
-    return Intl.message(
-      'One link per line',
-      name: 'batchLinkInputTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Link`
-  String get link {
-    return Intl.message('Link', name: 'link', desc: '', args: []);
-  }
-
-  /// `Allowed IPs`
-  String get allowedIps {
-    return Intl.message('Allowed IPs', name: 'allowedIps', desc: '', args: []);
-  }
-
-  /// `Cipher`
-  String get cipher {
-    return Intl.message('Cipher', name: 'cipher', desc: '', args: []);
-  }
-
-  /// `Client fingerprint`
-  String get clientFingerprint {
-    return Intl.message(
-      'Client fingerprint',
-      name: 'clientFingerprint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Request headers`
-  String get requestHeaders {
-    return Intl.message(
-      'Request headers',
-      name: 'requestHeaders',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{transport} Headers`
-  String transportHeaders(Object transport) {
-    return Intl.message(
-      '$transport Headers',
-      name: 'transportHeaders',
-      desc: '',
-      args: [transport],
-    );
-  }
-
-  /// `Congestion control`
-  String get congestionControl {
-    return Intl.message(
-      'Congestion control',
-      name: 'congestionControl',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Download bandwidth`
-  String get downloadBandwidth {
-    return Intl.message(
-      'Download bandwidth',
-      name: 'downloadBandwidth',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Hop interval`
-  String get hopInterval {
-    return Intl.message(
-      'Hop interval',
-      name: 'hopInterval',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Obfuscation`
-  String get obfs {
-    return Intl.message('Obfuscation', name: 'obfs', desc: '', args: []);
-  }
-
-  /// `Obfuscation host`
-  String get obfsHost {
-    return Intl.message(
-      'Obfuscation host',
-      name: 'obfsHost',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Obfuscation mode`
-  String get obfsMode {
-    return Intl.message(
-      'Obfuscation mode',
-      name: 'obfsMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Obfuscation parameter`
-  String get obfsParam {
-    return Intl.message(
-      'Obfuscation parameter',
-      name: 'obfsParam',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Obfuscation password`
-  String get obfsPassword {
-    return Intl.message(
-      'Obfuscation password',
-      name: 'obfsPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Plugin`
-  String get plugin {
-    return Intl.message('Plugin', name: 'plugin', desc: '', args: []);
-  }
-
-  /// `Plugin host`
-  String get pluginHost {
-    return Intl.message('Plugin host', name: 'pluginHost', desc: '', args: []);
-  }
-
-  /// `Plugin path`
-  String get pluginPath {
-    return Intl.message('Plugin path', name: 'pluginPath', desc: '', args: []);
-  }
-
-  /// `Plugin username`
-  String get pluginUsername {
-    return Intl.message(
-      'Plugin username',
-      name: 'pluginUsername',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Plugin password`
-  String get pluginPassword {
-    return Intl.message(
-      'Plugin password',
-      name: 'pluginPassword',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Plugin cipher`
-  String get pluginCipher {
-    return Intl.message(
-      'Plugin cipher',
-      name: 'pluginCipher',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Plugin mode`
-  String get pluginMode {
-    return Intl.message('Plugin mode', name: 'pluginMode', desc: '', args: []);
-  }
-
-  /// `Port hopping`
-  String get portHopping {
-    return Intl.message(
-      'Port hopping',
-      name: 'portHopping',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pre-shared key`
-  String get preSharedKey {
-    return Intl.message(
-      'Pre-shared key',
-      name: 'preSharedKey',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Private key`
-  String get privateKey {
-    return Intl.message('Private key', name: 'privateKey', desc: '', args: []);
-  }
-
-  /// `Private key passphrase`
-  String get privateKeyPassphrase {
-    return Intl.message(
-      'Private key passphrase',
-      name: 'privateKeyPassphrase',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Protocol parameter`
-  String get protocolParam {
-    return Intl.message(
-      'Protocol parameter',
-      name: 'protocolParam',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Protocol version`
-  String get protocolVersion {
-    return Intl.message(
-      'Protocol version',
-      name: 'protocolVersion',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Public key`
-  String get publicKey {
-    return Intl.message('Public key', name: 'publicKey', desc: '', args: []);
-  }
-
-  /// `Remote DNS resolution`
-  String get remoteDnsResolve {
-    return Intl.message(
-      'Remote DNS resolution',
-      name: 'remoteDnsResolve',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Key`
-  String get secretKey {
-    return Intl.message('Key', name: 'secretKey', desc: '', args: []);
-  }
-
-  /// `Skip certificate verification`
-  String get skipCertVerify {
-    return Intl.message(
-      'Skip certificate verification',
-      name: 'skipCertVerify',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Transport`
-  String get transport {
-    return Intl.message('Transport', name: 'transport', desc: '', args: []);
-  }
-
-  /// `UDP relay mode`
-  String get udpRelayMode {
-    return Intl.message(
-      'UDP relay mode',
-      name: 'udpRelayMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Upload bandwidth`
-  String get uploadBandwidth {
-    return Intl.message(
-      'Upload bandwidth',
-      name: 'uploadBandwidth',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Username`
-  String get username {
-    return Intl.message('Username', name: 'username', desc: '', args: []);
-  }
-
-  /// `Network name`
-  String get networkName {
-    return Intl.message(
-      'Network name',
-      name: 'networkName',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Network secret`
-  String get networkSecret {
-    return Intl.message(
-      'Network secret',
-      name: 'networkSecret',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Peers`
-  String get peers {
-    return Intl.message('Peers', name: 'peers', desc: '', args: []);
-  }
-
-  /// `Virtual IPv4`
-  String get virtualIpv4 {
-    return Intl.message(
-      'Virtual IPv4',
-      name: 'virtualIpv4',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Hostname`
-  String get hostname {
-    return Intl.message('Hostname', name: 'hostname', desc: '', args: []);
-  }
-
-  /// `Exit nodes`
-  String get exitNodes {
-    return Intl.message('Exit nodes', name: 'exitNodes', desc: '', args: []);
-  }
-
-  /// `Age secret key`
-  String get ageSecretKey {
-    return Intl.message(
-      'Age secret key',
-      name: 'ageSecretKey',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This profile is encrypted with age and needs an age secret key to decrypt`
-  String get ageSecretKeyRequiredTip {
-    return Intl.message(
-      'This profile is encrypted with age and needs an age secret key to decrypt',
-      name: 'ageSecretKeyRequiredTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Could not decrypt the profile. Check the age secret key and try again.`
-  String get ageDecryptFailedTip {
-    return Intl.message(
-      'Could not decrypt the profile. Check the age secret key and try again.',
-      name: 'ageDecryptFailedTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Reset DNS`
-  String get resetDns {
-    return Intl.message('Reset DNS', name: 'resetDns', desc: '', args: []);
-  }
-
-  /// `DNS state cleared`
-  String get resetDnsSuccess {
-    return Intl.message(
-      'DNS state cleared',
-      name: 'resetDnsSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Could not reset DNS. Check that the core is connected and try again.`
-  String get resetDnsFailed {
-    return Intl.message(
-      'Could not reset DNS. Check that the core is connected and try again.',
-      name: 'resetDnsFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The resource exceeds {limit}`
-  String resourceSizeLimitTip(Object limit) {
-    return Intl.message(
-      'The resource exceeds $limit',
-      name: 'resourceSizeLimitTip',
-      desc: '',
-      args: [limit],
-    );
-  }
-
-  /// `Detect format and behavior`
-  String get ruleSetDetect {
-    return Intl.message(
-      'Detect format and behavior',
-      name: 'ruleSetDetect',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Convert to MRS`
-  String get ruleSetConvert {
-    return Intl.message(
-      'Convert to MRS',
-      name: 'ruleSetConvert',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Download as local MRS`
-  String get ruleSetConvertRemote {
-    return Intl.message(
-      'Download as local MRS',
-      name: 'ruleSetConvertRemote',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The rule set has no usable entries`
-  String get ruleSetEmptyTip {
-    return Intl.message(
-      'The rule set has no usable entries',
-      name: 'ruleSetEmptyTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The rule set mixes bare domains and IP ranges; use classical rules to combine them`
-  String get ruleSetMixedTip {
-    return Intl.message(
-      'The rule set mixes bare domains and IP ranges; use classical rules to combine them',
-      name: 'ruleSetMixedTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Unable to read this rule set. Check its format and entries`
-  String get ruleSetInvalidTip {
-    return Intl.message(
-      'Unable to read this rule set. Check its format and entries',
-      name: 'ruleSetInvalidTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `These rules cannot be converted to MRS without changing their behavior`
-  String get ruleSetUnsupportedTip {
-    return Intl.message(
-      'These rules cannot be converted to MRS without changing their behavior',
-      name: 'ruleSetUnsupportedTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Another rule set operation is running. Try again shortly`
-  String get ruleSetBusyTip {
-    return Intl.message(
-      'Another rule set operation is running. Try again shortly',
-      name: 'ruleSetBusyTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This remote rule set needs normalization. Download it as local MRS to use it`
-  String get ruleSetNeedsConversionTip {
-    return Intl.message(
-      'This remote rule set needs normalization. Download it as local MRS to use it',
-      name: 'ruleSetNeedsConversionTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The rule set exceeds the processing limit. Split it into smaller sets`
-  String get ruleSetSizeTip {
-    return Intl.message(
-      'The rule set exceeds the processing limit. Split it into smaller sets',
-      name: 'ruleSetSizeTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Unable to read the active node configuration. Refresh the resource and try again.`
-  String get providerLookupFailed {
-    return Intl.message(
-      'Unable to read the active node configuration. Refresh the resource and try again.',
-      name: 'providerLookupFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Find node configuration`
-  String get lookupProxyConfig {
-    return Intl.message(
-      'Find node configuration',
-      name: 'lookupProxyConfig',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `System DNS mode`
-  String get tunDnsMode {
-    return Intl.message(
-      'System DNS mode',
-      name: 'tunDnsMode',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Empty keeps the previous behavior. disabled leaves system DNS unchanged; native uses the TUN address; hijack also intercepts DNS on other interfaces (Windows requires strict-route; Linux requires auto-redirect). An explicit mode takes precedence over automatic system DNS on macOS.`
-  String get tunDnsModeDesc {
-    return Intl.message(
-      'Empty keeps the previous behavior. disabled leaves system DNS unchanged; native uses the TUN address; hijack also intercepts DNS on other interfaces (Windows requires strict-route; Linux requires auto-redirect). An explicit mode takes precedence over automatic system DNS on macOS.',
-      name: 'tunDnsModeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This node cannot be represented by a share link; use fields or YAML`
-  String get nodeShareLinkUnavailable {
-    return Intl.message(
-      'This node cannot be represented by a share link; use fields or YAML',
-      name: 'nodeShareLinkUnavailable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{count} nodes cannot be represented by links and will be kept unchanged`
-  String shareLinkNodesPreserved(int count) {
-    return Intl.message(
-      '$count nodes cannot be represented by links and will be kept unchanged',
-      name: 'shareLinkNodesPreserved',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Select`
-  String get select {
-    return Intl.message('Select', name: 'select', desc: '', args: []);
-  }
-
-  /// `Preferred`
-  String get preferred {
-    return Intl.message('Preferred', name: 'preferred', desc: '', args: []);
-  }
-
-  /// `Add to custom nodes`
-  String get addToLocalProxies {
-    return Intl.message(
-      'Add to custom nodes',
-      name: 'addToLocalProxies',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Added {name} to custom nodes`
-  String addedToLocalProxies(Object name) {
-    return Intl.message(
-      'Added $name to custom nodes',
-      name: 'addedToLocalProxies',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `{name} is already in custom nodes`
-  String alreadyInLocalProxies(Object name) {
-    return Intl.message(
-      '$name is already in custom nodes',
-      name: 'alreadyInLocalProxies',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Entries added here replace the setting of every profile; anything not added keeps the profile's own setting, or the core default when the profile has none.`
-  String get generalOverrideDesc {
-    return Intl.message(
-      'Entries added here replace the setting of every profile; anything not added keeps the profile\'s own setting, or the core default when the profile has none.',
-      name: 'generalOverrideDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Group by`
-  String get groupBy {
-    return Intl.message('Group by', name: 'groupBy', desc: '', args: []);
-  }
-
-  /// `Copy host`
-  String get copyHost {
-    return Intl.message('Copy host', name: 'copyHost', desc: '', args: []);
-  }
-
-  /// `Copy destination`
-  String get copyDestination {
-    return Intl.message(
-      'Copy destination',
-      name: 'copyDestination',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Close connection`
-  String get closeConnection {
-    return Intl.message(
-      'Close connection',
-      name: 'closeConnection',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recent requests`
-  String get recentRequests {
-    return Intl.message(
-      'Recent requests',
-      name: 'recentRequests',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Root`
-  String get root {
-    return Intl.message('Root', name: 'root', desc: '', args: []);
-  }
-
-  /// `MITM`
-  String get mitm {
-    return Intl.message('MITM', name: 'mitm', desc: '', args: []);
-  }
-
-  /// `HTTPS decryption`
-  String get httpsDecryption {
-    return Intl.message(
-      'HTTPS decryption',
-      name: 'httpsDecryption',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `HTTP capture`
-  String get httpCapture {
-    return Intl.message(
-      'HTTP capture',
-      name: 'httpCapture',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Records requests to the hosts listed under Hostname, to view in connection details. Records stay in memory only.`
-  String get httpCaptureDesc {
-    return Intl.message(
-      'Records requests to the hosts listed under Hostname, to view in connection details. Records stay in memory only.',
-      name: 'httpCaptureDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No host is listed, so nothing is recorded. Add hosts under Hostname on the MITM page, or from the details of a connection.`
-  String get httpCaptureNoHosts {
-    return Intl.message(
-      'No host is listed, so nothing is recorded. Add hosts under Hostname on the MITM page, or from the details of a connection.',
-      name: 'httpCaptureNoHosts',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Maximum records`
-  String get httpCaptureLimit {
-    return Intl.message(
-      'Maximum records',
-      name: 'httpCaptureLimit',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The oldest records go first once this many are kept or they fill {memory} of memory. Each body keeps its first {body}.`
-  String httpCaptureLimitDesc(Object memory, Object body) {
-    return Intl.message(
-      'The oldest records go first once this many are kept or they fill $memory of memory. Each body keeps its first $body.',
-      name: 'httpCaptureLimitDesc',
-      desc: '',
-      args: [memory, body],
-    );
-  }
-
-  /// `HTTP requests`
-  String get httpRequests {
-    return Intl.message(
-      'HTTP requests',
-      name: 'httpRequests',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Requests made before capture was on, or since cleared, are not listed.`
-  String get httpRequestsMissing {
-    return Intl.message(
-      'Requests made before capture was on, or since cleared, are not listed.',
-      name: 'httpRequestsMissing',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This request is no longer kept`
-  String get httpRequestCleared {
-    return Intl.message(
-      'This request is no longer kept',
-      name: 'httpRequestCleared',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Capture is off`
-  String get httpCaptureOff {
-    return Intl.message(
-      'Capture is off',
-      name: 'httpCaptureOff',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `In progress`
-  String get inProgress {
-    return Intl.message('In progress', name: 'inProgress', desc: '', args: []);
-  }
-
-  /// `Method`
-  String get method {
-    return Intl.message('Method', name: 'method', desc: '', args: []);
-  }
-
-  /// `Original URL`
-  String get originalUrl {
-    return Intl.message(
-      'Original URL',
-      name: 'originalUrl',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Time to first byte`
-  String get timeToFirstByte {
-    return Intl.message(
-      'Time to first byte',
-      name: 'timeToFirstByte',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Request body`
-  String get requestBody {
-    return Intl.message(
-      'Request body',
-      name: 'requestBody',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Response`
-  String get response {
-    return Intl.message('Response', name: 'response', desc: '', args: []);
-  }
-
-  /// `Response body`
-  String get responseBody {
-    return Intl.message(
-      'Response body',
-      name: 'responseBody',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Response headers`
-  String get responseHeaders {
-    return Intl.message(
-      'Response headers',
-      name: 'responseHeaders',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Matched rules`
-  String get matchedRules {
-    return Intl.message(
-      'Matched rules',
-      name: 'matchedRules',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Overview`
-  String get overview {
-    return Intl.message('Overview', name: 'overview', desc: '', args: []);
-  }
-
-  /// `View all`
-  String get viewAll {
-    return Intl.message('View all', name: 'viewAll', desc: '', args: []);
-  }
-
-  /// `Copy as Base64`
-  String get copyAsBase64 {
-    return Intl.message(
-      'Copy as Base64',
-      name: 'copyAsBase64',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Copy as cURL`
-  String get copyAsCurl {
-    return Intl.message('Copy as cURL', name: 'copyAsCurl', desc: '', args: []);
-  }
-
-  /// `Copy request`
-  String get copyRequest {
-    return Intl.message(
-      'Copy request',
-      name: 'copyRequest',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Copy response`
-  String get copyResponse {
-    return Intl.message(
-      'Copy response',
-      name: 'copyResponse',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Copy response body`
-  String get copyResponseBody {
-    return Intl.message(
-      'Copy response body',
-      name: 'copyResponseBody',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Read as Protobuf without its schema: field numbers only, and the types are guesses.`
-  String get httpBodyProtobufGuess {
-    return Intl.message(
-      'Read as Protobuf without its schema: field numbers only, and the types are guesses.',
-      name: 'httpBodyProtobufGuess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Export HAR`
-  String get exportHar {
-    return Intl.message('Export HAR', name: 'exportHar', desc: '', args: []);
-  }
-
-  /// `Add a reject rule`
-  String get mitmAddRejectRule {
-    return Intl.message(
-      'Add a reject rule',
-      name: 'mitmAddRejectRule',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add a map local rule`
-  String get mitmAddMapLocalRule {
-    return Intl.message(
-      'Add a map local rule',
-      name: 'mitmAddMapLocalRule',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Contains private data`
-  String get httpExportPrivateTitle {
-    return Intl.message(
-      'Contains private data',
-      name: 'httpExportPrivateTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A request can carry cookies, tokens, passwords and form contents. Check what you share, and with whom.`
-  String get httpExportPrivate {
-    return Intl.message(
-      'A request can carry cookies, tokens, passwords and form contents. Check what you share, and with whom.',
-      name: 'httpExportPrivate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This module is a Stash override, so the rule was copied for you to add by hand.`
-  String get mitmRuleCopiedForStash {
-    return Intl.message(
-      'This module is a Stash override, so the rule was copied for you to add by hand.',
-      name: 'mitmRuleCopiedForStash',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Binary data`
-  String get binaryData {
-    return Intl.message('Binary data', name: 'binaryData', desc: '', args: []);
-  }
-
-  /// `Not recorded while memory was short.`
-  String get httpBodyNotKept {
-    return Intl.message(
-      'Not recorded while memory was short.',
-      name: 'httpBodyNotKept',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only the start of this body was recorded.`
-  String get httpBodyTruncated {
-    return Intl.message(
-      'Only the start of this body was recorded.',
-      name: 'httpBodyTruncated',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Could not decode {encoding}, so this is the data as it was sent.`
-  String httpBodyUndecoded(Object encoding) {
-    return Intl.message(
-      'Could not decode $encoding, so this is the data as it was sent.',
-      name: 'httpBodyUndecoded',
-      desc: '',
-      args: [encoding],
-    );
-  }
-
-  /// `FlClash will be able to read everything sent to the decrypted hosts, cookies and passwords included. Turn this on only for hosts you mean to rewrite.`
-  String get mitmEnableTip {
-    return Intl.message(
-      'FlClash will be able to read everything sent to the decrypted hosts, cookies and passwords included. Turn this on only for hosts you mean to rewrite.',
-      name: 'mitmEnableTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Certificate`
-  String get certificate {
-    return Intl.message('Certificate', name: 'certificate', desc: '', args: []);
-  }
-
-  /// `Generate certificate`
-  String get generateCertificate {
-    return Intl.message(
-      'Generate certificate',
-      name: 'generateCertificate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Regenerate certificate`
-  String get regenerateCertificate {
-    return Intl.message(
-      'Regenerate certificate',
-      name: 'regenerateCertificate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The new certificate replaces the current one, which FlClash takes out of this device's trusted roots where it can. Every other device that trusts the current one has to install the new one.`
-  String get regenerateCertificateTip {
-    return Intl.message(
-      'The new certificate replaces the current one, which FlClash takes out of this device\'s trusted roots where it can. Every other device that trusts the current one has to install the new one.',
-      name: 'regenerateCertificateTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Export certificate`
-  String get exportCertificate {
-    return Intl.message(
-      'Export certificate',
-      name: 'exportCertificate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Install to system`
-  String get installCertificate {
-    return Intl.message(
-      'Install to system',
-      name: 'installCertificate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Certificate installed`
-  String get installCertificateSuccess {
-    return Intl.message(
-      'Certificate installed',
-      name: 'installCertificateSuccess',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Valid until {date}`
-  String validUntil(Object date) {
-    return Intl.message(
-      'Valid until $date',
-      name: 'validUntil',
-      desc: '',
-      args: [date],
-    );
-  }
-
-  /// `Export it and trust it on the devices you want to decrypt.`
-  String get mitmCertificateExportTip {
-    return Intl.message(
-      'Export it and trust it on the devices you want to decrypt.',
-      name: 'mitmCertificateExportTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Trusted`
-  String get mitmTrustReady {
-    return Intl.message('Trusted', name: 'mitmTrustReady', desc: '', args: []);
-  }
-
-  /// `Not fully trusted`
-  String get mitmTrustUntrusted {
-    return Intl.message(
-      'Not fully trusted',
-      name: 'mitmTrustUntrusted',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Not installed`
-  String get mitmTrustNotInstalled {
-    return Intl.message(
-      'Not installed',
-      name: 'mitmTrustNotInstalled',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Checking…`
-  String get mitmTrustChecking {
-    return Intl.message(
-      'Checking…',
-      name: 'mitmTrustChecking',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Trust certificate`
-  String get trustCertificate {
-    return Intl.message(
-      'Trust certificate',
-      name: 'trustCertificate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only apps that trust user certificates, mostly browsers, are decrypted.`
-  String get mitmCertificateAndroidReadyTip {
-    return Intl.message(
-      'Only apps that trust user certificates, mostly browsers, are decrypted.',
-      name: 'mitmCertificateAndroidReadyTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Flatpak browsers need the exported certificate imported by hand.`
-  String get mitmCertificateLinuxTip {
-    return Intl.message(
-      'Flatpak browsers need the exported certificate imported by hand.',
-      name: 'mitmCertificateLinuxTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Chrome and Firefox keep their own certificate stores, which need certutil: {command}`
-  String mitmCertutilMissing(Object command) {
-    return Intl.message(
-      'Chrome and Firefox keep their own certificate stores, which need certutil: $command',
-      name: 'mitmCertutilMissing',
-      desc: '',
-      args: [command],
-    );
-  }
-
-  /// `Not yet in: {stores}`
-  String mitmMissingStores(Object stores) {
-    return Intl.message(
-      'Not yet in: $stores',
-      name: 'mitmMissingStores',
-      desc: '',
-      args: [stores],
-    );
-  }
-
-  /// `Adding the certificate to the system's trusted roots failed`
-  String get mitmSystemStoreFailed {
-    return Intl.message(
-      'Adding the certificate to the system\'s trusted roots failed',
-      name: 'mitmSystemStoreFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No Magisk, KernelSU or APatch was found to keep the certificate. Install it again after the device restarts.`
-  String get mitmRootUntilReboot {
-    return Intl.message(
-      'No Magisk, KernelSU or APatch was found to keep the certificate. Install it again after the device restarts.',
-      name: 'mitmRootUntilReboot',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The certificate takes effect after the device restarts.`
-  String get mitmRootPendingReboot {
-    return Intl.message(
-      'The certificate takes effect after the device restarts.',
-      name: 'mitmRootPendingReboot',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Root was found, so the certificate goes into the system's trusted certificates as a FlClash MITM CA module for Magisk, KernelSU or APatch. Every app on this device will then trust it, and anyone holding its private key could decrypt this device's HTTPS traffic. To undo it, regenerate the certificate or remove the module in the root manager and restart. If root is denied, it is installed as a user certificate instead.`
-  String get mitmInstallSystemCaTip {
-    return Intl.message(
-      'Root was found, so the certificate goes into the system\'s trusted certificates as a FlClash MITM CA module for Magisk, KernelSU or APatch. Every app on this device will then trust it, and anyone holding its private key could decrypt this device\'s HTTPS traffic. To undo it, regenerate the certificate or remove the module in the root manager and restart. If root is denied, it is installed as a user certificate instead.',
-      name: 'mitmInstallSystemCaTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No root was found, so the certificate can only be installed as a user certificate. Only apps that trust user certificates, mostly browsers, are decrypted; other apps fail on the hosts you list, so leave those hosts out. On Android 11 and later you finish the install yourself in system settings.`
-  String get mitmInstallUserCaTip {
-    return Intl.message(
-      'No root was found, so the certificate can only be installed as a user certificate. Only apps that trust user certificates, mostly browsers, are decrypted; other apps fail on the hosts you list, so leave those hosts out. On Android 11 and later you finish the install yourself in system settings.',
-      name: 'mitmInstallUserCaTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Saved {fileName} to Downloads. Install it in Settings under Security › Encryption & credentials › Install a certificate › CA certificate.`
-  String mitmCertificateSavedTip(Object fileName) {
-    return Intl.message(
-      'Saved $fileName to Downloads. Install it in Settings under Security › Encryption & credentials › Install a certificate › CA certificate.',
-      name: 'mitmCertificateSavedTip',
-      desc: '',
-      args: [fileName],
-    );
-  }
-
-  /// `Open settings`
-  String get openSettings {
-    return Intl.message(
-      'Open settings',
-      name: 'openSettings',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Remove the old certificate, {name}, in Settings under Security › Encryption & credentials › Trusted credentials › User, then install the new one.`
-  String mitmRemoveOldCertificateTip(Object name) {
-    return Intl.message(
-      'Remove the old certificate, $name, in Settings under Security › Encryption & credentials › Trusted credentials › User, then install the new one.',
-      name: 'mitmRemoveOldCertificateTip',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `The old certificate, {name}, could not be removed. Remove it from the trusted roots yourself.`
-  String mitmOldCertificateLeftTip(Object name) {
-    return Intl.message(
-      'The old certificate, $name, could not be removed. Remove it from the trusted roots yourself.',
-      name: 'mitmOldCertificateLeftTip',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `The old certificate, {name}, is still among the system's trusted CAs. Allow FlClash root access in your root manager and regenerate, or remove the FlClash MITM CA module there and restart.`
-  String mitmOldSystemCertificateLeftTip(Object name) {
-    return Intl.message(
-      'The old certificate, $name, is still among the system\'s trusted CAs. Allow FlClash root access in your root manager and regenerate, or remove the FlClash MITM CA module there and restart.',
-      name: 'mitmOldSystemCertificateLeftTip',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `Decrypt this host`
-  String get mitmDecryptHost {
-    return Intl.message(
-      'Decrypt this host',
-      name: 'mitmDecryptHost',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add {host} to the hostname list? FlClash can then read what is sent to it, cookies and passwords included.`
-  String mitmDecryptHostTip(Object host) {
-    return Intl.message(
-      'Add $host to the hostname list? FlClash can then read what is sent to it, cookies and passwords included.',
-      name: 'mitmDecryptHostTip',
-      desc: '',
-      args: [host],
-    );
-  }
-
-  /// `The client refused the certificate. Install the CA, or exclude this host if the app pins its certificate.`
-  String get mitmClientRefusedCertificate {
-    return Intl.message(
-      'The client refused the certificate. Install the CA, or exclude this host if the app pins its certificate.',
-      name: 'mitmClientRefusedCertificate',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exclude from decryption`
-  String get mitmExcludeHost {
-    return Intl.message(
-      'Exclude from decryption',
-      name: 'mitmExcludeHost',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add -{host} to the top of the hostname list? The host is then never decrypted.`
-  String mitmExcludeHostTip(Object host) {
-    return Intl.message(
-      'Add -$host to the top of the hostname list? The host is then never decrypted.',
-      name: 'mitmExcludeHostTip',
-      desc: '',
-      args: [host],
-    );
-  }
-
-  /// `URL rewrite`
-  String get urlRewrite {
-    return Intl.message('URL rewrite', name: 'urlRewrite', desc: '', args: []);
-  }
-
-  /// `Header rewrite`
-  String get headerRewrite {
-    return Intl.message(
-      'Header rewrite',
-      name: 'headerRewrite',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Body rewrite`
-  String get bodyRewrite {
-    return Intl.message(
-      'Body rewrite',
-      name: 'bodyRewrite',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Map local`
-  String get mapLocal {
-    return Intl.message('Map local', name: 'mapLocal', desc: '', args: []);
-  }
-
-  /// `A leading - excludes a host, and the first match decides.`
-  String get mitmHostnameDesc {
-    return Intl.message(
-      'A leading - excludes a host, and the first match decides.',
-      name: 'mitmHostnameDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Modules`
-  String get mitmModules {
-    return Intl.message('Modules', name: 'mitmModules', desc: '', args: []);
-  }
-
-  /// `Module`
-  String get mitmModule {
-    return Intl.message('Module', name: 'mitmModule', desc: '', args: []);
-  }
-
-  /// `This is not a Surge module, a Loon plugin, a Quantumult X snippet or a Stash override`
-  String get mitmModuleInvalid {
-    return Intl.message(
-      'This is not a Surge module, a Loon plugin, a Quantumult X snippet or a Stash override',
-      name: 'mitmModuleInvalid',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Arguments`
-  String get arguments {
-    return Intl.message('Arguments', name: 'arguments', desc: '', args: []);
-  }
-
-  /// `Routing rules`
-  String get mitmRoutingRules {
-    return Intl.message(
-      'Routing rules',
-      name: 'mitmRoutingRules',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Ignored lines`
-  String get mitmIgnoredLines {
-    return Intl.message(
-      'Ignored lines',
-      name: 'mitmIgnoredLines',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Routing rules go in front of the profile’s own.`
-  String get mitmModuleRulesDesc {
-    return Intl.message(
-      'Routing rules go in front of the profile’s own.',
-      name: 'mitmModuleRulesDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Written for {system}; some lines may not match apps on this device.`
-  String mitmModuleSystemTip(Object system) {
-    return Intl.message(
-      'Written for $system; some lines may not match apps on this device.',
-      name: 'mitmModuleSystemTip',
-      desc: '',
-      args: [system],
-    );
-  }
-
-  /// `The [{section}] section is not supported`
-  String mitmSkipSection(Object section) {
-    return Intl.message(
-      'The [$section] section is not supported',
-      name: 'mitmSkipSection',
-      desc: '',
-      args: [section],
-    );
-  }
-
-  /// `This setting is not supported`
-  String get mitmSkipSetting {
-    return Intl.message(
-      'This setting is not supported',
-      name: 'mitmSkipSetting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This script type is not supported`
-  String get mitmSkipScriptType {
-    return Intl.message(
-      'This script type is not supported',
-      name: 'mitmSkipScriptType',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This rule type is not supported`
-  String get mitmSkipRule {
-    return Intl.message(
-      'This rule type is not supported',
-      name: 'mitmSkipRule',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Only the DIRECT and REJECT policies are supported`
-  String get mitmSkipPolicy {
-    return Intl.message(
-      'Only the DIRECT and REJECT policies are supported',
-      name: 'mitmSkipPolicy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `jq rewrites are not supported`
-  String get mitmSkipJq {
-    return Intl.message(
-      'jq rewrites are not supported',
-      name: 'mitmSkipJq',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `JSON body rewrites are not supported`
-  String get mitmSkipJsonBody {
-    return Intl.message(
-      'JSON body rewrites are not supported',
-      name: 'mitmSkipJsonBody',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Rewriting all headers as one text is not supported`
-  String get mitmSkipRawHeader {
-    return Intl.message(
-      'Rewriting all headers as one text is not supported',
-      name: 'mitmSkipRawHeader',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Conditional rewrites are not supported`
-  String get mitmSkipConditional {
-    return Intl.message(
-      'Conditional rewrites are not supported',
-      name: 'mitmSkipConditional',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The file this line names is not attached; use a URL or attach it`
-  String get mitmSkipRelativeData {
-    return Intl.message(
-      'The file this line names is not attached; use a URL or attach it',
-      name: 'mitmSkipRelativeData',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Its file has not been downloaded`
-  String get mitmSkipNotDownloaded {
-    return Intl.message(
-      'Its file has not been downloaded',
-      name: 'mitmSkipNotDownloaded',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This line cannot be read`
-  String get mitmSkipUnreadable {
-    return Intl.message(
-      'This line cannot be read',
-      name: 'mitmSkipUnreadable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add a local file`
-  String get mitmAddLocalFile {
-    return Intl.message(
-      'Add a local file',
-      name: 'mitmAddLocalFile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `New module`
-  String get mitmNewModule {
-    return Intl.message(
-      'New module',
-      name: 'mitmNewModule',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Attachments`
-  String get mitmAttachments {
-    return Intl.message(
-      'Attachments',
-      name: 'mitmAttachments',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Lines refer to attachments by file name, as in script-path=a.js.`
-  String get mitmAttachmentsDesc {
-    return Intl.message(
-      'Lines refer to attachments by file name, as in script-path=a.js.',
-      name: 'mitmAttachmentsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The file is larger than {size} MB`
-  String mitmFileTooLarge(Object size) {
-    return Intl.message(
-      'The file is larger than $size MB',
-      name: 'mitmFileTooLarge',
-      desc: '',
-      args: [size],
-    );
-  }
-
-  /// `Turned off by an argument`
-  String get mitmSkipDisabled {
-    return Intl.message(
-      'Turned off by an argument',
-      name: 'mitmSkipDisabled',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This event is not supported`
-  String get mitmSkipEvent {
-    return Intl.message(
-      'This event is not supported',
-      name: 'mitmSkipEvent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Run now`
-  String get mitmRunScript {
-    return Intl.message('Run now', name: 'mitmRunScript', desc: '', args: []);
-  }
-
-  /// `The script finished without output`
-  String get mitmScriptNoOutput {
-    return Intl.message(
-      'The script finished without output',
-      name: 'mitmScriptNoOutput',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Run this module's scripts?`
-  String get mitmScriptRiskTitle {
-    return Intl.message(
-      'Run this module\'s scripts?',
-      name: 'mitmScriptRiskTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Its scripts read and change the traffic of the hosts they match, cookies and tokens included, and can send requests of their own. Turn it on only if you trust where it comes from.`
-  String get mitmScriptRisk {
-    return Intl.message(
-      'Its scripts read and change the traffic of the hosts they match, cookies and tokens included, and can send requests of their own. Turn it on only if you trust where it comes from.',
-      name: 'mitmScriptRisk',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Skip server certificate verification`
-  String get skipServerCertVerify {
-    return Intl.message(
-      'Skip server certificate verification',
-      name: 'skipServerCertVerify',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `HTTP/2`
-  String get http2 {
-    return Intl.message('HTTP/2', name: 'http2', desc: '', args: []);
-  }
-
-  /// `Decrypt without local trust`
-  String get decryptUntrusted {
-    return Intl.message(
-      'Decrypt without local trust',
-      name: 'decryptUntrusted',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{invalid} of {total} invalid`
-  String invalidOfCount(Object invalid, Object total) {
-    return Intl.message(
-      '$invalid of $total invalid',
-      name: 'invalidOfCount',
-      desc: '',
-      args: [invalid, total],
-    );
-  }
-
-  /// `{name} changed its scripts and was turned off`
-  String mitmModuleScriptsChanged(Object name) {
-    return Intl.message(
-      '$name changed its scripts and was turned off',
-      name: 'mitmModuleScriptsChanged',
-      desc: '',
-      args: [name],
-    );
-  }
-
-  /// `{count} items failed. Tap to view`
-  String failedCount(Object count) {
-    return Intl.message(
-      '$count items failed. Tap to view',
-      name: 'failedCount',
-      desc: '',
-      args: [count],
-    );
-  }
-
-  /// `Resolves proxy server hostnames only.`
-  String get proxyServerNameserverDesc {
-    return Intl.message(
-      'Resolves proxy server hostnames only.',
-      name: 'proxyServerNameserverDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Matching proxy server hostnames use the DNS server given here instead of Proxy Server Nameserver.`
-  String get proxyServerNameserverPolicyDesc {
-    return Intl.message(
-      'Matching proxy server hostnames use the DNS server given here instead of Proxy Server Nameserver.',
-      name: 'proxyServerNameserverPolicyDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Resolves domains for connections that go direct.`
-  String get directNameserverDesc {
-    return Intl.message(
-      'Resolves domains for connections that go direct.',
-      name: 'directNameserverDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `These domains get real IPs instead of Fake-IPs. In whitelist mode, only they get Fake-IPs.`
-  String get fakeipFilterDesc {
-    return Intl.message(
-      'These domains get real IPs instead of Fake-IPs. In whitelist mode, only they get Fake-IPs.',
-      name: 'fakeipFilterDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Domains in these GeoSite categories are resolved by Fallback directly.`
-  String get fallbackFilterGeositeDesc {
-    return Intl.message(
-      'Domains in these GeoSite categories are resolved by Fallback directly.',
-      name: 'fallbackFilterGeositeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `When Nameserver returns an IP in these ranges, the Fallback answer is used.`
-  String get fallbackFilterIpcidrDesc {
-    return Intl.message(
-      'When Nameserver returns an IP in these ranges, the Fallback answer is used.',
-      name: 'fallbackFilterIpcidrDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `These domains are resolved by Fallback directly.`
-  String get fallbackFilterDomainDesc {
-    return Intl.message(
-      'These domains are resolved by Fallback directly.',
-      name: 'fallbackFilterDomainDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Custom`
-  String get customResources {
-    return Intl.message('Custom', name: 'customResources', desc: '', args: []);
-  }
-
-  /// `A subscription node has this name, so this profile uses that one`
-  String get proxyYieldsToSubscription {
-    return Intl.message(
-      'A subscription node has this name, so this profile uses that one',
-      name: 'proxyYieldsToSubscription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Measurement time unavailable`
-  String get delayMeasurementUnknown {
-    return Intl.message(
-      'Measurement time unavailable',
-      name: 'delayMeasurementUnknown',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Last tested: {time}`
-  String delayMeasuredAt(String time) {
-    return Intl.message(
-      'Last tested: $time',
-      name: 'delayMeasuredAt',
-      desc: '',
-      args: [time],
-    );
-  }
-
-  /// `Old result; test again`
-  String get delayMeasurementStale {
-    return Intl.message(
-      'Old result; test again',
-      name: 'delayMeasurementStale',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `UDP connectivity`
-  String get diagUdp {
-    return Intl.message(
-      'UDP connectivity',
-      name: 'diagUdp',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A UDP round trip succeeded`
-  String get diagUdpReady {
-    return Intl.message(
-      'A UDP round trip succeeded',
-      name: 'diagUdpReady',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `UDP connectivity could not be confirmed`
-  String get diagUdpUnknown {
-    return Intl.message(
-      'UDP connectivity could not be confirmed',
-      name: 'diagUdpUnknown',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This route does not support UDP`
-  String get diagUdpUnsupported {
-    return Intl.message(
-      'This route does not support UDP',
-      name: 'diagUdpUnsupported',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Tests follow the current routing rules. A timeout may be caused by the test server or network; it does not prove all UDP traffic is blocked.`
-  String get diagUdpHint {
-    return Intl.message(
-      'Tests follow the current routing rules. A timeout may be caused by the test server or network; it does not prove all UDP traffic is blocked.',
-      name: 'diagUdpHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Recent operation history`
-  String get diagTimeline {
-    return Intl.message(
-      'Recent operation history',
-      name: 'diagTimeline',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `{time} · {stage} · {result} {code}`
+    return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('ja'),
+    Locale('ko'),
+    Locale('ru'),
+    Locale('zh'),
+  ];
+
+  /// No description provided for @applyNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply now'**
+  String get applyNow;
+
+  /// No description provided for @rule.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule'**
+  String get rule;
+
+  /// No description provided for @global.
+  ///
+  /// In en, this message translates to:
+  /// **'Global'**
+  String get global;
+
+  /// No description provided for @direct.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct'**
+  String get direct;
+
+  /// No description provided for @dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboard;
+
+  /// No description provided for @proxies.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxies'**
+  String get proxies;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles'**
+  String get profiles;
+
+  /// No description provided for @tools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get tools;
+
+  /// No description provided for @logs.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs'**
+  String get logs;
+
+  /// No description provided for @logsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Log capture records'**
+  String get logsDesc;
+
+  /// No description provided for @resources.
+  ///
+  /// In en, this message translates to:
+  /// **'Resources'**
+  String get resources;
+
+  /// No description provided for @resourcesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'External resource related info'**
+  String get resourcesDesc;
+
+  /// No description provided for @trafficUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Traffic usage'**
+  String get trafficUsage;
+
+  /// No description provided for @networkSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Network speed'**
+  String get networkSpeed;
+
+  /// No description provided for @outboundMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Outbound mode'**
+  String get outboundMode;
+
+  /// No description provided for @networkDetection.
+  ///
+  /// In en, this message translates to:
+  /// **'Network detection'**
+  String get networkDetection;
+
+  /// No description provided for @upload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get upload;
+
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// No description provided for @noProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'No proxy'**
+  String get noProxy;
+
+  /// No description provided for @nullProfileDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No profile, Please add a profile'**
+  String get nullProfileDesc;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @defaultText.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get defaultText;
+
+  /// No description provided for @more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @en.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get en;
+
+  /// No description provided for @ja.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese'**
+  String get ja;
+
+  /// No description provided for @ru.
+  ///
+  /// In en, this message translates to:
+  /// **'Russian'**
+  String get ru;
+
+  /// No description provided for @fr.
+  ///
+  /// In en, this message translates to:
+  /// **'French'**
+  String get fr;
+
+  /// No description provided for @es.
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get es;
+
+  /// No description provided for @ko.
+  ///
+  /// In en, this message translates to:
+  /// **'Korean'**
+  String get ko;
+
+  /// No description provided for @zh_CN.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplified Chinese'**
+  String get zh_CN;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @themeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Set dark mode,adjust the color'**
+  String get themeDesc;
+
+  /// No description provided for @overrideLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Override'**
+  String get overrideLabel;
+
+  /// No description provided for @allowLan.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow LAN'**
+  String get allowLan;
+
+  /// No description provided for @tun.
+  ///
+  /// In en, this message translates to:
+  /// **'TUN'**
+  String get tun;
+
+  /// No description provided for @tunDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'TUN works only in administrator mode'**
+  String get tunDesc;
+
+  /// No description provided for @minimizeOnExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize on exit'**
+  String get minimizeOnExit;
+
+  /// No description provided for @autoLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto launch'**
+  String get autoLaunch;
+
+  /// No description provided for @silentLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Silent launch'**
+  String get silentLaunch;
+
+  /// No description provided for @silentLaunchDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Start in the background'**
+  String get silentLaunchDesc;
+
+  /// No description provided for @autoRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto run'**
+  String get autoRun;
+
+  /// No description provided for @autoRunDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto run when the application is opened'**
+  String get autoRunDesc;
+
+  /// No description provided for @logcat.
+  ///
+  /// In en, this message translates to:
+  /// **'Logcat'**
+  String get logcat;
+
+  /// No description provided for @logcatDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabling will hide the log entry'**
+  String get logcatDesc;
+
+  /// No description provided for @accessControl.
+  ///
+  /// In en, this message translates to:
+  /// **'AccessControl'**
+  String get accessControl;
+
+  /// No description provided for @accessControlDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure application access proxy'**
+  String get accessControlDesc;
+
+  /// No description provided for @application.
+  ///
+  /// In en, this message translates to:
+  /// **'Application'**
+  String get application;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get hours;
+
+  /// No description provided for @seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Seconds'**
+  String get seconds;
+
+  /// No description provided for @qrcode.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code'**
+  String get qrcode;
+
+  /// No description provided for @qrcodeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR code to obtain profile'**
+  String get qrcodeDesc;
+
+  /// No description provided for @url.
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get url;
+
+  /// No description provided for @file.
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get file;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
+
+  /// No description provided for @profileNameNullValidationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please input the profile name'**
+  String get profileNameNullValidationDesc;
+
+  /// No description provided for @profileUrlNullValidationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please input the profile URL'**
+  String get profileUrlNullValidationDesc;
+
+  /// No description provided for @profileUrlInvalidValidationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please input a valid profile URL'**
+  String get profileUrlInvalidValidationDesc;
+
+  /// No description provided for @autoUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto update'**
+  String get autoUpdate;
+
+  /// No description provided for @autoUpdateInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto update interval'**
+  String get autoUpdateInterval;
+
+  /// No description provided for @profileAutoUpdateIntervalNullValidationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the auto update interval time'**
+  String get profileAutoUpdateIntervalNullValidationDesc;
+
+  /// No description provided for @profileAutoUpdateIntervalInvalidValidationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please input a valid interval time format'**
+  String get profileAutoUpdateIntervalInvalidValidationDesc;
+
+  /// No description provided for @themeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme mode'**
+  String get themeMode;
+
+  /// No description provided for @themeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme color'**
+  String get themeColor;
+
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
+  /// No description provided for @auto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get auto;
+
+  /// No description provided for @light.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get light;
+
+  /// No description provided for @dark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get dark;
+
+  /// No description provided for @submit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submit;
+
+  /// No description provided for @createProfileFromUrlTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to create a profile from {url}?'**
+  String createProfileFromUrlTip(Object url);
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @pleaseUploadValidQrcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please upload a valid QR code'**
+  String get pleaseUploadValidQrcode;
+
+  /// No description provided for @blacklistMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Blacklist mode'**
+  String get blacklistMode;
+
+  /// No description provided for @whitelistMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Whitelist mode'**
+  String get whitelistMode;
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get selectAll;
+
+  /// No description provided for @cancelSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel select all'**
+  String get cancelSelectAll;
+
+  /// No description provided for @appAccessControl.
+  ///
+  /// In en, this message translates to:
+  /// **'App access control'**
+  String get appAccessControl;
+
+  /// No description provided for @accessControlAllowDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Only selected apps go through the VPN'**
+  String get accessControlAllowDesc;
+
+  /// No description provided for @accessControlNotAllowDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected apps are excluded from the VPN'**
+  String get accessControlNotAllowDesc;
+
+  /// No description provided for @accessControlDisabledDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'App access control is disabled'**
+  String get accessControlDisabledDesc;
+
+  /// No description provided for @accessControlSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count} selected}}'**
+  String accessControlSelectedCount(num count);
+
+  /// No description provided for @profileParseErrorDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile parse error'**
+  String get profileParseErrorDesc;
+
+  /// No description provided for @proxyPort.
+  ///
+  /// In en, this message translates to:
+  /// **'ProxyPort'**
+  String get proxyPort;
+
+  /// No description provided for @port.
+  ///
+  /// In en, this message translates to:
+  /// **'Port'**
+  String get port;
+
+  /// No description provided for @logLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Log level'**
+  String get logLevel;
+
+  /// No description provided for @show.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get show;
+
+  /// No description provided for @hide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get hide;
+
+  /// No description provided for @exit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exit;
+
+  /// No description provided for @systemProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'System proxy'**
+  String get systemProxy;
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @project.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get project;
+
+  /// No description provided for @core.
+  ///
+  /// In en, this message translates to:
+  /// **'Core'**
+  String get core;
+
+  /// No description provided for @reverseEngineeringNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse engineering, decompilation, disassembly, or AI-assisted analysis of this application is strictly prohibited.'**
+  String get reverseEngineeringNotice;
+
+  /// No description provided for @tabAnimation.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab animation'**
+  String get tabAnimation;
+
+  /// No description provided for @desc.
+  ///
+  /// In en, this message translates to:
+  /// **'A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.'**
+  String get desc;
+
+  /// No description provided for @startVpn.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting VPN...'**
+  String get startVpn;
+
+  /// No description provided for @stopVpn.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping VPN...'**
+  String get stopVpn;
+
+  /// No description provided for @discovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery a new version'**
+  String get discovery;
+
+  /// No description provided for @compatible.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatibility mode'**
+  String get compatible;
+
+  /// No description provided for @notSelectedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The current proxy group cannot be selected.'**
+  String get notSelectedTip;
+
+  /// No description provided for @tip.
+  ///
+  /// In en, this message translates to:
+  /// **'tip'**
+  String get tip;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup'**
+  String get backup;
+
+  /// No description provided for @backupSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup success'**
+  String get backupSuccess;
+
+  /// No description provided for @noInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No info'**
+  String get noInfo;
+
+  /// No description provided for @pleaseBindWebDAV.
+  ///
+  /// In en, this message translates to:
+  /// **'Please bind WebDAV'**
+  String get pleaseBindWebDAV;
+
+  /// No description provided for @bind.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind'**
+  String get bind;
+
+  /// No description provided for @connectivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Connectivity：'**
+  String get connectivity;
+
+  /// No description provided for @webDAVConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'WebDAV configuration'**
+  String get webDAVConfiguration;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @addressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'WebDAV server address'**
+  String get addressHelp;
+
+  /// No description provided for @addressTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid WebDAV address'**
+  String get addressTip;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @checkUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get checkUpdate;
+
+  /// No description provided for @checkUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'The current application is already the latest version'**
+  String get checkUpdateError;
+
+  /// No description provided for @checkUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to check for updates. Please check your network and try again'**
+  String get checkUpdateFailed;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @allowBypass.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow apps to bypass VPN'**
+  String get allowBypass;
+
+  /// No description provided for @externalController.
+  ///
+  /// In en, this message translates to:
+  /// **'External controller'**
+  String get externalController;
+
+  /// No description provided for @externalControllerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The external controller lets you control the core on the configured address'**
+  String get externalControllerDesc;
+
+  /// No description provided for @openDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Open dashboard'**
+  String get openDashboard;
+
+  /// No description provided for @ipv6Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'IPv6 traffic is received only while IPv6 is on'**
+  String get ipv6Desc;
+
+  /// No description provided for @autoIpv6.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto IPv6'**
+  String get autoIpv6;
+
+  /// No description provided for @autoIpv6Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto IPv6 turns IPv6 on or off by whether the local network supports it'**
+  String get autoIpv6Desc;
+
+  /// No description provided for @app.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get app;
+
+  /// No description provided for @unifiedDelay.
+  ///
+  /// In en, this message translates to:
+  /// **'Unified delay'**
+  String get unifiedDelay;
+
+  /// No description provided for @tcpConcurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'TCP concurrent'**
+  String get tcpConcurrent;
+
+  /// No description provided for @geodataLoader.
+  ///
+  /// In en, this message translates to:
+  /// **'Geo low-memory mode'**
+  String get geodataLoader;
+
+  /// No description provided for @requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get requests;
+
+  /// No description provided for @requestsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'View recent requests and live connections'**
+  String get requestsDesc;
+
+  /// No description provided for @findProcessMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Find process'**
+  String get findProcessMode;
+
+  /// No description provided for @init.
+  ///
+  /// In en, this message translates to:
+  /// **'Init'**
+  String get init;
+
+  /// No description provided for @infiniteTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Long term effective'**
+  String get infiniteTime;
+
+  /// No description provided for @connections.
+  ///
+  /// In en, this message translates to:
+  /// **'Connections'**
+  String get connections;
+
+  /// No description provided for @intranetIP.
+  ///
+  /// In en, this message translates to:
+  /// **'Intranet IP'**
+  String get intranetIP;
+
+  /// No description provided for @view.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get view;
+
+  /// No description provided for @cut.
+  ///
+  /// In en, this message translates to:
+  /// **'Cut'**
+  String get cut;
+
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @paste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get paste;
+
+  /// No description provided for @userAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'User-Agent'**
+  String get userAgent;
+
+  /// No description provided for @testUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Test URL'**
+  String get testUrl;
+
+  /// No description provided for @delayTestTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay test timeout'**
+  String get delayTestTimeout;
+
+  /// No description provided for @sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get sync;
+
+  /// No description provided for @exclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide from recent tasks'**
+  String get exclude;
+
+  /// No description provided for @compact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact'**
+  String get compact;
+
+  /// No description provided for @filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filter;
+
+  /// No description provided for @tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab'**
+  String get tab;
+
+  /// No description provided for @list.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get list;
+
+  /// No description provided for @delay.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay'**
+  String get delay;
+
+  /// No description provided for @style.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get style;
+
+  /// No description provided for @size.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get size;
+
+  /// No description provided for @sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sort;
+
+  /// No description provided for @columns.
+  ///
+  /// In en, this message translates to:
+  /// **'Columns'**
+  String get columns;
+
+  /// No description provided for @proxyGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy group'**
+  String get proxyGroup;
+
+  /// No description provided for @go.
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get go;
+
+  /// No description provided for @externalLink.
+  ///
+  /// In en, this message translates to:
+  /// **'External link'**
+  String get externalLink;
+
+  /// No description provided for @autoCloseConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto close connections'**
+  String get autoCloseConnections;
+
+  /// No description provided for @autoCloseConnectionsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'After switching nodes, close all connections or only those passing through the changed proxy group, including nested groups'**
+  String get autoCloseConnectionsDesc;
+
+  /// No description provided for @connectionCloseScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection closing scope'**
+  String get connectionCloseScope;
+
+  /// No description provided for @closeCurrentGroupConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the current proxy group'**
+  String get closeCurrentGroupConnections;
+
+  /// No description provided for @onlyStatisticsProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Only count proxy traffic'**
+  String get onlyStatisticsProxy;
+
+  /// No description provided for @pureBlackMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pure black mode'**
+  String get pureBlackMode;
+
+  /// No description provided for @keepAliveIntervalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'TCP keep-alive interval'**
+  String get keepAliveIntervalDesc;
+
+  /// No description provided for @entries.
+  ///
+  /// In en, this message translates to:
+  /// **' entries'**
+  String get entries;
+
+  /// No description provided for @secondsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} seconds'**
+  String secondsCount(Object count);
+
+  /// No description provided for @itemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String itemsCount(num count);
+
+  /// No description provided for @geoAutoUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Update'**
+  String get geoAutoUpdate;
+
+  /// No description provided for @geoAutoUpdateInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Update Interval'**
+  String get geoAutoUpdateInterval;
+
+  /// No description provided for @geoAutoUpdateIntervalTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto update interval must be between 1 and 8760 hours'**
+  String get geoAutoUpdateIntervalTip;
+
+  /// No description provided for @geoResources.
+  ///
+  /// In en, this message translates to:
+  /// **'Geo Resources'**
+  String get geoResources;
+
+  /// No description provided for @geoUpdating.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating {name}...'**
+  String geoUpdating(Object name);
+
+  /// No description provided for @geoSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} skipped'**
+  String geoSkipped(Object name);
+
+  /// No description provided for @geoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} updated'**
+  String geoUpdated(Object name);
+
+  /// No description provided for @local.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get local;
+
+  /// No description provided for @remote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote'**
+  String get remote;
+
+  /// No description provided for @remoteBackupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup local data to WebDAV'**
+  String get remoteBackupDesc;
+
+  /// No description provided for @localBackupDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup local data to local'**
+  String get localBackupDesc;
+
+  /// No description provided for @mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get mode;
+
+  /// No description provided for @time.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get time;
+
+  /// No description provided for @source.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get source;
+
+  /// No description provided for @action.
+  ///
+  /// In en, this message translates to:
+  /// **'Action'**
+  String get action;
+
+  /// No description provided for @intelligentSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Intelligent selection'**
+  String get intelligentSelected;
+
+  /// No description provided for @clipboardNoPackageNames.
+  ///
+  /// In en, this message translates to:
+  /// **'No package names found in the clipboard'**
+  String get clipboardNoPackageNames;
+
+  /// No description provided for @clipboardImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from clipboard'**
+  String get clipboardImport;
+
+  /// No description provided for @clipboardExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export to clipboard'**
+  String get clipboardExport;
+
+  /// No description provided for @layout.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout'**
+  String get layout;
+
+  /// No description provided for @tight.
+  ///
+  /// In en, this message translates to:
+  /// **'Tight'**
+  String get tight;
+
+  /// No description provided for @standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get standard;
+
+  /// No description provided for @loose.
+  ///
+  /// In en, this message translates to:
+  /// **'Loose'**
+  String get loose;
+
+  /// No description provided for @profilesSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles sort'**
+  String get profilesSort;
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stop;
+
+  /// No description provided for @key.
+  ///
+  /// In en, this message translates to:
+  /// **'Key'**
+  String get key;
+
+  /// No description provided for @value.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get value;
+
+  /// No description provided for @vpnTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes take effect after restarting the VPN'**
+  String get vpnTip;
+
+  /// No description provided for @vpnEnableDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'VPN routes all system traffic through VpnService automatically'**
+  String get vpnEnableDesc;
+
+  /// No description provided for @options.
+  ///
+  /// In en, this message translates to:
+  /// **'Options'**
+  String get options;
+
+  /// No description provided for @loopback.
+  ///
+  /// In en, this message translates to:
+  /// **'UWP loopback exemption'**
+  String get loopback;
+
+  /// No description provided for @providers.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get providers;
+
+  /// No description provided for @proxyProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy providers'**
+  String get proxyProviders;
+
+  /// No description provided for @ruleProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule providers'**
+  String get ruleProviders;
+
+  /// No description provided for @status.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get status;
+
+  /// No description provided for @statusDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'With DNS off, the system DNS is used'**
+  String get statusDesc;
+
+  /// No description provided for @preferH3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer HTTP/3 tries HTTP/3 first for DoH servers'**
+  String get preferH3Desc;
+
+  /// No description provided for @respectRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Respect rules'**
+  String get respectRules;
+
+  /// No description provided for @respectRulesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Respect rules routes DNS connections by the rules and needs a proxy nameserver'**
+  String get respectRulesDesc;
+
+  /// No description provided for @dnsMode.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS mode'**
+  String get dnsMode;
+
+  /// No description provided for @fakeipRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake-IP range'**
+  String get fakeipRange;
+
+  /// No description provided for @fakeipFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake-IP filter'**
+  String get fakeipFilter;
+
+  /// No description provided for @defaultNameserver.
+  ///
+  /// In en, this message translates to:
+  /// **'Default nameserver'**
+  String get defaultNameserver;
+
+  /// No description provided for @defaultNameserverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolves the hostnames of the other DNS servers. Use IP addresses only.'**
+  String get defaultNameserverDesc;
+
+  /// No description provided for @nameserver.
+  ///
+  /// In en, this message translates to:
+  /// **'Nameserver'**
+  String get nameserver;
+
+  /// No description provided for @nameserverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The default DNS servers, such as 223.5.5.5, tls://1.1.1.1 or https://dns.google/dns-query.'**
+  String get nameserverDesc;
+
+  /// No description provided for @useHosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Use hosts'**
+  String get useHosts;
+
+  /// No description provided for @useSystemHosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Use system hosts'**
+  String get useSystemHosts;
+
+  /// No description provided for @nameserverPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Nameserver policy'**
+  String get nameserverPolicy;
+
+  /// No description provided for @nameserverPolicyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching domains use the DNS server given here instead of Nameserver and Fallback.'**
+  String get nameserverPolicyDesc;
+
+  /// No description provided for @proxyNameserver.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy nameserver'**
+  String get proxyNameserver;
+
+  /// No description provided for @fallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback'**
+  String get fallback;
+
+  /// No description provided for @fallbackDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Used instead of Nameserver when the fallback filter treats its answer as polluted.'**
+  String get fallbackDesc;
+
+  /// No description provided for @preferH3.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefer HTTP/3'**
+  String get preferH3;
+
+  /// No description provided for @fallbackLazyQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Lazy fallback query'**
+  String get fallbackLazyQuery;
+
+  /// No description provided for @proxyNameserverPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy nameserver policy'**
+  String get proxyNameserverPolicy;
+
+  /// No description provided for @directNameserver.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct nameserver'**
+  String get directNameserver;
+
+  /// No description provided for @directNameserverFollowPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct nameserver follows policy'**
+  String get directNameserverFollowPolicy;
+
+  /// No description provided for @fallbackFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback filter'**
+  String get fallbackFilter;
+
+  /// No description provided for @geoipCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Geoip code'**
+  String get geoipCode;
+
+  /// No description provided for @ipcidr.
+  ///
+  /// In en, this message translates to:
+  /// **'Ipcidr'**
+  String get ipcidr;
+
+  /// No description provided for @domain.
+  ///
+  /// In en, this message translates to:
+  /// **'Domain'**
+  String get domain;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @action_view.
+  ///
+  /// In en, this message translates to:
+  /// **'Show/Hide'**
+  String get action_view;
+
+  /// No description provided for @action_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start/Stop'**
+  String get action_start;
+
+  /// No description provided for @action_mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch mode'**
+  String get action_mode;
+
+  /// No description provided for @action_proxy.
+  ///
+  /// In en, this message translates to:
+  /// **'System proxy'**
+  String get action_proxy;
+
+  /// No description provided for @action_tun.
+  ///
+  /// In en, this message translates to:
+  /// **'TUN'**
+  String get action_tun;
+
+  /// No description provided for @hotkeyManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotkey Management'**
+  String get hotkeyManagement;
+
+  /// No description provided for @hotkeyManagementDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use keyboard to control applications'**
+  String get hotkeyManagementDesc;
+
+  /// No description provided for @pressKeyboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Please press the keyboard.'**
+  String get pressKeyboard;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @noNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No network'**
+  String get noNetwork;
+
+  /// No description provided for @ipv6InboundDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'With IPv6 on, the VPN allows IPv6 inbound'**
+  String get ipv6InboundDesc;
+
+  /// No description provided for @exportLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Export logs'**
+  String get exportLogs;
+
+  /// No description provided for @exportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Success'**
+  String get exportSuccess;
+
+  /// No description provided for @iconStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon style'**
+  String get iconStyle;
+
+  /// No description provided for @iconStyleFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled'**
+  String get iconStyleFilled;
+
+  /// No description provided for @iconStylePlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain'**
+  String get iconStylePlain;
+
+  /// No description provided for @iconStyleHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get iconStyleHidden;
+
+  /// No description provided for @stackMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Stack mode'**
+  String get stackMode;
+
+  /// No description provided for @network.
+  ///
+  /// In en, this message translates to:
+  /// **'Network'**
+  String get network;
+
+  /// No description provided for @bypassDomain.
+  ///
+  /// In en, this message translates to:
+  /// **'Bypass domains'**
+  String get bypassDomain;
+
+  /// No description provided for @bypassDomainDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Bypass domains apply only while the system proxy is on'**
+  String get bypassDomainDesc;
+
+  /// No description provided for @resetTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure to reset'**
+  String get resetTip;
+
+  /// No description provided for @icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get icon;
+
+  /// No description provided for @noData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get noData;
+
+  /// No description provided for @fontFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Font family'**
+  String get fontFamily;
+
+  /// No description provided for @installedFonts.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed fonts'**
+  String get installedFonts;
+
+  /// No description provided for @toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle'**
+  String get toggle;
+
+  /// No description provided for @system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get system;
+
+  /// No description provided for @bypassPrivateRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Bypass private addresses'**
+  String get bypassPrivateRoute;
+
+  /// No description provided for @bypassPrivateRouteDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'With Bypass private addresses on, LAN, loopback and multicast addresses skip TUN'**
+  String get bypassPrivateRouteDesc;
+
+  /// No description provided for @routeAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Route addresses'**
+  String get routeAddress;
+
+  /// No description provided for @pleaseInputAdminPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the admin password'**
+  String get pleaseInputAdminPassword;
+
+  /// No description provided for @tunAuthorizationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'TUN could not be enabled because administrator authorization was denied. Allow the system permission prompt and try again.'**
+  String get tunAuthorizationFailed;
+
+  /// No description provided for @tunHelperInstallFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'TUN could not be enabled: Helper installation or startup failed. Check that the app installation is complete and the system service is working, then try again.'**
+  String get tunHelperInstallFailed;
+
+  /// No description provided for @tunAdminAccountRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'TUN needs an administrator account on this Mac. Sign in with an administrator account to turn it on.'**
+  String get tunAdminAccountRequired;
+
+  /// No description provided for @copyEnvVar.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying environment variables'**
+  String get copyEnvVar;
+
+  /// No description provided for @memoryInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory info'**
+  String get memoryInfo;
+
+  /// No description provided for @dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Dialog'**
+  String get dialog;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @fileIsUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'The file has been modified. Do you want to save the changes?'**
+  String get fileIsUpdate;
+
+  /// No description provided for @profileHasUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'The profile has been modified. Do you want to disable auto update?'**
+  String get profileHasUpdate;
+
+  /// No description provided for @copySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy success'**
+  String get copySuccess;
+
+  /// No description provided for @copyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get copyLink;
+
+  /// No description provided for @exportFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Export file'**
+  String get exportFile;
+
+  /// No description provided for @cacheCorrupt.
+  ///
+  /// In en, this message translates to:
+  /// **'The cache is corrupt. Do you want to clear it?'**
+  String get cacheCorrupt;
+
+  /// No description provided for @listen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get listen;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'undo'**
+  String get undo;
+
+  /// No description provided for @redo.
+  ///
+  /// In en, this message translates to:
+  /// **'redo'**
+  String get redo;
+
+  /// No description provided for @none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get none;
+
+  /// No description provided for @required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get required;
+
+  /// No description provided for @advancedConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced configuration'**
+  String get advancedConfig;
+
+  /// No description provided for @advancedConfigDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide diverse configuration options'**
+  String get advancedConfigDesc;
+
+  /// No description provided for @addRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rule'**
+  String get addRule;
+
+  /// No description provided for @ruleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule name'**
+  String get ruleName;
+
+  /// No description provided for @content.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get content;
+
+  /// No description provided for @subRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Sub rule'**
+  String get subRule;
+
+  /// No description provided for @ruleTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule target'**
+  String get ruleTarget;
+
+  /// No description provided for @sourceIp.
+  ///
+  /// In en, this message translates to:
+  /// **'Source IP'**
+  String get sourceIp;
+
+  /// No description provided for @noResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'No resolve IP'**
+  String get noResolve;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to save the changes?'**
+  String get saveChanges;
+
+  /// No description provided for @findProcessModeAutomaticDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Process rules look up the process only when they are checked'**
+  String get findProcessModeAutomaticDesc;
+
+  /// No description provided for @monochromeScheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Monochrome'**
+  String get monochromeScheme;
+
+  /// No description provided for @colorStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Color style'**
+  String get colorStyle;
+
+  /// No description provided for @vividStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vivid'**
+  String get vividStyle;
+
+  /// No description provided for @tintedStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tinted'**
+  String get tintedStyle;
+
+  /// No description provided for @softStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft'**
+  String get softStyle;
+
+  /// No description provided for @customColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom color'**
+  String get customColor;
+
+  /// No description provided for @grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get grid;
+
+  /// No description provided for @spectrum.
+  ///
+  /// In en, this message translates to:
+  /// **'Spectrum'**
+  String get spectrum;
+
+  /// No description provided for @sliders.
+  ///
+  /// In en, this message translates to:
+  /// **'Sliders'**
+  String get sliders;
+
+  /// No description provided for @hue.
+  ///
+  /// In en, this message translates to:
+  /// **'Hue'**
+  String get hue;
+
+  /// No description provided for @saturation.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturation'**
+  String get saturation;
+
+  /// No description provided for @brightness.
+  ///
+  /// In en, this message translates to:
+  /// **'Brightness'**
+  String get brightness;
+
+  /// No description provided for @hex.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex'**
+  String get hex;
+
+  /// No description provided for @liquidGlass.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquid Glass'**
+  String get liquidGlass;
+
+  /// No description provided for @ultra.
+  ///
+  /// In en, this message translates to:
+  /// **'Ultra'**
+  String get ultra;
+
+  /// No description provided for @developerMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer mode'**
+  String get developerMode;
+
+  /// No description provided for @developerModeEnableTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer mode is enabled.'**
+  String get developerModeEnableTip;
+
+  /// No description provided for @messageTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Message test'**
+  String get messageTest;
+
+  /// No description provided for @messageTestTip.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a message.'**
+  String get messageTestTip;
+
+  /// No description provided for @crashTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Crash test'**
+  String get crashTest;
+
+  /// No description provided for @clearData.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Data'**
+  String get clearData;
+
+  /// No description provided for @textScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Scaling'**
+  String get textScale;
+
+  /// No description provided for @internet.
+  ///
+  /// In en, this message translates to:
+  /// **'Internet'**
+  String get internet;
+
+  /// No description provided for @systemApp.
+  ///
+  /// In en, this message translates to:
+  /// **'System APP'**
+  String get systemApp;
+
+  /// No description provided for @noNetworkApp.
+  ///
+  /// In en, this message translates to:
+  /// **'No network APP'**
+  String get noNetworkApp;
+
+  /// No description provided for @restoreStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore strategy'**
+  String get restoreStrategy;
+
+  /// No description provided for @restoreStrategy_override.
+  ///
+  /// In en, this message translates to:
+  /// **'Override'**
+  String get restoreStrategy_override;
+
+  /// No description provided for @restoreStrategy_compatible.
+  ///
+  /// In en, this message translates to:
+  /// **'Compatible'**
+  String get restoreStrategy_compatible;
+
+  /// No description provided for @logsTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs test'**
+  String get logsTest;
+
+  /// No description provided for @emptyTip.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} cannot be empty'**
+  String emptyTip(Object label);
+
+  /// No description provided for @urlTip.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} must be a url'**
+  String urlTip(Object label);
+
+  /// No description provided for @numberTip.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} must be a number'**
+  String numberTip(Object label);
+
+  /// No description provided for @interval.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get interval;
+
+  /// No description provided for @existsTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Current {label} already exists'**
+  String existsTip(Object label);
+
+  /// No description provided for @deleteTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the current {label}?'**
+  String deleteTip(Object label);
+
+  /// No description provided for @deleteMultipTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the selected {label}?'**
+  String deleteMultipTip(Object label);
+
+  /// No description provided for @nullTip.
+  ///
+  /// In en, this message translates to:
+  /// **'No {label} yet'**
+  String nullTip(Object label);
+
+  /// No description provided for @script.
+  ///
+  /// In en, this message translates to:
+  /// **'Script'**
+  String get script;
+
+  /// No description provided for @color.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get color;
+
+  /// No description provided for @rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rename;
+
+  /// No description provided for @unnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed'**
+  String get unnamed;
+
+  /// No description provided for @mixedPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed port'**
+  String get mixedPort;
+
+  /// No description provided for @socksPort.
+  ///
+  /// In en, this message translates to:
+  /// **'SOCKS port'**
+  String get socksPort;
+
+  /// No description provided for @redirPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Redir port'**
+  String get redirPort;
+
+  /// No description provided for @tproxyPort.
+  ///
+  /// In en, this message translates to:
+  /// **'TProxy port'**
+  String get tproxyPort;
+
+  /// No description provided for @portTip.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} must be between 1024 and 49151'**
+  String portTip(Object label);
+
+  /// No description provided for @portConflictTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a different port'**
+  String get portConflictTip;
+
+  /// No description provided for @portUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Port unavailable'**
+  String get portUnavailableTitle;
+
+  /// No description provided for @portUnavailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The mixed port {port} could not start listening and may be in use by another application. Change the port to retry immediately.'**
+  String portUnavailableMessage(Object port);
+
+  /// No description provided for @saveAndRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and retry'**
+  String get saveAndRetry;
+
+  /// No description provided for @portSuggestionTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested port {port} has been filled in.'**
+  String portSuggestionTip(Object port);
+
+  /// No description provided for @portProxyAppTip.
+  ///
+  /// In en, this message translates to:
+  /// **'If another proxy app is running, close it first.'**
+  String get portProxyAppTip;
+
+  /// No description provided for @import.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get import;
+
+  /// No description provided for @importFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from file'**
+  String get importFile;
+
+  /// No description provided for @importUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from URL'**
+  String get importUrl;
+
+  /// No description provided for @autoSetSystemDns.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-set system DNS'**
+  String get autoSetSystemDns;
+
+  /// No description provided for @suspendOnIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause proxy when idle'**
+  String get suspendOnIdle;
+
+  /// No description provided for @suspendOnIdleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause proxy when idle stops traffic forwarding and health checks while the screen is off and the system is idle, which may disconnect calls and live audio and delay push notifications'**
+  String get suspendOnIdleDesc;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} details'**
+  String details(Object label);
+
+  /// No description provided for @creationTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Creation time'**
+  String get creationTime;
+
+  /// No description provided for @process.
+  ///
+  /// In en, this message translates to:
+  /// **'Process'**
+  String get process;
+
+  /// No description provided for @host.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get host;
+
+  /// No description provided for @destination.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get destination;
+
+  /// No description provided for @destinationGeoIP.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination GeoIP'**
+  String get destinationGeoIP;
+
+  /// No description provided for @destinationIPASN.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination IPASN'**
+  String get destinationIPASN;
+
+  /// No description provided for @specialProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Special proxy'**
+  String get specialProxy;
+
+  /// No description provided for @specialRules.
+  ///
+  /// In en, this message translates to:
+  /// **'special rules'**
+  String get specialRules;
+
+  /// No description provided for @remoteDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote destination'**
+  String get remoteDestination;
+
+  /// No description provided for @networkType.
+  ///
+  /// In en, this message translates to:
+  /// **'Network type'**
+  String get networkType;
+
+  /// No description provided for @proxyChains.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy chains'**
+  String get proxyChains;
+
+  /// No description provided for @proxyChainWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy chaining can significantly reduce network speed. Keep it disabled unless you clearly need it.'**
+  String get proxyChainWarning;
+
+  /// No description provided for @proxyChainInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose hops from entry to exit. Nodes or policy groups can occupy any hop. Concrete group members use the preceding hop; nested groups and DIRECT/REJECT stay unchanged. After saving, the chain appears under its name as a policy group in the proxy list and rule targets. Delays in this editor are per-hop references; test the chain\'s group to measure the effective route.'**
+  String get proxyChainInstruction;
+
+  /// No description provided for @proxyChainMinimumNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'A proxy chain needs an entry and an exit'**
+  String get proxyChainMinimumNodes;
+
+  /// No description provided for @proxyChainMinimumNodesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an exit node or policy group.'**
+  String get proxyChainMinimumNodesHint;
+
+  /// No description provided for @proxyChainPolicyGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Policy groups'**
+  String get proxyChainPolicyGroups;
+
+  /// No description provided for @proxyChainUnsupportedGroupTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Only select, url-test, fallback, and load-balance groups can be used in a chain.'**
+  String get proxyChainUnsupportedGroupTip;
+
+  /// No description provided for @proxyChainEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry'**
+  String get proxyChainEntry;
+
+  /// No description provided for @proxyChainExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get proxyChainExit;
+
+  /// No description provided for @clearProxyChain.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear chain config'**
+  String get clearProxyChain;
+
+  /// No description provided for @proxyChainCustomNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom nodes'**
+  String get proxyChainCustomNodes;
+
+  /// No description provided for @proxyChainCustomNode.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom node'**
+  String get proxyChainCustomNode;
+
+  /// No description provided for @addProxyChainNode.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addProxyChainNode;
+
+  /// No description provided for @proxyChainOtherNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Other nodes'**
+  String get proxyChainOtherNodes;
+
+  /// No description provided for @proxyChainSavedAndApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy chain saved and applied. Select it by its name in rules or in the proxy list.'**
+  String get proxyChainSavedAndApplied;
+
+  /// No description provided for @proxyChainConflictTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy {name} conflicts with another enabled chain or creates a loop'**
+  String proxyChainConflictTip(Object name);
+
+  /// No description provided for @proxyChainUnavailableNodeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy {name} is not available in this position'**
+  String proxyChainUnavailableNodeTip(Object name);
+
+  /// No description provided for @proxyChainUnavailableReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy chain “{chainName}” references an unavailable node or policy group “{nodeName}”. Select it again in “Proxy chains”, or disable this chain.'**
+  String proxyChainUnavailableReference(Object chainName, Object nodeName);
+
+  /// No description provided for @proxyChainRelatedChainsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Related proxy chains updated'**
+  String get proxyChainRelatedChainsUpdated;
+
+  /// No description provided for @proxyChainSelectedNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy chain'**
+  String get proxyChainSelectedNodes;
+
+  /// No description provided for @proxyChainAvailableNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Available nodes and groups'**
+  String get proxyChainAvailableNodes;
+
+  /// No description provided for @proxyChainEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No nodes in the proxy chain'**
+  String get proxyChainEmpty;
+
+  /// No description provided for @proxyChainNodeAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Node added to proxy chain'**
+  String get proxyChainNodeAdded;
+
+  /// No description provided for @proxyChainUriNodeSupportedFormats.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported formats: ss://, ssr://, vmess://, vless://, trojan://, anytls://, hysteria:// / hy://, hysteria2:// / hy2://, tuic://, wireguard:// / wg://, http(s)://, socks(5)://'**
+  String get proxyChainUriNodeSupportedFormats;
+
+  /// No description provided for @log.
+  ///
+  /// In en, this message translates to:
+  /// **'Log'**
+  String get log;
+
+  /// No description provided for @connection.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection'**
+  String get connection;
+
+  /// No description provided for @request.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get request;
+
+  /// No description provided for @connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get connected;
+
+  /// No description provided for @disconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get disconnected;
+
+  /// No description provided for @connecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting...'**
+  String get connecting;
+
+  /// No description provided for @restartCoreTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restart the core?'**
+  String get restartCoreTip;
+
+  /// No description provided for @forceRestartCoreTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to force restart the core?'**
+  String get forceRestartCoreTip;
+
+  /// No description provided for @dnsHijacking.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS hijacking'**
+  String get dnsHijacking;
+
+  /// No description provided for @coreStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Core status'**
+  String get coreStatus;
+
+  /// No description provided for @coreNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Core is not connected'**
+  String get coreNotConnected;
+
+  /// No description provided for @appendSystemDns.
+  ///
+  /// In en, this message translates to:
+  /// **'Append system DNS'**
+  String get appendSystemDns;
+
+  /// No description provided for @blockQuic.
+  ///
+  /// In en, this message translates to:
+  /// **'Block QUIC'**
+  String get blockQuic;
+
+  /// No description provided for @blockQuicDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject UDP 443 traffic to force connections back to TCP'**
+  String get blockQuicDesc;
+
+  /// No description provided for @blockWebRtc.
+  ///
+  /// In en, this message translates to:
+  /// **'Block WebRTC'**
+  String get blockWebRtc;
+
+  /// No description provided for @blockWebRtcDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject STUN traffic to reduce WebRTC IP leaks.'**
+  String get blockWebRtcDesc;
+
+  /// No description provided for @editRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit rule'**
+  String get editRule;
+
+  /// No description provided for @overrideMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Override mode'**
+  String get overrideMode;
+
+  /// No description provided for @standardModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard mode, optionally runs an override script, then adds rules on top of the configuration'**
+  String get standardModeDesc;
+
+  /// No description provided for @addedRulesAfterScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Inserted after the script runs, ahead of the profile\'s rules'**
+  String get addedRulesAfterScript;
+
+  /// No description provided for @addedRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Added rules'**
+  String get addedRules;
+
+  /// No description provided for @controlGlobalAddedRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Control global added rules'**
+  String get controlGlobalAddedRules;
+
+  /// No description provided for @overrideScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Override script'**
+  String get overrideScript;
+
+  /// No description provided for @goToConfigureScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to configure script'**
+  String get goToConfigureScript;
+
+  /// No description provided for @editGlobalRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit global rules'**
+  String get editGlobalRules;
+
+  /// No description provided for @confirmForceCrashCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to force crash the core?'**
+  String get confirmForceCrashCore;
+
+  /// No description provided for @confirmClearAllData.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear all data?'**
+  String get confirmClearAllData;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @yearsAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 year ago} other{{count} years ago}}'**
+  String yearsAgo(num count);
+
+  /// No description provided for @monthsAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 month ago} other{{count} months ago}}'**
+  String monthsAgo(num count);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day ago} other{{count} days ago}}'**
+  String daysAgo(num count);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour ago} other{{count} hours ago}}'**
+  String hoursAgo(num count);
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute ago} other{{count} minutes ago}}'**
+  String minutesAgo(num count);
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// No description provided for @turnOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn On'**
+  String get turnOn;
+
+  /// No description provided for @turnOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn Off'**
+  String get turnOff;
+
+  /// No description provided for @vpnConfigChangeDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'VPN settings changed. Tap to restart'**
+  String get vpnConfigChangeDetected;
+
+  /// No description provided for @restart.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get restart;
+
+  /// No description provided for @speedStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed statistics'**
+  String get speedStatistics;
+
+  /// No description provided for @resetPageChangesTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The current page has changes. Are you sure you want to reset?'**
+  String get resetPageChangesTip;
+
+  /// No description provided for @overwriteTypeCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get overwriteTypeCustom;
+
+  /// No description provided for @overwriteTypeCustomDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom mode, fully customize proxy groups and rules'**
+  String get overwriteTypeCustomDesc;
+
+  /// No description provided for @emptyCustomOverwrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom override is empty. Use Quick fill or add rules and proxy groups first. To keep subscription content, use Overlay mode.'**
+  String get emptyCustomOverwrite;
+
+  /// No description provided for @proxyGroupEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy group is empty'**
+  String get proxyGroupEmpty;
+
+  /// No description provided for @proxyGroupNameEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy group name cannot be empty'**
+  String get proxyGroupNameEmpty;
+
+  /// No description provided for @ruleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule is empty'**
+  String get ruleEmpty;
+
+  /// No description provided for @confirmOverwriteTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing data will be overwritten after confirmation'**
+  String get confirmOverwriteTip;
+
+  /// No description provided for @configDataDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Data detected in configuration'**
+  String get configDataDetected;
+
+  /// No description provided for @quickFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick fill'**
+  String get quickFill;
+
+  /// No description provided for @clearCustomRouting.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get clearCustomRouting;
+
+  /// No description provided for @confirmClearCustomRouting.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear this profile’s custom proxy groups and rules? Subscription content, added rules, proxy chains, and custom nodes will be kept.'**
+  String get confirmClearCustomRouting;
+
+  /// No description provided for @addProxyGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add proxy group'**
+  String get addProxyGroup;
+
+  /// No description provided for @editProxyGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit proxy group'**
+  String get editProxyGroup;
+
+  /// No description provided for @lazy.
+  ///
+  /// In en, this message translates to:
+  /// **'Lazy loading'**
+  String get lazy;
+
+  /// No description provided for @proxyFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy filter'**
+  String get proxyFilter;
+
+  /// No description provided for @excludeProxyFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude proxy filter'**
+  String get excludeProxyFilter;
+
+  /// No description provided for @excludeType.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude type'**
+  String get excludeType;
+
+  /// No description provided for @expectedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected status'**
+  String get expectedStatus;
+
+  /// No description provided for @maxFailedTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'Max failed times'**
+  String get maxFailedTimes;
+
+  /// No description provided for @timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeout'**
+  String get timeout;
+
+  /// No description provided for @strategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Strategy'**
+  String get strategy;
+
+  /// No description provided for @iconUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon URL'**
+  String get iconUrl;
+
+  /// No description provided for @disableUDP.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable UDP'**
+  String get disableUDP;
+
+  /// No description provided for @hideFromList.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide from list'**
+  String get hideFromList;
+
+  /// No description provided for @includeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Include all proxies and providers'**
+  String get includeAll;
+
+  /// No description provided for @includeAllProxies.
+  ///
+  /// In en, this message translates to:
+  /// **'Include all proxies'**
+  String get includeAllProxies;
+
+  /// No description provided for @includeAllProxyProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Include all proxy providers'**
+  String get includeAllProxyProviders;
+
+  /// No description provided for @proxyGroupMembersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a proxy, provider, or include-all option'**
+  String get proxyGroupMembersEmpty;
+
+  /// No description provided for @tolerance.
+  ///
+  /// In en, this message translates to:
+  /// **'Tolerance'**
+  String get tolerance;
+
+  /// No description provided for @customOutboundInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is still referenced by a group, rule, or proxy chain'**
+  String customOutboundInUse(Object name);
+
+  /// No description provided for @relayGroupUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Relay groups were removed by the core. Choose another type.'**
+  String get relayGroupUnsupported;
+
+  /// No description provided for @rawOutboundInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is referenced by the original configuration at {path}'**
+  String rawOutboundInUse(Object name, Object path);
+
+  /// No description provided for @unknownNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown network error'**
+  String get unknownNetworkError;
+
+  /// No description provided for @restoreException.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery exception'**
+  String get restoreException;
+
+  /// No description provided for @networkException.
+  ///
+  /// In en, this message translates to:
+  /// **'Network exception, please check your connection and try again'**
+  String get networkException;
+
+  /// No description provided for @invalidBackupFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid backup file'**
+  String get invalidBackupFile;
+
+  /// No description provided for @backupFromNewerVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup comes from a newer version of the app. Update the app before restoring it'**
+  String get backupFromNewerVersion;
+
+  /// No description provided for @pruneCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Prune cache'**
+  String get pruneCache;
+
+  /// No description provided for @backupAndRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup and Restore'**
+  String get backupAndRestore;
+
+  /// No description provided for @backupAndRestoreDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync data via WebDAV or files'**
+  String get backupAndRestoreDesc;
+
+  /// No description provided for @restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// No description provided for @restoreDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Default'**
+  String get restoreDefault;
+
+  /// No description provided for @restoreSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore success'**
+  String get restoreSuccess;
+
+  /// No description provided for @restoreFromWebDAVDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore data via WebDAV'**
+  String get restoreFromWebDAVDesc;
+
+  /// No description provided for @restoreFromFileDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore data via file'**
+  String get restoreFromFileDesc;
+
+  /// No description provided for @restoreOnlyConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore configuration files only'**
+  String get restoreOnlyConfig;
+
+  /// No description provided for @restoreAllData.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore all data'**
+  String get restoreAllData;
+
+  /// No description provided for @backupRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups to keep'**
+  String get backupRetention;
+
+  /// No description provided for @backupRetentionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Each backup removes this device\'s older WebDAV backups'**
+  String get backupRetentionDesc;
+
+  /// No description provided for @selectBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a backup'**
+  String get selectBackup;
+
+  /// No description provided for @noRemoteBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'No backups on WebDAV'**
+  String get noRemoteBackup;
+
+  /// No description provided for @deleteBackupTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this backup from WebDAV?'**
+  String get deleteBackupTip;
+
+  /// No description provided for @addProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Profile'**
+  String get addProfile;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @delayTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay Test'**
+  String get delayTest;
+
+  /// No description provided for @userCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'User Center'**
+  String get userCenter;
+
+  /// No description provided for @userCenterFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'User Center (Backup)'**
+  String get userCenterFallback;
+
+  /// No description provided for @userGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'User Guide'**
+  String get userGuide;
+
+  /// No description provided for @oixCloud.
+  ///
+  /// In en, this message translates to:
+  /// **'oixCloud'**
+  String get oixCloud;
+
+  /// No description provided for @register.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get register;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get registerTitle;
+
+  /// No description provided for @registerFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration failed'**
+  String get registerFailed;
+
+  /// No description provided for @registerClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration is currently closed'**
+  String get registerClosed;
+
+  /// No description provided for @haveAccountAlready.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get haveAccountAlready;
+
+  /// No description provided for @goLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get goLogin;
+
+  /// No description provided for @nicknameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get nicknameLabel;
+
+  /// No description provided for @nicknameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters and numbers, up to 12 characters'**
+  String get nicknameHint;
+
+  /// No description provided for @nicknameValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a nickname'**
+  String get nicknameValidation;
+
+  /// No description provided for @confirmPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPasswordLabel;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @confirmPasswordValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get confirmPasswordValidation;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordMismatch;
+
+  /// No description provided for @passwordRuleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'10-36 chars incl. upper/lowercase, number and symbol'**
+  String get passwordRuleHint;
+
+  /// No description provided for @inviteCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Code'**
+  String get inviteCodeLabel;
+
+  /// No description provided for @inviteCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter invite code'**
+  String get inviteCodeHint;
+
+  /// No description provided for @inviteCodeValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the invite code'**
+  String get inviteCodeValidation;
+
+  /// No description provided for @emailCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Code'**
+  String get emailCodeLabel;
+
+  /// No description provided for @emailCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get emailCodeHint;
+
+  /// No description provided for @emailCodeValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the email code'**
+  String get emailCodeValidation;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Code'**
+  String get sendCode;
+
+  /// No description provided for @resendCodeIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend in {seconds}s'**
+  String resendCodeIn(Object seconds);
+
+  /// No description provided for @codeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code sent'**
+  String get codeSent;
+
+  /// No description provided for @loggedOutViewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'oixCloud'**
+  String get loggedOutViewTitle;
+
+  /// No description provided for @loggedOutViewDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Login to view account info and manage subscriptions'**
+  String get loggedOutViewDesc;
+
+  /// No description provided for @signInWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get signInWithGoogle;
+
+  /// No description provided for @googleLoginWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Google sign-in in your browser'**
+  String get googleLoginWaiting;
+
+  /// No description provided for @googleLoginUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open Google sign-in. Please try again.'**
+  String get googleLoginUnavailable;
+
+  /// No description provided for @googleLoginTimedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in timed out. Please try again.'**
+  String get googleLoginTimedOut;
+
+  /// No description provided for @googleLoginInvalidCallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not verify Google sign-in. Please try again.'**
+  String get googleLoginInvalidCallback;
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get loginTitle;
+
+  /// No description provided for @startCorePromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get startCorePromptTitle;
+
+  /// No description provided for @startCorePromptContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile has been successfully imported. Do you want to start the core now?'**
+  String get startCorePromptContent;
+
+  /// No description provided for @logoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logoutTitle;
+
+  /// No description provided for @logoutContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out?'**
+  String get logoutContent;
+
+  /// No description provided for @loginSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Login Successful'**
+  String get loginSuccess;
+
+  /// No description provided for @getProfileSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile imported successfully'**
+  String get getProfileSuccess;
+
+  /// No description provided for @startSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Started successfully'**
+  String get startSuccess;
+
+  /// No description provided for @loginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Login Failed'**
+  String get loginFailed;
+
+  /// No description provided for @invalidCertificateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate Verification Failed'**
+  String get invalidCertificateTitle;
+
+  /// No description provided for @certificateExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate has expired'**
+  String get certificateExpired;
+
+  /// No description provided for @certificateNotYetValid.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate is not yet valid'**
+  String get certificateNotYetValid;
+
+  /// No description provided for @certificateHostnameMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate does not match the requested domain'**
+  String get certificateHostnameMismatch;
+
+  /// No description provided for @certificateUntrusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate chain is not trusted'**
+  String get certificateUntrusted;
+
+  /// No description provided for @certificateValidityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First synchronize the system date and time. If the time is correct, the server certificate needs to be fixed.'**
+  String get certificateValidityHint;
+
+  /// No description provided for @invalidCertificateContent.
+  ///
+  /// In en, this message translates to:
+  /// **'The server certificate could not be verified. Skipping verification means the server may be impersonated, and any account credentials or subscription data you send or receive could be stolen or altered.\n\nProceed only if you trust this network and server. This exception applies only to this retry with the same server and certificate, and is removed when the operation ends.'**
+  String get invalidCertificateContent;
+
+  /// No description provided for @allowTemporarily.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Temporarily'**
+  String get allowTemporarily;
+
+  /// No description provided for @retryWithoutCertificateVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporarily Check API'**
+  String get retryWithoutCertificateVerification;
+
+  /// No description provided for @apiAvailableWithCertificateException.
+  ///
+  /// In en, this message translates to:
+  /// **'The API was reachable with a temporary certificate exception. No account or node configuration was synced. Fix the certificate issue, then check again.'**
+  String get apiAvailableWithCertificateException;
+
+  /// No description provided for @certificateUntrustedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different network, such as a phone hotspot, and check for system updates. If antivirus software or a company network inspects HTTPS, ask its administrator to check it. If the problem persists, contact the service provider to check the certificate chain.'**
+  String get certificateUntrustedHint;
+
+  /// No description provided for @certificateHostnameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different network and complete any Wi-Fi sign-in first. If the problem persists, contact the service provider to check that the certificate matches the server domain.'**
+  String get certificateHostnameHint;
+
+  /// No description provided for @certificateRevokedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact the service provider to replace the revoked certificate. Retrying or changing the system time will not fix a revoked certificate.'**
+  String get certificateRevokedHint;
+
+  /// No description provided for @certificateUnknownHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the system date and time, then try a different network. If verification still fails, send this error to the service provider for help.'**
+  String get certificateUnknownHint;
+
+  /// No description provided for @certificateCheckOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This action only checks API connectivity. It does not sign in or download node configurations.'**
+  String get certificateCheckOnlyHint;
+
+  /// No description provided for @certificateSyncRetryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'After confirmation, this attempt checks the connection, refreshes your account, and downloads the node configuration. The certificate exception ends when this sync finishes.'**
+  String get certificateSyncRetryDescription;
+
+  /// No description provided for @retryCloudSyncWithCertificateException.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Temporarily and Sync'**
+  String get retryCloudSyncWithCertificateException;
+
+  /// No description provided for @cloudSyncedWithCertificateException.
+  ///
+  /// In en, this message translates to:
+  /// **'Account and configuration sync completed with a temporary certificate exception. Verification is now restored; resolve the certificate issue before the next sync.'**
+  String get cloudSyncedWithCertificateException;
+
+  /// No description provided for @cloudCertificateSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The API check passed, but account or node configuration sync failed: '**
+  String get cloudCertificateSyncFailed;
+
+  /// No description provided for @cloudConfigSyncIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'The node configuration was not downloaded. Resolve the download error and sync again.'**
+  String get cloudConfigSyncIncomplete;
+
+  /// No description provided for @emailPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Email & Password'**
+  String get emailPassword;
+
+  /// No description provided for @accessToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Access Token'**
+  String get accessToken;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @emailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email address'**
+  String get emailHint;
+
+  /// No description provided for @emailValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter email'**
+  String get emailValidation;
+
+  /// No description provided for @emailFormatValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email format'**
+  String get emailFormatValidation;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @sendResetEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset email'**
+  String get sendResetEmail;
+
+  /// No description provided for @resetEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset email sent. Paste the reset link or code from the email below.'**
+  String get resetEmailSent;
+
+  /// No description provided for @resetTokenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset link or code'**
+  String get resetTokenLabel;
+
+  /// No description provided for @resetTokenValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the reset link or code'**
+  String get resetTokenValidation;
+
+  /// No description provided for @newPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPasswordLabel;
+
+  /// No description provided for @resetPasswordSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password has been reset, please sign in with your new password'**
+  String get resetPasswordSuccess;
+
+  /// No description provided for @passwordValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter password'**
+  String get passwordValidation;
+
+  /// No description provided for @tokenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Access Token'**
+  String get tokenLabel;
+
+  /// No description provided for @tokenValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Access Token'**
+  String get tokenValidation;
+
+  /// No description provided for @expireDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires: {date}'**
+  String expireDate(Object date);
+
+  /// No description provided for @todayUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Usage'**
+  String get todayUsed;
+
+  /// No description provided for @remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining: {value}'**
+  String remaining(Object value);
+
+  /// No description provided for @balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get balance;
+
+  /// No description provided for @commission.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission'**
+  String get commission;
+
+  /// No description provided for @points.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get points;
+
+  /// No description provided for @announcement.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement'**
+  String get announcement;
+
+  /// No description provided for @readFullAnnouncement.
+  ///
+  /// In en, this message translates to:
+  /// **'Read full announcement'**
+  String get readFullAnnouncement;
+
+  /// No description provided for @serviceCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Check Failed'**
+  String get serviceCheckFailed;
+
+  /// No description provided for @apiAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'API service is operational'**
+  String get apiAvailable;
+
+  /// No description provided for @checkApi.
+  ///
+  /// In en, this message translates to:
+  /// **'Check API'**
+  String get checkApi;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @nodeFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Node Filter'**
+  String get nodeFilter;
+
+  /// No description provided for @nodeFilterSmartSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart Selection'**
+  String get nodeFilterSmartSelection;
+
+  /// No description provided for @nodeFilterCustomized.
+  ///
+  /// In en, this message translates to:
+  /// **'Customized'**
+  String get nodeFilterCustomized;
+
+  /// No description provided for @nodeFilterKept.
+  ///
+  /// In en, this message translates to:
+  /// **'{kept} of {total} nodes kept'**
+  String nodeFilterKept(Object kept, Object total);
+
+  /// No description provided for @nodeFilterLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get nodeFilterLines;
+
+  /// No description provided for @nodeFilterRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'Regions'**
+  String get nodeFilterRegions;
+
+  /// No description provided for @nodeFilterNameContains.
+  ///
+  /// In en, this message translates to:
+  /// **'Name contains'**
+  String get nodeFilterNameContains;
+
+  /// No description provided for @nodeFilterNameExcludes.
+  ///
+  /// In en, this message translates to:
+  /// **'Name excludes'**
+  String get nodeFilterNameExcludes;
+
+  /// No description provided for @nodeFilterPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get nodeFilterPreview;
+
+  /// No description provided for @nodeFilterSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search nodes'**
+  String get nodeFilterSearch;
+
+  /// No description provided for @nodeFilterAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get nodeFilterAny;
+
+  /// No description provided for @nodeFilterOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only'**
+  String get nodeFilterOnly;
+
+  /// No description provided for @nodeFilterExclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude'**
+  String get nodeFilterExclude;
+
+  /// No description provided for @nodeFilterKeepOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep at least one node'**
+  String get nodeFilterKeepOne;
+
+  /// No description provided for @nodeFilterNodeKept.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, kept'**
+  String nodeFilterNodeKept(Object name);
+
+  /// No description provided for @nodeFilterNodeExcluded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, excluded'**
+  String nodeFilterNodeExcluded(Object name);
+
+  /// No description provided for @nodeFilterRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get nodeFilterRetry;
+
+  /// No description provided for @nodeFilterAccountNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to your account and applies to every device signed in to this app.'**
+  String get nodeFilterAccountNote;
+
+  /// No description provided for @nodeFilterUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Node filters are available once you have a plan'**
+  String get nodeFilterUnavailable;
+
+  /// No description provided for @minimalConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimal Configuration'**
+  String get minimalConfiguration;
+
+  /// No description provided for @minimalConfigurationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a simplified rule set to generate a smaller profile'**
+  String get minimalConfigurationDesc;
+
+  /// No description provided for @tcpFastOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'TCP Fast Open'**
+  String get tcpFastOpen;
+
+  /// No description provided for @tcpFastOpenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable this option to accelerate TCP connection establishment'**
+  String get tcpFastOpenDesc;
+
+  /// No description provided for @store.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get store;
+
+  /// No description provided for @recharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge'**
+  String get recharge;
+
+  /// No description provided for @availablePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a Plan'**
+  String get availablePlans;
+
+  /// No description provided for @noAvailablePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'No plans available'**
+  String get noAvailablePlans;
+
+  /// No description provided for @myOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased Plans'**
+  String get myOrders;
+
+  /// No description provided for @noPurchaseRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'No purchased plans yet'**
+  String get noPurchaseRecords;
+
+  /// No description provided for @accountBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get accountBalance;
+
+  /// No description provided for @commissionBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Commission {value}'**
+  String commissionBalance(Object value);
+
+  /// No description provided for @soldOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold out'**
+  String get soldOut;
+
+  /// No description provided for @remainingStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Only {count} left'**
+  String remainingStock(Object count);
+
+  /// No description provided for @mainlandNetworkWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'May not be suitable for networks in mainland China'**
+  String get mainlandNetworkWarning;
+
+  /// No description provided for @planInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'In use'**
+  String get planInUse;
+
+  /// No description provided for @planNotActivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending activation'**
+  String get planNotActivated;
+
+  /// No description provided for @planEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get planEnded;
+
+  /// No description provided for @planAwaitingAutoRenewal.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting auto-renewal'**
+  String get planAwaitingAutoRenewal;
+
+  /// No description provided for @planAwaitingAutoRenewalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued after your other plans; renews automatically once they are used up'**
+  String get planAwaitingAutoRenewalNote;
+
+  /// No description provided for @planAutoRenewalOffNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued after your other plans; ends once they are used up'**
+  String get planAutoRenewalOffNote;
+
+  /// No description provided for @planNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan #{id}'**
+  String planNumber(Object id);
+
+  /// No description provided for @activate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get activate;
+
+  /// No description provided for @upgradePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade plan'**
+  String get upgradePlan;
+
+  /// No description provided for @noPaymentMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment methods available'**
+  String get noPaymentMethods;
+
+  /// No description provided for @activatePlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate plan'**
+  String get activatePlanTitle;
+
+  /// No description provided for @activatePlanConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate this plan? It will become your active plan.'**
+  String get activatePlanConfirm;
+
+  /// No description provided for @noUpgradablePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'No upgradable plans'**
+  String get noUpgradablePlans;
+
+  /// No description provided for @selectUpgradeTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Select upgrade target'**
+  String get selectUpgradeTarget;
+
+  /// No description provided for @refreshAfterPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'After payment, pull down to refresh and check the result'**
+  String get refreshAfterPayment;
+
+  /// No description provided for @discountCodeOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount code (optional)'**
+  String get discountCodeOptional;
+
+  /// No description provided for @bindCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply coupon'**
+  String get bindCoupon;
+
+  /// No description provided for @bindCouponIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an official coupon code. The difference is settled for the remaining plan duration, and a recurring coupon also updates the renewal price.'**
+  String get bindCouponIntro;
+
+  /// No description provided for @verifyCoupon.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verifyCoupon;
+
+  /// No description provided for @discountCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount code'**
+  String get discountCode;
+
+  /// No description provided for @discountCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a discount code'**
+  String get discountCodeRequired;
+
+  /// No description provided for @discountedPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Discounted price'**
+  String get discountedPriceLabel;
+
+  /// No description provided for @amountDueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount due'**
+  String get amountDueLabel;
+
+  /// No description provided for @refundAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get refundAmountLabel;
+
+  /// No description provided for @recurringRenewalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Future automatic renewals keep this discount'**
+  String get recurringRenewalHint;
+
+  /// No description provided for @insufficientBalanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient balance. Top up before continuing.'**
+  String get insufficientBalanceHint;
+
+  /// No description provided for @amountPayable.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount payable'**
+  String get amountPayable;
+
+  /// No description provided for @renewalPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Renewal price'**
+  String get renewalPriceLabel;
+
+  /// No description provided for @calculatingQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating…'**
+  String get calculatingQuote;
+
+  /// No description provided for @paymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get paymentMethod;
+
+  /// No description provided for @goPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay'**
+  String get goPay;
+
+  /// No description provided for @confirmPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm purchase'**
+  String get confirmPurchase;
+
+  /// No description provided for @rechargeAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge amount (¥)'**
+  String get rechargeAmount;
+
+  /// No description provided for @invalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid amount'**
+  String get invalidAmount;
+
+  /// No description provided for @scanOrTransferPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan / Transfer payment'**
+  String get scanOrTransferPay;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @checkingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking...'**
+  String get checkingPayment;
+
+  /// No description provided for @paymentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment has not been received yet. Please check again shortly.'**
+  String get paymentPending;
+
+  /// No description provided for @iHavePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'I have paid'**
+  String get iHavePaid;
+
+  /// No description provided for @openInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in browser'**
+  String get openInBrowser;
+
+  /// No description provided for @openLinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open the link. Check that a browser is installed and try again.'**
+  String get openLinkFailed;
+
+  /// No description provided for @scanToPayNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan with Alipay / WeChat to pay'**
+  String get scanToPayNotice;
+
+  /// No description provided for @paymentAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment amount'**
+  String get paymentAmount;
+
+  /// No description provided for @receivingAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving address'**
+  String get receivingAddress;
+
+  /// No description provided for @addressCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Address copied'**
+  String get addressCopied;
+
+  /// No description provided for @transferConfirmNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The system will confirm automatically after the transfer is completed, and the selected plan will be activated.'**
+  String get transferConfirmNotice;
+
+  /// No description provided for @operationSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation successful'**
+  String get operationSuccess;
+
+  /// No description provided for @operationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed'**
+  String get operationFailed;
+
+  /// No description provided for @paymentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment successful'**
+  String get paymentSuccess;
+
+  /// No description provided for @paymentRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment request failed'**
+  String get paymentRequestFailed;
+
+  /// No description provided for @fetchPlansFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load plans'**
+  String get fetchPlansFailed;
+
+  /// No description provided for @storeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase, renew, and upgrade plans'**
+  String get storeSubtitle;
+
+  /// No description provided for @paymentUnknownResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment endpoint returned an unknown format'**
+  String get paymentUnknownResponse;
+
+  /// No description provided for @buy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy'**
+  String get buy;
+
+  /// No description provided for @payWithBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with balance'**
+  String get payWithBalance;
+
+  /// No description provided for @availableBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Available {value}'**
+  String availableBalance(Object value);
+
+  /// No description provided for @planUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get planUnavailable;
+
+  /// No description provided for @balanceDeductionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases use your balance first, then commission for any shortfall.'**
+  String get balanceDeductionHint;
+
+  /// No description provided for @rechargeAllowedRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed range {min} – {max}'**
+  String rechargeAllowedRange(Object min, Object max);
+
+  /// No description provided for @rechargeAmountOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'The amount is outside the range allowed by this payment method'**
+  String get rechargeAmountOutOfRange;
+
+  /// No description provided for @insufficientBalanceRecharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Recharge and try again.'**
+  String get insufficientBalanceRecharge;
+
+  /// No description provided for @storeOutcomeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The request may still have gone through. Check Purchased Plans before trying again.'**
+  String get storeOutcomeUnknown;
+
+  /// No description provided for @configParseErrorAtLine.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration format is invalid at line {line}.'**
+  String configParseErrorAtLine(Object line);
+
+  /// No description provided for @configTypeMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected {expected}, but found {actual}.'**
+  String configTypeMismatch(Object expected, Object actual);
+
+  /// No description provided for @configYamlFormatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the indentation and \"-\" list markers near this line.'**
+  String get configYamlFormatHint;
+
+  /// No description provided for @configValueTypeList.
+  ///
+  /// In en, this message translates to:
+  /// **'a list'**
+  String get configValueTypeList;
+
+  /// No description provided for @configValueTypeObject.
+  ///
+  /// In en, this message translates to:
+  /// **'an object'**
+  String get configValueTypeObject;
+
+  /// No description provided for @configValueTypeText.
+  ///
+  /// In en, this message translates to:
+  /// **'text'**
+  String get configValueTypeText;
+
+  /// No description provided for @configValueTypeBoolean.
+  ///
+  /// In en, this message translates to:
+  /// **'a boolean'**
+  String get configValueTypeBoolean;
+
+  /// No description provided for @configValueTypeInteger.
+  ///
+  /// In en, this message translates to:
+  /// **'an integer'**
+  String get configValueTypeInteger;
+
+  /// No description provided for @configValueTypeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'a number'**
+  String get configValueTypeNumber;
+
+  /// No description provided for @configValueTypeNull.
+  ///
+  /// In en, this message translates to:
+  /// **'an empty value'**
+  String get configValueTypeNull;
+
+  /// No description provided for @configRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover local configuration'**
+  String get configRecoveryTitle;
+
+  /// No description provided for @configRecoveryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Local configuration is temporarily unavailable. Your existing data has been kept. Unlock your device and retry, or reopen the app later.'**
+  String get configRecoveryMessage;
+
+  /// No description provided for @configRecoveryRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get configRecoveryRetry;
+
+  /// No description provided for @geoDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'GEO download failed'**
+  String get geoDownloadFailed;
+
+  /// No description provided for @geoFileMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not downloaded'**
+  String get geoFileMissing;
+
+  /// No description provided for @geoFileReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read resource file'**
+  String get geoFileReadFailed;
+
+  /// No description provided for @geoDownloadRecoveryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Download uses the current network rules, or a direct connection when the proxy is unavailable. Retry the current address, choose another source, or enter a custom URL. After validation, the operation will continue automatically.'**
+  String get geoDownloadRecoveryHint;
+
+  /// No description provided for @geoOriginalSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Current address'**
+  String get geoOriginalSource;
+
+  /// No description provided for @geoBackupSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup CDN'**
+  String get geoBackupSource;
+
+  /// No description provided for @geoDownloadUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Download URL'**
+  String get geoDownloadUrl;
+
+  /// No description provided for @geoInvalidDownloadUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid HTTP or HTTPS URL'**
+  String get geoInvalidDownloadUrl;
+
+  /// No description provided for @purchasedAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase time'**
+  String get purchasedAtLabel;
+
+  /// No description provided for @purchasePriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase price'**
+  String get purchasePriceLabel;
+
+  /// No description provided for @billingPeriodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing period'**
+  String get billingPeriodLabel;
+
+  /// No description provided for @remainingTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining time'**
+  String get remainingTimeLabel;
+
+  /// No description provided for @remainingTrafficLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining traffic'**
+  String get remainingTrafficLabel;
+
+  /// No description provided for @expiresAtLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires at'**
+  String get expiresAtLabel;
+
+  /// No description provided for @usedTrafficLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Used traffic'**
+  String get usedTrafficLabel;
+
+  /// No description provided for @purchaseTotalTrafficLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total traffic'**
+  String get purchaseTotalTrafficLabel;
+
+  /// No description provided for @purchaseAutoRenewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-renew'**
+  String get purchaseAutoRenewLabel;
+
+  /// No description provided for @purchaseDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d'**
+  String purchaseDays(Object count);
+
+  /// No description provided for @purchaseHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h'**
+  String purchaseHours(Object count);
+
+  /// No description provided for @purchaseMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m'**
+  String purchaseMinutes(Object count);
+
+  /// No description provided for @purchaseRenewOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get purchaseRenewOn;
+
+  /// No description provided for @purchaseRenewOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get purchaseRenewOff;
+
+  /// No description provided for @overwriteTypeMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Overlay'**
+  String get overwriteTypeMerge;
+
+  /// No description provided for @overwriteTypeMergeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep subscription rules and groups, then add your own. Personal rules take priority over subscription rules; existing added rules keep their priority.'**
+  String get overwriteTypeMergeDesc;
+
+  /// No description provided for @personalRouting.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal routing'**
+  String get personalRouting;
+
+  /// No description provided for @overlayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved separately from the subscription and reapplied after updates. New groups block connections when no members match.'**
+  String get overlayHint;
+
+  /// No description provided for @overlayNameConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'The name \"{name}\" is already used. Rename the personal group to keep both.'**
+  String overlayNameConflict(Object name);
+
+  /// No description provided for @outboundUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable in this configuration. Remove or replace it.'**
+  String get outboundUnavailable;
+
+  /// No description provided for @memberOrderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection order is the fallback order. Remove and reselect a member to move it to the end.'**
+  String get memberOrderHint;
+
+  /// No description provided for @groupCycleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Circular group reference: {name}. Choose a different member.'**
+  String groupCycleError(Object name);
+
+  /// No description provided for @rulesRequireRuleMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal routing rules take effect in Rule mode.'**
+  String get rulesRequireRuleMode;
+
+  /// No description provided for @checkRouting.
+  ///
+  /// In en, this message translates to:
+  /// **'Check configuration'**
+  String get checkRouting;
+
+  /// No description provided for @routingChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration is valid. Personal settings are saved for this profile.'**
+  String get routingChecked;
+
+  /// No description provided for @routingApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal settings applied.'**
+  String get routingApplied;
+
+  /// No description provided for @routingApplyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes were saved but could not be applied. Check the configuration and retry.'**
+  String get routingApplyFailed;
+
+  /// No description provided for @customRuleForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Form'**
+  String get customRuleForm;
+
+  /// No description provided for @customRuleRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule text'**
+  String get customRuleRaw;
+
+  /// No description provided for @customRuleRawHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter one complete rule. Advanced expressions are preserved.'**
+  String get customRuleRawHint;
+
+  /// No description provided for @customRuleFormUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This rule uses advanced syntax. Edit the rule text to preserve all options.'**
+  String get customRuleFormUnavailable;
+
+  /// No description provided for @customRuleInvalidSyntax.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter one complete rule with a valid type, content and target.'**
+  String get customRuleInvalidSyntax;
+
+  /// No description provided for @customRuleInvalidContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the content for this rule type. Example: {example}'**
+  String customRuleInvalidContent(Object example);
+
+  /// No description provided for @customRuleUnavailableTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is unavailable. Choose a target from this configuration.'**
+  String customRuleUnavailableTarget(Object name);
+
+  /// No description provided for @customRuleUnavailableProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is unavailable. Choose an existing rule provider.'**
+  String customRuleUnavailableProvider(Object name);
+
+  /// No description provided for @customRuleChooseTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a target'**
+  String get customRuleChooseTarget;
+
+  /// No description provided for @customRuleChooseProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a rule provider'**
+  String get customRuleChooseProvider;
+
+  /// No description provided for @customRuleMatchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches all remaining traffic. Rules below it will not be reached.'**
+  String get customRuleMatchHint;
+
+  /// No description provided for @customRuleNoResolveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Match known IP addresses without resolving domain names.'**
+  String get customRuleNoResolveHint;
+
+  /// No description provided for @saveRoutingDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get saveRoutingDraft;
+
+  /// No description provided for @routingDraftHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a draft to fix other items. Settings are applied only after the full configuration passes validation.'**
+  String get routingDraftHint;
+
+  /// No description provided for @groupFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters automatically included and provider nodes. Manually selected members are always kept.'**
+  String get groupFilterHint;
+
+  /// No description provided for @groupTypeSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual selection'**
+  String get groupTypeSelect;
+
+  /// No description provided for @groupTypeUrlTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic selection'**
+  String get groupTypeUrlTest;
+
+  /// No description provided for @groupTypeFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Failover'**
+  String get groupTypeFallback;
+
+  /// No description provided for @groupTypeLoadBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Load balancing'**
+  String get groupTypeLoadBalance;
+
+  /// No description provided for @groupTypeSelectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the active member on the Proxies page.'**
+  String get groupTypeSelectHint;
+
+  /// No description provided for @groupTypeUrlTestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Periodically test members and select a low-latency node.'**
+  String get groupTypeUrlTestHint;
+
+  /// No description provided for @groupTypeFallbackHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try members in order and switch when the current member fails.'**
+  String get groupTypeFallbackHint;
+
+  /// No description provided for @groupTypeLoadBalanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Distribute connections across available members.'**
+  String get groupTypeLoadBalanceHint;
+
+  /// No description provided for @routingGroupType.
+  ///
+  /// In en, this message translates to:
+  /// **'Group type'**
+  String get routingGroupType;
+
+  /// No description provided for @customRuleType.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule type'**
+  String get customRuleType;
+
+  /// No description provided for @routingChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'This configuration changed while it was being edited or checked. Reopen the editor or check it again.'**
+  String get routingChanged;
+
+  /// No description provided for @editCustomRouting.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit custom routing'**
+  String get editCustomRouting;
+
+  /// No description provided for @customRoutingDraftHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in your custom routing, then switch to Custom mode. Editing this draft does not change the current mode.'**
+  String get customRoutingDraftHint;
+
+  /// No description provided for @coreBlockedByPolicyTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Windows blocked the proxy core from starting (system error {code}). Check Protection history in Windows Security and your app control policy, and verify the installer source and signature.'**
+  String coreBlockedByPolicyTip(int code);
+
+  /// No description provided for @startupRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Startup recovery'**
+  String get startupRecoveryTitle;
+
+  /// No description provided for @startupRecoveryTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The previous startup did not finish. Automatic configuration setup and VPN startup are paused for this launch. Your selected profile and settings are unchanged. Check the configuration and tap Start to retry; an already running VPN will stay connected.'**
+  String get startupRecoveryTip;
+
+  /// No description provided for @initFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Startup failed'**
+  String get initFailed;
+
+  /// No description provided for @initFailedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The application encountered a critical error during startup and cannot continue.'**
+  String get initFailedTip;
+
+  /// No description provided for @startupTimeoutTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Startup timed out. Quit and reopen the application. Copy the diagnostics below if the problem persists.'**
+  String get startupTimeoutTip;
+
+  /// No description provided for @startupDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Startup diagnostics'**
+  String get startupDiagnostics;
+
+  /// No description provided for @errorDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Error details'**
+  String get errorDetails;
+
+  /// No description provided for @stackTrace.
+  ///
+  /// In en, this message translates to:
+  /// **'Stack trace'**
+  String get stackTrace;
+
+  /// No description provided for @authentication.
+  ///
+  /// In en, this message translates to:
+  /// **'Local proxy authentication'**
+  String get authentication;
+
+  /// No description provided for @authenticationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Local proxy authentication asks for a username and password on the HTTP and SOCKS ports. While it is on, the system HTTP proxy is not set; TUN and VPN keep working'**
+  String get authenticationDesc;
+
+  /// No description provided for @authenticationSystemProxyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The system proxy is not applied while local proxy authentication is on'**
+  String get authenticationSystemProxyDesc;
+
+  /// No description provided for @authenticationUsernameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 1–255 UTF-8 bytes, without colons or control characters'**
+  String get authenticationUsernameInvalid;
+
+  /// No description provided for @authenticationPasswordInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use 1–255 UTF-8 bytes, without control characters'**
+  String get authenticationPasswordInvalid;
+
+  /// No description provided for @authenticationApplyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not apply authentication settings'**
+  String get authenticationApplyFailed;
+
+  /// No description provided for @installedAppsPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed apps permission required'**
+  String get installedAppsPermissionRequired;
+
+  /// No description provided for @installedAppsPermissionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow access to the installed app list to choose which apps use the VPN.'**
+  String get installedAppsPermissionDesc;
+
+  /// No description provided for @installedAppsPermissionDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission was not granted. You can enable it in system settings.'**
+  String get installedAppsPermissionDeniedMessage;
+
+  /// No description provided for @installedAppsPermissionGrant.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow access'**
+  String get installedAppsPermissionGrant;
+
+  /// No description provided for @installedAppsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load installed apps. Please try again.'**
+  String get installedAppsLoadFailed;
+
+  /// No description provided for @configRecoveryMissingKey.
+  ///
+  /// In en, this message translates to:
+  /// **'The encryption key for your existing configuration is missing or invalid. Try the original system account on the original device or restore a backup. Retrying cannot recreate a lost key.'**
+  String get configRecoveryMissingKey;
+
+  /// No description provided for @configRecoveryDatabaseUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The local database cannot be accessed right now. Your files have been kept. Check permissions for this app’s data folder and whether another process is using the database, then retry.'**
+  String get configRecoveryDatabaseUnavailable;
+
+  /// No description provided for @configRecoveryIncompatibleDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'The database in this app’s data folder is incompatible or damaged. Your files have been kept. Restore a compatible backup, or back up and reset to set up this app again. Data belonging to other apps will not be accessed.'**
+  String get configRecoveryIncompatibleDatabase;
+
+  /// No description provided for @configRecoveryUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The local configuration cannot be decrypted or is damaged. Existing files have been kept. Restore the matching key and configuration backup, or back up and reset.'**
+  String get configRecoveryUnreadable;
+
+  /// No description provided for @configRecoveryStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'The local configuration or its encryption key could not be read or saved. Check access to the application data folder and the system secure storage, then retry.'**
+  String get configRecoveryStorage;
+
+  /// No description provided for @configRecoveryReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up and reset'**
+  String get configRecoveryReset;
+
+  /// No description provided for @configRecoveryResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an encrypted backup of all local settings, subscriptions, rules and account data, then reset the application? You will need to sign in again and restore or import your subscriptions and settings. The backup is protected by this Windows account; it cannot recover a lost encryption key.'**
+  String get configRecoveryResetConfirm;
+
+  /// No description provided for @configRecoveryResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'An encrypted backup of your original data has been saved in the folder below. Exit and reopen the application to set it up again.'**
+  String get configRecoveryResetDone;
+
+  /// No description provided for @configRecoveryResetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The encrypted backup and reset could not be completed. Surviving original data will not be removed without a verified backup. Retry this operation, or exit and reopen the application to finish it.'**
+  String get configRecoveryResetFailed;
+
+  /// No description provided for @configRecoveryKeyring.
+  ///
+  /// In en, this message translates to:
+  /// **'The system keyring (Secret Service) could not be accessed. Enable and unlock KDE Wallet or GNOME Keyring in your system settings, then retry.'**
+  String get configRecoveryKeyring;
+
+  /// No description provided for @configRecoveryUseLocalStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Use local file storage'**
+  String get configRecoveryUseLocalStorage;
+
+  /// No description provided for @configRecoveryUseLocalStorageConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Store encryption keys and account credentials in a file in the application data folder that only your user account can open, instead of the system keyring? Any program running as your user can read them and decrypt the local configuration. This choice stays in effect from now on.'**
+  String get configRecoveryUseLocalStorageConfirm;
+
+  /// No description provided for @excludeSsids.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi networks that pause the proxy'**
+  String get excludeSsids;
+
+  /// No description provided for @excludeSsidsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause proxying on the listed Wi-Fi networks; resume after leaving only while the app remains started.'**
+  String get excludeSsidsDesc;
+
+  /// No description provided for @allowBackgroundLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow all the time'**
+  String get allowBackgroundLocation;
+
+  /// No description provided for @locationPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission'**
+  String get locationPermission;
+
+  /// No description provided for @locationPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission required'**
+  String get locationPermissionRequired;
+
+  /// No description provided for @locationPermissionGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Open System Settings > Privacy & Security\n2. Choose Location Services\n3. Find and check {appName} in the list\n\nWhen you are done, return to the app to continue. Thank you for your cooperation.'**
+  String locationPermissionGuide(Object appName);
+
+  /// No description provided for @ssidPermissionGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access to read Wi-Fi names. On Android, allow precise location all the time and enable system location services.'**
+  String get ssidPermissionGuide;
+
+  /// No description provided for @ssidPermissionMacosGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow this app to use Location Services in System Settings to read Wi-Fi names.'**
+  String get ssidPermissionMacosGuide;
+
+  /// No description provided for @matchTargetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Match target'**
+  String get matchTargetTitle;
+
+  /// No description provided for @matchTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'MATCH-TARGET'**
+  String get matchTarget;
+
+  /// No description provided for @followProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow profile'**
+  String get followProfile;
+
+  /// No description provided for @iconHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent icons'**
+  String get iconHistory;
+
+  /// No description provided for @exitFullScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit full screen'**
+  String get exitFullScreen;
+
+  /// No description provided for @unmaximize.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore down'**
+  String get unmaximize;
+
+  /// No description provided for @maximize.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize'**
+  String get maximize;
+
+  /// No description provided for @unpinWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin window'**
+  String get unpinWindow;
+
+  /// No description provided for @pinWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin window'**
+  String get pinWindow;
+
+  /// No description provided for @minimize.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize'**
+  String get minimize;
+
+  /// No description provided for @cloudApiDnsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS lookup failed'**
+  String get cloudApiDnsFailed;
+
+  /// No description provided for @cloudApiDnsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS returned no address, possibly blocked or a broken system resolver'**
+  String get cloudApiDnsEmpty;
+
+  /// No description provided for @cloudApiDnsUnknownHost.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS could not find this domain'**
+  String get cloudApiDnsUnknownHost;
+
+  /// No description provided for @cloudApiConnectTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection timed out'**
+  String get cloudApiConnectTimeout;
+
+  /// No description provided for @cloudApiSendTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending the request timed out'**
+  String get cloudApiSendTimeout;
+
+  /// No description provided for @cloudApiReceiveTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the response timed out'**
+  String get cloudApiReceiveTimeout;
+
+  /// No description provided for @cloudApiTlsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'TLS handshake failed'**
+  String get cloudApiTlsFailed;
+
+  /// No description provided for @cloudApiConnectionRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection refused'**
+  String get cloudApiConnectionRefused;
+
+  /// No description provided for @cloudApiConnectionReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection reset'**
+  String get cloudApiConnectionReset;
+
+  /// No description provided for @cloudApiNetworkUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Network unreachable'**
+  String get cloudApiNetworkUnreachable;
+
+  /// No description provided for @cloudApiAccessDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Network access denied'**
+  String get cloudApiAccessDenied;
+
+  /// No description provided for @cloudApiConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed'**
+  String get cloudApiConnectionFailed;
+
+  /// No description provided for @cloudApiProxyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy connection failed'**
+  String get cloudApiProxyFailed;
+
+  /// No description provided for @cloudApiProxyAuthFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy authentication failed (HTTP 407)'**
+  String get cloudApiProxyAuthFailed;
+
+  /// No description provided for @cloudApiHttpError.
+  ///
+  /// In en, this message translates to:
+  /// **'Server returned HTTP {status}'**
+  String cloudApiHttpError(Object status);
+
+  /// No description provided for @certificateRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate has been revoked'**
+  String get certificateRevoked;
+
+  /// No description provided for @cloudApiBadRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Server rejected the request as invalid'**
+  String get cloudApiBadRequest;
+
+  /// No description provided for @cloudApiForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Access forbidden'**
+  String get cloudApiForbidden;
+
+  /// No description provided for @cloudApiNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested API or resource was not found'**
+  String get cloudApiNotFound;
+
+  /// No description provided for @cloudApiMethodNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Request method is not allowed'**
+  String get cloudApiMethodNotAllowed;
+
+  /// No description provided for @cloudApiServerRequestTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Server timed out receiving the request'**
+  String get cloudApiServerRequestTimeout;
+
+  /// No description provided for @cloudApiRequestTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Request exceeds the server size limit'**
+  String get cloudApiRequestTooLarge;
+
+  /// No description provided for @cloudApiRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests; try again later'**
+  String get cloudApiRateLimited;
+
+  /// No description provided for @cloudApiServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal server error'**
+  String get cloudApiServerError;
+
+  /// No description provided for @cloudApiBadGateway.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway received an invalid upstream response'**
+  String get cloudApiBadGateway;
+
+  /// No description provided for @cloudApiServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Service is temporarily unavailable'**
+  String get cloudApiServiceUnavailable;
+
+  /// No description provided for @cloudApiGatewayTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Gateway timed out waiting for the upstream server'**
+  String get cloudApiGatewayTimeout;
+
+  /// No description provided for @cloudApiNetworkAuthRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This network requires sign-in before access'**
+  String get cloudApiNetworkAuthRequired;
+
+  /// No description provided for @cloudApiResponseTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Server response exceeds the allowed size'**
+  String get cloudApiResponseTooLarge;
+
+  /// No description provided for @cloudApiTlsProtocolFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Incompatible TLS protocol or invalid TLS response'**
+  String get cloudApiTlsProtocolFailed;
+
+  /// No description provided for @cloudApiTlsAlgorithmFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'TLS cryptographic algorithm negotiation failed'**
+  String get cloudApiTlsAlgorithmFailed;
+
+  /// No description provided for @cloudApiTlsInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection closed before the TLS handshake completed'**
+  String get cloudApiTlsInterrupted;
+
+  /// No description provided for @cloudApiRedirectLoop.
+  ///
+  /// In en, this message translates to:
+  /// **'Server redirects form a loop'**
+  String get cloudApiRedirectLoop;
+
+  /// No description provided for @cloudApiRedirectLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many server redirects'**
+  String get cloudApiRedirectLimit;
+
+  /// No description provided for @cloudApiRedirectInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Server redirect is invalid'**
+  String get cloudApiRedirectInvalid;
+
+  /// No description provided for @cloudApiResponseInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection closed before the full response was received'**
+  String get cloudApiResponseInterrupted;
+
+  /// No description provided for @cloudApiConnectionAborted.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection aborted'**
+  String get cloudApiConnectionAborted;
+
+  /// No description provided for @cloudApiAddressUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Network address is unavailable'**
+  String get cloudApiAddressUnavailable;
+
+  /// No description provided for @cloudApiAddressInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Network address or port is already in use'**
+  String get cloudApiAddressInUse;
+
+  /// No description provided for @cloudApiNetworkResourcesExhausted.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient system network resources'**
+  String get cloudApiNetworkResourcesExhausted;
+
+  /// No description provided for @cloudApiClockSkew.
+  ///
+  /// In en, this message translates to:
+  /// **'The device clock is too far from the server. Turn on automatic date and time, then retry.'**
+  String get cloudApiClockSkew;
+
+  /// No description provided for @cloudApiSignatureRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'The server rejected this app’s signature. Reinstall the latest official build.'**
+  String get cloudApiSignatureRejected;
+
+  /// No description provided for @cloudApiServerUnconfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'The server has no key configured for this app. Contact support.'**
+  String get cloudApiServerUnconfigured;
+
+  /// No description provided for @cloudApiConfigKeyRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'The server rejected this device’s configuration key. Reinstall the latest official build.'**
+  String get cloudApiConfigKeyRejected;
+
+  /// No description provided for @cloudApiAccountDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled. Contact support.'**
+  String get cloudApiAccountDisabled;
+
+  /// No description provided for @cloudApiAccountAnomaly.
+  ///
+  /// In en, this message translates to:
+  /// **'This account needs verification. Complete it on the website, then retry.'**
+  String get cloudApiAccountAnomaly;
+
+  /// No description provided for @cloudApiAccountNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This account no longer exists. Sign in again.'**
+  String get cloudApiAccountNotFound;
+
+  /// No description provided for @cloudApiInvalidResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid server response'**
+  String get cloudApiInvalidResponse;
+
+  /// No description provided for @cloudApiRequestCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Request canceled'**
+  String get cloudApiRequestCanceled;
+
+  /// No description provided for @cloudApiSystemError.
+  ///
+  /// In en, this message translates to:
+  /// **'System error {code}'**
+  String cloudApiSystemError(Object code);
+
+  /// No description provided for @cloudApiTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Request timed out'**
+  String get cloudApiTimeout;
+
+  /// No description provided for @cloudApiRouteDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct: {error}'**
+  String cloudApiRouteDirect(Object error);
+
+  /// No description provided for @cloudApiRouteProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Local proxy: {error}'**
+  String cloudApiRouteProxy(Object error);
+
+  /// No description provided for @diagTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Network self-check'**
+  String get diagTitle;
+
+  /// No description provided for @diagEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the core, system proxy, TUN and DNS'**
+  String get diagEntryHint;
+
+  /// No description provided for @diagScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks the current connection using a small sample. The system network path may also pass through TUN. Results do not cover every app or node.'**
+  String get diagScope;
+
+  /// No description provided for @diagRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run self-check'**
+  String get diagRun;
+
+  /// No description provided for @diagCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy diagnostic report'**
+  String get diagCopy;
+
+  /// No description provided for @diagCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Check canceled; results are incomplete'**
+  String get diagCanceled;
+
+  /// No description provided for @diagFixing.
+  ///
+  /// In en, this message translates to:
+  /// **'Applying the fix, then checking again'**
+  String get diagFixing;
+
+  /// No description provided for @diagFixFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The fix could not be applied. Follow the suggestion above.'**
+  String get diagFixFailed;
+
+  /// No description provided for @diagFixApplyProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply configuration'**
+  String get diagFixApplyProfile;
+
+  /// No description provided for @diagFixStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start connection'**
+  String get diagFixStart;
+
+  /// No description provided for @diagFixRestartCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart core'**
+  String get diagFixRestartCore;
+
+  /// No description provided for @diagFixRestartConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect'**
+  String get diagFixRestartConnection;
+
+  /// No description provided for @diagFixSystemProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Reapply system proxy'**
+  String get diagFixSystemProxy;
+
+  /// No description provided for @diagFixEnableSystemProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable system proxy'**
+  String get diagFixEnableSystemProxy;
+
+  /// No description provided for @diagFixTun.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enable TUN'**
+  String get diagFixTun;
+
+  /// No description provided for @diagFixRetest.
+  ///
+  /// In en, this message translates to:
+  /// **'Retest nodes'**
+  String get diagFixRetest;
+
+  /// No description provided for @diagPassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed'**
+  String get diagPassed;
+
+  /// No description provided for @diagWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get diagWarning;
+
+  /// No description provided for @diagFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get diagFailed;
+
+  /// No description provided for @diagUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not confirm'**
+  String get diagUnknown;
+
+  /// No description provided for @diagSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped'**
+  String get diagSkipped;
+
+  /// No description provided for @diagDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This option is not enabled'**
+  String get diagDisabled;
+
+  /// No description provided for @diagProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied configuration'**
+  String get diagProfile;
+
+  /// No description provided for @diagProfileReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected configuration has been applied'**
+  String get diagProfileReady;
+
+  /// No description provided for @diagProfileMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected configuration has not been applied'**
+  String get diagProfileMissing;
+
+  /// No description provided for @diagProfileHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a valid configuration and start the connection before checking again.'**
+  String get diagProfileHint;
+
+  /// No description provided for @diagCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Core response'**
+  String get diagCore;
+
+  /// No description provided for @diagCoreReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The core responded and reports active listeners'**
+  String get diagCoreReady;
+
+  /// No description provided for @diagCoreUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The core diagnostic response is unavailable or the configuration changed'**
+  String get diagCoreUnknown;
+
+  /// No description provided for @diagCoreStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'The core reports that traffic forwarding is stopped'**
+  String get diagCoreStopped;
+
+  /// No description provided for @diagSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Traffic forwarding is paused by the current Wi-Fi exclusion setting'**
+  String get diagSuspended;
+
+  /// No description provided for @diagCoreHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the connection switch and Wi-Fi exclusions. If the core cannot respond, restart it and use a matching current client/core version.'**
+  String get diagCoreHint;
+
+  /// No description provided for @diagListener.
+  ///
+  /// In en, this message translates to:
+  /// **'Local proxy entry'**
+  String get diagListener;
+
+  /// No description provided for @diagListenerReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The expected port responded to the proxy protocol'**
+  String get diagListenerReady;
+
+  /// No description provided for @diagListenerFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The expected proxy port did not respond or differs from the core port'**
+  String get diagListenerFailed;
+
+  /// No description provided for @diagListenerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for port conflicts or a stopped listener. Reconnect first; if it still fails, open Ports and authentication to check or change the mixed port.'**
+  String get diagListenerHint;
+
+  /// No description provided for @diagSystemProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'System proxy settings'**
+  String get diagSystemProxy;
+
+  /// No description provided for @diagProxyReady.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP and HTTPS proxy settings point to the expected local port'**
+  String get diagProxyReady;
+
+  /// No description provided for @diagProxyDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'The app requested a system proxy, but the OS reports it disabled'**
+  String get diagProxyDisabled;
+
+  /// No description provided for @diagProxyDifferent.
+  ///
+  /// In en, this message translates to:
+  /// **'The OS proxy does not match the app port'**
+  String get diagProxyDifferent;
+
+  /// No description provided for @diagProxyAutomatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic proxy configuration is present; its effective route was not verified'**
+  String get diagProxyAutomatic;
+
+  /// No description provided for @diagProxyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Troubleshoot and manual setup to compare the system proxy address and port. If settings keep reverting, check other proxy apps or device management policies.'**
+  String get diagProxyHint;
+
+  /// No description provided for @diagProxyAutomaticHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A PAC script or auto-discovery may choose a different proxy for each website. This does not necessarily mean the connection is broken. Check who provided the configuration before changing it.'**
+  String get diagProxyAutomaticHint;
+
+  /// No description provided for @diagSystemDnsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another network and check the DNS servers for the active connection in your operating system. Changing only the client DNS overrides may not fix system lookups.'**
+  String get diagSystemDnsHint;
+
+  /// No description provided for @diagProxyRecover.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off inactive local proxy'**
+  String get diagProxyRecover;
+
+  /// No description provided for @diagProxyRecoverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop the connection first. This turns off a manual proxy pointing to the current local port only when no service is listening. Other proxy addresses, ports and automatic settings are kept.'**
+  String get diagProxyRecoverHint;
+
+  /// No description provided for @diagProxyGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Troubleshoot and manual setup'**
+  String get diagProxyGuide;
+
+  /// No description provided for @diagRecheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get diagRecheck;
+
+  /// No description provided for @diagOpenPortSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Ports and authentication'**
+  String get diagOpenPortSettings;
+
+  /// No description provided for @diagOpenNetworkSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Network and TUN settings'**
+  String get diagOpenNetworkSettings;
+
+  /// No description provided for @diagOpenDnsSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS override settings'**
+  String get diagOpenDnsSettings;
+
+  /// No description provided for @diagOpenSystemSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open system settings'**
+  String get diagOpenSystemSettings;
+
+  /// No description provided for @diagOpenSettingsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open system settings. Follow the path above to open them manually.'**
+  String get diagOpenSettingsFailed;
+
+  /// No description provided for @diagCopyProxyAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy proxy address'**
+  String get diagCopyProxyAddress;
+
+  /// No description provided for @diagProxyGuidePrepareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Check the local proxy first'**
+  String get diagProxyGuidePrepareTitle;
+
+  /// No description provided for @diagProxyGuidePrepare.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a valid profile, start the connection in FlClash, and make sure Local proxy listener passes before entering the proxy address.\nQuit other proxy apps that may keep changing system settings. If your company or school manages the settings, or they are locked or keep reverting, check with the administrator.'**
+  String get diagProxyGuidePrepare;
+
+  /// No description provided for @diagProxyGuideManualTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Check or enter the proxy settings'**
+  String get diagProxyGuideManualTitle;
+
+  /// No description provided for @diagProxyGuideWindows.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings → Network & internet → Proxy\nIf automatic settings are left over from another app and your network no longer needs them, turn off Use setup script and Automatically detect settings.\nUnder Manual proxy setup, enable Use a proxy server, enter the address and port below in their separate fields, and save. Do not prefix the address with http://. Keep any exceptions your network needs.'**
+  String get diagProxyGuideWindows;
+
+  /// No description provided for @diagProxyGuideMacos.
+  ///
+  /// In en, this message translates to:
+  /// **'System Settings → Network → active Wi-Fi or Ethernet service → Details → Proxies\nmacOS 12: System Preferences → Network → active service → Advanced → Proxies\nIf automatic settings are left over from another app and your network no longer needs them, turn off Auto proxy discovery and Automatic proxy configuration.\nEnable Web proxy (HTTP) and Secure web proxy (HTTPS). Enter the address and port below for both, then save. Keep any bypass entries your network needs.'**
+  String get diagProxyGuideMacos;
+
+  /// No description provided for @diagProxyGuideLinux.
+  ///
+  /// In en, this message translates to:
+  /// **'Open your desktop settings → Network → Network Proxy and select Manual (names vary by desktop).\nEnter the address and port below for both HTTP and HTTPS, then apply. If there is no system proxy panel, configure the target app instead.\nBefore replacing an automatic configuration, check its source and whether your network still needs it.'**
+  String get diagProxyGuideLinux;
+
+  /// No description provided for @diagProxyGuideApp.
+  ///
+  /// In en, this message translates to:
+  /// **'On this device, open the target app’s proxy settings, choose HTTP or SOCKS5, and enter the address and port below.\nAndroid provides the system proxy through the VPN service. For VPN access, check the VPN switch and app access control in FlClash network settings.'**
+  String get diagProxyGuideApp;
+
+  /// No description provided for @diagProxyGuideAuthenticated.
+  ///
+  /// In en, this message translates to:
+  /// **'Local proxy authentication is enabled, so FlClash does not apply a system proxy automatically.\nIn an app that supports proxy authentication, choose HTTP or SOCKS5 and enter the address and port below. Use the username and password from FlClash → Override → General → Inbound → Authentication.\nDo not include credentials in diagnostic reports.'**
+  String get diagProxyGuideAuthenticated;
+
+  /// No description provided for @diagProxyGuideValues.
+  ///
+  /// In en, this message translates to:
+  /// **'Local address: 127.0.0.1\nMixed port (current configuration): {port}\nUse this mixed port for HTTP, HTTPS website proxying, or SOCKS5 on this device only.'**
+  String diagProxyGuideValues(Object port);
+
+  /// No description provided for @diagProxyGuideInvalidPort.
+  ///
+  /// In en, this message translates to:
+  /// **'The mixed port is unavailable. Set a valid port in Ports and authentication, then start the connection.'**
+  String get diagProxyGuideInvalidPort;
+
+  /// No description provided for @diagProxyGuideVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Save and verify the actual app'**
+  String get diagProxyGuideVerifyTitle;
+
+  /// No description provided for @diagProxyGuideVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Return and select Check again, then retry in the browser or app you use.\nIf the local proxy check passes but an app still fails, check its system proxy, custom proxy, or proxy extension settings. System proxy settings do not capture every app.\nYou may need to turn off a manually configured proxy or restore its previous settings when stopping FlClash to keep internet access.'**
+  String get diagProxyGuideVerify;
+
+  /// No description provided for @diagTun.
+  ///
+  /// In en, this message translates to:
+  /// **'TUN interface and route'**
+  String get diagTun;
+
+  /// No description provided for @diagTunMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The core TUN interface was not found in an active state'**
+  String get diagTunMissing;
+
+  /// No description provided for @diagTunReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The core TUN interface is active and the sampled IPv4 route uses it'**
+  String get diagTunReady;
+
+  /// No description provided for @diagTunRouteMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'TUN is active, but the sampled IPv4 route uses another interface'**
+  String get diagTunRouteMismatch;
+
+  /// No description provided for @diagTunRouteUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'TUN is active; its IPv4 route could not be verified'**
+  String get diagTunRouteUnknown;
+
+  /// No description provided for @diagTunHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn TUN off and on and complete system authorization. If the route differs, check other VPNs. IPv6, UDP and app-specific exclusions need separate checks.'**
+  String get diagTunHint;
+
+  /// No description provided for @proxyConflictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Possible proxy conflict'**
+  String get proxyConflictTitle;
+
+  /// No description provided for @proxyConflictSystemProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Before starting, the system proxy pointed to {address}.'**
+  String proxyConflictSystemProxy(Object address);
+
+  /// No description provided for @proxyConflictAutoConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Before starting, the system proxy used an automatic configuration script.'**
+  String get proxyConflictAutoConfig;
+
+  /// No description provided for @proxyConflictVpn.
+  ///
+  /// In en, this message translates to:
+  /// **'Before starting, traffic was routed through another VPN or virtual adapter: {name}.'**
+  String proxyConflictVpn(Object name);
+
+  /// No description provided for @proxyConflictHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If this belongs to another proxy app or VPN, close it; running both can break the connection.'**
+  String get proxyConflictHint;
+
+  /// No description provided for @diagTrafficCapture.
+  ///
+  /// In en, this message translates to:
+  /// **'Traffic capture'**
+  String get diagTrafficCapture;
+
+  /// No description provided for @diagNoCapture.
+  ///
+  /// In en, this message translates to:
+  /// **'Neither system proxy nor TUN is enabled'**
+  String get diagNoCapture;
+
+  /// No description provided for @diagCaptureHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable system proxy or TUN, or configure the affected app to use the local proxy.'**
+  String get diagCaptureHint;
+
+  /// No description provided for @diagSystemDns.
+  ///
+  /// In en, this message translates to:
+  /// **'System DNS'**
+  String get diagSystemDns;
+
+  /// No description provided for @diagCoreDns.
+  ///
+  /// In en, this message translates to:
+  /// **'Core DNS'**
+  String get diagCoreDns;
+
+  /// No description provided for @diagProbeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{passed}/{total} samples passed'**
+  String diagProbeSummary(int passed, int total);
+
+  /// No description provided for @diagProbeResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample {index}: {result} · {milliseconds} ms'**
+  String diagProbeResult(int index, String result, int milliseconds);
+
+  /// No description provided for @diagDnsServerFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS upstream returned a server failure'**
+  String get diagDnsServerFailed;
+
+  /// No description provided for @diagDnsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Sampled names resolved successfully'**
+  String get diagDnsReady;
+
+  /// No description provided for @diagDnsPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Only some sampled names resolved'**
+  String get diagDnsPartial;
+
+  /// No description provided for @diagOixDnsNoSample.
+  ///
+  /// In en, this message translates to:
+  /// **'No managed node hostname was available for this sample'**
+  String get diagOixDnsNoSample;
+
+  /// No description provided for @diagOixDnsAuthMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The managed DNS signing function is not ready'**
+  String get diagOixDnsAuthMissing;
+
+  /// No description provided for @diagDnsNoAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS returned no usable address; this alone does not prove an authentication failure'**
+  String get diagDnsNoAnswer;
+
+  /// No description provided for @diagDnsRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The DNS request was refused'**
+  String get diagDnsRefused;
+
+  /// No description provided for @diagDnsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check DNS overrides and try another network. If system DNS works but core DNS fails, inspect the configuration DNS settings.'**
+  String get diagDnsHint;
+
+  /// No description provided for @diagOixDnsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the client version and system time, then refresh the subscription. If resolution still fails, share this diagnostic report with support.'**
+  String get diagOixDnsHint;
+
+  /// No description provided for @diagSystemPath.
+  ///
+  /// In en, this message translates to:
+  /// **'System network path'**
+  String get diagSystemPath;
+
+  /// No description provided for @diagProxyPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Through the local proxy'**
+  String get diagProxyPath;
+
+  /// No description provided for @diagWebResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of 2 independent HTTPS checks passed'**
+  String diagWebResult(Object count);
+
+  /// No description provided for @diagSystemPathHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This path does not explicitly use the app HTTP proxy, but may use TUN. A failed sample may be caused by DNS, filtering or the test site; compare the local proxy result.'**
+  String get diagSystemPathHint;
+
+  /// No description provided for @diagProxyPathHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If the system path works, check the selected node, routing rules and core DNS. Failure at one test site does not mean every node is unusable.'**
+  String get diagProxyPathHint;
+
+  /// No description provided for @diagClock.
+  ///
+  /// In en, this message translates to:
+  /// **'System time comparison'**
+  String get diagClock;
+
+  /// No description provided for @diagClockUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough uncached HTTPS responses to compare time'**
+  String get diagClockUnknown;
+
+  /// No description provided for @diagClockSkew.
+  ///
+  /// In en, this message translates to:
+  /// **'Two independent responses indicate a possible time difference of at least five minutes'**
+  String get diagClockSkew;
+
+  /// No description provided for @diagClockReady.
+  ///
+  /// In en, this message translates to:
+  /// **'No consistent large time difference was found in this sample'**
+  String get diagClockReady;
+
+  /// No description provided for @diagClockHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable automatic system date and time, then retry. A clock error can affect certificates and oixCloud DNS signatures.'**
+  String get diagClockHint;
+
+  /// No description provided for @diagAllFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Every node tested in this group failed. The test URL may also be unreachable. Run a network self-check?'**
+  String get diagAllFailed;
+
+  /// No description provided for @updateDownloadBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Download in background'**
+  String get updateDownloadBackground;
+
+  /// No description provided for @updateReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Update ready to install'**
+  String get updateReady;
+
+  /// No description provided for @updateRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Update and relaunch'**
+  String get updateRestart;
+
+  /// No description provided for @updateRestartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The app will close, update in place, and reopen. Your settings will be preserved.'**
+  String get updateRestartHint;
+
+  /// No description provided for @updatePreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the update'**
+  String get updatePreparing;
+
+  /// No description provided for @updateVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying update package'**
+  String get updateVerifying;
+
+  /// No description provided for @updateCheckingInstaller.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking the installer'**
+  String get updateCheckingInstaller;
+
+  /// No description provided for @updateRestarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing and restarting'**
+  String get updateRestarting;
+
+  /// No description provided for @updateApplyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic update did not complete. Retry or update from the download page.'**
+  String get updateApplyFailed;
+
+  /// No description provided for @updateReadyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The update has been downloaded. Install when convenient.'**
+  String get updateReadyHint;
+
+  /// No description provided for @updateInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Install update'**
+  String get updateInstall;
+
+  /// No description provided for @updateDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading update'**
+  String get updateDownloading;
+
+  /// No description provided for @updateDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update download failed'**
+  String get updateDownloadFailed;
+
+  /// No description provided for @updateDownloadBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Download in browser'**
+  String get updateDownloadBrowser;
+
+  /// No description provided for @updatePackageFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the package format'**
+  String get updatePackageFormat;
+
+  /// No description provided for @updatePackageFormatTip.
+  ///
+  /// In en, this message translates to:
+  /// **'How this build was installed could not be determined. Pick the format that matches it.'**
+  String get updatePackageFormatTip;
+
+  /// No description provided for @updateAppImageTip.
+  ///
+  /// In en, this message translates to:
+  /// **'An AppImage cannot be installed automatically. Replace the running program with the downloaded file; its folder has been opened.'**
+  String get updateAppImageTip;
+
+  /// No description provided for @updatePackageManagerTip.
+  ///
+  /// In en, this message translates to:
+  /// **'This build was installed by a package manager; upgrade it the same way you installed it.'**
+  String get updatePackageManagerTip;
+
+  /// No description provided for @tunMtuDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Default: 9000; alternatives: 1480 or 4064. Restart the Android VPN to apply'**
+  String get tunMtuDesc;
+
+  /// No description provided for @tunMtuInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an integer from 1280 to 65535'**
+  String get tunMtuInvalid;
+
+  /// No description provided for @scriptOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Script options'**
+  String get scriptOptions;
+
+  /// No description provided for @scriptOptionsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This script does not expose configurable switches'**
+  String get scriptOptionsEmpty;
+
+  /// No description provided for @scriptChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Script changes'**
+  String get scriptChanges;
+
+  /// No description provided for @scriptFullConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Full config'**
+  String get scriptFullConfig;
+
+  /// No description provided for @scriptChangesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-level configuration fields added, modified or removed by the script. The full configuration also includes app settings.'**
+  String get scriptChangesDescription;
+
+  /// No description provided for @scriptChangesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The script did not change the configuration'**
+  String get scriptChangesEmpty;
+
+  /// No description provided for @scriptChangesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added ({count})'**
+  String scriptChangesAdded(int count);
+
+  /// No description provided for @scriptChangesModified.
+  ///
+  /// In en, this message translates to:
+  /// **'Modified ({count})'**
+  String scriptChangesModified(int count);
+
+  /// No description provided for @scriptChangesRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed ({count})'**
+  String scriptChangesRemoved(int count);
+
+  /// No description provided for @excludeNetworks.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause proxy by IP or gateway'**
+  String get excludeNetworks;
+
+  /// No description provided for @excludeNetworksDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause on matching Wi-Fi/Ethernet IPv4 addresses, subnets or gateways; resume after leaving. Comma-separated, e.g. 192.168.1.0/24,gateway:192.168.1.1'**
+  String get excludeNetworksDesc;
+
+  /// No description provided for @excludeNetworksInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 16 rules; enter valid IPv4, CIDR or gateway:address'**
+  String get excludeNetworksInvalid;
+
+  /// No description provided for @delayConcurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Concurrent batch latency tests'**
+  String get delayConcurrency;
+
+  /// No description provided for @delayTestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get delayTestFailed;
+
+  /// No description provided for @updateReleaseNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Release notes'**
+  String get updateReleaseNotes;
+
+  /// No description provided for @updateDownloadConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Download update'**
+  String get updateDownloadConfirm;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
+
+  /// No description provided for @updateCancelDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel download'**
+  String get updateCancelDownload;
+
+  /// No description provided for @updateNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'New version detected'**
+  String get updateNotice;
+
+  /// No description provided for @updateVersionNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Version: {version}'**
+  String updateVersionNumber(String version);
+
+  /// No description provided for @updateBuildNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Build: {build}'**
+  String updateBuildNumber(String build);
+
+  /// No description provided for @updateReleaseNotesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load release notes. Please try again.'**
+  String get updateReleaseNotesFailed;
+
+  /// No description provided for @tailscaleEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Access the devices in your tailnet'**
+  String get tailscaleEntryHint;
+
+  /// No description provided for @tailscaleEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access your tailnet'**
+  String get tailscaleEmptyTitle;
+
+  /// No description provided for @tailscaleEmptyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a network, sign in on this device, then start the proxy to reach your devices.'**
+  String get tailscaleEmptyDesc;
+
+  /// No description provided for @tailscaleAddNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Add network'**
+  String get tailscaleAddNetwork;
+
+  /// No description provided for @tailscaleNetworks.
+  ///
+  /// In en, this message translates to:
+  /// **'Networks'**
+  String get tailscaleNetworks;
+
+  /// No description provided for @tailscaleGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Guide'**
+  String get tailscaleGuide;
+
+  /// No description provided for @tailscaleThisDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'This device'**
+  String get tailscaleThisDevice;
+
+  /// No description provided for @tailscaleStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get tailscaleStatus;
+
+  /// No description provided for @tailscaleDeviceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Device name'**
+  String get tailscaleDeviceName;
+
+  /// No description provided for @tailscaleDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Devices ({count})'**
+  String tailscaleDevices(Object count);
+
+  /// No description provided for @tailscaleNetworkName.
+  ///
+  /// In en, this message translates to:
+  /// **'Network name'**
+  String get tailscaleNetworkName;
+
+  /// No description provided for @tailscaleNameInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This name is already in use'**
+  String get tailscaleNameInUse;
+
+  /// No description provided for @tailscaleLoginMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Login method'**
+  String get tailscaleLoginMethod;
+
+  /// No description provided for @tailscaleInteractiveLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Interactive'**
+  String get tailscaleInteractiveLogin;
+
+  /// No description provided for @tailscaleAuthKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Auth key'**
+  String get tailscaleAuthKey;
+
+  /// No description provided for @tailscaleAuthKeySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'An auth key is saved on this device. Enter a new one to replace it.'**
+  String get tailscaleAuthKeySaved;
+
+  /// No description provided for @tailscaleLoginFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in once per network on this device.'**
+  String get tailscaleLoginFooter;
+
+  /// No description provided for @tailscaleAutoRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic routing'**
+  String get tailscaleAutoRoute;
+
+  /// No description provided for @tailscaleAutoRouteDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Route peer addresses, MagicDNS names and approved subnets through this network'**
+  String get tailscaleAutoRouteDesc;
+
+  /// No description provided for @tailscaleExitNode.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit node'**
+  String get tailscaleExitNode;
+
+  /// No description provided for @tailscaleExitNodeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty for none, or use auto, a peer name or a peer IP address.'**
+  String get tailscaleExitNodeDesc;
+
+  /// No description provided for @tailscaleAvailableExitNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Available exit nodes'**
+  String get tailscaleAvailableExitNodes;
+
+  /// No description provided for @tailscaleExitNodeAllowLan.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow local network access'**
+  String get tailscaleExitNodeAllowLan;
+
+  /// No description provided for @tailscaleAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get tailscaleAdvanced;
+
+  /// No description provided for @tailscaleControlUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Control URL'**
+  String get tailscaleControlUrl;
+
+  /// No description provided for @tailscaleCredentialsFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication and device identity stay on this device.'**
+  String get tailscaleCredentialsFooter;
+
+  /// No description provided for @tailscaleAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get tailscaleAccount;
+
+  /// No description provided for @tailscaleSaveAndLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and log in'**
+  String get tailscaleSaveAndLogin;
+
+  /// No description provided for @tailscaleOpenLoginPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Open login page'**
+  String get tailscaleOpenLoginPage;
+
+  /// No description provided for @tailscaleLoginWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the login page or scan the code. Sign-in completes automatically after approval.'**
+  String get tailscaleLoginWaiting;
+
+  /// No description provided for @tailscaleSigningIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in'**
+  String get tailscaleSigningIn;
+
+  /// No description provided for @tailscaleSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in'**
+  String get tailscaleSignedIn;
+
+  /// No description provided for @tailscaleLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get tailscaleLogout;
+
+  /// No description provided for @tailscaleLoginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Tailscale login failed'**
+  String get tailscaleLoginFailed;
+
+  /// No description provided for @tailscaleLoginTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in was not completed within five minutes. Try again.'**
+  String get tailscaleLoginTimeout;
+
+  /// No description provided for @tailscaleLoginHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in authorizes this device. Start the proxy to use the network.'**
+  String get tailscaleLoginHint;
+
+  /// No description provided for @tailscaleEnterAuthKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the auth key to log in on this device.'**
+  String get tailscaleEnterAuthKey;
+
+  /// No description provided for @tailscaleCheckSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Check these settings: {fields}'**
+  String tailscaleCheckSettings(Object fields);
+
+  /// No description provided for @tailscaleNotApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Not applied'**
+  String get tailscaleNotApplied;
+
+  /// No description provided for @tailscaleNotAppliedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The network is not part of the running configuration. Select a profile and make sure none of its nodes uses the same name.'**
+  String get tailscaleNotAppliedHint;
+
+  /// No description provided for @tailscaleNotSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get tailscaleNotSignedIn;
+
+  /// No description provided for @tailscaleNeedsLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Login required'**
+  String get tailscaleNeedsLogin;
+
+  /// No description provided for @tailscaleKeyExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Node key has expired'**
+  String get tailscaleKeyExpired;
+
+  /// No description provided for @tailscaleNeedsApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Device approval is pending'**
+  String get tailscaleNeedsApproval;
+
+  /// No description provided for @tailscaleConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting'**
+  String get tailscaleConnecting;
+
+  /// No description provided for @tailscaleConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get tailscaleConnected;
+
+  /// No description provided for @tailscaleStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped'**
+  String get tailscaleStopped;
+
+  /// No description provided for @tailscaleUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection unavailable'**
+  String get tailscaleUnavailable;
+
+  /// No description provided for @tailscaleOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get tailscaleOnline;
+
+  /// No description provided for @tailscaleOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get tailscaleOffline;
+
+  /// No description provided for @tailscaleRemoveNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove network'**
+  String get tailscaleRemoveNetwork;
+
+  /// No description provided for @tailscaleRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This device will leave {name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.'**
+  String tailscaleRemoveConfirm(Object name);
+
+  /// No description provided for @tailscaleNetworkInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is still used by a rule or group in profile {profile}'**
+  String tailscaleNetworkInUse(Object name, Object profile);
+
+  /// No description provided for @tailscaleGuideGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get tailscaleGuideGetStarted;
+
+  /// No description provided for @tailscaleGuideGetStartedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a network and choose \"Save and log in\". Open the login page and authorize this device; sign-in completes on its own.\nTo sign in with an auth key, choose \"Auth key\" and enter it. No browser is needed.\nThe network carries traffic only while the proxy runs. Signing in alone routes nothing.'**
+  String get tailscaleGuideGetStartedBody;
+
+  /// No description provided for @tailscaleGuideDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Devices and MagicDNS'**
+  String get tailscaleGuideDevices;
+
+  /// No description provided for @tailscaleGuideDevicesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic routing sends the addresses and MagicDNS names of known peers, and the subnets approved in your tailnet, into this network. Other traffic follows your rules.\nIt applies after your added and custom rules and before the profile\'s own rules.\nWith a custom control server domain, only known device names are routed, so the domain\'s public sites stay reachable.\nSubnet addresses inside the local network this device is on stay local. To reach a remote subnet with the same addresses, add a rule that points to this network.\nA hostname that resolves into an approved subnet also goes through this network. If the profile hands such a name straight to a proxy, add a domain rule that points to this network.'**
+  String get tailscaleGuideDevicesBody;
+
+  /// No description provided for @tailscaleGuideExitNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit nodes'**
+  String get tailscaleGuideExitNodes;
+
+  /// No description provided for @tailscaleGuideExitNodesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'With an exit node, the network appears in the profile\'s selector groups. Traffic uses the exit node only after you select the network there or point a rule to it.\nLeave the field empty to use no exit node. auto picks an available exit node; a device name or address picks that device.'**
+  String get tailscaleGuideExitNodesBody;
+
+  /// No description provided for @tailscaleGuideSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in and backup'**
+  String get tailscaleGuideSignIn;
+
+  /// No description provided for @tailscaleGuideSignInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Network settings are included in backups. Auth keys and the device identity stay on this device, so sign in again after restoring on another device.\nWhen the node key expires, choose \"Save and log in\" again. Device approval and access are managed in your tailnet.\nRemoving a network signs this device out and deletes its identity from this device.'**
+  String get tailscaleGuideSignInBody;
+
+  /// No description provided for @tailscaleGuideTroubleshooting.
+  ///
+  /// In en, this message translates to:
+  /// **'Troubleshooting'**
+  String get tailscaleGuideTroubleshooting;
+
+  /// No description provided for @tailscaleGuideTroubleshootingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check that the proxy is running, this device is approved and the peer is online. For subnets or the Internet, also check route approval and the exit node.\n\"Not applied\" means the running configuration lacks the network: select a profile and make sure none of its nodes uses the same name.\nThis app only connects out to your tailnet. It accepts no inbound connections and never offers this device as a subnet router or exit node.'**
+  String get tailscaleGuideTroubleshootingBody;
+
+  /// No description provided for @tailscaleNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use up to 64 characters without commas'**
+  String get tailscaleNameInvalid;
+
+  /// No description provided for @tailscaleHostnameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use lowercase letters, digits and hyphens, up to 63 characters'**
+  String get tailscaleHostnameInvalid;
+
+  /// No description provided for @tailscaleAuthKeyInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This does not look like an auth key'**
+  String get tailscaleAuthKeyInvalid;
+
+  /// No description provided for @tailscaleDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct'**
+  String get tailscaleDirect;
+
+  /// No description provided for @tailscaleRelay.
+  ///
+  /// In en, this message translates to:
+  /// **'Relay {region}'**
+  String tailscaleRelay(Object region);
+
+  /// No description provided for @tailscaleExitNodeActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit node in use'**
+  String get tailscaleExitNodeActive;
+
+  /// No description provided for @quickAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get quickAdd;
+
+  /// No description provided for @rulePresetBlockQuic.
+  ///
+  /// In en, this message translates to:
+  /// **'Block QUIC'**
+  String get rulePresetBlockQuic;
+
+  /// No description provided for @rulePresetBlockStun.
+  ///
+  /// In en, this message translates to:
+  /// **'Block STUN'**
+  String get rulePresetBlockStun;
+
+  /// No description provided for @rulePresetBlockDot.
+  ///
+  /// In en, this message translates to:
+  /// **'Block DNS over TLS'**
+  String get rulePresetBlockDot;
+
+  /// No description provided for @rulePresetBlockLoopback.
+  ///
+  /// In en, this message translates to:
+  /// **'Block proxy loopback'**
+  String get rulePresetBlockLoopback;
+
+  /// No description provided for @rulePresetLanDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'LAN direct'**
+  String get rulePresetLanDirect;
+
+  /// No description provided for @rulePresetSystemServicesDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple and Microsoft direct'**
+  String get rulePresetSystemServicesDirect;
+
+  /// No description provided for @rulePresetBittorrentDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'BitTorrent direct'**
+  String get rulePresetBittorrentDirect;
+
+  /// No description provided for @rulePresetInsertHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add selected presets before existing rules. Identical rules are not added again.'**
+  String get rulePresetInsertHint;
+
+  /// No description provided for @overwriteIssueEmptyName.
+  ///
+  /// In en, this message translates to:
+  /// **'The name is empty'**
+  String get overwriteIssueEmptyName;
+
+  /// No description provided for @overwriteIssueReservedName.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is a built-in policy name and cannot be used here'**
+  String overwriteIssueReservedName(Object name);
+
+  /// No description provided for @overwriteIssueDuplicateName.
+  ///
+  /// In en, this message translates to:
+  /// **'The name {name} is already used by another proxy or proxy group'**
+  String overwriteIssueDuplicateName(Object name);
+
+  /// No description provided for @overwriteIssueNoProxySource.
+  ///
+  /// In en, this message translates to:
+  /// **'No proxies or proxy providers are selected, so the core rejects this group'**
+  String get overwriteIssueNoProxySource;
+
+  /// No description provided for @overwriteIssueMissingProxies.
+  ///
+  /// In en, this message translates to:
+  /// **'These proxies or policies do not exist: {names}'**
+  String overwriteIssueMissingProxies(Object names);
+
+  /// No description provided for @overwriteIssueMissingProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'These proxy providers do not exist: {names}'**
+  String overwriteIssueMissingProviders(Object names);
+
+  /// No description provided for @overwriteIssueEmptyFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'The empty-group fallback must be an existing node or built-in outbound, not a proxy group: {name}'**
+  String overwriteIssueEmptyFallback(Object name);
+
+  /// No description provided for @overwriteIssueGroupLoop.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy groups reference each other in a loop: {path}'**
+  String overwriteIssueGroupLoop(Object path);
+
+  /// No description provided for @invalidPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'{target} is an invalid policy'**
+  String invalidPolicy(Object target);
+
+  /// No description provided for @invalidRuleSet.
+  ///
+  /// In en, this message translates to:
+  /// **'{ruleSet} is an invalid rule set'**
+  String invalidRuleSet(Object ruleSet);
+
+  /// No description provided for @invalidSubRule.
+  ///
+  /// In en, this message translates to:
+  /// **'{subRule} is an invalid SUB_RULE'**
+  String invalidSubRule(Object subRule);
+
+  /// No description provided for @safeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe mode'**
+  String get safeMode;
+
+  /// No description provided for @safeModeAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} (Safe mode)'**
+  String safeModeAppTitle(Object appName);
+
+  /// No description provided for @hideTimeoutProxies.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide failed nodes'**
+  String get hideTimeoutProxies;
+
+  /// No description provided for @delayTestQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get delayTestQueued;
+
+  /// No description provided for @delayTestRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing'**
+  String get delayTestRunning;
+
+  /// No description provided for @dnsQueries.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS queries'**
+  String get dnsQueries;
+
+  /// No description provided for @dnsQueriesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'View the latest 500 resolver queries'**
+  String get dnsQueriesDesc;
+
+  /// No description provided for @dnsQueryCached.
+  ///
+  /// In en, this message translates to:
+  /// **'Cached'**
+  String get dnsQueryCached;
+
+  /// No description provided for @dnsQueryUpstream.
+  ///
+  /// In en, this message translates to:
+  /// **'Upstream'**
+  String get dnsQueryUpstream;
+
+  /// No description provided for @dnsQueryAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers'**
+  String get dnsQueryAnswers;
+
+  /// No description provided for @dnsQueryRcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Response code'**
+  String get dnsQueryRcode;
+
+  /// No description provided for @dnsQueryType.
+  ///
+  /// In en, this message translates to:
+  /// **'Query type'**
+  String get dnsQueryType;
+
+  /// No description provided for @pauseUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause updates'**
+  String get pauseUpdates;
+
+  /// No description provided for @resumeUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume updates'**
+  String get resumeUpdates;
+
+  /// No description provided for @dnsQueryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All queries'**
+  String get dnsQueryAll;
+
+  /// No description provided for @dnsQueryFailures.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed queries'**
+  String get dnsQueryFailures;
+
+  /// No description provided for @dnsQueryInitiatorApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Application'**
+  String get dnsQueryInitiatorApp;
+
+  /// No description provided for @dnsQueryInitiatorRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule matching'**
+  String get dnsQueryInitiatorRule;
+
+  /// No description provided for @dnsQueryInitiatorDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct connection'**
+  String get dnsQueryInitiatorDirect;
+
+  /// No description provided for @dnsQueryInitiatorProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy connection'**
+  String get dnsQueryInitiatorProxy;
+
+  /// No description provided for @dnsQueryInitiatorOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get dnsQueryInitiatorOther;
+
+  /// No description provided for @action_ruleMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule mode'**
+  String get action_ruleMode;
+
+  /// No description provided for @action_globalMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Global mode'**
+  String get action_globalMode;
+
+  /// No description provided for @action_directMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct mode'**
+  String get action_directMode;
+
+  /// No description provided for @action_delayTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Test node latency'**
+  String get action_delayTest;
+
+  /// No description provided for @action_updateProfiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Update profiles'**
+  String get action_updateProfiles;
+
+  /// No description provided for @action_copyEnv.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy proxy environment variables'**
+  String get action_copyEnv;
+
+  /// No description provided for @action_exit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get action_exit;
+
+  /// No description provided for @hotkeyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcut unavailable'**
+  String get hotkeyUnavailable;
+
+  /// No description provided for @runTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Uptime'**
+  String get runTime;
+
+  /// No description provided for @floatingNavigationBar.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating navigation'**
+  String get floatingNavigationBar;
+
+  /// No description provided for @localNetworkTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Local network access denied; using gVisor for this connection. LAN proxies and services may remain unavailable'**
+  String get localNetworkTip;
+
+  /// No description provided for @sidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Sidebar'**
+  String get sidebar;
+
+  /// No description provided for @backgroundBlur.
+  ///
+  /// In en, this message translates to:
+  /// **'Background blur'**
+  String get backgroundBlur;
+
+  /// No description provided for @sidebarBlurDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Background blur lets the desktop behind the window show through the sidebar.'**
+  String get sidebarBlurDesc;
+
+  /// No description provided for @format.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get format;
+
+  /// No description provided for @behavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Behavior'**
+  String get behavior;
+
+  /// No description provided for @appProviderLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider library'**
+  String get appProviderLibrary;
+
+  /// No description provided for @providerLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local file'**
+  String get providerLocal;
+
+  /// No description provided for @providerRemote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote URL'**
+  String get providerRemote;
+
+  /// No description provided for @providerContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource content'**
+  String get providerContent;
+
+  /// No description provided for @providerContentInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The resource content or format is invalid'**
+  String get providerContentInvalid;
+
+  /// No description provided for @providerContentTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The resource exceeds 32 MiB'**
+  String get providerContentTooLarge;
+
+  /// No description provided for @providerChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The resource changed while editing; reopen it and try again'**
+  String get providerChanged;
+
+  /// No description provided for @providerNameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name without commas or line breaks'**
+  String get providerNameInvalid;
+
+  /// No description provided for @providerInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This resource is still used by {profiles}'**
+  String providerInUse(String profiles);
+
+  /// No description provided for @providerRenameShadowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Renaming would change subscription resource references in {profiles}'**
+  String providerRenameShadowed(String profiles);
+
+  /// No description provided for @providerUrlTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an HTTP or HTTPS URL without embedded credentials'**
+  String get providerUrlTip;
+
+  /// No description provided for @providerSourceReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit references in the source profile before renaming: {profiles}'**
+  String providerSourceReference(String profiles);
+
+  /// No description provided for @providerSourceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot read these profiles to check references: {profiles}'**
+  String providerSourceUnavailable(String profiles);
+
+  /// No description provided for @nodeDefinition.
+  ///
+  /// In en, this message translates to:
+  /// **'Node definition'**
+  String get nodeDefinition;
+
+  /// No description provided for @nodeQuickFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick edit'**
+  String get nodeQuickFields;
+
+  /// No description provided for @nodeCoreValidationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the Core before validating this node'**
+  String get nodeCoreValidationUnavailable;
+
+  /// No description provided for @nodeInvalidDefinition.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter one complete proxy definition with a name and type'**
+  String get nodeInvalidDefinition;
+
+  /// No description provided for @releaseMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Release memory'**
+  String get releaseMemory;
+
+  /// No description provided for @memoryCoreHeapInuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Heap in use'**
+  String get memoryCoreHeapInuse;
+
+  /// No description provided for @memoryCoreHeapIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Heap idle'**
+  String get memoryCoreHeapIdle;
+
+  /// No description provided for @memoryCoreStack.
+  ///
+  /// In en, this message translates to:
+  /// **'Goroutine stacks'**
+  String get memoryCoreStack;
+
+  /// No description provided for @memoryCoreRuntime.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime overhead'**
+  String get memoryCoreRuntime;
+
+  /// No description provided for @memoryCoreNotRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Core is not running'**
+  String get memoryCoreNotRunning;
+
+  /// No description provided for @memoryAppResident.
+  ///
+  /// In en, this message translates to:
+  /// **'Resident memory'**
+  String get memoryAppResident;
+
+  /// No description provided for @memoryAppShared.
+  ///
+  /// In en, this message translates to:
+  /// **'App & shared'**
+  String get memoryAppShared;
+
+  /// No description provided for @memoryEstimateDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated from process resident memory; it may differ from what the system reports.'**
+  String get memoryEstimateDesc;
+
+  /// No description provided for @memoryEstimateSharedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The Core runs inside the app process. Its share is estimated from runtime stats, and the rest counts as app and shared memory.'**
+  String get memoryEstimateSharedDesc;
+
+  /// No description provided for @memoryReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory released'**
+  String get memoryReleased;
+
+  /// No description provided for @memoryReleasedSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Released {size}'**
+  String memoryReleasedSize(Object size);
+
+  /// No description provided for @releaseMemoryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to release memory'**
+  String get releaseMemoryFailed;
+
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @showNotificationStopAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop button in notification'**
+  String get showNotificationStopAction;
+
+  /// No description provided for @interfaceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface name'**
+  String get interfaceName;
+
+  /// No description provided for @interfaceNameMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Outbound interface'**
+  String get interfaceNameMode;
+
+  /// No description provided for @interfaceNameDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface name is the network interface outbound connections use'**
+  String get interfaceNameDesc;
+
+  /// No description provided for @interfaceFollowProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow profile'**
+  String get interfaceFollowProfile;
+
+  /// No description provided for @interfaceAutomatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear override (automatic interface)'**
+  String get interfaceAutomatic;
+
+  /// No description provided for @hideIp.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide IP'**
+  String get hideIp;
+
+  /// No description provided for @cameraPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission required'**
+  String get cameraPermissionRequired;
+
+  /// No description provided for @cameraPermissionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera access in system settings to scan QR codes, or choose a QR code image from the album.'**
+  String get cameraPermissionDesc;
+
+  /// No description provided for @cameraUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera unavailable'**
+  String get cameraUnavailable;
+
+  /// No description provided for @invalidProfileQrcode.
+  ///
+  /// In en, this message translates to:
+  /// **'This QR code doesn\'t contain a profile link'**
+  String get invalidProfileQrcode;
+
+  /// No description provided for @pickFromAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from album'**
+  String get pickFromAlbum;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @toggleFlashlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle flashlight'**
+  String get toggleFlashlight;
+
+  /// No description provided for @networkTimeoutError.
+  ///
+  /// In en, this message translates to:
+  /// **'The request timed out. Check your network or proxy, then try again'**
+  String get networkTimeoutError;
+
+  /// No description provided for @networkHostLookupError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t resolve the server address. Check that the URL is correct and DNS is working'**
+  String get networkHostLookupError;
+
+  /// No description provided for @monochromeIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Monochrome icon'**
+  String get monochromeIcon;
+
+  /// No description provided for @networkConnectionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t connect to the server. Check your network connection or proxy settings'**
+  String get networkConnectionError;
+
+  /// No description provided for @networkTlsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure connection failed. The server\'s certificate may be invalid, or the connection is being intercepted'**
+  String get networkTlsError;
+
+  /// No description provided for @networkCancelledError.
+  ///
+  /// In en, this message translates to:
+  /// **'The request was cancelled'**
+  String get networkCancelledError;
+
+  /// No description provided for @networkAccessDeniedError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server denied access (HTTP {code}). The link may have expired, or the credentials are wrong'**
+  String networkAccessDeniedError(Object code);
+
+  /// No description provided for @networkNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was found at this address (HTTP {code}). Check that the URL is correct'**
+  String networkNotFoundError(Object code);
+
+  /// No description provided for @networkRateLimitedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests (HTTP 429). Wait a moment and try again'**
+  String get networkRateLimitedError;
+
+  /// No description provided for @networkServerError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server ran into a problem (HTTP {code}). Try again later'**
+  String networkServerError(Object code);
+
+  /// No description provided for @networkBadResponseError.
+  ///
+  /// In en, this message translates to:
+  /// **'The server rejected the request (HTTP {code})'**
+  String networkBadResponseError(Object code);
+
+  /// No description provided for @clipboardWriteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t copy to the clipboard. The selection may be too large'**
+  String get clipboardWriteFailed;
+
+  /// No description provided for @lineWrap.
+  ///
+  /// In en, this message translates to:
+  /// **'Word wrap'**
+  String get lineWrap;
+
+  /// No description provided for @previousMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous match'**
+  String get previousMatch;
+
+  /// No description provided for @nextMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Next match'**
+  String get nextMatch;
+
+  /// No description provided for @editorUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Editor unavailable'**
+  String get editorUnavailable;
+
+  /// No description provided for @replaceAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace all'**
+  String get replaceAll;
+
+  /// No description provided for @fontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get fontSize;
+
+  /// No description provided for @replace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get replace;
+
+  /// No description provided for @locateSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Locate selected node'**
+  String get locateSelected;
+
+  /// No description provided for @expandList.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get expandList;
+
+  /// No description provided for @collapseList.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get collapseList;
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearch;
+
+  /// No description provided for @closeAllConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Close all connections'**
+  String get closeAllConnections;
+
+  /// No description provided for @showMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get showMore;
+
+  /// No description provided for @showLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get showLess;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePassword;
+
+  /// No description provided for @switchProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch profile'**
+  String get switchProfile;
+
+  /// No description provided for @subscriptionInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription info'**
+  String get subscriptionInfo;
+
+  /// No description provided for @lastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated'**
+  String get lastUpdated;
+
+  /// No description provided for @proxiesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 proxy} other{{count} proxies}}'**
+  String proxiesCount(num count);
+
+  /// No description provided for @rulesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 rule} other{{count} rules}}'**
+  String rulesCount(num count);
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching results'**
+  String get noSearchResults;
+
+  /// No description provided for @proxyNode.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy node'**
+  String get proxyNode;
+
+  /// No description provided for @rules.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules'**
+  String get rules;
+
+  /// No description provided for @addOverrideEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add override entry'**
+  String get addOverrideEntry;
+
+  /// No description provided for @batchAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch add'**
+  String get batchAdd;
+
+  /// No description provided for @batchListInputTip.
+  ///
+  /// In en, this message translates to:
+  /// **'One item per line, or separated by commas'**
+  String get batchListInputTip;
+
+  /// No description provided for @batchMapInputTip.
+  ///
+  /// In en, this message translates to:
+  /// **'One entry per line: key, a space, then value'**
+  String get batchMapInputTip;
+
+  /// No description provided for @batchPreviewTip.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} to add, {skipped} skipped as existing'**
+  String batchPreviewTip(Object count, Object skipped);
+
+  /// No description provided for @cacheAlgorithm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache algorithm'**
+  String get cacheAlgorithm;
+
+  /// No description provided for @cacheMaxSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache size'**
+  String get cacheMaxSize;
+
+  /// No description provided for @dialerProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Dialer proxy'**
+  String get dialerProxy;
+
+  /// No description provided for @dialerProxyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Dialer proxy is the outbound used to reach the NTP server'**
+  String get dialerProxyDesc;
+
+  /// No description provided for @dialerProxyLoopStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Dialing through {name} leads back to the proxy that uses it, so the connection was stopped'**
+  String dialerProxyLoopStopped(Object name);
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard the changes?'**
+  String get discardChanges;
+
+  /// No description provided for @fakeipFilterMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake-IP filter mode'**
+  String get fakeipFilterMode;
+
+  /// No description provided for @fakeipFilterModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'In Fake-IP filter mode, blacklist excludes matches, whitelist fakes only matches, and rule matches as rules'**
+  String get fakeipFilterModeDesc;
+
+  /// No description provided for @fakeipRange6.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake-IP range (IPv6)'**
+  String get fakeipRange6;
+
+  /// No description provided for @fakeipTtl.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake-IP TTL'**
+  String get fakeipTtl;
+
+  /// No description provided for @ipv6Timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'IPv6 timeout (ms)'**
+  String get ipv6Timeout;
+
+  /// No description provided for @lineIssueTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {line}: {message}'**
+  String lineIssueTip(Object line, Object message);
+
+  /// No description provided for @listenRoutingMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen routing mark'**
+  String get listenRoutingMark;
+
+  /// No description provided for @listenRoutingMarkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen routing mark works only on Linux'**
+  String get listenRoutingMarkDesc;
+
+  /// No description provided for @maxLengthTip.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} must be at most {max} characters'**
+  String maxLengthTip(Object label, Object max);
+
+  /// No description provided for @ntpInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync interval (minutes)'**
+  String get ntpInterval;
+
+  /// No description provided for @ntpStatusDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'NTP takes the time from an NTP server instead of the system clock'**
+  String get ntpStatusDesc;
+
+  /// No description provided for @overrideEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Override entries'**
+  String get overrideEntries;
+
+  /// No description provided for @quickEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick edit'**
+  String get quickEdit;
+
+  /// No description provided for @server.
+  ///
+  /// In en, this message translates to:
+  /// **'Server'**
+  String get server;
+
+  /// No description provided for @singleAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Single add'**
+  String get singleAdd;
+
+  /// No description provided for @singleValueTip.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} must be a single item'**
+  String singleValueTip(Object label);
+
+  /// No description provided for @writeToSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Write to system'**
+  String get writeToSystem;
+
+  /// No description provided for @writeToSystemDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Write to system also sets the system clock; Android ignores it'**
+  String get writeToSystemDesc;
+
+  /// No description provided for @basicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic info'**
+  String get basicInfo;
+
+  /// No description provided for @ruleActionIpSuffixDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match an IP suffix range'**
+  String get ruleActionIpSuffixDesc;
+
+  /// No description provided for @ruleActionDomainSuffixDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match a domain suffix'**
+  String get ruleActionDomainSuffixDesc;
+
+  /// No description provided for @ruleActionMatchDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match all requests, no conditions needed'**
+  String get ruleActionMatchDesc;
+
+  /// No description provided for @ruleActionSrcGeoipDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the source IP\'s country code'**
+  String get ruleActionSrcGeoipDesc;
+
+  /// No description provided for @ruleActionDomainWildcardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Wildcard match; only * and ? are supported'**
+  String get ruleActionDomainWildcardDesc;
+
+  /// No description provided for @ruleActionAndDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Logical rule AND'**
+  String get ruleActionAndDesc;
+
+  /// No description provided for @ruleActionIpCidr6Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match an IP address range; IP-CIDR6 is just an alias'**
+  String get ruleActionIpCidr6Desc;
+
+  /// No description provided for @ruleActionDomainRegexDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match a domain regex'**
+  String get ruleActionDomainRegexDesc;
+
+  /// No description provided for @ruleActionProcessPathRegexDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match by process path regex'**
+  String get ruleActionProcessPathRegexDesc;
+
+  /// No description provided for @ruleActionDstPortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the destination port range'**
+  String get ruleActionDstPortDesc;
+
+  /// No description provided for @ruleActionDscpDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the DSCP mark (tproxy UDP inbound only)'**
+  String get ruleActionDscpDesc;
+
+  /// No description provided for @ruleActionInPortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the inbound port'**
+  String get ruleActionInPortDesc;
+
+  /// No description provided for @ruleActionUidDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the Linux user ID'**
+  String get ruleActionUidDesc;
+
+  /// No description provided for @ruleActionIpCidrDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match an IP address range'**
+  String get ruleActionIpCidrDesc;
+
+  /// No description provided for @ruleActionRuleSetDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference a rule set; requires rule-providers'**
+  String get ruleActionRuleSetDesc;
+
+  /// No description provided for @ruleActionGeositeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match domains in Geosite'**
+  String get ruleActionGeositeDesc;
+
+  /// No description provided for @ruleActionNetworkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match TCP or UDP'**
+  String get ruleActionNetworkDesc;
+
+  /// No description provided for @ruleActionProcessPathDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match by the full process path'**
+  String get ruleActionProcessPathDesc;
+
+  /// No description provided for @ruleActionProcessPathWildcardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match by process path wildcard; only * and ? are supported'**
+  String get ruleActionProcessPathWildcardDesc;
+
+  /// No description provided for @ruleActionRematchNameDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the rematch name; separate multiple names with /'**
+  String get ruleActionRematchNameDesc;
+
+  /// No description provided for @ruleActionSrcIpSuffixDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match a source IP suffix range'**
+  String get ruleActionSrcIpSuffixDesc;
+
+  /// No description provided for @ruleActionGeoipDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the IP\'s country code'**
+  String get ruleActionGeoipDesc;
+
+  /// No description provided for @ruleActionInUserDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the inbound username; separate multiple usernames with /'**
+  String get ruleActionInUserDesc;
+
+  /// No description provided for @invalidNetworkContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Only tcp or udp is supported'**
+  String get invalidNetworkContent;
+
+  /// No description provided for @ruleActionDomainKeywordDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match a domain keyword'**
+  String get ruleActionDomainKeywordDesc;
+
+  /// No description provided for @ruleActionNotDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Logical rule NOT'**
+  String get ruleActionNotDesc;
+
+  /// No description provided for @ruleActionSrcIpAsnDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the source IP\'s ASN'**
+  String get ruleActionSrcIpAsnDesc;
+
+  /// No description provided for @invalidRangeContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter numbers or ranges such as 80 or 8000-9000, separated by /'**
+  String get invalidRangeContent;
+
+  /// No description provided for @ruleActionProcessNameRegexDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match by process name regex; matches the package name on Android'**
+  String get ruleActionProcessNameRegexDesc;
+
+  /// No description provided for @ruleActionSrcIpCidrDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match a source IP address range'**
+  String get ruleActionSrcIpCidrDesc;
+
+  /// No description provided for @ruleActionDomainDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the full domain'**
+  String get ruleActionDomainDesc;
+
+  /// No description provided for @ruleActionInNameDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the inbound name'**
+  String get ruleActionInNameDesc;
+
+  /// No description provided for @invalidDscpContent.
+  ///
+  /// In en, this message translates to:
+  /// **'A DSCP mark cannot exceed 63'**
+  String get invalidDscpContent;
+
+  /// No description provided for @invalidCidrContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an IP range in CIDR form such as 192.168.0.0/16'**
+  String get invalidCidrContent;
+
+  /// No description provided for @invalidIpv6CidrContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an IPv6 range in CIDR form such as fd00::/8'**
+  String get invalidIpv6CidrContent;
+
+  /// No description provided for @invalidHostContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a domain or an IP address'**
+  String get invalidHostContent;
+
+  /// No description provided for @invalidListenContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an address and port such as 0.0.0.0:1053'**
+  String get invalidListenContent;
+
+  /// No description provided for @ruleActionIpAsnDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the IP\'s ASN'**
+  String get ruleActionIpAsnDesc;
+
+  /// No description provided for @ruleActionSrcPortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the source port range'**
+  String get ruleActionSrcPortDesc;
+
+  /// No description provided for @ruleActionInTypeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the inbound type'**
+  String get ruleActionInTypeDesc;
+
+  /// No description provided for @ruleActionOrDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Logical rule OR'**
+  String get ruleActionOrDesc;
+
+  /// No description provided for @ruleActionSubRuleDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match into a sub-rule; mind the parentheses'**
+  String get ruleActionSubRuleDesc;
+
+  /// No description provided for @ruleActionProcessNameWildcardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match by process name wildcard; only * and ? are supported'**
+  String get ruleActionProcessNameWildcardDesc;
+
+  /// No description provided for @ruleActionProcessNameDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Match by process name; matches the package name on Android'**
+  String get ruleActionProcessNameDesc;
+
+  /// No description provided for @general.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get general;
+
+  /// No description provided for @startupAndBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Startup and background'**
+  String get startupAndBackground;
+
+  /// No description provided for @inbound.
+  ///
+  /// In en, this message translates to:
+  /// **'Inbound'**
+  String get inbound;
+
+  /// No description provided for @outbound.
+  ///
+  /// In en, this message translates to:
+  /// **'Outbound'**
+  String get outbound;
+
+  /// No description provided for @logsAndDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs and diagnostics'**
+  String get logsAndDiagnostics;
+
+  /// No description provided for @onDemand.
+  ///
+  /// In en, this message translates to:
+  /// **'On demand'**
+  String get onDemand;
+
+  /// No description provided for @onDemandDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'On demand pauses and resumes the proxy by Wi-Fi or network conditions'**
+  String get onDemandDesc;
+
+  /// No description provided for @prerequisites.
+  ///
+  /// In en, this message translates to:
+  /// **'Prerequisites'**
+  String get prerequisites;
+
+  /// No description provided for @suspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended…'**
+  String get suspended;
+
+  /// No description provided for @enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabled;
+
+  /// No description provided for @enabledOnStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable on start'**
+  String get enabledOnStart;
+
+  /// No description provided for @disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabled;
+
+  /// No description provided for @overwriteIssuesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items have problems, and applying this override may fail'**
+  String overwriteIssuesSummary(Object count);
+
+  /// No description provided for @ignoreBatteryOptimization.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore battery optimization'**
+  String get ignoreBatteryOptimization;
+
+  /// No description provided for @batteryOptimizationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore battery optimization keeps the app running in the background'**
+  String get batteryOptimizationDesc;
+
+  /// No description provided for @batteryOptimizationStatusTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Due to system limitations, the battery optimization status cannot be read correctly while running'**
+  String get batteryOptimizationStatusTip;
+
+  /// No description provided for @authorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized'**
+  String get authorized;
+
+  /// No description provided for @tapToAuthorize.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to authorize'**
+  String get tapToAuthorize;
+
+  /// No description provided for @addSsid.
+  ///
+  /// In en, this message translates to:
+  /// **'Add SSID'**
+  String get addSsid;
+
+  /// No description provided for @editSsid.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit SSID'**
+  String get editSsid;
+
+  /// No description provided for @ssidsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'SSIDs are empty'**
+  String get ssidsEmpty;
+
+  /// No description provided for @hotkeyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Global hotkeys work even while the window is hidden. Tap an action to record its key combination.'**
+  String get hotkeyDesc;
+
+  /// No description provided for @hotkeyNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get hotkeyNotSet;
+
+  /// No description provided for @hotkeyNeedsModifier.
+  ///
+  /// In en, this message translates to:
+  /// **'Include at least one of {modifiers}'**
+  String hotkeyNeedsModifier(Object modifiers);
+
+  /// No description provided for @hotkeyConflictWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Already used by “{action}”. Saving moves it here.'**
+  String hotkeyConflictWith(Object action);
+
+  /// No description provided for @confirmExitWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to exit the current window?'**
+  String get confirmExitWindow;
+
+  /// No description provided for @dataChangedSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Data changes detected. Save them?'**
+  String get dataChangedSave;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @docked.
+  ///
+  /// In en, this message translates to:
+  /// **'Docked'**
+  String get docked;
+
+  /// No description provided for @fade.
+  ///
+  /// In en, this message translates to:
+  /// **'Fade'**
+  String get fade;
+
+  /// No description provided for @floating.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating'**
+  String get floating;
+
+  /// No description provided for @followSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow system'**
+  String get followSystem;
+
+  /// No description provided for @navigationBarStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom bar'**
+  String get navigationBarStyle;
+
+  /// No description provided for @pureBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Pure black'**
+  String get pureBlack;
+
+  /// No description provided for @slide.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide'**
+  String get slide;
+
+  /// No description provided for @textScalePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Text in the app will look like this'**
+  String get textScalePreview;
+
+  /// No description provided for @basicStrategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic strategies'**
+  String get basicStrategy;
+
+  /// No description provided for @nonTextProviderFile.
+  ///
+  /// In en, this message translates to:
+  /// **'This external resource is not a text file'**
+  String get nonTextProviderFile;
+
+  /// No description provided for @scriptChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The script changed or was deleted. Reopen it and try again.'**
+  String get scriptChanged;
+
+  /// No description provided for @startFromScratch.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from scratch'**
+  String get startFromScratch;
+
+  /// No description provided for @optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get optional;
+
+  /// No description provided for @coreBlockedBySmartAppControlTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Windows blocked FlClashCore.exe, and Smart App Control is enabled. Check the block details in Windows Security → App & browser control, and use a trusted, verified release.'**
+  String get coreBlockedBySmartAppControlTip;
+
+  /// No description provided for @helperCorruptTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Helper service unavailable; TUN mode cannot be enabled. Reinstall FlClash to restore it.'**
+  String get helperCorruptTip;
+
+  /// No description provided for @changeProxyFailedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to switch proxy; the previous selection has been restored'**
+  String get changeProxyFailedTip;
+
+  /// No description provided for @databaseWriteFailedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save the change. Please check the current value and try again.'**
+  String get databaseWriteFailedTip;
+
+  /// No description provided for @proxyType.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy type'**
+  String get proxyType;
+
+  /// No description provided for @providerSourceSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get providerSourceSubscription;
+
+  /// No description provided for @providerSourceProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get providerSourceProfile;
+
+  /// No description provided for @providerSourceApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App library'**
+  String get providerSourceApp;
+
+  /// No description provided for @target.
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get target;
+
+  /// No description provided for @outboundExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get outboundExit;
+
+  /// No description provided for @protocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol'**
+  String get protocol;
+
+  /// No description provided for @traffic.
+  ///
+  /// In en, this message translates to:
+  /// **'Traffic'**
+  String get traffic;
+
+  /// No description provided for @totalDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get totalDownload;
+
+  /// No description provided for @totalUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get totalUpload;
+
+  /// No description provided for @duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get duration;
+
+  /// No description provided for @initiatorShort.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get initiatorShort;
+
+  /// No description provided for @result.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get result;
+
+  /// No description provided for @elapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Took'**
+  String get elapsed;
+
+  /// No description provided for @tunOverrideDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries added here replace the TUN settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence'**
+  String get tunOverrideDesc;
+
+  /// No description provided for @dnsOverrideDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries added here replace the DNS settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence'**
+  String get dnsOverrideDesc;
+
+  /// No description provided for @ntpOverrideDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries added here replace the NTP settings of every profile; anything not added keeps the profile\'s own setting. Entries a custom profile adds itself take precedence'**
+  String get ntpOverrideDesc;
+
+  /// No description provided for @congestionController.
+  ///
+  /// In en, this message translates to:
+  /// **'TCP congestion control'**
+  String get congestionController;
+
+  /// No description provided for @congestionControllerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'TCP congestion control works only with the mips stack'**
+  String get congestionControllerDesc;
+
+  /// No description provided for @strictRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Strict route'**
+  String get strictRoute;
+
+  /// No description provided for @strictRouteDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Strict route keeps traffic such as DNS from bypassing TUN, and with IPv6 off it blocks this device\'s IPv6 connections'**
+  String get strictRouteDesc;
+
+  /// No description provided for @routeExcludeAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Route exclude addresses'**
+  String get routeExcludeAddress;
+
+  /// No description provided for @udpTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'UDP timeout'**
+  String get udpTimeout;
+
+  /// No description provided for @udpTimeoutDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The UDP timeout is in seconds and works only with the gvisor, system and mixed stacks'**
+  String get udpTimeoutDesc;
+
+  /// No description provided for @dnsHijackDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Without this entry, TUN hijacks every DNS query to port 53 (any:53)'**
+  String get dnsHijackDesc;
+
+  /// No description provided for @disableIcmpForwarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable ICMP forwarding'**
+  String get disableIcmpForwarding;
+
+  /// No description provided for @disableIcmpForwardingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'With ICMP forwarding disabled, TUN answers ping itself, so ping no longer shows the real latency'**
+  String get disableIcmpForwardingDesc;
+
+  /// No description provided for @includeInterface.
+  ///
+  /// In en, this message translates to:
+  /// **'Included interfaces'**
+  String get includeInterface;
+
+  /// No description provided for @includeInterfaceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Only traffic arriving on included interfaces goes through TUN, and excluded interfaces no longer apply'**
+  String get includeInterfaceDesc;
+
+  /// No description provided for @excludeInterface.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded interfaces'**
+  String get excludeInterface;
+
+  /// No description provided for @excludeInterfaceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Traffic arriving on excluded interfaces, such as docker0, skips TUN'**
+  String get excludeInterfaceDesc;
+
+  /// No description provided for @includeUid.
+  ///
+  /// In en, this message translates to:
+  /// **'Included user IDs'**
+  String get includeUid;
+
+  /// No description provided for @includeUidDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Only traffic from processes of included user IDs goes through TUN'**
+  String get includeUidDesc;
+
+  /// No description provided for @excludeUid.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded user IDs'**
+  String get excludeUid;
+
+  /// No description provided for @excludeUidDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Traffic from processes of excluded user IDs skips TUN'**
+  String get excludeUidDesc;
+
+  /// No description provided for @excludeSrcPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded source ports'**
+  String get excludeSrcPort;
+
+  /// No description provided for @excludeSrcPortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Traffic from excluded source ports skips TUN'**
+  String get excludeSrcPortDesc;
+
+  /// No description provided for @excludeDstPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded destination ports'**
+  String get excludeDstPort;
+
+  /// No description provided for @excludeDstPortDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Traffic to excluded destination ports skips TUN'**
+  String get excludeDstPortDesc;
+
+  /// No description provided for @numberRangeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} must be between {min} and {max}'**
+  String numberRangeTip(Object label, Object min, Object max);
+
+  /// No description provided for @customProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom profile'**
+  String get customProfile;
+
+  /// No description provided for @customProfileDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Assemble proxy groups and rules from your own nodes, the provider library and other profiles'**
+  String get customProfileDesc;
+
+  /// No description provided for @emptyCustomProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a proxy group or a rule to this custom profile first'**
+  String get emptyCustomProfile;
+
+  /// No description provided for @nameCustomProfileTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Name this custom profile'**
+  String get nameCustomProfileTip;
+
+  /// No description provided for @profileProviderInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This profile is a proxy provider of {profiles}. Remove it there first.'**
+  String profileProviderInUse(Object profiles);
+
+  /// No description provided for @healthCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Health check'**
+  String get healthCheck;
+
+  /// No description provided for @additionalPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Name prefix'**
+  String get additionalPrefix;
+
+  /// No description provided for @additionalSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'Name suffix'**
+  String get additionalSuffix;
+
+  /// No description provided for @ipVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'IP version'**
+  String get ipVersion;
+
+  /// No description provided for @profileSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to this profile only; anything not added uses its default'**
+  String get profileSettingsDesc;
+
+  /// No description provided for @profileOverrideSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to this profile only and takes precedence over the override entries in the app\'s DNS and NTP settings; anything not added follows those entries'**
+  String get profileOverrideSettingsDesc;
+
+  /// No description provided for @profileTunSettingsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to this profile only and takes precedence over the TUN override entries in the network settings'**
+  String get profileTunSettingsDesc;
+
+  /// No description provided for @settingEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'settings'**
+  String get settingEntries;
+
+  /// No description provided for @addSettingEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add setting'**
+  String get addSettingEntry;
+
+  /// No description provided for @settingsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 setting} other{{count} settings}}'**
+  String settingsCount(num count);
+
+  /// No description provided for @sniffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sniffer'**
+  String get sniffer;
+
+  /// No description provided for @snifferStatusDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The sniffer reads the domain from TLS, HTTP and QUIC traffic so rules can match it'**
+  String get snifferStatusDesc;
+
+  /// No description provided for @overrideDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Override destination'**
+  String get overrideDestination;
+
+  /// No description provided for @overrideDestinationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Override destination connects to the sniffed domain instead of the original address'**
+  String get overrideDestinationDesc;
+
+  /// No description provided for @forceDnsMapping.
+  ///
+  /// In en, this message translates to:
+  /// **'Force DNS mapping'**
+  String get forceDnsMapping;
+
+  /// No description provided for @forceDnsMappingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Force DNS mapping also sniffs connections whose domain came from a DNS mapping'**
+  String get forceDnsMappingDesc;
+
+  /// No description provided for @parsePureIp.
+  ///
+  /// In en, this message translates to:
+  /// **'Parse pure IP'**
+  String get parsePureIp;
+
+  /// No description provided for @parsePureIpDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Parse pure IP sniffs connections that carry only an IP address'**
+  String get parsePureIpDesc;
+
+  /// No description provided for @forceDomain.
+  ///
+  /// In en, this message translates to:
+  /// **'Force domains'**
+  String get forceDomain;
+
+  /// No description provided for @forceDomainDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Force domains are sniffed too; other connections that already have a domain are left alone'**
+  String get forceDomainDesc;
+
+  /// No description provided for @skipDomain.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip domains'**
+  String get skipDomain;
+
+  /// No description provided for @skipDomainDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A sniffed domain on the Skip domains list is not used'**
+  String get skipDomainDesc;
+
+  /// No description provided for @skipSrcAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip source addresses'**
+  String get skipSrcAddress;
+
+  /// No description provided for @skipDstAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip destination addresses'**
+  String get skipDstAddress;
+
+  /// No description provided for @sniffProtocols.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocols'**
+  String get sniffProtocols;
+
+  /// No description provided for @ports.
+  ///
+  /// In en, this message translates to:
+  /// **'Ports'**
+  String get ports;
+
+  /// No description provided for @invalidPortRangeContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a port or a range such as 443 or 8000-9000'**
+  String get invalidPortRangeContent;
+
+  /// No description provided for @importConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Import config'**
+  String get importConfig;
+
+  /// No description provided for @importText.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from text'**
+  String get importText;
+
+  /// No description provided for @importConfigInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a config that can be imported'**
+  String get importConfigInvalid;
+
+  /// No description provided for @importConfigReplaceTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing replaces the nodes, proxy groups, rules and settings this profile has now'**
+  String get importConfigReplaceTip;
+
+  /// No description provided for @customImportCloudRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'oixCloud addresses cannot be imported into a custom profile'**
+  String get customImportCloudRefused;
+
+  /// No description provided for @customImportNotImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not imported'**
+  String get customImportNotImported;
+
+  /// No description provided for @customImportDroppedSubRules.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules} other{{count} SUB-RULE rules were dropped, since custom profiles do not support sub-rules}}'**
+  String customImportDroppedSubRules(num count);
+
+  /// No description provided for @customImportUnnamedProxies.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 proxy had no name or type} other{{count} proxies had no name or type}}'**
+  String customImportUnnamedProxies(num count);
+
+  /// No description provided for @failedItem.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {message}'**
+  String failedItem(Object label, Object message);
+
+  /// No description provided for @shareLinkNodesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 node was added from the share links} other{{count} nodes were added from the share links}}'**
+  String shareLinkNodesAdded(num count);
+
+  /// No description provided for @shareLinksNotRead.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 link could not be read} other{{count} links could not be read}}'**
+  String shareLinksNotRead(num count);
+
+  /// No description provided for @connectionStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection stats'**
+  String get connectionStats;
+
+  /// No description provided for @connectionStatsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Live connections, recent requests and DNS queries'**
+  String get connectionStatsDesc;
+
+  /// No description provided for @currentOutboundDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Holds the start button and can\'t be removed'**
+  String get currentOutboundDesc;
+
+  /// No description provided for @dashboardAddableSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Available to add'**
+  String get dashboardAddableSection;
+
+  /// No description provided for @dashboardReorderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag cards to reorder; touch and hold first on touchscreens'**
+  String get dashboardReorderHint;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @editDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit dashboard'**
+  String get editDashboard;
+
+  /// No description provided for @groupCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 group} other{{count} groups}}'**
+  String groupCount(num count);
+
+  /// No description provided for @groupCountUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'groups'**
+  String get groupCountUnit;
+
+  /// No description provided for @groupTimeoutCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} timed out'**
+  String groupTimeoutCount(Object count);
+
+  /// No description provided for @ipType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get ipType;
+
+  /// No description provided for @liveConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Live connections'**
+  String get liveConnections;
+
+  /// No description provided for @memoryInfoDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory the app and the core use'**
+  String get memoryInfoDesc;
+
+  /// No description provided for @networkTakeover.
+  ///
+  /// In en, this message translates to:
+  /// **'Traffic takeover'**
+  String get networkTakeover;
+
+  /// No description provided for @notRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Not running'**
+  String get notRunning;
+
+  /// No description provided for @portValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Port {port}'**
+  String portValue(Object port);
+
+  /// No description provided for @profileDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day left} other{{days} days left}}'**
+  String profileDaysLeft(num days);
+
+  /// No description provided for @profileExpiresIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires {date}, {days, plural, =1{1 day} other{{days} days}} left'**
+  String profileExpiresIn(Object date, num days);
+
+  /// No description provided for @profileUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {time}'**
+  String profileUpdatedAt(Object time);
+
+  /// No description provided for @proxyGroupsAfterStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups show up here once the core starts'**
+  String get proxyGroupsAfterStart;
+
+  /// No description provided for @running.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get running;
+
+  /// No description provided for @serviceFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Check failed'**
+  String get serviceFailed;
+
+  /// No description provided for @tapIconToRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the icon to retry'**
+  String get tapIconToRetry;
+
+  /// No description provided for @trafficPeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak {value}'**
+  String trafficPeak(Object value);
+
+  /// No description provided for @trafficTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {value}'**
+  String trafficTotal(Object value);
+
+  /// No description provided for @usedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'used'**
+  String get usedShort;
+
+  /// No description provided for @disableKeepAlive.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable TCP keep-alive'**
+  String get disableKeepAlive;
+
+  /// No description provided for @keepAliveIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'TCP keep-alive idle'**
+  String get keepAliveIdle;
+
+  /// No description provided for @routingMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Routing mark'**
+  String get routingMark;
+
+  /// No description provided for @minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes'**
+  String get minutes;
+
+  /// No description provided for @yearsAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count}y ago}}'**
+  String yearsAgoShort(num count);
+
+  /// No description provided for @monthsAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count}mo ago}}'**
+  String monthsAgoShort(num count);
+
+  /// No description provided for @daysAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count}d ago}}'**
+  String daysAgoShort(num count);
+
+  /// No description provided for @hoursAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count}h ago}}'**
+  String hoursAgoShort(num count);
+
+  /// No description provided for @minutesAgoShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count}m ago}}'**
+  String minutesAgoShort(num count);
+
+  /// No description provided for @expireTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiration time'**
+  String get expireTime;
+
+  /// No description provided for @runtimeConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime config'**
+  String get runtimeConfig;
+
+  /// No description provided for @proxyGroupsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 proxy group} other{{count} proxy groups}}'**
+  String proxyGroupsCount(num count);
+
+  /// No description provided for @confirmDeleteProxyGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this proxy group?'**
+  String get confirmDeleteProxyGroup;
+
+  /// No description provided for @invalidProxyProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'{providerName} is an invalid proxy provider'**
+  String invalidProxyProvider(Object providerName);
+
+  /// No description provided for @customIssuesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items have problems, and applying this profile may fail'**
+  String customIssuesSummary(Object count);
+
+  /// No description provided for @sectionsInEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in effect'**
+  String sectionsInEffect(Object count);
+
+  /// No description provided for @emptyFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty fallback'**
+  String get emptyFallback;
+
+  /// No description provided for @testInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Test interval'**
+  String get testInterval;
+
+  /// No description provided for @testWhenUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Test when used'**
+  String get testWhenUsed;
+
+  /// No description provided for @defaultSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Default selection'**
+  String get defaultSelected;
+
+  /// No description provided for @hashByInUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Hash by inbound user'**
+  String get hashByInUser;
+
+  /// No description provided for @nodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Nodes'**
+  String get nodes;
+
+  /// No description provided for @addNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add nodes'**
+  String get addNodes;
+
+  /// No description provided for @autoInclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-include'**
+  String get autoInclude;
+
+  /// No description provided for @filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filters;
+
+  /// No description provided for @inputProxyGroupName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the proxy group name'**
+  String get inputProxyGroupName;
+
+  /// No description provided for @definitionNotMap.
+  ///
+  /// In en, this message translates to:
+  /// **'The configuration must be a YAML mapping with a name and a type'**
+  String get definitionNotMap;
+
+  /// No description provided for @additionalParameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional parameters'**
+  String get additionalParameters;
+
+  /// No description provided for @quickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick actions'**
+  String get quickActions;
+
+  /// No description provided for @ruleListInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The rules must be a YAML list with one rule per item, such as - DOMAIN,example.com,DIRECT'**
+  String get ruleListInvalid;
+
+  /// No description provided for @goToConfigureAddedRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to added rules configuration'**
+  String get goToConfigureAddedRules;
+
+  /// No description provided for @large.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get large;
+
+  /// No description provided for @extraLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra large'**
+  String get extraLarge;
+
+  /// No description provided for @matchCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Match case'**
+  String get matchCase;
+
+  /// No description provided for @regex.
+  ///
+  /// In en, this message translates to:
+  /// **'Regex'**
+  String get regex;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @iconSets.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon sets'**
+  String get iconSets;
+
+  /// No description provided for @localImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Local image'**
+  String get localImage;
+
+  /// No description provided for @label.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get label;
+
+  /// No description provided for @iconSetsEmptyTip.
+  ///
+  /// In en, this message translates to:
+  /// **'No icon sets yet. Add them in Custom profile resources → Icon sets'**
+  String get iconSetsEmptyTip;
+
+  /// No description provided for @recommendedIcons.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get recommendedIcons;
+
+  /// No description provided for @customProfileResources.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom profile resources'**
+  String get customProfileResources;
+
+  /// No description provided for @importFromLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from link'**
+  String get importFromLink;
+
+  /// No description provided for @sendFromPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Send from phone'**
+  String get sendFromPhone;
+
+  /// No description provided for @sendFromPhoneTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the code with your phone\'s camera and paste the link on the page that opens. Both devices need to be on the same network.'**
+  String get sendFromPhoneTip;
+
+  /// No description provided for @sendFromPhoneNoNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'This device is not connected to a local network'**
+  String get sendFromPhoneNoNetwork;
+
+  /// No description provided for @sendFromPhonePermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving a link from your phone needs the Nearby devices permission, which lets FlClash reach the local network. Turn it on in the app\'s settings.'**
+  String get sendFromPhonePermissionDenied;
+
+  /// No description provided for @sendFromPhonePageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a link to FlClash'**
+  String get sendFromPhonePageTitle;
+
+  /// No description provided for @sendFromPhonePageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription link or proxy share link'**
+  String get sendFromPhonePageHint;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @sendFromPhonePageSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent. Confirm the import on the other device.'**
+  String get sendFromPhonePageSent;
+
+  /// No description provided for @sendFromPhoneConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import the link from your phone?'**
+  String get sendFromPhoneConfirmTitle;
+
+  /// No description provided for @shareQrcodeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan with FlClash on another device to import this profile.'**
+  String get shareQrcodeTip;
+
+  /// No description provided for @qrcodeTooLongTip.
+  ///
+  /// In en, this message translates to:
+  /// **'This link is too long for a QR code. Use Copy link instead.'**
+  String get qrcodeTooLongTip;
+
+  /// No description provided for @invalidLinkTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a subscription link or a proxy share link'**
+  String get invalidLinkTip;
+
+  /// No description provided for @batchLinkInputTip.
+  ///
+  /// In en, this message translates to:
+  /// **'One link per line'**
+  String get batchLinkInputTip;
+
+  /// No description provided for @link.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get link;
+
+  /// No description provided for @allowedIps.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed IPs'**
+  String get allowedIps;
+
+  /// No description provided for @cipher.
+  ///
+  /// In en, this message translates to:
+  /// **'Cipher'**
+  String get cipher;
+
+  /// No description provided for @clientFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Client fingerprint'**
+  String get clientFingerprint;
+
+  /// No description provided for @requestHeaders.
+  ///
+  /// In en, this message translates to:
+  /// **'Request headers'**
+  String get requestHeaders;
+
+  /// No description provided for @transportHeaders.
+  ///
+  /// In en, this message translates to:
+  /// **'{transport} Headers'**
+  String transportHeaders(Object transport);
+
+  /// No description provided for @congestionControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Congestion control'**
+  String get congestionControl;
+
+  /// No description provided for @downloadBandwidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Download bandwidth'**
+  String get downloadBandwidth;
+
+  /// No description provided for @hopInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Hop interval'**
+  String get hopInterval;
+
+  /// No description provided for @obfs.
+  ///
+  /// In en, this message translates to:
+  /// **'Obfuscation'**
+  String get obfs;
+
+  /// No description provided for @obfsHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Obfuscation host'**
+  String get obfsHost;
+
+  /// No description provided for @obfsMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Obfuscation mode'**
+  String get obfsMode;
+
+  /// No description provided for @obfsParam.
+  ///
+  /// In en, this message translates to:
+  /// **'Obfuscation parameter'**
+  String get obfsParam;
+
+  /// No description provided for @obfsPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Obfuscation password'**
+  String get obfsPassword;
+
+  /// No description provided for @plugin.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin'**
+  String get plugin;
+
+  /// No description provided for @pluginHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin host'**
+  String get pluginHost;
+
+  /// No description provided for @pluginPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin path'**
+  String get pluginPath;
+
+  /// No description provided for @pluginUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin username'**
+  String get pluginUsername;
+
+  /// No description provided for @pluginPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin password'**
+  String get pluginPassword;
+
+  /// No description provided for @pluginCipher.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin cipher'**
+  String get pluginCipher;
+
+  /// No description provided for @pluginMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin mode'**
+  String get pluginMode;
+
+  /// No description provided for @portHopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Port hopping'**
+  String get portHopping;
+
+  /// No description provided for @preSharedKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-shared key'**
+  String get preSharedKey;
+
+  /// No description provided for @privateKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Private key'**
+  String get privateKey;
+
+  /// No description provided for @privateKeyPassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Private key passphrase'**
+  String get privateKeyPassphrase;
+
+  /// No description provided for @protocolParam.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol parameter'**
+  String get protocolParam;
+
+  /// No description provided for @protocolVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol version'**
+  String get protocolVersion;
+
+  /// No description provided for @publicKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Public key'**
+  String get publicKey;
+
+  /// No description provided for @remoteDnsResolve.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote DNS resolution'**
+  String get remoteDnsResolve;
+
+  /// No description provided for @secretKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Key'**
+  String get secretKey;
+
+  /// No description provided for @skipCertVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip certificate verification'**
+  String get skipCertVerify;
+
+  /// No description provided for @transport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get transport;
+
+  /// No description provided for @udpRelayMode.
+  ///
+  /// In en, this message translates to:
+  /// **'UDP relay mode'**
+  String get udpRelayMode;
+
+  /// No description provided for @uploadBandwidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload bandwidth'**
+  String get uploadBandwidth;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @networkName.
+  ///
+  /// In en, this message translates to:
+  /// **'Network name'**
+  String get networkName;
+
+  /// No description provided for @networkSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Network secret'**
+  String get networkSecret;
+
+  /// No description provided for @peers.
+  ///
+  /// In en, this message translates to:
+  /// **'Peers'**
+  String get peers;
+
+  /// No description provided for @virtualIpv4.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual IPv4'**
+  String get virtualIpv4;
+
+  /// No description provided for @hostname.
+  ///
+  /// In en, this message translates to:
+  /// **'Hostname'**
+  String get hostname;
+
+  /// No description provided for @exitNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit nodes'**
+  String get exitNodes;
+
+  /// No description provided for @ageSecretKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Age secret key'**
+  String get ageSecretKey;
+
+  /// No description provided for @ageSecretKeyRequiredTip.
+  ///
+  /// In en, this message translates to:
+  /// **'This profile is encrypted with age and needs an age secret key to decrypt'**
+  String get ageSecretKeyRequiredTip;
+
+  /// No description provided for @ageDecryptFailedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not decrypt the profile. Check the age secret key and try again.'**
+  String get ageDecryptFailedTip;
+
+  /// No description provided for @resetDns.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset DNS'**
+  String get resetDns;
+
+  /// No description provided for @resetDnsSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS state cleared'**
+  String get resetDnsSuccess;
+
+  /// No description provided for @resetDnsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset DNS. Check that the core is connected and try again.'**
+  String get resetDnsFailed;
+
+  /// No description provided for @resourceSizeLimitTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The resource exceeds {limit}'**
+  String resourceSizeLimitTip(Object limit);
+
+  /// No description provided for @ruleSetDetect.
+  ///
+  /// In en, this message translates to:
+  /// **'Detect format and behavior'**
+  String get ruleSetDetect;
+
+  /// No description provided for @ruleSetConvert.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert to MRS'**
+  String get ruleSetConvert;
+
+  /// No description provided for @ruleSetConvertRemote.
+  ///
+  /// In en, this message translates to:
+  /// **'Download as local MRS'**
+  String get ruleSetConvertRemote;
+
+  /// No description provided for @ruleSetEmptyTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The rule set has no usable entries'**
+  String get ruleSetEmptyTip;
+
+  /// No description provided for @ruleSetMixedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The rule set mixes bare domains and IP ranges; use classical rules to combine them'**
+  String get ruleSetMixedTip;
+
+  /// No description provided for @ruleSetInvalidTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to read this rule set. Check its format and entries'**
+  String get ruleSetInvalidTip;
+
+  /// No description provided for @ruleSetUnsupportedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'These rules cannot be converted to MRS without changing their behavior'**
+  String get ruleSetUnsupportedTip;
+
+  /// No description provided for @ruleSetBusyTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Another rule set operation is running. Try again shortly'**
+  String get ruleSetBusyTip;
+
+  /// No description provided for @ruleSetNeedsConversionTip.
+  ///
+  /// In en, this message translates to:
+  /// **'This remote rule set needs normalization. Download it as local MRS to use it'**
+  String get ruleSetNeedsConversionTip;
+
+  /// No description provided for @ruleSetSizeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The rule set exceeds the processing limit. Split it into smaller sets'**
+  String get ruleSetSizeTip;
+
+  /// No description provided for @providerLookupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to read the active node configuration. Refresh the resource and try again.'**
+  String get providerLookupFailed;
+
+  /// No description provided for @lookupProxyConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Find node configuration'**
+  String get lookupProxyConfig;
+
+  /// No description provided for @tunDnsMode.
+  ///
+  /// In en, this message translates to:
+  /// **'System DNS mode'**
+  String get tunDnsMode;
+
+  /// No description provided for @tunDnsModeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty keeps the previous behavior. disabled leaves system DNS unchanged; native uses the TUN address; hijack also intercepts DNS on other interfaces (Windows requires strict-route; Linux requires auto-redirect). An explicit mode takes precedence over automatic system DNS on macOS.'**
+  String get tunDnsModeDesc;
+
+  /// No description provided for @nodeShareLinkUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This node cannot be represented by a share link; use fields or YAML'**
+  String get nodeShareLinkUnavailable;
+
+  /// No description provided for @shareLinkNodesPreserved.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} nodes cannot be represented by links and will be kept unchanged'**
+  String shareLinkNodesPreserved(int count);
+
+  /// No description provided for @select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get select;
+
+  /// No description provided for @preferred.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred'**
+  String get preferred;
+
+  /// No description provided for @addToLocalProxies.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to custom nodes'**
+  String get addToLocalProxies;
+
+  /// No description provided for @addedToLocalProxies.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {name} to custom nodes'**
+  String addedToLocalProxies(Object name);
+
+  /// No description provided for @alreadyInLocalProxies.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is already in custom nodes'**
+  String alreadyInLocalProxies(Object name);
+
+  /// No description provided for @generalOverrideDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Entries added here replace the setting of every profile; anything not added keeps the profile\'s own setting, or the core default when the profile has none.'**
+  String get generalOverrideDesc;
+
+  /// No description provided for @groupBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by'**
+  String get groupBy;
+
+  /// No description provided for @copyHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy host'**
+  String get copyHost;
+
+  /// No description provided for @copyDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy destination'**
+  String get copyDestination;
+
+  /// No description provided for @closeConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Close connection'**
+  String get closeConnection;
+
+  /// No description provided for @recentRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent requests'**
+  String get recentRequests;
+
+  /// No description provided for @root.
+  ///
+  /// In en, this message translates to:
+  /// **'Root'**
+  String get root;
+
+  /// No description provided for @mitm.
+  ///
+  /// In en, this message translates to:
+  /// **'MITM'**
+  String get mitm;
+
+  /// No description provided for @httpsDecryption.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTPS decryption'**
+  String get httpsDecryption;
+
+  /// No description provided for @httpCapture.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP capture'**
+  String get httpCapture;
+
+  /// No description provided for @httpCaptureDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Records requests to the hosts listed under Hostname, to view in connection details. Records stay in memory only.'**
+  String get httpCaptureDesc;
+
+  /// No description provided for @httpCaptureNoHosts.
+  ///
+  /// In en, this message translates to:
+  /// **'No host is listed, so nothing is recorded. Add hosts under Hostname on the MITM page, or from the details of a connection.'**
+  String get httpCaptureNoHosts;
+
+  /// No description provided for @httpCaptureLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum records'**
+  String get httpCaptureLimit;
+
+  /// No description provided for @httpCaptureLimitDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The oldest records go first once this many are kept or they fill {memory} of memory. Each body keeps its first {body}.'**
+  String httpCaptureLimitDesc(Object memory, Object body);
+
+  /// No description provided for @httpRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP requests'**
+  String get httpRequests;
+
+  /// No description provided for @httpRequestsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests made before capture was on, or since cleared, are not listed.'**
+  String get httpRequestsMissing;
+
+  /// No description provided for @httpRequestCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'This request is no longer kept'**
+  String get httpRequestCleared;
+
+  /// No description provided for @httpCaptureOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture is off'**
+  String get httpCaptureOff;
+
+  /// No description provided for @inProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get inProgress;
+
+  /// No description provided for @method.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get method;
+
+  /// No description provided for @originalUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Original URL'**
+  String get originalUrl;
+
+  /// No description provided for @timeToFirstByte.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to first byte'**
+  String get timeToFirstByte;
+
+  /// No description provided for @requestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Request body'**
+  String get requestBody;
+
+  /// No description provided for @response.
+  ///
+  /// In en, this message translates to:
+  /// **'Response'**
+  String get response;
+
+  /// No description provided for @responseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Response body'**
+  String get responseBody;
+
+  /// No description provided for @responseHeaders.
+  ///
+  /// In en, this message translates to:
+  /// **'Response headers'**
+  String get responseHeaders;
+
+  /// No description provided for @matchedRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched rules'**
+  String get matchedRules;
+
+  /// No description provided for @overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overview;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAll;
+
+  /// No description provided for @copyAsBase64.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy as Base64'**
+  String get copyAsBase64;
+
+  /// No description provided for @copyAsCurl.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy as cURL'**
+  String get copyAsCurl;
+
+  /// No description provided for @copyRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy request'**
+  String get copyRequest;
+
+  /// No description provided for @copyResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy response'**
+  String get copyResponse;
+
+  /// No description provided for @copyResponseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy response body'**
+  String get copyResponseBody;
+
+  /// No description provided for @httpBodyProtobufGuess.
+  ///
+  /// In en, this message translates to:
+  /// **'Read as Protobuf without its schema: field numbers only, and the types are guesses.'**
+  String get httpBodyProtobufGuess;
+
+  /// No description provided for @exportHar.
+  ///
+  /// In en, this message translates to:
+  /// **'Export HAR'**
+  String get exportHar;
+
+  /// No description provided for @mitmAddRejectRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a reject rule'**
+  String get mitmAddRejectRule;
+
+  /// No description provided for @mitmAddMapLocalRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a map local rule'**
+  String get mitmAddMapLocalRule;
+
+  /// No description provided for @httpExportPrivateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains private data'**
+  String get httpExportPrivateTitle;
+
+  /// No description provided for @httpExportPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'A request can carry cookies, tokens, passwords and form contents. Check what you share, and with whom.'**
+  String get httpExportPrivate;
+
+  /// No description provided for @mitmRuleCopiedForStash.
+  ///
+  /// In en, this message translates to:
+  /// **'This module is a Stash override, so the rule was copied for you to add by hand.'**
+  String get mitmRuleCopiedForStash;
+
+  /// No description provided for @binaryData.
+  ///
+  /// In en, this message translates to:
+  /// **'Binary data'**
+  String get binaryData;
+
+  /// No description provided for @httpBodyNotKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded while memory was short.'**
+  String get httpBodyNotKept;
+
+  /// No description provided for @httpBodyTruncated.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the start of this body was recorded.'**
+  String get httpBodyTruncated;
+
+  /// No description provided for @httpBodyUndecoded.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not decode {encoding}, so this is the data as it was sent.'**
+  String httpBodyUndecoded(Object encoding);
+
+  /// No description provided for @mitmEnableTip.
+  ///
+  /// In en, this message translates to:
+  /// **'FlClash will be able to read everything sent to the decrypted hosts, cookies and passwords included. Turn this on only for hosts you mean to rewrite.'**
+  String get mitmEnableTip;
+
+  /// No description provided for @certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate'**
+  String get certificate;
+
+  /// No description provided for @generateCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate certificate'**
+  String get generateCertificate;
+
+  /// No description provided for @regenerateCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate certificate'**
+  String get regenerateCertificate;
+
+  /// No description provided for @regenerateCertificateTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The new certificate replaces the current one, which FlClash takes out of this device\'s trusted roots where it can. Every other device that trusts the current one has to install the new one.'**
+  String get regenerateCertificateTip;
+
+  /// No description provided for @exportCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Export certificate'**
+  String get exportCertificate;
+
+  /// No description provided for @installCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Install to system'**
+  String get installCertificate;
+
+  /// No description provided for @installCertificateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate installed'**
+  String get installCertificateSuccess;
+
+  /// No description provided for @validUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}'**
+  String validUntil(Object date);
+
+  /// No description provided for @mitmCertificateExportTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export it and trust it on the devices you want to decrypt.'**
+  String get mitmCertificateExportTip;
+
+  /// No description provided for @mitmTrustReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted'**
+  String get mitmTrustReady;
+
+  /// No description provided for @mitmTrustUntrusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not fully trusted'**
+  String get mitmTrustUntrusted;
+
+  /// No description provided for @mitmTrustNotInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Not installed'**
+  String get mitmTrustNotInstalled;
+
+  /// No description provided for @mitmTrustChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get mitmTrustChecking;
+
+  /// No description provided for @trustCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Trust certificate'**
+  String get trustCertificate;
+
+  /// No description provided for @mitmCertificateAndroidReadyTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Only apps that trust user certificates, mostly browsers, are decrypted.'**
+  String get mitmCertificateAndroidReadyTip;
+
+  /// No description provided for @mitmCertificateLinuxTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Flatpak browsers need the exported certificate imported by hand.'**
+  String get mitmCertificateLinuxTip;
+
+  /// No description provided for @mitmCertutilMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Chrome and Firefox keep their own certificate stores, which need certutil: {command}'**
+  String mitmCertutilMissing(Object command);
+
+  /// No description provided for @mitmMissingStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet in: {stores}'**
+  String mitmMissingStores(Object stores);
+
+  /// No description provided for @mitmSystemStoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding the certificate to the system\'s trusted roots failed'**
+  String get mitmSystemStoreFailed;
+
+  /// No description provided for @mitmRootUntilReboot.
+  ///
+  /// In en, this message translates to:
+  /// **'No Magisk, KernelSU or APatch was found to keep the certificate. Install it again after the device restarts.'**
+  String get mitmRootUntilReboot;
+
+  /// No description provided for @mitmRootPendingReboot.
+  ///
+  /// In en, this message translates to:
+  /// **'The certificate takes effect after the device restarts.'**
+  String get mitmRootPendingReboot;
+
+  /// No description provided for @mitmInstallSystemCaTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Root was found, so the certificate goes into the system\'s trusted certificates as a FlClash MITM CA module for Magisk, KernelSU or APatch. Every app on this device will then trust it, and anyone holding its private key could decrypt this device\'s HTTPS traffic. To undo it, regenerate the certificate or remove the module in the root manager and restart. If root is denied, it is installed as a user certificate instead.'**
+  String get mitmInstallSystemCaTip;
+
+  /// No description provided for @mitmInstallUserCaTip.
+  ///
+  /// In en, this message translates to:
+  /// **'No root was found, so the certificate can only be installed as a user certificate. Only apps that trust user certificates, mostly browsers, are decrypted; other apps fail on the hosts you list, so leave those hosts out. On Android 11 and later you finish the install yourself in system settings.'**
+  String get mitmInstallUserCaTip;
+
+  /// No description provided for @mitmCertificateSavedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved {fileName} to Downloads. Install it in Settings under Security › Encryption & credentials › Install a certificate › CA certificate.'**
+  String mitmCertificateSavedTip(Object fileName);
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openSettings;
+
+  /// No description provided for @mitmRemoveOldCertificateTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the old certificate, {name}, in Settings under Security › Encryption & credentials › Trusted credentials › User, then install the new one.'**
+  String mitmRemoveOldCertificateTip(Object name);
+
+  /// No description provided for @mitmOldCertificateLeftTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The old certificate, {name}, could not be removed. Remove it from the trusted roots yourself.'**
+  String mitmOldCertificateLeftTip(Object name);
+
+  /// No description provided for @mitmOldSystemCertificateLeftTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The old certificate, {name}, is still among the system\'s trusted CAs. Allow FlClash root access in your root manager and regenerate, or remove the FlClash MITM CA module there and restart.'**
+  String mitmOldSystemCertificateLeftTip(Object name);
+
+  /// No description provided for @mitmDecryptHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrypt this host'**
+  String get mitmDecryptHost;
+
+  /// No description provided for @mitmDecryptHostTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {host} to the hostname list? FlClash can then read what is sent to it, cookies and passwords included.'**
+  String mitmDecryptHostTip(Object host);
+
+  /// No description provided for @mitmClientRefusedCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'The client refused the certificate. Install the CA, or exclude this host if the app pins its certificate.'**
+  String get mitmClientRefusedCertificate;
+
+  /// No description provided for @mitmExcludeHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude from decryption'**
+  String get mitmExcludeHost;
+
+  /// No description provided for @mitmExcludeHostTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add -{host} to the top of the hostname list? The host is then never decrypted.'**
+  String mitmExcludeHostTip(Object host);
+
+  /// No description provided for @urlRewrite.
+  ///
+  /// In en, this message translates to:
+  /// **'URL rewrite'**
+  String get urlRewrite;
+
+  /// No description provided for @headerRewrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Header rewrite'**
+  String get headerRewrite;
+
+  /// No description provided for @bodyRewrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Body rewrite'**
+  String get bodyRewrite;
+
+  /// No description provided for @mapLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Map local'**
+  String get mapLocal;
+
+  /// No description provided for @mitmHostnameDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A leading - excludes a host, and the first match decides.'**
+  String get mitmHostnameDesc;
+
+  /// No description provided for @mitmModules.
+  ///
+  /// In en, this message translates to:
+  /// **'Modules'**
+  String get mitmModules;
+
+  /// No description provided for @mitmModule.
+  ///
+  /// In en, this message translates to:
+  /// **'Module'**
+  String get mitmModule;
+
+  /// No description provided for @mitmModuleInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a Surge module, a Loon plugin, a Quantumult X snippet or a Stash override'**
+  String get mitmModuleInvalid;
+
+  /// No description provided for @arguments.
+  ///
+  /// In en, this message translates to:
+  /// **'Arguments'**
+  String get arguments;
+
+  /// No description provided for @mitmRoutingRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Routing rules'**
+  String get mitmRoutingRules;
+
+  /// No description provided for @mitmIgnoredLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignored lines'**
+  String get mitmIgnoredLines;
+
+  /// No description provided for @mitmModuleRulesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Routing rules go in front of the profile’s own.'**
+  String get mitmModuleRulesDesc;
+
+  /// No description provided for @mitmModuleSystemTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Written for {system}; some lines may not match apps on this device.'**
+  String mitmModuleSystemTip(Object system);
+
+  /// No description provided for @mitmSkipSection.
+  ///
+  /// In en, this message translates to:
+  /// **'The [{section}] section is not supported'**
+  String mitmSkipSection(Object section);
+
+  /// No description provided for @mitmSkipSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'This setting is not supported'**
+  String get mitmSkipSetting;
+
+  /// No description provided for @mitmSkipScriptType.
+  ///
+  /// In en, this message translates to:
+  /// **'This script type is not supported'**
+  String get mitmSkipScriptType;
+
+  /// No description provided for @mitmSkipRule.
+  ///
+  /// In en, this message translates to:
+  /// **'This rule type is not supported'**
+  String get mitmSkipRule;
+
+  /// No description provided for @mitmSkipPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the DIRECT and REJECT policies are supported'**
+  String get mitmSkipPolicy;
+
+  /// No description provided for @mitmSkipJq.
+  ///
+  /// In en, this message translates to:
+  /// **'jq rewrites are not supported'**
+  String get mitmSkipJq;
+
+  /// No description provided for @mitmSkipJsonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON body rewrites are not supported'**
+  String get mitmSkipJsonBody;
+
+  /// No description provided for @mitmSkipRawHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewriting all headers as one text is not supported'**
+  String get mitmSkipRawHeader;
+
+  /// No description provided for @mitmSkipConditional.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditional rewrites are not supported'**
+  String get mitmSkipConditional;
+
+  /// No description provided for @mitmSkipRelativeData.
+  ///
+  /// In en, this message translates to:
+  /// **'The file this line names is not attached; use a URL or attach it'**
+  String get mitmSkipRelativeData;
+
+  /// No description provided for @mitmSkipNotDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Its file has not been downloaded'**
+  String get mitmSkipNotDownloaded;
+
+  /// No description provided for @mitmSkipUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'This line cannot be read'**
+  String get mitmSkipUnreadable;
+
+  /// No description provided for @mitmAddLocalFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a local file'**
+  String get mitmAddLocalFile;
+
+  /// No description provided for @mitmNewModule.
+  ///
+  /// In en, this message translates to:
+  /// **'New module'**
+  String get mitmNewModule;
+
+  /// No description provided for @mitmAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get mitmAttachments;
+
+  /// No description provided for @mitmAttachmentsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines refer to attachments by file name, as in script-path=a.js.'**
+  String get mitmAttachmentsDesc;
+
+  /// No description provided for @mitmFileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is larger than {size} MB'**
+  String mitmFileTooLarge(Object size);
+
+  /// No description provided for @mitmSkipDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Turned off by an argument'**
+  String get mitmSkipDisabled;
+
+  /// No description provided for @mitmSkipEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'This event is not supported'**
+  String get mitmSkipEvent;
+
+  /// No description provided for @mitmRunScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Run now'**
+  String get mitmRunScript;
+
+  /// No description provided for @mitmScriptNoOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'The script finished without output'**
+  String get mitmScriptNoOutput;
+
+  /// No description provided for @mitmScriptRiskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Run this module\'s scripts?'**
+  String get mitmScriptRiskTitle;
+
+  /// No description provided for @mitmScriptRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Its scripts read and change the traffic of the hosts they match, cookies and tokens included, and can send requests of their own. Turn it on only if you trust where it comes from.'**
+  String get mitmScriptRisk;
+
+  /// No description provided for @skipServerCertVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip server certificate verification'**
+  String get skipServerCertVerify;
+
+  /// No description provided for @http2.
+  ///
+  /// In en, this message translates to:
+  /// **'HTTP/2'**
+  String get http2;
+
+  /// No description provided for @decryptUntrusted.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrypt without local trust'**
+  String get decryptUntrusted;
+
+  /// No description provided for @invalidOfCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{invalid} of {total} invalid'**
+  String invalidOfCount(Object invalid, Object total);
+
+  /// No description provided for @mitmModuleScriptsChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} changed its scripts and was turned off'**
+  String mitmModuleScriptsChanged(Object name);
+
+  /// No description provided for @failedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items failed. Tap to view'**
+  String failedCount(Object count);
+
+  /// No description provided for @proxyServerNameserverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolves proxy server hostnames only.'**
+  String get proxyServerNameserverDesc;
+
+  /// No description provided for @proxyServerNameserverPolicyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching proxy server hostnames use the DNS server given here instead of Proxy Server Nameserver.'**
+  String get proxyServerNameserverPolicyDesc;
+
+  /// No description provided for @directNameserverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolves domains for connections that go direct.'**
+  String get directNameserverDesc;
+
+  /// No description provided for @fakeipFilterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'These domains get real IPs instead of Fake-IPs. In whitelist mode, only they get Fake-IPs.'**
+  String get fakeipFilterDesc;
+
+  /// No description provided for @fallbackFilterGeositeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Domains in these GeoSite categories are resolved by Fallback directly.'**
+  String get fallbackFilterGeositeDesc;
+
+  /// No description provided for @fallbackFilterIpcidrDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'When Nameserver returns an IP in these ranges, the Fallback answer is used.'**
+  String get fallbackFilterIpcidrDesc;
+
+  /// No description provided for @fallbackFilterDomainDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'These domains are resolved by Fallback directly.'**
+  String get fallbackFilterDomainDesc;
+
+  /// No description provided for @customResources.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get customResources;
+
+  /// No description provided for @proxyYieldsToSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'A subscription node has this name, so this profile uses that one'**
+  String get proxyYieldsToSubscription;
+
+  /// No description provided for @delayMeasurementUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Measurement time unavailable'**
+  String get delayMeasurementUnknown;
+
+  /// No description provided for @delayMeasuredAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Last tested: {time}'**
+  String delayMeasuredAt(String time);
+
+  /// No description provided for @delayMeasurementStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Old result; test again'**
+  String get delayMeasurementStale;
+
+  /// No description provided for @diagUdp.
+  ///
+  /// In en, this message translates to:
+  /// **'UDP connectivity'**
+  String get diagUdp;
+
+  /// No description provided for @diagUdpReady.
+  ///
+  /// In en, this message translates to:
+  /// **'A UDP round trip succeeded'**
+  String get diagUdpReady;
+
+  /// No description provided for @diagUdpUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'UDP connectivity could not be confirmed'**
+  String get diagUdpUnknown;
+
+  /// No description provided for @diagUdpUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This route does not support UDP'**
+  String get diagUdpUnsupported;
+
+  /// No description provided for @diagUdpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tests follow the current routing rules. A timeout may be caused by the test server or network; it does not prove all UDP traffic is blocked.'**
+  String get diagUdpHint;
+
+  /// No description provided for @diagTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent operation history'**
+  String get diagTimeline;
+
+  /// No description provided for @diagTimelineEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} · {stage} · {result} {code}'**
   String diagTimelineEvent(
     String time,
     String stage,
     String result,
     String code,
-  ) {
-    return Intl.message(
-      '$time · $stage · $result $code',
-      name: 'diagTimelineEvent',
-      desc: '',
-      args: [time, stage, result, code],
-    );
-  }
+  );
 
-  /// `Fetch configuration`
-  String get diagStageFetch {
-    return Intl.message(
-      'Fetch configuration',
-      name: 'diagStageFetch',
-      desc: '',
-      args: [],
-    );
-  }
+  /// No description provided for @diagStageFetch.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch configuration'**
+  String get diagStageFetch;
 
-  /// `Validate configuration`
-  String get diagStageValidate {
-    return Intl.message(
-      'Validate configuration',
-      name: 'diagStageValidate',
-      desc: '',
-      args: [],
-    );
-  }
+  /// No description provided for @diagStageValidate.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate configuration'**
+  String get diagStageValidate;
 
-  /// `Apply configuration`
-  String get diagStageApply {
-    return Intl.message(
-      'Apply configuration',
-      name: 'diagStageApply',
-      desc: '',
-      args: [],
-    );
-  }
+  /// No description provided for @diagStageApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply configuration'**
+  String get diagStageApply;
 
-  /// `Start VPN`
-  String get diagStageStart {
-    return Intl.message(
-      'Start VPN',
-      name: 'diagStageStart',
-      desc: '',
-      args: [],
-    );
-  }
+  /// No description provided for @diagStageStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start VPN'**
+  String get diagStageStart;
 
-  /// `Stop VPN`
-  String get diagStageStop {
-    return Intl.message('Stop VPN', name: 'diagStageStop', desc: '', args: []);
-  }
+  /// No description provided for @diagStageStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop VPN'**
+  String get diagStageStop;
 
-  /// `Started`
-  String get diagEventStarted {
-    return Intl.message(
-      'Started',
-      name: 'diagEventStarted',
-      desc: '',
-      args: [],
-    );
-  }
+  /// No description provided for @diagEventStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Started'**
+  String get diagEventStarted;
 
-  /// `Succeeded`
-  String get diagEventSucceeded {
-    return Intl.message(
-      'Succeeded',
-      name: 'diagEventSucceeded',
-      desc: '',
-      args: [],
-    );
-  }
+  /// No description provided for @diagEventSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Succeeded'**
+  String get diagEventSucceeded;
 
-  /// `Failed`
-  String get diagEventFailed {
-    return Intl.message('Failed', name: 'diagEventFailed', desc: '', args: []);
-  }
+  /// No description provided for @diagEventFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get diagEventFailed;
 
-  /// `Content unchanged`
-  String get diagEventUnchanged {
-    return Intl.message(
-      'Content unchanged',
-      name: 'diagEventUnchanged',
-      desc: '',
-      args: [],
-    );
-  }
+  /// No description provided for @diagEventUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Content unchanged'**
+  String get diagEventUnchanged;
 
-  /// `Canceled`
-  String get diagEventCanceled {
-    return Intl.message(
-      'Canceled',
-      name: 'diagEventCanceled',
-      desc: '',
-      args: [],
-    );
-  }
+  /// No description provided for @diagEventCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get diagEventCanceled;
 
-  /// `History`
-  String get diagRecorded {
-    return Intl.message('History', name: 'diagRecorded', desc: '', args: []);
-  }
+  /// No description provided for @diagRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get diagRecorded;
 }
 
-class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
-  const AppLocalizationDelegate();
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
 
-  List<Locale> get supportedLocales {
-    return const <Locale>[
-      Locale.fromSubtags(languageCode: 'en'),
-      Locale.fromSubtags(languageCode: 'es'),
-      Locale.fromSubtags(languageCode: 'fr'),
-      Locale.fromSubtags(languageCode: 'ja'),
-      Locale.fromSubtags(languageCode: 'ko'),
-      Locale.fromSubtags(languageCode: 'ru'),
-      Locale.fromSubtags(languageCode: 'zh', countryCode: 'CN'),
-    ];
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
   }
 
   @override
-  bool isSupported(Locale locale) => _isSupported(locale);
-  @override
-  Future<AppLocalizations> load(Locale locale) => AppLocalizations.load(locale);
-  @override
-  bool shouldReload(AppLocalizationDelegate old) => false;
+  bool isSupported(Locale locale) => <String>[
+    'en',
+    'es',
+    'fr',
+    'ja',
+    'ko',
+    'ru',
+    'zh',
+  ].contains(locale.languageCode);
 
-  bool _isSupported(Locale locale) {
-    for (var supportedLocale in supportedLocales) {
-      if (supportedLocale.languageCode == locale.languageCode) {
-        return true;
-      }
-    }
-    return false;
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'ko':
+      return AppLocalizationsKo();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'zh':
+      return AppLocalizationsZh();
   }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

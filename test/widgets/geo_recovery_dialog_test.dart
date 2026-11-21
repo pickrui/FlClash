@@ -78,9 +78,9 @@ void main() {
       isFalse,
     );
     for (final label in [
-      AppLocalizations.current.geoOriginalSource,
+      currentAppLocalizations.geoOriginalSource,
       'GitHub',
-      AppLocalizations.current.geoBackupSource,
+      currentAppLocalizations.geoBackupSource,
     ]) {
       expect(
         tester
@@ -290,11 +290,11 @@ Future<void> _openDialog(
       child: MaterialApp(
         locale: const Locale('en'),
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) =>
             AlertScope(presenter: const AppAlertPresenter(), child: child!),
         home: material.Scaffold(

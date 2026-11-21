@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/geo_recovery.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/action.dart';
@@ -149,7 +148,7 @@ void main() {
           );
           await pumpUntilFound(
             tester,
-            find.text(AppLocalizations.current.autoUpdate),
+            find.text(currentAppLocalizations.autoUpdate),
           );
           expect(reads, feature ? 1 : 0);
           expect(
@@ -160,7 +159,7 @@ void main() {
           if (feature) {
             await tester.longPress(find.text('Remote module'));
             await tester.pumpAndSettle();
-            await tester.tap(find.text(AppLocalizations.current.sync));
+            await tester.tap(find.text(currentAppLocalizations.sync));
             await tester.pumpAndSettle();
             expect(action.updated, [remote.id]);
           }
@@ -213,7 +212,7 @@ void main() {
       );
       await pumpUntilFound(
         tester,
-        find.text(AppLocalizations.current.autoUpdate),
+        find.text(currentAppLocalizations.autoUpdate),
       );
       final rows = find.byWidgetPredicate(
         (widget) =>
@@ -346,7 +345,7 @@ void main() {
         child: const TestApp(locale: Locale('en'), child: ResourcesView()),
       ),
     );
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     await pumpUntilFound(tester, find.text(l10n.autoUpdate));
     bool autoUpdate() => container.read(patchClashConfigProvider).geoAutoUpdate;
     final interval = find.text(l10n.geoAutoUpdateInterval);

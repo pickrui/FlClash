@@ -191,7 +191,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      title: appLocalizations.override,
+      title: appLocalizations.overrideLabel,
       isLoading: previewing || checking,
       actions: buildRoutingActions(
         ref.watch(profileProvider(widget.profileId)),

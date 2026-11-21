@@ -9,7 +9,6 @@ import 'dart:io';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/mitm_module.dart';
 import 'package:fl_clash/database/database.dart' as db;
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -42,7 +41,7 @@ void main() {
   Completer<void>? requested;
 
   setUpAll(() async {
-    await AppLocalizations.load(const Locale('en'));
+    loadAppLocalizations(const Locale('en'));
     try {
       previousPackage = globalState.packageInfo;
     } catch (_) {}

@@ -8,12 +8,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:code_forge/code_forge.dart';
 import 'package:fl_clash/common/lock.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/features/form/form_row.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -146,7 +146,7 @@ void main() {
   ) async {
     final profiles = await openEditor(tester, editFile: false);
     final name = find.descendant(
-      of: find.widgetWithText(FormRow, AppLocalizations.current.name),
+      of: find.widgetWithText(FormRow, currentAppLocalizations.name),
       matching: find.byType(TextFormField),
     );
     await tester.enterText(name, '  ');
@@ -154,7 +154,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(profiles.metadata, isEmpty);
     expect(
-      find.text(AppLocalizations.current.profileNameNullValidationDesc),
+      find.text(currentAppLocalizations.profileNameNullValidationDesc),
       findsOneWidget,
     );
     await tester.enterText(name, '  Renamed  ');

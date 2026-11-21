@@ -7,9 +7,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:code_forge/code_forge.dart';
 import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
@@ -305,7 +305,7 @@ void main() {
     await tester.pump();
     await tester.binding.handlePopRoute();
     await settle(tester);
-    await tester.tap(find.text(AppLocalizations.current.save));
+    await tester.tap(find.text(currentAppLocalizations.save));
     await settle(tester, 12);
     expect(find.byType(EditorPage), findsOneWidget);
     expect(
@@ -329,7 +329,7 @@ void main() {
     final actions = await openLibrary(tester);
     await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.startFromScratch));
+    await tester.tap(find.text(currentAppLocalizations.startFromScratch));
     await waitForEditor(tester);
     expect(actions.errors, isEmpty);
     expect(

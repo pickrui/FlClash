@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
-import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/views/cloud/cloud_register_page.dart';
@@ -56,7 +56,7 @@ Future<void> _open(
 }
 
 Future<void> _cancel(WidgetTester tester) async {
-  await tester.tap(find.text(AppLocalizations.current.cancel));
+  await tester.tap(find.text(currentAppLocalizations.cancel));
   await tester.pumpAndSettle();
   expect(find.byType(CloudRegisterPage), findsNothing);
 }
@@ -77,7 +77,7 @@ void main() {
   testWidgets('the register form can be cancelled', (tester) async {
     await _open(tester, () async => _config);
     await tester.pumpAndSettle();
-    expect(find.text(AppLocalizations.current.registerTitle), findsWidgets);
+    expect(find.text(currentAppLocalizations.registerTitle), findsWidgets);
     await _cancel(tester);
   });
 }

@@ -113,11 +113,11 @@ Future<ProviderContainer> _pump(
       child: MaterialApp(
         locale: const Locale('en'),
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) => wrapAppScopes(context, child!),
         home: Builder(
           builder: (context) {
@@ -175,7 +175,7 @@ void main() {
         tester.widget<LoadingBar>(find.byType(LoadingBar)).active,
         isFalse,
       );
-      await tester.tap(find.byTooltip(AppLocalizations.current.diagCopy));
+      await tester.tap(find.byTooltip(currentAppLocalizations.diagCopy));
       await tester.pump();
       expect(clipboard, contains('[Failed] oix DNS'));
       expect(clipboard, contains('0.8.97+fixture (windows)'));
@@ -202,7 +202,7 @@ void main() {
       ];
     await _pump(tester, service);
     await tester.pumpAndSettle();
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     expect(find.text(l.diagFixSystemProxy), findsNothing);
     await tester.tap(find.text(l.diagProxyGuide));
     await tester.pumpAndSettle();
@@ -235,7 +235,7 @@ void main() {
         ];
       await _pump(tester, service);
       await tester.pumpAndSettle();
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       final label = switch (id) {
         'listener' => l.diagOpenPortSettings,
         'coreDns' => l.diagOpenDnsSettings,
@@ -266,17 +266,17 @@ void main() {
   ) async {
     final service = _ControlledService();
     await _pump(tester, service);
-    await tester.tap(find.byTooltip(AppLocalizations.current.cancel));
+    await tester.tap(find.byTooltip(currentAppLocalizations.cancel));
     await tester.pump();
     expect(service.token!.isCancelled, isTrue);
     service.completion.complete();
     await tester.pumpAndSettle();
     expect(find.text('Late result'), findsNothing);
-    expect(find.text(AppLocalizations.current.diagCanceled), findsOneWidget);
-    await tester.tap(find.byTooltip(AppLocalizations.current.diagRun));
+    expect(find.text(currentAppLocalizations.diagCanceled), findsOneWidget);
+    await tester.tap(find.byTooltip(currentAppLocalizations.diagRun));
     await tester.pumpAndSettle();
     expect(service.runs, 2);
-    expect(find.text(AppLocalizations.current.diagCanceled), findsNothing);
+    expect(find.text(currentAppLocalizations.diagCanceled), findsNothing);
   });
   // Switching a group tab rewrites the profile and recomputes the snapshot.
   testWidgets('an unchanged snapshot keeps a run going', (tester) async {
@@ -354,7 +354,7 @@ void main() {
     },
   );
   Finder fixButton() => find.ancestor(
-    of: find.text(AppLocalizations.current.diagFixTun),
+    of: find.text(currentAppLocalizations.diagFixTun),
     matching: find.byWidgetPredicate((widget) => widget is FilledButton),
   );
   testWidgets('a fix runs the mapped action, then re-checks', (tester) async {
@@ -369,13 +369,13 @@ void main() {
     await tester.tap(fixButton());
     await tester.pump();
     expect(fixes, [DiagnosticFix.applyTun]);
-    expect(find.text(AppLocalizations.current.diagFixing), findsOneWidget);
+    expect(find.text(currentAppLocalizations.diagFixing), findsOneWidget);
     expect(tester.widget<LoadingBar>(find.byType(LoadingBar)).active, isTrue);
     expect(tester.widget<FilledButton>(fixButton()).onPressed, isNull);
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(service.runs, 2);
-    expect(find.text(AppLocalizations.current.diagFixing), findsNothing);
+    expect(find.text(currentAppLocalizations.diagFixing), findsNothing);
     expect(tester.takeException(), isNull);
   });
   testWidgets('a failing fix still re-checks without crashing', (tester) async {
@@ -390,7 +390,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(service.runs, 2);
-    expect(find.text(AppLocalizations.current.diagFixing), findsNothing);
+    expect(find.text(currentAppLocalizations.diagFixing), findsNothing);
     expect(tester.takeException(), isNull);
   });
   testWidgets(
@@ -405,14 +405,14 @@ void main() {
       } finally {
         debugPrint = originalDebugPrint;
       }
-      expect(find.text(AppLocalizations.current.diagUnknown), findsWidgets);
+      expect(find.text(currentAppLocalizations.diagUnknown), findsWidgets);
       expect(
         tester.widget<LoadingBar>(find.byType(LoadingBar)).active,
         isFalse,
       );
       final log = printed.whereType<String>().join('\n');
       expect(log, contains('network diagnostics failed:'));
-      expect(log, contains(AppLocalizations.current.unknownNetworkError));
+      expect(log, contains(currentAppLocalizations.unknownNetworkError));
       for (final secret in [
         'probe backend missing',
         'private.example',
@@ -446,10 +446,10 @@ void main() {
     );
     await _pump(tester, service);
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip(AppLocalizations.current.diagCopy));
+    await tester.tap(find.byTooltip(currentAppLocalizations.diagCopy));
     await tester.pump();
     expect(clipboard, contains('Turn TUN off and on'));
-    expect(clipboard, isNot(contains(AppLocalizations.current.diagFixTun)));
+    expect(clipboard, isNot(contains(currentAppLocalizations.diagFixTun)));
   });
   testWidgets('results fit a narrow window and large text', (tester) async {
     tester.view.physicalSize = const Size(360, 760);

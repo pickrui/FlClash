@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/common/boot_guard.dart';
 import 'package:fl_clash/common/boot_record.dart';
@@ -18,7 +19,6 @@ import 'package:fl_clash/common/system.dart';
 import 'package:fl_clash/common/window_port.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as p;
@@ -380,7 +380,7 @@ void main() {
   });
 
   test('formats YAML type mismatch for the profile error dialog', () async {
-    final localizations = await AppLocalizations.load(const Locale('zh', 'CN'));
+    final localizations = loadAppLocalizations(const Locale('zh', 'CN'));
 
     final message = formatConfigValidationMessage(
       'Parse Error: yaml: unmarshal errors:\n'

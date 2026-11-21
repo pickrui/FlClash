@@ -6,9 +6,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/plugins/app.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -302,7 +302,7 @@ void main() {
   );
 
   test('labels the shortcut for every Android quick action', () async {
-    await AppLocalizations.load(const Locale('en'));
+    loadAppLocalizations(const Locale('en'));
     Object? labels;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {

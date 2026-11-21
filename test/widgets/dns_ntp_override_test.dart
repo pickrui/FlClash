@@ -51,11 +51,11 @@ Future<ProviderContainer> _pumpOverrides(
         navigatorKey: globalState.navigatorKey,
         locale: const Locale('en'),
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) {
           return wrapAppScopes(context, child!);
         },
@@ -141,7 +141,7 @@ void main() {
       const GeneralView(platform: TargetPlatform.macOS),
       (_) => const ClashConfig(unifiedDelay: false),
     );
-    final label = find.text(AppLocalizations.current.unifiedDelay);
+    final label = find.text(currentAppLocalizations.unifiedDelay);
     expect(label, findsNothing);
     await tester.scrollUntilVisible(
       find.text('Add override entry').hitTestable(),
@@ -171,11 +171,11 @@ void main() {
             navigatorKey: globalState.navigatorKey,
             locale: const Locale('en'),
             localizationsDelegates: const [
-              AppLocalizations.delegate,
+              appLocalizationsDelegate,
               AppUiLocalizations.delegate,
               ...GlobalMaterialLocalizations.delegates,
             ],
-            supportedLocales: AppLocalizations.delegate.supportedLocales,
+            supportedLocales: AppLocalizations.supportedLocales,
             builder: (context, child) {
               return wrapAppScopes(context, child!);
             },
@@ -398,11 +398,11 @@ void main() {
           navigatorKey: globalState.navigatorKey,
           locale: const Locale('zh', 'CN'),
           localizationsDelegates: const [
-            AppLocalizations.delegate,
+            appLocalizationsDelegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) {
             return wrapAppScopes(context, child!);
           },
@@ -415,7 +415,7 @@ void main() {
       expect(find.text(label), findsOneWidget);
     }
     expect(
-      find.textContaining(AppLocalizations.current.defaultNameserverDesc),
+      find.textContaining(currentAppLocalizations.defaultNameserverDesc),
       findsOneWidget,
     );
     expect(find.text('Default Nameserver'), findsNothing);

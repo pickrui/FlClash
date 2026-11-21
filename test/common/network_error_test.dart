@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/common/network_error.dart';
@@ -23,7 +24,7 @@ void main() {
   setUp(() async {
     final previousLocale = Intl.defaultLocale;
     addTearDown(() => Intl.defaultLocale = previousLocale);
-    l = await AppLocalizations.load(const Locale('en'));
+    l = loadAppLocalizations(const Locale('en'));
   });
   DioException dio(DioExceptionType type, [Object? cause, int? status]) {
     final options = RequestOptions(
@@ -120,8 +121,8 @@ void main() {
     () async {
       final previousLocale = Intl.defaultLocale;
       addTearDown(() => Intl.defaultLocale = previousLocale);
-      for (final locale in AppLocalizations.delegate.supportedLocales) {
-        final strings = await AppLocalizations.load(locale);
+      for (final locale in AppLocalizations.supportedLocales) {
+        final strings = loadAppLocalizations(locale);
         final cases = <(Object, String)>[
           (
             const ProviderLibraryException('ruleSetNeedsConversion'),

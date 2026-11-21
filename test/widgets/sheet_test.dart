@@ -97,11 +97,11 @@ Future<ValueNotifier<ThemeMode>> _openFromPage(
           darkTheme: _theme(Brightness.dark),
           themeMode: themeMode,
           localizationsDelegates: const [
-            AppLocalizations.delegate,
+            appLocalizationsDelegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) => wrapAppScopes(context, child!),
           home: Scaffold(
             title: 'Page',

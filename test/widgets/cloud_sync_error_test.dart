@@ -44,11 +44,11 @@ void main() {
           child: MaterialApp(
             locale: const Locale('en'),
             localizationsDelegates: const [
-              AppLocalizations.delegate,
+              appLocalizationsDelegate,
               AppUiLocalizations.delegate,
               ...GlobalMaterialLocalizations.delegates,
             ],
-            supportedLocales: AppLocalizations.delegate.supportedLocales,
+            supportedLocales: AppLocalizations.supportedLocales,
             builder: (context, child) => wrapAppScopes(context, child!),
             home: const CloudAccountPage(),
           ),
@@ -167,7 +167,7 @@ void main() {
     );
     expect(find.byGlyph(AppGlyphs.warning), findsNWidgets(2));
     expect(
-      find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
+      find.text(currentAppLocalizations.cloudSyncedWithCertificateException),
       findsOneWidget,
     );
     await tester.tap(find.widgetWithText(FilledButton, 'Check API'));
@@ -230,7 +230,7 @@ void main() {
     expect(account.refreshAttempts, [true]);
     expect(account.syncAttempts, [true]);
     expect(
-      find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
+      find.text(currentAppLocalizations.cloudSyncedWithCertificateException),
       findsNothing,
     );
     expect(
@@ -242,7 +242,7 @@ void main() {
     account.syncGate!.complete();
     await tester.pumpAndSettle();
     expect(
-      find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
+      find.text(currentAppLocalizations.cloudSyncedWithCertificateException),
       findsOneWidget,
     );
     expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
@@ -275,7 +275,7 @@ void main() {
         expect(account.syncAttempts, refreshFails ? isEmpty : [true]);
         expect(
           find.textContaining(
-            AppLocalizations.current.cloudCertificateSyncFailed,
+            currentAppLocalizations.cloudCertificateSyncFailed,
           ),
           findsOneWidget,
         );
@@ -285,7 +285,7 @@ void main() {
         );
         expect(
           find.text(
-            AppLocalizations.current.cloudSyncedWithCertificateException,
+            currentAppLocalizations.cloudSyncedWithCertificateException,
           ),
           findsNothing,
         );
@@ -308,7 +308,7 @@ void main() {
         expect(account.syncAttempts, refreshFails ? [true] : [true, true]);
         expect(
           find.text(
-            AppLocalizations.current.cloudSyncedWithCertificateException,
+            currentAppLocalizations.cloudSyncedWithCertificateException,
           ),
           findsOneWidget,
         );
@@ -330,11 +330,11 @@ void main() {
       await tester.tap(find.text('Allow Temporarily'));
       await tester.pumpAndSettle();
       expect(
-        find.textContaining(AppLocalizations.current.cloudConfigSyncIncomplete),
+        find.textContaining(currentAppLocalizations.cloudConfigSyncIncomplete),
         findsOneWidget,
       );
       expect(
-        find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
+        find.text(currentAppLocalizations.cloudSyncedWithCertificateException),
         findsNothing,
       );
     },
@@ -371,11 +371,11 @@ void main() {
     expect(api.attempts, [false, true]);
     await tester.pumpAndSettle();
     expect(
-      find.text(AppLocalizations.current.nodeFilterSmartSelection),
+      find.text(currentAppLocalizations.nodeFilterSmartSelection),
       findsOneWidget,
     );
     expect(
-      find.text(AppLocalizations.current.cloudSyncedWithCertificateException),
+      find.text(currentAppLocalizations.cloudSyncedWithCertificateException),
       findsOneWidget,
     );
     expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
@@ -410,7 +410,7 @@ void main() {
         expect(account.syncAttempts, isEmpty);
         expect(
           find.text(
-            AppLocalizations.current.cloudSyncedWithCertificateException,
+            currentAppLocalizations.cloudSyncedWithCertificateException,
           ),
           findsNothing,
         );
@@ -462,7 +462,7 @@ void main() {
       );
       expect(account.unauthorized, outcome == 'expired' ? 1 : 0);
       expect(
-        find.textContaining(AppLocalizations.current.cloudApiRequestCanceled),
+        find.textContaining(currentAppLocalizations.cloudApiRequestCanceled),
         findsOneWidget,
       );
     });
@@ -478,7 +478,7 @@ void main() {
     }, account: account);
     await tester.pumpAndSettle();
     expect(
-      find.text(AppLocalizations.current.certificateCheckOnlyHint),
+      find.text(currentAppLocalizations.certificateCheckOnlyHint),
       findsOneWidget,
     );
     await tester.tap(find.text('Temporarily Check API'));
@@ -489,7 +489,7 @@ void main() {
     expect(account.refreshAttempts, isEmpty);
     expect(account.syncAttempts, isEmpty);
     expect(
-      find.text(AppLocalizations.current.apiAvailableWithCertificateException),
+      find.text(currentAppLocalizations.apiAvailableWithCertificateException),
       findsOneWidget,
     );
     expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
@@ -505,11 +505,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(
-      find.text(AppLocalizations.current.certificateUntrustedHint),
+      find.text(currentAppLocalizations.certificateUntrustedHint),
       findsOneWidget,
     );
     expect(
-      find.text(AppLocalizations.current.certificateValidityHint),
+      find.text(currentAppLocalizations.certificateValidityHint),
       findsNothing,
     );
   });
@@ -573,7 +573,7 @@ void main() {
         locale: locale,
       );
       await tester.pumpAndSettle();
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       await tester.tap(find.text(l.retryCloudSyncWithCertificateException));
       await tester.pumpAndSettle();
       expect(find.text(l.certificateUntrusted), findsOneWidget);

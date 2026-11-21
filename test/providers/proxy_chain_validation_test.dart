@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -184,13 +185,13 @@ void main() {
           final previousLocale = Intl.getCurrentLocale();
           final previousDefault = Intl.defaultLocale;
           addTearDown(() async {
-            await AppLocalizations.load(Locale(previousLocale));
+            loadAppLocalizations(Locale(previousLocale));
             Intl.defaultLocale = previousDefault;
           });
-          for (final locale in AppLocalizations.delegate.supportedLocales) {
+          for (final locale in AppLocalizations.supportedLocales) {
             await tester.pump();
             await tester.runAsync(() async {
-              await AppLocalizations.load(locale);
+              loadAppLocalizations(locale);
               final messages = jsonDecode(
                 File('arb/intl_$locale.arb').readAsStringSync(),
               ) as Map<String, dynamic>;
@@ -222,7 +223,7 @@ void main() {
           expect(container.read(profilesProvider).single, profile);
           expect(container.read(appliedSetupStateProvider), isNull);
           verify(() => handler.managedServers(any()))
-              .called(AppLocalizations.delegate.supportedLocales.length);
+              .called(AppLocalizations.supportedLocales.length);
           verifyNoMoreInteractions(handler);
         }
       },

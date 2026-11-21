@@ -5,9 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/common/secrets.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -38,7 +38,7 @@ void main() {
     expect(container.read(logsProvider).length, 1);
   });
 
-  tearDown(() => AppLocalizations.load(const Locale('en')));
+  tearDown(() => loadAppLocalizations(const Locale('en')));
 
   test('log provider keeps newest bounded text before and after reset', () {
     final container = ProviderContainer();
@@ -64,7 +64,7 @@ void main() {
   });
 
   test('a disconnected core is reported in the app language', () async {
-    await AppLocalizations.load(const Locale('zh', 'CN'));
+    loadAppLocalizations(const Locale('zh', 'CN'));
     expect(appController.coreDisconnectedMessage, '内核未连接');
   });
 }

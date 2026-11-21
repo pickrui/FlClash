@@ -6,6 +6,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_clash/features/overwrite/custom_rule_editor.dart';
@@ -14,7 +15,6 @@ import 'package:fl_clash/features/overwrite/proxy_group_editor.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -90,21 +90,21 @@ void main() {
       expect(find.byType(SheetPagesNavigator), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.enterText(_field('Name'), 'Fixture');
-      await tester.ensureVisible(find.text(AppLocalizations.current.addNodes));
-      await tester.tap(find.text(AppLocalizations.current.addNodes));
+      await tester.ensureVisible(find.text(currentAppLocalizations.addNodes));
+      await tester.tap(find.text(currentAppLocalizations.addNodes));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('${AppLocalizations.current.proxies} (1)'));
+      await tester.tap(find.text('${currentAppLocalizations.proxies} (1)'));
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('Japan'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Japan'));
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip(AppLocalizations.current.confirm));
+      await tester.tap(find.byTooltip(currentAppLocalizations.confirm));
       await tester.pumpAndSettle();
       expect(find.text('Japan'), findsOneWidget);
       expect(find.text('Fixture'), findsOneWidget);
       expect(saved, isNull);
-      await tester.tap(find.byTooltip(AppLocalizations.current.save));
+      await tester.tap(find.byTooltip(currentAppLocalizations.save));
       await tester.pumpAndSettle();
       expect(saved?.name, 'Fixture');
       expect(saved?.proxies, ['Japan']);
@@ -129,13 +129,13 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(_field('Name'), 'Retained');
       Future<void> members() async {
-        await tester.tap(find.text(AppLocalizations.current.addNodes));
+        await tester.tap(find.text(currentAppLocalizations.addNodes));
         await tester.pumpAndSettle();
       }
 
       await members();
       await tester.tap(
-        find.text('${AppLocalizations.current.basicStrategy} (1)'),
+        find.text('${currentAppLocalizations.basicStrategy} (1)'),
       );
       await tester.pumpAndSettle();
       await tester.tap(find.text('DIRECT'));
@@ -148,22 +148,22 @@ void main() {
       await tester.tapAt(const Offset(10, 200));
       await tester.pumpAndSettle();
       expect(
-        find.text(AppLocalizations.current.confirmExitWindow),
+        find.text(currentAppLocalizations.confirmExitWindow),
         findsOneWidget,
       );
-      await tester.tap(find.text(AppLocalizations.current.cancel).last);
+      await tester.tap(find.text(currentAppLocalizations.cancel).last);
       await tester.pumpAndSettle();
-      expect(find.byTooltip(AppLocalizations.current.confirm), findsOneWidget);
+      expect(find.byTooltip(currentAppLocalizations.confirm), findsOneWidget);
       expect(closed, isFalse);
       await tester.tapAt(const Offset(10, 200));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.confirm).last);
+      await tester.tap(find.text(currentAppLocalizations.confirm).last);
       await tester.pumpAndSettle();
       expect(
-        find.text(AppLocalizations.current.dataChangedSave),
+        find.text(currentAppLocalizations.dataChangedSave),
         findsOneWidget,
       );
-      await tester.tap(find.text(AppLocalizations.current.discard));
+      await tester.tap(find.text(currentAppLocalizations.discard));
       await tester.pumpAndSettle();
       expect(closed, isTrue);
       expect(tester.takeException(), isNull);
@@ -209,7 +209,7 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          final save = find.byTooltip(AppLocalizations.current.save);
+          final save = find.byTooltip(currentAppLocalizations.save);
           expect(
             tester.getBottomRight(save).dy,
             lessThanOrEqualTo(scenario.size.height - scenario.keyboard + 1),
@@ -268,27 +268,27 @@ void main() {
       ).then((_) => closed = true);
       await tester.pumpAndSettle();
       await tester.enterText(_field('Name'), 'Changed');
-      await tester.tap(find.byTooltip(AppLocalizations.current.close));
+      await tester.tap(find.byTooltip(currentAppLocalizations.close));
       await tester.pumpAndSettle();
       expect(
-        find.text(AppLocalizations.current.dataChangedSave),
+        find.text(currentAppLocalizations.dataChangedSave),
         findsOneWidget,
       );
-      await tester.tap(find.text(AppLocalizations.current.cancel).last);
+      await tester.tap(find.text(currentAppLocalizations.cancel).last);
       await tester.pumpAndSettle();
       expect(calls, 0);
       expect(closed, isFalse);
       expect(find.text('Changed'), findsOneWidget);
-      await tester.tap(find.byTooltip(AppLocalizations.current.close));
+      await tester.tap(find.byTooltip(currentAppLocalizations.close));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.save).last);
+      await tester.tap(find.text(currentAppLocalizations.save).last);
       await tester.pumpAndSettle();
       expect(calls, 1);
       expect(closed, isFalse);
       expect(find.text('Fixture validation failed'), findsOneWidget);
-      await tester.tap(find.byTooltip(AppLocalizations.current.close));
+      await tester.tap(find.byTooltip(currentAppLocalizations.close));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.discard));
+      await tester.tap(find.text(currentAppLocalizations.discard));
       await tester.pumpAndSettle();
       expect(closed, isTrue);
       expect(tester.takeException(), isNull);

@@ -164,10 +164,10 @@ Future<Map<String, Object?>?> _loadStartupConfig() async {
           PrismApp(
             debugShowCheckedModeBanner: false,
             localizationsDelegates: const [
-              AppLocalizations.delegate,
+              appLocalizationsDelegate,
               AppUiLocalizations.delegate,
             ],
-            supportedLocales: AppLocalizations.delegate.supportedLocales,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: ConfigRecoveryScreen(
               onRetry: retry,
               initialReason: failure.reason,

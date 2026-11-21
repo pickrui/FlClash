@@ -337,11 +337,11 @@ class _TestApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: globalState.navigatorKey,
       localizationsDelegates: const [
-        AppLocalizations.delegate,
+        appLocalizationsDelegate,
         AppUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],
-      supportedLocales: AppLocalizations.delegate.supportedLocales,
+      supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
         return AlertScope(presenter: const AppAlertPresenter(), child: child!);
       },

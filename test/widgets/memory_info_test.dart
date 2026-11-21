@@ -80,7 +80,7 @@ void main() {
     released.complete();
     await tester.pumpAndSettle();
     expect(
-      find.text(AppLocalizations.current.memoryReleasedSize(1024.traffic.show)),
+      find.text(currentAppLocalizations.memoryReleasedSize(1024.traffic.show)),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -366,11 +366,11 @@ class _TestApp extends StatelessWidget {
       child: MaterialApp(
         navigatorKey: globalState.navigatorKey,
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) {
           return wrapAppScopes(context, child!);
         },

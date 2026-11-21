@@ -49,9 +49,7 @@ void main() {
       final c = await _pump(tester, const Size(900, 1800));
       await _scrollTo(tester, find.byType(Slider));
       expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNull);
-      await tester.tap(
-        find.text(AppLocalizations.current.custom).hitTestable(),
-      );
+      await tester.tap(find.text(currentAppLocalizations.custom).hitTestable());
       await tester.pumpAndSettle();
       final before = c.read(themeSettingProvider).textScale.scale;
       final slider = find.byType(Slider);
@@ -65,13 +63,13 @@ void main() {
       expect(scale, isNot(before));
       expect((scale / 0.05).roundToDouble(), closeTo(scale / 0.05, 0.001));
       await tester.tap(
-        find.byTooltip(AppLocalizations.current.reset).hitTestable().last,
+        find.byTooltip(currentAppLocalizations.reset).hitTestable().last,
       );
       await tester.pumpAndSettle();
       expect(c.read(themeSettingProvider).textScale.scale, 1);
       expect(c.read(themeSettingProvider).textScale.enable, isTrue);
       await tester.tap(
-        find.text(AppLocalizations.current.followSystem).hitTestable(),
+        find.text(currentAppLocalizations.followSystem).hitTestable(),
       );
       await tester.pumpAndSettle();
       expect(c.read(themeSettingProvider).textScale.enable, isFalse);
@@ -83,7 +81,7 @@ void main() {
     'sidebar blur starts off, with a working toggle on supported platforms',
     (tester) async {
       final c = await _pump(tester, const Size(900, 1800));
-      final toggle = find.text(AppLocalizations.current.backgroundBlur);
+      final toggle = find.text(currentAppLocalizations.backgroundBlur);
 
       expect(c.read(themeSettingProvider).sidebarBlur, isFalse);
       if (!Platform.isMacOS && !Platform.isWindows) {
@@ -130,7 +128,7 @@ void main() {
         hex,
       );
       await tester.pump();
-      await tester.tap(find.byTooltip(AppLocalizations.current.confirm));
+      await tester.tap(find.byTooltip(currentAppLocalizations.confirm));
       await tester.pumpAndSettle();
     }
 
@@ -154,15 +152,15 @@ void main() {
         find.byWidgetPredicate(
           (widget) =>
               widget is Semantics &&
-              widget.properties.label == AppLocalizations.current.followSystem,
+              widget.properties.label == currentAppLocalizations.followSystem,
         ),
       );
       await tester.pumpAndSettle();
       expect(c.read(themeSettingProvider).primaryColor, isNull);
 
-      await tester.tap(find.text(AppLocalizations.current.colorStyle));
+      await tester.tap(find.text(currentAppLocalizations.colorStyle));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.softStyle).last);
+      await tester.tap(find.text(currentAppLocalizations.softStyle).last);
       await tester.pumpAndSettle();
       expect(c.read(themeSettingProvider).colorStyle, ColorStyle.soft);
     });
@@ -174,9 +172,9 @@ void main() {
       await tester.pumpAndSettle();
 
       await openMenu(tester, 0xFFFF8D28);
-      await tester.tap(find.text(AppLocalizations.current.delete));
+      await tester.tap(find.text(currentAppLocalizations.delete));
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.delete));
+      await tester.tap(find.text(currentAppLocalizations.delete));
       await tester.pumpAndSettle();
 
       final theme = c.read(themeSettingProvider);
@@ -198,8 +196,8 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.contextMenu);
       await tester.pumpAndSettle();
 
-      expect(find.text(AppLocalizations.current.edit), findsOneWidget);
-      expect(find.text(AppLocalizations.current.delete), findsOneWidget);
+      expect(find.text(currentAppLocalizations.edit), findsOneWidget);
+      expect(find.text(currentAppLocalizations.delete), findsOneWidget);
     });
 
     testWidgets('edits a color in place from its long-press menu', (
@@ -215,7 +213,7 @@ void main() {
           .indexOf(0xFFFF8D28);
 
       await openMenu(tester, 0xFFFF8D28);
-      await tester.tap(find.text(AppLocalizations.current.edit));
+      await tester.tap(find.text(currentAppLocalizations.edit));
       await tester.pumpAndSettle();
       await enterHex(tester, '123456');
 
@@ -230,8 +228,8 @@ void main() {
       final count = c.read(themeSettingProvider).primaryColors.length;
 
       for (var i = 0; i < 2; i++) {
-        await _scrollTo(tester, find.byTooltip(AppLocalizations.current.add));
-        await tester.tap(find.byTooltip(AppLocalizations.current.add));
+        await _scrollTo(tester, find.byTooltip(currentAppLocalizations.add));
+        await tester.tap(find.byTooltip(currentAppLocalizations.add));
         await tester.pumpAndSettle();
         await enterHex(tester, '123456');
       }
@@ -248,13 +246,13 @@ void main() {
     final group = find.byType(PreviewChoiceGroup<LiquidGlassMode>);
     Finder choice(String label) =>
         find.descendant(of: group, matching: find.text(label));
-    await _scrollTo(tester, choice(AppLocalizations.current.ultra));
+    await _scrollTo(tester, choice(currentAppLocalizations.ultra));
 
     expect(c.read(themeSettingProvider).liquidGlass, LiquidGlassMode.none);
-    await tester.tap(choice(AppLocalizations.current.ultra));
+    await tester.tap(choice(currentAppLocalizations.ultra));
     await tester.pumpAndSettle();
     expect(c.read(themeSettingProvider).liquidGlass, LiquidGlassMode.ultra);
-    await tester.tap(choice(AppLocalizations.current.none));
+    await tester.tap(choice(currentAppLocalizations.none));
     await tester.pumpAndSettle();
     expect(c.read(themeSettingProvider).liquidGlass, LiquidGlassMode.none);
   });
@@ -465,8 +463,8 @@ void main() {
       await _capture(tester, boundary, 'theme-text-${locale.toString()}');
       await tester.drag(find.byType(ListView).first, const Offset(0, 3000));
       await tester.pumpAndSettle();
-      await _scrollTo(tester, find.byTooltip(AppLocalizations.current.add));
-      await tester.tap(find.byTooltip(AppLocalizations.current.add));
+      await _scrollTo(tester, find.byTooltip(currentAppLocalizations.add));
+      await tester.tap(find.byTooltip(currentAppLocalizations.add));
       await tester.pumpAndSettle();
       expect(find.byType(Palette), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -496,9 +494,9 @@ Future<ProviderContainer> _pump(
       child: PrismApp(
         navigatorKey: globalState.navigatorKey,
         locale: locale,
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],

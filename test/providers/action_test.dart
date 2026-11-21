@@ -13,7 +13,6 @@ import 'package:fl_clash/core/interface.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/config.dart';
@@ -100,7 +99,7 @@ void main() {
     testWidgets(
       'superseded TUN authorization cannot ${failed ? 'disable the latest request' : 're-enable TUN'}',
       (tester) async {
-        await AppLocalizations.load(const Locale('en'));
+        loadAppLocalizations(const Locale('en'));
         final previous = system.runProcess;
         final previousReadiness = system.macOSHelperReadiness;
         final helperDir = Directory.systemTemp.createTempSync('flclash-helper');
@@ -478,7 +477,7 @@ void main() {
     testWidgets(
       'proxy reconciliation waits for an in-flight selection (failed: $failed, reconciliation failed: $reconcileFailed, switched: $switchProfile)',
       (tester) async {
-        await AppLocalizations.load(const Locale('en'));
+        loadAppLocalizations(const Locale('en'));
         final handler = _CoreHandler();
         when(() => handler.isConnected).thenReturn(true);
         final probeStarted = Completer<void>();
@@ -638,7 +637,7 @@ void main() {
           };
           restoreDebugPrint = () => debugPrint = previousDebugPrint;
           addTearDown(restoreDebugPrint);
-          await AppLocalizations.load(const Locale('en'));
+          loadAppLocalizations(const Locale('en'));
           final directory = await Directory.systemTemp.createTemp(
             'profile-selection-',
           );
@@ -1334,7 +1333,7 @@ void main() {
     }
 
     setUp(() async {
-      await AppLocalizations.load(const Locale('en'));
+      loadAppLocalizations(const Locale('en'));
       handler = _CoreHandler();
       setup = _RawSetupAction({
         'proxies': [

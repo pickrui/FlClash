@@ -35,7 +35,7 @@
   "zh_CN": "Simplified Chinese",
   "theme": "Theme",
   "themeDesc": "Set dark mode,adjust the color",
-  "override": "Override",
+  "overrideLabel": "Override",
   "allowLan": "Allow LAN",
   "tun": "TUN",
   "tunDesc": "TUN works only in administrator mode",
@@ -387,6 +387,12 @@
   "proxyChainConflictTip": "Proxy {name} conflicts with another enabled chain or creates a loop",
   "proxyChainUnavailableNodeTip": "Proxy {name} is not available in this position",
   "proxyChainUnavailableReference": "Proxy chain “{chainName}” references an unavailable node or policy group “{nodeName}”. Select it again in “Proxy chains”, or disable this chain.",
+  "@proxyChainUnavailableReference": {
+    "placeholders": {
+      "chainName": {},
+      "nodeName": {}
+    }
+  },
   "proxyChainRelatedChainsUpdated": "Related proxy chains updated",
   "proxyChainSelectedNodes": "Proxy chain",
   "proxyChainAvailableNodes": "Available nodes and groups",
@@ -465,6 +471,12 @@
   "customOutboundInUse": "{name} is still referenced by a group, rule, or proxy chain",
   "relayGroupUnsupported": "Relay groups were removed by the core. Choose another type.",
   "rawOutboundInUse": "{name} is referenced by the original configuration at {path}",
+  "@rawOutboundInUse": {
+    "placeholders": {
+      "name": {},
+      "path": {}
+    }
+  },
   "unknownNetworkError": "Unknown network error",
   "restoreException": "Recovery exception",
   "networkException": "Network exception, please check your connection and try again",
@@ -585,6 +597,12 @@
   "nodeFilterSmartSelection": "Smart Selection",
   "nodeFilterCustomized": "Customized",
   "nodeFilterKept": "{kept} of {total} nodes kept",
+  "@nodeFilterKept": {
+    "placeholders": {
+      "kept": {},
+      "total": {}
+    }
+  },
   "nodeFilterLines": "Lines",
   "nodeFilterRegions": "Regions",
   "nodeFilterNameContains": "Name contains",
@@ -674,11 +692,23 @@
   "planUnavailable": "Unavailable",
   "balanceDeductionHint": "Purchases use your balance first, then commission for any shortfall.",
   "rechargeAllowedRange": "Allowed range {min} – {max}",
+  "@rechargeAllowedRange": {
+    "placeholders": {
+      "min": {},
+      "max": {}
+    }
+  },
   "rechargeAmountOutOfRange": "The amount is outside the range allowed by this payment method",
   "insufficientBalanceRecharge": "Recharge and try again.",
   "storeOutcomeUnknown": "The request may still have gone through. Check Purchased Plans before trying again.",
   "configParseErrorAtLine": "The configuration format is invalid at line {line}.",
   "configTypeMismatch": "Expected {expected}, but found {actual}.",
+  "@configTypeMismatch": {
+    "placeholders": {
+      "expected": {},
+      "actual": {}
+    }
+  },
   "configYamlFormatHint": "Check the indentation and \"-\" list markers near this line.",
   "configValueTypeList": "a list",
   "configValueTypeObject": "an object",
@@ -946,8 +976,29 @@
   "diagSystemDns": "System DNS",
   "diagCoreDns": "Core DNS",
   "diagProbeSummary": "{passed}/{total} samples passed",
-  "@diagProbeSummary": {"placeholders": {"passed": {"type": "int"}, "total": {"type": "int"}}},
-  "@diagProbeResult": {"placeholders": {"index": {"type": "int"}, "result": {"type": "String"}, "milliseconds": {"type": "int"}}},
+  "@diagProbeSummary": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@diagProbeResult": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "result": {
+        "type": "String"
+      },
+      "milliseconds": {
+        "type": "int"
+      }
+    }
+  },
   "diagProbeResult": "Sample {index}: {result} · {milliseconds} ms",
   "diagDnsServerFailed": "DNS upstream returned a server failure",
   "diagDnsReady": "Sampled names resolved successfully",
@@ -1099,6 +1150,12 @@
   "tailscaleRemoveNetwork": "Remove network",
   "tailscaleRemoveConfirm": "This device will leave {name} and its sign-in will be deleted from this device. If the network is unreachable now, remove the device in the Tailscale admin console.",
   "tailscaleNetworkInUse": "{name} is still used by a rule or group in profile {profile}",
+  "@tailscaleNetworkInUse": {
+    "placeholders": {
+      "name": {},
+      "profile": {}
+    }
+  },
   "tailscaleGuideGetStarted": "Get started",
   "tailscaleGuideGetStartedBody": "Add a network and choose \"Save and log in\". Open the login page and authorize this device; sign-in completes on its own.\nTo sign in with an auth key, choose \"Auth key\" and enter it. No browser is needed.\nThe network carries traffic only while the proxy runs. Signing in alone routes nothing.",
   "tailscaleGuideDevices": "Devices and MagicDNS",
@@ -1287,6 +1344,12 @@
   "batchListInputTip": "One item per line, or separated by commas",
   "batchMapInputTip": "One entry per line: key, a space, then value",
   "batchPreviewTip": "{count} to add, {skipped} skipped as existing",
+  "@batchPreviewTip": {
+    "placeholders": {
+      "count": {},
+      "skipped": {}
+    }
+  },
   "cacheAlgorithm": "Cache algorithm",
   "cacheMaxSize": "Cache size",
   "dialerProxy": "Dialer proxy",
@@ -1299,9 +1362,21 @@
   "fakeipTtl": "Fake-IP TTL",
   "ipv6Timeout": "IPv6 timeout (ms)",
   "lineIssueTip": "Line {line}: {message}",
+  "@lineIssueTip": {
+    "placeholders": {
+      "line": {},
+      "message": {}
+    }
+  },
   "listenRoutingMark": "Listen routing mark",
   "listenRoutingMarkDesc": "Listen routing mark works only on Linux",
   "maxLengthTip": "{label} must be at most {max} characters",
+  "@maxLengthTip": {
+    "placeholders": {
+      "label": {},
+      "max": {}
+    }
+  },
   "ntpInterval": "Sync interval (minutes)",
   "ntpStatusDesc": "NTP takes the time from an NTP server instead of the system clock",
   "overrideEntries": "Override entries",
@@ -1441,6 +1516,13 @@
   "excludeDstPort": "Excluded destination ports",
   "excludeDstPortDesc": "Traffic to excluded destination ports skips TUN",
   "numberRangeTip": "{label} must be between {min} and {max}",
+  "@numberRangeTip": {
+    "placeholders": {
+      "label": {},
+      "min": {},
+      "max": {}
+    }
+  },
   "customProfile": "Custom profile",
   "customProfileDesc": "Assemble proxy groups and rules from your own nodes, the provider library and other profiles",
   "emptyCustomProfile": "Add a proxy group or a rule to this custom profile first",
@@ -1482,6 +1564,12 @@
   "customImportDroppedSubRules": "{count, plural, =1{1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules} other{{count} SUB-RULE rules were dropped, since custom profiles do not support sub-rules}}",
   "customImportUnnamedProxies": "{count, plural, =1{1 proxy had no name or type} other{{count} proxies had no name or type}}",
   "failedItem": "{label}: {message}",
+  "@failedItem": {
+    "placeholders": {
+      "label": {},
+      "message": {}
+    }
+  },
   "shareLinkNodesAdded": "{count, plural, =1{1 node was added from the share links} other{{count} nodes were added from the share links}}",
   "shareLinksNotRead": "{count, plural, =1{1 link could not be read} other{{count} links could not be read}}",
   "connectionStats": "Connection stats",
@@ -1502,6 +1590,12 @@
   "portValue": "Port {port}",
   "profileDaysLeft": "{days, plural, =1{1 day left} other{{days} days left}}",
   "profileExpiresIn": "Expires {date}, {days, plural, =1{1 day} other{{days} days}} left",
+  "@profileExpiresIn": {
+    "placeholders": {
+      "date": {},
+      "days": {}
+    }
+  },
   "profileUpdatedAt": "Updated {time}",
   "proxyGroupsAfterStart": "Groups show up here once the core starts",
   "running": "Running",
@@ -1658,6 +1752,12 @@
   "httpCaptureNoHosts": "No host is listed, so nothing is recorded. Add hosts under Hostname on the MITM page, or from the details of a connection.",
   "httpCaptureLimit": "Maximum records",
   "httpCaptureLimitDesc": "The oldest records go first once this many are kept or they fill {memory} of memory. Each body keeps its first {body}.",
+  "@httpCaptureLimitDesc": {
+    "placeholders": {
+      "memory": {},
+      "body": {}
+    }
+  },
   "httpRequests": "HTTP requests",
   "httpRequestsMissing": "Requests made before capture was on, or since cleared, are not listed.",
   "httpRequestCleared": "This request is no longer kept",
@@ -1763,6 +1863,12 @@
   "http2": "HTTP/2",
   "decryptUntrusted": "Decrypt without local trust",
   "invalidOfCount": "{invalid} of {total} invalid",
+  "@invalidOfCount": {
+    "placeholders": {
+      "invalid": {},
+      "total": {}
+    }
+  },
   "mitmModuleScriptsChanged": "{name} changed its scripts and was turned off",
   "failedCount": "{count} items failed. Tap to view",
   "proxyServerNameserverDesc": "Resolves proxy server hostnames only.",

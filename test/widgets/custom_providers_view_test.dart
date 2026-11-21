@@ -6,12 +6,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/path.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/overwrite/profile_provider_options.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -205,10 +205,7 @@ void main() {
       );
       expect(container.read(profileProvider(1)), latest);
       expect(find.byType(ProfileProviderOptionsDialog), findsOneWidget);
-      expect(
-        find.text(AppLocalizations.current.routingChanged),
-        findsOneWidget,
-      );
+      expect(find.text(currentAppLocalizations.routingChanged), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }

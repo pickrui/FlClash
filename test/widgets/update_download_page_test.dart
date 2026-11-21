@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/common/update_download_task.dart';
@@ -27,7 +28,7 @@ const _release = AppUpdateInfo(
   remoteBuildNumber: 2026092110,
 );
 
-String get _installLabel => AppLocalizations.current.updateInstall;
+String get _installLabel => currentAppLocalizations.updateInstall;
 
 void main() {
   testWidgets(
@@ -46,7 +47,7 @@ void main() {
       task.verifying(token);
       await tester.pump();
       expect(
-        find.text(AppLocalizations.current.updateVerifying),
+        find.text(currentAppLocalizations.updateVerifying),
         findsOneWidget,
       );
       expect(find.text('100%'), findsNothing);
@@ -88,19 +89,19 @@ void main() {
     expect(result, isNull);
     await tester.tap(find.text(_installLabel));
     await pumpTransition(tester);
-    expect(find.text(AppLocalizations.current.updatePreparing), findsOneWidget);
+    expect(find.text(currentAppLocalizations.updatePreparing), findsOneWidget);
     for (final (phase, label) in [
       (
         AppUpdateInstallPhase.verifying,
-        AppLocalizations.current.updateVerifying,
+        currentAppLocalizations.updateVerifying,
       ),
       (
         AppUpdateInstallPhase.waiting,
-        AppLocalizations.current.updateCheckingInstaller,
+        currentAppLocalizations.updateCheckingInstaller,
       ),
       (
         AppUpdateInstallPhase.restarting,
-        AppLocalizations.current.updateRestarting,
+        currentAppLocalizations.updateRestarting,
       ),
     ]) {
       task.reportInstallPhase(phase);
@@ -126,7 +127,7 @@ void main() {
     await startDownload(tester);
     pending.complete(File('/tmp/flclash-linux-amd64.AppImage'));
     await tester.pumpAndSettle();
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     expect(find.text(l.updateRestart), findsOneWidget);
     expect(find.text(l.updateRestartHint), findsOneWidget);
     expect(find.text(l.updateInstall), findsNothing);
@@ -153,7 +154,7 @@ void main() {
       await pumpTransition(tester);
       expect(find.byType(AppUpdatePage), findsOneWidget);
       expect(
-        find.text(AppLocalizations.current.updateDownloading),
+        find.text(currentAppLocalizations.updateDownloading),
         findsOneWidget,
       );
       expect(downloads, 1);
@@ -192,7 +193,7 @@ void main() {
     expect(task.value.phase, AppUpdateDownloadPhase.canceled);
     expect(find.byType(AppUpdatePage), findsOneWidget);
     expect(
-      find.text(AppLocalizations.current.updateDownloadConfirm),
+      find.text(currentAppLocalizations.updateDownloadConfirm),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -228,7 +229,7 @@ void main() {
       expect(find.text('Update download failed'), findsOneWidget);
       expect(find.textContaining('private raw'), findsNothing);
       expect(result, isNull);
-      await tester.tap(find.text(AppLocalizations.current.configRecoveryRetry));
+      await tester.tap(find.text(currentAppLocalizations.configRecoveryRetry));
       await tester.pumpAndSettle();
       expect(attempts, 2);
       expect(task.value.phase, AppUpdateDownloadPhase.failed);
@@ -237,7 +238,7 @@ void main() {
       expect(result, UpdateDownloadAction.browser);
     },
   );
-  for (final locale in AppLocalizations.delegate.supportedLocales) {
+  for (final locale in AppLocalizations.supportedLocales) {
     testWidgets('download and install actions fit 320 dp in $locale', (
       tester,
     ) async {
@@ -256,12 +257,12 @@ void main() {
       await startDownload(tester);
       expect(
         find
-            .text(AppLocalizations.current.updateDownloadBackground)
+            .text(currentAppLocalizations.updateDownloadBackground)
             .hitTestable(),
         findsOneWidget,
       );
       expect(
-        find.text(AppLocalizations.current.updateCancelDownload).hitTestable(),
+        find.text(currentAppLocalizations.updateCancelDownload).hitTestable(),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -272,7 +273,7 @@ void main() {
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
-      await tester.tap(find.text(AppLocalizations.current.updateLater));
+      await tester.tap(find.text(currentAppLocalizations.updateLater));
       await tester.pumpAndSettle();
       expect(result, isNull);
       expect(task.value.phase, AppUpdateDownloadPhase.ready);
@@ -299,13 +300,13 @@ void main() {
         find
             .widgetWithText(
               FilledButton,
-              AppLocalizations.current.configRecoveryRetry,
+              currentAppLocalizations.configRecoveryRetry,
             )
             .hitTestable(),
         findsOneWidget,
       );
       expect(
-        find.text(AppLocalizations.current.updateDownloadBrowser).hitTestable(),
+        find.text(currentAppLocalizations.updateDownloadBrowser).hitTestable(),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -363,7 +364,7 @@ Future<AppUpdateDownloadTask> openUpdatePage(
 /// An indeterminate progress bar never settles, so the transfer states are
 /// reached by pumping past the frames they schedule.
 Future<void> startDownload(WidgetTester tester) async {
-  await tester.tap(find.text(AppLocalizations.current.updateDownloadConfirm));
+  await tester.tap(find.text(currentAppLocalizations.updateDownloadConfirm));
   await pumpTransition(tester);
 }
 

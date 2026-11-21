@@ -121,7 +121,7 @@ extension LocaleL10n on Locale {
       'ja' => l.ja,
       'ko' => l.ko,
       'ru' => l.ru,
-      'zh_CN' => l.zh_CN,
+      'zh' || 'zh_CN' => l.zh_CN,
       final code => code,
     };
   }

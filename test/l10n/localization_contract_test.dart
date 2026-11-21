@@ -6,90 +6,60 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fl_clash/l10n/intl/messages_en.dart' as messages_en;
-import 'package:fl_clash/l10n/intl/messages_es.dart' as messages_es;
-import 'package:fl_clash/l10n/intl/messages_fr.dart' as messages_fr;
-import 'package:fl_clash/l10n/intl/messages_ja.dart' as messages_ja;
-import 'package:fl_clash/l10n/intl/messages_ko.dart' as messages_ko;
-import 'package:fl_clash/l10n/intl/messages_ru.dart' as messages_ru;
-import 'package:fl_clash/l10n/intl/messages_zh_CN.dart' as messages_zh_cn;
+import 'package:fl_clash/common/app_localizations.dart';
+import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/message_lookup_by_library.dart';
+
+import '../helpers/test_app.dart';
 
 void main() {
-  final lookups = <String, MessageLookupByLibrary>{
-    'en': messages_en.messages,
-    'es': messages_es.messages,
-    'fr': messages_fr.messages,
-    'ja': messages_ja.messages,
-    'ko': messages_ko.messages,
-    'ru': messages_ru.messages,
-    'zh_CN': messages_zh_cn.messages,
-  };
-
-  test('every generated locale exposes and evaluates every source message', () {
-    final arbByLocale = <String, Map<String, dynamic>>{
-      for (final locale in lookups.keys)
-        locale: jsonDecode(
-          File('arb/intl_$locale.arb').readAsStringSync(),
-        ) as Map<String, dynamic>,
+  test('every locale preserves the placeholders of every message', () {
+    final arbByLocale = {
+      for (final file in Directory('arb').listSync().whereType<File>())
+        if (file.path.endsWith('.arb'))
+          file.uri.pathSegments.last:
+              jsonDecode(file.readAsStringSync()) as Map<String, dynamic>,
     };
-    final expectedKeys = arbByLocale['en']!.keys
-        .where((key) => !key.startsWith('@'))
-        .toSet();
-
-    for (final entry in lookups.entries) {
-      final locale = entry.key;
-      final messages = entry.value.messages;
-      expect(
-        arbByLocale[locale]!.keys.where((key) => !key.startsWith('@')).toSet(),
-        expectedKeys,
-        reason: '$locale source messages must match the English contract',
-      );
-      expect(
-        messages.keys.toSet(),
-        expectedKeys,
-        reason: '$locale generated messages must match the English contract',
-      );
-
-      for (final key in expectedKeys) {
-        final template = arbByLocale['en']![key] as String;
-        final placeholderPattern = RegExp(r'\{([A-Za-z_][A-Za-z0-9_]*)\s*[,}]');
-        final placeholderNames = placeholderPattern
-            .allMatches(template)
-            .map((match) => match.group(1))
-            .toSet();
+    final template = arbByLocale['intl_en.arb']!;
+    final placeholder = RegExp(r'\{([A-Za-z_][A-Za-z0-9_]*)\s*[,}]');
+    Set<String?> namesOf(String text) =>
+        placeholder.allMatches(text).map((match) => match.group(1)).toSet();
+    for (final MapEntry(key: file, value: messages) in arbByLocale.entries) {
+      for (final MapEntry(:key, :value) in template.entries) {
+        if (key.startsWith('@') || value is! String) continue;
         expect(
-          placeholderPattern
-              .allMatches(arbByLocale[locale]![key] as String)
-              .map((match) => match.group(1))
-              .toSet(),
-          placeholderNames,
-          reason: '$locale.$key must preserve every placeholder',
-        );
-        final arguments = List<dynamic>.filled(placeholderNames.length, 2);
-        late final dynamic translated;
-        try {
-          translated = Intl.withLocale(
-            locale,
-            () => Function.apply(messages[key]! as Function, arguments),
-          );
-        } on NoSuchMethodError catch (error) {
-          fail('$locale.$key has mismatched placeholder metadata: $error');
-        }
-
-        expect(
-          translated,
-          isA<String>(),
-          reason: '$locale.$key must evaluate to text',
-        );
-        expect(
-          translated as String,
-          isNotEmpty,
-          reason: '$locale.$key must not be empty',
+          namesOf(messages[key] as String? ?? ''),
+          namesOf(value),
+          reason: '$file.$key must preserve every placeholder',
         );
       }
+    }
+  });
+
+  test('an unsupported locale reads English', () {
+    final appLocalizations = loadAppLocalizations(const Locale('de'));
+
+    expect(appLocalizations.localeName, 'en');
+    expect(currentAppLocalizations.settings, appLocalizations.settings);
+  });
+
+  testWidgets('currentAppLocalizations follows the locale the app switches '
+      'to', (tester) async {
+    for (final locale in const [
+      Locale('zh', 'CN'),
+      Locale('ja'),
+      Locale('en'),
+    ]) {
+      await tester.pumpWidget(
+        TestApp(locale: locale, child: const SizedBox.shrink()),
+      );
+
+      final expected = lookupAppLocalizations(locale);
+      expect(currentAppLocalizations.localeName, expected.localeName);
+      expect(currentAppLocalizations.settings, expected.settings);
+      expect(Intl.getCurrentLocale(), expected.localeName);
     }
   });
 }

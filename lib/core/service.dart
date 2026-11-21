@@ -5,11 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/core.dart';
 import 'package:flutter/foundation.dart';
 
@@ -89,7 +89,7 @@ class CoreService extends CoreHandlerInterface {
     try {
       final result = await _lifecycle.start();
       return result.outcome == CoreLifecycleOutcome.superseded
-          ? AppLocalizations.current.coreNotConnected
+          ? currentAppLocalizations.coreNotConnected
           : '';
     } catch (error) {
       return coreLaunchBlockedMessage(error, null) ?? error.toString();

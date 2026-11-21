@@ -10,7 +10,6 @@ import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/ui.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
@@ -146,7 +145,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
               await notifier.signInWithToken(token);
           }
         },
-        errorTitle: AppLocalizations.current.loginFailed,
+        errorTitle: currentAppLocalizations.loginFailed,
         isActive: () => mounted && (route?.isActive ?? true),
       );
       if (signedIn && mounted) {
@@ -186,7 +185,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
           CloudApiException.isHandledUnauthorized(error)) {
         return;
       }
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       final message = switch (error) {
         CloudGoogleLoginFailure.unavailable => l.googleLoginUnavailable,
         CloudGoogleLoginFailure.timedOut => l.googleLoginTimedOut,
@@ -216,7 +215,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
   }
 
   String? _issue() {
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     return switch (_loginMode) {
       _LoginMode.token =>
         _tokenController.text.isEmpty ? l10n.tokenValidation : null,
@@ -248,7 +247,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
   Widget build(BuildContext context) {
     final accountState = ref.watch(cloudAccountProvider);
     final isLoading = accountState.isLoading || _isSubmitting;
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     final issue = _attempted ? _issue() : null;
 
     return CloudFormSheet(
@@ -310,7 +309,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
   }
 
   Widget _buildEmailPasswordForm(String? issue) {
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -366,11 +365,11 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     }
     _emailController.text = email;
     _passwordController.clear();
-    globalState.showNotifier(AppLocalizations.current.resetPasswordSuccess);
+    globalState.showNotifier(currentAppLocalizations.resetPasswordSuccess);
   }
 
   Widget _buildTokenForm(String? issue) {
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     return generateSection(
       items: [
         FormRow(
@@ -429,7 +428,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
   }
 
   String? _issue() {
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     if (_emailController.text.isEmpty) return l10n.emailValidation;
     if (!_emailSent) return null;
     if (_tokenController.text.trim().isEmpty) return l10n.resetTokenValidation;
@@ -463,7 +462,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
     } catch (error) {
       if (!mounted || route?.isActive == false) return;
       globalState.showMessage(
-        title: AppLocalizations.current.resetPasswordTitle,
+        title: currentAppLocalizations.resetPasswordTitle,
         message: TextSpan(text: CloudApiException.clean(error)),
       );
     } finally {
@@ -483,7 +482,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
     final issue = _attempted ? _issue() : null;
     return CloudFormSheet(
       title: l10n.resetPasswordTitle,

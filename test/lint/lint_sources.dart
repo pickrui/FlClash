@@ -14,7 +14,7 @@ const lintRoots = ['lib', 'test', 'tool', 'plugins'];
 
 const _vendoredRoots = ['plugins/flutter_distributor'];
 
-const _generatedL10n = ['lib/l10n/l10n.dart', 'lib/l10n/intl/'];
+const _generatedL10n = ['lib/l10n/l10n.dart', 'lib/l10n/l10n_'];
 
 bool isGenerated(String relativePath) {
   return relativePath.contains('/generated/') ||

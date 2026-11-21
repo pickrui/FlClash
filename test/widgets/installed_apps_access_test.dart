@@ -5,8 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/installed_apps.dart';
@@ -243,7 +243,7 @@ void main() {
         );
         container.listen(accessControlStateProvider, (_, _) {});
         final route = ModalRoute.of(tester.element(find.byType(AccessView)))!;
-        final l10n = AppLocalizations.current;
+        final l10n = currentAppLocalizations;
         await tester.tap(find.byTooltip(l10n.more));
         await tester.pumpAndSettle();
         await tester.tap(find.text(l10n.action));
@@ -309,7 +309,7 @@ void main() {
       );
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.discard));
+      await tester.tap(find.text(currentAppLocalizations.discard));
       await tester.pumpAndSettle();
       expect(find.byType(AccessView), findsNothing);
       expect(
@@ -345,7 +345,7 @@ void main() {
         textScaler: const TextScaler.linear(1.3),
         props: original,
       );
-      final l10n = AppLocalizations.current;
+      final l10n = currentAppLocalizations;
       Finder inMenu(String label) => find.descendant(
         of: find.byType(PopupMenu),
         matching: find.text(label),
@@ -407,24 +407,24 @@ void main() {
       api,
       props: const AccessControlProps(enable: false),
     );
-    await tester.tap(find.byTooltip(AppLocalizations.current.more));
+    await tester.tap(find.byTooltip(currentAppLocalizations.more));
     await tester.pumpAndSettle();
     expect(
       find.descendant(
         of: find.byType(PopupMenu),
-        matching: find.text(AppLocalizations.current.accessControl),
+        matching: find.text(currentAppLocalizations.accessControl),
       ),
       findsOneWidget,
     );
     await tester.tap(
       find.descendant(
         of: find.byType(PopupMenu),
-        matching: find.text(AppLocalizations.current.turnOn),
+        matching: find.text(currentAppLocalizations.turnOn),
       ),
     );
     await tester.pumpAndSettle();
     expect(container.read(accessControlStateProvider).enable, isTrue);
-    await tester.tap(find.byTooltip(AppLocalizations.current.save));
+    await tester.tap(find.byTooltip(currentAppLocalizations.save));
     await tester.pumpAndSettle();
     expect(
       container.read(vpnSettingProvider).accessControlProps.enable,
@@ -441,7 +441,7 @@ void main() {
       api,
       props: const AccessControlProps(enable: false),
     );
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
 
     expect(find.text(l10n.accessControlDisabledDesc), findsOneWidget);
     await tester.tap(find.widgetWithText(TonalButton, l10n.turnOn));
@@ -467,7 +467,7 @@ void main() {
         rejectList: ['browser.app'],
       ),
     );
-    final l10n = AppLocalizations.current;
+    final l10n = currentAppLocalizations;
 
     expect(find.text(l10n.accessControlNotAllowDesc), findsOneWidget);
     expect(find.text(l10n.accessControlSelectedCount(1)), findsOneWidget);
@@ -498,7 +498,7 @@ void main() {
     await openAccess(tester, api);
 
     expect(
-      find.text(AppLocalizations.current.installedAppsPermissionRequired),
+      find.text(currentAppLocalizations.installedAppsPermissionRequired),
       findsOneWidget,
     );
     expect(find.byType(FloatingFootBar), findsNothing);
@@ -518,13 +518,13 @@ void main() {
           ..load = () async => [];
         await openAccess(tester, api, locale: locale);
         expect(
-          find.text(AppLocalizations.current.installedAppsPermissionRequired),
+          find.text(currentAppLocalizations.installedAppsPermissionRequired),
           findsOneWidget,
         );
         expect(find.text('new.app'), findsNothing);
         api.load = () async => [installedPackage('new.app')];
         await tester.tap(
-          find.text(AppLocalizations.current.installedAppsPermissionGrant),
+          find.text(currentAppLocalizations.installedAppsPermissionGrant),
         );
         await tester.pumpAndSettle();
         expect(api.requests, 1);
@@ -542,14 +542,14 @@ void main() {
       ..requestResult = false;
     await openAccess(tester, api);
     await tester.tap(
-      find.text(AppLocalizations.current.installedAppsPermissionGrant),
+      find.text(currentAppLocalizations.installedAppsPermissionGrant),
     );
     await tester.pumpAndSettle();
     expect(
-      find.text(AppLocalizations.current.installedAppsPermissionDeniedMessage),
+      find.text(currentAppLocalizations.installedAppsPermissionDeniedMessage),
       findsOneWidget,
     );
-    await tester.tap(find.text(AppLocalizations.current.settings));
+    await tester.tap(find.text(currentAppLocalizations.settings));
     await tester.pumpAndSettle();
     expect(api.settings, 1);
     api.granted = true;
@@ -589,12 +589,12 @@ void main() {
     final api = InstalledAppsFake()..fail = true;
     await openAccess(tester, api);
     expect(
-      find.text(AppLocalizations.current.installedAppsLoadFailed),
+      find.text(currentAppLocalizations.installedAppsLoadFailed),
       findsOneWidget,
     );
     api.fail = false;
     api.packages = [installedPackage('retried.app')];
-    await tester.tap(find.text(AppLocalizations.current.refresh));
+    await tester.tap(find.text(currentAppLocalizations.refresh));
     await tester.pumpAndSettle();
     expect(find.text('retried.app'), findsWidgets);
     expect(tester.takeException(), isNull);
@@ -623,7 +623,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byType(Checkbox).first);
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip(AppLocalizations.current.save));
+      await tester.tap(find.byTooltip(currentAppLocalizations.save));
       await tester.pumpAndSettle();
       expect(
         container.read(vpnSettingProvider).accessControlProps.acceptList,
@@ -664,7 +664,7 @@ void main() {
         ..granted = false
         ..packages = [installedPackage('partial.app')];
       await openAccess(tester, api);
-      final l10n = AppLocalizations.current;
+      final l10n = currentAppLocalizations;
       expect(find.text('partial.app'), findsWidgets);
       expect(find.byType(FloatingFootBar), findsOneWidget);
       expect(find.text(l10n.installedAppsPermissionRequired), findsOneWidget);
@@ -700,7 +700,7 @@ void main() {
         props: props,
         commonAction: action,
       );
-      final l10n = AppLocalizations.current;
+      final l10n = currentAppLocalizations;
       await tester.tap(find.byTooltip(l10n.more));
       await tester.pumpAndSettle();
       await tester.tap(find.text(l10n.action));
@@ -749,7 +749,7 @@ void main() {
         props: const AccessControlProps(enable: true, rejectList: ['old.app']),
         commonAction: action,
       );
-      final l10n = AppLocalizations.current;
+      final l10n = currentAppLocalizations;
       await tester.tap(find.byTooltip(l10n.more));
       await tester.pumpAndSettle();
       await tester.tap(find.text(l10n.action));

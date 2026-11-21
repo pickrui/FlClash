@@ -59,11 +59,11 @@ void main() {
         container: container,
         child: MaterialApp(
           localizationsDelegates: const [
-            AppLocalizations.delegate,
+            appLocalizationsDelegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) {
             return wrapAppScopes(context, child!);
           },

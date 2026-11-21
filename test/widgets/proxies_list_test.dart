@@ -5,10 +5,10 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/ui/ui.dart' hide ListHeader;
 import 'package:fl_clash/common/layout.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -133,7 +133,7 @@ void main() {
 
   Finder scrollable() => allScrollables().first;
 
-  String locate() => AppLocalizations.current.locateSelected;
+  String locate() => currentAppLocalizations.locateSelected;
 
   Future<void> revealHeaderOf(WidgetTester tester, String groupName) async {
     await tester.scrollUntilVisible(
@@ -373,7 +373,7 @@ void main() {
     final card = tester.getRect(find.byKey(const ValueKey('G1.G1-25')).first);
     expect(card.top, tester.getRect(headerOf('G1')).bottom);
     expect(left.pixels, 120);
-    await tester.tap(actionOf('G1', AppLocalizations.current.collapseList));
+    await tester.tap(actionOf('G1', currentAppLocalizations.collapseList));
     await tester.pumpAndSettle();
     expect(container.read(unfoldSetProvider), isNot(contains('G1')));
     expect(left.pixels, 120);
@@ -437,7 +437,7 @@ void main() {
   testWidgets('the delay test button tests its own group only', (tester) async {
     await pumpList(tester);
 
-    await tester.tap(actionOf('G0', AppLocalizations.current.delayTest));
+    await tester.tap(actionOf('G0', currentAppLocalizations.delayTest));
     await tester.pumpAndSettle();
 
     expect(_RecordingProxiesAction.tested, [
@@ -467,7 +467,7 @@ void main() {
       findsOneWidget,
     );
     await tester.tap(
-      actionOf('G0', AppLocalizations.current.delayTest),
+      actionOf('G0', currentAppLocalizations.delayTest),
       warnIfMissed: false,
     );
     await tester.pump();

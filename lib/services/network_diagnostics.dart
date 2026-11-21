@@ -8,10 +8,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/http.dart';
 import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 
 import 'network_diagnostic_platform.dart';
@@ -170,7 +170,7 @@ String describeDiagnosticError(Object error) =>
         error is FormatException ||
         error is TimeoutException
     ? CloudApiException.clean(error)
-    : AppLocalizations.current.unknownNetworkError;
+    : currentAppLocalizations.unknownNetworkError;
 
 class DiagnosticWebResult {
   final int passed;
@@ -264,7 +264,7 @@ class LiveNetworkDiagnosticBackend implements NetworkDiagnosticBackend {
 
   @override
   Future<DiagnosticDnsResult> dns(CancelToken token) async {
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     final probes = await Future.wait(
       ['www.cloudflare.com', 'www.gstatic.com'].map((host) async {
         final stopwatch = Stopwatch()..start();
@@ -342,7 +342,7 @@ class LiveNetworkDiagnosticBackend implements NetworkDiagnosticBackend {
                 } catch (_) {}
               }
             } else {
-              detail = AppLocalizations.current.cloudApiHttpError(
+              detail = currentAppLocalizations.cloudApiHttpError(
                 response.statusCode ?? '?',
               );
             }
@@ -382,7 +382,7 @@ class NetworkDiagnosticService {
     CancelToken token, {
     required void Function(NetworkDiagnosticCheck) onResult,
   }) async {
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     final results = <NetworkDiagnosticCheck>[];
     if (token.isCancelled) return results;
     void emit(NetworkDiagnosticCheck check) {
@@ -915,7 +915,7 @@ class NetworkDiagnosticService {
 
   List<String> _probeDetails(List<DiagnosticProbeResult> probes) => [
     for (final (index, probe) in probes.indexed)
-      AppLocalizations.current.diagProbeResult(
+      currentAppLocalizations.diagProbeResult(
         index + 1,
         probe.detail,
         probe.elapsedMilliseconds,
@@ -929,7 +929,7 @@ class NetworkDiagnosticService {
     String hint, {
     DiagnosticFix? fix,
   }) {
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     return NetworkDiagnosticCheck(
       id,
       title,

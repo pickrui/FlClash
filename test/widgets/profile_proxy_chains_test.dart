@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/task.dart';
 import 'package:fl_clash/core/controller.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -169,7 +170,7 @@ class _StatusState extends StatusManagerState {
 
 const _baseProfile = Profile(id: 1, autoUpdateDuration: Duration(hours: 1));
 
-AppLocalizations get _l10n => AppLocalizations.current;
+AppLocalizations get _l10n => currentAppLocalizations;
 
 Future<(TestProfiles, List<String>)> _pump(
   WidgetTester tester,

@@ -5,8 +5,8 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/widgets.dart';
@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setUp(() async => AppLocalizations.load(const Locale('en')));
+  setUp(() async => loadAppLocalizations(const Locale('en')));
   test(
     'Android adopts 16 while other platforms retain their saved concurrency',
     () {

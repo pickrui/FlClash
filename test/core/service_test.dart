@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/constant.dart';
 
 import 'package:fl_clash/core/desktop/lifecycle.dart';
@@ -13,7 +14,6 @@ import 'package:fl_clash/core/desktop/rpc_client.dart';
 import 'package:fl_clash/core/event.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/core/service.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -98,7 +98,7 @@ void main() {
     when(() => lifecycle.start()).thenAnswer((_) async => superseded);
     when(() => lifecycle.stop()).thenAnswer((_) async => superseded);
     when(() => lifecycle.state).thenReturn(const DesktopCoreIdle());
-    final strings = await AppLocalizations.load(const Locale('en'));
+    final strings = loadAppLocalizations(const Locale('en'));
     expect(await service.preload(), strings.coreNotConnected);
     expect(await service.shutdown(), isFalse);
   });

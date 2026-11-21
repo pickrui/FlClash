@@ -5,12 +5,12 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/mitm_trust.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_clash/plugins/app.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:mocktail/mocktail.dart';
@@ -119,7 +119,7 @@ void main() {
   });
 
   group('Android', () {
-    setUpAll(() => AppLocalizations.load(const Locale('en')));
+    setUpAll(() => loadAppLocalizations(const Locale('en')));
 
     void locate(
       _MockApp app, {
@@ -150,9 +150,9 @@ void main() {
         AndroidMitmTrustStore(app).install(_ca),
         throwsA(
           isA<MitmTrustException>().having(
-            (error) => error.messageFor(AppLocalizations.current),
+            (error) => error.messageFor(currentAppLocalizations),
             'message',
-            AppLocalizations.current.mitmSystemStoreFailed,
+            currentAppLocalizations.mitmSystemStoreFailed,
           ),
         ),
       );

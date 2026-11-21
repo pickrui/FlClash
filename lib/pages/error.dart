@@ -46,10 +46,10 @@ class InitErrorApp extends StatelessWidget {
         ),
       ),
       localizationsDelegates: const [
-        AppLocalizations.delegate,
+        appLocalizationsDelegate,
         AppUiLocalizations.delegate,
       ],
-      supportedLocales: AppLocalizations.delegate.supportedLocales,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: InitErrorScreen(
         error: error,
         stack: stack,
@@ -101,7 +101,7 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final l = AppLocalizations.maybeOf(context);
+    final l = Localizations.of<AppLocalizations>(context, AppLocalizations);
 
     final size = MediaQuery.sizeOf(context);
     return ViewScope(
@@ -156,7 +156,10 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
                       child: SelectableText(
                         coreLaunchBlockedMessage(
                               error,
-                              AppLocalizations.maybeOf(context),
+                              Localizations.of<AppLocalizations>(
+                                context,
+                                AppLocalizations,
+                              ),
                             ) ??
                             error.toString(),
                         style: AppTextStyle.subheadline
@@ -244,7 +247,11 @@ class _InitErrorScreenState extends State<InitErrorScreen> {
     Clipboard.setData(ClipboardData(text: text));
 
     BannerHost.maybeOf(context)?.show(
-      AppLocalizations.maybeOf(context)?.copySuccess ?? 'Copy success',
+      Localizations.of<AppLocalizations>(
+            context,
+            AppLocalizations,
+          )?.copySuccess ??
+          'Copy success',
       level: BannerLevel.success,
     );
   }

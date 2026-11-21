@@ -46,11 +46,11 @@ Future<void> _pumpDnsQueries(
         navigatorKey: globalState.navigatorKey,
         locale: locale,
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) {
           return wrapAppScopes(context, child!);
         },
@@ -125,7 +125,7 @@ void main() {
     await _pumpDnsQueries(tester, container);
     await tester.tap(find.byTooltip('More'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.clearData));
+    await tester.tap(find.text(currentAppLocalizations.clearData));
     await tester.pumpAndSettle();
     expect(container.read(dnsQueryCountProvider), 0);
   });
@@ -273,12 +273,12 @@ void main() {
     await _pumpDnsQueries(tester, container, locale: const Locale('zh', 'CN'));
     expect(find.text('query.example'), findsNothing);
     expect(
-      find.widgetWithText(Chip, AppLocalizations.current.dnsQueryCached),
+      find.widgetWithText(Chip, currentAppLocalizations.dnsQueryCached),
       findsOneWidget,
     );
     await tester.enterText(
       find.byType(TextField),
-      AppLocalizations.current.dnsQueryCached,
+      currentAppLocalizations.dnsQueryCached,
     );
     await tester.pumpAndSettle();
     expect(find.text('query.example'), findsOneWidget);
@@ -476,7 +476,7 @@ void main() {
       ],
     );
     addTearDown(container.dispose);
-    final l10n = await AppLocalizations.load(const Locale('en'));
+    final l10n = loadAppLocalizations(const Locale('en'));
     await _pumpDnsQueries(tester, container);
     expect(find.text(l10n.nullTip(l10n.dnsQueries)), findsOneWidget);
 

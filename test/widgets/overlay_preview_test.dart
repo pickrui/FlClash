@@ -59,7 +59,7 @@ void main() {
               targets: ['DIRECT', 'REJECT', 'Japan automatic'],
             ),
           );
-          final saveRule = find.byTooltip(AppLocalizations.current.save);
+          final saveRule = find.byTooltip(currentAppLocalizations.save);
           _expectReachable(tester, saveRule, scenario.size, scenario.keyboard);
           await _reveal(tester, find.byKey(const Key('custom-rule-target')));
           await tester.tap(find.byKey(const Key('custom-rule-target')));
@@ -88,26 +88,24 @@ void main() {
                 'US Seattle - Residential broadband',
               ],
               availableProviders: const ['Subscription nodes'],
-              validate: (_) async => AppLocalizations.current.routingChanged,
+              validate: (_) async => currentAppLocalizations.routingChanged,
             ),
           );
-          final save = find.byTooltip(AppLocalizations.current.save);
+          final save = find.byTooltip(currentAppLocalizations.save);
           await tester.tap(save);
           await tester.pumpAndSettle();
           _expectReachable(tester, save, scenario.size, scenario.keyboard);
           expect(
-            find.text(AppLocalizations.current.routingChanged),
+            find.text(currentAppLocalizations.routingChanged),
             findsOneWidget,
           );
-          final addNodes = find.text(AppLocalizations.current.addNodes);
+          final addNodes = find.text(currentAppLocalizations.addNodes);
           await _reveal(tester, addNodes);
           await tester.tap(addNodes);
           await tester.pumpAndSettle();
-          final confirm = find.byTooltip(AppLocalizations.current.confirm);
+          final confirm = find.byTooltip(currentAppLocalizations.confirm);
           _expectReachable(tester, confirm, scenario.size, scenario.keyboard);
-          await tester.tap(
-            find.text('${AppLocalizations.current.proxies} (2)'),
-          );
+          await tester.tap(find.text('${currentAppLocalizations.proxies} (2)'));
           await tester.pumpAndSettle();
           final entry = find.text('US Seattle - Residential broadband');
           await _reveal(tester, entry);
@@ -116,7 +114,7 @@ void main() {
           await tester.tap(confirm);
           await tester.pumpAndSettle();
           expect(
-            find.widgetWithText(FormRow, AppLocalizations.current.addNodes),
+            find.widgetWithText(FormRow, currentAppLocalizations.addNodes),
             findsOneWidget,
           );
           expect(
@@ -149,11 +147,11 @@ Future<void> _open(
         locale: locale,
         theme: ThemeData(),
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(

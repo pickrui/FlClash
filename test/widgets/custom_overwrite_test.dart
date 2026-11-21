@@ -502,14 +502,11 @@ void main() {
       );
       await _save(tester);
       expect(
-        find.text(AppLocalizations.current.proxyGroupMembersEmpty),
+        find.text(currentAppLocalizations.proxyGroupMembersEmpty),
         findsOneWidget,
       );
       expect(find.byTooltip('Save draft'), findsNothing);
-      expect(
-        find.text(AppLocalizations.current.routingDraftHint),
-        findsNothing,
-      );
+      expect(find.text(currentAppLocalizations.routingDraftHint), findsNothing);
       expect(find.byType(ProxyGroupDialog), findsOneWidget);
     },
   );
@@ -632,12 +629,12 @@ void main() {
     );
     expect(
       tester.widget<InfoMessageButton>(find.byType(InfoMessageButton)).message,
-      AppLocalizations.current.outboundUnavailable,
+      currentAppLocalizations.outboundUnavailable,
     );
     await tester.tap(
       find.descendant(
         of: find.widgetWithText(DecorationListItem, 'Gone'),
-        matching: find.byTooltip(AppLocalizations.current.remove),
+        matching: find.byTooltip(currentAppLocalizations.remove),
       ),
     );
     await tester.pumpAndSettle();
@@ -689,7 +686,7 @@ void main() {
     await tester.enterText(_field('Exclude proxy filter'), ' expired ');
     await tester.tap(find.text('Add setting'));
     await tester.pumpAndSettle();
-    expect(find.text(AppLocalizations.current.testUrl), findsNothing);
+    expect(find.text(currentAppLocalizations.testUrl), findsNothing);
     await tester.tap(find.text('Test interval'));
     await tester.pumpAndSettle();
     await tester.binding.handlePopRoute();
@@ -809,7 +806,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.widgetWithText(FormRow, 'UDP'),
-        matching: find.byTooltip(AppLocalizations.current.remove),
+        matching: find.byTooltip(currentAppLocalizations.remove),
       ),
     );
     await tester.pumpAndSettle();
@@ -919,11 +916,11 @@ class _TestApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: globalState.navigatorKey,
       localizationsDelegates: const [
-        AppLocalizations.delegate,
+        appLocalizationsDelegate,
         AppUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],
-      supportedLocales: AppLocalizations.delegate.supportedLocales,
+      supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) {
         return wrapAppScopes(context, child!);
       },

@@ -60,11 +60,11 @@ Future<ProviderContainer> _pumpRequests(
         navigatorKey: globalState.navigatorKey,
         locale: const Locale('en'),
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) {
           return wrapAppScopes(context, child!);
         },
@@ -283,11 +283,11 @@ void main() {
           navigatorKey: globalState.navigatorKey,
           locale: const Locale('en'),
           localizationsDelegates: const [
-            AppLocalizations.delegate,
+            appLocalizationsDelegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) {
             return wrapAppScopes(context, child!);
           },
@@ -344,11 +344,11 @@ void main() {
           navigatorKey: globalState.navigatorKey,
           locale: const Locale('en'),
           localizationsDelegates: const [
-            AppLocalizations.delegate,
+            appLocalizationsDelegate,
             AppUiLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) {
             return wrapAppScopes(context, child!);
           },

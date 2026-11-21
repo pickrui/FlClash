@@ -40,11 +40,11 @@ Future<void> _pump(
         theme: ThemeData(platform: platform),
         locale: locale,
         localizationsDelegates: const [
-          AppLocalizations.delegate,
+          appLocalizationsDelegate,
           AppUiLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: NetworkDiagnosticProxyGuide(
           snapshot: NetworkDiagnosticSnapshot(
             profileApplied: true,
@@ -81,7 +81,7 @@ void main() {
       tester,
     ) async {
       await _pump(tester, platform: platform);
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       final steps = switch (platform) {
         TargetPlatform.windows => l.diagProxyGuideWindows,
         TargetPlatform.macOS => l.diagProxyGuideMacos,
@@ -113,7 +113,7 @@ void main() {
       final button = tester.widget<TonalButton>(
         find.widgetWithText(
           TonalButton,
-          AppLocalizations.current.diagProxyRecover,
+          currentAppLocalizations.diagProxyRecover,
         ),
       );
       expect(button.onPressed, isNull);
@@ -135,7 +135,7 @@ void main() {
         },
       );
       expect(ports, isEmpty);
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       await tester.ensureVisible(find.text(l.diagProxyRecover));
       await tester.tap(find.text(l.diagProxyRecover));
       await tester.pump();
@@ -178,7 +178,7 @@ void main() {
               ),
             );
     await tester.pumpAndSettle();
-    final label = AppLocalizations.current.diagProxyRecover;
+    final label = currentAppLocalizations.diagProxyRecover;
     await tester.ensureVisible(find.text(label));
     await tester.tap(find.text(label));
     await tester.pumpAndSettle();
@@ -216,7 +216,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final l = AppLocalizations.current;
+      final l = currentAppLocalizations;
       await tester.ensureVisible(find.text(l.diagProxyRecover));
       await tester.tap(find.text(l.diagProxyRecover));
       await tester.pump();
@@ -254,7 +254,7 @@ void main() {
       ),
     );
     await _pump(tester, authenticated: true);
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     expect(find.text(l.diagProxyGuideAuthenticated), findsOneWidget);
     expect(find.text(l.diagProxyGuideWindows), findsNothing);
     expect(find.text(l.diagOpenSystemSettings), findsNothing);
@@ -278,7 +278,7 @@ void main() {
         throw PlatformException(code: 'unavailable');
       },
     );
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     await tester.ensureVisible(find.text(l.diagOpenSystemSettings));
     await tester.tap(find.text(l.diagOpenSystemSettings));
     await tester.pumpAndSettle();
@@ -290,7 +290,7 @@ void main() {
 
   testWidgets('an unavailable listener port cannot be copied', (tester) async {
     await _pump(tester, port: 0);
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     expect(find.text(l.diagProxyGuideInvalidPort), findsOneWidget);
     expect(find.text(l.diagCopyProxyAddress), findsNothing);
   });
@@ -307,7 +307,7 @@ void main() {
     for (final platform in [TargetPlatform.windows, TargetPlatform.linux]) {
       for (final locale in [const Locale('zh', 'CN'), const Locale('ru')]) {
         await _pump(tester, locale: locale, platform: platform, running: false);
-        final l = AppLocalizations.current;
+        final l = currentAppLocalizations;
         if (platform == TargetPlatform.linux) {
           await tester.ensureVisible(find.text(l.diagProxyRecover));
           expect(find.text(l.diagProxyRecover).hitTestable(), findsOneWidget);

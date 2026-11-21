@@ -31,11 +31,11 @@ void main() {
 
       expect(find.text(entry.value), findsOneWidget);
       expect(
-        find.text(AppLocalizations.current.configRecoveryMessage),
+        find.text(currentAppLocalizations.configRecoveryMessage),
         findsOneWidget,
       );
       expect(
-        find.text(AppLocalizations.current.configRecoveryRetry),
+        find.text(currentAppLocalizations.configRecoveryRetry),
         findsOneWidget,
       );
       expect(find.byType(SelectableText), findsNothing);
@@ -57,14 +57,14 @@ void main() {
         },
       );
       expect(
-        find.text(AppLocalizations.current.configRecoveryIncompatibleDatabase),
+        find.text(currentAppLocalizations.configRecoveryIncompatibleDatabase),
         findsOneWidget,
       );
       expect(resets, 0);
-      await tester.tap(find.text(AppLocalizations.current.configRecoveryReset));
+      await tester.tap(find.text(currentAppLocalizations.configRecoveryReset));
       await tester.pumpAndSettle();
       expect(resets, 0);
-      await tester.tap(find.text(AppLocalizations.current.cancel));
+      await tester.tap(find.text(currentAppLocalizations.cancel));
       await tester.pumpAndSettle();
       expect(resets, 0);
     },
@@ -81,15 +81,15 @@ void main() {
       onRetry: () async {},
     );
     expect(
-      find.text(AppLocalizations.current.configRecoveryDatabaseUnavailable),
+      find.text(currentAppLocalizations.configRecoveryDatabaseUnavailable),
       findsOneWidget,
     );
     expect(
-      find.text(AppLocalizations.current.configRecoveryKeyring),
+      find.text(currentAppLocalizations.configRecoveryKeyring),
       findsNothing,
     );
     expect(
-      find.text(AppLocalizations.current.configRecoveryUseLocalStorage),
+      find.text(currentAppLocalizations.configRecoveryUseLocalStorage),
       findsNothing,
     );
   });
@@ -422,11 +422,11 @@ Future<void> _showRecovery(
     MaterialApp(
       locale: locale,
       localizationsDelegates: const [
-        AppLocalizations.delegate,
+        appLocalizationsDelegate,
         AppUiLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],
-      supportedLocales: AppLocalizations.delegate.supportedLocales,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: ConfigRecoveryScreen(
         onRetry: onRetry,
         onExit: onExit,

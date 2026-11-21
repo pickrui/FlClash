@@ -6,10 +6,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/render.dart';
 import 'package:fl_clash/common/render_binding.dart';
 import 'package:fl_clash/common/window_port.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/manager/window_manager.dart';
 import 'package:fl_clash/models/config.dart';
@@ -117,7 +117,7 @@ void main() {
   late bool isFullScreen;
 
   setUpAll(() async {
-    await AppLocalizations.load(const Locale('en'));
+    loadAppLocalizations(const Locale('en'));
   });
 
   setUp(() {
@@ -522,20 +522,20 @@ void main() {
 
       expect(
         tooltipOf(tester, find.byGlyph(AppGlyphs.pin)),
-        AppLocalizations.current.pinWindow,
+        currentAppLocalizations.pinWindow,
       );
       expect(tester.widget<GlyphIcon>(find.byGlyph(AppGlyphs.pin)).fill, 0);
       expect(
         tooltipOf(tester, glyph(CaptionGlyph.minimize)),
-        AppLocalizations.current.minimize,
+        currentAppLocalizations.minimize,
       );
       expect(
         tooltipOf(tester, glyph(CaptionGlyph.maximize)),
-        AppLocalizations.current.maximize,
+        currentAppLocalizations.maximize,
       );
       expect(
         tooltipOf(tester, glyph(CaptionGlyph.close)),
-        AppLocalizations.current.close,
+        currentAppLocalizations.close,
       );
     });
 
@@ -552,12 +552,12 @@ void main() {
 
       expect(
         tooltipOf(tester, find.byGlyph(AppGlyphs.pin)),
-        AppLocalizations.current.unpinWindow,
+        currentAppLocalizations.unpinWindow,
       );
       expect(tester.widget<GlyphIcon>(find.byGlyph(AppGlyphs.pin)).fill, 1);
       expect(
         tooltipOf(tester, glyph(CaptionGlyph.restore)),
-        AppLocalizations.current.unmaximize,
+        currentAppLocalizations.unmaximize,
       );
     });
 
@@ -575,7 +575,7 @@ void main() {
       expect(glyph(CaptionGlyph.maximize), findsNothing);
       expect(
         tooltipOf(tester, glyph(CaptionGlyph.restore)),
-        AppLocalizations.current.exitFullScreen,
+        currentAppLocalizations.exitFullScreen,
       );
     });
 

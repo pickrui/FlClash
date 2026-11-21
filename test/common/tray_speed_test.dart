@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fl_clash/common/tray.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -35,7 +35,7 @@ void main() {
   final calls = <MethodCall>[];
   setUp(() async {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-    await AppLocalizations.load(const Locale('en'));
+    loadAppLocalizations(const Locale('en'));
     native.Tray.instance.resetForTesting();
     calls.clear();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -114,7 +114,7 @@ void main() {
         .buildMenu(colored)
         .whereType<native.TrayMenuCheckbox>()
         .singleWhere(
-          (item) => item.label == AppLocalizations.current.monochromeIcon,
+          (item) => item.label == currentAppLocalizations.monochromeIcon,
         );
     expect(toggle.checked, isFalse);
   }, skip: Platform.isWindows);

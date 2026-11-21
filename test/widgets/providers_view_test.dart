@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:code_forge/code_forge.dart';
 import 'package:yaml/yaml.dart';
@@ -134,7 +135,7 @@ void main() {
             .controller;
         editor.replaceText('payload: [example.net]');
         await settle(tester);
-        await tester.tap(find.byTooltip(AppLocalizations.current.save));
+        await tester.tap(find.byTooltip(currentAppLocalizations.save));
         await settle(tester);
         expect(
           find.text('fixture save failed', findRichText: true),
@@ -146,15 +147,15 @@ void main() {
           'payload: [example.com]',
         );
         expect(action.groupRefreshes, 0);
-        await tester.tap(find.text(AppLocalizations.current.confirm));
+        await tester.tap(find.text(currentAppLocalizations.confirm));
         await settle(tester);
         expect(find.byType(EditorPage), findsOneWidget);
         if (saveOnBack) {
           await tester.binding.handlePopRoute();
           await settle(tester);
-          await tester.tap(find.text(AppLocalizations.current.save));
+          await tester.tap(find.text(currentAppLocalizations.save));
         } else {
-          await tester.tap(find.byTooltip(AppLocalizations.current.save));
+          await tester.tap(find.byTooltip(currentAppLocalizations.save));
         }
         await tester.pump();
         expect(attempts, 2);
@@ -197,7 +198,7 @@ void main() {
       total: 100,
       expire: 0,
     );
-    for (final locale in AppLocalizations.delegate.supportedLocales) {
+    for (final locale in AppLocalizations.supportedLocales) {
       await tester.pumpWidget(
         TestApp(
           locale: locale,
@@ -244,15 +245,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(find.text(currentAppLocalizations.usedTrafficLabel), findsOneWidget);
     expect(
-      find.text(AppLocalizations.current.usedTrafficLabel),
-      findsOneWidget,
-    );
-    expect(
-      find.text(AppLocalizations.current.purchaseTotalTrafficLabel),
+      find.text(currentAppLocalizations.purchaseTotalTrafficLabel),
       findsNothing,
     );
-    expect(find.text(AppLocalizations.current.infiniteTime), findsNWidgets(2));
+    expect(find.text(currentAppLocalizations.infiniteTime), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 
@@ -318,10 +316,10 @@ void main() {
           kind: PointerDeviceKind.mouse,
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.text(AppLocalizations.current.lookupProxyConfig));
+        await tester.tap(find.text(currentAppLocalizations.lookupProxyConfig));
         await tester.pumpAndSettle();
         await tester.enterText(find.byType(TextField), 'node');
-        await tester.tap(find.text(AppLocalizations.current.submit));
+        await tester.tap(find.text(currentAppLocalizations.submit));
         await tester.pumpAndSettle();
         expect(core.calls, [('first', 'node')]);
         if (switchProfile) {
@@ -349,7 +347,7 @@ void main() {
             ),
             {'name': 'node', 'type': 'direct'},
           );
-          expect(find.byTooltip(AppLocalizations.current.save), findsNothing);
+          expect(find.byTooltip(currentAppLocalizations.save), findsNothing);
         }
         expect(tester.takeException(), isNull);
       },
@@ -396,7 +394,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text(AppLocalizations.current.proxiesCount(128)), findsNothing);
+    expect(find.text(currentAppLocalizations.proxiesCount(128)), findsNothing);
     expect(
       tester.getTopLeft(usage).dy,
       greaterThanOrEqualTo(tester.getBottomLeft(find.text('metered')).dy),
@@ -413,7 +411,7 @@ void main() {
     expect(
       find.descendant(
         of: unmetered,
-        matching: find.text(AppLocalizations.current.proxiesCount(1)),
+        matching: find.text(currentAppLocalizations.proxiesCount(1)),
       ),
       findsOneWidget,
     );
@@ -433,7 +431,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await tester.pumpAndSettle();
-    expect(find.text(AppLocalizations.current.lookupProxyConfig), findsNothing);
+    expect(find.text(currentAppLocalizations.lookupProxyConfig), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -457,7 +455,7 @@ void main() {
     for (var i = 0; i < 50 && row().onPressed == null; i++) {
       await settle(tester, 1);
     }
-    expect(find.byTooltip(AppLocalizations.current.more), findsNothing);
+    expect(find.byTooltip(currentAppLocalizations.more), findsNothing);
 
     await tester.tap(
       find.text('first'),
@@ -466,9 +464,9 @@ void main() {
     );
     await tester.pumpAndSettle();
     for (final label in [
-      AppLocalizations.current.edit,
-      AppLocalizations.current.upload,
-      AppLocalizations.current.sync,
+      currentAppLocalizations.edit,
+      currentAppLocalizations.upload,
+      currentAppLocalizations.sync,
     ]) {
       expect(find.text(label), findsOneWidget);
     }
@@ -557,7 +555,7 @@ void main() {
 
     expect(
       find.text(
-        AppLocalizations.current.nullTip(AppLocalizations.current.providers),
+        currentAppLocalizations.nullTip(currentAppLocalizations.providers),
       ),
       findsOneWidget,
     );
@@ -565,7 +563,7 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is IconButton &&
-            widget.tooltip == AppLocalizations.current.update,
+            widget.tooltip == currentAppLocalizations.update,
       ),
     );
     expect(refresh.onPressed, isNull);
@@ -591,7 +589,7 @@ void main() {
       expect(find.text('transport lost', findRichText: true), findsNothing);
       action.pending['second']!.complete('invalid rules');
       await tester.pumpAndSettle();
-      await tester.tap(find.text(AppLocalizations.current.failedCount(2)));
+      await tester.tap(find.text(currentAppLocalizations.failedCount(2)));
       await tester.pumpAndSettle();
       expect(find.text('Bad state: transport lost'), findsOneWidget);
       expect(find.text('invalid rules'), findsOneWidget);

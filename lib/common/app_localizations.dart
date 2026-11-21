@@ -7,11 +7,46 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:prism_ui/color.dart';
 import 'package:prism_ui/l10n.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 part 'l10n_labels.dart';
 
-AppLocalizations get appLocalizations => AppLocalizations.current;
+var _currentLocale = const Locale('en');
+
+AppLocalizations get currentAppLocalizations =>
+    lookupAppLocalizations(_currentLocale);
+
+AppLocalizations get appLocalizations => currentAppLocalizations;
+
+AppLocalizations loadAppLocalizations(Locale locale) {
+  _currentLocale = AppLocalizations.delegate.isSupported(locale)
+      ? locale
+      : const Locale('en');
+  Intl.defaultLocale = Intl.canonicalizedLocale(_currentLocale.toString());
+  return lookupAppLocalizations(_currentLocale);
+}
+
+// AppLocalizations.delegate would not move currentAppLocalizations along.
+const LocalizationsDelegate<AppLocalizations> appLocalizationsDelegate =
+    _AppLocalizationsDelegate();
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) =>
+      AppLocalizations.delegate.isSupported(locale);
+
+  @override
+  Future<AppLocalizations> load(Locale locale) =>
+      SynchronousFuture(loadAppLocalizations(locale));
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
 
 class AppUiLocalizations implements UiLocalizations {
   const AppUiLocalizations(this._localizations);
@@ -92,7 +127,7 @@ class _AppUiLocalizationsDelegate
 
   @override
   Future<UiLocalizations> load(Locale locale) =>
-      AppLocalizations.load(locale).then(AppUiLocalizations.new);
+      SynchronousFuture(AppUiLocalizations(lookupAppLocalizations(locale)));
 
   @override
   bool shouldReload(_AppUiLocalizationsDelegate old) => false;

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fl_clash/l10n/l10n.dart';
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/widgets.dart';
@@ -16,7 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setUp(() async => AppLocalizations.load(const Locale('en')));
+  setUp(() async => loadAppLocalizations(const Locale('en')));
 
   test(
     'the Android VPN receives the routes the bypass switch selects',

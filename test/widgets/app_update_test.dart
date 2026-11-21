@@ -5,6 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/l10n/l10n.dart';
@@ -185,16 +186,16 @@ void main() {
     expect(find.text(_release.version), findsNothing);
     expect(find.text('v0.8.98'), findsNothing);
     expect(find.textContaining('${_release.remoteBuildNumber}'), findsNothing);
-    expect(find.text(AppLocalizations.current.updateNotice), findsOneWidget);
+    expect(find.text(currentAppLocalizations.updateNotice), findsOneWidget);
     // The card is tappable, but only a button reads as one.
     expect(
-      find.widgetWithText(FilledButton, AppLocalizations.current.view),
+      find.widgetWithText(FilledButton, currentAppLocalizations.view),
       findsOneWidget,
     );
     expect(action.opened, isEmpty);
     expect(find.byType(AppUpdatePage), findsNothing);
     expect(find.byType(material.AlertDialog), findsNothing);
-    await tester.tap(find.text(AppLocalizations.current.updateNotice));
+    await tester.tap(find.text(currentAppLocalizations.updateNotice));
     expect(action.opened, [_release]);
     notice.value = null;
     await tester.pumpAndSettle();
@@ -223,7 +224,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip(AppLocalizations.current.close));
+    await tester.tap(find.byTooltip(currentAppLocalizations.close));
     expect(action.dismissed, [_release]);
     expect(action.opened, isEmpty);
   });
@@ -281,7 +282,7 @@ void main() {
     expect(find.text(release.releaseNotes!), findsOneWidget);
   });
 
-  for (final locale in AppLocalizations.delegate.supportedLocales) {
+  for (final locale in AppLocalizations.supportedLocales) {
     testWidgets('legacy API still shows the build in $locale', (tester) async {
       final release = AppUpdateInfo.fromVersionData({
         'version': '2026092110',
@@ -290,7 +291,7 @@ void main() {
       await _openDetails(tester, release, (_) {}, locale: locale);
       expect(
         find
-            .text(AppLocalizations.current.updateBuildNumber('2026092110'))
+            .text(currentAppLocalizations.updateBuildNumber('2026092110'))
             .hitTestable(),
         findsOneWidget,
       );
@@ -313,7 +314,7 @@ void main() {
         expect(find.text('v0.8.98'), findsNothing);
         expect(
           find.text(
-            AppLocalizations.current.updateVersionNumber('0.8.98+2026092110'),
+            currentAppLocalizations.updateVersionNumber('0.8.98+2026092110'),
           ),
           findsOneWidget,
         );
@@ -326,8 +327,8 @@ void main() {
           await tester.tap(
             find.text(
               choice == 'download'
-                  ? AppLocalizations.current.updateDownloadConfirm
-                  : AppLocalizations.current.updateLater,
+                  ? currentAppLocalizations.updateDownloadConfirm
+                  : currentAppLocalizations.updateLater,
             ),
           );
         }
@@ -363,12 +364,12 @@ void main() {
     expect(find.text('v0.8.98'), findsNothing);
     expect(
       find.text(
-        AppLocalizations.current.updateVersionNumber('0.8.98+2026092110'),
+        currentAppLocalizations.updateVersionNumber('0.8.98+2026092110'),
       ),
       findsOneWidget,
     );
     expect(
-      find.text(AppLocalizations.current.updateDownloadConfirm).hitTestable(),
+      find.text(currentAppLocalizations.updateDownloadConfirm).hitTestable(),
       findsOneWidget,
     );
     pending.complete('Recovered release notes');
@@ -394,20 +395,20 @@ void main() {
         },
       );
       expect(
-        find.text(AppLocalizations.current.updateReleaseNotesFailed),
+        find.text(currentAppLocalizations.updateReleaseNotesFailed),
         findsOneWidget,
       );
-      expect(find.text(AppLocalizations.current.noInfo), findsNothing);
+      expect(find.text(currentAppLocalizations.noInfo), findsNothing);
       expect(
-        find.text(AppLocalizations.current.updateDownloadConfirm),
+        find.text(currentAppLocalizations.updateDownloadConfirm),
         findsOneWidget,
       );
-      await tester.tap(find.text(AppLocalizations.current.configRecoveryRetry));
+      await tester.tap(find.text(currentAppLocalizations.configRecoveryRetry));
       await tester.pumpAndSettle();
       expect(calls, 2);
       expect(find.text('Recovered after retry'), findsOneWidget);
       expect(
-        find.text(AppLocalizations.current.updateReleaseNotesFailed),
+        find.text(currentAppLocalizations.updateReleaseNotesFailed),
         findsNothing,
       );
       expect(tester.takeException(), isNull);
@@ -425,7 +426,7 @@ void main() {
       loadReleaseNotes: () => pending.future,
       settle: false,
     );
-    await tester.tap(find.text(AppLocalizations.current.updateLater));
+    await tester.tap(find.text(currentAppLocalizations.updateLater));
     await tester.pumpAndSettle();
     pending.completeError(StateError('late network error'));
     await tester.pumpAndSettle();
@@ -433,7 +434,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  for (final locale in AppLocalizations.delegate.supportedLocales) {
+  for (final locale in AppLocalizations.supportedLocales) {
     testWidgets('long notes keep confirmation visible at 320 dp in $locale', (
       tester,
     ) async {
@@ -455,7 +456,7 @@ void main() {
       );
       final button = find.widgetWithText(
         FilledButton,
-        AppLocalizations.current.updateDownloadConfirm,
+        currentAppLocalizations.updateDownloadConfirm,
       );
       final before = tester.getRect(button);
       expect(before.bottom, lessThanOrEqualTo(640));

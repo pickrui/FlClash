@@ -7,12 +7,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:code_forge/code_forge.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/core/method.dart';
-import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
@@ -191,7 +191,7 @@ void main() {
       content: convert ? [1, 2, 3] : utf8.encode('192.0.2.1/32'),
     );
     await open(tester);
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     expect(find.text(l.ruleSetNeedsConversionTip), findsOneWidget);
     expect(library.saved, isEmpty);
     await tester.tap(find.text(l.ruleSetConvertRemote));
@@ -215,7 +215,7 @@ void main() {
               message: 'fixture',
             );
         await open(tester);
-        final l = AppLocalizations.current;
+        final l = currentAppLocalizations;
         if (!autoDetect) {
           await tester.tap(find.text(l.ruleSetConvert));
           await tester.pumpAndSettle();
@@ -278,7 +278,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+        await tester.tap(find.text(currentAppLocalizations.ruleProviders));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Fixture'));
         await settle(tester, 12);
@@ -329,7 +329,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+    await tester.tap(find.text(currentAppLocalizations.ruleProviders));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fixture'));
     await settle(tester, 12);
@@ -381,7 +381,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+    await tester.tap(find.text(currentAppLocalizations.ruleProviders));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fixture'));
     await settle(tester, 12);
@@ -394,7 +394,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    final l = AppLocalizations.current;
+    final l = currentAppLocalizations;
     expect(find.text('duplicate', skipOffstage: false), findsNothing);
     expect(find.text(l.existsTip(l.name), skipOffstage: false), findsOneWidget);
     expect(find.byType(EditorPage), findsOneWidget);
@@ -418,7 +418,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(AppLocalizations.current.ruleProviders));
+    await tester.tap(find.text(currentAppLocalizations.ruleProviders));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byTooltip('Sort'));
