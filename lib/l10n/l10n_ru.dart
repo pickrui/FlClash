@@ -5706,6 +5706,11 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String mitmGrpcOverLimit(Object size) {
+    return 'После распаковки больше $size МБ; показаны сжатые данные';
+  }
+
+  @override
   String mitmUntrustedStores(Object stores) {
     return 'Установлен, но не доверен в: $stores';
   }

@@ -104,7 +104,7 @@ Future<ProviderContainer> _pumpDetail(
         contentType: contentType,
       ).overrideWith(
         (ref) async => bodyError == null
-            ? readMitmBody((responseBody, contentType))
+            ? readMitmBody((responseBody, contentType, grpcOverLimitNote: null))
             : throw bodyError,
       ),
       profilesProvider.overrideWith(TestProfiles.new),
