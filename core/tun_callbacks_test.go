@@ -171,4 +171,11 @@ func TestSocketsOpenedBeforeTheTunAreProtectedWhenItStarts(t *testing.T) {
 	if len(protected) != 1 || protected[0] != refusedFd {
 		t.Fatalf("the next TUN protected %v, want the refused socket %d", protected, refusedFd)
 	}
+
+	p.deactivate()
+	p.begin()
+	_, starting, _ := socket()
+	if err := p.guard(starting); !errors.Is(err, errTunNotReady) || len(p.pending) != 0 {
+		t.Fatalf("a socket opened while the TUN starts got %v and %d held", err, len(p.pending))
+	}
 }

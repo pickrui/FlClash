@@ -82,6 +82,7 @@ func protectSocket(conn syscall.RawConn, protect func(int) error) error {
 type socketProtector struct {
 	mu         sync.Mutex
 	protect    func(fd int) error
+	starting   bool
 	generation uint64
 	pending    []syscall.RawConn
 	limit      int
@@ -89,27 +90,38 @@ type socketProtector struct {
 
 const minPendingSockets = 64
 
-func (p *socketProtector) guard(conn syscall.RawConn) {
+// A socket opened once the VPN is established already routes into it, so it
+// cannot wait for protection and fails while the TUN starts.
+func (p *socketProtector) guard(conn syscall.RawConn) error {
 	p.mu.Lock()
 	for {
 		protect, generation := p.protect, p.generation
 		if protect == nil {
+			defer p.mu.Unlock()
+			if p.starting {
+				return errTunNotReady
+			}
 			p.holdLocked(conn)
-			p.mu.Unlock()
-			return
+			return nil
 		}
 		p.mu.Unlock()
 		if err := protectSocket(conn, protect); err == nil ||
 			!errors.Is(err, errTunNotReady) && !errors.Is(err, errProtectRefused) {
-			return
+			return nil
 		}
 		p.mu.Lock()
 		if p.generation == generation {
 			p.holdLocked(conn)
 			p.mu.Unlock()
-			return
+			return nil
 		}
 	}
+}
+
+func (p *socketProtector) begin() {
+	p.mu.Lock()
+	p.starting = true
+	p.mu.Unlock()
 }
 
 func (p *socketProtector) holdLocked(conn syscall.RawConn) {
@@ -130,6 +142,7 @@ func (p *socketProtector) holdLocked(conn syscall.RawConn) {
 func (p *socketProtector) activate(protect func(fd int) error) {
 	p.mu.Lock()
 	p.protect = protect
+	p.starting = false
 	p.generation++
 	pending := p.pending
 	p.pending, p.limit = nil, 0
@@ -142,5 +155,6 @@ func (p *socketProtector) activate(protect func(fd int) error) {
 func (p *socketProtector) deactivate() {
 	p.mu.Lock()
 	p.protect = nil
+	p.starting = false
 	p.mu.Unlock()
 }

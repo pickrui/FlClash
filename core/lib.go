@@ -121,8 +121,7 @@ func init() {
 		}
 		th := activeTunHandler.Load()
 		if th == nil {
-			socketProtection.guard(conn)
-			return nil
+			return socketProtection.guard(conn)
 		}
 		return protectSocket(conn, th.handleProtect)
 	}
@@ -179,6 +178,7 @@ func handleStartTun(callbacks TunCallbacks, fd int, stack, address, dns, options
 	handler := &TunHandler{callbacks: callbacks}
 	handler.lease.release = func() { handler.callbacks = nil }
 	tunHandler = handler
+	socketProtection.begin()
 	if !tunHandler.start(fd, stack, address, dns, options) {
 		tunHandler = nil
 		handleStopListener()
