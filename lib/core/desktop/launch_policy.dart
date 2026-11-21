@@ -5,7 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:io';
 
-import 'package:win32_registry/win32_registry.dart';
+import 'package:rust_api/rust_api.dart' as rust_api;
 
 import 'package:fl_clash/core/desktop/helper_client.dart';
 import 'package:fl_clash/core/desktop/model.dart';
@@ -33,14 +33,11 @@ bool isPolicyBlockedLaunch(Object? error) {
 bool isSmartAppControlEnabled() {
   if (!Platform.isWindows) return false;
   try {
-    final key = LOCAL_MACHINE.open(
-      r'SYSTEM\CurrentControlSet\Control\CI\Policy',
-    );
-    try {
-      return key.getInt('VerifiedAndReputablePolicyState') == 1;
-    } finally {
-      key.close();
-    }
+    return rust_api.readLocalMachineDword(
+          key: r'SYSTEM\CurrentControlSet\Control\CI\Policy',
+          value: 'VerifiedAndReputablePolicyState',
+        ) ==
+        1;
   } catch (_) {
     return false;
   }

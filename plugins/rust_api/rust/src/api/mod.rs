@@ -8,6 +8,7 @@ pub mod editor;
 pub mod hotkey;
 pub mod init;
 pub mod ipc;
+pub mod launch;
 pub mod link;
 pub mod script;
 pub mod tray;

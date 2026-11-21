@@ -13,7 +13,7 @@ import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:path/path.dart' as p;
-import 'package:win32_registry/win32_registry.dart';
+import 'package:rust_api/rust_api.dart' as rust_api;
 
 import 'core_manifest.dart';
 import 'model.dart';
@@ -151,12 +151,10 @@ final class HelperClient {
 
   static int? _readPublishedHelperPort() {
     if (!Platform.isWindows) return null;
-    final key = LOCAL_MACHINE.open(helperPortKey);
-    try {
-      return key.getInt(helperPortValue);
-    } finally {
-      key.close();
-    }
+    return rust_api.readLocalMachineDword(
+      key: helperPortKey,
+      value: helperPortValue,
+    );
   }
 
   // The bundled manifest.json is a fixed build artifact; a usable value is read

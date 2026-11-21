@@ -8,6 +8,7 @@ mod editor;
 mod frb_generated;
 mod hotkey;
 mod ipc;
+mod launch;
 mod script;
 mod tray;
 mod window;

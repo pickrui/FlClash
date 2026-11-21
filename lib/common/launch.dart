@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:launch_at_startup/launch_at_startup.dart';
+import 'package:rust_api/rust_api.dart' as rust_api;
 
 import 'constant.dart';
 import 'print.dart';
@@ -163,35 +163,78 @@ String escapeDesktopEntryValue(String value) => value
     .replaceAll('\r', r'\r')
     .replaceAll('\t', r'\t');
 
+/// Written as the launch_at_startup builds did, so their entries still match.
+@visibleForTesting
+String autostartCommand({required bool isLinux, String? executable}) {
+  final program = isLinux
+      ? quoteDesktopExecArgument(
+          linuxLaunchExecutable(resolvedExecutable: executable),
+        )
+      : executable ?? Platform.resolvedExecutable;
+  return '$program $silentLaunchArgument';
+}
+
+abstract interface class AutostartEntry {
+  Future<bool> isEnabled();
+
+  Future<bool> setEnabled(bool enabled);
+}
+
+class _SystemAutostartEntry implements AutostartEntry {
+  const _SystemAutostartEntry();
+
+  String get _command => autostartCommand(isLinux: system.isLinux);
+
+  @override
+  Future<bool> isEnabled() =>
+      rust_api.isAutostartEnabled(name: appName, executable: _command);
+
+  @override
+  Future<bool> setEnabled(bool enabled) async {
+    if (safeModeBuild) {
+      throw StateError('Login items are disabled in safe mode');
+    }
+    return rust_api.setAutostart(
+      name: appName,
+      executable: _command,
+      enabled: enabled,
+    );
+  }
+}
+
 class AutoLaunch {
   static AutoLaunch? _instance;
 
-  AutoLaunch._internal() {
-    launchAtStartup.setup(
-      appName: appName,
-      appPath: system.isLinux
-          ? quoteDesktopExecArgument(linuxLaunchExecutable())
-          : Platform.resolvedExecutable,
-      args: const [silentLaunchArgument],
-    );
-  }
+  AutoLaunch._internal();
 
   factory AutoLaunch() {
     _instance ??= AutoLaunch._internal();
     return _instance!;
   }
 
-  Future<void> updateStatus(bool isAutoLaunch) async {
+  @visibleForTesting
+  static AutostartEntry entry = const _SystemAutostartEntry();
+
+  Future<void> _update = Future.value();
+
+  /// Bridge calls run on separate workers, so each update waits for the last.
+  Future<void> updateStatus(bool isAutoLaunch) {
     if (kDebugMode) {
-      return;
+      return Future.value();
     }
+    final update = _update.then((_) => _apply(isAutoLaunch));
+    _update = update.then<void>((_) {}, onError: (Object _) {});
+    return update;
+  }
+
+  Future<void> _apply(bool isAutoLaunch) async {
     if (isAutoLaunch) {
       // Linux only checks the entry exists, so rewrite it to drop a stale path.
-      if (system.isLinux || !await launchAtStartup.isEnabled()) {
-        await launchAtStartup.enable();
+      if (system.isLinux || !await entry.isEnabled()) {
+        await entry.setEnabled(true);
       }
-    } else if (system.isWindows || await launchAtStartup.isEnabled()) {
-      await launchAtStartup.disable();
+    } else if (system.isWindows || await entry.isEnabled()) {
+      await entry.setEnabled(false);
     }
   }
 }

@@ -7,6 +7,7 @@ import 'api/charset.dart';
 import 'api/editor.dart';
 import 'api/hotkey.dart';
 import 'api/ipc.dart';
+import 'api/launch.dart';
 import 'api/link.dart';
 import 'api/script.dart';
 import 'api/tray.dart';

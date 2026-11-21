@@ -164,6 +164,20 @@ void main() {
     });
   });
 
+  test('autostart entries keep the silent launch the older builds wrote', () {
+    expect(
+      autostartCommand(
+        isLinux: false,
+        executable: r'C:\Program Files\FlClash\FlClash.exe',
+      ),
+      r'C:\Program Files\FlClash\FlClash.exe --silent-launch',
+    );
+    expect(
+      autostartCommand(isLinux: true, executable: '/opt/My Apps/flclash'),
+      '"/opt/My Apps/flclash" --silent-launch',
+    );
+  });
+
   group('Linux desktop entries', () {
     test('start the AppImage file rather than its temporary mount', () {
       expect(

@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import Cocoa
 import FlutterMacOS
-import LaunchAtLogin
 
 class MainFlutterWindow: NSWindow {
     private var hiddenAtLaunch = false
@@ -30,23 +29,12 @@ class MainFlutterWindow: NSWindow {
                 }
                 delegate.prepareApplication(safeMode: safeMode)
                 result(nil)
-            case "launchAtStartupIsEnabled":
-                result(LaunchAtLogin.isEnabled)
             case "launchAtStartupWasLaunchedAtLogin":
                 guard let delegate = NSApp.delegate as? AppDelegate else {
                     result(false)
                     return
                 }
                 delegate.resolveLaunchAtLogin(result)
-            case "launchAtStartupSetEnabled":
-                guard let delegate = NSApp.delegate as? AppDelegate, !delegate.isSafeMode else {
-                    result(FlutterError(code: "safe_mode", message: "Login items are disabled in safe mode", details: nil))
-                    return
-                }
-                if let arguments = call.arguments as? [String: Any] {
-                    LaunchAtLogin.isEnabled = arguments["setEnabledValue"] as! Bool
-                }
-                result(nil)
             default:
                 result(FlutterMethodNotImplemented)
             }

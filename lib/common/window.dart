@@ -53,9 +53,7 @@ class Window implements WindowPort {
 
     if (!system.isMacOS) unawaited(_startWakeupServer());
     if (system.isWindows && !safeModeBuild) {
-      for (final scheme in protocolSchemes) {
-        protocol.register(scheme);
-      }
+      unawaited(protocol.registerWindows(protocolSchemes));
     }
     if (system.isLinux && !safeModeBuild) {
       unawaited(protocol.registerLinux(protocolSchemes));
