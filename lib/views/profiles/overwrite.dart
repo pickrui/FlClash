@@ -643,6 +643,7 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
           SliverToBoxAdapter(
             child: ListHeader(
               title: appLocalizations.addedRules,
+              caption: appLocalizations.addedRulesAfterScript,
               padding: EdgeInsets.symmetric(
                 horizontal: 16.mAp(context),
                 vertical: 8.mAp(context),
@@ -674,20 +675,6 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
               ],
             ),
           ),
-          if (profile?.overwriteType == OverwriteType.script)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  appLocalizations.addedRulesAfterScript,
-                  style: AppTextStyle.footnote
-                      .of(context)
-                      .copyWith(
-                        color: context.colorScheme.onSurfaceVariant.opacity80,
-                      ),
-                ),
-              ),
-            ),
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
           _librarySliver(
             state: rulesState,

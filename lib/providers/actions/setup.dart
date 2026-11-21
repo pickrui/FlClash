@@ -51,8 +51,12 @@ class SetupAction extends _$SetupAction {
   Future<Set<String>> appliedRuleTargets(int profileId) =>
       database.rulesDao.appliedRuleTargets(profileId);
 
+  /// A script profile's targets are what its script leaves.
   Future<Map<String, dynamic>> getRoutingProfileConfig(int profileId) async {
-    final source = await getRawProfileConfig(profileId);
+    final source = await _controller.getRawProfileConfig(
+      profileId,
+      runScript: true,
+    );
     final providers = await database.clashProvidersDao.all().get();
     final profilesPath = await appPath.profilesPath;
     final config = withLibraryProviders(source, providers, profilesPath);
@@ -370,6 +374,7 @@ extension SetupControllerExt on AppController {
     bool validateSnapshot = true,
     bool refetchCloud = true,
     bool applyAliases = true,
+    bool runScript = false,
   }) async {
     var profile = _ref.read(profilesProvider).getProfile(profileId);
     if (profile?.type == ProfileType.custom) return <String, dynamic>{};
@@ -396,7 +401,23 @@ extension SetupControllerExt on AppController {
     if (profile?.isoixCloudProfile != true) {
       await refuseEncryptedProfileFile(path);
     }
-    final source = await coreController.getConfig(path);
+    var source = await coreController.getConfig(path);
+    final scriptId = profile?.overwriteType == OverwriteType.script
+        ? profile?.scriptId
+        : null;
+    if (runScript && scriptId != null) {
+      final script = await database.scriptsDao.get(scriptId).getSingleOrNull();
+      final content = await script?.content;
+      if (content != null && content.isNotEmpty) {
+        source = await evaluateProfileScript(
+          content,
+          source,
+          options:
+              _ref.read(appSettingProvider).scriptOptions['$scriptId'] ??
+              const {},
+        );
+      }
+    }
     if (!applyAliases) return source;
     final activeNames = {
       for (final proxy in profile?.profileProxies ?? <ProfileProxy>[])

@@ -21,10 +21,30 @@ part 'generated/routing_issues.g.dart';
 
 @riverpod
 Future<Map<String, dynamic>?> routingSource(Ref ref, int profileId) {
-  ref.watch(
-    profileProvider(profileId)
-        .select((profile) => (profile?.lastUpdateDate, profile?.url)),
-  );
+  final scriptId = ref.watch(
+    profileProvider(profileId).select((profile) {
+      return (
+        profile?.lastUpdateDate,
+        profile?.url,
+        profile?.overwriteType == OverwriteType.script
+            ? profile?.scriptId
+            : null,
+      );
+    }),
+  ).$3;
+  if (scriptId != null) {
+    ref.watch(
+      scriptsProvider.select(
+        (scripts) => scripts.value
+            ?.where((script) => script.id == scriptId)
+            .firstOrNull
+            ?.lastUpdateTime,
+      ),
+    );
+    ref.watch(
+      appSettingProvider.select((state) => state.scriptOptions['$scriptId']),
+    );
+  }
   ref.watch(
     profilesProvider.select(
       (profiles) => profiles.getProfile(profileId)?.type == ProfileType.custom
