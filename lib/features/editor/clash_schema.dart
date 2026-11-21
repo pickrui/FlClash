@@ -1665,6 +1665,7 @@ const _listener = YamlSchema.map(
     'shadowsocks': {
       'password': _str,
       'cipher': YamlSchema.scalar(_ssCiphers),
+      'users': _listenerUserDict,
       'udp': _bool,
       'mux-option': _muxOption,
       ..._listenerTlsLayers,
@@ -1867,6 +1868,7 @@ const _listener = YamlSchema.map(
       'users': _listenerUserDict,
       'traffic-pattern': _str,
       'user-hint-is-mandatory': _bool,
+      'tcp-idle-timeout': _str,
     },
     'sudoku': {
       'key': _str,
