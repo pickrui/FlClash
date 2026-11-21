@@ -10,19 +10,12 @@ pkgdesc="A multi-platform proxy client based on ClashMeta, simple and easy to us
 arch=('x86_64' 'aarch64')
 url="https://github.com/@REPO@"
 license=('GPL-3.0-or-later')
-# One entry per DT_NEEDED soname of the release bundle. libayatana-indicator
-# and ayatana-ido are listed because Arch's libayatana-appindicator 0.6 no
-# longer depends on them while the Ubuntu-built tray plugin still links them,
-# and the executable fails to load without them.
+# One entry per DT_NEEDED soname of the release bundle.
 depends=(
   'gtk3'
   'glib2'
   'gcc-libs'
   'libsecret'
-  'libayatana-appindicator'
-  'libayatana-indicator'
-  'ayatana-ido'
-  'libdbusmenu-glib'
 )
 optdepends=(
   'polkit: authorize the privileged helper that TUN mode needs'

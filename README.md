@@ -59,7 +59,7 @@ Get the latest build from this repository's [GitHub Releases](https://github.com
 ⚠️ Make sure to install the following dependencies before using them
 
 ```bash
-sudo apt-get install libayatana-appindicator3-dev libkeybinder-3.0-dev
+sudo apt-get install libkeybinder-3.0-dev
 ```
 
 On Arch Linux and its derivatives install with the PKGBUILD published beside
@@ -172,7 +172,7 @@ exposure, updates, and troubleshooting.
 
         2. Dependencies are auto-installed by setup script, or manually:
            ```bash
-           sudo apt-get install -y libayatana-appindicator3-dev libkeybinder-3.0-dev
+           sudo apt-get install -y libkeybinder-3.0-dev
            ```
 
         3. Run build script

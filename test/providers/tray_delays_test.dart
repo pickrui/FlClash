@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tray/tray.dart' as native;
+import 'package:rust_api/tray.dart' as native;
 
 void main() {
   test('nested scoped probes share card, pending and tray identities', () {

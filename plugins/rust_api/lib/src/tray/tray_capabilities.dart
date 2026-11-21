@@ -40,9 +40,9 @@ final class TrayCapabilities {
 
   static const TrayCapabilities linux = TrayCapabilities(
     supported: true,
-    title: true,
+    title: false,
     toolTip: true,
-    iconEvents: false,
+    iconEvents: true,
     menuControl: false,
   );
 

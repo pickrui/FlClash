@@ -8,7 +8,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
-import 'package:tray/tray.dart' as native;
+import 'package:rust_api/tray.dart' as native;
 
 import 'app_localizations.dart';
 import 'constant.dart';

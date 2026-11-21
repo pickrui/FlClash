@@ -15,20 +15,36 @@ rquickjs = { version = "0.14", default-features = false }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 interprocess = { version = "2", features = ["tokio"] }
-tokio = { version = "1.36", features = ["io-util", "macros", "rt", "sync"] }
+tokio = { version = "1.36", features = ["io-util", "macros", "rt", "sync", "time"] }
 global-hotkey = "0.9"
 
 [target.'cfg(all(unix, not(target_os = "android")))'.dependencies]
 libc = "0.2"
 
 [target.'cfg(target_os = "macos")'.dependencies]
+block2 = "0.6"
 dispatch2 = "0.3"
+objc2 = "0.6"
+objc2-app-kit = "0.3"
+objc2-foundation = "0.3"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ksni = { version = "0.3", default-features = false, features = ["tokio"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
 rquickjs = { version = "0.14", default-features = false, features = ["bindgen"] }
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Threading", "Win32_UI_WindowsAndMessaging"] }
+windows-sys = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_Globalization",
+  "Win32_Graphics_Gdi",
+  "Win32_System_LibraryLoader",
+  "Win32_System_SystemInformation",
+  "Win32_System_Threading",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+] }
 
 [profile.release]
 opt-level = "s"

@@ -37,8 +37,6 @@ dependencies:
   mobile_scanner: ^7.5.0
   app_links: ^7.2.2
   win32_registry: ^3.0.3
-  tray:
-    path: plugins/tray
   collection: ^1.19.1
   package_info_plus: ^10.2.2
   url_launcher: ^6.3.3

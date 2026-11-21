@@ -5,21 +5,18 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:convert';
 
+import '../rust/api/tray.dart';
 import 'tray_menu.dart';
 import 'tray_spec.dart';
 
 final class EncodedTray {
   const EncodedTray({
-    required this.icon,
-    required this.toolTip,
     required this.menu,
     required this.itemsById,
     required this.signature,
   });
 
-  final Map<String, Object?> icon;
-  final String toolTip;
-  final List<Object?> menu;
+  final List<TrayItem> menu;
   final Map<int, TrayMenuItem> itemsById;
   final String signature;
 }
@@ -30,26 +27,21 @@ abstract final class TrayCodec {
   static EncodedTray encode(TraySpec spec, {int firstId = firstItemId}) {
     final itemsById = <int, TrayMenuItem>{};
     final menu = _encodeItems(spec.menu, itemsById, _IdAllocator(firstId));
-    final icon = <String, Object?>{
-      'asset': spec.icon.asset,
-      'isTemplate': spec.icon.isTemplate,
-      'size': spec.icon.size,
-      'position': spec.icon.position.name,
-    };
     return EncodedTray(
-      icon: icon,
-      toolTip: spec.toolTip,
       menu: menu,
       itemsById: itemsById,
-      signature: jsonEncode(<String, Object?>{
-        'icon': icon,
-        'toolTip': spec.toolTip,
-        'menu': menu,
-      }),
+      signature: jsonEncode(<Object?>[
+        spec.icon.asset,
+        spec.icon.isTemplate,
+        spec.icon.size,
+        spec.icon.position.name,
+        spec.toolTip,
+        _describe(menu),
+      ]),
     );
   }
 
-  static List<Object?> _encodeItems(
+  static List<TrayItem> _encodeItems(
     List<TrayMenuItem> items,
     Map<int, TrayMenuItem> sink,
     _IdAllocator allocator,
@@ -58,45 +50,74 @@ abstract final class TrayCodec {
       final id = allocator.next();
       sink[id] = item;
       return switch (item) {
-        TrayMenuSeparator() => <String, Object?>{'id': id, 'type': 'separator'},
-        TrayMenuAction(:final label, :final detail, :final enabled) =>
-          <String, Object?>{
-            'id': id,
-            'type': 'action',
-            'label': label,
-            if (detail != null && detail.isNotEmpty) 'detail': detail,
-            'enabled': enabled,
-          },
+        TrayMenuSeparator() => TrayItem(
+          id: id,
+          kind: TrayItemKind.separator,
+          label: '',
+          enabled: true,
+          checked: false,
+          items: const [],
+        ),
+        TrayMenuAction(:final label, :final detail, :final enabled) => TrayItem(
+          id: id,
+          kind: TrayItemKind.action,
+          label: label,
+          detail: _detail(detail),
+          enabled: enabled,
+          checked: false,
+          items: const [],
+        ),
         TrayMenuCheckbox(
           :final label,
           :final detail,
           :final enabled,
           :final checked,
         ) =>
-          <String, Object?>{
-            'id': id,
-            'type': 'checkbox',
-            'label': label,
-            if (detail != null && detail.isNotEmpty) 'detail': detail,
-            'enabled': enabled,
-            'checked': checked,
-          },
+          TrayItem(
+            id: id,
+            kind: TrayItemKind.checkbox,
+            label: label,
+            detail: _detail(detail),
+            enabled: enabled,
+            checked: checked,
+            items: const [],
+          ),
         TrayMenuSubmenu(
           :final label,
           :final detail,
           :final enabled,
           :final items,
         ) =>
-          <String, Object?>{
-            'id': id,
-            'type': 'submenu',
-            'label': label,
-            if (detail != null && detail.isNotEmpty) 'detail': detail,
-            'enabled': enabled,
-            'items': _encodeItems(items, sink, allocator),
-          },
+          TrayItem(
+            id: id,
+            kind: TrayItemKind.submenu,
+            label: label,
+            detail: _detail(detail),
+            enabled: enabled,
+            checked: false,
+            items: _encodeItems(items, sink, allocator),
+          ),
       };
     }).toList();
+  }
+
+  static String? _detail(String? detail) {
+    return detail == null || detail.isEmpty ? null : detail;
+  }
+
+  static List<Object?> _describe(List<TrayItem> items) {
+    return [
+      for (final item in items)
+        [
+          item.id,
+          item.kind.name,
+          item.label,
+          item.detail,
+          item.enabled,
+          item.checked,
+          _describe(item.items),
+        ],
+    ];
   }
 }
 

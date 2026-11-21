@@ -11,7 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'dart:async';
 
-import 'package:tray/tray.dart' as native;
+import 'package:rust_api/tray.dart' as native;
 
 class TrayManager extends ConsumerStatefulWidget {
   final Widget child;

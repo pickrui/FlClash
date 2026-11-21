@@ -1,5 +1,5 @@
 name: rust_api
-description: Desktop transport, JavaScript runtime and hotkeys built through Native Assets
+description: Desktop transport, tray, JavaScript runtime and hotkeys built through Native Assets
 version: 0.0.1
 publish_to: none
 
@@ -14,6 +14,7 @@ dependencies:
   flutter_rust_bridge: 2.13.0
   flutter_rust_bridge_hooks: 2.13.0
   native_toolchain_rust: ^1.0.6
+  path: ^1.9.1
   setup_hooks:
     path: ../setup/setup_hooks
 
