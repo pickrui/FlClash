@@ -397,7 +397,7 @@ class ProfileItem extends ConsumerWidget {
               content: content,
               changes: changes!,
             );
-      BaseNavigator.push<String>(context, previewPage);
+      pushNestedPage<String>(context, previewPage);
     } catch (error) {
       if (context.mounted) context.showNotifier(error.toString());
     } finally {

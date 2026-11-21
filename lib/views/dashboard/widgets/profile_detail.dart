@@ -55,7 +55,7 @@ class ProfileDetailSheet extends ConsumerWidget {
     if (profile.isoixCloudProfile) return;
     final setupAction = context.setupAction;
     unawaited(
-      BaseNavigator.push<String>(
+      pushNestedPage<String>(
         context,
         EditorPage(
           title: profile.realLabel,
