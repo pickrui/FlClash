@@ -1326,6 +1326,56 @@ class AppLocalizationsFr extends AppLocalizations {
   String get coreStatus => 'État du cœur';
 
   @override
+  String get liveStatus => 'État en direct';
+
+  @override
+  String liveStatusPosition(Object index, Object count) {
+    return '$index sur $count';
+  }
+
+  @override
+  String get liveStatusTest => 'Test des cartes d’état en direct';
+
+  @override
+  String get coreStopped => 'Cœur arrêté';
+
+  @override
+  String get restartCore => 'Redémarrer le cœur';
+
+  @override
+  String get coreStarting => 'Démarrage du cœur';
+
+  @override
+  String get coreStartingDesc => 'Connexion au cœur';
+
+  @override
+  String get coreRunning => 'Cœur en marche';
+
+  @override
+  String get coreRunningDesc => 'L’application est connectée au cœur';
+
+  @override
+  String get forceRestartCore => 'Forcer le redémarrage';
+
+  @override
+  String get forceRestartCoreAsk => 'Forcer le redémarrage du cœur ?';
+
+  @override
+  String get forceRestartCoreAskDesc =>
+      'Les connexions en cours seront coupées';
+
+  @override
+  String get stopUpdateDownloadTip =>
+      'Arrêter le téléchargement de la mise à jour ?';
+
+  @override
+  String get stopUpdateDownloadDesc =>
+      'Ce qui est déjà téléchargé est supprimé';
+
+  @override
+  String get stopDownload => 'Arrêter';
+
+  @override
   String get coreNotConnected => 'Le cœur n’est pas connecté';
 
   @override

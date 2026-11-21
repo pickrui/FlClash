@@ -123,6 +123,12 @@ class UpdateAction extends _$UpdateAction {
 
   void dismissNotice(AppUpdateInfo info) =>
       _controller.dismissAppUpdateNotice(info);
+
+  Future<void> install() => _controller.installAppUpdate();
+
+  /// Whether installing [file] replaces this app and relaunches it.
+  bool appliesInPlace(File file) =>
+      _controller.desktopUpdateInstaller?.appliesInPlace(file) ?? false;
 }
 
 /// Start, the tile and profile changes wait for init, even after a failure.
@@ -521,6 +527,7 @@ extension InitControllerExt on AppController {
         },
         url: downloadUrl,
         directory: directory,
+        version: _appUpdateDownloadInfo?.version,
       ),
     );
   }

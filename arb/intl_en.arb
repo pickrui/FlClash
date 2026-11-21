@@ -409,6 +409,27 @@
   "forceRestartCoreTip": "Are you sure you want to force restart the core?",
   "dnsHijacking": "DNS hijacking",
   "coreStatus": "Core status",
+  "liveStatus": "Live status",
+  "liveStatusPosition": "{index} of {count}",
+  "@liveStatusPosition": {
+    "placeholders": {
+      "index": {},
+      "count": {}
+    }
+  },
+  "liveStatusTest": "Live status cards test",
+  "coreStopped": "Core stopped",
+  "restartCore": "Restart core",
+  "coreStarting": "Starting core",
+  "coreStartingDesc": "Connecting to the core",
+  "coreRunning": "Core running",
+  "coreRunningDesc": "The app is connected to the core",
+  "forceRestartCore": "Force restart",
+  "forceRestartCoreAsk": "Force restart the core?",
+  "forceRestartCoreAskDesc": "Connections in progress will drop",
+  "stopUpdateDownloadTip": "Stop downloading the update?",
+  "stopUpdateDownloadDesc": "What has downloaded is deleted",
+  "stopDownload": "Stop",
   "coreNotConnected": "Core is not connected",
   "appendSystemDns": "Append system DNS",
   "blockQuic": "Block QUIC",

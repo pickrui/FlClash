@@ -2532,6 +2532,96 @@ abstract class AppLocalizations {
   /// **'Core status'**
   String get coreStatus;
 
+  /// No description provided for @liveStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Live status'**
+  String get liveStatus;
+
+  /// No description provided for @liveStatusPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'{index} of {count}'**
+  String liveStatusPosition(Object index, Object count);
+
+  /// No description provided for @liveStatusTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Live status cards test'**
+  String get liveStatusTest;
+
+  /// No description provided for @coreStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Core stopped'**
+  String get coreStopped;
+
+  /// No description provided for @restartCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart core'**
+  String get restartCore;
+
+  /// No description provided for @coreStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting core'**
+  String get coreStarting;
+
+  /// No description provided for @coreStartingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to the core'**
+  String get coreStartingDesc;
+
+  /// No description provided for @coreRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Core running'**
+  String get coreRunning;
+
+  /// No description provided for @coreRunningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The app is connected to the core'**
+  String get coreRunningDesc;
+
+  /// No description provided for @forceRestartCore.
+  ///
+  /// In en, this message translates to:
+  /// **'Force restart'**
+  String get forceRestartCore;
+
+  /// No description provided for @forceRestartCoreAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Force restart the core?'**
+  String get forceRestartCoreAsk;
+
+  /// No description provided for @forceRestartCoreAskDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Connections in progress will drop'**
+  String get forceRestartCoreAskDesc;
+
+  /// No description provided for @stopUpdateDownloadTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop downloading the update?'**
+  String get stopUpdateDownloadTip;
+
+  /// No description provided for @stopUpdateDownloadDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'What has downloaded is deleted'**
+  String get stopUpdateDownloadDesc;
+
+  /// No description provided for @stopDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stopDownload;
+
   /// No description provided for @coreNotConnected.
   ///
   /// In en, this message translates to:

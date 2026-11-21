@@ -11,6 +11,7 @@ import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/models/common.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/views/dashboard/widgets/live_status.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,6 +59,10 @@ class DeveloperView extends ConsumerWidget {
               ref.read(coreHandlerProvider).crash();
             },
           ),
+        ListItem(
+          title: Text(appLocalizations.liveStatusTest),
+          onTap: () => showLiveStatusPreview(context),
+        ),
         ListItem(
           title: Text(appLocalizations.clearData),
           onTap: () async {

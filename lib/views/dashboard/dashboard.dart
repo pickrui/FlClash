@@ -18,7 +18,6 @@ import 'edit.dart';
 import 'layout.dart';
 import 'style.dart';
 import 'widget_registry.dart';
-import 'widgets/core_status_button.dart';
 import 'widgets/widgets.dart';
 
 const _maxColumnWidth = 440.0;
@@ -77,7 +76,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           ? appLocalizations.editDashboard
           : appLocalizations.dashboard,
       backAction: editing ? () => _setEditing(false) : null,
-      actions: [if (!editing) const CoreStatusButton()],
+      actions: [
+        if (!editing) const LiveStatusButton(),
+        if (editable && !editing)
+          AppBarActionButton(
+            data: IconButtonData(
+              glyph: AppGlyphs.edit,
+              tooltip: appLocalizations.editDashboard,
+              onPressed: () => _setEditing(true),
+            ),
+          ),
+      ],
       confirmationAction: editing
           ? IconButtonData(
               glyph: AppGlyphs.check,
@@ -85,14 +94,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
               onPressed: () => _setEditing(false),
             )
           : null,
-      iconActions: [
-        if (editable && !editing)
-          IconButtonData(
-            glyph: AppGlyphs.edit,
-            tooltip: appLocalizations.editDashboard,
-            onPressed: () => _setEditing(true),
-          ),
-      ],
       // The providers learn a resize a frame late, too late for the cards.
       body: LayoutBuilder(
         builder: (context, constraints) {

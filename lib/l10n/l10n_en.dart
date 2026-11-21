@@ -1312,6 +1312,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coreStatus => 'Core status';
 
   @override
+  String get liveStatus => 'Live status';
+
+  @override
+  String liveStatusPosition(Object index, Object count) {
+    return '$index of $count';
+  }
+
+  @override
+  String get liveStatusTest => 'Live status cards test';
+
+  @override
+  String get coreStopped => 'Core stopped';
+
+  @override
+  String get restartCore => 'Restart core';
+
+  @override
+  String get coreStarting => 'Starting core';
+
+  @override
+  String get coreStartingDesc => 'Connecting to the core';
+
+  @override
+  String get coreRunning => 'Core running';
+
+  @override
+  String get coreRunningDesc => 'The app is connected to the core';
+
+  @override
+  String get forceRestartCore => 'Force restart';
+
+  @override
+  String get forceRestartCoreAsk => 'Force restart the core?';
+
+  @override
+  String get forceRestartCoreAskDesc => 'Connections in progress will drop';
+
+  @override
+  String get stopUpdateDownloadTip => 'Stop downloading the update?';
+
+  @override
+  String get stopUpdateDownloadDesc => 'What has downloaded is deleted';
+
+  @override
+  String get stopDownload => 'Stop';
+
+  @override
   String get coreNotConnected => 'Core is not connected';
 
   @override

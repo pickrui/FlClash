@@ -14,6 +14,23 @@ final appUpdateDownloadProvider = Provider<AppUpdateDownloadTask>((ref) {
   return task;
 });
 
+final appUpdateDownloadStateProvider =
+    NotifierProvider<AppUpdateDownloadStateNotifier, AppUpdateDownloadState>(
+      AppUpdateDownloadStateNotifier.new,
+    );
+
+/// The download task's state, for widgets that rebuild as it changes.
+class AppUpdateDownloadStateNotifier extends Notifier<AppUpdateDownloadState> {
+  @override
+  AppUpdateDownloadState build() {
+    final task = ref.watch(appUpdateDownloadProvider);
+    void follow() => state = task.value;
+    task.addListener(follow);
+    ref.onDispose(() => task.removeListener(follow));
+    return task.value;
+  }
+}
+
 final appUpdateNoticeProvider = Provider<ValueNotifier<AppUpdateInfo?>>((ref) {
   final notice = ValueNotifier<AppUpdateInfo?>(null);
   ref.onDispose(notice.dispose);

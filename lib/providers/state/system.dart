@@ -345,3 +345,33 @@ VpnOptions? vpnOptions(Ref ref) {
     routeAddress: routeAddress,
   );
 }
+
+/// Keeps a start on screen for [minimumStart] so a fast restart does not flash.
+@riverpod
+class HeldCoreStatus extends _$HeldCoreStatus {
+  static const minimumStart = Duration(milliseconds: 600);
+
+  Timer? _hold;
+
+  @override
+  CoreStatus build() {
+    ref.onDispose(() => _hold?.cancel());
+    ref.listen(coreStatusProvider, (_, next) {
+      switch (next) {
+        case CoreStatus.connecting:
+          _hold ??= Timer(minimumStart, () {
+            _hold = null;
+            state = ref.read(coreStatusProvider);
+          });
+          state = next;
+        case CoreStatus.disconnected:
+          _hold?.cancel();
+          _hold = null;
+          state = next;
+        case CoreStatus.connected:
+          if (_hold == null) state = next;
+      }
+    });
+    return ref.read(coreStatusProvider);
+  }
+}

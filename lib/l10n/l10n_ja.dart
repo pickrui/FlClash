@@ -1283,6 +1283,53 @@ class AppLocalizationsJa extends AppLocalizations {
   String get coreStatus => 'コアステータス';
 
   @override
+  String get liveStatus => 'リアルタイムの状態';
+
+  @override
+  String liveStatusPosition(Object index, Object count) {
+    return '$count 件中 $index 件目';
+  }
+
+  @override
+  String get liveStatusTest => 'ライブステータスカードのテスト';
+
+  @override
+  String get coreStopped => 'コアが停止しました';
+
+  @override
+  String get restartCore => 'コアを再起動';
+
+  @override
+  String get coreStarting => 'コアを起動中';
+
+  @override
+  String get coreStartingDesc => 'コアに接続しています';
+
+  @override
+  String get coreRunning => 'コアは実行中';
+
+  @override
+  String get coreRunningDesc => 'アプリはコアに接続されています';
+
+  @override
+  String get forceRestartCore => '強制再起動';
+
+  @override
+  String get forceRestartCoreAsk => 'コアを強制再起動しますか？';
+
+  @override
+  String get forceRestartCoreAskDesc => '進行中の接続は切断されます';
+
+  @override
+  String get stopUpdateDownloadTip => 'アップデートのダウンロードを中止しますか？';
+
+  @override
+  String get stopUpdateDownloadDesc => 'ダウンロード済みの部分は削除されます';
+
+  @override
+  String get stopDownload => '中止';
+
+  @override
   String get coreNotConnected => 'コアに接続されていません';
 
   @override

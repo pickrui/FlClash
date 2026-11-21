@@ -1285,6 +1285,53 @@ class AppLocalizationsKo extends AppLocalizations {
   String get coreStatus => '코어 상태';
 
   @override
+  String get liveStatus => '실시간 상태';
+
+  @override
+  String liveStatusPosition(Object index, Object count) {
+    return '$count개 중 $index번째';
+  }
+
+  @override
+  String get liveStatusTest => '실시간 상태 카드 테스트';
+
+  @override
+  String get coreStopped => '코어가 중지됨';
+
+  @override
+  String get restartCore => '코어 다시 시작';
+
+  @override
+  String get coreStarting => '코어 시작 중';
+
+  @override
+  String get coreStartingDesc => '코어에 연결하는 중';
+
+  @override
+  String get coreRunning => '코어 실행 중';
+
+  @override
+  String get coreRunningDesc => '앱이 코어에 연결되어 있습니다';
+
+  @override
+  String get forceRestartCore => '강제 다시 시작';
+
+  @override
+  String get forceRestartCoreAsk => '코어를 강제로 다시 시작할까요?';
+
+  @override
+  String get forceRestartCoreAskDesc => '진행 중인 연결이 끊어집니다';
+
+  @override
+  String get stopUpdateDownloadTip => '업데이트 다운로드를 중지할까요?';
+
+  @override
+  String get stopUpdateDownloadDesc => '이미 받은 부분은 삭제됩니다';
+
+  @override
+  String get stopDownload => '중지';
+
+  @override
   String get coreNotConnected => '코어가 연결되지 않았습니다';
 
   @override

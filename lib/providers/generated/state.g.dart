@@ -684,6 +684,64 @@ final class VpnOptionsProvider
 
 String _$vpnOptionsHash() => r'4a9b4e35d0511862576e2fec89b195c738bc8f4f';
 
+/// Keeps a start on screen for [minimumStart] so a fast restart does not flash.
+
+@ProviderFor(HeldCoreStatus)
+final heldCoreStatusProvider = HeldCoreStatusProvider._();
+
+/// Keeps a start on screen for [minimumStart] so a fast restart does not flash.
+final class HeldCoreStatusProvider
+    extends $NotifierProvider<HeldCoreStatus, CoreStatus> {
+  /// Keeps a start on screen for [minimumStart] so a fast restart does not flash.
+  HeldCoreStatusProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'heldCoreStatusProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$heldCoreStatusHash();
+
+  @$internal
+  @override
+  HeldCoreStatus create() => HeldCoreStatus();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CoreStatus value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CoreStatus>(value),
+    );
+  }
+}
+
+String _$heldCoreStatusHash() => r'b2852b231be7c2238f0fb382523f8d7b9fb7a7f9';
+
+/// Keeps a start on screen for [minimumStart] so a fast restart does not flash.
+
+abstract class _$HeldCoreStatus extends $Notifier<CoreStatus> {
+  CoreStatus build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<CoreStatus, CoreStatus>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<CoreStatus, CoreStatus>,
+              CoreStatus,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(navigationItemsState)
 final navigationItemsStateProvider = NavigationItemsStateProvider._();
 

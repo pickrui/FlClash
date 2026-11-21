@@ -1323,6 +1323,54 @@ class AppLocalizationsEs extends AppLocalizations {
   String get coreStatus => 'Estado del núcleo';
 
   @override
+  String get liveStatus => 'Estado en vivo';
+
+  @override
+  String liveStatusPosition(Object index, Object count) {
+    return '$index de $count';
+  }
+
+  @override
+  String get liveStatusTest => 'Prueba de tarjetas de estado en vivo';
+
+  @override
+  String get coreStopped => 'Núcleo detenido';
+
+  @override
+  String get restartCore => 'Reiniciar núcleo';
+
+  @override
+  String get coreStarting => 'Iniciando núcleo';
+
+  @override
+  String get coreStartingDesc => 'Conectando con el núcleo';
+
+  @override
+  String get coreRunning => 'Núcleo en ejecución';
+
+  @override
+  String get coreRunningDesc => 'La app está conectada al núcleo';
+
+  @override
+  String get forceRestartCore => 'Forzar reinicio';
+
+  @override
+  String get forceRestartCoreAsk => '¿Forzar el reinicio del núcleo?';
+
+  @override
+  String get forceRestartCoreAskDesc => 'Las conexiones en curso se cortarán';
+
+  @override
+  String get stopUpdateDownloadTip =>
+      '¿Detener la descarga de la actualización?';
+
+  @override
+  String get stopUpdateDownloadDesc => 'Se borra lo ya descargado';
+
+  @override
+  String get stopDownload => 'Detener';
+
+  @override
   String get coreNotConnected => 'El núcleo no está conectado';
 
   @override

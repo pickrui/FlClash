@@ -68,11 +68,18 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
   bool _disposed = false;
   String? downloadUrl;
 
+  /// The release being downloaded, as `version+build`, when the caller named it.
+  String? version;
+
   bool get hasDownload =>
       value.phase != AppUpdateDownloadPhase.idle &&
       value.phase != AppUpdateDownloadPhase.canceled;
 
-  Future<void> start(AppUpdateDownloader download, {required String url}) {
+  Future<void> start(
+    AppUpdateDownloader download, {
+    required String url,
+    String? version,
+  }) {
     if (_disposed) return Future.value();
     if (value.phase == AppUpdateDownloadPhase.downloading ||
         value.phase == AppUpdateDownloadPhase.verifying ||
@@ -81,6 +88,7 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
     }
     _download = download;
     downloadUrl = url;
+    this.version = version;
     final token = _token = CancelToken();
     final completion = Completer<void>();
     _operation = completion.future;
@@ -95,11 +103,16 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
     AppUpdateDownloader download, {
     required String url,
     required Directory directory,
-  }) => start((token, onProgress) async {
-    await _serializeStaging(() => sweepStaleUpdateDownloads(directory));
-    if (token.isCancelled) throw token.cancelError!;
-    return download(token, onProgress);
-  }, url: url);
+    String? version,
+  }) => start(
+    (token, onProgress) async {
+      await _serializeStaging(() => sweepStaleUpdateDownloads(directory));
+      if (token.isCancelled) throw token.cancelError!;
+      return download(token, onProgress);
+    },
+    url: url,
+    version: version,
+  );
 
   /// Startup cleanup is serialized with the preparation of new downloads.
   Future<void> cleanStaleDownloads(Directory directory) =>
@@ -121,7 +134,7 @@ class AppUpdateDownloadTask extends ValueNotifier<AppUpdateDownloadState> {
     final download = _download;
     final url = downloadUrl;
     if (download == null || url == null) return Future.value();
-    return start(download, url: url);
+    return start(download, url: url, version: version);
   }
 
   void verifying(CancelToken token) {

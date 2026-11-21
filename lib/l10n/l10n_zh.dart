@@ -1272,6 +1272,53 @@ class AppLocalizationsZh extends AppLocalizations {
   String get coreStatus => '核心状态';
 
   @override
+  String get liveStatus => '实时状态';
+
+  @override
+  String liveStatusPosition(Object index, Object count) {
+    return '第 $index 项，共 $count 项';
+  }
+
+  @override
+  String get liveStatusTest => '实时状态卡片测试';
+
+  @override
+  String get coreStopped => '内核已停止';
+
+  @override
+  String get restartCore => '重启内核';
+
+  @override
+  String get coreStarting => '正在启动内核';
+
+  @override
+  String get coreStartingDesc => '正在连接内核';
+
+  @override
+  String get coreRunning => '内核运行中';
+
+  @override
+  String get coreRunningDesc => '应用已连接到内核';
+
+  @override
+  String get forceRestartCore => '强制重启';
+
+  @override
+  String get forceRestartCoreAsk => '强制重启内核？';
+
+  @override
+  String get forceRestartCoreAskDesc => '进行中的连接会断开';
+
+  @override
+  String get stopUpdateDownloadTip => '要停止下载更新吗？';
+
+  @override
+  String get stopUpdateDownloadDesc => '已下载的部分会被删除';
+
+  @override
+  String get stopDownload => '停止';
+
+  @override
   String get coreNotConnected => '内核未连接';
 
   @override

@@ -1318,6 +1318,53 @@ class AppLocalizationsRu extends AppLocalizations {
   String get coreStatus => 'Основной статус';
 
   @override
+  String get liveStatus => 'Текущее состояние';
+
+  @override
+  String liveStatusPosition(Object index, Object count) {
+    return '$index из $count';
+  }
+
+  @override
+  String get liveStatusTest => 'Тест карточек текущего состояния';
+
+  @override
+  String get coreStopped => 'Ядро остановлено';
+
+  @override
+  String get restartCore => 'Перезапустить ядро';
+
+  @override
+  String get coreStarting => 'Запуск ядра';
+
+  @override
+  String get coreStartingDesc => 'Подключение к ядру';
+
+  @override
+  String get coreRunning => 'Ядро работает';
+
+  @override
+  String get coreRunningDesc => 'Приложение подключено к ядру';
+
+  @override
+  String get forceRestartCore => 'Принудительный перезапуск';
+
+  @override
+  String get forceRestartCoreAsk => 'Принудительно перезапустить ядро?';
+
+  @override
+  String get forceRestartCoreAskDesc => 'Текущие соединения будут разорваны';
+
+  @override
+  String get stopUpdateDownloadTip => 'Остановить загрузку обновления?';
+
+  @override
+  String get stopUpdateDownloadDesc => 'Уже загруженная часть будет удалена';
+
+  @override
+  String get stopDownload => 'Стоп';
+
+  @override
   String get coreNotConnected => 'Ядро не подключено';
 
   @override
