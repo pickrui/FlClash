@@ -355,15 +355,16 @@ Ads = type=http-response,pattern=^https://a,script-path=${urlOf('/ads.js')}
       expect(awaitingConsent(), {updated.id});
     });
 
-    test('keeps a module agreed to on', () async {
+    test('asks again about a module agreed to before', () async {
       await action().putModule(
         (await stored()).single.copyWith(accepted: true),
       );
 
       final updated = await bringScripts();
 
-      expect(updated.enabled, isTrue);
-      expect(awaitingConsent(), isEmpty);
+      expect(updated.enabled, isFalse);
+      expect(updated.accepted, isNull);
+      expect(awaitingConsent(), {updated.id});
     });
 
     test('asks again about a module the user once declined', () async {
@@ -408,17 +409,27 @@ Ads = type=http-response,pattern=$pattern,script-path=${urlOf('/ads.js')}
       return (await stored()).single;
     }
 
-    test('stays on through an update that changes its scripts', () async {
+    test('turns off when an update changes its scripts', () async {
       final ads = await accepted();
       bodies['/ads.sgmodule'] = scripted('.*');
       bodies['/ads.js'] = 'two';
 
       await action().updateModule(ads);
 
+      expect((await stored()).single.enabled, isFalse);
+    });
+
+    test('stays on through an update that changes no script', () async {
+      final ads = await accepted();
+      bodies['/ads.sgmodule'] = scripted('^https://a')
+          .replaceFirst('example.com', 'example.com, *.example.org');
+
+      await action().updateModule(ads);
+
       expect((await stored()).single.enabled, isTrue);
     });
 
-    test('stays on through an auto update that changes its scripts', () async {
+    test('turns off through an auto update that changes its scripts', () async {
       final ads = await accepted();
       bodies['/ads.js'] = 'two';
       await action().putModule(
@@ -430,7 +441,7 @@ Ads = type=http-response,pattern=$pattern,script-path=${urlOf('/ads.js')}
       await action().autoUpdate();
 
       final updated = (await stored()).single;
-      expect(updated.enabled, isTrue);
+      expect(updated.enabled, isFalse);
       expect(updated.lastUpdateTime.isAfter(DateTime.utc(2000)), isTrue);
     });
   });

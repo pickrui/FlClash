@@ -84,7 +84,9 @@ List<LiveStatus> watchLiveStatuses(WidgetRef ref) {
     ),
     _ => null,
   };
-  final awaitingConsent = ref.watch(mitmModulesToAgreeProvider);
+  final awaitingConsent = mitmFeature
+      ? ref.watch(mitmModulesToAgreeProvider)
+      : const [];
   return [
     if (core != CoreStatus.connected) CoreLiveStatus(core),
     ?update,

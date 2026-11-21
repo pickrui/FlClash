@@ -334,13 +334,25 @@ class MitmModulesAction extends _$MitmModulesAction {
         if (current == null || !ref.mounted) {
           return module;
         }
-        final saved = _withContent(current, content).copyWith(
+        final merged = {...mitmAttachments(current), ...resources, ...written};
+        final bringsNew =
+            !added &&
+            !edited &&
+            current.enabled &&
+            await _bringsNewScripts(current, content, merged);
+        if (!ref.mounted) {
+          return module;
+        }
+        var saved = _withContent(current, content).copyWith(
           name: content.name ?? current.name,
           description: content.description ?? '',
           system: content.system,
-          resources: {...mitmAttachments(current), ...resources, ...written},
+          resources: merged,
           lastUpdateTime: DateTime.now(),
         );
+        if (bringsNew) {
+          saved = saved.copyWith(enabled: false, accepted: null);
+        }
         final path = await _pathOf(saved);
         await durableCreateDirectory(p.dirname(path));
         await withFileRollback(path, () async {
@@ -355,6 +367,29 @@ class MitmModulesAction extends _$MitmModulesAction {
         await _cleanAfterSave();
       }
     }
+  }
+
+  /// An update that adds a script or changes the file a script runs asks
+  /// again, even for a module agreed to before.
+  Future<bool> _bringsNewScripts(
+    MitmModule current,
+    MitmModuleContent content,
+    Map<String, String> resources,
+  ) async {
+    final MitmModuleContent previous;
+    try {
+      previous = await _read(current, current.arguments);
+    } on FileSystemException {
+      return content.declaredScripts > 0;
+    }
+    final before = previous.declaredScriptLines.toSet();
+    final lines = content.declaredScriptLines;
+    return lines.any((line) => !before.contains(line)) ||
+        resources.entries.any(
+          (entry) =>
+              current.resources[entry.key] != entry.value &&
+              lines.any((line) => line.contains(entry.key)),
+        );
   }
 
   MitmModule _withContent(MitmModule current, MitmModuleContent content) {

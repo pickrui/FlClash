@@ -241,8 +241,10 @@ class Database extends _$Database {
     );
   }
 
-  /// On with something to ask about counts as agreed, on with nothing as not
-  /// yet asked, off as declined; an unreadable module file counts as asking.
+  /// Only scripts were asked about before, so on with scripts counts as
+  /// agreed; on with other things to ask about turns off until the user
+  /// agrees, on with nothing as not yet asked, off as declined. An unreadable
+  /// module file counts as asking.
   Future<void> _recordMitmConsent(Migrator m) async {
     final columns = (await customSelect(
       'PRAGMA table_info(mitm_modules)',
@@ -266,13 +268,16 @@ class Database extends _$Database {
           values: row.arguments,
         ).asksConsent;
       } catch (_) {}
+      final asks = fileAsks ?? true;
+      final agreed = row.enabled && row.scripts > 0;
       await (update(mitmModules)..where((t) => t.id.equals(row.id))).write(
         MitmModulesCompanion(
-          asksConsent: Value(fileAsks ?? true),
+          asksConsent: Value(asks),
+          enabled: Value(row.enabled && (agreed || !asks)),
           accepted: Value(
             !row.enabled
                 ? false
-                : row.scripts > 0 || fileAsks == true
+                : agreed
                 ? true
                 : null,
           ),

@@ -14,6 +14,7 @@ import 'package:fl_clash/features/overwrite/proxy_chain.dart';
 import 'package:fl_clash/features/overwrite/rule.dart';
 import 'package:fl_clash/features/overwrite/routing_draft.dart';
 import 'package:fl_clash/features/overwrite/routing_target_picker.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/routing_issues.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
@@ -631,6 +632,7 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
       ...customExitsOf(
         ref.watch(addedRuleStreamProvider(widget.profileId)).value ?? const [],
       ),
+      if (mitmFeature) ...?ref.watch(mitmModuleExitsProvider).value?.keys,
       ...?profile?.exitTargets.keys,
     };
     final globalRules = ref.watch(globalRulesProvider).value ?? const [];

@@ -128,9 +128,14 @@ void main() {
     expect(
       [
         for (final row in await upgraded.mitmModulesDao.query().get())
-          (row.asksConsent, row.accepted),
+          (row.asksConsent, row.accepted, row.enabled),
       ],
-      [(true, true), (true, true), (false, null), (true, false)],
+      [
+        (true, true, true),
+        (true, null, false),
+        (false, null, true),
+        (true, false, false),
+      ],
     );
   });
 
