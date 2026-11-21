@@ -9,7 +9,9 @@ package core
 import (
 	"slices"
 
+	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/dns"
+	"github.com/metacubex/mihomo/tunnel"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
@@ -78,7 +80,34 @@ func handleResetNetwork() bool {
 		_ = c.Close()
 		return true
 	})
+	resetOutbounds()
 	return handleClearDnsState()
+}
+
+type networkResetter interface{ ResetNetwork() }
+
+// Each provider may hold its own node by a name AllProxies keeps only once.
+func resetOutbounds() {
+	reset := make(map[networkResetter]struct{})
+	visit := func(proxy C.Proxy) {
+		outbound, ok := proxy.Adapter().(networkResetter)
+		if !ok {
+			return
+		}
+		if _, done := reset[outbound]; done {
+			return
+		}
+		reset[outbound] = struct{}{}
+		outbound.ResetNetwork()
+	}
+	for _, proxy := range tunnel.AllProxies() {
+		visit(proxy)
+	}
+	for _, provider := range tunnel.ProvidersSnapshot() {
+		for _, proxy := range provider.Proxies() {
+			visit(proxy)
+		}
+	}
 }
 
 func handleCloseConnection(connectionId string) bool {

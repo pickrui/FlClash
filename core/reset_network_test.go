@@ -14,8 +14,14 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/metacubex/mihomo/adapter"
+	"github.com/metacubex/mihomo/adapter/outbound"
+	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/component/resolver"
+	C "github.com/metacubex/mihomo/constant"
+	P "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/dns"
+	"github.com/metacubex/mihomo/tunnel"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
@@ -69,5 +75,38 @@ func TestResetNetworkClosesEveryTrackedConnection(t *testing.T) {
 	}
 	if client.calls.Load() != 2 {
 		t.Fatal("a network reset left the answer cached on the previous network")
+	}
+}
+
+type resettableOutbound struct {
+	C.ProxyAdapter
+	resets int
+}
+
+func (o *resettableOutbound) ResetNetwork() { o.resets++ }
+
+func TestResetNetworkReopensEveryOutboundThatSharesAConnection(t *testing.T) {
+	node := func(name string) *resettableOutbound {
+		return &resettableOutbound{ProxyAdapter: outbound.NewRejectWithOption(outbound.RejectOption{Name: name})}
+	}
+	providerOf := func(name string, node *resettableOutbound) P.ProxyProvider {
+		proxies := []C.Proxy{adapter.NewProxy(node)}
+		pd, err := provider.NewCompatibleProvider(name, proxies, provider.NewHealthCheck(proxies, "", 0, 0, true, nil))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return pd
+	}
+	shared, first, second := node("Hysteria2"), node("WG"), node("WG")
+	tunnel.UpdateProxies(map[string]C.Proxy{"Hysteria2": adapter.NewProxy(shared)}, map[string]P.ProxyProvider{
+		"A": providerOf("A", first),
+		"B": providerOf("B", second),
+	})
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	handleResetNetwork()
+
+	if shared.resets != 1 || first.resets != 1 || second.resets != 1 {
+		t.Fatalf("resets %d, %d and %d, want one each", shared.resets, first.resets, second.resets)
 	}
 }
