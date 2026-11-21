@@ -59,7 +59,7 @@ class LinuxProtocolRegistrationPlan {
   String get desktopEntry => [
     '[Desktop Entry]',
     'Type=Application',
-    'Name=FlClash for oixCloud',
+    'Name=$appName',
     if (menuIcon case final icon?) ...[
       'Icon=${escapeDesktopEntryValue(icon)}',
       'Categories=Network;',
