@@ -10,6 +10,7 @@ import 'dart:math' as math;
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/update_download_task.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/providers/update_download.dart';
 import 'package:fl_clash/state.dart';
@@ -57,6 +58,13 @@ final class UpdateStatus extends LiveStatus {
       : 1;
 }
 
+/// MITM modules turned off until the user agrees to what they run.
+final class MitmConsentStatus extends LiveStatus {
+  const MitmConsentStatus(this.names, {super.preview});
+
+  final List<String> names;
+}
+
 bool _isRunningCore(LiveStatus status) =>
     status is CoreLiveStatus && status.phase == CoreStatus.connected;
 
@@ -76,9 +84,12 @@ List<LiveStatus> watchLiveStatuses(WidgetRef ref) {
     ),
     _ => null,
   };
+  final awaitingConsent = ref.watch(mitmModulesToAgreeProvider);
   return [
     if (core != CoreStatus.connected) CoreLiveStatus(core),
     ?update,
+    if (awaitingConsent.isNotEmpty)
+      MitmConsentStatus([for (final module in awaitingConsent) module.name]),
     if (core == CoreStatus.connected)
       const CoreLiveStatus(CoreStatus.connected),
   ];
@@ -116,6 +127,7 @@ void showLiveStatusPreview(BuildContext context) {
             version: version,
             preview: 'downloading',
           ),
+          const MitmConsentStatus(['Ads', 'Scripts'], preview: 'consent'),
           const CoreLiveStatus(CoreStatus.connected, preview: 'running'),
         ],
       ),
@@ -226,6 +238,10 @@ class _LiveStatusPill extends StatelessWidget {
         colorScheme.successContainer,
         colorScheme.onSuccessContainer,
       ),
+      MitmConsentStatus() => (
+        colorScheme.warningContainer,
+        colorScheme.onWarningContainer,
+      ),
       _ => (null, null),
     };
     final label = switch (status) {
@@ -234,6 +250,7 @@ class _LiveStatusPill extends StatelessWidget {
       CoreLiveStatus() => appLocalizations.connecting,
       UpdateStatus(isReady: true) => appLocalizations.updateReady,
       UpdateStatus() => appLocalizations.updateDownloading,
+      MitmConsentStatus() => appLocalizations.mitmModulesTurnedOff,
     };
     final iconSize = globalState.measure.textHeight(AppTextStyle.subheadline);
     final icon = SizedBox.square(
@@ -252,6 +269,7 @@ class _LiveStatusPill extends StatelessWidget {
           fill: 1,
         ),
         UpdateStatus(:final progress) => _PillProgressRing(value: progress),
+        MitmConsentStatus() => const GlyphIcon(AppGlyphs.puzzle, fill: 1),
       },
     );
     final shown = switch (status) {

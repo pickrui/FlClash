@@ -6,6 +6,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:fl_clash/features/mitm/module_editor.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/common/update_download.dart'
     show AppUpdateInstallPhase;
@@ -701,6 +703,22 @@ _Confirm? _confirmOf(LiveStatus status) => switch (status) {
 
 void _inert() {}
 
+/// Asks module by module, each as it stands when its turn comes, until the
+/// card goes or a prompt is dismissed.
+Future<void> _reviewModules(BuildContext context, WidgetRef ref) async {
+  final ids = [
+    for (final module in ref.read(mitmModulesToAgreeProvider)) module.id,
+  ];
+  for (final id in ids) {
+    if (!context.mounted) return;
+    final module = ref
+        .read(mitmModulesToAgreeProvider)
+        .where((item) => item.id == id)
+        .firstOrNull;
+    if (module != null && !await answerMitmModule(ref, module)) return;
+  }
+}
+
 class _StatusCard extends ConsumerWidget {
   const _StatusCard({
     required this.status,
@@ -741,12 +759,14 @@ class _StatusCard extends ConsumerWidget {
             stopDownload: task.cancel,
             install: () => unawaited(update.install()),
             discard: task.cancel,
+            reviewModules: () => unawaited(_reviewModules(context, ref)),
           )
         : (
             restartCore: _inert,
             stopDownload: _inert,
             install: _inert,
             discard: _inert,
+            reviewModules: _inert,
           );
     final inPlace = switch (status) {
       UpdateStatus(download: AppUpdateDownloadState(:final file?)) when live =>
@@ -835,6 +855,17 @@ class _StatusCard extends ConsumerWidget {
             : appLocalizations.updateInstall,
         download.installPhase == null ? effects.install : null,
         (colorScheme.success, colorScheme.onSuccess),
+      ),
+      MitmConsentStatus(:final names) => (
+        colorScheme.warningContainer,
+        _ConsentHero(names: names),
+        appLocalizations.mitmModulesTurnedOff,
+        names.length == 1
+            ? appLocalizations.mitmModuleTurnedOffDesc(names.single)
+            : appLocalizations.mitmModulesTurnedOffDesc(names.length),
+        appLocalizations.view,
+        effects.reviewModules,
+        (colorScheme.warning, colorScheme.onWarning),
       ),
     };
     final ask = switch (_confirmOf(status)) {
@@ -1247,12 +1278,14 @@ class _BadgeHero extends StatelessWidget {
     required this.glyph,
     required this.glyphColor,
     required this.chips,
+    this.fill = 0,
   });
 
   final Color color;
   final Glyph glyph;
   final Color glyphColor;
   final List<Widget> chips;
+  final double fill;
 
   @override
   Widget build(BuildContext context) {
@@ -1271,7 +1304,12 @@ class _BadgeHero extends StatelessWidget {
                   shape: AppShape.circle,
                 ),
                 child: Center(
-                  child: GlyphIcon(glyph, size: 28, color: glyphColor),
+                  child: GlyphIcon(
+                    glyph,
+                    size: 28,
+                    color: glyphColor,
+                    fill: fill,
+                  ),
                 ),
               ),
             ),
@@ -1279,6 +1317,30 @@ class _BadgeHero extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ConsentHero extends StatelessWidget {
+  const _ConsentHero({required this.names});
+
+  static const _shownNames = 2;
+
+  final List<String> names;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final rest = names.length - _shownNames;
+    return _BadgeHero(
+      color: colorScheme.warning,
+      glyph: AppGlyphs.puzzle,
+      glyphColor: colorScheme.onWarning,
+      fill: 1,
+      chips: [
+        for (final text in [...names.take(_shownNames), if (rest > 0) '+$rest'])
+          Flexible(child: _HeroChip(text, color: colorScheme.onSurfaceVariant)),
+      ],
     );
   }
 }
