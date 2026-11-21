@@ -36,6 +36,20 @@ class ToolsView extends ConsumerStatefulWidget {
 }
 
 class _ToolViewState extends ConsumerState<ToolsView> {
+  late final ScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = sheetScrollController(context);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Widget _buildNavigationMenuItem(NavigationItem navigationItem) {
     return ListItem.open(
       leading: GlyphIcon(navigationGlyphOf(navigationItem.label)),
@@ -132,6 +146,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       body: Builder(
         builder: (context) => ListView(
           key: toolsStoreKey,
+          controller: _controller,
           padding: EdgeInsets.fromLTRB(
             16,
             context.sectionsTopPadding,

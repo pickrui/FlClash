@@ -30,7 +30,7 @@ extension DashboardWidgetView on DashboardWidget {
     DashboardWidget.vpnButton => AppGlyphs.vpn,
     DashboardWidget.networkTakeover => AppGlyphs.shuffle,
     DashboardWidget.profiles => AppGlyphs.profiles,
-    DashboardWidget.proxyGroups => AppGlyphs.layers,
+    DashboardWidget.proxyGroups => AppGlyphs.nodeGroup,
     DashboardWidget.connectionStats => AppGlyphs.connections,
     DashboardWidget.intranetIp => AppGlyphs.devices,
     DashboardWidget.memoryInfo => AppGlyphs.memory,
