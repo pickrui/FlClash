@@ -198,15 +198,15 @@ void main() {
   );
 
   group('restoredWindowPosition', () {
+    // Every display in the units of a window at 100%.
     const primary = DesktopDisplay(
       bounds: Rect.fromLTWH(0, 0, 1920, 1080),
-      workArea: Rect.fromLTWH(0, 0, 1920, 1080),
+      workArea: Rect.fromLTWH(0, 0, 1920, 1040),
       isPrimary: true,
     );
-    // 2560x1440 physical at 150%, in its own logical pixels.
     const secondary = DesktopDisplay(
-      bounds: Rect.fromLTWH(1280, 0, 1707, 960),
-      workArea: Rect.fromLTWH(1280, 0, 1707, 960),
+      bounds: Rect.fromLTWH(1920, 0, 2560, 1440),
+      workArea: Rect.fromLTWH(1920, 0, 2560, 1400),
       scaleFactor: 1.5,
     );
 
@@ -235,6 +235,25 @@ void main() {
         height: 600,
         left: 2200,
         top: 100,
+        scale: 1,
+      );
+
+      expect(
+        restoredWindowPosition(
+          props,
+          displays: const [primary],
+          currentScale: 1,
+        ),
+        isNull,
+      );
+    });
+
+    test('rejects a title bar under the taskbar', () {
+      const props = WindowProps(
+        width: 800,
+        height: 600,
+        left: 400,
+        top: 1045,
         scale: 1,
       );
 
