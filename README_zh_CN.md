@@ -56,7 +56,7 @@
 ⚠️ 使用前请确保安装以下依赖
 
 ```bash
-sudo apt-get install libkeybinder-3.0-dev
+sudo apt-get install libgtk-3-0 libsecret-1-0
 ```
 
 Arch Linux 及其衍生版用发布页附带的 PKGBUILD 安装，依赖与升级都交给 pacman：
@@ -165,7 +165,7 @@ macOS 和 Windows 上的 Docker Desktop 会为所有 Linux 容器运行一个共
 
         2. 依赖会由 setup 脚本自动安装，也可以手动安装：
            ```bash
-           sudo apt-get install -y libkeybinder-3.0-dev
+           sudo apt-get install -y libgtk-3-dev libsecret-1-dev
            ```
 
         3. 运行构建脚本

@@ -59,6 +59,9 @@ jobs:
       - name: Run Windows service tests
         run: cargo test --manifest-path services/helper/Cargo.toml --features windows-service
 
+      - name: Run rust_api Windows tests
+        run: cargo test --locked --manifest-path plugins/rust_api/rust/Cargo.toml
+
       - name: Setup Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:

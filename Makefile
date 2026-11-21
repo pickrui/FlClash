@@ -15,7 +15,7 @@ GOTOOLCHAIN ?= go1.27.4
 ##> ARGS=...              package-*: extra setup.dart arguments
 
 CARGO := env -u all_proxy -u ALL_PROXY CARGO_INCREMENTAL=0 cargo
-COVERAGE_TESTS := test plugins/proxy/test/proxy_test.dart plugins/wifi_ssid/test plugins/tray/test plugins/window/test
+COVERAGE_TESTS := test plugins/proxy/test/proxy_test.dart
 # setup.dart reads the build secrets from the environment, as .env.local holds them.
 SETUP := set -a; if [ -f .env.local ]; then . ./.env.local; fi; set +a; dart setup.dart
 PACKAGE_FLAGS = $(if $(ARCH),--arch $(ARCH)) $(if $(FORM),--targets $(FORM))

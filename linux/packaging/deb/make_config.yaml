@@ -11,6 +11,7 @@ essential: false
 icon: ./assets/images/icon.png
 
 dependencies:
+  - libgtk-3-0
   - libsecret-1-0
 
 supported_mime_type:

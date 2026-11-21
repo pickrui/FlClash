@@ -72,7 +72,7 @@ void main() {
       'Essential: no\n'
       'Installed-Size: 6604\n'
       'Description: $_description\n'
-      'Depends: libsecret-1-0\n',
+      'Depends: libgtk-3-0, libsecret-1-0\n',
     );
     expect(
       files['usr/share/applications/flclash-oixcloud.desktop'],
@@ -130,7 +130,7 @@ void main() {
       'Group: Applications/Internet\n'
       'Packager: chen08209 <chen08209@gmail.com>\n'
       'License: Other\n'
-      'Requires: libsecret\n'
+      'Requires: gtk3, libsecret\n'
       'BuildArch: x86_64\n'
       '\n'
       '%description\n'

@@ -11,6 +11,7 @@ essential: false
 icon: ./assets/images/icon.png
 
 requires:
+  - gtk3
   - libsecret
 
 supported_mime_type:
