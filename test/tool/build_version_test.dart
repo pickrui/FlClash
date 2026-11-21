@@ -119,7 +119,8 @@ void main() {
   });
 
   test(
-    'the real CI script ignores the future pubspec floor and matches setup',
+    'the real CI script takes the tag version, ignores the pubspec floor and '
+    'matches setup',
     () async {
       final workflow = loadYaml(
         File('.github/workflows/build.yaml').readAsStringSync(),
@@ -143,20 +144,32 @@ void main() {
         ..writeAsStringSync('version: 0.8.97+2026092919\n');
       final output = File('${temp.path}/output');
       final dateCall = File('${temp.path}/date-call');
-      final environment = <String, String>{
-        'PATH': '${bin.path}:${Platform.environment['PATH']}',
-        'GITHUB_OUTPUT': output.path,
-        'DATE_CALL': dateCall.path,
-        for (final entry in (step['env'] as YamlMap).entries)
-          entry.key as String: entry.value as String,
-      };
-      final result = await Process.run(
+      Future<ProcessResult> run(String tag) => Process.run(
         'bash',
         ['-c', step['run'] as String],
         workingDirectory: temp.path,
-        environment: environment,
+        environment: {
+          'PATH': '${bin.path}:${Platform.environment['PATH']}',
+          'GITHUB_OUTPUT': output.path,
+          'DATE_CALL': dateCall.path,
+          for (final entry in (step['env'] as YamlMap).entries)
+            entry.key as String: entry.value as String,
+          'TAG': tag,
+        },
         includeParentEnvironment: false,
       );
+      for (final (tag, version) in [
+        ('v0.8.98-pre.2+1', '0.8.98'),
+        ('v0.8.97-debug', null),
+      ]) {
+        final result = await run(tag);
+        expect(result.exitCode == 0, version != null, reason: tag);
+        if (version != null) {
+          expect(output.readAsLinesSync().first, 'version_number=$version');
+          output.deleteSync();
+        }
+      }
+      final result = await run('v0.8.97');
       expect(result.exitCode, 0, reason: '${result.stderr}');
       expect(dateCall.readAsLinesSync(), ['Asia/Shanghai', '+%Y%m%d%H']);
       expect(output.readAsLinesSync(), [
