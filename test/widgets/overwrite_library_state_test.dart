@@ -86,6 +86,8 @@ Future<void> _pumpPage(
   SetupAction? setup,
   Map<String, dynamic> source = const {},
   Map<String, String> proxyAliases = const {},
+  Map<String, String> exitTargets = const {},
+  bool globalRules = false,
 }) async {
   const size = Size(800, 1400);
   await tester.binding.setSurfaceSize(size);
@@ -102,12 +104,19 @@ Future<void> _pumpPage(
               overwriteType: mode,
               scriptId: scriptId,
               proxyAliases: proxyAliases,
+              exitTargets: exitTargets,
             ),
           ],
         ),
         setupActionProvider.overrideWith(() => setup ?? _SetupAction()),
         viewSizeProvider.overrideWithBuild((_, _) => size),
         routingSourceProvider(1).overrideWith((_) async => source),
+        addedRuleStreamProvider(1).overrideWith((_) => Stream.value([])),
+        if (!globalRules) ...[
+          globalRulesProvider.overrideWithBuild((_, _) => Stream.value([])),
+          profileDisabledRuleIdsProvider(1)
+              .overrideWithBuild((_, _) => Stream.value([])),
+        ],
         if (scripts)
           scriptsProvider.overrideWithBuild((_, _) => Stream.value([])),
         ...overrides,
@@ -263,7 +272,7 @@ void main() {
         ),
         profileDisabledRuleIdsProvider(1)
             .overrideWithBuild((_, _) => disabledIds()),
-      ]);
+      ], globalRules: true);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Control global added rules'));
       await tester.pump();
@@ -329,15 +338,20 @@ void main() {
             for (final (id, target) in [
               (1, 'Proxy'),
               (2, 'Removed'),
-              (3, 'match'),
+              (3, 'Media'),
               (4, 'DIRECT'),
               (5, 'Old'),
             ])
-              Rule(id: id, value: 'DOMAIN,$id.test,$target'),
+              Rule(
+                id: id,
+                value: 'DOMAIN,$id.test,$target',
+                customExit: id == 3,
+              ),
           ]),
         ),
       ],
       proxyAliases: const {'Old': 'Proxy'},
+      exitTargets: const {'Media': 'Gone'},
       source: {
         'proxy-groups': [
           {
@@ -356,6 +370,11 @@ void main() {
       },
       {1: false, 2: true, 3: false, 4: false, 5: false},
     );
+    expect(
+      find.byTooltip(currentAppLocalizations.outboundUnavailable),
+      findsOneWidget,
+    );
+    expect(find.text('Gone'), findsOneWidget);
   });
 
   testWidgets('added rules hold back the back gesture only while selected', (
@@ -392,7 +411,7 @@ void main() {
       ),
       profileDisabledRuleIdsProvider(1)
           .overrideWithBuild((_, _) => Stream.value([])),
-    ]);
+    ], globalRules: true);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Control global added rules'));
     await tester.pumpAndSettle();

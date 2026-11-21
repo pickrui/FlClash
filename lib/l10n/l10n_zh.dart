@@ -2572,13 +2572,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ssidPermissionMacosGuide => '读取 Wi-Fi 名称需要定位权限，请在系统设置中允许本应用使用定位服务';
 
   @override
-  String get matchTargetTitle => '匹配目标';
+  String get exitDefault => '默认';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get customExit => '自定义出口';
 
   @override
-  String get followProfile => '跟随配置';
+  String get inputExitName => '输入出口名称';
 
   @override
   String get iconHistory => '最近使用的图标';

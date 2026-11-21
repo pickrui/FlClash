@@ -412,6 +412,51 @@ Map<String, dynamic> applyCustomProxyAliases(
   return result;
 }
 
+String? lastMatchTarget(List<String> rules) {
+  for (var index = rules.length - 1; index >= 0; index--) {
+    final parsed = ParsedRule.parseString(rules[index]);
+    final target = parsed.ruleTarget;
+    if (parsed.ruleAction == RuleAction.MATCH &&
+        target != null &&
+        target.isNotEmpty) {
+      return target;
+    }
+  }
+  return null;
+}
+
+Set<String> outboundNamesOf(Map<dynamic, dynamic> config) => {
+  for (final key in const ['proxies', 'proxy-groups'])
+    if (config[key] case final List<dynamic> items)
+      for (final item in items)
+        if (item case {'name': final String name}) name,
+};
+
+/// mihomo sends DIRECT what no rule matches, MATCH included.
+String Function(String exit) exitTargetResolver({
+  required Map<String, String> targets,
+  required Set<String> outbounds,
+  required String? fallback,
+}) {
+  bool usable(String? target) =>
+      target != null &&
+      (RuleTarget.ruleTargets.contains(target) || outbounds.contains(target));
+  return (exit) {
+    final mapped = targets[exit];
+    if (usable(mapped)) return mapped!;
+    if (outbounds.contains(exit)) return exit;
+    return fallback ?? RuleTarget.DIRECT.value;
+  };
+}
+
+String _routeExit(String rule, String Function(String exit) targetOf) {
+  final parsed = ParsedRule.parseString(rule);
+  final exit = parsed.ruleTarget;
+  return exit == null
+      ? rule
+      : parsed.copyWith(ruleTarget: targetOf(exit)).value;
+}
+
 Future<Map<String, dynamic>> _makeRealProfileTask(
   MakeRealProfileState data,
 ) async {
@@ -453,14 +498,17 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   };
   final addedRules = [
     for (final rule in data.addedRules)
-      rule.copyWith(
-        value: _renameCustomProxyRule(
-          rule.value,
-          data.globalRuleIds.contains(rule.id)
-              ? globalRuleAliases
-              : ruleAliases,
+      if (rule.customExit)
+        rule
+      else
+        rule.copyWith(
+          value: _renameCustomProxyRule(
+            rule.value,
+            data.globalRuleIds.contains(rule.id)
+                ? globalRuleAliases
+                : ruleAliases,
+          ),
         ),
-      ),
   ];
   // A shared node leaves a same-named subscription node alone, unless this
   // profile holds it: an alias from a subscription name to the node.
@@ -782,45 +830,21 @@ Future<Map<String, dynamic>> _makeRealProfileTask(
   ];
   rawConfig.remove('rules');
   if (addedRules.isNotEmpty) {
-    final parsedNewRules = addedRules
-        .map((item) => ParsedRule.parseString(item.value))
-        .toList();
-    final hasMatchPlaceholder = parsedNewRules.any(
-      (item) => item.ruleTarget?.toUpperCase() == 'MATCH',
-    );
-    String? replacementTarget = data.matchTarget?.trim();
-    if (replacementTarget?.isEmpty == true) replacementTarget = null;
-
-    if (hasMatchPlaceholder && replacementTarget == null) {
-      for (int i = rules.length - 1; i >= 0; i--) {
-        final parsed = ParsedRule.parseString(rules[i]);
-        if (parsed.ruleAction == RuleAction.MATCH) {
-          final target = parsed.ruleTarget;
-          if (target != null && target.isNotEmpty) {
-            replacementTarget = target;
-            break;
-          }
-        }
-      }
-    }
-    final List<String> finalAddedRules;
-
-    if (replacementTarget?.isNotEmpty == true) {
-      finalAddedRules = [];
-      for (int i = 0; i < parsedNewRules.length; i++) {
-        final parsed = parsedNewRules[i];
-        if (parsed.ruleTarget?.toUpperCase() == 'MATCH') {
-          finalAddedRules.add(
-            parsed.copyWith(ruleTarget: replacementTarget).value,
-          );
-        } else {
-          finalAddedRules.add(addedRules[i].value);
-        }
-      }
-    } else {
-      finalAddedRules = addedRules.map((e) => e.value).toList();
-    }
-    rules = [...finalAddedRules, ...rules];
+    final exitTarget = addedRules.any((rule) => rule.customExit)
+        ? exitTargetResolver(
+            targets: data.exitTargets,
+            outbounds: outboundNamesOf(rawConfig),
+            fallback: lastMatchTarget(rules),
+          )
+        : null;
+    rules = [
+      for (final rule in addedRules)
+        if (exitTarget != null && rule.customExit)
+          _routeExit(rule.value, exitTarget)
+        else
+          rule.value,
+      ...rules,
+    ];
   }
   rawConfig['rules'] = [
     if (blockWebRtc) 'SNIFF-PROTOCOL,stun,REJECT-DROP',

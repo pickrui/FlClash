@@ -2753,13 +2753,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Autorisez la localisation pour cette application dans les Réglages Système afin de lire les noms Wi-Fi.';
 
   @override
-  String get matchTargetTitle => 'Cible de correspondance';
+  String get exitDefault => 'Par défaut';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get customExit => 'Sortie personnalisée';
 
   @override
-  String get followProfile => 'Suivre le profil';
+  String get inputExitName => 'Saisissez le nom de la sortie';
 
   @override
   String get iconHistory => 'Icônes récentes';

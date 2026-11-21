@@ -1232,7 +1232,7 @@ void main() {
     };
     final profile = _baseProfile.copyWith(
       overwriteType: OverwriteType.custom,
-      matchTarget: 'HK',
+      exitTargets: const {'MATCH': 'HK'},
       selectedMap: const {'Personal': 'HK'},
       customProxyGroups: const [
         ProxyGroup(name: 'Personal', type: GroupType.Selector, proxies: ['HK']),
@@ -1247,7 +1247,7 @@ void main() {
     );
 
     void expectReferencesKept(Profile next) {
-      expect(next.matchTarget, 'HK');
+      expect(next.exitTargets, {'MATCH': 'HK'});
       expect(next.selectedMap, {'Personal': 'HK'});
       expect(next.proxyChains.single, profile.proxyChains.single);
     }
@@ -1294,7 +1294,7 @@ void main() {
       final (profiles, messages) = await _pump(
         tester,
         setupAction,
-        profile.copyWith(matchTarget: 'Solo'),
+        profile.copyWith(exitTargets: const {'MATCH': 'Solo'}),
       );
 
       await _deleteFromMenu(tester, 'Solo');
@@ -1321,7 +1321,7 @@ void main() {
       'rules': ['MATCH,Proxy'],
     };
     final profile = _baseProfile.copyWith(
-      matchTarget: 'HK',
+      exitTargets: const {'MATCH': 'HK'},
       profileProxies: const [
         ProfileProxy(id: 10, proxy: {'name': 'HK', 'type': 'vmess'}),
       ],
@@ -1379,7 +1379,7 @@ void main() {
 
           expect(messages, isEmpty);
           final next = profiles.state.single;
-          expect(next.matchTarget, 'HK');
+          expect(next.exitTargets, {'MATCH': 'HK'});
           expect(next.proxyChains.single, profile.proxyChains.single);
           expect(setupAction.applies, 1);
           await expectBuilds(tester, raw, next);

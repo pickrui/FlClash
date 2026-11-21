@@ -257,8 +257,8 @@ void main() {
             title: 'Target',
             options: ['DIRECT', 'Group', 'Node'],
             groupNames: {'Group'},
-            value: 'Missing',
-            allowFollow: true,
+            value: (name: 'Missing', exit: false),
+            allowDefault: true,
           ),
         ),
       );

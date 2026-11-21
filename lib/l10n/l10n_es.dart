@@ -2745,13 +2745,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Permita la ubicación para esta aplicación en Ajustes del Sistema para leer los nombres Wi-Fi.';
 
   @override
-  String get matchTargetTitle => 'Destino de coincidencia';
+  String get exitDefault => 'Predeterminado';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get customExit => 'Salida personalizada';
 
   @override
-  String get followProfile => 'Seguir perfil';
+  String get inputExitName => 'Introduce el nombre de la salida';
 
   @override
   String get iconHistory => 'Iconos recientes';

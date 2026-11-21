@@ -2638,13 +2638,13 @@ class AppLocalizationsKo extends AppLocalizations {
       'Wi-Fi 이름을 읽으려면 시스템 설정에서 이 앱의 위치 서비스 사용을 허용하세요.';
 
   @override
-  String get matchTargetTitle => '일치 대상';
+  String get exitDefault => '기본값';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get customExit => '사용자 지정 출구';
 
   @override
-  String get followProfile => '프로필 따르기';
+  String get inputExitName => '출구 이름을 입력하세요';
 
   @override
   String get iconHistory => '최근 아이콘';

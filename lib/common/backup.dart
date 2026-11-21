@@ -170,7 +170,7 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
     }
     final id = idMap.putIfAbsent(ruleMap['id'], () => _legacyId(rawRuleId));
     ruleMap['id'] = id;
-    rules.add(Rule.fromJson(ruleMap));
+    rules.add(Rule.fromJson(ruleMap).withMatchExit);
     links.add(ProfileRuleLink(ruleId: id, order: globalOrders[index]));
   }
   final globalRuleIds = [for (final rule in rules) rule.id];
@@ -213,7 +213,7 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
             () => _legacyId(addRuleId),
           );
           addRuleMap['id'] = id;
-          rules.add(Rule.fromJson(addRuleMap));
+          rules.add(Rule.fromJson(addRuleMap).withMatchExit);
           links.add(
             ProfileRuleLink(
               profileId: profileId,
@@ -265,6 +265,10 @@ Future<MigrationData> _oldToNowTask(LegacyBackupRequest data) async {
       fileMigrations.add(
         VM2(targetFilePath, _getProfilePath(livePath, profileId.toString())),
       );
+    }
+    if (profileMap.remove('matchTarget') case final String target
+        when target.trim().isNotEmpty) {
+      profileMap['exitTargets'] = {RuleTarget.MATCH.value: target.trim()};
     }
     profiles.add(Profile.fromJson(profileMap));
   }

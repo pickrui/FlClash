@@ -28,7 +28,12 @@ class Profiles extends Table {
 
   IntColumn get scriptId => integer().nullable()();
 
+  /// Read only by the v15 upgrade, which moves it into [exitTargets].
   TextColumn get matchTarget => text().nullable()();
+
+  TextColumn get exitTargets => text()
+      .map(const StringMapConverter())
+      .withDefault(const Constant('{}'))();
 
   IntColumn get autoUpdateDurationMillis => integer()();
 
@@ -269,7 +274,7 @@ extension RawProfilExt on RawProfile {
       customProxyGroups: customProxyGroups,
       customRules: customRules,
       scriptId: scriptId,
-      matchTarget: matchTarget,
+      exitTargets: exitTargets,
       order: order,
       profileType: profileType,
       // A custom profile has no subscription to overwrite: always replace.
@@ -303,7 +308,7 @@ extension ProfilesCompanionExt on Profile {
       customProxyGroups: Value(customProxyGroups),
       customRules: Value(customRules),
       scriptId: Value(scriptId),
-      matchTarget: Value(matchTarget),
+      exitTargets: Value(exitTargets),
       order: Value(order ?? this.order),
       profileType: Value(profileType),
       overrides: Value(overrides),

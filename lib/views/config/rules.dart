@@ -54,6 +54,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
       builder: (_) => AddedRuleForm(
         rule: rule,
         targets: tailscaleRoutingTargets(ref.read(tailscaleNetworksProvider)),
+        exits: customExitsOf(ref.read(globalRulesProvider).value ?? const []),
       ),
     );
     if (!mounted || res == null) {

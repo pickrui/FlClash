@@ -444,12 +444,14 @@ _Rule _$RuleFromJson(Map<String, dynamic> json) => _Rule(
   id: (json['id'] as num).toInt(),
   value: json['value'] as String,
   order: json['order'] as String?,
+  customExit: json['customExit'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$RuleToJson(_Rule instance) => <String, dynamic>{
   'id': instance.id,
   'value': instance.value,
   'order': instance.order,
+  'customExit': instance.customExit,
 };
 
 _SubRule _$SubRuleFromJson(Map<String, dynamic> json) =>

@@ -2605,13 +2605,13 @@ class AppLocalizationsJa extends AppLocalizations {
       'Wi-Fi 名を取得するには、システム設定でこのアプリの位置情報サービスを許可してください';
 
   @override
-  String get matchTargetTitle => 'マッチ先';
+  String get exitDefault => 'デフォルト';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get customExit => 'カスタム出口';
 
   @override
-  String get followProfile => 'プロファイルに従う';
+  String get inputExitName => '出口名を入力してください';
 
   @override
   String get iconHistory => '最近使用したアイコン';

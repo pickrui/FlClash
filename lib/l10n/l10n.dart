@@ -4962,23 +4962,23 @@ abstract class AppLocalizations {
   /// **'Allow this app to use Location Services in System Settings to read Wi-Fi names.'**
   String get ssidPermissionMacosGuide;
 
-  /// No description provided for @matchTargetTitle.
+  /// No description provided for @exitDefault.
   ///
   /// In en, this message translates to:
-  /// **'Match target'**
-  String get matchTargetTitle;
+  /// **'Default'**
+  String get exitDefault;
 
-  /// No description provided for @matchTarget.
+  /// No description provided for @customExit.
   ///
   /// In en, this message translates to:
-  /// **'MATCH-TARGET'**
-  String get matchTarget;
+  /// **'Custom exit'**
+  String get customExit;
 
-  /// No description provided for @followProfile.
+  /// No description provided for @inputExitName.
   ///
   /// In en, this message translates to:
-  /// **'Follow profile'**
-  String get followProfile;
+  /// **'Enter the exit name'**
+  String get inputExitName;
 
   /// No description provided for @iconHistory.
   ///

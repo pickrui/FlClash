@@ -26,6 +26,7 @@ class Rules extends Table {
   TextColumn get subRule => text().nullable()();
   BoolColumn get noResolve => boolean().withDefault(const Constant(false))();
   BoolColumn get src => boolean().withDefault(const Constant(false))();
+  BoolColumn get customExit => boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -46,7 +47,7 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
             ),
           ])
           ..addColumns([profileRuleLinks.profileId])
-          ..where(rules.ruleTarget.equals(target))
+          ..where(rules.ruleTarget.equals(target) & rules.customExit.not())
           ..orderBy([OrderingTerm.asc(profileRuleLinks.profileId)])
           ..limit(1);
     final row = await query.getSingleOrNull();
@@ -57,7 +58,10 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
 
   Future<Set<String>> appliedRuleTargets(int profileId) async {
     final applied = await allAddedRules(profileId).get();
-    return {for (final rule in applied) ?ruleTarget(rule.value)};
+    return {
+      for (final rule in applied)
+        if (!rule.customExit) ?ruleTarget(rule.value),
+    };
   }
 
   Future<Set<int>> globalRuleIds() async {
@@ -116,7 +120,9 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
     Map<String, String> names,
     Expression<bool> Function($RulesTable rule) filter,
   ) async {
-    for (final row in await (select(rules)..where(filter)).get()) {
+    final query = select(rules)
+      ..where((rule) => filter(rule) & rule.customExit.not());
+    for (final row in await query.get()) {
       final next = names[row.ruleTarget];
       if (next == null) continue;
       await (update(rules)..whereSamePrimaryKey(row)).write(
@@ -410,7 +416,7 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
 
 extension RawRuleExt on RawRule {
   Rule toRule([String? order]) {
-    return Rule(id: id, value: value, order: order);
+    return Rule(id: id, value: value, order: order, customExit: customExit);
   }
 }
 
@@ -427,6 +433,7 @@ extension RulesCompanionExt on Rule {
       subRule: Value(parsed.subRule),
       noResolve: Value(parsed.noResolve),
       src: Value(parsed.src),
+      customExit: Value(customExit),
     );
   }
 }

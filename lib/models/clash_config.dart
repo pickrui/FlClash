@@ -1320,8 +1320,14 @@ List<int>? _parseRanges(String payload) {
 
 @freezed
 abstract class Rule with _$Rule {
-  const factory Rule({required int id, required String value, String? order}) =
-      _Rule;
+  const factory Rule({
+    required int id,
+    required String value,
+    String? order,
+
+    /// The target is an exit each profile routes as it picks, not an outbound.
+    @Default(false) bool customExit,
+  }) = _Rule;
 
   factory Rule.value(String value) {
     return Rule(value: value, id: snowflake.id);
@@ -1334,6 +1340,29 @@ extension RulesExt on List<Rule> {
   List<Rule> copyAndPut(Rule rule) =>
       ListExt(this).copyAndPut(rule, (item) => item.id == rule.id);
 }
+
+extension RuleExitExt on Rule {
+  String? get exitName =>
+      customExit ? ParsedRule.parseString(value).ruleTarget : null;
+
+  Rule get withMatchExit {
+    final parsed = ParsedRule.parseString(value);
+    if (customExit ||
+        parsed.ruleTarget?.toUpperCase() != RuleTarget.MATCH.value) {
+      return this;
+    }
+    return copyWith(
+      value: parsed.ruleTarget == RuleTarget.MATCH.value
+          ? value
+          : parsed.copyWith(ruleTarget: RuleTarget.MATCH.value).value,
+      customExit: true,
+    );
+  }
+}
+
+Set<String> customExitsOf(Iterable<Rule> rules) => {
+  for (final rule in rules) ?rule.exitName,
+};
 
 @freezed
 abstract class SubRule with _$SubRule {

@@ -113,6 +113,16 @@ class $ProfilesTable extends Profiles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, String>, String>
+  exitTargets = GeneratedColumn<String>(
+    'exit_targets',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  ).withConverter<Map<String, String>>($ProfilesTable.$converterexitTargets);
   static const VerificationMeta _autoUpdateDurationMillisMeta =
       const VerificationMeta('autoUpdateDurationMillis');
   @override
@@ -254,6 +264,7 @@ class $ProfilesTable extends Profiles
     overwriteType,
     scriptId,
     matchTarget,
+    exitTargets,
     autoUpdateDurationMillis,
     subscriptionInfo,
     autoUpdate,
@@ -426,6 +437,12 @@ class $ProfilesTable extends Profiles
         DriftSqlType.string,
         data['${effectivePrefix}match_target'],
       ),
+      exitTargets: $ProfilesTable.$converterexitTargets.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}exit_targets'],
+        )!,
+      ),
       autoUpdateDurationMillis: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}auto_update_duration_millis'],
@@ -510,6 +527,8 @@ class $ProfilesTable extends Profiles
   $converteroverwriteType = const EnumNameConverter<OverwriteType>(
     OverwriteType.values,
   );
+  static TypeConverter<Map<String, String>, String> $converterexitTargets =
+      const StringMapConverter();
   static TypeConverter<SubscriptionInfo?, String?> $convertersubscriptionInfo =
       const SubscriptionInfoConverter();
   static TypeConverter<Map<String, String>, String> $converterselectedMap =
@@ -544,7 +563,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final DateTime? lastCheckDate;
   final OverwriteType overwriteType;
   final int? scriptId;
+
+  /// Read only by the v15 upgrade, which moves it into [exitTargets].
   final String? matchTarget;
+  final Map<String, String> exitTargets;
   final int autoUpdateDurationMillis;
   final SubscriptionInfo? subscriptionInfo;
   final bool autoUpdate;
@@ -569,6 +591,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     required this.overwriteType,
     this.scriptId,
     this.matchTarget,
+    required this.exitTargets,
     required this.autoUpdateDurationMillis,
     this.subscriptionInfo,
     required this.autoUpdate,
@@ -611,6 +634,11 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     }
     if (!nullToAbsent || matchTarget != null) {
       map['match_target'] = Variable<String>(matchTarget);
+    }
+    {
+      map['exit_targets'] = Variable<String>(
+        $ProfilesTable.$converterexitTargets.toSql(exitTargets),
+      );
     }
     map['auto_update_duration_millis'] = Variable<int>(
       autoUpdateDurationMillis,
@@ -696,6 +724,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       matchTarget: matchTarget == null && nullToAbsent
           ? const Value.absent()
           : Value(matchTarget),
+      exitTargets: Value(exitTargets),
       autoUpdateDurationMillis: Value(autoUpdateDurationMillis),
       subscriptionInfo: subscriptionInfo == null && nullToAbsent
           ? const Value.absent()
@@ -738,6 +767,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       ),
       scriptId: serializer.fromJson<int?>(json['scriptId']),
       matchTarget: serializer.fromJson<String?>(json['matchTarget']),
+      exitTargets: serializer.fromJson<Map<String, String>>(
+        json['exitTargets'],
+      ),
       autoUpdateDurationMillis: serializer.fromJson<int>(
         json['autoUpdateDurationMillis'],
       ),
@@ -783,6 +815,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       ),
       'scriptId': serializer.toJson<int?>(scriptId),
       'matchTarget': serializer.toJson<String?>(matchTarget),
+      'exitTargets': serializer.toJson<Map<String, String>>(exitTargets),
       'autoUpdateDurationMillis': serializer.toJson<int>(
         autoUpdateDurationMillis,
       ),
@@ -818,6 +851,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     OverwriteType? overwriteType,
     Value<int?> scriptId = const Value.absent(),
     Value<String?> matchTarget = const Value.absent(),
+    Map<String, String>? exitTargets,
     int? autoUpdateDurationMillis,
     Value<SubscriptionInfo?> subscriptionInfo = const Value.absent(),
     bool? autoUpdate,
@@ -848,6 +882,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     overwriteType: overwriteType ?? this.overwriteType,
     scriptId: scriptId.present ? scriptId.value : this.scriptId,
     matchTarget: matchTarget.present ? matchTarget.value : this.matchTarget,
+    exitTargets: exitTargets ?? this.exitTargets,
     autoUpdateDurationMillis:
         autoUpdateDurationMillis ?? this.autoUpdateDurationMillis,
     subscriptionInfo: subscriptionInfo.present
@@ -889,6 +924,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       matchTarget: data.matchTarget.present
           ? data.matchTarget.value
           : this.matchTarget,
+      exitTargets: data.exitTargets.present
+          ? data.exitTargets.value
+          : this.exitTargets,
       autoUpdateDurationMillis: data.autoUpdateDurationMillis.present
           ? data.autoUpdateDurationMillis.value
           : this.autoUpdateDurationMillis,
@@ -938,6 +976,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ..write('overwriteType: $overwriteType, ')
           ..write('scriptId: $scriptId, ')
           ..write('matchTarget: $matchTarget, ')
+          ..write('exitTargets: $exitTargets, ')
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
           ..write('autoUpdate: $autoUpdate, ')
@@ -967,6 +1006,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     overwriteType,
     scriptId,
     matchTarget,
+    exitTargets,
     autoUpdateDurationMillis,
     subscriptionInfo,
     autoUpdate,
@@ -995,6 +1035,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           other.overwriteType == this.overwriteType &&
           other.scriptId == this.scriptId &&
           other.matchTarget == this.matchTarget &&
+          other.exitTargets == this.exitTargets &&
           other.autoUpdateDurationMillis == this.autoUpdateDurationMillis &&
           other.subscriptionInfo == this.subscriptionInfo &&
           other.autoUpdate == this.autoUpdate &&
@@ -1021,6 +1062,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<OverwriteType> overwriteType;
   final Value<int?> scriptId;
   final Value<String?> matchTarget;
+  final Value<Map<String, String>> exitTargets;
   final Value<int> autoUpdateDurationMillis;
   final Value<SubscriptionInfo?> subscriptionInfo;
   final Value<bool> autoUpdate;
@@ -1045,6 +1087,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.overwriteType = const Value.absent(),
     this.scriptId = const Value.absent(),
     this.matchTarget = const Value.absent(),
+    this.exitTargets = const Value.absent(),
     this.autoUpdateDurationMillis = const Value.absent(),
     this.subscriptionInfo = const Value.absent(),
     this.autoUpdate = const Value.absent(),
@@ -1070,6 +1113,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     required OverwriteType overwriteType,
     this.scriptId = const Value.absent(),
     this.matchTarget = const Value.absent(),
+    this.exitTargets = const Value.absent(),
     required int autoUpdateDurationMillis,
     this.subscriptionInfo = const Value.absent(),
     required bool autoUpdate,
@@ -1101,6 +1145,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<String>? overwriteType,
     Expression<int>? scriptId,
     Expression<String>? matchTarget,
+    Expression<String>? exitTargets,
     Expression<int>? autoUpdateDurationMillis,
     Expression<String>? subscriptionInfo,
     Expression<bool>? autoUpdate,
@@ -1126,6 +1171,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       if (overwriteType != null) 'overwrite_type': overwriteType,
       if (scriptId != null) 'script_id': scriptId,
       if (matchTarget != null) 'match_target': matchTarget,
+      if (exitTargets != null) 'exit_targets': exitTargets,
       if (autoUpdateDurationMillis != null)
         'auto_update_duration_millis': autoUpdateDurationMillis,
       if (subscriptionInfo != null) 'subscription_info': subscriptionInfo,
@@ -1154,6 +1200,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<OverwriteType>? overwriteType,
     Value<int?>? scriptId,
     Value<String?>? matchTarget,
+    Value<Map<String, String>>? exitTargets,
     Value<int>? autoUpdateDurationMillis,
     Value<SubscriptionInfo?>? subscriptionInfo,
     Value<bool>? autoUpdate,
@@ -1179,6 +1226,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       overwriteType: overwriteType ?? this.overwriteType,
       scriptId: scriptId ?? this.scriptId,
       matchTarget: matchTarget ?? this.matchTarget,
+      exitTargets: exitTargets ?? this.exitTargets,
       autoUpdateDurationMillis:
           autoUpdateDurationMillis ?? this.autoUpdateDurationMillis,
       subscriptionInfo: subscriptionInfo ?? this.subscriptionInfo,
@@ -1230,6 +1278,11 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     }
     if (matchTarget.present) {
       map['match_target'] = Variable<String>(matchTarget.value);
+    }
+    if (exitTargets.present) {
+      map['exit_targets'] = Variable<String>(
+        $ProfilesTable.$converterexitTargets.toSql(exitTargets.value),
+      );
     }
     if (autoUpdateDurationMillis.present) {
       map['auto_update_duration_millis'] = Variable<int>(
@@ -1310,6 +1363,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           ..write('overwriteType: $overwriteType, ')
           ..write('scriptId: $scriptId, ')
           ..write('matchTarget: $matchTarget, ')
+          ..write('exitTargets: $exitTargets, ')
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
           ..write('autoUpdate: $autoUpdate, ')
@@ -1773,6 +1827,21 @@ class $RulesTable extends Rules with TableInfo<$RulesTable, RawRule> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _customExitMeta = const VerificationMeta(
+    'customExit',
+  );
+  @override
+  late final GeneratedColumn<bool> customExit = GeneratedColumn<bool>(
+    'custom_exit',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("custom_exit" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1784,6 +1853,7 @@ class $RulesTable extends Rules with TableInfo<$RulesTable, RawRule> {
     subRule,
     noResolve,
     src,
+    customExit,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1847,6 +1917,12 @@ class $RulesTable extends Rules with TableInfo<$RulesTable, RawRule> {
         src.isAcceptableOrUnknown(data['src']!, _srcMeta),
       );
     }
+    if (data.containsKey('custom_exit')) {
+      context.handle(
+        _customExitMeta,
+        customExit.isAcceptableOrUnknown(data['custom_exit']!, _customExitMeta),
+      );
+    }
     return context;
   }
 
@@ -1894,6 +1970,10 @@ class $RulesTable extends Rules with TableInfo<$RulesTable, RawRule> {
         DriftSqlType.bool,
         data['${effectivePrefix}src'],
       )!,
+      customExit: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}custom_exit'],
+      )!,
     );
   }
 
@@ -1918,6 +1998,7 @@ class RawRule extends DataClass implements Insertable<RawRule> {
   final String? subRule;
   final bool noResolve;
   final bool src;
+  final bool customExit;
   const RawRule({
     required this.id,
     required this.value,
@@ -1928,6 +2009,7 @@ class RawRule extends DataClass implements Insertable<RawRule> {
     this.subRule,
     required this.noResolve,
     required this.src,
+    required this.customExit,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1953,6 +2035,7 @@ class RawRule extends DataClass implements Insertable<RawRule> {
     }
     map['no_resolve'] = Variable<bool>(noResolve);
     map['src'] = Variable<bool>(src);
+    map['custom_exit'] = Variable<bool>(customExit);
     return map;
   }
 
@@ -1977,6 +2060,7 @@ class RawRule extends DataClass implements Insertable<RawRule> {
           : Value(subRule),
       noResolve: Value(noResolve),
       src: Value(src),
+      customExit: Value(customExit),
     );
   }
 
@@ -1997,6 +2081,7 @@ class RawRule extends DataClass implements Insertable<RawRule> {
       subRule: serializer.fromJson<String?>(json['subRule']),
       noResolve: serializer.fromJson<bool>(json['noResolve']),
       src: serializer.fromJson<bool>(json['src']),
+      customExit: serializer.fromJson<bool>(json['customExit']),
     );
   }
   @override
@@ -2014,6 +2099,7 @@ class RawRule extends DataClass implements Insertable<RawRule> {
       'subRule': serializer.toJson<String?>(subRule),
       'noResolve': serializer.toJson<bool>(noResolve),
       'src': serializer.toJson<bool>(src),
+      'customExit': serializer.toJson<bool>(customExit),
     };
   }
 
@@ -2027,6 +2113,7 @@ class RawRule extends DataClass implements Insertable<RawRule> {
     Value<String?> subRule = const Value.absent(),
     bool? noResolve,
     bool? src,
+    bool? customExit,
   }) => RawRule(
     id: id ?? this.id,
     value: value ?? this.value,
@@ -2037,6 +2124,7 @@ class RawRule extends DataClass implements Insertable<RawRule> {
     subRule: subRule.present ? subRule.value : this.subRule,
     noResolve: noResolve ?? this.noResolve,
     src: src ?? this.src,
+    customExit: customExit ?? this.customExit,
   );
   RawRule copyWithCompanion(RulesCompanion data) {
     return RawRule(
@@ -2055,6 +2143,9 @@ class RawRule extends DataClass implements Insertable<RawRule> {
       subRule: data.subRule.present ? data.subRule.value : this.subRule,
       noResolve: data.noResolve.present ? data.noResolve.value : this.noResolve,
       src: data.src.present ? data.src.value : this.src,
+      customExit: data.customExit.present
+          ? data.customExit.value
+          : this.customExit,
     );
   }
 
@@ -2069,7 +2160,8 @@ class RawRule extends DataClass implements Insertable<RawRule> {
           ..write('ruleProvider: $ruleProvider, ')
           ..write('subRule: $subRule, ')
           ..write('noResolve: $noResolve, ')
-          ..write('src: $src')
+          ..write('src: $src, ')
+          ..write('customExit: $customExit')
           ..write(')'))
         .toString();
   }
@@ -2085,6 +2177,7 @@ class RawRule extends DataClass implements Insertable<RawRule> {
     subRule,
     noResolve,
     src,
+    customExit,
   );
   @override
   bool operator ==(Object other) =>
@@ -2098,7 +2191,8 @@ class RawRule extends DataClass implements Insertable<RawRule> {
           other.ruleProvider == this.ruleProvider &&
           other.subRule == this.subRule &&
           other.noResolve == this.noResolve &&
-          other.src == this.src);
+          other.src == this.src &&
+          other.customExit == this.customExit);
 }
 
 class RulesCompanion extends UpdateCompanion<RawRule> {
@@ -2111,6 +2205,7 @@ class RulesCompanion extends UpdateCompanion<RawRule> {
   final Value<String?> subRule;
   final Value<bool> noResolve;
   final Value<bool> src;
+  final Value<bool> customExit;
   const RulesCompanion({
     this.id = const Value.absent(),
     this.value = const Value.absent(),
@@ -2121,6 +2216,7 @@ class RulesCompanion extends UpdateCompanion<RawRule> {
     this.subRule = const Value.absent(),
     this.noResolve = const Value.absent(),
     this.src = const Value.absent(),
+    this.customExit = const Value.absent(),
   });
   RulesCompanion.insert({
     this.id = const Value.absent(),
@@ -2132,6 +2228,7 @@ class RulesCompanion extends UpdateCompanion<RawRule> {
     this.subRule = const Value.absent(),
     this.noResolve = const Value.absent(),
     this.src = const Value.absent(),
+    this.customExit = const Value.absent(),
   }) : value = Value(value);
   static Insertable<RawRule> custom({
     Expression<int>? id,
@@ -2143,6 +2240,7 @@ class RulesCompanion extends UpdateCompanion<RawRule> {
     Expression<String>? subRule,
     Expression<bool>? noResolve,
     Expression<bool>? src,
+    Expression<bool>? customExit,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2154,6 +2252,7 @@ class RulesCompanion extends UpdateCompanion<RawRule> {
       if (subRule != null) 'sub_rule': subRule,
       if (noResolve != null) 'no_resolve': noResolve,
       if (src != null) 'src': src,
+      if (customExit != null) 'custom_exit': customExit,
     });
   }
 
@@ -2167,6 +2266,7 @@ class RulesCompanion extends UpdateCompanion<RawRule> {
     Value<String?>? subRule,
     Value<bool>? noResolve,
     Value<bool>? src,
+    Value<bool>? customExit,
   }) {
     return RulesCompanion(
       id: id ?? this.id,
@@ -2178,6 +2278,7 @@ class RulesCompanion extends UpdateCompanion<RawRule> {
       subRule: subRule ?? this.subRule,
       noResolve: noResolve ?? this.noResolve,
       src: src ?? this.src,
+      customExit: customExit ?? this.customExit,
     );
   }
 
@@ -2213,6 +2314,9 @@ class RulesCompanion extends UpdateCompanion<RawRule> {
     if (src.present) {
       map['src'] = Variable<bool>(src.value);
     }
+    if (customExit.present) {
+      map['custom_exit'] = Variable<bool>(customExit.value);
+    }
     return map;
   }
 
@@ -2227,7 +2331,8 @@ class RulesCompanion extends UpdateCompanion<RawRule> {
           ..write('ruleProvider: $ruleProvider, ')
           ..write('subRule: $subRule, ')
           ..write('noResolve: $noResolve, ')
-          ..write('src: $src')
+          ..write('src: $src, ')
+          ..write('customExit: $customExit')
           ..write(')'))
         .toString();
   }
@@ -4866,6 +4971,7 @@ typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
   required OverwriteType overwriteType,
   Value<int?> scriptId,
   Value<String?> matchTarget,
+  Value<Map<String, String>> exitTargets,
   required int autoUpdateDurationMillis,
   Value<SubscriptionInfo?> subscriptionInfo,
   required bool autoUpdate,
@@ -4891,6 +4997,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
   Value<OverwriteType> overwriteType,
   Value<int?> scriptId,
   Value<String?> matchTarget,
+  Value<Map<String, String>> exitTargets,
   Value<int> autoUpdateDurationMillis,
   Value<SubscriptionInfo?> subscriptionInfo,
   Value<bool> autoUpdate,
@@ -4989,6 +5096,16 @@ class $$ProfilesTableFilterComposer
   ColumnFilters<String> get matchTarget => $composableBuilder(
     column: $table.matchTarget,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    Map<String, String>,
+    Map<String, String>,
+    String
+  >
+  get exitTargets => $composableBuilder(
+    column: $table.exitTargets,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<int> get autoUpdateDurationMillis => $composableBuilder(
@@ -5159,6 +5276,11 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get exitTargets => $composableBuilder(
+    column: $table.exitTargets,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get autoUpdateDurationMillis => $composableBuilder(
     column: $table.autoUpdateDurationMillis,
     builder: (column) => ColumnOrderings(column),
@@ -5274,6 +5396,12 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<String> get matchTarget => $composableBuilder(
     column: $table.matchTarget,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Map<String, String>, String>
+  get exitTargets => $composableBuilder(
+    column: $table.exitTargets,
     builder: (column) => column,
   );
 
@@ -5408,6 +5536,7 @@ class $$ProfilesTableTableManager
                 Value<OverwriteType> overwriteType = const Value.absent(),
                 Value<int?> scriptId = const Value.absent(),
                 Value<String?> matchTarget = const Value.absent(),
+                Value<Map<String, String>> exitTargets = const Value.absent(),
                 Value<int> autoUpdateDurationMillis = const Value.absent(),
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
@@ -5434,6 +5563,7 @@ class $$ProfilesTableTableManager
                 overwriteType: overwriteType,
                 scriptId: scriptId,
                 matchTarget: matchTarget,
+                exitTargets: exitTargets,
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
                 autoUpdate: autoUpdate,
@@ -5460,6 +5590,7 @@ class $$ProfilesTableTableManager
                 required OverwriteType overwriteType,
                 Value<int?> scriptId = const Value.absent(),
                 Value<String?> matchTarget = const Value.absent(),
+                Value<Map<String, String>> exitTargets = const Value.absent(),
                 required int autoUpdateDurationMillis,
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
@@ -5486,6 +5617,7 @@ class $$ProfilesTableTableManager
                 overwriteType: overwriteType,
                 scriptId: scriptId,
                 matchTarget: matchTarget,
+                exitTargets: exitTargets,
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
                 autoUpdate: autoUpdate,
@@ -5764,6 +5896,7 @@ typedef $$RulesTableCreateCompanionBuilder = RulesCompanion Function({
   Value<String?> subRule,
   Value<bool> noResolve,
   Value<bool> src,
+  Value<bool> customExit,
 });
 typedef $$RulesTableUpdateCompanionBuilder = RulesCompanion Function({
   Value<int> id,
@@ -5775,6 +5908,7 @@ typedef $$RulesTableUpdateCompanionBuilder = RulesCompanion Function({
   Value<String?> subRule,
   Value<bool> noResolve,
   Value<bool> src,
+  Value<bool> customExit,
 });
 
 final class $$RulesTableReferences
@@ -5856,6 +5990,11 @@ class $$RulesTableFilterComposer extends Composer<_$Database, $RulesTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get customExit => $composableBuilder(
+    column: $table.customExit,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> profileRuleLinksRefs(
     Expression<bool> Function($$ProfileRuleLinksTableFilterComposer f) f,
   ) {
@@ -5934,6 +6073,11 @@ class $$RulesTableOrderingComposer extends Composer<_$Database, $RulesTable> {
     column: $table.src,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get customExit => $composableBuilder(
+    column: $table.customExit,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$RulesTableAnnotationComposer extends Composer<_$Database, $RulesTable> {
@@ -5977,6 +6121,11 @@ class $$RulesTableAnnotationComposer extends Composer<_$Database, $RulesTable> {
 
   GeneratedColumn<bool> get src =>
       $composableBuilder(column: $table.src, builder: (column) => column);
+
+  GeneratedColumn<bool> get customExit => $composableBuilder(
+    column: $table.customExit,
+    builder: (column) => column,
+  );
 
   Expression<T> profileRuleLinksRefs<T extends Object>(
     Expression<T> Function($$ProfileRuleLinksTableAnnotationComposer a) f,
@@ -6041,6 +6190,7 @@ class $$RulesTableTableManager
                 Value<String?> subRule = const Value.absent(),
                 Value<bool> noResolve = const Value.absent(),
                 Value<bool> src = const Value.absent(),
+                Value<bool> customExit = const Value.absent(),
               }) => RulesCompanion(
                 id: id,
                 value: value,
@@ -6051,6 +6201,7 @@ class $$RulesTableTableManager
                 subRule: subRule,
                 noResolve: noResolve,
                 src: src,
+                customExit: customExit,
               ),
           createCompanionCallback:
               ({
@@ -6063,6 +6214,7 @@ class $$RulesTableTableManager
                 Value<String?> subRule = const Value.absent(),
                 Value<bool> noResolve = const Value.absent(),
                 Value<bool> src = const Value.absent(),
+                Value<bool> customExit = const Value.absent(),
               }) => RulesCompanion.insert(
                 id: id,
                 value: value,
@@ -6073,6 +6225,7 @@ class $$RulesTableTableManager
                 subRule: subRule,
                 noResolve: noResolve,
                 src: src,
+                customExit: customExit,
               ),
           withReferenceMapper: (p0) => p0
               .map(

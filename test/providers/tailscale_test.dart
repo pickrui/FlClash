@@ -388,7 +388,7 @@ void main() {
           id: 2,
           label: 'Travel',
           autoUpdateDuration: Duration(days: 1),
-          matchTarget: 'Home',
+          exitTargets: {'MATCH': 'Home'},
         ),
       ]) {
         profiles = [profile];

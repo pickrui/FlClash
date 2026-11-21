@@ -136,7 +136,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     overrides: profileType == ProfileType.custom
         ? profile!.overrides
         : const ProfileOverrides(),
-    matchTarget: profile?.matchTarget,
+    exitTargets: profile?.exitTargets ?? const {},
     script: script,
     dns: dns,
     dnsOverrideKeys: ref.watch(

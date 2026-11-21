@@ -455,6 +455,62 @@ void main() {
     expect(await database.rulesDao.allAddedRules(2).get(), hasLength(1));
   });
 
+  test('v15 turns the MATCH placeholder into an exit named MATCH', () async {
+    final tempDir = await Directory.systemTemp.createTemp('flclash_v14_');
+    addTearDown(() => tempDir.delete(recursive: true));
+    final file = File('${tempDir.path}/database.sqlite');
+    var database = Database(NativeDatabase(file));
+    const profile = Profile(id: 1, autoUpdateDuration: Duration.zero);
+    await database.profilesDao.putAll([
+      profile.toCompanion(),
+      profile.copyWith(id: 2).toCompanion(),
+    ]);
+    await database.rulesDao.putGlobalRule(
+      const Rule(id: 7, value: 'DOMAIN,a.com,MATCH'),
+    );
+    await database.rulesDao.putProfileAddedRule(
+      1,
+      const Rule(id: 8, value: 'DOMAIN,b.com, match '),
+    );
+    await database.rulesDao.putProfileAddedRule(
+      2,
+      const Rule(id: 9, value: 'DOMAIN,c.com,DIRECT'),
+    );
+    await database.customStatement(
+      "UPDATE profiles SET match_target = ' Proxy ' WHERE id = 1",
+    );
+    await database.customStatement('ALTER TABLE rules DROP COLUMN custom_exit');
+    await database.customStatement(
+      'ALTER TABLE profiles DROP COLUMN exit_targets',
+    );
+    await database.customStatement('PRAGMA user_version = 14');
+    await database.close();
+
+    database = Database(NativeDatabase(file));
+    addTearDown(database.close);
+    final profiles = await database.profilesDao.all().get();
+    expect(profiles.map((profile) => profile.exitTargets), [
+      {'MATCH': 'Proxy'},
+      <String, String>{},
+    ]);
+    expect(_rawRows(file, 'SELECT match_target FROM profiles'), [
+      [null],
+      [null],
+    ]);
+    expect(
+      (await database.rulesDao.allAddedRules(1).get()).map(
+        (rule) => (rule.value, rule.customExit),
+      ),
+      [('DOMAIN,b.com,MATCH', true), ('DOMAIN,a.com,MATCH', true)],
+    );
+    expect(
+      (await database.rulesDao.allAddedRules(2).get()).map(
+        (rule) => (rule.id, rule.customExit),
+      ),
+      [(9, false), (7, true)],
+    );
+  });
+
   test('icon sets restore from a backup, one set per remote url', () async {
     final root = await Directory.systemTemp.createTemp('flclash_v8_backup_');
     addTearDown(() => root.delete(recursive: true));

@@ -2723,13 +2723,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Allow this app to use Location Services in System Settings to read Wi-Fi names.';
 
   @override
-  String get matchTargetTitle => 'Match target';
+  String get exitDefault => 'Default';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get customExit => 'Custom exit';
 
   @override
-  String get followProfile => 'Follow profile';
+  String get inputExitName => 'Enter the exit name';
 
   @override
   String get iconHistory => 'Recent icons';

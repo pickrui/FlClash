@@ -3493,7 +3493,8 @@ as bool,
 /// @nodoc
 mixin _$Rule {
 
- int get id; String get value; String? get order;
+ int get id; String get value; String? get order;/// The target is an exit each profile routes as it picks, not an outbound.
+ bool get customExit;
 /// Create a copy of Rule
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3507,20 +3508,20 @@ $RuleCopyWith<Rule> get copyWith => _$RuleCopyWithImpl<Rule>(this as Rule, _$ide
 @override
 bool operator ==(Object other) {
   final _this = this as Rule;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Rule&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.value, _this.value) || other.value == _this.value)&&(identical(other.order, _this.order) || other.order == _this.order));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Rule&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.value, _this.value) || other.value == _this.value)&&(identical(other.order, _this.order) || other.order == _this.order)&&(identical(other.customExit, _this.customExit) || other.customExit == _this.customExit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Rule;
-  return Object.hash(runtimeType,_this.id,_this.value,_this.order);
+  return Object.hash(runtimeType,_this.id,_this.value,_this.order,_this.customExit);
 }
 
 @override
 String toString() {
   final _this = this as Rule;
-  return 'Rule(id: ${_this.id}, value: ${_this.value}, order: ${_this.order})';
+  return 'Rule(id: ${_this.id}, value: ${_this.value}, order: ${_this.order}, customExit: ${_this.customExit})';
 }
 
 
@@ -3531,7 +3532,7 @@ abstract mixin class $RuleCopyWith<$Res>  {
   factory $RuleCopyWith(Rule value, $Res Function(Rule) _then) = _$RuleCopyWithImpl;
 @useResult
 $Res call({
- int id, String value, String? order
+ int id, String value, String? order, bool customExit
 });
 
 
@@ -3548,12 +3549,13 @@ class _$RuleCopyWithImpl<$Res>
 
 /// Create a copy of Rule
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? value = null,Object? order = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? value = null,Object? order = freezed,Object? customExit = null,}) {
   return _then(Rule(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as String,order: freezed == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,customExit: null == customExit ? _self.customExit : customExit // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -3638,10 +3640,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String value,  String? order)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String value,  String? order,  bool customExit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Rule() when $default != null:
-return $default(_that.id,_that.value,_that.order);case _:
+return $default(_that.id,_that.value,_that.order,_that.customExit);case _:
   return orElse();
 
 }
@@ -3659,10 +3661,10 @@ return $default(_that.id,_that.value,_that.order);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String value,  String? order)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String value,  String? order,  bool customExit)  $default,) {final _that = this;
 switch (_that) {
 case _Rule():
-return $default(_that.id,_that.value,_that.order);case _:
+return $default(_that.id,_that.value,_that.order,_that.customExit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3679,10 +3681,10 @@ return $default(_that.id,_that.value,_that.order);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String value,  String? order)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String value,  String? order,  bool customExit)?  $default,) {final _that = this;
 switch (_that) {
 case _Rule() when $default != null:
-return $default(_that.id,_that.value,_that.order);case _:
+return $default(_that.id,_that.value,_that.order,_that.customExit);case _:
   return null;
 
 }
@@ -3694,12 +3696,14 @@ return $default(_that.id,_that.value,_that.order);case _:
 @JsonSerializable()
 
 class _Rule implements Rule {
-  const _Rule({required this.id, required this.value, this.order});
+  const _Rule({required this.id, required this.value, this.order, this.customExit = false});
   factory _Rule.fromJson(Map<String, dynamic> json) => _$RuleFromJson(json);
 
 @override final  int id;
 @override final  String value;
 @override final  String? order;
+/// The target is an exit each profile routes as it picks, not an outbound.
+@override@JsonKey() final  bool customExit;
 
 /// Create a copy of Rule
 /// with the given fields replaced by the non-null parameter values.
@@ -3714,18 +3718,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Rule&&(identical(other.id, id) || other.id == id)&&(identical(other.value, value) || other.value == value)&&(identical(other.order, order) || other.order == order));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Rule&&(identical(other.id, id) || other.id == id)&&(identical(other.value, value) || other.value == value)&&(identical(other.order, order) || other.order == order)&&(identical(other.customExit, customExit) || other.customExit == customExit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,value,order);
+    return Object.hash(runtimeType,id,value,order,customExit);
 }
 
 @override
 String toString() {
-    return 'Rule(id: $id, value: $value, order: $order)';
+    return 'Rule(id: $id, value: $value, order: $order, customExit: $customExit)';
 }
 
 
@@ -3736,7 +3740,7 @@ abstract mixin class _$RuleCopyWith<$Res> implements $RuleCopyWith<$Res> {
   factory _$RuleCopyWith(_Rule value, $Res Function(_Rule) _then) = __$RuleCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String value, String? order
+ int id, String value, String? order, bool customExit
 });
 
 
@@ -3753,12 +3757,13 @@ class __$RuleCopyWithImpl<$Res>
 
 /// Create a copy of Rule
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? value = null,Object? order = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? value = null,Object? order = freezed,Object? customExit = null,}) {
   return _then(_Rule(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as String,order: freezed == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,customExit: null == customExit ? _self.customExit : customExit // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

@@ -720,7 +720,7 @@ final class HeldCoreStatusProvider
   }
 }
 
-String _$heldCoreStatusHash() => r'b2852b231be7c2238f0fb382523f8d7b9fb7a7f9';
+String _$heldCoreStatusHash() => r'c456d81c1da0e7075c4d96d4ff0307ffd05a42a7';
 
 /// Keeps a start on screen for [minimumStart] so a fast restart does not flash.
 
@@ -2686,7 +2686,7 @@ final class SetupStateProvider
   }
 }
 
-String _$setupStateHash() => r'01701ba570ea99b8e7e9ab665ebed1feef395be9';
+String _$setupStateHash() => r'0b344b4fd034be3e1c3f50026fe2af6f0094ef15';
 
 final class SetupStateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {

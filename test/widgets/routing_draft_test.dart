@@ -33,19 +33,21 @@ const _profile = Profile(
   id: 1,
   autoUpdateDuration: Duration.zero,
   overwriteType: OverwriteType.merge,
-  matchTarget: 'Old',
+  exitTargets: {'MATCH': 'Old'},
   customProxyGroups: _groups,
 );
 const _state = SetupState(
   profileId: 1,
   profileLastUpdateDate: null,
   overwriteType: OverwriteType.merge,
-  addedRules: [Rule(id: 1, value: 'DOMAIN,example.test,MATCH')],
+  addedRules: [
+    Rule(id: 1, value: 'DOMAIN,example.test,MATCH', customExit: true),
+  ],
   proxyChains: [],
   profileProxies: [],
   customProxyGroups: _groups,
   customRules: [],
-  matchTarget: 'Old',
+  exitTargets: {'MATCH': 'Old'},
   script: null,
   dns: Dns(),
 );
@@ -100,7 +102,7 @@ class _Setup extends SetupAction {
         profileProxies: setupState.profileProxies,
         customProxyGroups: setupState.customProxyGroups,
         customRules: setupState.customRules,
-        matchTarget: setupState.matchTarget,
+        exitTargets: setupState.exitTargets,
         defaultUA: 'fixture',
       ),
     );
@@ -141,7 +143,7 @@ void main() {
   }
 
   for (final target in ['New', null]) {
-    testWidgets('draft validation uses the candidate MATCH target $target', (
+    testWidgets('draft validation uses the candidate exit target $target', (
       tester,
     ) async {
       await open(tester);
@@ -152,7 +154,7 @@ void main() {
       final result = await tester.runAsync(
         () => validateCustomRoutingDraft(
           editor,
-          renamed.copyWith(matchTarget: target),
+          renamed.copyWith(exitTargets: {'MATCH': ?target}),
         ),
       );
       expect(result, isEmpty);

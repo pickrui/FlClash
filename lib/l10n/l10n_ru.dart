@@ -2743,13 +2743,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Для чтения имён Wi-Fi разрешите этому приложению использовать службы геолокации в системных настройках.';
 
   @override
-  String get matchTargetTitle => 'Цель MATCH';
+  String get exitDefault => 'По умолчанию';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get customExit => 'Свой выход';
 
   @override
-  String get followProfile => 'Как в профиле';
+  String get inputExitName => 'Введите название выхода';
 
   @override
   String get iconHistory => 'Недавние значки';

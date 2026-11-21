@@ -314,7 +314,11 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
           .toList() ??
       const [],
   scriptId: (json['scriptId'] as num?)?.toInt(),
-  matchTarget: json['matchTarget'] as String?,
+  exitTargets:
+      (json['exitTargets'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ) ??
+      const {},
   order: (json['order'] as num?)?.toInt(),
   profileType: $enumDecodeNullable(_$ProfileTypeEnumMap, json['profileType']),
   overrides: json['overrides'] == null
@@ -344,7 +348,7 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'customProxyGroups': instance.customProxyGroups,
   'customRules': instance.customRules,
   'scriptId': instance.scriptId,
-  'matchTarget': instance.matchTarget,
+  'exitTargets': instance.exitTargets,
   'order': instance.order,
   'profileType': _$ProfileTypeEnumMap[instance.profileType],
   'overrides': instance.overrides,

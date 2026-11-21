@@ -12,12 +12,24 @@ import 'package:fl_clash/widgets/sheet_scaffold.dart';
 
 import 'overwrite_sheet.dart';
 
+/// An outbound, or with [exit] a custom exit; an empty name is the default, or
+/// with [exit] a new exit still to be named.
+typedef RoutingPick = ({String name, bool exit});
+
+const RoutingPick routingDefault = (name: '', exit: false);
+const RoutingPick routingNewExit = (name: '', exit: true);
+
 class RoutingTargetPicker extends StatefulWidget {
   final String title;
   final List<String> options;
-  final String? value;
+  final RoutingPick? value;
   final Set<String>? groupNames;
-  final bool allowFollow;
+
+  /// The custom exits other added rules go to; null offers none.
+  final List<String>? exits;
+
+  final bool allowDefault;
+  final String? defaultTarget;
 
   const RoutingTargetPicker({
     super.key,
@@ -25,7 +37,9 @@ class RoutingTargetPicker extends StatefulWidget {
     required this.options,
     this.value,
     this.groupNames,
-    this.allowFollow = false,
+    this.exits,
+    this.allowDefault = false,
+    this.defaultTarget,
   });
 
   @override
@@ -35,6 +49,24 @@ class RoutingTargetPicker extends StatefulWidget {
 class _RoutingTargetPickerState extends State<RoutingTargetPicker> {
   String _query = '';
 
+  Widget _item(RoutingPick pick, String label, {String? subtitle}) {
+    final selected = pick == widget.value;
+    return Semantics(
+      selected: selected,
+      child: ListItem(
+        title: Text(
+          label,
+          style: TextStyle(
+            color: selected ? context.colorScheme.primary : null,
+          ),
+        ),
+        subtitle: subtitle == null ? null : Text(subtitle),
+        trailing: selected ? const GlyphIcon(AppGlyphs.check) : null,
+        onTap: () => context.safeNestedPop(pick),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
@@ -43,7 +75,7 @@ class _RoutingTargetPickerState extends State<RoutingTargetPicker> {
         .toSet()
         .where((name) => query.matches([name]))
         .toList();
-    final basic = {...RuleTarget.ruleTargets, RuleTarget.MATCH.value};
+    final basic = RuleTarget.ruleTargets;
     final sections = widget.groupNames == null
         ? [('', options)]
         : [
@@ -69,63 +101,43 @@ class _RoutingTargetPickerState extends State<RoutingTargetPicker> {
                   .toList(),
             ),
           ];
+    final value = widget.value;
+    final exits = widget.exits == null
+        ? null
+        : {
+            ...widget.exits!,
+            if (value != null && value.exit && value.name.isNotEmpty)
+              value.name,
+          }.where((name) => query.matches([name])).toList();
     final missing =
-        widget.value?.isNotEmpty == true &&
-        !widget.options.contains(widget.value);
+        value != null &&
+            !value.exit &&
+            value.name.isNotEmpty &&
+            !widget.options.contains(value.name)
+        ? value.name
+        : null;
     final entries = <Widget>[
-      if (widget.allowFollow && query.matches([l10n.followProfile]))
-        Semantics(
-          selected: widget.value == null || widget.value!.isEmpty,
-          child: ListItem(
-            title: Text(
-              l10n.followProfile,
-              style: TextStyle(
-                color: widget.value == null || widget.value!.isEmpty
-                    ? context.colorScheme.primary
-                    : null,
-              ),
-            ),
-            onTap: () => context.safeNestedPop(''),
-          ),
-        ),
-      if (missing && query.matches([widget.value!]))
+      if (widget.allowDefault && query.matches([l10n.exitDefault]))
+        _item(routingDefault, l10n.exitDefault, subtitle: widget.defaultTarget),
+      if (missing != null && query.matches([missing]))
         Semantics(
           enabled: false,
           child: ListItem(
             title: Text(
-              widget.value!,
+              missing,
               style: TextStyle(color: context.colorScheme.error),
             ),
             subtitle: Text(l10n.outboundUnavailable),
           ),
         ),
       for (final (label, names) in sections) ...[
-        if (names.isNotEmpty && label.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Text(
-              label,
-              style: AppTextStyle.subheadline.of(context, emphasized: true),
-            ),
-          ),
-        for (final option in names)
-          Semantics(
-            selected: option == widget.value,
-            child: ListItem(
-              title: Text(
-                option,
-                style: TextStyle(
-                  color: option == widget.value
-                      ? context.colorScheme.primary
-                      : null,
-                ),
-              ),
-              trailing: option == widget.value
-                  ? const GlyphIcon(AppGlyphs.check)
-                  : null,
-              onTap: () => context.safeNestedPop(option),
-            ),
-          ),
+        if (names.isNotEmpty && label.isNotEmpty) _header(label),
+        for (final option in names) _item((name: option, exit: false), option),
+      ],
+      if (exits != null) ...[
+        _header(l10n.outboundExit),
+        for (final exit in exits) _item((name: exit, exit: true), exit),
+        _item(routingNewExit, l10n.customExit),
       ],
     ];
     return OverwriteExitGuard(
@@ -168,4 +180,12 @@ class _RoutingTargetPickerState extends State<RoutingTargetPicker> {
       ),
     );
   }
+
+  Widget _header(String label) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+    child: Text(
+      label,
+      style: AppTextStyle.subheadline.of(context, emphasized: true),
+    ),
+  );
 }

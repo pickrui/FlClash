@@ -26,7 +26,7 @@ part 'rules.dart';
 part 'scripts.dart';
 part 'schema.dart';
 
-const currentDatabaseSchemaVersion = 14;
+const currentDatabaseSchemaVersion = 15;
 
 @DriftDatabase(
   tables: [
@@ -85,6 +85,18 @@ class Database extends _$Database {
       },
       onUpgrade: (m, from, to) => transaction(() async {
         final profileColumns = await _profileColumnNames();
+        // Ahead of the older steps, which read and write every column.
+        if (from < 15) {
+          if (profileColumns.add('exit_targets')) {
+            await m.addColumn(profiles, profiles.exitTargets);
+          }
+          final ruleColumns = await customSelect('PRAGMA table_info(rules)')
+              .map((row) => row.read<String>('name'))
+              .get();
+          if (!ruleColumns.contains('custom_exit')) {
+            await m.addColumn(rules, rules.customExit);
+          }
+        }
         if (from < 13 && profileColumns.add('last_check_date')) {
           await m.addColumn(profiles, profiles.lastCheckDate);
         }
@@ -198,7 +210,31 @@ class Database extends _$Database {
           await _moveRulesOffShadowedAliases(await profilesDao.all().get());
         }
         if (from < 14) await _mergeScriptAndAddedRules();
+        if (from < 15) await _matchTargetToExit();
       }),
+    );
+  }
+
+  Future<void> _matchTargetToExit() async {
+    final placeholders =
+        await (select(rules)..where(
+              (rule) =>
+                  rule.ruleTarget.upper().equals(RuleTarget.MATCH.value) &
+                  rule.customExit.not(),
+            ))
+            .get();
+    for (final row in placeholders) {
+      await into(rules)
+          .insertOnConflictUpdate(row.toRule().withMatchExit.toCompanion());
+    }
+    await customStatement(
+      'UPDATE profiles SET exit_targets = json_set('
+      "CASE WHEN json_valid(exit_targets) THEN exit_targets ELSE '{}' END, "
+      "'\$.MATCH', trim(match_target)) "
+      "WHERE trim(coalesce(match_target, '')) != ''",
+    );
+    await customStatement(
+      'UPDATE profiles SET match_target = NULL WHERE match_target IS NOT NULL',
     );
   }
 

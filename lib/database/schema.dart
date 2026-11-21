@@ -32,6 +32,7 @@ bool hasCompatibleDatabaseSchema(
       if (version >= 9) 'age_secret_key',
       if (version >= 11) 'proxy_aliases',
       if (version >= 13) 'last_check_date',
+      if (version >= 15) 'exit_targets',
     },
     'scripts': {
       'id',
@@ -51,6 +52,7 @@ bool hasCompatibleDatabaseSchema(
         'no_resolve',
         'src',
       },
+      if (version >= 15) 'custom_exit',
     },
     'profile_rule_mapping': {'id', 'profile_id', 'rule_id', 'scene', 'order'},
     if (version >= 4) ...{

@@ -6,6 +6,7 @@
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/features/overwrite/rule.dart';
 import 'package:fl_clash/features/overwrite/overwrite_sheet.dart';
+import 'package:fl_clash/features/overwrite/routing_target_picker.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -22,10 +23,10 @@ import '../helpers/test_app.dart';
 
 void main() {
   for (final (bottomInset, textScale, locale, target) in [
-    (48.0, 1.0, const Locale('en'), 'MATCH'),
-    (24.0, 1.5, const Locale('fr'), 'MATCH'),
-    (24.0, 1.5, const Locale('es'), 'MATCH'),
-    (24.0, 1.5, const Locale('ko'), 'MATCH'),
+    (48.0, 1.0, const Locale('en'), 'Media'),
+    (24.0, 1.5, const Locale('fr'), 'Media'),
+    (24.0, 1.5, const Locale('es'), 'Media'),
+    (24.0, 1.5, const Locale('ko'), 'Media'),
     (24.0, 1.0, const Locale('en'), 'PASS-RULE'),
   ]) {
     testWidgets(
@@ -51,6 +52,7 @@ void main() {
                       context: context,
                       builder: (_) => AddedRuleForm(
                         rule: Rule.value('DOMAIN,example.com,REJECT-DROP'),
+                        exits: const ['Media'],
                       ),
                     );
                   },
@@ -79,11 +81,13 @@ void main() {
           120,
           scrollable: find
               .descendant(
-                of: find.byType(SelectionSheet<String>),
+                of: find.byType(SelectionSheet<RoutingPick>),
                 matching: find.byType(Scrollable),
               )
               .first,
         );
+        // Rows scroll under the sheet's bar, where they take no taps.
+        await Scrollable.ensureVisible(tester.element(match), alignment: 0.5);
         await tester.pumpAndSettle();
         expect(
           tester.getRect(match).bottom,
@@ -94,6 +98,7 @@ void main() {
         await tester.tap(find.byTooltip(currentAppLocalizations.confirm));
         await tester.pumpAndSettle();
         expect(result?.value, 'DOMAIN,example.com,$target');
+        expect(result?.customExit, target == 'Media');
         expect(tester.takeException(), isNull);
       },
     );
@@ -226,7 +231,7 @@ void main() {
     expect(
       find.ancestor(
         of: find.descendant(
-          of: find.byType(SelectionSheet<String>),
+          of: find.byType(SelectionSheet<RoutingPick>),
           matching: find.text('DIRECT'),
         ),
         matching: find.byWidgetPredicate(
@@ -236,15 +241,65 @@ void main() {
       findsOneWidget,
     );
     final select = tester
-        .widget<SelectionSheet<String>>(find.byType(SelectionSheet<String>))
+        .widget<SelectionSheet<RoutingPick>>(
+          find.byType(SelectionSheet<RoutingPick>),
+        )
         .onSelected;
     await tester.tap(find.text('Home').last);
-    select('DIRECT');
+    select((name: 'DIRECT', exit: false));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip(currentAppLocalizations.confirm));
     await tester.pumpAndSettle();
 
     expect(result?.value, 'IP-CIDR,192.168.30.0/24,Home,no-resolve');
+  });
+
+  testWidgets('a new custom exit is named in its own field', (tester) async {
+    Rule? result;
+    await tester.pumpWidget(
+      TestApp(
+        wrapInProviderScope: true,
+        child: material.Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await showOverwriteSheet<Rule>(
+                  context: context,
+                  builder: (_) => AddedRuleForm(
+                    rule: Rule.value('DOMAIN,example.com,DIRECT'),
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    final l = currentAppLocalizations;
+    await tester.tap(find.byKey(const Key('added-rule-target')));
+    await tester.pumpAndSettle();
+    final sheet = tester.widget<SelectionSheet<RoutingPick>>(
+      find.byType(SelectionSheet<RoutingPick>),
+    );
+    expect(sheet.sections.last.items, [routingNewExit]);
+    sheet.onSelected(routingNewExit);
+    await tester.pumpAndSettle();
+    expect(find.text(l.inputExitName), findsOneWidget);
+    await tester.tap(find.byTooltip(l.confirm));
+    await tester.pumpAndSettle();
+    expect(result, isNull);
+    expect(find.text(l.emptyTip(l.name)), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('added-rule-exit-name')),
+      ' AI ',
+    );
+    await tester.tap(find.byTooltip(l.confirm));
+    await tester.pumpAndSettle();
+    expect(result?.value, 'DOMAIN,example.com,AI');
+    expect(result?.customExit, isTrue);
   });
 
   testWidgets('source matching keeps no-resolve enabled and saves only once', (

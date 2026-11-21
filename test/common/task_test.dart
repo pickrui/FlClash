@@ -2231,16 +2231,51 @@ DOMAIN,ads.example.test,REJECT
     expect(result['bind-address'], '127.0.0.1');
   });
 
-  test('explicit MATCH target overrides inference without rewriting subscription rules', () async {
-    final original = _makeRealProfileState().copyWith(
-      addedRules: const [Rule(id: 1, value: 'DOMAIN,example.com,MATCH')],
-    );
+  test('custom exits take their picked target, else an outbound of their '
+      'name, else the last MATCH target', () async {
+    final original =
+        _makeRealProfileState(
+          rawConfig: {
+            'proxies': [
+              {'name': 'Media', 'type': 'direct'},
+            ],
+            'proxy-groups': [
+              {
+                'name': 'Proxy',
+                'type': 'select',
+                'proxies': ['Media'],
+              },
+            ],
+            'rules': ['MATCH,Proxy'],
+          },
+        ).copyWith(
+          addedRules: const [
+            Rule(id: 1, value: 'DOMAIN,a.com,MATCH', customExit: true),
+            Rule(id: 2, value: 'DOMAIN,b.com,Media', customExit: true),
+            Rule(id: 3, value: 'DOMAIN,c.com,AI', customExit: true),
+            Rule(id: 4, value: 'DOMAIN,d.com,Media'),
+          ],
+        );
     final inferred = await makeRealProfileTask(original);
-    expect(inferred['rules'], ['DOMAIN,example.com,DIRECT', 'MATCH,DIRECT']);
-    final explicit = await makeRealProfileTask(
-      original.copyWith(matchTarget: 'REJECT'),
+    expect(inferred['rules'], [
+      'DOMAIN,a.com,Proxy',
+      'DOMAIN,b.com,Media',
+      'DOMAIN,c.com,Proxy',
+      'DOMAIN,d.com,Media',
+      'MATCH,Proxy',
+    ]);
+    final picked = await makeRealProfileTask(
+      original.copyWith(
+        exitTargets: const {'MATCH': 'REJECT', 'Media': 'Gone', 'AI': 'DIRECT'},
+      ),
     );
-    expect(explicit['rules'], ['DOMAIN,example.com,REJECT', 'MATCH,DIRECT']);
+    expect(picked['rules'], [
+      'DOMAIN,a.com,REJECT',
+      'DOMAIN,b.com,Media',
+      'DOMAIN,c.com,DIRECT',
+      'DOMAIN,d.com,Media',
+      'MATCH,Proxy',
+    ]);
   });
 
   test('makeRealProfileTask injects QUIC block rule when enabled', () async {

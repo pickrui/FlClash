@@ -75,6 +75,15 @@ List<String> customRoutingTargets(
   }.toList();
 }
 
+/// Where an exit with no target of its own goes: the profile's last MATCH.
+String? routingMatchTarget(Profile profile, Map<String, dynamic> raw) =>
+    lastMatchTarget([
+      if (_appliesCustomGroups(profile))
+        for (final rule in profile.customRules) rule.value,
+      if (profile.overwriteType != OverwriteType.custom && raw['rules'] is List)
+        ...(raw['rules'] as List).whereType<String>(),
+    ]);
+
 Map<String, String> routingGroupTypes(
   Profile profile,
   Map<String, dynamic> raw,
@@ -157,7 +166,7 @@ Future<String> validateCustomRoutingDraft(
         customRules: profile.customRules,
         proxyChains: profile.proxyChains,
         profileProxies: profile.profileProxies,
-        matchTarget: profile.matchTarget,
+        exitTargets: profile.exitTargets,
         overrides: state.profileType == ProfileType.custom
             ? profile.overrides
             : state.overrides,

@@ -247,25 +247,24 @@ void main() {
     expect((result['proxy-groups'] as List).single['empty-fallback'], 'DIRECT');
   });
 
-  test(
-    'added MATCH placeholders still follow the subscription final target',
-    () async {
-      final result = await makeRealProfileTask(
-        overlayState(
-          rawConfig: const {
-            'rules': ['MATCH,Subscription'],
-          },
-          groups: const [personalGroup],
-          rules: personalRules,
-          addedRules: const [Rule(id: 2, value: 'DOMAIN,local.example,MATCH')],
-        ),
-      );
-      expect(
-        (result['rules'] as List).first,
-        'DOMAIN,local.example,Subscription',
-      );
-    },
-  );
+  test('a MATCH exit still follows the subscription final target', () async {
+    final result = await makeRealProfileTask(
+      overlayState(
+        rawConfig: const {
+          'rules': ['MATCH,Subscription'],
+        },
+        groups: const [personalGroup],
+        rules: personalRules,
+        addedRules: const [
+          Rule(id: 2, value: 'DOMAIN,local.example,MATCH', customExit: true),
+        ],
+      ),
+    );
+    expect(
+      (result['rules'] as List).first,
+      'DOMAIN,local.example,Subscription',
+    );
+  });
 
   test('a shared node leaves its name to a subscription group', () async {
     final result = await makeRealProfileTask(

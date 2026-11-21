@@ -13,6 +13,7 @@ import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/features/form/form_page.dart';
 import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/features/form/selection_sheet.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'overwrite_sheet.dart';
@@ -170,7 +171,7 @@ class RuleStatusItem extends StatelessWidget {
   }
 }
 
-enum _RuleField { content, target }
+enum _RuleField { content, target, exit }
 
 class AddedRuleForm extends StatefulWidget {
   final Rule? rule;
@@ -180,11 +181,15 @@ class AddedRuleForm extends StatefulWidget {
   /// Profile rules can name hundreds of outbounds, so they get a search.
   final Set<String>? groupNames;
 
+  /// The custom exits other added rules already go to.
+  final Iterable<String> exits;
+
   const AddedRuleForm({
     super.key,
     this.rule,
     this.targets = const [],
     this.groupNames,
+    this.exits = const [],
   });
 
   @override
@@ -196,20 +201,25 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
   List<Object?> get _snapshot => [
     _ruleAction,
     _contentController.text,
-    _ruleTarget,
+    _target,
+    _exitController.text,
     _noResolve,
     _src,
   ];
   late RuleAction _ruleAction;
-  String _ruleTarget = '';
+  RoutingPick _target = routingDefault;
   final _contentController = TextEditingController();
+  final _exitController = TextEditingController();
   bool _noResolve = false;
   bool _src = false;
   List<String> get _targetItems => {
     ...RuleTarget.ruleTargetNames,
-    RuleTarget.MATCH.value,
     ...widget.targets,
-    if (_ruleTarget.isNotEmpty) _ruleTarget,
+    if (!_target.exit && _target.name.isNotEmpty) _target.name,
+  }.toList();
+  List<String> get _exits => {
+    ...widget.exits,
+    if (_target.exit && _target.name.isNotEmpty) _target.name,
   }.toList();
   late final _scroll = sheetScrollController(context);
   bool _attempted = false;
@@ -223,18 +233,22 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
   }
 
   void _initState() {
+    _exitController.clear();
     if (widget.rule != null) {
       final parsedRule = ParsedRule.parseString(widget.rule!.value);
       _ruleAction = parsedRule.ruleAction;
       _contentController.text = parsedRule.content ?? '';
-      _ruleTarget = parsedRule.ruleTarget ?? '';
+      _target = (
+        name: parsedRule.ruleTarget ?? '',
+        exit: widget.rule!.customExit,
+      );
       _noResolve = parsedRule.noResolve;
       _src = parsedRule.src;
       return;
     }
     _ruleAction = RuleAction.addedRuleActions.first;
     _contentController.clear();
-    _ruleTarget = RuleTarget.DIRECT.value;
+    _target = (name: RuleTarget.DIRECT.value, exit: false);
     _noResolve = false;
     _src = false;
   }
@@ -242,6 +256,7 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
   @override
   void dispose() {
     _contentController.dispose();
+    _exitController.dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -283,7 +298,15 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
     if (contentError != null) {
       return (field: _RuleField.content, message: contentError);
     }
-    if (_ruleTarget.trim().isEmpty) {
+    if (_target == routingNewExit) {
+      final name = _exitController.text.trim();
+      if (name.isEmpty) {
+        return (field: _RuleField.exit, message: l.emptyTip(l.name));
+      }
+      if (RuleTarget.ruleTargets.contains(name)) {
+        return (field: _RuleField.exit, message: l.existsTip(l.name));
+      }
+    } else if (_target.name.trim().isEmpty) {
       return (field: _RuleField.target, message: l.emptyTip(l.ruleTarget));
     }
     return null;
@@ -296,26 +319,29 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
       if (_scroll.hasClients) _scroll.jumpTo(0);
       return;
     }
+    final target = _target == routingNewExit
+        ? (name: _exitController.text.trim(), exit: true)
+        : _target;
     final parsedRule = ParsedRule(
       ruleAction: _ruleAction,
       content: _savedContent,
-      ruleTarget: _ruleTarget.trim(),
+      ruleTarget: target.name.trim(),
       noResolve: _noResolve || _src,
       src: _src,
     );
-    final rule = widget.rule != null
-        ? widget.rule!.copyWith(value: parsedRule.value)
-        : Rule.value(parsedRule.value);
+    final rule = (widget.rule ?? Rule.value(parsedRule.value)).copyWith(
+      value: parsedRule.value,
+      customExit: target.exit,
+    );
     _submitted = true;
     context.safeNestedPop(rule);
   }
 
   Future<void> _choose<T>({
     required String title,
-    required List<T> options,
+    required List<SelectionSection<T>> sections,
     required T value,
     required String Function(T) label,
-    String? Function(BuildContext, T)? description,
     required ValueChanged<T> onChanged,
   }) async {
     FocusScope.of(context).unfocus();
@@ -324,9 +350,7 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
       context: context,
       builder: (context) => SelectionSheet<T>(
         title: title,
-        sections: [
-          SelectionSection(items: options, subtitleBuilder: description),
-        ],
+        sections: sections,
         labelBuilder: label,
         selectedOf: (_) => value,
         onSelected: (item) {
@@ -350,23 +374,28 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
 
   Future<void> _chooseTarget(String title) async {
     FocusScope.of(context).unfocus();
-    final selected = await showOverwriteSheet<String>(
+    final selected = await showOverwriteSheet<RoutingPick>(
       context: context,
       builder: (_) => RoutingTargetPicker(
         title: title,
         options: _targetItems,
-        value: _ruleTarget,
+        value: _target,
         groupNames: widget.groupNames,
+        exits: _exits,
       ),
     );
     if (selected == null ||
-        selected.isEmpty ||
+        selected == routingDefault ||
         !mounted ||
         ModalRoute.of(context)?.isCurrent == false) {
       return;
     }
-    setState(() => _ruleTarget = selected);
+    setState(() => _target = selected);
   }
+
+  String _targetLabel(RoutingPick target) => target == routingNewExit
+      ? context.appLocalizations.customExit
+      : target.name;
 
   Widget _choice({
     required Key key,
@@ -428,10 +457,15 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
                 value: _ruleAction.value,
                 onPressed: () => _choose<RuleAction>(
                   title: l.ruleName,
-                  options: RuleAction.addedRuleActions,
+                  sections: [
+                    SelectionSection(
+                      items: RuleAction.addedRuleActions,
+                      subtitleBuilder: (context, action) =>
+                          action.getDesc(context),
+                    ),
+                  ],
                   value: _ruleAction,
                   label: (action) => action.value,
-                  description: (context, action) => action.getDesc(context),
                   onChanged: (action) => _ruleAction = action,
                 ),
               ),
@@ -452,18 +486,54 @@ class _AddedRuleFormState extends State<AddedRuleForm> {
               _choice(
                 key: const Key('added-rule-target'),
                 title: l.ruleTarget,
-                value: _ruleTarget,
+                value: _targetLabel(_target),
                 invalid: issue?.field == _RuleField.target,
                 onPressed: () => widget.groupNames == null
-                    ? _choose<String>(
+                    ? _choose<RoutingPick>(
                         title: l.ruleTarget,
-                        options: _targetItems,
-                        value: _ruleTarget,
-                        label: (target) => target,
-                        onChanged: (target) => _ruleTarget = target,
+                        sections: [
+                          SelectionSection(
+                            items: [
+                              for (final name in _targetItems)
+                                (name: name, exit: false),
+                            ],
+                          ),
+                          SelectionSection(
+                            label: l.outboundExit,
+                            items: [
+                              for (final name in _exits)
+                                (name: name, exit: true),
+                              routingNewExit,
+                            ],
+                          ),
+                        ],
+                        value: _target,
+                        label: _targetLabel,
+                        onChanged: (target) => _target = target,
                       )
                     : _chooseTarget(l.ruleTarget),
               ),
+              if (_target == routingNewExit)
+                FormRow(
+                  title: l.name,
+                  invalid: issue?.field == _RuleField.exit,
+                  trailing: FormRowTextField(
+                    key: const Key('added-rule-exit-name'),
+                    controller: _exitController,
+                    hintText: l.inputExitName,
+                    autofocus: true,
+                    autocorrect: false,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.singleLineFormatter,
+                      FilteringTextInputFormatter.deny(','),
+                      ...TextInputLimits.limit(TextInputLimits.name),
+                    ],
+                    onChanged: (_) {
+                      if (_attempted) setState(() {});
+                    },
+                    onFieldSubmitted: (_) => _handleSubmit(),
+                  ),
+                ),
             ],
           ),
           if (_ruleAction.hasParams)

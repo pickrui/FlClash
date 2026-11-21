@@ -210,7 +210,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default(false) bool customProfile,
     @Default({}) Map<String, Map<String, Object?>> profileProviders,
     @Default(ProfileOverrides()) ProfileOverrides overrides,
-    String? matchTarget,
+    @Default({}) Map<String, String> exitTargets,
     required String defaultUA,
     @Default(false) bool dockerMode,
     @Default(false) bool blockQuic,
@@ -266,7 +266,7 @@ abstract class SetupState with _$SetupState {
     required List<Rule> customRules,
     @Default({}) Map<String, ProfileProviderSource> profileProviders,
     @Default(ProfileOverrides()) ProfileOverrides overrides,
-    String? matchTarget,
+    @Default({}) Map<String, String> exitTargets,
     required Script? script,
     required Dns dns,
     @Default({}) Set<DnsOverrideKey> dnsOverrideKeys,
@@ -338,8 +338,11 @@ extension SetupStateExt on SetupState {
         )) {
       return true;
     }
-    if (matchTarget != lastSetupState.matchTarget &&
-        overwriteType != OverwriteType.custom) {
+    if (overwriteType != OverwriteType.custom &&
+        !const MapEquality<String, String>().equals(
+          exitTargets,
+          lastSetupState.exitTargets,
+        )) {
       return true;
     }
     if (!const DeepCollectionEquality().equals(

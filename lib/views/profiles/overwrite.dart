@@ -443,14 +443,12 @@ class _StandardContent extends ConsumerStatefulWidget {
 class _StandardContentState extends ConsumerState<_StandardContent> {
   final _key = uniqueId;
 
-  Future<void> _selectMatchTarget() async {
+  Future<void> _selectExitTarget(String exit) async {
     final commonAction = context.commonAction;
-    final setupAction = context.setupAction;
-
     final profile = ref.read(profileProvider(widget.profileId));
     if (profile == null) return;
     final raw = await commonAction.safeRun(
-      () => setupAction.getRoutingProfileConfig(widget.profileId),
+      () => ref.read(routingSourceProvider(widget.profileId).future),
     );
     if (!mounted || raw == null) return;
     final names = customRoutingTargets(
@@ -458,28 +456,37 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
       raw,
       tailscaleNetworks: ref.read(tailscaleNetworksProvider),
     );
-    final selected = await showOverwriteSheet<String>(
+    final picked = profile.exitTargets[exit];
+    final selected = await showOverwriteSheet<RoutingPick>(
       context: context,
       builder: (_) => RoutingTargetPicker(
-        title: appLocalizations.matchTargetTitle,
+        title: exit,
         options: names,
-        value: profile.matchTarget,
-        allowFollow: true,
+        value: picked == null ? routingDefault : (name: picked, exit: false),
+        allowDefault: true,
+        defaultTarget: exitTargetResolver(
+          targets: const {},
+          outbounds: names.toSet(),
+          fallback: routingMatchTarget(profile, raw),
+        )(exit),
         groupNames: routingGroupTypes(profile, raw).keys.toSet(),
       ),
     );
-    if (selected == null || !mounted) return;
+    if (selected == null || selected.exit || !mounted) return;
     if (ref.read(profileProvider(widget.profileId)) != profile) {
       context.showNotifier(appLocalizations.routingChanged);
       return;
     }
-    ref
-        .read(profilesProvider.notifier)
-        .updateProfile(
-          widget.profileId,
-          (profile) =>
-              profile.copyWith(matchTarget: selected.isEmpty ? null : selected),
-        );
+    ref.read(profilesProvider.notifier).updateProfile(widget.profileId, (
+      profile,
+    ) {
+      final exitTargets = {...profile.exitTargets}..remove(exit);
+      return profile.copyWith(
+        exitTargets: selected.name.isEmpty
+            ? exitTargets
+            : {...exitTargets, exit: selected.name},
+      );
+    });
   }
 
   Future<void> _addPresets() async {
@@ -513,6 +520,10 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
           tailscaleNetworks: ref.read(tailscaleNetworksProvider),
         ),
         groupNames: routingGroupTypes(profile, raw).keys.toSet(),
+        exits: customExitsOf([
+          ...?ref.read(profileAddedRulesProvider(widget.profileId)).value,
+          ...?ref.read(globalRulesProvider).value,
+        ]),
       ),
     );
     if (!mounted || res == null) {
@@ -583,8 +594,8 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
           missingTarget:
               targets != null &&
               target != null &&
+              !rule.customExit &&
               parsed.ruleAction != RuleAction.SUB_RULE &&
-              target.toUpperCase() != RuleTarget.MATCH.value &&
               !targets.contains(
                 ref
                         .read(profileProvider(widget.profileId))
@@ -614,22 +625,21 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
             tailscaleNetworks: ref.watch(tailscaleNetworksProvider),
           ).toSet()
         : null;
-    final target = profile?.matchTarget;
-    final invalidTarget =
-        targets != null && target != null && !targets.contains(target);
-    final targetText = Text(
-      target ?? appLocalizations.followProfile,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: AppTextStyle.subheadline
-          .of(context)
-          .toJetBrainsMono
-          .copyWith(
-            color: invalidTarget
-                ? context.colorScheme.error
-                : context.colorScheme.tertiary,
-          ),
-    );
+    // A picked target stays listed after its rules go: it still keeps the
+    // node it names from being removed.
+    final exits = {
+      ...customExitsOf(
+        ref.watch(addedRuleStreamProvider(widget.profileId)).value ?? const [],
+      ),
+      ...?profile?.exitTargets.keys,
+    };
+    final globalRules = ref.watch(globalRulesProvider).value ?? const [];
+    final disabledRuleIds =
+        ref.watch(profileDisabledRuleIdsProvider(widget.profileId)).value ??
+        const [];
+    final enabledGlobalRules = globalRules
+        .where((rule) => !disabledRuleIds.contains(rule.id))
+        .length;
     return PopGuard(
       onPop: selectedRules.isEmpty
           ? null
@@ -704,39 +714,128 @@ class _StandardContentState extends ConsumerState<_StandardContent> {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          SliverLayoutBuilder(
-            builder: (context, constraints) {
-              final trailing = ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: constraints.crossAxisExtent / 2,
-                ),
-                child: targetText,
-              );
-              return SliverToBoxAdapter(
-                child: MoreActionButton(
-                  label: appLocalizations.matchTargetTitle,
-                  trailing: invalidTarget
-                      ? Tooltip(
-                          message: appLocalizations.outboundUnavailable,
-                          child: trailing,
-                        )
-                      : trailing,
-                  onPressed: _selectMatchTarget,
-                ),
-              );
-            },
-          ),
           SliverToBoxAdapter(
             child: MoreActionButton(
               label: appLocalizations.controlGlobalAddedRules,
+              trailing: globalRules.isEmpty
+                  ? null
+                  : Text(
+                      '$enabledGlobalRules/${globalRules.length}',
+                      style: AppTextStyle.subheadline
+                          .of(context)
+                          .copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                    ),
               onPressed: () => BaseNavigator.push(
                 context,
                 _EditGlobalAddedRules(profileId: widget.profileId),
               ),
             ),
           ),
+          if (exits.isNotEmpty && profile != null) ...[
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            SliverToBoxAdapter(
+              child: InfoHeader(
+                info: Info(label: appLocalizations.outboundExit),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _ExitTargets(
+                  exits: exits,
+                  exitTargets: profile.exitTargets,
+                  targets: targets,
+                  fallback: raw == null
+                      ? null
+                      : routingMatchTarget(profile, raw),
+                  onSelect: _selectExitTarget,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _ExitTargets extends StatelessWidget {
+  final Set<String> exits;
+  final Map<String, String> exitTargets;
+
+  /// Null until the profile's outbounds are read.
+  final Set<String>? targets;
+  final String? fallback;
+  final ValueChanged<String> onSelect;
+
+  const _ExitTargets({
+    required this.exits,
+    required this.exitTargets,
+    required this.targets,
+    required this.fallback,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final targets = this.targets;
+    final resolve = targets == null
+        ? null
+        : exitTargetResolver(
+            targets: exitTargets,
+            outbounds: targets,
+            fallback: fallback,
+          );
+    return LayoutBuilder(
+      builder: (context, constraints) => generateGroup([
+        for (final exit in exits)
+          _buildExit(context, exit, resolve, constraints.maxWidth / 2),
+      ]),
+    );
+  }
+
+  Widget _buildExit(
+    BuildContext context,
+    String exit,
+    String Function(String exit)? resolve,
+    double maxTrailingWidth,
+  ) {
+    final picked = exitTargets[exit];
+    final invalid =
+        targets != null && picked != null && !targets!.contains(picked);
+    final actual = resolve != null && (picked == null || invalid)
+        ? resolve(exit)
+        : null;
+    final trailing = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxTrailingWidth),
+      child: Text(
+        picked ?? appLocalizations.exitDefault,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppTextStyle.subheadline
+            .of(context)
+            .toJetBrainsMono
+            .copyWith(
+              color: invalid
+                  ? context.colorScheme.error
+                  : context.colorScheme.tertiary,
+            ),
+      ),
+    );
+    return ListItem(
+      key: ValueKey('exit-$exit'),
+      title: Text(exit),
+      subtitle: actual == null ? null : Text(actual),
+      trailing: invalid
+          ? Tooltip(
+              message: appLocalizations.outboundUnavailable,
+              child: trailing,
+            )
+          : trailing,
+      onTap: () => onSelect(exit),
     );
   }
 }
@@ -871,9 +970,20 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
     return Builder(
       builder: (context) => CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.contentTopPadding),
+          ),
+          if (_query.isEmpty) ...[
+            SliverToBoxAdapter(
+              child: MoreActionButton(
+                label: appLocalizations.goToConfigureAddedRules,
+                onPressed: _handleToAddedRules,
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+          ],
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16)
-                .copyWith(top: context.contentTopPadding),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverPrismList(
               itemCount: rules.length,
               itemBuilder: (context, index) {
@@ -889,14 +999,7 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
               },
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          SliverToBoxAdapter(
-            child: MoreActionButton(
-              label: appLocalizations.goToConfigureAddedRules,
-              onPressed: _handleToAddedRules,
-            ),
-          ),
-          SliverToBoxAdapter(child: SizedBox(height: 12 + context.bottomInset)),
+          SliverToBoxAdapter(child: SizedBox(height: 16 + context.bottomInset)),
         ],
       ),
     );

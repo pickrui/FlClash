@@ -954,7 +954,7 @@ extension SetupControllerExt on AppController {
           mitmModules: setupState.mitmModules,
           customProxyGroups: customProxyGroups,
           customRules: customRules,
-          matchTarget: setupState.matchTarget,
+          exitTargets: setupState.exitTargets,
           defaultUA: defaultUA,
           dockerMode: system.isDocker,
           blockQuic: setupState.blockQuic,
