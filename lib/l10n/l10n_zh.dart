@@ -5542,4 +5542,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String mixedPortReset(Object value, Object port) {
     return '混合端口不能是 $value，已恢复为 $port';
   }
+
+  @override
+  String get coreStoppedDesc => '应用与内核的连接已断开';
+
+  @override
+  String coreStoppedWithReason(Object reason) {
+    return '应用与内核的连接已断开：$reason';
+  }
 }

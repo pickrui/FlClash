@@ -5761,4 +5761,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String mixedPortReset(Object value, Object port) {
     return '혼합 포트는 $value일 수 없어 $port(으)로 되돌렸습니다';
   }
+
+  @override
+  String get coreStoppedDesc => '앱과 코어의 연결이 끊어졌습니다';
+
+  @override
+  String coreStoppedWithReason(Object reason) {
+    return '앱과 코어의 연결이 끊어졌습니다: $reason';
+  }
 }

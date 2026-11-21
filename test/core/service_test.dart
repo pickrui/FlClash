@@ -116,7 +116,7 @@ void main() {
     crashes.add(failure);
     await pumpEventQueue();
 
-    expect(listener.messages, ['core done']);
+    expect(listener.messages, ['The app lost its connection to the core']);
     coreEventManager.removeListener(listener);
   });
 
@@ -181,14 +181,14 @@ void main() {
       await pumpEventQueue();
 
       if (replacement == 'same-session-failed') {
-        expect(listener.messages, ['core done']);
+        expect(listener.messages, ['The app lost its connection to the core']);
         return;
       }
       expect(listener.messages, isEmpty);
       if (state case DesktopCoreFailed(:final failure)) {
         crashes.add(failure);
         await pumpEventQueue();
-        expect(listener.messages, ['core done']);
+        expect(listener.messages, ['The app lost its connection to the core']);
       }
     });
   }

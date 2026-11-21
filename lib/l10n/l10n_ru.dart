@@ -5979,4 +5979,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String mixedPortReset(Object value, Object port) {
     return 'Смешанный порт не может быть $value, поэтому он возвращён на $port';
   }
+
+  @override
+  String get coreStoppedDesc => 'Приложение потеряло связь с ядром';
+
+  @override
+  String coreStoppedWithReason(Object reason) {
+    return 'Приложение потеряло связь с ядром: $reason';
+  }
 }

@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/network_error.dart';
+import 'package:fl_clash/common/print.dart';
 import 'package:fl_clash/common/system.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/core.dart';
@@ -65,10 +66,22 @@ class CoreService extends CoreHandlerInterface {
 
   CoreService._({required this._lifecycle, required this._rpcClient}) {
     _crashSubscription = _lifecycle.crashEvents.listen((failure) {
+      commonPrint.log(
+        'Core session lost: $failure',
+        logLevel: LogLevel.warning,
+      );
       coreEventManager.sendEvent(
         CoreEvent(
           type: CoreEventType.crash,
-          data: failure.cause?.toString() ?? 'core done',
+          data: coreSessionLostMessage(
+            failure.cause == null
+                ? null
+                : userFacingErrorMessage(
+                    failure.cause!,
+                    currentAppLocalizations,
+                  ),
+            currentAppLocalizations,
+          ),
         ),
         isCurrent: () => switch (_lifecycle.state) {
           DesktopCoreFailed(failure: final current) =>

@@ -10420,6 +10420,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The mixed port cannot be {value}, so it was set back to {port}'**
   String mixedPortReset(Object value, Object port);
+
+  /// No description provided for @coreStoppedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The app lost its connection to the core'**
+  String get coreStoppedDesc;
+
+  /// No description provided for @coreStoppedWithReason.
+  ///
+  /// In en, this message translates to:
+  /// **'The app lost its connection to the core: {reason}'**
+  String coreStoppedWithReason(Object reason);
 }
 
 class _AppLocalizationsDelegate

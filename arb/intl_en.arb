@@ -1930,5 +1930,7 @@
       "value": {},
       "port": {}
     }
-  }
+  },
+  "coreStoppedDesc": "The app lost its connection to the core",
+  "coreStoppedWithReason": "The app lost its connection to the core: {reason}"
 }

@@ -1816,5 +1816,7 @@
     }
   },
   "diagRecorded": "履歴",
-  "mixedPortReset": "ミックスポートを {value} にはできないため、{port} に戻しました"
+  "mixedPortReset": "ミックスポートを {value} にはできないため、{port} に戻しました",
+  "coreStoppedDesc": "アプリとコアの接続が切れました",
+  "coreStoppedWithReason": "アプリとコアの接続が切れました：{reason}"
 }

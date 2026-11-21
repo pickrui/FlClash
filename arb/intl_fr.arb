@@ -1816,5 +1816,7 @@
     }
   },
   "diagRecorded": "Historique",
-  "mixedPortReset": "Le port mixte ne peut pas être {value}, il a été remis à {port}"
+  "mixedPortReset": "Le port mixte ne peut pas être {value}, il a été remis à {port}",
+  "coreStoppedDesc": "L’application a perdu la connexion au cœur",
+  "coreStoppedWithReason": "L’application a perdu la connexion au cœur : {reason}"
 }

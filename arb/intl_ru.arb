@@ -1816,5 +1816,7 @@
     }
   },
   "diagRecorded": "История",
-  "mixedPortReset": "Смешанный порт не может быть {value}, поэтому он возвращён на {port}"
+  "mixedPortReset": "Смешанный порт не может быть {value}, поэтому он возвращён на {port}",
+  "coreStoppedDesc": "Приложение потеряло связь с ядром",
+  "coreStoppedWithReason": "Приложение потеряло связь с ядром: {reason}"
 }

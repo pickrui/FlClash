@@ -1816,5 +1816,7 @@
     }
   },
   "diagRecorded": "记录",
-  "mixedPortReset": "混合端口不能是 {value}，已恢复为 {port}"
+  "mixedPortReset": "混合端口不能是 {value}，已恢复为 {port}",
+  "coreStoppedDesc": "应用与内核的连接已断开",
+  "coreStoppedWithReason": "应用与内核的连接已断开：{reason}"
 }

@@ -20,6 +20,11 @@ AppLocalizations get currentAppLocalizations =>
 
 AppLocalizations get appLocalizations => currentAppLocalizations;
 
+String coreSessionLostMessage(Object? cause, AppLocalizations l) {
+  final reason = cause?.toString().trim() ?? '';
+  return reason.isEmpty ? l.coreStoppedDesc : l.coreStoppedWithReason(reason);
+}
+
 AppLocalizations loadAppLocalizations(Locale locale) {
   _currentLocale = AppLocalizations.delegate.isSupported(locale)
       ? locale

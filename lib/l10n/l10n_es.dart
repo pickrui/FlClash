@@ -6034,4 +6034,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String mixedPortReset(Object value, Object port) {
     return 'El puerto mixto no puede ser $value, así que se restableció a $port';
   }
+
+  @override
+  String get coreStoppedDesc => 'La app perdió la conexión con el núcleo';
+
+  @override
+  String coreStoppedWithReason(Object reason) {
+    return 'La app perdió la conexión con el núcleo: $reason';
+  }
 }

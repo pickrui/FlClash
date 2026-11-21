@@ -1816,5 +1816,7 @@
     }
   },
   "diagRecorded": "Historial",
-  "mixedPortReset": "El puerto mixto no puede ser {value}, así que se restableció a {port}"
+  "mixedPortReset": "El puerto mixto no puede ser {value}, así que se restableció a {port}",
+  "coreStoppedDesc": "La app perdió la conexión con el núcleo",
+  "coreStoppedWithReason": "La app perdió la conexión con el núcleo: {reason}"
 }

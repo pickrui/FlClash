@@ -6047,4 +6047,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String mixedPortReset(Object value, Object port) {
     return 'Le port mixte ne peut pas être $value, il a été remis à $port';
   }
+
+  @override
+  String get coreStoppedDesc => 'L’application a perdu la connexion au cœur';
+
+  @override
+  String coreStoppedWithReason(Object reason) {
+    return 'L’application a perdu la connexion au cœur : $reason';
+  }
 }

@@ -5640,4 +5640,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String mixedPortReset(Object value, Object port) {
     return 'ミックスポートを $value にはできないため、$port に戻しました';
   }
+
+  @override
+  String get coreStoppedDesc => 'アプリとコアの接続が切れました';
+
+  @override
+  String coreStoppedWithReason(Object reason) {
+    return 'アプリとコアの接続が切れました：$reason';
+  }
 }
