@@ -81,7 +81,10 @@ func handleResetNetwork() bool {
 		return true
 	})
 	resetOutbounds()
-	return handleClearDnsState()
+	handleClearDnsState()
+	// The exit IP probes closed above failed for the network that was left.
+	probeRouteRevision.Add(1)
+	return true
 }
 
 type networkResetter interface{ ResetNetwork() }

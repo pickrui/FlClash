@@ -60,6 +60,8 @@ func TestResetNetworkClosesEveryTrackedConnection(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	epoch, _ := routeStamp()
+
 	handleMethodCall(&MethodCall{ID: "1", Method: resetNetworkMethod}, MethodResponse{ID: "1"})
 
 	frame := written.responseFrame(t, "1")
@@ -75,6 +77,9 @@ func TestResetNetworkClosesEveryTrackedConnection(t *testing.T) {
 	}
 	if client.calls.Load() != 2 {
 		t.Fatal("a network reset left the answer cached on the previous network")
+	}
+	if next, _ := routeStamp(); next == epoch {
+		t.Fatal("a network reset kept the route epoch of the network that was left")
 	}
 }
 
