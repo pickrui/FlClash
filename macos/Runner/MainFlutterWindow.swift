@@ -5,10 +5,11 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import Cocoa
 import FlutterMacOS
-import window
 import LaunchAtLogin
 
 class MainFlutterWindow: NSWindow {
+    private var hiddenAtLaunch = false
+
     override func awakeFromNib() {
         let flutterViewController = FlutterViewController()
         let windowFrame = self.frame
@@ -56,6 +57,11 @@ class MainFlutterWindow: NSWindow {
     }
     override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
         super.order(place, relativeTo: otherWin)
-        hiddenWindowAtLaunch()
+        // Only the first order hides the window, which Dart shows once it is
+        // configured; the flag is set first because hiding orders it again.
+        if !hiddenAtLaunch {
+            hiddenAtLaunch = true
+            setIsVisible(false)
+        }
     }
 }

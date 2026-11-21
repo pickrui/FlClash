@@ -6,30 +6,24 @@
 import 'dart:async';
 
 import 'package:fl_clash/manager/window_manager.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const channel = MethodChannel('window');
+import '../helpers/fake_desktop_window.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, null);
-  });
 
   testWidgets('late initial state cannot replace newer native window events', (
     tester,
   ) async {
     final initial = Completer<bool>();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (call) async {
-          return switch (call.method) {
-            'isAlwaysOnTop' => true,
-            'isMaximized' || 'isFullScreen' => initial.future,
-            _ => null,
-          };
-        });
+    FakeDesktopWindow((call) async {
+      return switch (call.method) {
+        'isAlwaysOnTop' => true,
+        'isMaximized' || 'isFullScreen' => initial.future,
+        _ => null,
+      };
+    }).install();
     final caption = WindowCaptionController();
     addTearDown(caption.dispose);
     caption.onWindowMaximize();
@@ -47,20 +41,19 @@ void main() {
     final initialPin = Completer<bool>();
     var pinReads = 0;
     var pinned = false;
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (call) async {
-          switch (call.method) {
-            case 'isAlwaysOnTop':
-              return pinReads++ == 0 ? initialPin.future : pinned;
-            case 'setAlwaysOnTop':
-              pinned = (call.arguments as Map)['value'] as bool;
-              return null;
-            case 'isMaximized':
-            case 'isFullScreen':
-              return false;
-          }
+    FakeDesktopWindow((call) async {
+      switch (call.method) {
+        case 'isAlwaysOnTop':
+          return pinReads++ == 0 ? initialPin.future : pinned;
+        case 'setAlwaysOnTop':
+          pinned = (call.arguments as Map)['value'] as bool;
           return null;
-        });
+        case 'isMaximized':
+        case 'isFullScreen':
+          return false;
+      }
+      return null;
+    }).install();
     final caption = WindowCaptionController();
     addTearDown(caption.dispose);
     await caption.togglePin();
@@ -75,14 +68,13 @@ void main() {
     (tester) async {
       final pinResult = Completer<bool>();
       var pinReads = 0;
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (call) async {
-            return switch (call.method) {
-              'isAlwaysOnTop' => ++pinReads == 3 ? pinResult.future : false,
-              'isMaximized' || 'isFullScreen' => false,
-              _ => null,
-            };
-          });
+      FakeDesktopWindow((call) async {
+        return switch (call.method) {
+          'isAlwaysOnTop' => ++pinReads == 3 ? pinResult.future : false,
+          'isMaximized' || 'isFullScreen' => false,
+          _ => null,
+        };
+      }).install();
       final caption = WindowCaptionController();
       addTearDown(caption.dispose);
       await tester.pump();

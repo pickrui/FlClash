@@ -26,6 +26,7 @@ import 'package:material_ui/material_ui.dart'
 import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/fake_desktop_window.dart';
 import '../helpers/test_app.dart';
 
 class _Account extends CloudAccountNotifier {
@@ -188,16 +189,7 @@ void main() {
         final links = StreamController<Uri>.broadcast();
         addTearDown(links.close);
         Uri? browser;
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-          const MethodChannel('window'),
-          (_) async => null,
-        );
-        addTearDown(
-          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-            const MethodChannel('window'),
-            null,
-          ),
-        );
+        FakeDesktopWindow().install();
         await tester.pumpWidget(
           TestApp(
             locale: const Locale('en'),

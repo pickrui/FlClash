@@ -16,7 +16,7 @@ import 'package:fl_clash/providers/providers.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:window/window.dart';
+import 'package:rust_api/window.dart';
 
 export 'package:prism_ui/icons/caption_icon.dart';
 
@@ -430,7 +430,8 @@ class _WindowHeaderState extends ConsumerState<WindowHeader> {
       height: kHeaderHeight,
       backdropOpacity: backdropOpacity,
       onDragStart: desktopWindow.startDragging,
-      onDoubleTap: caption.toggleMaximized,
+      // rust_api answers title-bar double clicks on macOS by the system setting.
+      onDoubleTap: system.isMacOS ? null : caption.toggleMaximized,
       title: system.isMacOS ? const Text(appName) : null,
       actions: system.isMacOS
           ? null
@@ -452,7 +453,7 @@ class WindowHeaderBar extends StatelessWidget {
     super.key,
     required this.height,
     required this.onDragStart,
-    required this.onDoubleTap,
+    this.onDoubleTap,
     this.backdropOpacity,
     this.title,
     this.actions,
@@ -460,7 +461,7 @@ class WindowHeaderBar extends StatelessWidget {
 
   final double height;
   final VoidCallback onDragStart;
-  final VoidCallback onDoubleTap;
+  final VoidCallback? onDoubleTap;
   final double? backdropOpacity;
   final Widget? title;
   final Widget? actions;

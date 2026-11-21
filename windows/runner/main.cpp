@@ -6,14 +6,13 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
-#include <app_links/app_links_plugin_c_api.h>
 #include <proxy/proxy_plugin_c_api.h>
-#include <window/window_plugin_c_api.h>
 
 #include <algorithm>
 #include <string>
 
 #include "flutter_window.h"
+#include "rust_api.h"
 #include "utils.h"
 
 namespace {
@@ -46,19 +45,32 @@ bool ClearStaleProxy(HANDLE legacy_instance_mutex,
   return result != WAIT_FAILED && ProxyPluginClearStaleProxy();
 }
 
+// Claims the instance too, so a launch racing this one waits for its window.
+HWND FindRunningWindow() {
+  const auto find_running_window =
+      RustApiFunction<HWND (*)()>("flclash_find_running_window");
+  return find_running_window == nullptr ? nullptr : find_running_window();
+}
+
 // The title alone also matches an Explorer window opened on the install
 // folder, which carries the same name.
-bool ActivateExistingInstance(bool show_window) {
-  HWND existing_window = WindowPluginFindRunningWindow();
+bool ActivateExistingInstance(HWND existing_window, bool show_window) {
   if (existing_window == nullptr) {
     existing_window = ::FindWindowW(Win32Window::kWindowClassName, kWindowTitle);
   }
   if (existing_window == nullptr) {
     return false;
   }
-  SendAppLink(existing_window);
-  if (show_window) {
-    WindowPluginActivateWindow(existing_window);
+  if (const auto forward_links =
+          RustApiFunction<void (*)(HWND)>("flclash_forward_links")) {
+    forward_links(existing_window);
+  }
+  if (!show_window) {
+    return true;
+  }
+  if (const auto activate_window =
+          RustApiFunction<void (*)(HWND)>("flclash_activate_window")) {
+    activate_window(existing_window);
   }
   return true;
 }
@@ -94,8 +106,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     }
     return cleared ? EXIT_SUCCESS : EXIT_FAILURE;
   }
-  if (legacy_instance_exists || single_instance_exists) {
-    ActivateExistingInstance(!is_silent_launch);
+  HWND running_window = FindRunningWindow();
+  if (legacy_instance_exists || single_instance_exists ||
+      running_window != nullptr) {
+    ActivateExistingInstance(running_window, !is_silent_launch);
     if (single_instance_mutex != nullptr) {
       ::CloseHandle(single_instance_mutex);
     }

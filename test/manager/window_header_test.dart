@@ -11,17 +11,15 @@ import 'package:fl_clash/manager/window_manager.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart'
     hide ButtonTheme, Colors, IconButton, Theme;
 import 'package:material_ui/material_ui.dart' as material show Colors;
 
+import '../helpers/fake_desktop_window.dart';
 import '../helpers/test_app.dart';
 import '../helpers/glyph_finders.dart';
-
-const _windowChannel = MethodChannel('window');
 
 const _contentKey = Key('window-header-test-content');
 
@@ -772,19 +770,13 @@ void main() {
       await tester.pump();
     }
 
-    setUpAll(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(_windowChannel, (call) async {
-            return switch (call.method) {
-              'isMaximized' || 'isAlwaysOnTop' || 'isFullScreen' => false,
-              _ => null,
-            };
-          });
-    });
-
-    tearDownAll(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(_windowChannel, null);
+    setUp(() {
+      FakeDesktopWindow((call) {
+        return switch (call.method) {
+          'isMaximized' || 'isAlwaysOnTop' || 'isFullScreen' => false,
+          _ => null,
+        };
+      }).install();
     });
 
     testWidgets('a narrow desktop window carries the header', (tester) async {

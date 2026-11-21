@@ -146,7 +146,7 @@ extension SystemControllerExt on AppController {
         return;
       }
       await addProfilesFromLinks([(label: '', url: url)]);
-    }, initialLinks: system.isLinux ? globalState.launchArguments : const []);
+    });
   }
 
   void updateTun() {

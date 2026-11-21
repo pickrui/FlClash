@@ -6,12 +6,37 @@
 #include "flutter_window.h"
 
 #include <optional>
-#include <window/window_plugin_runner.h>
 
 #include "flutter/generated_plugin_registrant.h"
+#include "rust_api.h"
+
+namespace {
+
+// SetWindowPos shows and hides without WM_SHOWWINDOW, which the engine needs.
+void ForwardVisibility(flutter::FlutterViewController& controller, HWND hwnd,
+                       UINT message, WPARAM wparam, LPARAM lparam) {
+  const HWND view = controller.view()->GetNativeWindow();
+  if (message == WM_SIZE) {
+    controller.engine()->ProcessExternalWindowMessage(view, message, wparam,
+                                                      lparam);
+  } else if (message == WM_WINDOWPOSCHANGED) {
+    const UINT flags = reinterpret_cast<const WINDOWPOS*>(lparam)->flags;
+    if ((flags & (SWP_SHOWWINDOW | SWP_HIDEWINDOW)) != 0) {
+      const WPARAM shown = (flags & SWP_SHOWWINDOW) != 0 ? TRUE : FALSE;
+      controller.engine()->ProcessExternalWindowMessage(hwnd, WM_SHOWWINDOW,
+                                                        shown, 0);
+      controller.engine()->ProcessExternalWindowMessage(view, WM_SHOWWINDOW,
+                                                        shown, 0);
+    }
+  }
+}
+
+}  // namespace
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
-    : project_(project) {}
+    : project_(project),
+      window_message_(RustApiFunction<WindowMessageFunction>(
+          "flclash_window_message")) {}
 
 FlutterWindow::~FlutterWindow() {}
 
@@ -53,13 +78,17 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               LPARAM const lparam) noexcept {
   // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
-    WindowPluginForwardVisibility(*flutter_controller_, hwnd, message, wparam,
-                                  lparam);
+    ForwardVisibility(*flutter_controller_, hwnd, message, wparam, lparam);
     std::optional<LRESULT> result =
         flutter_controller_->HandleTopLevelWindowProc(hwnd, message, wparam,
                                                       lparam);
     if (result) {
       return *result;
+    }
+    LRESULT window_result = 0;
+    if (window_message_ != nullptr &&
+        window_message_(hwnd, message, wparam, lparam, &window_result)) {
+      return window_result;
     }
   }
 

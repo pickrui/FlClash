@@ -10,3 +10,4 @@ mod hotkey;
 mod ipc;
 mod script;
 mod tray;
+mod window;

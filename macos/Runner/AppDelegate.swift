@@ -6,7 +6,6 @@
 import Cocoa
 import Darwin
 import FlutterMacOS
-import window
 
 @main
 class AppDelegate: FlutterAppDelegate {
@@ -14,6 +13,8 @@ class AppDelegate: FlutterAppDelegate {
     private var startupPrepared = false
     private var wasLaunchedAtLogin: Bool?
     private var launchResultCallbacks: [FlutterResult] = []
+    private var pendingLinks: [String] = []
+    private var linksTaken = false
     private func activateExistingInstanceIfNeeded() -> Bool {
         guard let currentIdentifier = Bundle.main.bundleIdentifier else {
             return false
@@ -36,6 +37,36 @@ class AppDelegate: FlutterAppDelegate {
         if activateExistingInstanceIfNeeded() {
             Darwin.exit(0)
         }
+    }
+
+    override func applicationWillFinishLaunching(_ notification: Notification) {
+        NSAppleEventManager.shared().setEventHandler(
+            self,
+            andSelector: #selector(handleGetURL(_:withReplyEvent:)),
+            forEventClass: AEEventClass(kInternetEventClass),
+            andEventID: AEEventID(kAEGetURL)
+        )
+        super.applicationWillFinishLaunching(notification)
+    }
+
+    @objc private func handleGetURL(
+        _ event: NSAppleEventDescriptor,
+        withReplyEvent _: NSAppleEventDescriptor
+    ) {
+        guard let link = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue else {
+            return
+        }
+        if linksTaken {
+            NotificationCenter.default.post(name: .flClashApplicationOpenLink, object: link)
+        } else {
+            pendingLinks.append(link)
+        }
+    }
+
+    @objc func takePendingLinks() -> [String] {
+        linksTaken = true
+        defer { pendingLinks = [] }
+        return pendingLinks
     }
 
     override func applicationDidFinishLaunching(_ notification: Notification) {
@@ -63,7 +94,7 @@ class AppDelegate: FlutterAppDelegate {
     }
 
     override func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        WindowPlugin.instance?.handleShouldTerminate()
+        NotificationCenter.default.post(name: .flClashApplicationShouldTerminate, object: nil)
         return .terminateCancel
     }
 
@@ -72,7 +103,14 @@ class AppDelegate: FlutterAppDelegate {
     }
 
     override func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        WindowPlugin.instance?.handleReopen()
+        NotificationCenter.default.post(name: .flClashApplicationReopen, object: nil)
         return false
     }
+}
+
+// rust_api's window module observes these; the names are fixed there.
+extension Notification.Name {
+    static let flClashApplicationShouldTerminate = Notification.Name("FlClashApplicationShouldTerminate")
+    static let flClashApplicationReopen = Notification.Name("FlClashApplicationReopen")
+    static let flClashApplicationOpenLink = Notification.Name("FlClashApplicationOpenLink")
 }

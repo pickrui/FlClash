@@ -32,7 +32,7 @@ import 'package:prism_ui/app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:rust_api/rust_api.dart';
-import 'package:window/window.dart';
+import 'package:rust_api/window.dart';
 
 import 'application.dart';
 import 'common/common.dart';

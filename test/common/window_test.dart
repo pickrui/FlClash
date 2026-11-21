@@ -12,10 +12,10 @@ import 'package:fl_clash/common/window.dart';
 import 'package:fl_clash/models/config.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:screen_retriever/screen_retriever.dart';
-import 'package:window/window.dart' show desktopWindow;
+import 'package:rust_api/window.dart'
+    show DesktopDisplay, WindowEvent, desktopWindow;
 
-const _windowChannel = MethodChannel('window');
+import '../helpers/fake_desktop_window.dart';
 
 class _RenderTestBinding extends AutomatedTestWidgetsFlutterBinding
     with RenderSchedulerBinding {}
@@ -30,6 +30,7 @@ void main() {
   late bool isMinimized;
   late bool hideFails;
   late Rect bounds;
+  late FakeDesktopWindow fakeWindow;
 
   setUp(() {
     calls = <String>[];
@@ -39,32 +40,24 @@ void main() {
     isMinimized = false;
     hideFails = false;
     bounds = const Rect.fromLTWH(20, 30, 1000, 800);
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(_windowChannel, (call) async {
-          calls.add(call.method);
-          if (call.method == 'hide' && hideFails) {
-            throw PlatformException(code: 'hide_failed');
-          }
-          return switch (call.method) {
-            'isVisible' => isVisible,
-            'isMaximized' => isMaximized,
-            'isFullScreen' => isFullScreen,
-            'isMinimized' => isMinimized,
-            'getBounds' => <String, double>{
-              'x': bounds.left,
-              'y': bounds.top,
-              'width': bounds.width,
-              'height': bounds.height,
-            },
-            _ => null,
-          };
-        });
+    fakeWindow = FakeDesktopWindow((call) {
+      calls.add(call.method);
+      if (call.method == 'hide' && hideFails) {
+        throw PlatformException(code: 'hide_failed');
+      }
+      return switch (call.method) {
+        'isVisible' => isVisible,
+        'isMaximized' => isMaximized,
+        'isFullScreen' => isFullScreen,
+        'isMinimized' => isMinimized,
+        'getBounds' => bounds,
+        _ => null,
+      };
+    }).install();
   });
 
   tearDown(() {
     render?.resume();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(_windowChannel, null);
   });
 
   test('is a singleton so every caller drives the same window', () {
@@ -82,9 +75,7 @@ void main() {
       final applied = <String>[];
       Object? appliedTint;
       String? supported;
-      binding.defaultBinaryMessenger.setMockMethodCallHandler(_windowChannel, (
-        call,
-      ) async {
+      fakeWindow.responder = (call) {
         final arguments = call.arguments as Map;
         final effect = arguments['effect'] as String;
         if (call.method == 'isEffectSupported') {
@@ -96,7 +87,7 @@ void main() {
           appliedTint = arguments['tint'];
         }
         return null;
-      });
+      };
       const tint = Color(0xFF121212);
       Future<double?> setBlur(bool enabled) => window.setBlur(
         enabled: enabled,
@@ -207,18 +198,15 @@ void main() {
   );
 
   group('restoredWindowPosition', () {
-    const primary = Display(
-      id: 'primary',
-      size: Size(1920, 1080),
-      visiblePosition: Offset.zero,
-      scaleFactor: 1,
+    const primary = DesktopDisplay(
+      bounds: Rect.fromLTWH(0, 0, 1920, 1080),
+      workArea: Rect.fromLTWH(0, 0, 1920, 1080),
+      isPrimary: true,
     );
-    // 2560x1440 physical at 150%, right of the primary: screen_retriever
-    // divides its origin by its own scale.
-    const secondary = Display(
-      id: 'secondary',
-      size: Size(1707, 960),
-      visiblePosition: Offset(1280, 0),
+    // 2560x1440 physical at 150%, in its own logical pixels.
+    const secondary = DesktopDisplay(
+      bounds: Rect.fromLTWH(1280, 0, 1707, 960),
+      workArea: Rect.fromLTWH(1280, 0, 1707, 960),
       scaleFactor: 1.5,
     );
 
@@ -317,24 +305,12 @@ void main() {
     expect(await Window().captureNormalGeometry(const WindowProps()), isNull);
   });
 
-  Future<void> sendWindowEvent(String name) {
-    return binding.defaultBinaryMessenger.handlePlatformMessage(
-      _windowChannel.name,
-      _windowChannel.codec.encodeMethodCall(
-        MethodCall('onEvent', {'name': name}),
-      ),
-      null,
-    );
-  }
-
   test('the init failure window closes and quits through onExit', () async {
     final arguments = <String, Object?>{};
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(_windowChannel, (
-      call,
-    ) async {
+    fakeWindow.responder = (call) {
       arguments[call.method] = call.arguments;
       return call.method == 'isVisible' ? false : null;
-    });
+    };
     final listeners = desktopWindow.listeners;
     addTearDown(() {
       for (final listener in desktopWindow.listeners) {
@@ -353,8 +329,8 @@ void main() {
       'normal',
       reason: 'the error screen draws no window header of its own',
     );
-    for (final event in ['close', 'should-terminate']) {
-      await sendWindowEvent(event);
+    for (final event in [WindowEvent.close, WindowEvent.shouldTerminate]) {
+      fakeWindow.emit(event);
     }
     expect(
       exits,
@@ -369,16 +345,14 @@ void main() {
     'error window survives a stalled title bar and failed centering',
     (tester) async {
       final blocked = Completer<void>();
-      binding.defaultBinaryMessenger.setMockMethodCallHandler(_windowChannel, (
-        call,
-      ) async {
+      fakeWindow.responder = (call) async {
         calls.add(call.method);
         if (call.method == 'setTitleBarStyle') await blocked.future;
         if (call.method == 'getBounds') {
           throw PlatformException(code: 'fixture_center_failed');
         }
         return null;
-      });
+      };
       final showing = Window().showInitFailure();
       await tester.pump();
       await tester.pump(const Duration(seconds: 2));
@@ -394,13 +368,11 @@ void main() {
     (tester) async {
       final blocked = Completer<void>();
       var blocks = true;
-      binding.defaultBinaryMessenger.setMockMethodCallHandler(_windowChannel, (
-        call,
-      ) async {
+      fakeWindow.responder = (call) async {
         calls.add(call.method);
         if (blocks && call.method == 'ensureInitialized') await blocked.future;
         return null;
-      });
+      };
       final failed = expectLater(
         Window().show(),
         throwsA(isA<TimeoutException>()),
