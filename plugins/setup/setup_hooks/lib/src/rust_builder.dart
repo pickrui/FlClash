@@ -12,6 +12,7 @@ import 'build_cache.dart';
 import 'fingerprint.dart';
 import 'hardening.dart';
 import 'options.dart';
+import 'path_remap.dart';
 import 'target.dart';
 import 'util.dart';
 
@@ -66,6 +67,12 @@ class RustBuilder {
       'CORE_SHA256': coreSha256,
       'CORE_NAME': '${config.coreName}${target.executableExtension}',
       if (target.goos == 'darwin') 'MACOSX_DEPLOYMENT_TARGET': '13.0',
+      ...trimmedPathEnvironment(
+        checkoutDir: rootDir,
+        toolchainDir: _helperPath,
+        targetTriple: triple,
+        rustc: (rustc.stdout as String).trim(),
+      ),
     };
 
     final srcPath = p.join(

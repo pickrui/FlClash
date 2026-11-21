@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
 import 'package:flutter_rust_bridge_hooks/flutter_rust_bridge_hooks.dart';
+import 'package:setup_hooks/setup_hooks.dart';
 
 void main(List<String> args) async {
   await build(args, (input, output) async {
@@ -20,6 +21,10 @@ void main(List<String> args) async {
     // Select the compiler belonging to the pinned toolchain, including its std targets.
     await _rustup(['show', 'active-toolchain'], rustDirectory.path);
     final rustc = await _rustup(['which', 'rustc'], rustDirectory.path);
+    final pageSize = androidPageSizeEnvironment(
+      isAndroid: input.config.code.targetOS == OS.android,
+      architecture: input.config.code.targetArchitecture.name,
+    );
     await FlutterRustBridgeNativeAssetsBuilder(
       cratePath: 'rust',
       extraCargoBuildArgs: const ['--locked'],
@@ -32,9 +37,13 @@ void main(List<String> args) async {
         ),
         if (input.config.code.targetOS == OS.macOS)
           'MACOSX_DEPLOYMENT_TARGET': '13.0',
-        ...androidPageSizeEnvironment(
-          isAndroid: input.config.code.targetOS == OS.android,
-          architecture: input.config.code.targetArchitecture.name,
+        ...pageSize,
+        ...trimmedPathEnvironment(
+          checkoutDir: Directory.fromUri(input.packageRoot.resolve('../..')).path,
+          toolchainDir: rustDirectory.path,
+          targetTriple: rustTargetTriple(input.config.code),
+          rustc: rustc,
+          environment: {...Platform.environment, ...pageSize},
         ),
       },
     ).run(input: input, output: output);
