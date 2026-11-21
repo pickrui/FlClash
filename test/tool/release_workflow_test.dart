@@ -246,28 +246,6 @@ void main() {
     },
   );
 
-  test('the x64 Windows package ships the patched engine', () {
-    final steps = ((jobs['build'] as YamlMap)['steps'] as YamlList)
-        .cast<YamlMap>();
-    final verify = steps.indexWhere(
-      (step) => step['name'] == 'Verify the patched Windows engine',
-    );
-    expect(verify, greaterThan(0));
-    expect(
-      verify,
-      lessThan(steps.indexWhere((step) => step['name'] == 'Upload')),
-    );
-    expect(
-      steps[verify]['if'],
-      "matrix.platform == 'windows' && matrix.arch == 'amd64'",
-    );
-    expect(steps[verify]['run'], contains('-Verify'));
-    expect(
-      File('windows/CMakeLists.txt').readAsStringSync(),
-      contains('patch_flutter_engine.ps1'),
-    );
-  });
-
   test('deep checks run only on schedule or manual dispatch', () {
     final workflow = loadYaml(
       File('.github/workflows/go-deep-tests.yaml').readAsStringSync(),

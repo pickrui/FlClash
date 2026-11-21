@@ -93,22 +93,6 @@ install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}
 install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)
 
-# Every Windows on Arm GPU exceeds the feature level the script is about.
-if(CMAKE_VS_PLATFORM_NAME STREQUAL "x64")
-  install(CODE "
-    if(CMAKE_INSTALL_CONFIG_NAME STREQUAL \"Release\")
-      execute_process(
-        COMMAND powershell -NoProfile -ExecutionPolicy Bypass -File
-          \"${CMAKE_CURRENT_SOURCE_DIR}/patch_flutter_engine.ps1\"
-          -Dll \"${INSTALL_BUNDLE_LIB_DIR}/flutter_windows.dll\"
-        RESULT_VARIABLE patch_result)
-      if(patch_result)
-        message(FATAL_ERROR \"Patching flutter_windows.dll failed\")
-      endif()
-    endif()
-    " COMPONENT Runtime)
-endif()
-
 # FlClash
 set(CLASH_DIR "../libclash/windows")
 

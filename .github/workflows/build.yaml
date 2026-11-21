@@ -7,7 +7,7 @@ on:
 
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
-  FLUTTER_VERSION: '3.47.9'
+  FLUTTER_VERSION: '3.50.0'
   GO_VERSION: '1.27.4'
   MSYS_NO_PATHCONV: 1
 
@@ -468,10 +468,6 @@ jobs:
         if: matrix.platform == 'macos'
         run: python3 -m unittest discover -s test/ci -p 'test_macos_window_startup.py' -v
 
-      - name: Disable Impeller on Intel macOS
-        if: matrix.platform == 'macos' && matrix.arch == 'amd64'
-        run: plutil -replace FLTEnableImpeller -bool NO macos/Runner/Info.plist
-
       - name: Cache npm
         if: matrix.platform == 'macos'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
@@ -630,11 +626,6 @@ jobs:
         run: |
           python3 tool/check_apk_version.py --version "$RELEASE_VERSION" --build "$RELEASE_BUILD" \
             --arch "$RELEASE_ARCH" --core-digests build/core/gomobile/release/metadata/core-sha256.json dist/*.apk
-
-      - name: Verify the patched Windows engine
-        if: matrix.platform == 'windows' && matrix.arch == 'amd64'
-        shell: pwsh
-        run: ./windows/patch_flutter_engine.ps1 -Dll build/windows/x64/runner/Release/flutter_windows.dll -Verify
 
       - name: Verify the Windows ZIP CA bundle
         if: matrix.platform == 'windows'

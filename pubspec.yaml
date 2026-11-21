@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 0.9.3+2026110423
 environment:
   sdk: '>=3.13.7 <4.0.0'
-  flutter: '>=3.47.9'
+  flutter: '>=3.50.0'
 
 dependencies:
   setup:
@@ -86,7 +86,7 @@ dev_dependencies:
 
   drift_dev: ^2.35.2
   intl_utils: ^2.8.17
-  test: ^1.31.1
+  test: ^1.32.0
   mocktail: ^1.0.5
 
 flutter:
