@@ -171,4 +171,37 @@ void main() {
     expect(find.text('sheet'), findsNothing);
     handle.dispose();
   });
+
+  testWidgets('a nested sheet asks its root page before closing and closes '
+      'with it', (tester) async {
+    var asked = 0;
+    late BuildContext page;
+    await _open(
+      tester,
+      const Size(1280, 800),
+      (context) => showNestedExtend<void>(
+        context,
+        builder: (context) {
+          page = context;
+          return PopGuard(
+            onPop: (_) {
+              asked++;
+              return false;
+            },
+            child: _page(),
+          );
+        },
+      ),
+    );
+
+    await tester.tapAt(const Offset(20, 300));
+    await tester.pumpAndSettle();
+    expect(asked, 1);
+    expect(find.text('title'), findsOneWidget);
+
+    expect(closePage(page), isTrue);
+    await tester.pumpAndSettle();
+    expect(find.text('title'), findsNothing);
+    expect(closePage(page), isFalse);
+  });
 }
