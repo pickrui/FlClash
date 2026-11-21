@@ -419,6 +419,16 @@ void main() {
     expect(container.read(initProvider), isFalse);
   });
 
+  test('why the core stopped is kept until it starts again', () {
+    container.read(coreStopReasonProvider.notifier).value = 'pipe reset';
+    container.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+    expect(container.read(coreStopReasonProvider), 'pipe reset');
+
+    container.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
+
+    expect(container.read(coreStopReasonProvider), isNull);
+  });
+
   group('NetworkDetection provider', () {
     late HttpClientAdapter originalAdapter;
 

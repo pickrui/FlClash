@@ -527,6 +527,19 @@ class _CoreStatus extends _$CoreStatus with NotifierMixin<CoreStatus> {
   }
 }
 
+/// Why the Core stopped: a failed start, a failed restart or a lost session.
+/// It is kept until the Core leaves [CoreStatus.disconnected].
+@Riverpod(keepAlive: true)
+class CoreStopReason extends _$CoreStopReason with NotifierMixin<String?> {
+  @override
+  String? build() {
+    ref.listen(coreStatusProvider, (_, next) {
+      if (next != CoreStatus.disconnected) state = null;
+    });
+    return null;
+  }
+}
+
 @riverpod
 class Query extends _$Query with NotifierMixin<String> {
   @override

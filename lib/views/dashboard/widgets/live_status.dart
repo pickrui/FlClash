@@ -62,7 +62,7 @@ bool _isRunningCore(LiveStatus status) =>
 
 /// Why the core stopped, when something recorded it; the stopped card shows
 /// it in place of its generic line.
-String? watchCoreStopReason(WidgetRef ref) => null;
+String? watchCoreStopReason(WidgetRef ref) => ref.watch(coreStopReasonProvider);
 
 List<LiveStatus> watchLiveStatuses(WidgetRef ref) {
   final core = ref.watch(heldCoreStatusProvider);

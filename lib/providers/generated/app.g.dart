@@ -1699,6 +1699,68 @@ abstract class _$CoreStatus extends $Notifier<CoreStatus> {
   }
 }
 
+/// Why the Core stopped: a failed start, a failed restart or a lost session.
+/// It is kept until the Core leaves [CoreStatus.disconnected].
+
+@ProviderFor(CoreStopReason)
+final coreStopReasonProvider = CoreStopReasonProvider._();
+
+/// Why the Core stopped: a failed start, a failed restart or a lost session.
+/// It is kept until the Core leaves [CoreStatus.disconnected].
+final class CoreStopReasonProvider
+    extends $NotifierProvider<CoreStopReason, String?> {
+  /// Why the Core stopped: a failed start, a failed restart or a lost session.
+  /// It is kept until the Core leaves [CoreStatus.disconnected].
+  CoreStopReasonProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'coreStopReasonProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$coreStopReasonHash();
+
+  @$internal
+  @override
+  CoreStopReason create() => CoreStopReason();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$coreStopReasonHash() => r'24283aff8c62f8e2d9c5ab5d218a0c99a3afa56e';
+
+/// Why the Core stopped: a failed start, a failed restart or a lost session.
+/// It is kept until the Core leaves [CoreStatus.disconnected].
+
+abstract class _$CoreStopReason extends $Notifier<String?> {
+  String? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(Query)
 final queryProvider = QueryFamily._();
 

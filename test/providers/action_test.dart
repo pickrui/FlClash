@@ -957,6 +957,10 @@ void main() {
         containsAllInOrder([CoreStatus.connecting, CoreStatus.disconnected]),
       );
       expect(container.read(coreStatusProvider), CoreStatus.disconnected);
+      expect(
+        container.read(coreStopReasonProvider),
+        throws ? 'Bad state: bind failed' : isNull,
+      );
       verify(handler.shutdown).called(1);
     });
   }

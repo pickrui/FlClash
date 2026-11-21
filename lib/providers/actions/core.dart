@@ -131,18 +131,37 @@ extension CoreControllerExt on AppController {
     _ref.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
     final core = _ref.read(coreHandlerProvider);
     var connected = false;
+    String? failure;
     try {
       final message = await core.preload();
       connected = message.isEmpty && core.isCompleted;
-      if (message.isNotEmpty && _context.mounted) {
-        _context.showNotifier(message, level: MessageLevel.error);
+      if (message.isNotEmpty) {
+        failure = message;
+        if (_context.mounted) {
+          _context.showNotifier(message, level: MessageLevel.error);
+        }
       }
       return connected;
+    } catch (error) {
+      failure = userFacingErrorMessage(error, appLocalizations);
+      rethrow;
     } finally {
       _ref.read(coreStatusProvider.notifier).value = connected
           ? CoreStatus.connected
           : CoreStatus.disconnected;
+      if (!connected && failure != null && failure.isNotEmpty) {
+        _ref.read(coreStopReasonProvider.notifier).value = failure;
+      }
     }
+  }
+
+  /// Keeps the first reason a restart stopped for, which is the most specific.
+  void _recordCoreStopReason(Object error) {
+    if (_ref.read(coreStatusProvider) != CoreStatus.disconnected) return;
+    final notifier = _ref.read(coreStopReasonProvider.notifier);
+    if (notifier.value != null) return;
+    final reason = userFacingErrorMessage(error, appLocalizations);
+    if (reason.isNotEmpty) notifier.value = reason;
   }
 
   Future<bool> ensureCoreReady() {
@@ -298,16 +317,22 @@ extension CoreControllerExt on AppController {
         restart: () async {
           _ref.read(coreStatusProvider.notifier).value =
               CoreStatus.disconnected;
+          _ref.read(coreStopReasonProvider.notifier).value = null;
           clearDelay();
-          final core = _ref.read(coreHandlerProvider);
-          var stopped = false;
           try {
-            stopped = await core.shutdown();
-          } finally {
-            if (stopped || !core.isCompleted) _setAppliedSetupState(null);
+            final core = _ref.read(coreHandlerProvider);
+            var stopped = false;
+            try {
+              stopped = await core.shutdown();
+            } finally {
+              if (stopped || !core.isCompleted) _setAppliedSetupState(null);
+            }
+            if (!await _connectCore()) throw _coreDisconnectedMessage;
+            await _initCore();
+          } catch (error) {
+            _recordCoreStopReason(error);
+            rethrow;
           }
-          if (!await _connectCore()) throw _coreDisconnectedMessage;
-          await _initCore();
         },
         isRunning: () => _ref.read(isStartProvider),
         stop: () => updateStatus(false),
