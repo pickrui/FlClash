@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:fl_clash/core/desktop/helper_client.dart';
+import 'package:fl_clash/core/desktop/launcher.dart';
 import 'package:fl_clash/core/desktop/lifecycle.dart';
 import 'package:fl_clash/core/desktop/model.dart';
 import 'package:fl_clash/core/desktop/process_probe.dart';
@@ -95,15 +96,11 @@ void main() {
           pid: 84,
         );
         final resolver = MutableLauncherResolver(helper);
-        final transports = <FakeDesktopCoreTransport>[];
+        final transport = FakeDesktopCoreTransport(
+          state: DesktopTransportState.ready,
+        );
         final lifecycle = DesktopCoreLifecycle(
-          transportFactory: () {
-            final transport = FakeDesktopCoreTransport(
-              state: DesktopTransportState.ready,
-            );
-            transports.add(transport);
-            return transport;
-          },
+          transport: transport,
           launcherResolver: resolver,
           sessionIdFactory: () => _sessionId,
           verifyPeerPid: true,
@@ -116,7 +113,7 @@ void main() {
         addTearDown(lifecycle.close);
         final starting = lifecycle.start();
         await started.future;
-        transports.single.connect(pid: core.pid, generation: 1);
+        transport.connect(pid: core.pid, generation: 1);
         await starting;
 
         final previous = server!;
@@ -127,7 +124,7 @@ void main() {
         resolver.launcher = replacement;
         if (disconnected) {
           final crash = lifecycle.crashEvents.first;
-          transports.single.disconnect(1);
+          transport.disconnect(1);
           await crash;
         }
         await expectLater(
@@ -146,17 +143,21 @@ void main() {
 
         await core.stdin.close();
         await exit.timeout(const Duration(seconds: 5));
-        if (disconnected) await lifecycle.stop();
         final reconnect = lifecycle.start();
+        if (!disconnected) {
+          while (transport.state != DesktopTransportState.starting) {
+            await Future<void>.delayed(Duration.zero);
+          }
+          expect(transport.resetCount, 1);
+          transport.ready();
+        }
         await replacement.started;
-        transports.last.connect(pid: 84, generation: 2);
+        transport.connect(pid: 84, generation: 2);
         await reconnect;
         expect(replacement.startCount, 1);
         expect(lifecycle.state, isA<DesktopCoreRunning>());
-        expect(stops, [
-          {'sessionId': _sessionId},
-          {'sessionId': _sessionId},
-        ]);
+        expect(stops, hasLength(disconnected ? 3 : 2));
+        expect(stops, everyElement({'sessionId': _sessionId}));
       },
     );
   }
