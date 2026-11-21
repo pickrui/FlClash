@@ -6034,4 +6034,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String coreStoppedWithReason(Object reason) {
     return 'Приложение потеряло связь с ядром: $reason';
   }
+
+  @override
+  String get vpnPermissionNotGranted =>
+      'Разрешение на VPN не выдано, поэтому VPN не запущен. Постоянная VPN, заданная для другого приложения, тоже мешает запуску.';
+
+  @override
+  String get vpnServiceStartFailed => 'Не удалось запустить службу VPN.';
 }

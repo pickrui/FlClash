@@ -5,6 +5,9 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'dart:async';
 
+import 'package:fl_clash/common/print.dart';
+import 'package:fl_clash/enum/enum.dart';
+
 import 'launcher.dart';
 import 'model.dart';
 import 'transport.dart';
@@ -492,8 +495,12 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     if (_core case _Leftover(:final lease)) {
       try {
         await _release(lease, _revision);
-      } catch (_) {
+      } catch (error) {
         // The lease stays the leftover Core and the next intent retries it.
+        commonPrint.log(
+          'Leftover Core ${lease.pid} not released: ${compactError(error)}',
+          logLevel: LogLevel.warning,
+        );
       }
     }
   }

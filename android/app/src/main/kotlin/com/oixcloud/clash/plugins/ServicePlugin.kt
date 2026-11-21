@@ -7,6 +7,7 @@ package com.oixcloud.clash.plugins
 
 import com.oixcloud.clash.Service
 import com.oixcloud.clash.State
+import com.oixcloud.clash.startFailureOf
 import com.oixcloud.clash.common.Components
 import com.oixcloud.clash.common.GlobalState
 import com.oixcloud.clash.common.LocalNetworkAccess
@@ -124,7 +125,7 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
                 State.handleStartService()
                 result.success(encodeRunState(State.syncServiceState()))
             } catch (error: Exception) {
-                result.error("service_error", error.message, null)
+                result.error(startFailureOf(error)?.code ?: "service_error", error.message, null)
             }
         }
     }

@@ -262,6 +262,7 @@ extension SetupControllerExt on AppController {
     bool isInit = false,
     bool resume = false,
   }) async {
+    _resumeRunOnCoreRestart = false;
     if (isStart) {
       final generation = _startIntentGeneration;
       if (isInit) {

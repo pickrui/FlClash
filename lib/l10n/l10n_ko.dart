@@ -5816,4 +5816,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String coreStoppedWithReason(Object reason) {
     return '앱과 코어의 연결이 끊어졌습니다: $reason';
   }
+
+  @override
+  String get vpnPermissionNotGranted =>
+      'VPN 권한이 허용되지 않아 VPN을 시작하지 않았습니다. 다른 앱이 상시 사용 VPN으로 설정되어 있어도 시작할 수 없습니다.';
+
+  @override
+  String get vpnServiceStartFailed => 'VPN 서비스를 시작하지 못했습니다.';
 }

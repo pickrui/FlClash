@@ -138,4 +138,19 @@ class StartWithRollbackTest {
         assertSame(failure, result.exceptionOrNull())
         assertTrue(failure.suppressed.isEmpty())
     }
+
+    @Test
+    fun aGivenUpStartNamesItsReasonAndACancelledOneNone() {
+        assertEquals(
+            StartFailure.VPN_PERMISSION,
+            startFailureOf(
+                StartFailureException(StartFailure.VPN_PERMISSION, "refused"),
+            ),
+        )
+        assertEquals(
+            StartFailure.SERVICE,
+            startFailureOf(IllegalStateException("VPN service did not start")),
+        )
+        assertEquals(null, startFailureOf(CancellationException("superseded")))
+    }
 }

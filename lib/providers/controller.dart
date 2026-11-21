@@ -46,6 +46,7 @@ class AppController {
   bool _openingUpdateInstaller = false;
   Future<bool>? _listenerStartFuture;
   int _startIntentGeneration = 0;
+  bool _resumeRunOnCoreRestart = false;
   ProxyConflictReport? _reportedProxyConflict;
   final _coreLifecycleOperations = CoreLifecycleOperations();
   bool _preferencesWritesSuspended = false;

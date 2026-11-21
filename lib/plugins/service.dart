@@ -7,8 +7,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/core/event.dart';
 import 'package:fl_clash/core/method.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -48,6 +51,22 @@ class ServiceRunState {
       localNetworkAccess: data['localNetworkAccess'] as bool? ?? true,
     );
   }
+}
+
+final class ServiceStartException implements LocalizedException {
+  final ServiceStartFailure failure;
+  final String? detail;
+
+  const ServiceStartException(this.failure, [this.detail]);
+
+  @override
+  String messageFor(AppLocalizations localizations) => switch (failure) {
+    ServiceStartFailure.vpnPermission => localizations.vpnPermissionNotGranted,
+    ServiceStartFailure.service => localizations.vpnServiceStartFailed,
+  };
+
+  @override
+  String toString() => 'ServiceStartException(${failure.code}, $detail)';
 }
 
 abstract mixin class ServiceListener {
@@ -140,7 +159,15 @@ class Service {
     return resolveSpilledResponse(response);
   }
 
-  Future<ServiceRunState> start() => _readRunState('start');
+  Future<ServiceRunState> start() async {
+    try {
+      return await _readRunState('start');
+    } on PlatformException catch (error) {
+      final failure = ServiceStartFailure.fromCode(error.code);
+      if (failure == null) rethrow;
+      throw ServiceStartException(failure, error.message);
+    }
+  }
 
   Future<bool> stop() async {
     return await methodChannel.invokeMethod<bool>('stop') ?? false;

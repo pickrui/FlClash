@@ -1833,5 +1833,7 @@
   "diagRecorded": "Historique",
   "mixedPortReset": "Le port mixte ne peut pas être {value}, il a été remis à {port}",
   "coreStoppedDesc": "L’application a perdu la connexion au cœur",
-  "coreStoppedWithReason": "L’application a perdu la connexion au cœur : {reason}"
+  "coreStoppedWithReason": "L’application a perdu la connexion au cœur : {reason}",
+  "vpnPermissionNotGranted": "L'autorisation VPN n'a pas été accordée, le VPN n'a donc pas démarré. Un VPN permanent défini pour une autre application l'empêche aussi.",
+  "vpnServiceStartFailed": "Le service VPN n'a pas pu démarrer."
 }

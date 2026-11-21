@@ -10522,6 +10522,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The app lost its connection to the core: {reason}'**
   String coreStoppedWithReason(Object reason);
+
+  /// No description provided for @vpnPermissionNotGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'VPN permission was not granted, so the VPN did not start. An always-on VPN set for another app also blocks it.'**
+  String get vpnPermissionNotGranted;
+
+  /// No description provided for @vpnServiceStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The VPN service could not start.'**
+  String get vpnServiceStartFailed;
 }
 
 class _AppLocalizationsDelegate

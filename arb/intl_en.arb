@@ -1953,5 +1953,7 @@
     }
   },
   "coreStoppedDesc": "The app lost its connection to the core",
-  "coreStoppedWithReason": "The app lost its connection to the core: {reason}"
+  "coreStoppedWithReason": "The app lost its connection to the core: {reason}",
+  "vpnPermissionNotGranted": "VPN permission was not granted, so the VPN did not start. An always-on VPN set for another app also blocks it.",
+  "vpnServiceStartFailed": "The VPN service could not start."
 }

@@ -338,13 +338,23 @@ extension CoreControllerExt on AppController {
         stop: () => updateStatus(false),
       );
       if (startGeneration == _startIntentGeneration &&
-          (start || _ref.read(isStartProvider))) {
+          (start || _ref.read(isStartProvider) || _resumeRunOnCoreRestart)) {
         await updateStatus(true, isInit: true);
       } else {
         await applyProfile(force: true);
       }
     });
   }
+
+  /// A lost Core gets no stop. Its run ends here and the next Core restart
+  /// resumes it, unless a start or stop is asked for first.
+  void endRunAfterCoreLoss() {
+    if (globalState.isStart) _resumeRunOnCoreRestart = true;
+    globalState.clearRunState();
+  }
+
+  @visibleForTesting
+  bool get resumesRunOnCoreRestart => _resumeRunOnCoreRestart;
 
   Future<void> cleanupAfterCoreCrash() =>
       _coreLifecycleOperations.cleanupAfterCrash(

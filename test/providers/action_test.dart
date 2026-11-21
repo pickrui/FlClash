@@ -965,6 +965,28 @@ void main() {
     });
   }
 
+  testWidgets('a lost Core ends the run here and keeps it for a restart', (
+    tester,
+  ) async {
+    late ProviderContainer container;
+    final controller = await pumpController(
+      tester,
+      Future.value(appliedState),
+      onCreated: (value) => container = value,
+    );
+    globalState.container = container;
+    addTearDown(() => globalState.startTime = null);
+    globalState.startTime = DateTime(2026);
+    container.read(runTimeProvider.notifier).value = 1;
+
+    controller.endRunAfterCoreLoss();
+
+    expect(container.read(isStartProvider), isFalse);
+    expect(controller.resumesRunOnCoreRestart, isTrue);
+    controller.endRunAfterCoreLoss();
+    expect(controller.resumesRunOnCoreRestart, isTrue);
+  });
+
   testWidgets('a source edit during apply settles on the current source', (
     tester,
   ) async {

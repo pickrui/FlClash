@@ -5597,4 +5597,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String coreStoppedWithReason(Object reason) {
     return '应用与内核的连接已断开：$reason';
   }
+
+  @override
+  String get vpnPermissionNotGranted =>
+      '未获得 VPN 权限，VPN 没有启动。其他应用设为始终开启的 VPN 时也会如此';
+
+  @override
+  String get vpnServiceStartFailed => 'VPN 服务无法启动';
 }

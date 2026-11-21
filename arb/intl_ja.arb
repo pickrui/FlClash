@@ -1833,5 +1833,7 @@
   "diagRecorded": "履歴",
   "mixedPortReset": "ミックスポートを {value} にはできないため、{port} に戻しました",
   "coreStoppedDesc": "アプリとコアの接続が切れました",
-  "coreStoppedWithReason": "アプリとコアの接続が切れました：{reason}"
+  "coreStoppedWithReason": "アプリとコアの接続が切れました：{reason}",
+  "vpnPermissionNotGranted": "VPN の権限が許可されなかったため、VPN は起動しませんでした。ほかのアプリが常時接続 VPN に設定されている場合も起動できません",
+  "vpnServiceStartFailed": "VPN サービスを起動できませんでした"
 }

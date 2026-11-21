@@ -1833,5 +1833,7 @@
   "diagRecorded": "История",
   "mixedPortReset": "Смешанный порт не может быть {value}, поэтому он возвращён на {port}",
   "coreStoppedDesc": "Приложение потеряло связь с ядром",
-  "coreStoppedWithReason": "Приложение потеряло связь с ядром: {reason}"
+  "coreStoppedWithReason": "Приложение потеряло связь с ядром: {reason}",
+  "vpnPermissionNotGranted": "Разрешение на VPN не выдано, поэтому VPN не запущен. Постоянная VPN, заданная для другого приложения, тоже мешает запуску.",
+  "vpnServiceStartFailed": "Не удалось запустить службу VPN."
 }

@@ -654,6 +654,20 @@ enum MitmInstallOutcome { installed, untilReboot, prompted, saved }
 
 enum CoreStatus { connecting, connected, disconnected }
 
+/// Why the Android service gave up a start, by the code its failed start
+/// carries (`StartFailure` in StartWithRollback.kt).
+enum ServiceStartFailure {
+  vpnPermission('vpn_permission'),
+  service('service');
+
+  final String code;
+
+  const ServiceStartFailure(this.code);
+
+  static ServiceStartFailure? fromCode(Object? code) =>
+      values.where((it) => it.code == code).firstOrNull;
+}
+
 enum RuleScene { added, disabled }
 
 enum EditorFontSize {

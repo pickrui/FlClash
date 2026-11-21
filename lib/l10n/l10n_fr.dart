@@ -6105,4 +6105,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String coreStoppedWithReason(Object reason) {
     return 'L’application a perdu la connexion au cœur : $reason';
   }
+
+  @override
+  String get vpnPermissionNotGranted =>
+      'L\'autorisation VPN n\'a pas été accordée, le VPN n\'a donc pas démarré. Un VPN permanent défini pour une autre application l\'empêche aussi.';
+
+  @override
+  String get vpnServiceStartFailed => 'Le service VPN n\'a pas pu démarrer.';
 }

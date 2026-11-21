@@ -7,7 +7,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fl_clash/common/app_localizations.dart';
 import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/common/network_error.dart';
 import 'package:fl_clash/core/lib.dart';
 import 'package:fl_clash/core/method.dart';
 import 'package:fl_clash/plugins/service.dart';
@@ -334,6 +336,23 @@ void main() {
     await expectLater(
       service.syncRunState(),
       throwsA(isA<PlatformException>()),
+    );
+  });
+
+  test('a start the service gave up says why', () async {
+    messenger.setMockMethodCallHandler(channel, (_) async {
+      throw PlatformException(code: 'vpn_permission', message: 'refused');
+    });
+
+    await expectLater(
+      service.start(),
+      throwsA(
+        isA<ServiceStartException>().having(
+          (error) => userFacingErrorMessage(error, currentAppLocalizations),
+          'message',
+          currentAppLocalizations.vpnPermissionNotGranted,
+        ),
+      ),
     );
   });
 }

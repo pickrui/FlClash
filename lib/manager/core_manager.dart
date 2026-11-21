@@ -208,7 +208,7 @@ class _CoreManagerState extends ConsumerState<CoreManager>
     if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
       context.showNotifier(message);
     }
-    globalState.clearRunState();
+    appController.endRunAfterCoreLoss();
     await appController.cleanupAfterCoreCrash();
     super.onCrash(message);
   }

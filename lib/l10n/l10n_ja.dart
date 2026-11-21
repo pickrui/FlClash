@@ -5695,4 +5695,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String coreStoppedWithReason(Object reason) {
     return 'アプリとコアの接続が切れました：$reason';
   }
+
+  @override
+  String get vpnPermissionNotGranted =>
+      'VPN の権限が許可されなかったため、VPN は起動しませんでした。ほかのアプリが常時接続 VPN に設定されている場合も起動できません';
+
+  @override
+  String get vpnServiceStartFailed => 'VPN サービスを起動できませんでした';
 }

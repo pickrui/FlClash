@@ -6032,4 +6032,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String coreStoppedWithReason(Object reason) {
     return 'The app lost its connection to the core: $reason';
   }
+
+  @override
+  String get vpnPermissionNotGranted =>
+      'VPN permission was not granted, so the VPN did not start. An always-on VPN set for another app also blocks it.';
+
+  @override
+  String get vpnServiceStartFailed => 'The VPN service could not start.';
 }

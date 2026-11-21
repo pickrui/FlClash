@@ -1833,5 +1833,7 @@
   "diagRecorded": "记录",
   "mixedPortReset": "混合端口不能是 {value}，已恢复为 {port}",
   "coreStoppedDesc": "应用与内核的连接已断开",
-  "coreStoppedWithReason": "应用与内核的连接已断开：{reason}"
+  "coreStoppedWithReason": "应用与内核的连接已断开：{reason}",
+  "vpnPermissionNotGranted": "未获得 VPN 权限，VPN 没有启动。其他应用设为始终开启的 VPN 时也会如此",
+  "vpnServiceStartFailed": "VPN 服务无法启动"
 }
