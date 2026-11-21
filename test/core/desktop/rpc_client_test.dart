@@ -74,6 +74,40 @@ void main() {
     await transport.close();
   });
 
+  test(
+    'a disconnect held behind a large response spares the next connection',
+    () async {
+      final transport = FakeDesktopCoreTransport.connected();
+      final client = CoreRpcClient(transport);
+      final large = client.invoke<Object>(method: CoreMethod.getConfig);
+      final request = await _sentRequest(transport);
+      final rows = [
+        for (var index = 0; index < 4000; index++)
+          {'id': 'connection-$index', 'host': 'host-$index.example.com'},
+      ];
+      final frame = utf8.encode(
+        jsonEncode({'id': request['id'], 'result': rows}),
+      );
+      expect(frame.length, greaterThanOrEqualTo(coreIsolateDecodeBytes));
+
+      transport.addFrame(frame);
+      transport.disconnect(1);
+      await pumpEventQueue();
+      transport.connect(generation: 2);
+      final next = client.invoke<bool>(method: CoreMethod.getIsInit);
+      await pumpEventQueue();
+      final nextRequest =
+          jsonDecode(transport.sentMessages.last) as Map<String, Object?>;
+      transport.addJson({'id': nextRequest['id'], 'result': true});
+
+      expect(await next, isTrue);
+      expect(await large, hasLength(rows.length));
+      expect(client.pendingCount, 0);
+      await client.close();
+      await transport.close();
+    },
+  );
+
   for (final closeClient in [false, true]) {
     test(
       '${closeClient ? 'close' : 'disconnect'} releases requests while a send is blocked',

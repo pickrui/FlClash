@@ -13,8 +13,6 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-const _isolateDecodeBytes = 51200;
-
 final _utf8JsonDecoder = utf8.decoder.fuse(json.decoder);
 
 Map<String, Object?> _decodeEnvelope(Uint8List data) =>
@@ -131,7 +129,7 @@ class Service {
       );
     }
     final response = CoreMethodResponse.fromJson(
-      data.length < _isolateDecodeBytes
+      data.length < coreIsolateDecodeBytes
           ? _decodeEnvelope(data)
           : await compute(_decodeEnvelope, data),
     );

@@ -234,6 +234,9 @@ LogLevel coreFailureLogLevel(Object? error) {
   return error.isCoreUnavailable ? LogLevel.debug : LogLevel.warning;
 }
 
+/// A transport decodes a message at least this large off the UI isolate.
+const coreIsolateDecodeBytes = 50 * 1024;
+
 /// Mirrors spilledResponseDirName and the sealed layout in core/spill.go.
 const coreSpillDirectoryName = 'responses';
 
