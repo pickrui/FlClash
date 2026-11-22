@@ -28,15 +28,15 @@ const _config = CloudRegisterConfig(
 
 Future<void> _open(
   WidgetTester tester,
-  Future<CloudRegisterConfig> Function() loadConfig,
-) async {
+  Future<CloudRegisterConfig> Function() loadConfig, {
+  Size size = const Size(800, 900),
+  double textScale = 0.7,
+}) async {
   await tester.pumpWidget(
     TestApp(
       locale: const Locale('en'),
-      textScaler: const TextScaler.linear(0.7),
-      overrides: [
-        viewSizeProvider.overrideWithBuild((_, _) => const Size(800, 900)),
-      ],
+      textScaler: TextScaler.linear(textScale),
+      overrides: [viewSizeProvider.overrideWithBuild((_, _) => size)],
       child: Builder(
         builder: (context) => material.Scaffold(
           body: TextButton(
@@ -79,5 +79,30 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(currentAppLocalizations.registerTitle), findsWidgets);
     await _cancel(tester);
+  });
+
+  testWidgets('the code row fits a narrow screen with large text', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(320, 800)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await _open(
+      tester,
+      () async => const CloudRegisterConfig(
+        registerMode: 'open',
+        registerEnabled: true,
+        inviteRequired: false,
+        emailVerify: true,
+        turnstile: false,
+        appName: 'fixture',
+      ),
+      size: const Size(320, 800),
+      textScale: 2,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Send Code'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

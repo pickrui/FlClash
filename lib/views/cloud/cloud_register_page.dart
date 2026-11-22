@@ -357,27 +357,20 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
                       onChanged: _refresh,
                     ),
                   ),
-                  if (config.emailVerify)
+                  if (config.emailVerify) ...[
+                    _buildSendCodeRow(isLoading),
                     FormRow(
                       title: l10n.emailCodeLabel,
                       invalid: invalid(_RegisterField.emailCode),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 8,
-                        children: [
-                          Flexible(
-                            child: FormRowTextField(
-                              controller: _emailCodeController,
-                              hintText: l10n.emailCodeHint,
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.next,
-                              onChanged: _refresh,
-                            ),
-                          ),
-                          _buildSendCodeButton(isLoading),
-                        ],
+                      trailing: FormRowTextField(
+                        controller: _emailCodeController,
+                        hintText: l10n.emailCodeHint,
+                        keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.next,
+                        onChanged: _refresh,
                       ),
                     ),
+                  ],
                 ],
               ),
               generateSection(
@@ -462,20 +455,22 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     ];
   }
 
-  Widget _buildSendCodeButton(bool isLoading) {
+  Widget _buildSendCodeRow(bool isLoading) {
     final l10n = currentAppLocalizations;
-    if (_sendingCode) {
-      return const SizedBox(
-        width: 32,
-        child: Center(child: ActivityIndicator(size: 18)),
-      );
-    }
-    return TonalButton(
-      size: TonalButtonSize.compact,
-      label: _resendCountdown > 0
-          ? l10n.resendCodeIn(_resendCountdown)
-          : l10n.sendCode,
-      onPressed: isLoading || _resendCountdown > 0 ? null : _sendEmailCode,
+    final enabled = !isLoading && !_sendingCode && _resendCountdown == 0;
+    return ListItem(
+      title: Text(
+        _resendCountdown > 0
+            ? l10n.resendCodeIn(_resendCountdown)
+            : l10n.sendCode,
+        style: context.listTitleStyle.copyWith(
+          color: enabled
+              ? context.colorScheme.primary
+              : context.colorScheme.onSurfaceVariant,
+        ),
+      ),
+      trailing: _sendingCode ? const ActivityIndicator(size: 18) : null,
+      onTap: enabled ? _sendEmailCode : null,
     );
   }
 }
