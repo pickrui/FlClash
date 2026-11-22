@@ -609,6 +609,7 @@
   "nodeFilterOnly": "Solo",
   "nodeFilterExclude": "Excluir",
   "nodeFilterKeepOne": "Conserve al menos un nodo",
+  "nodeFilterRestoreConfirm": "¿Restaurar el filtro de nodos predeterminado? Pulse Guardar para aplicarlo.",
   "nodeFilterNodeKept": "{name}, conservado",
   "nodeFilterNodeExcluded": "{name}, excluido",
   "nodeFilterRetry": "Reintentar",

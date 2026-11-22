@@ -609,6 +609,7 @@
   "nodeFilterOnly": "선택 항목만",
   "nodeFilterExclude": "제외",
   "nodeFilterKeepOne": "노드를 하나 이상 유지하세요",
+  "nodeFilterRestoreConfirm": "노드 필터를 기본값으로 되돌릴까요? 저장하면 적용됩니다.",
   "nodeFilterNodeKept": "{name}, 유지됨",
   "nodeFilterNodeExcluded": "{name}, 제외됨",
   "nodeFilterRetry": "다시 시도",

@@ -609,6 +609,7 @@
   "nodeFilterOnly": "仅保留",
   "nodeFilterExclude": "排除",
   "nodeFilterKeepOne": "至少保留一个节点",
+  "nodeFilterRestoreConfirm": "恢复默认节点筛选？点保存后生效",
   "nodeFilterNodeKept": "{name}，保留",
   "nodeFilterNodeExcluded": "{name}，排除",
   "nodeFilterRetry": "重试",

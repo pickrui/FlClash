@@ -2050,6 +2050,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get nodeFilterKeepOne => 'Conservez au moins un nœud';
 
   @override
+  String get nodeFilterRestoreConfirm =>
+      'Rétablir le filtre des nœuds par défaut ? Appuyez sur Enregistrer pour l’appliquer.';
+
+  @override
   String nodeFilterNodeKept(Object name) {
     return '$name, conservé';
   }

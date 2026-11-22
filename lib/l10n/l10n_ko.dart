@@ -1967,6 +1967,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nodeFilterKeepOne => '노드를 하나 이상 유지하세요';
 
   @override
+  String get nodeFilterRestoreConfirm => '노드 필터를 기본값으로 되돌릴까요? 저장하면 적용됩니다.';
+
+  @override
   String nodeFilterNodeKept(Object name) {
     return '$name, 유지됨';
   }

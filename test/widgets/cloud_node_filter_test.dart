@@ -235,6 +235,19 @@ Finder _barButton(String tooltip) => find.byWidgetPredicate(
 VoidCallback? _onPressed(WidgetTester tester, String tooltip) =>
     tester.widget<IconButton>(_barButton(tooltip)).onPressed;
 
+Finder get _restoreButton =>
+    find.widgetWithText(TextButton, 'Restore Default').first;
+
+VoidCallback? _restoreOnPressed(WidgetTester tester) =>
+    tester.widget<TextButton>(_restoreButton).onPressed;
+
+/// Restores the default from the status bar and confirms it.
+Future<void> _restore(WidgetTester tester) async {
+  await tester.tap(_restoreButton);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Restore Default').last);
+}
+
 /// The text field of the form row titled [label].
 Finder _patternField(String label) => find.descendant(
   of: find.widgetWithText(FormRow, label),
@@ -387,7 +400,7 @@ void main() {
       expect(account.refreshes, 0);
       expect(find.text('Customized · 3 of 4 nodes kept'), findsOneWidget);
       expect(_onPressed(tester, 'Save'), isNull);
-      expect(_onPressed(tester, 'Restore Default'), isNotNull);
+      expect(_restoreOnPressed(tester), isNotNull);
       expect(tester.takeException(), isNull);
     });
 
@@ -454,9 +467,9 @@ void main() {
       final account = _Account();
       final route = await _pumpEditor(tester, api, account);
       await tester.tap(find.text('Fusion'));
-      await tester.tap(_barButton('Restore Default'));
+      await _restore(tester);
       await tester.pumpAndSettle();
-      expect(api.previews, const [NodeFilter()]);
+      expect(api.previews.last, const NodeFilter());
       expect(api.resets, 0);
       expect(account.refreshes, 0);
       expect(route.popped, isFalse);
@@ -465,6 +478,19 @@ void main() {
       expect(api.resets, 1);
       expect(route.popped, isTrue);
       expect(account.refreshes, 1);
+    });
+
+    testWidgets('restore default asks before clearing the draft', (
+      tester,
+    ) async {
+      final api = _FakeApi(_catalog(const NodeFilter(includeLines: ['gia'])));
+      await _pumpEditor(tester, api, _Account());
+      await tester.tap(_restoreButton);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(api.previews, isEmpty);
+      expect(_restoreOnPressed(tester), isNotNull);
     });
 
     testWidgets('an empty catalog still lets a saved filter be reset', (
@@ -477,9 +503,9 @@ void main() {
         ),
       )..keptFor = (_) => 0;
       final route = await _pumpEditor(tester, api, _Account());
-      expect(_onPressed(tester, 'Restore Default'), isNotNull);
+      expect(_restoreOnPressed(tester), isNotNull);
       expect(_onPressed(tester, 'Save'), isNull);
-      await tester.tap(_barButton('Restore Default'));
+      await _restore(tester);
       await tester.pumpAndSettle();
       expect(api.resets, 0);
       await tester.tap(_barButton('Save'));
@@ -609,7 +635,6 @@ void main() {
 
       await tester.tap(find.text('Fusion'));
       await tester.pumpAndSettle();
-      expect(find.text('Customized · 0 of 4 nodes kept'), findsOneWidget);
       expect(find.text('Keep at least one node'), findsOneWidget);
       expect(_onPressed(tester, 'Save'), isNull);
       expect(tester.takeException(), isNull);
@@ -671,11 +696,11 @@ void main() {
       final api = _FakeApi(_catalog(const NodeFilter()));
       await _pumpEditor(tester, api, _Account());
 
-      expect(_onPressed(tester, 'Restore Default'), isNull);
+      expect(_restoreOnPressed(tester), isNull);
       await tester.tap(find.text('GIA'));
       await tester.pumpAndSettle();
-      expect(_onPressed(tester, 'Restore Default'), isNotNull);
-      await tester.tap(_barButton('Restore Default'));
+      expect(_restoreOnPressed(tester), isNotNull);
+      await _restore(tester);
       await tester.pumpAndSettle();
       expect(_onPressed(tester, 'Save'), isNull);
       expect(api.resets, 0);

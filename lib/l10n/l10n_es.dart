@@ -2045,6 +2045,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get nodeFilterKeepOne => 'Conserve al menos un nodo';
 
   @override
+  String get nodeFilterRestoreConfirm =>
+      '¿Restaurar el filtro de nodos predeterminado? Pulse Guardar para aplicarlo.';
+
+  @override
   String nodeFilterNodeKept(Object name) {
     return '$name, conservado';
   }

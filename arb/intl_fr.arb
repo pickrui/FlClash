@@ -609,6 +609,7 @@
   "nodeFilterOnly": "Uniquement",
   "nodeFilterExclude": "Exclure",
   "nodeFilterKeepOne": "Conservez au moins un nœud",
+  "nodeFilterRestoreConfirm": "Rétablir le filtre des nœuds par défaut ? Appuyez sur Enregistrer pour l’appliquer.",
   "nodeFilterNodeKept": "{name}, conservé",
   "nodeFilterNodeExcluded": "{name}, exclu",
   "nodeFilterRetry": "Réessayer",

@@ -633,6 +633,7 @@
   "nodeFilterOnly": "Only",
   "nodeFilterExclude": "Exclude",
   "nodeFilterKeepOne": "Keep at least one node",
+  "nodeFilterRestoreConfirm": "Restore the default node filter? Tap Save to apply it.",
   "nodeFilterNodeKept": "{name}, kept",
   "nodeFilterNodeExcluded": "{name}, excluded",
   "nodeFilterRetry": "Retry",

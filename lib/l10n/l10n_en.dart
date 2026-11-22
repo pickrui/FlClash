@@ -2021,6 +2021,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nodeFilterKeepOne => 'Keep at least one node';
 
   @override
+  String get nodeFilterRestoreConfirm =>
+      'Restore the default node filter? Tap Save to apply it.';
+
+  @override
   String nodeFilterNodeKept(Object name) {
     return '$name, kept';
   }

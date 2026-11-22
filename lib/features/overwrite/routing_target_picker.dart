@@ -155,14 +155,10 @@ class _RoutingTargetPickerState extends State<RoutingTargetPicker> {
           height: 360,
           child: Column(
             children: [
-              TextField(
+              SearchField(
                 key: const Key('custom-rule-option-search'),
                 autofocus: true,
-                decoration: InputDecoration(
-                  border: const AppInputBorder(),
-                  hintText: l10n.search,
-                  prefixIcon: const GlyphIcon(AppGlyphs.search),
-                ),
+                fill: context.raisedSurfaceLevel.colorOf(context.colorScheme),
                 onChanged: (value) => setState(() => _query = value),
               ),
               const SizedBox(height: 8),

@@ -1940,6 +1940,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get nodeFilterKeepOne => '少なくとも 1 つのノードを残してください';
 
   @override
+  String get nodeFilterRestoreConfirm => 'ノードフィルターをデフォルトに戻しますか？保存すると適用されます';
+
+  @override
   String nodeFilterNodeKept(Object name) {
     return '$name、保持';
   }

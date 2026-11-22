@@ -609,6 +609,7 @@
   "nodeFilterOnly": "Только",
   "nodeFilterExclude": "Исключить",
   "nodeFilterKeepOne": "Оставьте хотя бы один узел",
+  "nodeFilterRestoreConfirm": "Восстановить фильтр узлов по умолчанию? Нажмите «Сохранить», чтобы применить.",
   "nodeFilterNodeKept": "{name}, оставлен",
   "nodeFilterNodeExcluded": "{name}, исключён",
   "nodeFilterRetry": "Повторить",

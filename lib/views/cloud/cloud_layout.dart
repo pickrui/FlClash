@@ -9,7 +9,7 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:flutter/services.dart' show TextInput;
 import 'package:flutter/widgets.dart';
 
-const _contentMaxWidth = 720.0;
+const cloudContentMaxWidth = 720.0;
 
 /// The gap iOS leaves between the grouped sections of a page.
 const cloudSectionGap = 24.0;
@@ -25,7 +25,7 @@ class CloudContentWidth extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
+        constraints: const BoxConstraints(maxWidth: cloudContentMaxWidth),
         child: child,
       ),
     );

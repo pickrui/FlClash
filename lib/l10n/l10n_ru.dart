@@ -2041,6 +2041,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get nodeFilterKeepOne => 'Оставьте хотя бы один узел';
 
   @override
+  String get nodeFilterRestoreConfirm =>
+      'Восстановить фильтр узлов по умолчанию? Нажмите «Сохранить», чтобы применить.';
+
+  @override
   String nodeFilterNodeKept(Object name) {
     return '$name, оставлен';
   }

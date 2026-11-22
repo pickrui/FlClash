@@ -1923,6 +1923,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nodeFilterKeepOne => '至少保留一个节点';
 
   @override
+  String get nodeFilterRestoreConfirm => '恢复默认节点筛选？点保存后生效';
+
+  @override
   String nodeFilterNodeKept(Object name) {
     return '$name，保留';
   }

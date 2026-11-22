@@ -6,6 +6,7 @@
 import 'package:fl_clash/ui/ui.dart';
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/form_row.dart';
@@ -172,7 +173,14 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
 
   bool get _canReset => !_submitting && !_draft.isEmpty;
 
-  void _restoreDefault() {
+  Future<void> _restoreDefault() async {
+    final l10n = context.appLocalizations;
+    final confirmed = await globalState.showMessage(
+      message: TextSpan(text: l10n.nodeFilterRestoreConfirm),
+      confirmText: l10n.restoreDefault,
+      destructive: true,
+    );
+    if (confirmed != true || !mounted || !_canReset) return;
     _matchController.clear();
     _nomatchController.clear();
     _edit(const NodeFilter());
@@ -213,14 +221,6 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     return Scaffold(
       title: l10n.nodeFilter,
       isLoading: _submitting,
-      iconActions: [
-        if (ready)
-          IconButtonData(
-            glyph: AppGlyphs.reset,
-            tooltip: l10n.restoreDefault,
-            onPressed: _canReset ? _restoreDefault : null,
-          ),
-      ],
       confirmationAction: ready
           ? IconButtonData(
               glyph: AppGlyphs.check,
@@ -252,10 +252,18 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
         message: context.appLocalizations.nodeFilterUnavailable,
       );
     }
-    return LayoutBuilder(
-      builder: (context, constraints) => constraints.maxWidth >= _twoPaneWidth
-          ? _buildTwoPanes(context)
-          : _buildOnePane(context),
+    return Column(
+      children: [
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) =>
+                constraints.maxWidth >= _twoPaneWidth
+                ? _buildTwoPanes(context)
+                : _buildOnePane(context, constraints.maxWidth),
+          ),
+        ),
+        _buildStatusBar(context),
+      ],
     );
   }
 
@@ -276,30 +284,71 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     );
   }
 
-  Widget _buildOnePane(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        context.contentTopPadding,
-        16,
-        24 + context.bottomInset,
-      ),
-      child: CloudContentWidth(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ..._buildFilters(context),
-            _buildPreviewHeader(context),
-            RaisedPanel(child: _buildPreview(context, expand: false)),
-          ],
+  Widget _buildOnePane(BuildContext context, double width) {
+    final side = math.max(16.0, (width - cloudContentMaxWidth) / 2);
+    final level = context.raisedSurfaceLevel;
+    final nodes = _previewNodes;
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            side,
+            context.contentTopPadding,
+            side,
+            24,
+          ),
+          sliver: SliverMainAxisGroup(
+            slivers: [
+              SliverList.list(
+                children: [
+                  ..._buildFilters(context),
+                  ListHeader(title: context.appLocalizations.nodeFilterPreview),
+                ],
+              ),
+              DecoratedSliver(
+                decoration: ShapeDecoration(
+                  color: level.colorOf(context.colorScheme),
+                  shape: AppShape.xl,
+                ),
+                sliver: SurfaceScope(
+                  level: level,
+                  child: SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverMainAxisGroup(
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Builder(builder: _buildPreviewTop),
+                        ),
+                        SliverAnimatedOpacity(
+                          opacity: _previewOpacity,
+                          duration: _fadeDuration(context),
+                          sliver: nodes.isEmpty
+                              ? SliverToBoxAdapter(
+                                  child: _buildPreviewEmpty(context),
+                                )
+                              : SliverPrismList(
+                                  itemCount: nodes.length,
+                                  itemBuilder: (_, index) => NodeFilterNodeRow(
+                                    node: nodes[index],
+                                    showKept: _previewSettled,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildTwoPanes(BuildContext context) {
     final top = context.contentTopPadding;
-    final bottom = 24 + context.bottomInset;
+    const bottom = 24.0;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1120),
@@ -323,11 +372,13 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildPreviewHeader(context),
+                    ListHeader(
+                      title: context.appLocalizations.nodeFilterPreview,
+                    ),
                     Expanded(
                       child: RaisedPanel(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                        child: _buildPreview(context, expand: true),
+                        child: _buildPreview(context),
                       ),
                     ),
                   ],
@@ -454,39 +505,46 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     );
   }
 
-  Widget _buildPreviewHeader(BuildContext context) {
+  /// What the draft keeps, and the way back to the default, under both
+  /// layouts as the iOS app keeps them at its foot.
+  Widget _buildStatusBar(BuildContext context) {
     final l10n = context.appLocalizations;
     final colorScheme = context.colorScheme;
     final catalog = _displayed;
     final settled = _previewSettled;
-    final failed = _previewError != null;
     final state = _draft.isEmpty
         ? l10n.nodeFilterSmartSelection
         : l10n.nodeFilterCustomized;
-    return ListHeader(
-      title: l10n.nodeFilterPreview,
-      trailing: Flexible(
-        flex: 2,
+    final style = AppTextStyle.footnote.of(context, emphasized: true).toTabular;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: SurfaceLevel.page.colorOf(colorScheme),
+        border: Border(
+          top: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(20, 6, 8, 6 + context.bottomInset),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
           spacing: 8,
           children: [
-            if (!settled && !failed) const ActivityIndicator(size: 14),
-            Flexible(
+            if (!settled && _previewError == null)
+              const ActivityIndicator(size: 14),
+            Expanded(
               child: Text(
-                !settled
-                    ? state
-                    : '$state · ${l10n.nodeFilterKept(catalog.kept, catalog.total)}',
-                textAlign: TextAlign.end,
-                style: AppTextStyle.footnote
-                    .of(context, emphasized: true)
-                    .toTabular
-                    .copyWith(
-                      color: _keptNone
-                          ? colorScheme.error
-                          : colorScheme.primary,
-                    ),
+                _keptNone
+                    ? l10n.nodeFilterKeepOne
+                    : settled
+                    ? '$state · ${l10n.nodeFilterKept(catalog.kept, catalog.total)}'
+                    : state,
+                style: style.copyWith(
+                  color: _keptNone ? colorScheme.error : colorScheme.primary,
+                ),
               ),
+            ),
+            TextButton(
+              onPressed: _canReset ? _restoreDefault : null,
+              child: Text(l10n.restoreDefault),
             ),
           ],
         ),
@@ -494,101 +552,68 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     );
   }
 
-  Widget _buildPreview(BuildContext context, {required bool expand}) {
-    final l10n = context.appLocalizations;
-    final colorScheme = context.colorScheme;
-    final catalog = _displayed;
-    final settled = _previewSettled;
-    final query = _searchController.text.trim().toLowerCase();
-    final nodes = catalog.previewNodes(query, keptFirst: settled);
-    final failed = _previewError != null;
-    final header = Column(
+  List<NodeFilterNode> get _previewNodes => _displayed.previewNodes(
+    _searchController.text.trim().toLowerCase(),
+    keptFirst: _previewSettled,
+  );
+
+  double get _previewOpacity =>
+      _previewSettled || _previewError != null ? 1.0 : 0.55;
+
+  Duration _fadeDuration(BuildContext context) =>
+      context.motionDuration(const Duration(milliseconds: 150));
+
+  /// The preview's error and search, on the panel the [context] sits in.
+  Widget _buildPreviewTop(BuildContext context) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (_previewError case final error?)
-          _buildPreviewError(context, error)
-        else if (_keptNone)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              l10n.nodeFilterKeepOne,
-              style: AppTextStyle.footnote
-                  .of(context)
-                  .copyWith(color: colorScheme.error),
-            ),
-          ),
-        FilledInputTheme(
-          fillColor: context.raisedSurfaceLevel.colorOf(colorScheme),
-          child: TextField(
-            controller: _searchController,
-            onChanged: (_) => setState(() {}),
-            style: AppTextStyle.body.of(context),
-            decoration: InputDecoration(
-              hintText: l10n.nodeFilterSearch,
-              isDense: true,
-              prefixIcon: const GlyphIcon(AppGlyphs.search, size: 20),
-              suffixIcon: query.isEmpty
-                  ? null
-                  : IconButton(
-                      icon: const GlyphIcon(AppGlyphs.close, size: 18),
-                      tooltip: l10n.clearSearch,
-                      onPressed: () => setState(_searchController.clear),
-                    ),
-            ),
-          ),
+        if (_previewError case final error?) _buildPreviewError(context, error),
+        SearchField(
+          controller: _searchController,
+          onChanged: (_) => setState(() {}),
+          hintText: context.appLocalizations.nodeFilterSearch,
+          fill: context.raisedSurfaceLevel.colorOf(context.colorScheme),
         ),
         const SizedBox(height: 8),
       ],
     );
-    final empty = Padding(
+  }
+
+  Widget _buildPreviewEmpty(BuildContext context) {
+    return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Text(
-        l10n.noData,
+        context.appLocalizations.noData,
         textAlign: TextAlign.center,
         style: AppTextStyle.subheadline
             .of(context)
-            .copyWith(color: colorScheme.onSurfaceVariant),
+            .copyWith(color: context.colorScheme.onSurfaceVariant),
       ),
     );
-    final fade = settled || failed ? 1.0 : 0.55;
-    final duration = context.motionDuration(const Duration(milliseconds: 150));
-    if (!expand) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          header,
-          AnimatedOpacity(
-            opacity: fade,
-            duration: duration,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: nodes.isEmpty
-                  ? [empty]
-                  : [
-                      for (final node in nodes)
-                        NodeFilterNodeRow(node: node, showKept: settled),
-                    ],
-            ),
-          ),
-        ],
-      );
-    }
+  }
+
+  Widget _buildPreview(BuildContext context) {
+    final nodes = _previewNodes;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        header,
+        Builder(builder: _buildPreviewTop),
         Expanded(
           child: AnimatedOpacity(
-            opacity: fade,
-            duration: duration,
+            opacity: _previewOpacity,
+            duration: _fadeDuration(context),
             child: nodes.isEmpty
-                ? Align(alignment: Alignment.topCenter, child: empty)
+                ? Align(
+                    alignment: Alignment.topCenter,
+                    child: _buildPreviewEmpty(context),
+                  )
                 : PrismListView(
                     padding: const EdgeInsets.only(bottom: 12),
                     itemCount: nodes.length,
                     itemBuilder: (_, index) => NodeFilterNodeRow(
                       node: nodes[index],
-                      showKept: settled,
+                      showKept: _previewSettled,
                     ),
                   ),
           ),

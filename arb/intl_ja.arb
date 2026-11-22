@@ -609,6 +609,7 @@
   "nodeFilterOnly": "のみ残す",
   "nodeFilterExclude": "除外",
   "nodeFilterKeepOne": "少なくとも 1 つのノードを残してください",
+  "nodeFilterRestoreConfirm": "ノードフィルターをデフォルトに戻しますか？保存すると適用されます",
   "nodeFilterNodeKept": "{name}、保持",
   "nodeFilterNodeExcluded": "{name}、除外",
   "nodeFilterRetry": "再試行",

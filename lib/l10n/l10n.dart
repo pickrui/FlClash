@@ -3768,6 +3768,12 @@ abstract class AppLocalizations {
   /// **'Keep at least one node'**
   String get nodeFilterKeepOne;
 
+  /// No description provided for @nodeFilterRestoreConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the default node filter? Tap Save to apply it.'**
+  String get nodeFilterRestoreConfirm;
+
   /// No description provided for @nodeFilterNodeKept.
   ///
   /// In en, this message translates to:
