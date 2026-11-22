@@ -5,10 +5,7 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/features/form/form_row.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
-import 'package:fl_clash/widgets/input_dialog.dart' show VisibilityToggleButton;
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 const _contentMaxWidth = 720.0;
@@ -35,11 +32,12 @@ class CloudContentWidth extends StatelessWidget {
 }
 
 /// The filled pill of the one action a cloud screen is for, as tall as the
-/// tonal buttons beside it.
+/// tonal buttons beside it; [loading] holds its size while the action runs.
 class CloudPrimaryButton extends StatelessWidget {
   final String label;
   final Glyph? glyph;
   final TonalButtonSize size;
+  final bool loading;
   final VoidCallback? onPressed;
 
   const CloudPrimaryButton({
@@ -47,6 +45,7 @@ class CloudPrimaryButton extends StatelessWidget {
     required this.label,
     this.glyph,
     this.size = TonalButtonSize.bar,
+    this.loading = false,
     required this.onPressed,
   });
 
@@ -63,14 +62,17 @@ class CloudPrimaryButton extends StatelessWidget {
       iconSize: size.icon,
       tapTargetSize: TapTargetSize.shrinkWrap,
     );
-    final glyph = this.glyph;
+    final glyph = loading ? null : this.glyph;
+    final Widget child = loading
+        ? ActivityIndicator(size: size.icon, semanticLabel: label)
+        : Text(label);
     final Widget button = glyph == null
-        ? FilledButton(onPressed: onPressed, style: style, child: Text(label))
+        ? FilledButton(onPressed: onPressed, style: style, child: child)
         : FilledButton.icon(
             onPressed: onPressed,
             style: style,
             icon: GlyphIcon(glyph, fill: 1),
-            label: Text(label),
+            label: child,
           );
     return ElasticButton(enabled: onPressed != null, child: button);
   }
@@ -121,10 +123,11 @@ class CloudErrorBanner extends StatelessWidget {
 
 /// A cloud form in a form sheet: its cancel and close buttons go through
 /// [onClose], which a form uses to finish what it has started before closing.
+/// Without [confirmation] the form carries its own buttons.
 class CloudFormSheet extends StatelessWidget {
   final String title;
   final bool busy;
-  final IconButtonData confirmation;
+  final IconButtonData? confirmation;
   final VoidCallback onClose;
   final List<Widget> children;
 
@@ -132,7 +135,7 @@ class CloudFormSheet extends StatelessWidget {
     super.key,
     required this.title,
     required this.busy,
-    required this.confirmation,
+    this.confirmation,
     required this.onClose,
     required this.children,
   });
@@ -203,58 +206,6 @@ class _CloudSheetGuardState extends State<CloudSheetGuard> {
 
   @override
   Widget build(BuildContext context) => widget.child;
-}
-
-/// A secret at the end of a form row, with the button that shows it.
-class CloudSecretField extends StatelessWidget {
-  final TextEditingController controller;
-  final bool obscure;
-  final VoidCallback? onToggle;
-  final String? hintText;
-  final TextInputAction? textInputAction;
-  final List<TextInputFormatter>? inputFormatters;
-  final ValueChanged<String>? onChanged;
-  final ValueChanged<String>? onFieldSubmitted;
-
-  const CloudSecretField({
-    super.key,
-    required this.controller,
-    required this.obscure,
-    required this.onToggle,
-    this.hintText,
-    this.textInputAction,
-    this.inputFormatters,
-    this.onChanged,
-    this.onFieldSubmitted,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(
-          child: FormRowTextField(
-            controller: controller,
-            hintText: hintText,
-            obscureText: obscure,
-            autocorrect: false,
-            enableSuggestions: false,
-            textInputAction: textInputAction,
-            inputFormatters: inputFormatters,
-            onChanged: onChanged,
-            onFieldSubmitted: onFieldSubmitted,
-          ),
-        ),
-        MinIconButtonTheme(
-          child: VisibilityToggleButton(
-            obscureText: obscure,
-            onPressed: onToggle,
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 /// Fields that stop taking input while a form is being sent.

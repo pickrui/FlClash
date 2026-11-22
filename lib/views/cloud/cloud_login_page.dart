@@ -17,11 +17,13 @@ import 'package:fl_clash/services/cloud_google_login.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart' show TextInputAction;
+import 'package:flutter/services.dart'
+    show AutofillHints, TextInput, TextInputAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud_account_page.dart' show cloudNodeFilterPageBuilder;
 import 'cloud_layout.dart';
+import 'cloud_register_page.dart' show showCloudRegisterPage;
 
 Future<T?> showCloudLoginPage<T>(BuildContext context) async {
   int? suggestedSession;
@@ -100,9 +102,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
 
   CloudGoogleLogin? _googleLogin;
 
-  var _loginMode = _LoginMode.token;
-  var _obscurePassword = true;
-  var _obscureToken = true;
+  var _withToken = false;
   var _isSubmitting = false;
   var _attempted = false;
 
@@ -125,7 +125,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     }
 
     final notifier = ref.read(cloudAccountProvider.notifier);
-    final mode = _loginMode;
+    final withToken = _withToken;
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final token = _tokenController.text.trim();
@@ -135,20 +135,20 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     try {
       final signedIn = await submitCloudAuth(
         () async {
-          switch (mode) {
-            case _LoginMode.emailPassword:
-              suggestNodeFilter = await notifier.signInWithPassword(
-                email: email,
-                password: password,
-              );
-            case _LoginMode.token:
-              await notifier.signInWithToken(token);
+          if (withToken) {
+            await notifier.signInWithToken(token);
+          } else {
+            suggestNodeFilter = await notifier.signInWithPassword(
+              email: email,
+              password: password,
+            );
           }
         },
         errorTitle: currentAppLocalizations.loginFailed,
         isActive: () => mounted && (route?.isActive ?? true),
       );
       if (signedIn && mounted) {
+        if (!withToken && _autofills) TextInput.finishAutofillContext();
         _finishLogin(suggestNodeFilter);
       }
     } finally {
@@ -216,16 +216,12 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
 
   String? _issue() {
     final l10n = currentAppLocalizations;
-    return switch (_loginMode) {
-      _LoginMode.token =>
-        _tokenController.text.isEmpty ? l10n.tokenValidation : null,
-      _LoginMode.emailPassword =>
-        _emailController.text.isEmpty
-            ? l10n.emailValidation
-            : _passwordController.text.isEmpty
-            ? l10n.passwordValidation
-            : null,
-    };
+    if (_withToken) {
+      return _tokenController.text.trim().isEmpty ? l10n.tokenValidation : null;
+    }
+    if (_emailController.text.trim().isEmpty) return l10n.emailValidation;
+    if (_passwordController.text.isEmpty) return l10n.passwordValidation;
+    return null;
   }
 
   /// Cancelling a pending Google sign-in keeps the form; once credentials are
@@ -237,6 +233,19 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     }
     if (_isSubmitting || ref.read(cloudAccountProvider).isLoading) return;
     Navigator.of(context).pop();
+  }
+
+  void _switchMethod() {
+    setState(() {
+      _withToken = !_withToken;
+      _attempted = false;
+    });
+  }
+
+  void _openRegister() {
+    final navigator = sheetNavigatorOf(context);
+    Navigator.of(context).pop();
+    showCloudRegisterPage<void>(navigator.context);
   }
 
   void _refresh(String _) {
@@ -254,14 +263,21 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
       title: l10n.loginTitle,
       busy: isLoading,
       onClose: _handleClose,
-      confirmation: IconButtonData(
-        glyph: AppGlyphs.check,
-        tooltip: l10n.loginTitle,
-        isLoading: isLoading && _googleLogin == null,
-        onPressed: isLoading ? null : _handleLogin,
-      ),
       children: [
         ErrorBanner(message: issue),
+        CloudFormFields(
+          enabled: !isLoading,
+          child: _withToken
+              ? _buildTokenForm(issue)
+              : _buildEmailPasswordForm(issue),
+        ),
+        const SizedBox(height: 16),
+        CloudPrimaryButton(
+          label: l10n.loginTitle,
+          loading: isLoading && _googleLogin == null,
+          onPressed: isLoading ? null : _handleLogin,
+        ),
+        const SizedBox(height: 12),
         TonalButton(
           size: TonalButtonSize.bar,
           label: l10n.signInWithGoogle,
@@ -285,32 +301,34 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
               ],
             ),
           ),
-        const SizedBox(height: cloudSectionGap),
-        IgnorePointer(
-          ignoring: isLoading,
-          child: SegmentedControl<_LoginMode>(
-            segments: [
-              (_LoginMode.token, l10n.accessToken),
-              (_LoginMode.emailPassword, l10n.emailPassword),
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              TextButton(
+                onPressed: isLoading ? null : _openRegister,
+                child: Text(l10n.registerTitle),
+              ),
+              TextButton(
+                onPressed: isLoading ? null : _switchMethod,
+                child: Text(_withToken ? l10n.emailPassword : l10n.accessToken),
+              ),
             ],
-            value: _loginMode,
-            onChanged: (mode) => setState(() => _loginMode = mode),
           ),
-        ),
-        const SizedBox(height: 16),
-        CloudFormFields(
-          enabled: !isLoading,
-          child: _loginMode == _LoginMode.emailPassword
-              ? _buildEmailPasswordForm(issue)
-              : _buildTokenForm(issue),
         ),
       ],
     );
   }
 
+  /// Password managers fill and save the pair on phones; desktop engines
+  /// have no autofill context to finish.
+  bool get _autofills => !system.isDesktop;
+
   Widget _buildEmailPasswordForm(String? issue) {
     final l10n = currentAppLocalizations;
-    return Column(
+    final form = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         generateSection(
@@ -324,19 +342,21 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 autocorrect: false,
+                autofillHints: const [
+                  AutofillHints.username,
+                  AutofillHints.email,
+                ],
                 onChanged: _refresh,
               ),
             ),
             FormRow(
               title: l10n.passwordLabel,
               invalid: issue == l10n.passwordValidation,
-              trailing: CloudSecretField(
+              trailing: FormRowSecretTextField(
                 controller: _passwordController,
-                obscure: _obscurePassword,
                 hintText: l10n.required,
-                onToggle: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
                 textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.password],
                 onChanged: _refresh,
                 onFieldSubmitted: (_) => _handleLogin(),
               ),
@@ -346,19 +366,24 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
         Align(
           alignment: AlignmentDirectional.centerEnd,
           child: TextButton(
-            onPressed: _showForgotPasswordDialog,
+            onPressed: _showPasswordReset,
             child: Text(l10n.forgotPassword),
           ),
         ),
       ],
     );
+    if (!_autofills) return form;
+    return AutofillGroup(
+      onDisposeAction: AutofillContextAction.cancel,
+      child: form,
+    );
   }
 
-  Future<void> _showForgotPasswordDialog() async {
+  Future<void> _showPasswordReset() async {
     final email = await showFormSheet<String>(
       context: context,
       builder: (_) =>
-          _ForgotPasswordDialog(initialEmail: _emailController.text.trim()),
+          _PasswordResetSheet(initialEmail: _emailController.text.trim()),
     );
     if (email == null || !mounted) {
       return;
@@ -375,11 +400,9 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
         FormRow(
           title: l10n.tokenLabel,
           invalid: issue == l10n.tokenValidation,
-          trailing: CloudSecretField(
+          trailing: FormRowSecretTextField(
             controller: _tokenController,
-            obscure: _obscureToken,
             hintText: l10n.required,
-            onToggle: () => setState(() => _obscureToken = !_obscureToken),
             textInputAction: TextInputAction.done,
             onChanged: _refresh,
             onFieldSubmitted: (_) => _handleLogin(),
@@ -390,18 +413,16 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
   }
 }
 
-enum _LoginMode { emailPassword, token }
-
-class _ForgotPasswordDialog extends StatefulWidget {
+class _PasswordResetSheet extends StatefulWidget {
   final String initialEmail;
 
-  const _ForgotPasswordDialog({required this.initialEmail});
+  const _PasswordResetSheet({required this.initialEmail});
 
   @override
-  State<_ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
+  State<_PasswordResetSheet> createState() => _PasswordResetSheetState();
 }
 
-class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
+class _PasswordResetSheetState extends State<_PasswordResetSheet> {
   late final _emailController = TextEditingController(
     text: widget.initialEmail,
   );
@@ -409,8 +430,6 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
   final _passwordController = TextEditingController();
 
   var _emailSent = false;
-  var _obscurePassword = true;
-  var _obscureToken = true;
   var _isSubmitting = false;
   var _attempted = false;
 
@@ -429,7 +448,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
 
   String? _issue() {
     final l10n = currentAppLocalizations;
-    if (_emailController.text.isEmpty) return l10n.emailValidation;
+    if (_emailController.text.trim().isEmpty) return l10n.emailValidation;
     if (!_emailSent) return null;
     if (_tokenController.text.trim().isEmpty) return l10n.resetTokenValidation;
     if (_passwordController.text.isEmpty) return l10n.passwordValidation;
@@ -526,12 +545,9 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                 FormRow(
                   title: l10n.resetTokenLabel,
                   invalid: issue == l10n.resetTokenValidation,
-                  trailing: CloudSecretField(
+                  trailing: FormRowSecretTextField(
                     controller: _tokenController,
-                    obscure: _obscureToken,
                     hintText: l10n.required,
-                    onToggle: () =>
-                        setState(() => _obscureToken = !_obscureToken),
                     textInputAction: TextInputAction.next,
                     onChanged: _refresh,
                   ),
@@ -539,12 +555,9 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
                 FormRow(
                   title: l10n.newPasswordLabel,
                   invalid: issue == l10n.passwordValidation,
-                  trailing: CloudSecretField(
+                  trailing: FormRowSecretTextField(
                     controller: _passwordController,
-                    obscure: _obscurePassword,
                     hintText: l10n.required,
-                    onToggle: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
                     textInputAction: TextInputAction.done,
                     onChanged: _refresh,
                     onFieldSubmitted: (_) => _handleSubmit(),

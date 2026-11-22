@@ -50,8 +50,6 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
   bool _loadingConfig = true;
   String? _configError;
   bool _isSubmitting = false;
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
   bool _sendingCode = false;
   int _resendCountdown = 0;
   Timer? _resendTimer;
@@ -119,7 +117,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     final route = ModalRoute.of(context);
     bool isActive() => mounted && (route?.isActive ?? true);
     final email = _emailController.text.trim();
-    if (email.isEmpty || !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+    if (!_emailPattern.hasMatch(email)) {
       globalState.showNotifier(currentAppLocalizations.emailFormatValidation);
       return;
     }
@@ -367,12 +365,9 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
                 FormRow(
                   title: l10n.passwordLabel,
                   invalid: invalid(_RegisterField.password),
-                  trailing: CloudSecretField(
+                  trailing: FormRowSecretTextField(
                     controller: _passwordController,
-                    obscure: _obscurePassword,
                     hintText: l10n.required,
-                    onToggle: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
                     textInputAction: TextInputAction.next,
                     onChanged: _refresh,
                   ),
@@ -380,13 +375,9 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
                 FormRow(
                   title: l10n.confirmPasswordLabel,
                   invalid: invalid(_RegisterField.confirmPassword),
-                  trailing: CloudSecretField(
+                  trailing: FormRowSecretTextField(
                     controller: _confirmPasswordController,
-                    obscure: _obscureConfirmPassword,
                     hintText: l10n.confirmPasswordHint,
-                    onToggle: () => setState(
-                      () => _obscureConfirmPassword = !_obscureConfirmPassword,
-                    ),
                     textInputAction: config.inviteRequired
                         ? TextInputAction.next
                         : TextInputAction.done,

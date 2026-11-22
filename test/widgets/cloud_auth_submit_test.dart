@@ -78,8 +78,10 @@ Future<_Account> _startLogin(WidgetTester tester) async {
   );
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
+  await tester.tap(find.text('Access Token'));
+  await tester.pump();
   await tester.enterText(find.byType(TextFormField), 'fixture-token');
-  await tester.tap(find.widgetWithText(TextButton, 'Login'));
+  await tester.tap(find.widgetWithText(FilledButton, 'Login'));
   await tester.pump();
   return account;
 }
@@ -154,12 +156,10 @@ void main() {
         );
         await tester.tap(find.text('open'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text(currentAppLocalizations.emailPassword));
-        await tester.pumpAndSettle();
         final fields = find.byType(TextFormField);
         await tester.enterText(fields.at(0), 'fixture@example.test');
         await tester.enterText(fields.at(1), 'fixture-password');
-        await tester.tap(find.widgetWithText(TextButton, 'Login'));
+        await tester.tap(find.widgetWithText(FilledButton, 'Login'));
         await tester.pump();
         expect(find.byType(CloudLoginPage), findsOneWidget);
         account.pendingPasswordLogin.complete(eligible);
@@ -229,7 +229,7 @@ void main() {
           findsOneWidget,
         );
         if (cancel) {
-          await tester.tap(find.text('Cancel'));
+          await tester.tap(find.byTooltip('Close'));
           await tester.pumpAndSettle();
         }
         final callback = Uri.parse('flclash://auth/google').replace(
@@ -253,12 +253,12 @@ void main() {
                 .onPressed,
             isNotNull,
           );
-          await tester.tap(find.text('Cancel'));
+          await tester.tap(find.byTooltip('Close'));
         } else {
           expect(account.googleGrant?.code, 'a' * 64);
           expect(account.googleGrant?.verifier.length, 43);
           // The exchange in flight keeps the sheet against cancel.
-          await tester.tap(find.text('Cancel'));
+          await tester.tap(find.byTooltip('Close'));
           await tester.pump();
           expect(find.byType(CloudLoginPage), findsOneWidget);
           account.pendingGoogleLogin.complete(eligible);
@@ -314,7 +314,7 @@ void main() {
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextFormField), 'fixture-token');
+    await tester.enterText(find.byType(TextFormField).first, 'fixture-token');
     await tester.tapAt(const Offset(4, 4));
     await tester.pumpAndSettle();
     expect(find.text('fixture-token'), findsOneWidget);
@@ -350,12 +350,19 @@ void main() {
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Email & Password'));
-    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
-    final login = find.widgetWithText(TextButton, 'Login');
-    await tester.ensureVisible(login);
+    final login = find.widgetWithText(FilledButton, 'Login');
+    await tester.scrollUntilVisible(
+      login,
+      100,
+      scrollable: find
+          .descendant(
+            of: find.byType(CloudLoginPage),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     await tester.pumpAndSettle();
     expect(tester.getRect(login).bottom, lessThanOrEqualTo(330));
   });

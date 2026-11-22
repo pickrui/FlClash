@@ -71,13 +71,15 @@ void main() {
         child: const CloudLoginPage(),
       ),
     );
+    await tester.tap(find.text('Access Token'));
+    await tester.pump();
 
     expect(
       tester.widget<EditableText>(find.byType(EditableText)).obscureText,
       isTrue,
     );
 
-    await tester.tap(find.byTooltip('Show'));
+    await tester.tap(find.byTooltip('Show password'));
     await tester.pump();
     expect(
       tester.widget<EditableText>(find.byType(EditableText)).obscureText,
