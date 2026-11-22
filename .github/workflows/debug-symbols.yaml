@@ -1,0 +1,93 @@
+name: Debug symbol lookup
+
+# Turns minified Dart names from a release build, such as an error label, back
+# into the original ones. The log is public, so it prints only the asked names.
+on:
+  workflow_dispatch:
+    inputs:
+      run-id:
+        description: Build run that produced the release (number from its URL)
+        required: true
+        type: string
+      artifact:
+        description: Sealed symbols artifact, such as debug-symbols-windows-amd64
+        required: true
+        type: string
+      names:
+        description: Minified names separated by spaces, such as tpa
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  lookup:
+    name: Look up names
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check inputs
+        env:
+          RUN_ID: ${{ inputs.run-id }}
+          ARTIFACT: ${{ inputs.artifact }}
+          NAMES: ${{ inputs.names }}
+        run: |
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo '::error::run-id must be a number'; exit 1; }
+          [[ "$ARTIFACT" =~ ^debug-symbols-[a-z0-9-]+$ ]] || { echo '::error::artifact must be a debug-symbols-* name'; exit 1; }
+          pattern='^[A-Za-z0-9_$ ]+$'
+          [[ "$NAMES" =~ $pattern ]] || { echo '::error::names may hold only identifier characters'; exit 1; }
+          read -ra names <<< "$NAMES"
+          (( ${#names[@]} >= 1 && ${#names[@]} <= 20 )) || { echo '::error::ask for 1 to 20 names'; exit 1; }
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Fetch the design package
+        run: git submodule update --init --depth 1 plugins/prism_ui
+
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: '3.50.1'
+          cache: false
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Download sealed symbols
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: ${{ inputs.artifact }}
+          run-id: ${{ inputs.run-id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/sealed
+
+      - name: Look up names
+        env:
+          IDENTITY: ${{ secrets.DEBUG_SYMBOLS_IDENTITY }}
+          NAMES: ${{ inputs.names }}
+        run: |
+          set -euo pipefail
+          if [ -z "$IDENTITY" ]; then
+            echo '::error::DEBUG_SYMBOLS_IDENTITY is not set'
+            exit 1
+          fi
+          umask 077
+          identity="$RUNNER_TEMP/identity.txt"
+          printf '%s\n' "$IDENTITY" > "$identity"
+          dart tool/debug_symbols.dart open "$identity" "$RUNNER_TEMP/sealed" "$RUNNER_TEMP/symbols"
+          rm -f "$identity"
+          read -ra names <<< "$NAMES"
+          find "$RUNNER_TEMP/symbols" -name obfuscation-map.json -print0 |
+            while IFS= read -r -d '' map; do
+              dart tool/debug_symbols.dart lookup "$map" "${names[@]}"
+            done

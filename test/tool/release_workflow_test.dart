@@ -270,4 +270,14 @@ void main() {
     );
     expect(jobs.containsKey('deep-tests'), isFalse);
   });
+
+  test('the public symbol lookup reads its inputs only from the env', () {
+    final lookup = loadYaml(
+      File('.github/workflows/debug-symbols.yaml').readAsStringSync(),
+    ) as YamlMap;
+    expect(lookup['permissions'], {'actions': 'read', 'contents': 'read'});
+    for (final step in (lookup['jobs']['lookup']['steps'] as YamlList)) {
+      expect('${step['run'] ?? ''}', isNot(contains(r'${{')));
+    }
+  });
 }
