@@ -17,7 +17,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fl_clash/l10n/l10n.dart';
 
-export 'input_dialog.dart';
 export 'options_dialog.dart';
 part 'edit_view.dart';
 

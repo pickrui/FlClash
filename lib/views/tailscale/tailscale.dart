@@ -12,6 +12,8 @@ import 'package:fl_clash/providers/tailscale.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fl_clash/widgets/primary_button.dart';
+import 'package:fl_clash/widgets/raised_panel.dart';
 
 import 'network.dart';
 
@@ -124,8 +126,7 @@ class _TailscaleViewState extends ConsumerState<TailscaleView>
         spacing: 12,
         runSpacing: 8,
         children: [
-          TonalButton(
-            size: TonalButtonSize.bar,
+          PrimaryButton(
             glyph: AppGlyphs.add,
             label: l.tailscaleAddNetwork,
             onPressed: () => _open(null),
@@ -213,7 +214,6 @@ class TailscaleGuidePage extends StatelessWidget {
     final body = AppTextStyle.subheadline
         .of(context)
         .copyWith(color: colorScheme.onSurface);
-    final level = context.raisedSurfaceLevel;
     return Scaffold(
       title: l.tailscaleGuide,
       body: ListView(
@@ -226,12 +226,7 @@ class TailscaleGuidePage extends StatelessWidget {
         children: [
           for (final (title, text) in sections) ...[
             ListHeader(title: title),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: ShapeDecoration(
-                color: level.colorOf(colorScheme),
-                shape: AppShape.xl,
-              ),
+            RaisedPanel(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 10,

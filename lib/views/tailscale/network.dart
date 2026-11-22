@@ -22,6 +22,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:fl_clash/widgets/raised_panel.dart';
+import 'package:fl_clash/features/form/input_lock.dart';
+import 'package:fl_clash/widgets/primary_button.dart';
 
 import 'tailscale.dart';
 
@@ -47,6 +50,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
   late final TextEditingController _exitNode;
   final _authKey = TextEditingController();
   late TailscaleLoginMethod _loginMethod;
+  late final bool _advancedOpen;
   late bool _autoRoute;
   late bool _allowLan;
   bool? _hasSavedAuthKey;
@@ -90,6 +94,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     _controlUrl = TextEditingController(text: existing?.controlUrl ?? '');
     _exitNode = TextEditingController(text: existing?.exitNode ?? '');
     _loginMethod = existing?.loginMethod ?? TailscaleLoginMethod.interactive;
+    _advancedOpen = _controlUrl.text.trim().isNotEmpty;
     _autoRoute = existing?.autoRoute ?? true;
     _allowLan = existing?.exitNodeAllowLanAccess ?? false;
     if (existing == null) {
@@ -435,8 +440,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     bool invalid = false,
     TextInputType? keyboardType,
   }) {
-    return _FormField(
-      enabled: !_busy,
+    return InputLock(
+      locked: _busy,
       child: FormRow(
         title: title,
         invalid: invalid,
@@ -586,8 +591,8 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
           if (!_hostnameValid)
             _footnote(l.tailscaleHostnameInvalid, color: error),
           ListHeader(title: l.tailscaleLoginMethod),
-          _FormField(
-            enabled: !_busy,
+          InputLock(
+            locked: _busy,
             child: SegmentedControl<TailscaleLoginMethod>(
               segments: [
                 (TailscaleLoginMethod.interactive, l.tailscaleInteractiveLogin),
@@ -600,13 +605,14 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
           if (_loginMethod == TailscaleLoginMethod.authKey) ...[
             generateSection(
               items: [
-                _FormField(
-                  enabled: !_busy,
+                InputLock(
+                  locked: _busy,
                   child: FormRow(
                     title: l.tailscaleAuthKey,
                     invalid: !_authKeyValid,
-                    trailing: _AuthKeyField(
+                    trailing: FormRowSecretTextField(
                       controller: _authKey,
+                      hintText: 'tskey-auth-…',
                       onChanged: _refresh,
                     ),
                   ),
@@ -686,24 +692,25 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
                 ],
               ),
             ),
-          generateSection(
-            title: l.tailscaleAdvanced,
-            items: [
-              _fieldRow(
-                title: l.tailscaleControlUrl,
-                controller: _controlUrl,
-                hint: tailscaleDefaultControlUrl,
-                keyboardType: TextInputType.url,
-                invalid: !_controlUrlValid,
-              ),
-            ],
-          ),
-          if (!_controlUrlValid)
-            _footnote(l.urlTip(l.tailscaleControlUrl), color: error),
-          _footnote(l.tailscaleCredentialsFooter),
         ],
       ),
     ];
+  }
+
+  /// Folded unless this network signs in to a control server of its own.
+  Widget _buildAdvancedSection(AppLocalizations l) {
+    return SliverCollapsibleSection(
+      label: l.tailscaleAdvanced,
+      initiallyExpanded: _advancedOpen,
+      itemCount: 1,
+      itemBuilder: (_, _) => _fieldRow(
+        title: l.tailscaleControlUrl,
+        controller: _controlUrl,
+        hint: tailscaleDefaultControlUrl,
+        keyboardType: TextInputType.url,
+        invalid: !_controlUrlValid,
+      ),
+    );
   }
 
   List<Widget> _buildAccountSection(AppLocalizations l) {
@@ -792,7 +799,7 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
           ),
         )
       else ...[
-        _PrimaryPill(
+        PrimaryButton(
           label: l.tailscaleSaveAndLogin,
           onPressed: _busy || !_authKeyStateReady || invalid.isNotEmpty
               ? null
@@ -812,19 +819,11 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
     ];
     return [
       ListHeader(title: l.tailscaleAccount),
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: ShapeDecoration(
-          color: level.colorOf(colorScheme),
-          shape: AppShape.xl,
-        ),
-        child: SurfaceScope(
-          level: level,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 12,
-            children: children,
-          ),
+      RaisedPanel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 12,
+          children: children,
         ),
       ),
     ];
@@ -849,127 +848,59 @@ class _TailscaleNetworkPageState extends ConsumerState<TailscaleNetworkPage>
             ? null
             : () => unawaited(_save()),
       ),
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          context.sectionsTopPadding,
-          16,
-          24 + context.bottomInset,
-        ),
-        children: [
-          if (saved != null) ..._buildDeviceSection(l),
-          ..._buildFormSection(l),
-          ..._buildAccountSection(l),
-          generateSection(
-            items: [
-              ListItem(
-                leading: const GlyphIcon(AppGlyphs.info),
-                title: Text(l.tailscaleGuide),
-                trailing: const GlyphIcon(AppGlyphs.chevronForward),
-                onTap: () => openTailscaleGuide(context),
-              ),
-              if (saved != null)
-                ListItem(
-                  title: Text(
-                    l.tailscaleRemoveNetwork,
-                    style: context.listTitleStyle.copyWith(
-                      color: context.colorScheme.destructive,
-                    ),
-                  ),
-                  onTap: _busy ? null : _remove,
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              context.sectionsTopPadding,
+              16,
+              24 + context.bottomInset,
+            ),
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                SliverList.list(
+                  children: [
+                    if (saved != null) ..._buildDeviceSection(l),
+                    ..._buildFormSection(l),
+                  ],
                 ),
-            ],
+                _buildAdvancedSection(l),
+                SliverList.list(
+                  children: [
+                    if (!_controlUrlValid)
+                      _footnote(
+                        l.urlTip(l.tailscaleControlUrl),
+                        color: context.colorScheme.error,
+                      ),
+                    _footnote(l.tailscaleCredentialsFooter),
+                    ..._buildAccountSection(l),
+                    generateSection(
+                      items: [
+                        ListItem(
+                          leading: const GlyphIcon(AppGlyphs.info),
+                          title: Text(l.tailscaleGuide),
+                          trailing: const GlyphIcon(AppGlyphs.chevronForward),
+                          onTap: () => openTailscaleGuide(context),
+                        ),
+                        if (saved != null)
+                          ListItem(
+                            title: Text(
+                              l.tailscaleRemoveNetwork,
+                              style: context.listTitleStyle.copyWith(
+                                color: context.colorScheme.destructive,
+                              ),
+                            ),
+                            onTap: _busy ? null : _remove,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// The auth key at the end of its form row, hidden until shown.
-class _AuthKeyField extends StatefulWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-
-  const _AuthKeyField({required this.controller, required this.onChanged});
-
-  @override
-  State<_AuthKeyField> createState() => _AuthKeyFieldState();
-}
-
-class _AuthKeyFieldState extends State<_AuthKeyField> {
-  var _obscure = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Flexible(
-          child: FormRowTextField(
-            controller: widget.controller,
-            hintText: 'tskey-auth-…',
-            obscureText: _obscure,
-            autocorrect: false,
-            enableSuggestions: false,
-            onChanged: widget.onChanged,
-          ),
-        ),
-        MinIconButtonTheme(
-          child: VisibilityToggleButton(
-            obscureText: _obscure,
-            onPressed: () => setState(() => _obscure = !_obscure),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The filled pill of the one action the account section is for.
-class _PrimaryPill extends StatelessWidget {
-  final String label;
-  final VoidCallback? onPressed;
-
-  const _PrimaryPill({required this.label, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final size = TonalButtonSize.bar.button;
-    return ElasticButton(
-      enabled: onPressed != null,
-      child: FilledButton(
-        onPressed: onPressed,
-        style: ButtonStyle.from(
-          minimumSize: Size(size, size),
-          shape: AppShape.full,
-          textStyle: AppTextStyle.body.of(context, emphasized: true),
-          tapTargetSize: TapTargetSize.shrinkWrap,
-        ),
-        child: Text(label),
-      ),
-    );
-  }
-}
-
-/// A field that stops taking input while the page saves or signs in.
-class _FormField extends StatelessWidget {
-  final bool enabled;
-  final Widget child;
-
-  const _FormField({required this.enabled, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return ExcludeFocus(
-      excluding: !enabled,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: AnimatedOpacity(
-          opacity: enabled ? 1 : 0.5,
-          duration: context.motionDuration(midDuration),
-          child: child,
-        ),
       ),
     );
   }
