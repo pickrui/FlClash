@@ -6,6 +6,7 @@
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
+import 'package:flutter/services.dart' show TextInput;
 import 'package:flutter/widgets.dart';
 
 const _contentMaxWidth = 720.0;
@@ -233,4 +234,26 @@ class CloudFormFields extends StatelessWidget {
       ),
     );
   }
+}
+
+// Desktop engines have no autofill context to save into.
+bool get _autofills => !system.isDesktop;
+
+class CloudAutofillGroup extends StatelessWidget {
+  final Widget child;
+
+  const CloudAutofillGroup({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_autofills) return child;
+    return AutofillGroup(
+      onDisposeAction: AutofillContextAction.cancel,
+      child: child,
+    );
+  }
+}
+
+void saveCloudAutofill() {
+  if (_autofills) TextInput.finishAutofillContext();
 }

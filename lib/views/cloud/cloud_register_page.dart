@@ -16,7 +16,7 @@ import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart' show TextInputAction;
+import 'package:flutter/services.dart' show AutofillHints, TextInputAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud_layout.dart';
@@ -51,14 +51,19 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
   String? _configError;
   bool _isSubmitting = false;
   bool _sendingCode = false;
-  int _resendCountdown = 0;
   Timer? _resendTimer;
   bool _attempted = false;
+  bool _codeRequested = false;
+
+  /// Kept for the process: the sheet's state ends when it closes, and
+  /// reopening it must not offer another code early.
+  static DateTime? _codeReadyAt;
 
   @override
   void initState() {
     super.initState();
     _loadConfig();
+    _tickResendCountdown();
   }
 
   @override
@@ -95,38 +100,44 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     }
   }
 
-  void _startResendCountdown() {
+  int get _resendCountdown {
+    final readyAt = _codeReadyAt;
+    if (readyAt == null) return 0;
+    final remaining = readyAt.difference(DateTime.now()).inMilliseconds;
+    return remaining <= 0 ? 0 : (remaining / 1000).ceil();
+  }
+
+  void _tickResendCountdown() {
     _resendTimer?.cancel();
-    setState(() => _resendCountdown = 60);
+    if (_resendCountdown == 0) return;
     _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
-      setState(() {
-        _resendCountdown--;
-        if (_resendCountdown <= 0) {
-          timer.cancel();
-        }
-      });
+      setState(() {});
+      if (_resendCountdown == 0) timer.cancel();
     });
   }
 
   Future<void> _sendEmailCode() async {
     if (_sendingCode || _resendCountdown > 0) return;
+    if (_emailIssue() != null) {
+      setState(() => _codeRequested = true);
+      return;
+    }
     final route = ModalRoute.of(context);
     bool isActive() => mounted && (route?.isActive ?? true);
     final email = _emailController.text.trim();
-    if (!_emailPattern.hasMatch(email)) {
-      globalState.showNotifier(currentAppLocalizations.emailFormatValidation);
-      return;
-    }
     setState(() => _sendingCode = true);
     try {
       await CloudApiService().sendEmailVerify(email);
       if (!isActive()) return;
       globalState.showNotifier(currentAppLocalizations.codeSent);
-      _startResendCountdown();
+      setState(() {
+        _codeReadyAt = DateTime.now().add(const Duration(seconds: 60));
+      });
+      _tickResendCountdown();
     } catch (e) {
       if (!isActive()) return;
       globalState.showMessage(
@@ -154,7 +165,10 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
         errorTitle: currentAppLocalizations.registerFailed,
         isActive: () => mounted && (route?.isActive ?? true),
       );
-      if (registered && mounted) closePage(context);
+      if (registered && mounted) {
+        saveCloudAutofill();
+        closePage(context);
+      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -180,20 +194,26 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
 
   static final _emailPattern = RegExp(r'^[^@]+@[^@]+\.[^@]+');
 
-  /// The first field the register form cannot send yet, and why.
-  ({_RegisterField field, String message})? _issue() {
+  ({_RegisterField field, String message})? _emailIssue() {
     final l10n = currentAppLocalizations;
-    final config = _config;
     final email = _emailController.text.trim();
-    if (_nicknameController.text.trim().isEmpty) {
-      return (field: _RegisterField.nickname, message: l10n.nicknameValidation);
-    }
     if (email.isEmpty) {
       return (field: _RegisterField.email, message: l10n.emailValidation);
     }
     if (!_emailPattern.hasMatch(email)) {
       return (field: _RegisterField.email, message: l10n.emailFormatValidation);
     }
+    return null;
+  }
+
+  /// The first field the register form cannot send yet, and why.
+  ({_RegisterField field, String message})? _issue() {
+    final l10n = currentAppLocalizations;
+    final config = _config;
+    if (_nicknameController.text.trim().isEmpty) {
+      return (field: _RegisterField.nickname, message: l10n.nicknameValidation);
+    }
+    if (_emailIssue() case final issue?) return issue;
     if ((config?.emailVerify ?? false) &&
         _emailCodeController.text.trim().isEmpty) {
       return (
@@ -229,7 +249,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
   }
 
   void _refresh(String _) {
-    if (_attempted) setState(() {});
+    if (_attempted || _codeRequested) setState(() {});
   }
 
   @override
@@ -293,110 +313,122 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
 
   List<Widget> _buildForm(CloudRegisterConfig config, bool isLoading) {
     final l10n = currentAppLocalizations;
-    final issue = _attempted ? _issue() : null;
+    final issue = _attempted
+        ? _issue()
+        : _codeRequested
+        ? _emailIssue()
+        : null;
     bool invalid(_RegisterField field) => issue?.field == field;
     return [
       ErrorBanner(message: issue?.message),
       CloudFormFields(
         enabled: !isLoading,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            generateSection(
-              items: [
-                FormRow(
-                  title: l10n.nicknameLabel,
-                  invalid: invalid(_RegisterField.nickname),
-                  trailing: FormRowTextField(
-                    controller: _nicknameController,
-                    hintText: l10n.nicknameHint,
-                    textInputAction: TextInputAction.next,
-                    onChanged: _refresh,
-                  ),
-                ),
-                FormRow(
-                  title: l10n.emailLabel,
-                  invalid: invalid(_RegisterField.email),
-                  trailing: FormRowTextField(
-                    controller: _emailController,
-                    hintText: l10n.emailHint,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    autocorrect: false,
-                    onChanged: _refresh,
-                  ),
-                ),
-                if (config.emailVerify)
-                  FormRow(
-                    title: l10n.emailCodeLabel,
-                    invalid: invalid(_RegisterField.emailCode),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: 8,
-                      children: [
-                        Flexible(
-                          child: FormRowTextField(
-                            controller: _emailCodeController,
-                            hintText: l10n.emailCodeHint,
-                            keyboardType: TextInputType.number,
-                            textInputAction: TextInputAction.next,
-                            onChanged: _refresh,
-                          ),
-                        ),
-                        _buildSendCodeButton(isLoading),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-            generateSection(
-              footer: l10n.passwordRuleHint,
-              items: [
-                FormRow(
-                  title: l10n.passwordLabel,
-                  invalid: invalid(_RegisterField.password),
-                  trailing: FormRowSecretTextField(
-                    controller: _passwordController,
-                    hintText: l10n.required,
-                    textInputAction: TextInputAction.next,
-                    onChanged: _refresh,
-                  ),
-                ),
-                FormRow(
-                  title: l10n.confirmPasswordLabel,
-                  invalid: invalid(_RegisterField.confirmPassword),
-                  trailing: FormRowSecretTextField(
-                    controller: _confirmPasswordController,
-                    hintText: l10n.confirmPasswordHint,
-                    textInputAction: config.inviteRequired
-                        ? TextInputAction.next
-                        : TextInputAction.done,
-                    onChanged: _refresh,
-                    onFieldSubmitted: config.inviteRequired
-                        ? null
-                        : (_) => _handleRegister(),
-                  ),
-                ),
-              ],
-            ),
-            if (config.inviteRequired) ...[
+        child: CloudAutofillGroup(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               generateSection(
                 items: [
                   FormRow(
-                    title: l10n.inviteCodeLabel,
-                    invalid: invalid(_RegisterField.invite),
+                    title: l10n.nicknameLabel,
+                    invalid: invalid(_RegisterField.nickname),
                     trailing: FormRowTextField(
-                      controller: _inviteCodeController,
-                      hintText: l10n.inviteCodeHint,
-                      textInputAction: TextInputAction.done,
+                      controller: _nicknameController,
+                      hintText: l10n.nicknameHint,
+                      textInputAction: TextInputAction.next,
                       onChanged: _refresh,
-                      onFieldSubmitted: (_) => _handleRegister(),
+                    ),
+                  ),
+                  FormRow(
+                    title: l10n.emailLabel,
+                    invalid: invalid(_RegisterField.email),
+                    trailing: FormRowTextField(
+                      controller: _emailController,
+                      hintText: l10n.emailHint,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autocorrect: false,
+                      autofillHints: const [
+                        AutofillHints.newUsername,
+                        AutofillHints.email,
+                      ],
+                      onChanged: _refresh,
+                    ),
+                  ),
+                  if (config.emailVerify)
+                    FormRow(
+                      title: l10n.emailCodeLabel,
+                      invalid: invalid(_RegisterField.emailCode),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 8,
+                        children: [
+                          Flexible(
+                            child: FormRowTextField(
+                              controller: _emailCodeController,
+                              hintText: l10n.emailCodeHint,
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.next,
+                              onChanged: _refresh,
+                            ),
+                          ),
+                          _buildSendCodeButton(isLoading),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+              generateSection(
+                footer: l10n.passwordRuleHint,
+                items: [
+                  FormRow(
+                    title: l10n.passwordLabel,
+                    invalid: invalid(_RegisterField.password),
+                    trailing: FormRowSecretTextField(
+                      controller: _passwordController,
+                      hintText: l10n.required,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.newPassword],
+                      onChanged: _refresh,
+                    ),
+                  ),
+                  FormRow(
+                    title: l10n.confirmPasswordLabel,
+                    invalid: invalid(_RegisterField.confirmPassword),
+                    trailing: FormRowSecretTextField(
+                      controller: _confirmPasswordController,
+                      hintText: l10n.confirmPasswordHint,
+                      autofillHints: const [AutofillHints.newPassword],
+                      textInputAction: config.inviteRequired
+                          ? TextInputAction.next
+                          : TextInputAction.done,
+                      onChanged: _refresh,
+                      onFieldSubmitted: config.inviteRequired
+                          ? null
+                          : (_) => _handleRegister(),
                     ),
                   ),
                 ],
               ),
+              if (config.inviteRequired) ...[
+                generateSection(
+                  items: [
+                    FormRow(
+                      title: l10n.inviteCodeLabel,
+                      invalid: invalid(_RegisterField.invite),
+                      trailing: FormRowTextField(
+                        controller: _inviteCodeController,
+                        hintText: l10n.inviteCodeHint,
+                        textInputAction: TextInputAction.done,
+                        onChanged: _refresh,
+                        onFieldSubmitted: (_) => _handleRegister(),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       const SizedBox(height: 16),

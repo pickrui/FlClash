@@ -8,7 +8,6 @@ import 'dart:async';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/features/form/error_banner.dart';
 import 'package:fl_clash/features/form/form_row.dart';
-import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
@@ -17,8 +16,7 @@ import 'package:fl_clash/services/cloud_google_login.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart'
-    show AutofillHints, TextInput, TextInputAction;
+import 'package:flutter/services.dart' show AutofillHints, TextInputAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud_account_page.dart' show cloudNodeFilterPageBuilder;
@@ -148,7 +146,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
         isActive: () => mounted && (route?.isActive ?? true),
       );
       if (signedIn && mounted) {
-        if (!withToken && _autofills) TextInput.finishAutofillContext();
+        if (!withToken) saveCloudAutofill();
         _finishLogin(suggestNodeFilter);
       }
     } finally {
@@ -322,10 +320,6 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
     );
   }
 
-  /// Password managers fill and save the pair on phones; desktop engines
-  /// have no autofill context to finish.
-  bool get _autofills => !system.isDesktop;
-
   Widget _buildEmailPasswordForm(String? issue) {
     final l10n = currentAppLocalizations;
     final form = Column(
@@ -372,11 +366,7 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
         ),
       ],
     );
-    if (!_autofills) return form;
-    return AutofillGroup(
-      onDisposeAction: AutofillContextAction.cancel,
-      child: form,
-    );
+    return CloudAutofillGroup(child: form);
   }
 
   Future<void> _showPasswordReset() async {
@@ -475,6 +465,7 @@ class _PasswordResetSheetState extends State<_PasswordResetSheet> {
           password: _passwordController.text,
         );
         if (mounted && route?.isActive != false) {
+          saveCloudAutofill();
           closePage(context, _emailController.text.trim());
         }
       }
@@ -507,66 +498,78 @@ class _PasswordResetSheetState extends State<_PasswordResetSheet> {
       title: l10n.resetPasswordTitle,
       busy: _isSubmitting,
       onClose: _handleClose,
-      confirmation: IconButtonData(
-        glyph: AppGlyphs.check,
-        tooltip: _emailSent ? l10n.resetPasswordTitle : l10n.sendResetEmail,
-        isLoading: _isSubmitting,
-        onPressed: _isSubmitting ? null : _handleSubmit,
-      ),
       children: [
         ErrorBanner(message: issue),
-        CloudFormFields(
-          enabled: !_isSubmitting && !_emailSent,
-          child: generateSection(
-            footer: _emailSent ? l10n.resetEmailSent : null,
-            items: [
-              FormRow(
-                title: l10n.emailLabel,
-                invalid: issue == l10n.emailValidation,
-                trailing: FormRowTextField(
-                  controller: _emailController,
-                  hintText: l10n.emailHint,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.done,
-                  autocorrect: false,
-                  autofocus: true,
-                  onChanged: _refresh,
-                  onFieldSubmitted: (_) => _handleSubmit(),
+        CloudAutofillGroup(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CloudFormFields(
+                enabled: !_isSubmitting && !_emailSent,
+                child: generateSection(
+                  footer: _emailSent ? l10n.resetEmailSent : null,
+                  items: [
+                    FormRow(
+                      title: l10n.emailLabel,
+                      invalid: issue == l10n.emailValidation,
+                      trailing: FormRowTextField(
+                        controller: _emailController,
+                        hintText: l10n.emailHint,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.done,
+                        autocorrect: false,
+                        autofocus: true,
+                        autofillHints: const [
+                          AutofillHints.username,
+                          AutofillHints.email,
+                        ],
+                        onChanged: _refresh,
+                        onFieldSubmitted: (_) => _handleSubmit(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              if (_emailSent)
+                CloudFormFields(
+                  enabled: !_isSubmitting,
+                  child: generateSection(
+                    items: [
+                      FormRow(
+                        title: l10n.resetTokenLabel,
+                        invalid: issue == l10n.resetTokenValidation,
+                        trailing: FormRowTextField(
+                          controller: _tokenController,
+                          hintText: l10n.required,
+                          autocorrect: false,
+                          textInputAction: TextInputAction.next,
+                          onChanged: _refresh,
+                        ),
+                      ),
+                      FormRow(
+                        title: l10n.newPasswordLabel,
+                        invalid: issue == l10n.passwordValidation,
+                        trailing: FormRowSecretTextField(
+                          controller: _passwordController,
+                          hintText: l10n.required,
+                          textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.newPassword],
+                          onChanged: _refresh,
+                          onFieldSubmitted: (_) => _handleSubmit(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
-        if (_emailSent) ...[
-          CloudFormFields(
-            enabled: !_isSubmitting,
-            child: generateSection(
-              items: [
-                FormRow(
-                  title: l10n.resetTokenLabel,
-                  invalid: issue == l10n.resetTokenValidation,
-                  trailing: FormRowSecretTextField(
-                    controller: _tokenController,
-                    hintText: l10n.required,
-                    textInputAction: TextInputAction.next,
-                    onChanged: _refresh,
-                  ),
-                ),
-                FormRow(
-                  title: l10n.newPasswordLabel,
-                  invalid: issue == l10n.passwordValidation,
-                  trailing: FormRowSecretTextField(
-                    controller: _passwordController,
-                    hintText: l10n.required,
-                    textInputAction: TextInputAction.done,
-                    onChanged: _refresh,
-                    onFieldSubmitted: (_) => _handleSubmit(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        const SizedBox(height: 16),
+        CloudPrimaryButton(
+          label: _emailSent ? l10n.resetPasswordTitle : l10n.sendResetEmail,
+          loading: _isSubmitting,
+          onPressed: _isSubmitting ? null : _handleSubmit,
+        ),
       ],
     );
   }
