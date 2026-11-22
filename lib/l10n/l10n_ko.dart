@@ -3202,7 +3202,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get updateRestart => '업데이트 후 앱 다시 열기';
 
   @override
-  String get updateRestartHint => '앱이 닫힌 뒤 현재 위치에서 업데이트되고 다시 열립니다. 설정은 유지됩니다.';
+  String get updateRestartHint => '앱이 닫히고 업데이트된 뒤 다시 열립니다. 설정은 유지됩니다.';
 
   @override
   String get updatePreparing => '업데이트 준비 중';

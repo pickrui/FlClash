@@ -986,7 +986,7 @@
   "updateDownloadBackground": "Скачать в фоне",
   "updateReady": "Обновление готово к установке",
   "updateRestart": "Обновить и перезапустить",
-  "updateRestartHint": "Приложение закроется, обновится и откроется снова. Ваши настройки сохранятся.",
+  "updateRestartHint": "Приложение обновится и перезапустится. Настройки сохранятся.",
   "updatePreparing": "Подготовка обновления",
   "updateVerifying": "Проверка пакета обновления",
   "updateCheckingInstaller": "Проверка установщика",

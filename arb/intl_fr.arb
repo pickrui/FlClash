@@ -986,7 +986,7 @@
   "updateDownloadBackground": "Télécharger en arrière-plan",
   "updateReady": "Mise à jour prête à installer",
   "updateRestart": "Mettre à jour et relancer",
-  "updateRestartHint": "L’application va se fermer, se mettre à jour sur place et se rouvrir. Vos paramètres seront conservés.",
+  "updateRestartHint": "L’appli se ferme, se met à jour et se rouvre. Vos paramètres sont conservés.",
   "updatePreparing": "Préparation de la mise à jour",
   "updateVerifying": "Vérification du paquet de mise à jour",
   "updateCheckingInstaller": "Vérification du programme d’installation",

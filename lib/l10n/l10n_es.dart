@@ -3358,7 +3358,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get updateRestartHint =>
-      'La aplicación se cerrará, se actualizará en su ubicación actual y se abrirá de nuevo. Sus ajustes se conservarán.';
+      'La app se cerrará, se actualizará y se reabrirá. Sus ajustes se conservan.';
 
   @override
   String get updatePreparing => 'Preparando la actualización';

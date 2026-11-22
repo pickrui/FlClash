@@ -3341,7 +3341,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get updateRestartHint =>
-      'Приложение закроется, обновится и откроется снова. Ваши настройки сохранятся.';
+      'Приложение обновится и перезапустится. Настройки сохранятся.';
 
   @override
   String get updatePreparing => 'Подготовка обновления';

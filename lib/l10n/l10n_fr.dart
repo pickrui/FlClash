@@ -3364,7 +3364,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get updateRestartHint =>
-      'L’application va se fermer, se mettre à jour sur place et se rouvrir. Vos paramètres seront conservés.';
+      'L’appli se ferme, se met à jour et se rouvre. Vos paramètres sont conservés.';
 
   @override
   String get updatePreparing => 'Préparation de la mise à jour';

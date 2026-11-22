@@ -986,7 +986,7 @@
   "updateDownloadBackground": "백그라운드에서 다운로드",
   "updateReady": "업데이트 설치 준비 완료",
   "updateRestart": "업데이트 후 앱 다시 열기",
-  "updateRestartHint": "앱이 닫힌 뒤 현재 위치에서 업데이트되고 다시 열립니다. 설정은 유지됩니다.",
+  "updateRestartHint": "앱이 닫히고 업데이트된 뒤 다시 열립니다. 설정은 유지됩니다.",
   "updatePreparing": "업데이트 준비 중",
   "updateVerifying": "업데이트 패키지 확인 중",
   "updateCheckingInstaller": "설치 프로그램 확인 중",

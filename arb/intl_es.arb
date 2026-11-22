@@ -986,7 +986,7 @@
   "updateDownloadBackground": "Descargar en segundo plano",
   "updateReady": "Actualización lista para instalar",
   "updateRestart": "Actualizar y volver a abrir",
-  "updateRestartHint": "La aplicación se cerrará, se actualizará en su ubicación actual y se abrirá de nuevo. Sus ajustes se conservarán.",
+  "updateRestartHint": "La app se cerrará, se actualizará y se reabrirá. Sus ajustes se conservan.",
   "updatePreparing": "Preparando la actualización",
   "updateVerifying": "Verificando el paquete de actualización",
   "updateCheckingInstaller": "Comprobando el instalador",

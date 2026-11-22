@@ -986,7 +986,7 @@
   "updateDownloadBackground": "バックグラウンドでダウンロード",
   "updateReady": "更新の準備ができました",
   "updateRestart": "更新してアプリを再起動",
-  "updateRestartHint": "アプリを終了して更新し、再起動します。設定は保持されます。",
+  "updateRestartHint": "アプリを終了して更新し、再起動します。設定は保持されます",
   "updatePreparing": "アップデートを準備しています",
   "updateVerifying": "更新パッケージを検証しています",
   "updateCheckingInstaller": "インストーラーを確認しています",

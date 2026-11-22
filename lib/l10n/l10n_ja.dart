@@ -3166,7 +3166,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get updateRestart => '更新してアプリを再起動';
 
   @override
-  String get updateRestartHint => 'アプリを終了して更新し、再起動します。設定は保持されます。';
+  String get updateRestartHint => 'アプリを終了して更新し、再起動します。設定は保持されます';
 
   @override
   String get updatePreparing => 'アップデートを準備しています';
