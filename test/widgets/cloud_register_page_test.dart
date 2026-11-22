@@ -56,7 +56,7 @@ Future<void> _open(
 }
 
 Future<void> _cancel(WidgetTester tester) async {
-  await tester.tap(find.text(currentAppLocalizations.cancel));
+  await tester.tap(find.byTooltip('Close'));
   await tester.pumpAndSettle();
   expect(find.byType(CloudRegisterPage), findsNothing);
 }

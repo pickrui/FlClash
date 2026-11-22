@@ -238,20 +238,10 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     final isLoading = accountState.isLoading || _isSubmitting;
     final l10n = currentAppLocalizations;
     final config = _config;
-    final canRegister =
-        !_loadingConfig &&
-        _configError == null &&
-        config?.registerEnabled == true;
     return CloudFormSheet(
       title: l10n.registerTitle,
       busy: isLoading,
       onClose: _handleClose,
-      confirmation: IconButtonData(
-        glyph: AppGlyphs.check,
-        tooltip: l10n.register,
-        isLoading: isLoading,
-        onPressed: !canRegister || isLoading ? null : _handleRegister,
-      ),
       children: switch (config) {
         _ when _loadingConfig => [
           const SizedBox(
@@ -408,6 +398,12 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
             ],
           ],
         ),
+      ),
+      const SizedBox(height: 16),
+      CloudPrimaryButton(
+        label: l10n.register,
+        loading: isLoading,
+        onPressed: isLoading ? null : _handleRegister,
       ),
       Padding(
         padding: const EdgeInsets.only(top: 8),
