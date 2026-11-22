@@ -132,7 +132,10 @@ class SingleInstanceWakeup {
 
 class AsyncStorageLock {
   final Object _zoneKey = Object();
-  Future<void> _tail = Future.value();
+
+  // Started in the caller's zone: a completed future answers in the zone that
+  // made it, which may be a test's fake clock that no longer runs.
+  Future<void>? _tail;
 
   bool get isActiveInCurrentZone {
     final parentContext = Zone.current[_zoneKey];
@@ -152,7 +155,7 @@ class AsyncStorageLock {
       return action();
     }
     final context = _StorageLockContext(this);
-    final operation = _tail.then((_) async {
+    final operation = (_tail ?? Future<void>.value()).then((_) async {
       try {
         return await runZoned(action, zoneValues: {_zoneKey: context});
       } finally {

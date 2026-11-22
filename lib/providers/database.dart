@@ -30,7 +30,7 @@ bool _asyncListChanged<T>(
 }
 
 class DatabaseWriteQueue {
-  Future<void> _tail = Future.value();
+  Future<void>? _tail;
   Object? _error;
   StackTrace? _stackTrace;
 
@@ -38,7 +38,7 @@ class DatabaseWriteQueue {
     FutureOr<void> Function() action, {
     bool reportOnWait = true,
   }) {
-    final operation = _tail.then((_) => action());
+    final operation = (_tail ?? Future<void>.value()).then((_) => action());
     _tail = operation.catchError((Object error, StackTrace stackTrace) {
       if (reportOnWait) {
         _error ??= error;

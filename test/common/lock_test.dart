@@ -30,6 +30,17 @@ void main() {
     expect(events, ['first-start', 'first-end', 'second']);
   });
 
+  test('a lock made in a zone that stopped running still opens', () async {
+    final stopped = Zone.current.fork(
+      specification: ZoneSpecification(scheduleMicrotask: (_, _, _, _) {}),
+    );
+    final lock = stopped.run(AsyncStorageLock.new);
+    final result = await lock
+        .synchronized(() async => 42)
+        .timeout(const Duration(seconds: 1));
+    expect(result, 42);
+  });
+
   test('AsyncStorageLock allows nested operations in the same zone', () async {
     final lock = AsyncStorageLock();
     final result = await lock.synchronized(() {
