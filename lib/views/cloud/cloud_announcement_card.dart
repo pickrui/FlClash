@@ -15,10 +15,32 @@ import 'package:flutter/widgets.dart';
 
 import 'cloud_layout.dart';
 
-class CloudAnnouncementCard extends StatelessWidget {
+class CloudAnnouncementCard extends StatefulWidget {
   const CloudAnnouncementCard({super.key, required this.notice});
 
   final CloudNotification notice;
+
+  @override
+  State<CloudAnnouncementCard> createState() => _CloudAnnouncementCardState();
+}
+
+class _CloudAnnouncementCardState extends State<CloudAnnouncementCard> {
+  var _truncated = false;
+
+  CloudNotification get notice => widget.notice;
+
+  bool _measure(ScrollMetricsNotification notification) {
+    final truncated = notification.metrics.maxScrollExtent > 0;
+    if (truncated != _truncated) setState(() => _truncated = truncated);
+    return true;
+  }
+
+  Shader _fade(Rect bounds) => const LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFFFFFF), Color(0x00FFFFFF)],
+    stops: [0.7, 1],
+  ).createShader(bounds);
 
   void _openDetail(BuildContext context) {
     showSheet<void>(
@@ -50,6 +72,19 @@ class CloudAnnouncementCard extends StatelessWidget {
     final accent = AppTextStyle.subheadline
         .of(context, emphasized: true)
         .copyWith(color: colorScheme.primary);
+    final Widget preview = NotificationListener<ScrollMetricsNotification>(
+      onNotification: _measure,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.textScalerOf(context).scale(68),
+        ),
+        child: SingleChildScrollView(
+          primary: false,
+          physics: const NeverScrollableScrollPhysics(),
+          child: _AnnouncementBody(notice: notice),
+        ),
+      ),
+    );
     return Card(
       radius: AppCorner.xl,
       onPressed: () => _openDetail(context),
@@ -91,35 +126,34 @@ class CloudAnnouncementCard extends StatelessWidget {
             const SizedBox(height: 10),
             ExcludeSemantics(
               child: IgnorePointer(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.textScalerOf(context).scale(68),
-                  ),
-                  child: SingleChildScrollView(
-                    primary: false,
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: _AnnouncementBody(notice: notice),
-                  ),
-                ),
+                child: _truncated
+                    ? ShaderMask(
+                        shaderCallback: _fade,
+                        blendMode: BlendMode.dstIn,
+                        child: preview,
+                      )
+                    : preview,
               ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              spacing: 4,
-              children: [
-                Flexible(
-                  child: Text(
-                    context.appLocalizations.readFullAnnouncement,
-                    style: accent,
+            if (_truncated) ...[
+              const SizedBox(height: 12),
+              Row(
+                spacing: 4,
+                children: [
+                  Flexible(
+                    child: Text(
+                      context.appLocalizations.readFullAnnouncement,
+                      style: accent,
+                    ),
                   ),
-                ),
-                GlyphIcon(
-                  AppGlyphs.chevronForward,
-                  size: 16,
-                  color: colorScheme.primary,
-                ),
-              ],
-            ),
+                  GlyphIcon(
+                    AppGlyphs.chevronForward,
+                    size: 16,
+                    color: colorScheme.primary,
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

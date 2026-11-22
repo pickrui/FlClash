@@ -132,6 +132,7 @@ literal <script>example</script>
       );
       expect(find.byType(MarkdownBody), findsNothing);
       expect(find.text('# Literal text'), findsOneWidget);
+      expect(find.text('Read full announcement'), findsNothing);
     });
   }
 
