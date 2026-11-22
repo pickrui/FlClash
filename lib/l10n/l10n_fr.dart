@@ -1985,15 +1985,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get balance => 'Solde';
-
-  @override
-  String get commission => 'Commission';
-
-  @override
-  String get points => 'Points';
-
-  @override
   String get announcement => 'Annonce';
 
   @override
@@ -2010,6 +2001,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get refresh => 'Actualiser';
+
+  @override
+  String get refreshNodes => 'Actualiser les nœuds';
 
   @override
   String get nodeFilter => 'Filtre des nœuds';
@@ -2293,9 +2287,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get fetchPlansFailed => 'Impossible de charger les offres';
-
-  @override
-  String get storeSubtitle => 'Acheter, renouveler et changer d’offre';
 
   @override
   String get paymentUnknownResponse =>

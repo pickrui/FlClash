@@ -265,16 +265,8 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
         if (accountState.isLoggedIn) ...[
           IconButtonData(
             glyph: AppGlyphs.refresh,
-            tooltip: currentAppLocalizations.refresh,
-            isLoading: accountState.isRefreshing,
-            onPressed: accountBusy
-                ? null
-                : () => notifier.refreshProfile(force: true),
-          ),
-          IconButtonData(
-            glyph: AppGlyphs.sync,
-            tooltip: currentAppLocalizations.sync,
-            isLoading: accountState.isSyncing,
+            tooltip: currentAppLocalizations.refreshNodes,
+            isLoading: accountState.isRefreshing || accountState.isSyncing,
             onPressed: accountBusy
                 ? null
                 : () => notifier.refreshManagedSubscription(),
@@ -497,12 +489,12 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
                         ? _nodeFilterRecovery?.result
                         : null,
                   ),
-                _buildStoreEntry(),
                 if (state.latestNotification case final notice?
                     when notice.cleanMessage.isNotEmpty) ...[
                   const SizedBox(height: cloudSectionGap),
                   CloudAnnouncementCard(notice: notice),
                 ],
+                _buildStoreEntry(profile),
                 generateSection(
                   items: [
                     ListItem(
@@ -524,14 +516,17 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
     );
   }
 
-  Widget _buildStoreEntry() {
+  Widget _buildStoreEntry(CloudProfile profile) {
     final storePage = cloudStorePageBuilder;
     return generateSection(
       items: [
         ListItem(
           leading: const GlyphIcon(AppGlyphs.bag),
           title: Text(currentAppLocalizations.store),
-          subtitle: Text(currentAppLocalizations.storeSubtitle),
+          subtitle: Text(
+            '${currentAppLocalizations.accountBalance} '
+            '${storeMoneyText(profile.balance)}',
+          ),
           trailing: const GlyphIcon(AppGlyphs.chevronForward),
           onTap: storePage == null
               ? null

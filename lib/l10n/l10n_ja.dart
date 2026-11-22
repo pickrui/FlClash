@@ -1875,15 +1875,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get balance => '残高';
-
-  @override
-  String get commission => 'コミッション';
-
-  @override
-  String get points => 'ポイント';
-
-  @override
   String get announcement => 'お知らせ';
 
   @override
@@ -1900,6 +1891,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get refresh => '更新';
+
+  @override
+  String get refreshNodes => 'ノードを更新';
 
   @override
   String get nodeFilter => 'ノードフィルター';
@@ -2169,9 +2163,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get fetchPlansFailed => 'プランの取得に失敗しました';
-
-  @override
-  String get storeSubtitle => 'プランの購入・更新・アップグレード';
 
   @override
   String get paymentUnknownResponse => '支払いエンドポイントが不明な形式を返しました';

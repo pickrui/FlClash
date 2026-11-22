@@ -235,7 +235,12 @@ void main() {
     );
     expect(
       tester
-          .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.sync))
+          .widget<IconButton>(
+            find.ancestor(
+              of: find.byTooltip('Refresh nodes'),
+              matching: find.byType(IconButton),
+            ),
+          )
           .onPressed,
       isNull,
     );
@@ -246,7 +251,7 @@ void main() {
       findsOneWidget,
     );
     expect(FlClashTemporaryTls.allowBadCertificate, isFalse);
-    await tester.tap(find.byTooltip('Sync'));
+    await tester.tap(find.byTooltip('Refresh nodes'));
     await tester.pumpAndSettle();
     expect(account.refreshAttempts, [true, false]);
     expect(account.syncAttempts, [true, false]);

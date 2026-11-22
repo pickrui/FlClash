@@ -1902,15 +1902,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get balance => '잔액';
-
-  @override
-  String get commission => '수수료';
-
-  @override
-  String get points => '포인트';
-
-  @override
   String get announcement => '공지';
 
   @override
@@ -1927,6 +1918,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get refresh => '새로 고침';
+
+  @override
+  String get refreshNodes => '노드 새로 고침';
 
   @override
   String get nodeFilter => '노드 필터';
@@ -2197,9 +2191,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get fetchPlansFailed => '요금제를 불러오지 못했습니다';
-
-  @override
-  String get storeSubtitle => '요금제 구매, 갱신 및 업그레이드';
 
   @override
   String get paymentUnknownResponse => '결제 서비스가 알 수 없는 형식으로 응답했습니다';

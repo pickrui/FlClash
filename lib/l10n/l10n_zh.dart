@@ -1858,15 +1858,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get balance => '余额';
-
-  @override
-  String get commission => '佣金';
-
-  @override
-  String get points => '积分';
-
-  @override
   String get announcement => '公告';
 
   @override
@@ -1883,6 +1874,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get refresh => '刷新';
+
+  @override
+  String get refreshNodes => '刷新节点';
 
   @override
   String get nodeFilter => '节点筛选';
@@ -2150,9 +2144,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get fetchPlansFailed => '获取套餐失败';
-
-  @override
-  String get storeSubtitle => '购买、续费与升级套餐';
 
   @override
   String get paymentUnknownResponse => '支付接口返回未知格式';

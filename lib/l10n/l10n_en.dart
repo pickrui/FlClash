@@ -1956,15 +1956,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get balance => 'Balance';
-
-  @override
-  String get commission => 'Commission';
-
-  @override
-  String get points => 'Points';
-
-  @override
   String get announcement => 'Announcement';
 
   @override
@@ -1981,6 +1972,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refresh => 'Refresh';
+
+  @override
+  String get refreshNodes => 'Refresh nodes';
 
   @override
   String get nodeFilter => 'Node Filter';
@@ -2263,9 +2257,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fetchPlansFailed => 'Failed to load plans';
-
-  @override
-  String get storeSubtitle => 'Purchase, renew, and upgrade plans';
 
   @override
   String get paymentUnknownResponse =>

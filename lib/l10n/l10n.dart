@@ -3642,24 +3642,6 @@ abstract class AppLocalizations {
   /// **'Remaining: {value}'**
   String remaining(Object value);
 
-  /// No description provided for @balance.
-  ///
-  /// In en, this message translates to:
-  /// **'Balance'**
-  String get balance;
-
-  /// No description provided for @commission.
-  ///
-  /// In en, this message translates to:
-  /// **'Commission'**
-  String get commission;
-
-  /// No description provided for @points.
-  ///
-  /// In en, this message translates to:
-  /// **'Points'**
-  String get points;
-
   /// No description provided for @announcement.
   ///
   /// In en, this message translates to:
@@ -3695,6 +3677,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refresh'**
   String get refresh;
+
+  /// No description provided for @refreshNodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh nodes'**
+  String get refreshNodes;
 
   /// No description provided for @nodeFilter.
   ///
@@ -4205,12 +4193,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load plans'**
   String get fetchPlansFailed;
-
-  /// No description provided for @storeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Purchase, renew, and upgrade plans'**
-  String get storeSubtitle;
 
   /// No description provided for @paymentUnknownResponse.
   ///

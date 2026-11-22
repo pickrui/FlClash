@@ -1976,15 +1976,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get balance => 'Баланс';
-
-  @override
-  String get commission => 'Комиссия';
-
-  @override
-  String get points => 'Баллы';
-
-  @override
   String get announcement => 'Объявление';
 
   @override
@@ -2001,6 +1992,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get refresh => 'Обновить';
+
+  @override
+  String get refreshNodes => 'Обновить узлы';
 
   @override
   String get nodeFilter => 'Фильтр узлов';
@@ -2282,9 +2276,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get fetchPlansFailed => 'Не удалось загрузить тарифы';
-
-  @override
-  String get storeSubtitle => 'Покупка, продление и улучшение тарифов';
 
   @override
   String get paymentUnknownResponse =>
