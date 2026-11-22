@@ -21,6 +21,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fl_clash/widgets/raised_panel.dart';
 
 import 'config/dns.dart';
 import 'config/general.dart' show PortItem;
@@ -382,80 +383,72 @@ class _NetworkDiagnosticsPageState
     };
     final settings = _settingsFor(check);
     final guide = check.id == 'systemProxy' || check.id == 'capture';
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: ShapeDecoration(
-        color: level.colorOf(colorScheme),
-        shape: AppShape.xl,
-      ),
-      child: SurfaceScope(
-        level: level,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 8,
-          children: [
-            Row(
-              spacing: 10,
-              children: [
-                GlyphIcon(glyph, fill: 1, color: color),
-                Expanded(
-                  child: Text(
-                    check.title,
-                    style: AppTextStyle.headline
-                        .of(context)
-                        .copyWith(color: colorScheme.onSurface),
-                  ),
-                ),
-                TonalChip(
-                  label: _status(check.status),
-                  color: container,
-                  foregroundColor: onContainer,
-                ),
-              ],
-            ),
-            SelectableText(
-              check.detail,
-              style: AppTextStyle.subheadline
-                  .of(context)
-                  .copyWith(color: colorScheme.onSurface),
-            ),
-            if (check.suggestion case final suggestion?)
-              Text(suggestion, style: context.listSubtitleStyle),
-            if (check.fix != null || guide || settings != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    if (guide)
-                      TonalButton(
-                        size: TonalButtonSize.compact,
-                        glyph: AppGlyphs.info,
-                        label: l.diagProxyGuide,
-                        onPressed: _busy ? null : () => _showProxyGuide(check),
-                      ),
-                    if (settings != null)
-                      TonalButton(
-                        size: TonalButtonSize.compact,
-                        glyph: AppGlyphs.settings,
-                        label: settings.$1,
-                        onPressed: _busy
-                            ? null
-                            : () => _openSettings(settings.$2),
-                      ),
-                    if (check.fix case final fix?)
-                      TonalButton(
-                        size: TonalButtonSize.compact,
-                        glyph: AppGlyphs.sparkle,
-                        label: _fixLabel(fix),
-                        onPressed: _busy ? null : () => _fix(fix),
-                      ),
-                  ],
+    return RaisedPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 8,
+        children: [
+          Row(
+            spacing: 10,
+            children: [
+              GlyphIcon(glyph, fill: 1, color: color),
+              Expanded(
+                child: Text(
+                  check.title,
+                  style: AppTextStyle.headline
+                      .of(context)
+                      .copyWith(color: colorScheme.onSurface),
                 ),
               ),
-          ],
-        ),
+              TonalChip(
+                label: _status(check.status),
+                color: container,
+                foregroundColor: onContainer,
+              ),
+            ],
+          ),
+          SelectableText(
+            check.detail,
+            style: AppTextStyle.subheadline
+                .of(context)
+                .copyWith(color: colorScheme.onSurface),
+          ),
+          if (check.suggestion case final suggestion?)
+            Text(suggestion, style: context.listSubtitleStyle),
+          if (check.fix != null || guide || settings != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (guide)
+                    TonalButton(
+                      size: TonalButtonSize.compact,
+                      glyph: AppGlyphs.info,
+                      label: l.diagProxyGuide,
+                      onPressed: _busy ? null : () => _showProxyGuide(check),
+                    ),
+                  if (settings != null)
+                    TonalButton(
+                      size: TonalButtonSize.compact,
+                      glyph: AppGlyphs.settings,
+                      label: settings.$1,
+                      onPressed: _busy
+                          ? null
+                          : () => _openSettings(settings.$2),
+                    ),
+                  if (check.fix case final fix?)
+                    TonalButton(
+                      size: TonalButtonSize.compact,
+                      glyph: AppGlyphs.sparkle,
+                      label: _fixLabel(fix),
+                      onPressed: _busy ? null : () => _fix(fix),
+                    ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

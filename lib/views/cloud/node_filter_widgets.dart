@@ -9,32 +9,6 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:flutter/widgets.dart';
 
-class NodeFilterPanel extends StatelessWidget {
-  final EdgeInsetsGeometry padding;
-  final Widget child;
-
-  const NodeFilterPanel({
-    super.key,
-    this.padding = const EdgeInsets.all(16),
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final level = context.raisedSurfaceLevel;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: level.colorOf(context.colorScheme),
-        shape: AppShape.xl,
-      ),
-      child: SurfaceScope(
-        level: level,
-        child: Padding(padding: padding, child: child),
-      ),
-    );
-  }
-}
-
 class NodeFilterChoiceChip extends StatelessWidget {
   final String label;
   final int? count;

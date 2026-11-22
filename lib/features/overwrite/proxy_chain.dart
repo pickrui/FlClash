@@ -22,6 +22,7 @@ import 'overwrite_sheet.dart';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_clash/features/form/input_lock.dart';
 
 class ProxyChainCandidateSection {
   final String label;
@@ -1265,8 +1266,8 @@ class _ProxyChainEditViewState extends ConsumerState<ProxyChainEditView> {
           isLoading: _saving,
           onPressed: canSubmit ? _handleSubmit : null,
         ),
-        body: AbsorbPointer(
-          absorbing: _saving,
+        body: InputLock(
+          locked: _saving,
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(

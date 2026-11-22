@@ -32,53 +32,6 @@ class CloudContentWidth extends StatelessWidget {
   }
 }
 
-/// The filled pill of the one action a cloud screen is for, as tall as the
-/// tonal buttons beside it; [loading] holds its size while the action runs.
-class CloudPrimaryButton extends StatelessWidget {
-  final String label;
-  final Glyph? glyph;
-  final TonalButtonSize size;
-  final bool loading;
-  final VoidCallback? onPressed;
-
-  const CloudPrimaryButton({
-    super.key,
-    required this.label,
-    this.glyph,
-    this.size = TonalButtonSize.bar,
-    this.loading = false,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final compact = size != TonalButtonSize.bar;
-    final style = ButtonStyle.from(
-      minimumSize: Size(size.button, size.button),
-      padding: EdgeInsets.symmetric(horizontal: compact ? 14 : 20),
-      shape: AppShape.full,
-      textStyle: compact
-          ? AppTextStyle.subheadline.of(context, emphasized: true)
-          : AppTextStyle.body.of(context, emphasized: true),
-      iconSize: size.icon,
-      tapTargetSize: TapTargetSize.shrinkWrap,
-    );
-    final glyph = loading ? null : this.glyph;
-    final Widget child = loading
-        ? ActivityIndicator(size: size.icon, semanticLabel: label)
-        : Text(label);
-    final Widget button = glyph == null
-        ? FilledButton(onPressed: onPressed, style: style, child: child)
-        : FilledButton.icon(
-            onPressed: onPressed,
-            style: style,
-            icon: GlyphIcon(glyph, fill: 1),
-            label: child,
-          );
-    return ElasticButton(enabled: onPressed != null, child: button);
-  }
-}
-
 /// An error a cloud screen keeps showing above its content until it clears.
 class CloudErrorBanner extends StatelessWidget {
   final String message;
@@ -207,33 +160,6 @@ class _CloudSheetGuardState extends State<CloudSheetGuard> {
 
   @override
   Widget build(BuildContext context) => widget.child;
-}
-
-/// Fields that stop taking input while a form is being sent.
-class CloudFormFields extends StatelessWidget {
-  final bool enabled;
-  final Widget child;
-
-  const CloudFormFields({
-    super.key,
-    required this.enabled,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ExcludeFocus(
-      excluding: !enabled,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: AnimatedOpacity(
-          opacity: enabled ? 1 : 0.5,
-          duration: context.motionDuration(midDuration),
-          child: child,
-        ),
-      ),
-    );
-  }
 }
 
 // Desktop engines have no autofill context to save into.

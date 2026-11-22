@@ -18,6 +18,8 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fl_clash/features/form/input_lock.dart';
+import 'package:fl_clash/widgets/raised_panel.dart';
 
 import 'cloud_layout.dart';
 import 'node_filter_widgets.dart';
@@ -288,7 +290,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
           children: [
             ..._buildFilters(context),
             _buildPreviewHeader(context),
-            NodeFilterPanel(child: _buildPreview(context, expand: false)),
+            RaisedPanel(child: _buildPreview(context, expand: false)),
           ],
         ),
       ),
@@ -323,7 +325,7 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
                   children: [
                     _buildPreviewHeader(context),
                     Expanded(
-                      child: NodeFilterPanel(
+                      child: RaisedPanel(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                         child: _buildPreview(context, expand: true),
                       ),
@@ -342,9 +344,8 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
     final l10n = context.appLocalizations;
     final catalog = _displayed;
     final editable = !_submitting;
-    Widget chips(List<Widget> children) => NodeFilterPanel(
-      child: Wrap(spacing: 8, runSpacing: 8, children: children),
-    );
+    Widget chips(List<Widget> children) =>
+        RaisedPanel(child: Wrap(spacing: 8, runSpacing: 8, children: children));
     return [
       _buildLegend(context),
       if (catalog.lines.isNotEmpty) ...[
@@ -376,8 +377,8 @@ class _CloudNodeFilterPageState extends ConsumerState<CloudNodeFilterPage> {
             ),
         ]),
       ],
-      CloudFormFields(
-        enabled: editable,
+      InputLock(
+        locked: !editable,
         child: generateSection(
           footer: l10n.nodeFilterAccountNote,
           items: [

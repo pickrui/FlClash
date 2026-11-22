@@ -12,6 +12,7 @@ import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fl_clash/features/form/input_lock.dart';
 
 import 'overwrite_sheet.dart';
 
@@ -216,20 +217,13 @@ class _ProfileProviderOptionsDialogState
     }
   }
 
-  Future<T?> _push<T>(Widget page) {
-    if (isSheetPage(context)) {
-      return Navigator.of(context)
-          .push(PagedSheetRoute<T>(builder: (_) => page));
-    }
-    return BaseNavigator.push<T>(context, page);
-  }
-
   void _addOption(List<_ProviderOption> options) {
     final sections = <String, List<_ProviderOption>>{};
     for (final option in options) {
       sections.putIfAbsent(option.section, () => []).add(option);
     }
-    _push<void>(
+    pushNestedPage<void>(
+      context,
       SelectionSheet<_ProviderOption>(
         title: appLocalizations.addSettingEntry,
         sections: [
@@ -268,7 +262,8 @@ class _ProfileProviderOptionsDialogState
   }
 
   Future<void> _showIpVersions() async {
-    final value = await _push<String>(
+    final value = await pushNestedPage<String>(
+      context,
       Builder(
         builder: (context) => SelectionSheet<String>(
           title: appLocalizations.ipVersion,
@@ -440,57 +435,51 @@ class _ProfileProviderOptionsDialogState
           isLoading: _saving,
           onPressed: _saving ? null : _submit,
         ),
-        body: ExcludeFocus(
-          excluding: _saving,
-          child: AbsorbPointer(
-            absorbing: _saving,
-            child: Builder(
-              builder: (context) => ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-                  top: context.sectionsTopPadding,
-                  bottom: 20 + context.bottomInset,
-                ),
-                children: [
-                  ErrorBanner(
-                    message: issue?.message ?? _error,
-                    sectioned: true,
-                  ),
-                  generateSection(
-                    title: l.filters,
-                    items: [
-                      _textItem(
-                        title: l.proxyFilter,
-                        controller: _filterController,
-                      ),
-                      _textItem(
-                        title: l.excludeProxyFilter,
-                        controller: _excludeFilterController,
-                      ),
-                    ],
-                  ),
-                  generateAnimatedSection(
-                    title: l.options,
-                    items: [
-                      for (final option in _ProviderOption.values)
-                        if (_shown.contains(option))
-                          KeyedSubtree(
-                            key: ValueKey(option),
-                            child: _buildOption(option, issue?.field),
-                          ),
-                      if (remaining.isNotEmpty)
-                        FormRow(
-                          key: const ValueKey(#add),
-                          leading: EntryButton.add(onPressed: handleAdd),
-                          title: l.addSettingEntry,
-                          titleStyle: TextStyle(
-                            color: context.colorScheme.primary,
-                          ),
-                          onPressed: handleAdd,
-                        ),
-                    ],
-                  ),
-                ],
+        body: InputLock(
+          locked: _saving,
+          child: Builder(
+            builder: (context) => ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+                top: context.sectionsTopPadding,
+                bottom: 20 + context.bottomInset,
               ),
+              children: [
+                ErrorBanner(message: issue?.message ?? _error, sectioned: true),
+                generateSection(
+                  title: l.filters,
+                  items: [
+                    _textItem(
+                      title: l.proxyFilter,
+                      controller: _filterController,
+                    ),
+                    _textItem(
+                      title: l.excludeProxyFilter,
+                      controller: _excludeFilterController,
+                    ),
+                  ],
+                ),
+                generateAnimatedSection(
+                  title: l.options,
+                  items: [
+                    for (final option in _ProviderOption.values)
+                      if (_shown.contains(option))
+                        KeyedSubtree(
+                          key: ValueKey(option),
+                          child: _buildOption(option, issue?.field),
+                        ),
+                    if (remaining.isNotEmpty)
+                      FormRow(
+                        key: const ValueKey(#add),
+                        leading: EntryButton.add(onPressed: handleAdd),
+                        title: l.addSettingEntry,
+                        titleStyle: TextStyle(
+                          color: context.colorScheme.primary,
+                        ),
+                        onPressed: handleAdd,
+                      ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

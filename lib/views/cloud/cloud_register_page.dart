@@ -18,6 +18,8 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart' show AutofillHints, TextInputAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_clash/widgets/primary_button.dart';
+import 'package:fl_clash/features/form/input_lock.dart';
 
 import 'cloud_layout.dart';
 import 'cloud_login_page.dart';
@@ -321,8 +323,8 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
     bool invalid(_RegisterField field) => issue?.field == field;
     return [
       ErrorBanner(message: issue?.message),
-      CloudFormFields(
-        enabled: !isLoading,
+      InputLock(
+        locked: isLoading,
         child: CloudAutofillGroup(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -432,7 +434,7 @@ class _CloudRegisterPageState extends ConsumerState<CloudRegisterPage> {
         ),
       ),
       const SizedBox(height: 16),
-      CloudPrimaryButton(
+      PrimaryButton(
         label: l10n.register,
         loading: isLoading,
         onPressed: isLoading ? null : _handleRegister,

@@ -22,6 +22,7 @@ import 'package:fl_clash/providers/config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fl_clash/features/form/input_lock.dart';
 
 import 'overwrite_sheet.dart';
 import '../form/quick_edit.dart';
@@ -56,13 +57,6 @@ const _defaultEmptyFallback = 'COMPATIBLE';
 const _inUserHashKey = 'in-user';
 const _roundRobin = 'round-robin';
 const _strategies = ['consistent-hashing', _roundRobin, 'sticky-sessions'];
-
-Future<T?> _pushPage<T>(BuildContext context, Widget page) {
-  if (isSheetPage(context)) {
-    return Navigator.of(context).push(PagedSheetRoute<T>(builder: (_) => page));
-  }
-  return BaseNavigator.push<T>(context, page);
-}
 
 /// What a group leaves to the core until it is added, starting from the
 /// core's own default.
@@ -603,7 +597,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
 
   Future<void> _showMemberPicker() async {
     final name = _nameController.text.trim();
-    final picked = await _pushPage<List<_Member>>(
+    final picked = await pushNestedPage<List<_Member>>(
       context,
       _MemberPicker(
         available: [
@@ -633,7 +627,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     required String Function(T item) labelBuilder,
     required T selected,
   }) {
-    return _pushPage<T>(
+    return pushNestedPage<T>(
       context,
       Builder(
         builder: (context) => SelectionSheet<T>(
@@ -732,7 +726,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
   }
 
   Future<void> _showIconPicker() async {
-    final value = await _pushPage<String>(
+    final value = await pushNestedPage<String>(
       context,
       IconPickerView(value: _icon, groupName: _nameController.text.trim()),
     );
@@ -766,7 +760,7 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
     for (final option in options) {
       sections.putIfAbsent(option.section, () => []).add(option);
     }
-    _pushPage<void>(
+    pushNestedPage<void>(
       context,
       SelectionSheet<_GroupOption>(
         title: appLocalizations.addSettingEntry,
@@ -1288,107 +1282,104 @@ class _ProxyGroupDialogState extends State<ProxyGroupDialog> {
           isLoading: _saving,
           onPressed: _saving ? null : _submit,
         ),
-        body: ExcludeFocus(
-          excluding: _saving,
-          child: AbsorbPointer(
-            absorbing: _saving,
-            child: CustomScrollView(
-              key: ValueKey(_revision),
-              controller: _scrollController,
-              slivers: [
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    16,
-                    context.sectionsTopPadding,
-                    16,
-                    0,
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        ErrorBanner(message: _bannerMessage, sectioned: true),
-                        if (_canSaveDraft && !_saving)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                            child: Text(
-                              appLocalizations.routingDraftHint,
-                              style: context.listCaptionStyle,
+        body: InputLock(
+          locked: _saving,
+          child: CustomScrollView(
+            key: ValueKey(_revision),
+            controller: _scrollController,
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  context.sectionsTopPadding,
+                  16,
+                  0,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ErrorBanner(message: _bannerMessage, sectioned: true),
+                      if (_canSaveDraft && !_saving)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Text(
+                            appLocalizations.routingDraftHint,
+                            style: context.listCaptionStyle,
+                          ),
+                        ),
+                      generateSection(
+                        title: appLocalizations.general,
+                        footer: _groupTypeHint(_type),
+                        items: [
+                          _textItem(
+                            title: appLocalizations.name,
+                            controller: _nameController,
+                            invalid: invalid.contains(_Field.name),
+                            maxLength: TextInputLimits.groupName,
+                            hintText: appLocalizations.inputProxyGroupName,
+                          ),
+                          FormRow(
+                            title: appLocalizations.routingGroupType,
+                            onPressed: _showTypeOptions,
+                            trailing: _chevronValue(
+                              customProxyGroupTypeLabel(_type),
                             ),
                           ),
-                        generateSection(
-                          title: appLocalizations.general,
-                          footer: _groupTypeHint(_type),
-                          items: [
-                            _textItem(
-                              title: appLocalizations.name,
-                              controller: _nameController,
-                              invalid: invalid.contains(_Field.name),
-                              maxLength: TextInputLimits.groupName,
-                              hintText: appLocalizations.inputProxyGroupName,
-                            ),
-                            FormRow(
-                              title: appLocalizations.routingGroupType,
-                              onPressed: _showTypeOptions,
-                              trailing: _chevronValue(
-                                customProxyGroupTypeLabel(_type),
-                              ),
-                            ),
-                            FormRow(
-                              title: appLocalizations.icon,
-                              onPressed: _showIconPicker,
-                              trailing: Row(
-                                spacing: 2,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (icon.isNotEmpty)
-                                    CommonTargetIcon(src: icon, size: 28)
-                                  else
-                                    Flexible(
-                                      child: Text(
-                                        appLocalizations.optional,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: context.listTitleStyle.copyWith(
-                                          color: context
-                                              .colorScheme
-                                              .onSurfaceVariant,
-                                        ),
+                          FormRow(
+                            title: appLocalizations.icon,
+                            onPressed: _showIconPicker,
+                            trailing: Row(
+                              spacing: 2,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (icon.isNotEmpty)
+                                  CommonTargetIcon(src: icon, size: 28)
+                                else
+                                  Flexible(
+                                    child: Text(
+                                      appLocalizations.optional,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: context.listTitleStyle.copyWith(
+                                        color: context
+                                            .colorScheme
+                                            .onSurfaceVariant,
                                       ),
                                     ),
-                                  const GlyphIcon(AppGlyphs.chevronForward),
-                                ],
-                              ),
+                                  ),
+                                const GlyphIcon(AppGlyphs.chevronForward),
+                              ],
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: _buildMembers(invalid.contains(_Field.members)),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    16,
-                    0,
-                    16,
-                    20 + context.bottomInset,
-                  ),
-                  sliver: SliverList.list(
-                    children: [
-                      if (_hasDynamicMembers ||
-                          _filterController.text.isNotEmpty ||
-                          _excludeFilterController.text.isNotEmpty)
-                        _buildFilters(),
-                      _buildOptions(invalid),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: _buildMembers(invalid.contains(_Field.members)),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  0,
+                  16,
+                  20 + context.bottomInset,
+                ),
+                sliver: SliverList.list(
+                  children: [
+                    if (_hasDynamicMembers ||
+                        _filterController.text.isNotEmpty ||
+                        _excludeFilterController.text.isNotEmpty)
+                      _buildFilters(),
+                    _buildOptions(invalid),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

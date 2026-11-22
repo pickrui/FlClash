@@ -500,14 +500,6 @@ class _CustomProfileViewState extends ConsumerState<CustomProfileView>
   }
 }
 
-void _push(BuildContext context, Widget view) {
-  if (isSheetPage(context)) {
-    Navigator.of(context).push(PagedSheetRoute<void>(builder: (_) => view));
-    return;
-  }
-  BaseNavigator.push(context, view);
-}
-
 Widget _sectionRow(
   BuildContext context,
   Glyph glyph,
@@ -520,7 +512,7 @@ Widget _sectionRow(
     title: Text(title),
     subtitle: state,
     trailing: const GlyphIcon(AppGlyphs.chevronForward),
-    onTap: () => _push(context, view),
+    onTap: () => pushNestedPage<void>(context, view),
   );
 }
 

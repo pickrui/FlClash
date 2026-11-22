@@ -9,29 +9,10 @@ import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fl_clash/widgets/primary_button.dart';
+import 'package:fl_clash/widgets/raised_panel.dart';
 
-import 'cloud_layout.dart';
 import 'purchased_plan_details.dart';
-
-/// A raised panel for store content that is read rather than pressed.
-class StorePanel extends StatelessWidget {
-  final Widget child;
-
-  const StorePanel({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final level = context.raisedSurfaceLevel;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: ShapeDecoration(
-        color: level.colorOf(context.colorScheme),
-        shape: AppShape.xl,
-      ),
-      child: SurfaceScope(level: level, child: child),
-    );
-  }
-}
 
 class StoreBalanceCard extends StatelessWidget {
   final CloudProfile? profile;
@@ -46,7 +27,7 @@ class StoreBalanceCard extends StatelessWidget {
         .of(context)
         .toTabular
         .copyWith(color: colorScheme.onSurfaceVariant);
-    return StorePanel(
+    return RaisedPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -81,7 +62,7 @@ class StoreBalanceCard extends StatelessWidget {
                   ],
                 ),
               ),
-              CloudPrimaryButton(
+              PrimaryButton(
                 glyph: AppGlyphs.add,
                 label: appLocalizations.recharge,
                 onPressed: onRecharge,
@@ -260,7 +241,7 @@ class StoreBoughtCard extends StatelessWidget {
         : bought.autoRenew
         ? appLocalizations.planAwaitingAutoRenewalNote
         : appLocalizations.planAutoRenewalOffNote;
-    return StorePanel(
+    return RaisedPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

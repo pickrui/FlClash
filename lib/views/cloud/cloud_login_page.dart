@@ -18,6 +18,8 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart' show AutofillHints, TextInputAction;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_clash/widgets/primary_button.dart';
+import 'package:fl_clash/features/form/input_lock.dart';
 
 import 'cloud_account_page.dart' show cloudNodeFilterPageBuilder;
 import 'cloud_layout.dart';
@@ -263,14 +265,14 @@ class _CloudLoginPageState extends ConsumerState<CloudLoginPage> {
       onClose: _handleClose,
       children: [
         ErrorBanner(message: issue),
-        CloudFormFields(
-          enabled: !isLoading,
+        InputLock(
+          locked: isLoading,
           child: _withToken
               ? _buildTokenForm(issue)
               : _buildEmailPasswordForm(issue),
         ),
         const SizedBox(height: 16),
-        CloudPrimaryButton(
+        PrimaryButton(
           label: l10n.loginTitle,
           loading: isLoading && _googleLogin == null,
           onPressed: isLoading ? null : _handleLogin,
@@ -504,8 +506,8 @@ class _PasswordResetSheetState extends State<_PasswordResetSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CloudFormFields(
-                enabled: !_isSubmitting && !_emailSent,
+              InputLock(
+                locked: _isSubmitting || _emailSent,
                 child: generateSection(
                   footer: _emailSent ? l10n.resetEmailSent : null,
                   items: [
@@ -531,8 +533,8 @@ class _PasswordResetSheetState extends State<_PasswordResetSheet> {
                 ),
               ),
               if (_emailSent)
-                CloudFormFields(
-                  enabled: !_isSubmitting,
+                InputLock(
+                  locked: _isSubmitting,
                   child: generateSection(
                     items: [
                       FormRow(
@@ -565,7 +567,7 @@ class _PasswordResetSheetState extends State<_PasswordResetSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        CloudPrimaryButton(
+        PrimaryButton(
           label: _emailSent ? l10n.resetPasswordTitle : l10n.sendResetEmail,
           loading: _isSubmitting,
           onPressed: _isSubmitting ? null : _handleSubmit,

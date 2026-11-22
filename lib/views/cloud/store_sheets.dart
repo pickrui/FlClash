@@ -10,6 +10,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fl_clash/widgets/primary_button.dart';
+import 'package:fl_clash/widgets/raised_panel.dart';
 
 import 'cloud_layout.dart';
 import 'store_widgets.dart';
@@ -122,7 +124,7 @@ class _StorePurchaseSheetState extends State<StorePurchaseSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            StorePanel(
+            RaisedPanel(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 4,
@@ -214,7 +216,7 @@ class _StorePurchaseSheetState extends State<StorePurchaseSheet> {
               ],
             ),
             const SizedBox(height: cloudSectionGap),
-            CloudPrimaryButton(
+            PrimaryButton(
               label: payWithBalance
                   ? appLocalizations.buy
                   : appLocalizations.goPay,
@@ -329,7 +331,7 @@ class _StoreRechargeSheetState extends State<StoreRechargeSheet> {
               ],
             ),
             const SizedBox(height: cloudSectionGap),
-            CloudPrimaryButton(
+            PrimaryButton(
               label: appLocalizations.goPay,
               onPressed: amount != null && !outOfRange
                   ? () => Navigator.of(

@@ -22,6 +22,7 @@ import 'package:material_ui/material_ui.dart' as material show Scaffold;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fl_clash/features/form/input_lock.dart';
 
 import '../helpers/test_app.dart';
 
@@ -259,10 +260,10 @@ void main() {
       expect(saving.onPressed, isNull);
       expect(
         tester
-            .widgetList<AbsorbPointer>(
-              find.ancestor(of: name, matching: find.byType(AbsorbPointer)),
+            .widgetList<InputLock>(
+              find.ancestor(of: name, matching: find.byType(InputLock)),
             )
-            .any((pointer) => pointer.absorbing),
+            .any((lock) => lock.locked),
         isTrue,
       );
       expect(calls, 1);

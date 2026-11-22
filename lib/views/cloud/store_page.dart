@@ -14,6 +14,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart' show RefreshIndicator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_clash/widgets/primary_button.dart';
 
 import 'cloud_layout.dart';
 import 'store_payment_dialog.dart';
@@ -320,7 +321,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
         ),
       // Activation closes the row, so the actions every plan shares keep their place.
       if (bought.canActivate)
-        CloudPrimaryButton(
+        PrimaryButton(
           size: TonalButtonSize.compact,
           glyph: AppGlyphs.checkCircle,
           label: appLocalizations.activate,

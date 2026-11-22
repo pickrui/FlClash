@@ -15,6 +15,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:material_ui/material_ui.dart' show RefreshIndicator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_clash/widgets/primary_button.dart';
 
 import 'cloud_announcement_card.dart';
 import 'cloud_layout.dart';
@@ -554,7 +555,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
         spacing: 12,
         runSpacing: 12,
         children: [
-          CloudPrimaryButton(
+          PrimaryButton(
             label: currentAppLocalizations.loginTitle,
             onPressed: () =>
                 commonAction.openCloudLogin(navigateToCloud: false),

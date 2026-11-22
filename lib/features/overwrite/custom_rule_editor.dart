@@ -21,6 +21,7 @@ import 'package:fl_clash/widgets/widgets.dart';
 import 'overwrite_sheet.dart';
 
 import 'package:collection/collection.dart';
+import 'package:fl_clash/features/form/input_lock.dart';
 
 /// A visual editor for common rules, with a lossless text editor for advanced
 /// expressions. [validate] can check the candidate in its complete configuration
@@ -469,14 +470,6 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
     if (_scrollController.hasClients) _scrollController.jumpTo(0);
   }
 
-  Future<T?> _pick<T>(Widget sheet) {
-    if (isSheetPage(context)) {
-      return Navigator.of(context)
-          .push(PagedSheetRoute<T>(builder: (_) => sheet));
-    }
-    return BaseNavigator.push<T>(context, sheet);
-  }
-
   SelectionSheet<T> _sheet<T>({
     required String title,
     required List<SelectionSection<T>> sections,
@@ -493,7 +486,8 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
   );
 
   Future<void> _showTypes() async {
-    final action = await _pick<RuleAction>(
+    final action = await pushNestedPage<RuleAction>(
+      context,
       Builder(
         builder: (context) => _sheet<RuleAction>(
           title: context.appLocalizations.customRuleType,
@@ -522,7 +516,8 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
   Future<void> _showRuleProviders() async {
     final l10n = context.appLocalizations;
     final value = _payloadController.text;
-    final provider = await _pick<String>(
+    final provider = await pushNestedPage<String>(
+      context,
       _sheet<String>(
         title: l10n.ruleProviders,
         sections: [SelectionSection(items: widget.ruleProviders)],
@@ -550,7 +545,8 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
       for (final name in targets)
         if (!subRule && widget.groupNames.contains(name)) name,
     };
-    final target = await _pick<String>(
+    final target = await pushNestedPage<String>(
+      context,
       _sheet<String>(
         title: subRule ? l10n.subRule : l10n.ruleTarget,
         sections: [
@@ -798,65 +794,60 @@ class _CustomRuleEditorDialogState extends State<CustomRuleEditorDialog> {
           isLoading: _saving,
           onPressed: _saving ? null : _submit,
         ),
-        body: ExcludeFocus(
-          excluding: _saving,
-          child: AbsorbPointer(
-            absorbing: _saving,
-            child: Builder(
-              builder: (context) => ListView(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-                  top: context.sectionsTopPadding,
-                  bottom: 20 + context.bottomInset,
-                ),
-                children: [
-                  Semantics(
-                    liveRegion: true,
-                    child: ErrorBanner(
-                      message: issue?.message ?? _error,
-                      sectioned: true,
-                    ),
-                  ),
-                  if (_failedCandidate != null && issue == null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      child: Text(
-                        l10n.routingDraftHint,
-                        style: context.listCaptionStyle,
-                      ),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: SegmentedControl<bool>(
-                      segments: [
-                        (false, l10n.customRuleForm),
-                        (true, l10n.customRuleRaw),
-                      ],
-                      value: _rawMode,
-                      onChanged: _setMode,
-                    ),
-                  ),
-                  if (_rawMode)
-                    _buildRaw(issue?.field)
-                  else
-                    ..._buildForm(issue?.field)
-                        .separated(const SizedBox(height: 8)),
-                  if (widget.rule != null && widget.onDelete != null) ...[
-                    const SizedBox(height: 16),
-                    generateSection(
-                      items: [
-                        FormRow(
-                          title: l10n.delete,
-                          titleStyle: TextStyle(
-                            color: context.colorScheme.error,
-                          ),
-                          onPressed: _delete,
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
+        body: InputLock(
+          locked: _saving,
+          child: Builder(
+            builder: (context) => ListView(
+              controller: _scrollController,
+              padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+                top: context.sectionsTopPadding,
+                bottom: 20 + context.bottomInset,
               ),
+              children: [
+                Semantics(
+                  liveRegion: true,
+                  child: ErrorBanner(
+                    message: issue?.message ?? _error,
+                    sectioned: true,
+                  ),
+                ),
+                if (_failedCandidate != null && issue == null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Text(
+                      l10n.routingDraftHint,
+                      style: context.listCaptionStyle,
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: SegmentedControl<bool>(
+                    segments: [
+                      (false, l10n.customRuleForm),
+                      (true, l10n.customRuleRaw),
+                    ],
+                    value: _rawMode,
+                    onChanged: _setMode,
+                  ),
+                ),
+                if (_rawMode)
+                  _buildRaw(issue?.field)
+                else
+                  ..._buildForm(issue?.field)
+                      .separated(const SizedBox(height: 8)),
+                if (widget.rule != null && widget.onDelete != null) ...[
+                  const SizedBox(height: 16),
+                  generateSection(
+                    items: [
+                      FormRow(
+                        title: l10n.delete,
+                        titleStyle: TextStyle(color: context.colorScheme.error),
+                        onPressed: _delete,
+                      ),
+                    ],
+                  ),
+                ],
+              ],
             ),
           ),
         ),
