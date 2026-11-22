@@ -6,6 +6,8 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:crypto/crypto.dart';
+import 'package:path/path.dart' as p;
 
 import 'src/package/context.dart';
 import 'src/package/plan.dart';
@@ -67,6 +69,19 @@ PackageArch hostArch() {
   };
 }
 
+const _rootsDigestKey = 'FLCLASH_CA_BUNDLE_SHA256';
+
+/// The installer compares the roots it ships with this digest; `setup.dart`
+/// passes it, and a repackaging run takes it from the roots that were staged.
+Map<String, String> _stagedRootsDigest() {
+  final roots = File(p.join('assets', 'data', 'ca-certificates.crt'));
+  if (Platform.environment.containsKey(_rootsDigestKey) ||
+      !roots.existsSync()) {
+    return const {};
+  }
+  return {_rootsDigestKey: '${sha256.convert(roots.readAsBytesSync())}'};
+}
+
 Future<int> _package(ArgResults results) async {
   final dryRun = results['dry-run'] as bool;
   final host = hostOs();
@@ -97,6 +112,7 @@ Future<int> _package(ArgResults results) async {
     os: os,
     arch: arch,
     outputDirectory: results['out'] as String,
+    toolEnvironment: os == PackageOs.windows ? _stagedRootsDigest() : const {},
   );
 
   if (dryRun) {
