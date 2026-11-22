@@ -2145,6 +2145,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectUpgradeTarget => 'Select upgrade target';
 
   @override
+  String get changePlan => 'Change plan';
+
+  @override
+  String get noChangeablePlans => 'No plans to change to';
+
+  @override
+  String get selectChangeTarget => 'Select a plan to change to';
+
+  @override
   String get refreshAfterPayment =>
       'After payment, pull down to refresh and check the result';
 

@@ -2056,6 +2056,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get selectUpgradeTarget => 'アップグレード対象を選択';
 
   @override
+  String get changePlan => 'プランを変更';
+
+  @override
+  String get noChangeablePlans => '変更可能なプランがありません';
+
+  @override
+  String get selectChangeTarget => '変更先のプランを選択';
+
+  @override
   String get refreshAfterPayment => '支払い完了後、下にスワイプして結果を確認してください';
 
   @override

@@ -2155,7 +2155,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get activate => 'Activer';
 
   @override
-  String get upgradePlan => 'Changer d’offre';
+  String get upgradePlan => 'Mettre à niveau l’offre';
 
   @override
   String get noPaymentMethods => 'Aucun moyen de paiement disponible';
@@ -2173,6 +2173,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selectUpgradeTarget => 'Choisir l’offre cible';
+
+  @override
+  String get changePlan => 'Changer d’offre';
+
+  @override
+  String get noChangeablePlans => 'Aucune offre disponible pour le changement';
+
+  @override
+  String get selectChangeTarget => 'Choisir la nouvelle offre';
 
   @override
   String get refreshAfterPayment =>

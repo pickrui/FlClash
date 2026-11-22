@@ -2165,6 +2165,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get selectUpgradeTarget => 'Выберите тариф для улучшения';
 
   @override
+  String get changePlan => 'Сменить тариф';
+
+  @override
+  String get noChangeablePlans => 'Нет тарифов для смены';
+
+  @override
+  String get selectChangeTarget => 'Выберите новый тариф';
+
+  @override
   String get refreshAfterPayment =>
       'После оплаты потяните вниз, чтобы обновить и проверить результат';
 

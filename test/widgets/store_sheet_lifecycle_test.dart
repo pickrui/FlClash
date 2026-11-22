@@ -314,6 +314,15 @@ void main() {
   VoidCallback? activatePressed(WidgetTester tester) =>
       tester.widget<FilledButton>(_filledButton('Activate')).onPressed;
 
+  testWidgets('a plan not yet used offers a change, not an upgrade', (
+    tester,
+  ) async {
+    await openPurchased(tester, (_) => {'ret': 1});
+    expect(find.text('Change plan'), findsOneWidget);
+    expect(find.text('Upgrade plan'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets(
     'switching accounts invalidates an open activation confirmation',
     (tester) async {
@@ -474,17 +483,30 @@ class _ShopAdapter implements HttpClientAdapter {
 
 class _BoughtStore extends _Store {
   @override
-  StoreState build() => super.build().copyWith(
-    bought: [
-      BoughtRecord.fromJson({
-        'id': 7,
-        'shop_id': 1,
-        'shop_name': 'Fixture plan',
-        'status': 0,
-        'buy_time': '2026-01-01 00:00:00',
-      }),
-    ],
-  );
+  StoreState build() {
+    final base = super.build();
+    return base.copyWith(
+      plans: [
+        ...base.plans,
+        StorePlan.fromJson({
+          'id': 2,
+          'name': 'Cheaper plan',
+          'price': 5,
+          'inventory': -1,
+        }),
+      ],
+      bought: [
+        BoughtRecord.fromJson({
+          'id': 7,
+          'shop_id': 1,
+          'shop_name': 'Fixture plan',
+          'status': 0,
+          'buy_time': '2026-01-01 00:00:00',
+          'upgrade_shop_ids': [2],
+        }),
+      ],
+    );
+  }
 }
 
 class _Store extends StoreNotifier {

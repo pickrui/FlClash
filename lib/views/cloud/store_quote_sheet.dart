@@ -50,7 +50,9 @@ StoreQuote storeShopQuote(ShopQuote quote) {
     sufficientBalance: quote.hasSufficientBalance,
     recurring: quote.isRecurring,
     rows: [
-      StoreQuoteRow(appLocalizations.amountPayable, quote.price),
+      quote.price < 0
+          ? StoreQuoteRow(appLocalizations.refundAmountLabel, -quote.price)
+          : StoreQuoteRow(appLocalizations.amountPayable, quote.price),
       ..._renewalRows(quote.renewalAvailable, quote.renewalPrice),
     ],
   );

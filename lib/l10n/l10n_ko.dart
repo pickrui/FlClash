@@ -2083,6 +2083,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get selectUpgradeTarget => '업그레이드 대상 선택';
 
   @override
+  String get changePlan => '요금제 변경';
+
+  @override
+  String get noChangeablePlans => '변경 가능한 요금제가 없습니다';
+
+  @override
+  String get selectChangeTarget => '변경할 요금제 선택';
+
+  @override
   String get refreshAfterPayment => '결제 후 아래로 당겨 새로 고침하고 결과를 확인하세요';
 
   @override

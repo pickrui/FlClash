@@ -3978,6 +3978,24 @@ abstract class AppLocalizations {
   /// **'Select upgrade target'**
   String get selectUpgradeTarget;
 
+  /// No description provided for @changePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Change plan'**
+  String get changePlan;
+
+  /// No description provided for @noChangeablePlans.
+  ///
+  /// In en, this message translates to:
+  /// **'No plans to change to'**
+  String get noChangeablePlans;
+
+  /// No description provided for @selectChangeTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a plan to change to'**
+  String get selectChangeTarget;
+
   /// No description provided for @refreshAfterPayment.
   ///
   /// In en, this message translates to:

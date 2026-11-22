@@ -2038,6 +2038,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get selectUpgradeTarget => '选择升级目标套餐';
 
   @override
+  String get changePlan => '更换套餐';
+
+  @override
+  String get noChangeablePlans => '暂无可更换的套餐';
+
+  @override
+  String get selectChangeTarget => '选择要更换的套餐';
+
+  @override
   String get refreshAfterPayment => '支付完成后请下拉刷新查看结果';
 
   @override

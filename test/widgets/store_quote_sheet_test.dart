@@ -188,6 +188,15 @@ void main() {
     expect(_action(tester, 'Recharge'), isNotNull);
   });
 
+  test('a change to a cheaper plan quotes a refund, not a negative charge', () {
+    final quote = storeShopQuote(
+      ShopQuote.fromJson({'price': -30, 'renewal_available': false}),
+    );
+    expect(quote.authorizedPrice, -30);
+    expect(quote.rows.single.label, 'Refund');
+    expect(quote.rows.single.amount, 30);
+  });
+
   testWidgets('without a recharge the short quote only blocks confirm', (
     tester,
   ) async {

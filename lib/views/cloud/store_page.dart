@@ -308,8 +308,8 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
       if (storeUpgradeTargets(bought, state.plans).isNotEmpty)
         TonalButton(
           size: TonalButtonSize.compact,
-          glyph: AppGlyphs.arrowUp,
-          label: appLocalizations.upgradePlan,
+          glyph: bought.isPending ? AppGlyphs.swap : AppGlyphs.arrowUp,
+          label: _upgradeLabel(bought),
           onPressed: guarded(() => _upgradeFlow(bought)),
         ),
       if (bought.canBindCoupon)
@@ -440,14 +440,26 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     await _finishAction(res);
   }
 
+  /// The panel lets a plan never used switch to any tier, cheaper ones included;
+  /// a plan in use can only move up.
+  String _upgradeLabel(BoughtRecord bought) => bought.isPending
+      ? appLocalizations.changePlan
+      : appLocalizations.upgradePlan;
+
   Future<void> _upgradeFlow(BoughtRecord bought) async {
     final targets = storeUpgradeTargets(bought, ref.read(storeProvider).plans);
     if (targets.isEmpty) {
-      globalState.showNotifier(appLocalizations.noUpgradablePlans);
+      globalState.showNotifier(
+        bought.isPending
+            ? appLocalizations.noChangeablePlans
+            : appLocalizations.noUpgradablePlans,
+      );
       return;
     }
     final target = await _showPlanPicker(
-      appLocalizations.selectUpgradeTarget,
+      bought.isPending
+          ? appLocalizations.selectChangeTarget
+          : appLocalizations.selectUpgradeTarget,
       targets,
     );
     if (target == null || !mounted || !_sameSession) return;
@@ -455,7 +467,7 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     final choice = await showSheet<StoreQuoteChoice>(
       context: context,
       builder: (_) => StoreQuoteSheet(
-        title: appLocalizations.upgradePlan,
+        title: _upgradeLabel(bought),
         onRecharge: _rechargeForQuote,
         loadQuote: (coupon) async => storeShopQuote(
           await _sessionApi.previewUpgrade(
