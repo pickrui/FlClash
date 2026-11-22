@@ -8,9 +8,9 @@ import 'dart:async';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
-import 'package:fl_clash/views/cloud/store_quote_dialog.dart';
+import 'package:fl_clash/views/cloud/store_quote_sheet.dart';
 import 'package:material_ui/material_ui.dart'
-    hide AlertDialog, Scaffold, TextButton;
+    hide AlertDialog, FilledButton, Scaffold, TextButton;
 import 'package:material_ui/material_ui.dart'
     as material
     show AlertDialog, Scaffold;
@@ -78,9 +78,9 @@ Future<List<StoreQuoteChoice?>> _open(
         builder: (context) => material.Scaffold(
           body: TextButton(
             onPressed: () async => results.add(
-              await showDialog<StoreQuoteChoice>(
+              await showSheet<StoreQuoteChoice>(
                 context: context,
-                builder: (_) => StoreQuoteDialog(
+                builder: (_) => StoreQuoteSheet(
                   title: 'Upgrade',
                   loadQuote: panel.quote,
                   onRecharge: offerRecharge ? panel.recharge : null,
@@ -98,8 +98,9 @@ Future<List<StoreQuoteChoice?>> _open(
   return results;
 }
 
-VoidCallback? _action(WidgetTester tester, String label) =>
-    tester.widget<TextButton>(find.widgetWithText(TextButton, label)).onPressed;
+VoidCallback? _action(WidgetTester tester, String label) => tester
+    .widget<FilledButton>(find.widgetWithText(FilledButton, label))
+    .onPressed;
 
 void main() {
   for (final error in [
@@ -112,9 +113,9 @@ void main() {
       final panel = _Panel();
       final results = await _open(tester, panel);
       final pending = panel.pendingQuote = Completer<StoreQuote>();
-      await tester.tap(find.widgetWithText(TextButton, 'Verify'));
+      await tester.tap(find.text('Verify'));
       await tester.pump();
-      final context = tester.element(find.byType(StoreQuoteDialog));
+      final context = tester.element(find.byType(StoreQuoteSheet));
       final navigator = Navigator.of(context);
       unawaited(
         showDialog<void>(
@@ -132,7 +133,7 @@ void main() {
       expect(results, [null]);
       navigator.pop();
       await tester.pumpAndSettle();
-      expect(find.byType(StoreQuoteDialog), findsNothing);
+      expect(find.byType(StoreQuoteSheet), findsNothing);
       expect(tester.takeException(), isNull);
     });
   }
@@ -160,15 +161,15 @@ void main() {
       find.text('Insufficient balance. Top up before continuing.'),
       findsOneWidget,
     );
-    expect(find.widgetWithText(TextButton, 'Confirm'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Confirm'), findsNothing);
 
-    await tester.tap(find.widgetWithText(TextButton, 'Recharge'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Recharge'));
     await tester.pumpAndSettle();
     expect(panel.recharges, 1);
     expect(panel.quotes, 2);
-    expect(find.widgetWithText(TextButton, 'Recharge'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Recharge'), findsNothing);
 
-    await tester.tap(find.widgetWithText(TextButton, 'Confirm'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Confirm'));
     await tester.pumpAndSettle();
     expect(results.single?.authorizedPrice, 30);
     expect(tester.takeException(), isNull);
@@ -180,7 +181,7 @@ void main() {
     final panel = _Panel()..rechargeSucceeds = false;
     await _open(tester, panel);
 
-    await tester.tap(find.widgetWithText(TextButton, 'Recharge'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Recharge'));
     await tester.pumpAndSettle();
     expect(panel.recharges, 1);
     expect(panel.quotes, 1);
@@ -192,7 +193,7 @@ void main() {
   ) async {
     await _open(tester, _Panel(), offerRecharge: false);
 
-    expect(find.widgetWithText(TextButton, 'Recharge'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Recharge'), findsNothing);
     expect(_action(tester, 'Confirm'), isNull);
   });
 }

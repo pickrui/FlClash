@@ -18,7 +18,7 @@ import 'package:fl_clash/widgets/primary_button.dart';
 
 import 'cloud_layout.dart';
 import 'store_payment_dialog.dart';
-import 'store_quote_dialog.dart';
+import 'store_quote_sheet.dart';
 import 'store_sheets.dart';
 import 'store_widgets.dart';
 
@@ -419,8 +419,9 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
   }
 
   Future<void> _bindCouponFlow(BoughtRecord bought) async {
-    final choice = await globalState.showCommonDialog<StoreQuoteChoice>(
-      child: StoreQuoteDialog(
+    final choice = await showSheet<StoreQuoteChoice>(
+      context: context,
+      builder: (_) => StoreQuoteSheet(
         title: appLocalizations.bindCoupon,
         couponRequired: true,
         hint: appLocalizations.bindCouponIntro,
@@ -451,8 +452,9 @@ class _CloudStorePageState extends ConsumerState<CloudStorePage> {
     );
     if (target == null || !mounted || !_sameSession) return;
 
-    final choice = await globalState.showCommonDialog<StoreQuoteChoice>(
-      child: StoreQuoteDialog(
+    final choice = await showSheet<StoreQuoteChoice>(
+      context: context,
+      builder: (_) => StoreQuoteSheet(
         title: appLocalizations.upgradePlan,
         onRecharge: _rechargeForQuote,
         loadQuote: (coupon) async => storeShopQuote(

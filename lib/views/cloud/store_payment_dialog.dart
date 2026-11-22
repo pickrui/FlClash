@@ -123,6 +123,12 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
         .of(context)
         .toTabular
         .copyWith(color: colorScheme.onSurface);
+    final open = isUrl && init.url != null
+        ? TextButton(
+            onPressed: () => globalState.openUrl(init.url!),
+            child: Text(appLocalizations.openInBrowser),
+          )
+        : null;
     return AlertDialog(
       title: appLocalizations.scanOrTransferPay,
       actions: [
@@ -130,11 +136,7 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
           onPressed: () => _close(false),
           child: Text(appLocalizations.close),
         ),
-        if (isUrl && init.url != null)
-          TextButton(
-            onPressed: () => globalState.openUrl(init.url!),
-            child: Text(appLocalizations.openInBrowser),
-          ),
+        if (open != null && init.renderQrcode) open,
         if (hasPaymentId)
           TextButton(
             onPressed: _checking ? null : () => _check(manual: true),
@@ -144,6 +146,7 @@ class _StorePaymentDialogState extends ConsumerState<StorePaymentDialog> {
                   : appLocalizations.iHavePaid,
             ),
           ),
+        if (open != null && !init.renderQrcode) open,
       ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
