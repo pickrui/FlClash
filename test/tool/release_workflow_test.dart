@@ -99,6 +99,15 @@ void main() {
     expect(steps[records]['with']['if-no-files-found'], 'error');
     expect(steps[records]['with']['overwrite'], isTrue);
     expect(steps[packages]['with']['path'], './dist');
+    final seal = steps.indexWhere(
+      (step) => '${step['run']}'.contains('tool/debug_symbols.dart seal'),
+    );
+    final symbols = steps.indexWhere(
+      (step) => '${step['with']?['name']}'.startsWith('debug-symbols-'),
+    );
+    expect(seal, greaterThan(0));
+    expect(symbols, greaterThan(seal));
+    expect(steps[symbols]['with']['path'], 'build/debug-symbols-sealed');
     final download = (jobs['upload']['steps'] as YamlList)
         .cast<YamlMap>()
         .singleWhere(
