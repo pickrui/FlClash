@@ -10,6 +10,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/javascript.dart';
+import 'package:fl_clash/core/controller.dart' show ConfigValidationException;
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/manager/status_manager.dart';
 import 'package:fl_clash/pages/editor.dart';
@@ -19,6 +20,8 @@ import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/providers/clash_providers.dart';
 import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/database.dart';
+import 'package:fl_clash/services/cloud_api_service.dart'
+    show CloudApiUnauthorizedHandledException;
 import 'package:fl_clash/views/profiles/custom_profile.dart';
 import 'package:fl_clash/views/profiles/overwrite.dart';
 import 'package:fl_clash/views/profiles/profiles.dart';
@@ -370,7 +373,9 @@ void main() {
       findsNothing,
     );
     action.pending[2]!.complete(_second);
-    action.pending[3]!.completeError(StateError('fixture-managed-private'));
+    action.pending[3]!.completeError(
+      const ConfigValidationException('fixture-managed-private'),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text(currentAppLocalizations.failedCount(2)));
     await tester.pumpAndSettle();
@@ -380,7 +385,10 @@ void main() {
     );
     expect(find.textContaining('fixture-private'), findsNothing);
     expect(find.textContaining('DioException'), findsNothing);
-    expect(find.text('StateError'), findsOneWidget);
+    expect(
+      find.text(currentAppLocalizations.profileParseErrorDesc),
+      findsOneWidget,
+    );
     expect(find.textContaining('fixture-managed-private'), findsNothing);
     await tester.pageBack();
     await tester.pumpAndSettle();
@@ -389,12 +397,15 @@ void main() {
     expect(action.calls, [1, 2, 3, 1, 2, 3]);
     action.pending[1]!.complete(_first);
     action.pending[2]!.complete(_second);
-    action.pending[3]!.complete(managed);
+    action.pending[3]!.completeError(
+      const CloudApiUnauthorizedHandledException(),
+    );
     await tester.pumpAndSettle();
     expect(
       find.text(currentAppLocalizations.networkTimeoutError),
       findsNothing,
     );
+    expect(find.textContaining('CloudApiUnauthorized'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

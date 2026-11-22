@@ -17,6 +17,8 @@ import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/pages/editor.dart';
 import 'package:fl_clash/providers/database.dart';
 import 'package:fl_clash/providers/providers.dart';
+import 'package:fl_clash/services/cloud_api_service.dart'
+    show CloudApiException;
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/updating_failures.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -78,11 +80,12 @@ class _ProfilesViewState extends State<ProfilesView> {
           try {
             await profileAction.updateProfile(profile, showLoading: true);
           } catch (error) {
+            if (CloudApiException.isHandledUnauthorized(error)) return;
             messages.add(
               UpdatingMessage(
                 label: profile.realLabel,
                 message: profile.isoixCloudProfile
-                    ? errorLabel(error)
+                    ? managedErrorMessage(error, localizations)
                     : userFacingErrorMessage(error, localizations),
               ),
             );

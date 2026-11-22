@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/http_read_race.dart';
 import 'package:fl_clash/providers/action.dart';
 import 'package:fl_clash/services/cloud_api_service.dart';
 import 'package:flutter/foundation.dart';
@@ -79,6 +80,17 @@ void main() {
         ),
       ),
       'DioException(connectionTimeout)',
+    );
+    expect(
+      errorLabel(
+        HttpReadHeldRefusal(
+          DioException(
+            requestOptions: RequestOptions(path: 'https://private.example'),
+            type: DioExceptionType.receiveTimeout,
+          ),
+        ),
+      ),
+      'DioException(receiveTimeout)',
     );
   });
 
