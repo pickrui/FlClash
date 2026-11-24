@@ -337,7 +337,7 @@ jobs:
           cp -R "$wrapper/." .
           chmod +x gradlew
           # No JVM unit test loads the Core, but :core compiles against the gomobile classes, so one ABI is bound.
-          ./gradlew :app:testDebugUnitTest :service:testDebugUnitTest :common:testDebugUnitTest \
+          ./gradlew --init-script gradle/ci-central.init.gradle :app:testDebugUnitTest :service:testDebugUnitTest :common:testDebugUnitTest \
             -Ptarget-platform=android-arm64 \
             -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug --no-daemon
 

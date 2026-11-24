@@ -1,0 +1,24 @@
+// The plugin portal redirects Maven Central dependencies to a rate-limited host on CI.
+def centralMirror = URI.create('https://maven-central.storage-download.googleapis.com/maven2/')
+
+def mirrorCentral = { repository ->
+    if (repository instanceof MavenArtifactRepository &&
+            repository.url?.host in ['repo.maven.apache.org', 'repo1.maven.org']) {
+        repository.url = centralMirror
+    }
+}
+
+gradle.beforeSettings { settings ->
+    settings.pluginManagement.repositories {
+        google()
+        maven { url = centralMirror }
+        gradlePluginPortal()
+    }
+    settings.pluginManagement.repositories.configureEach(mirrorCentral)
+    settings.dependencyResolutionManagement.repositories.configureEach(mirrorCentral)
+}
+
+gradle.beforeProject { project ->
+    project.buildscript.repositories.configureEach(mirrorCentral)
+    project.repositories.configureEach(mirrorCentral)
+}
