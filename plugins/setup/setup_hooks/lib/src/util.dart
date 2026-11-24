@@ -122,11 +122,13 @@ Future<int> runCommandCaptureToFile(
   String executable,
   List<String> arguments, {
   required String outputPath,
+  String? stderrPath,
   String? workingDirectory,
   Map<String, String>? environment,
 }) async {
   final output = File(outputPath)..createSync(recursive: true);
   final sink = output.openWrite();
+  final errors = stderrPath == null ? sink : File(stderrPath).openWrite();
   try {
     final process = await Process.start(
       executable,
@@ -138,11 +140,11 @@ Future<int> runCommandCaptureToFile(
     );
     await Future.wait([
       process.stdout.listen(sink.add).asFuture<void>(),
-      process.stderr.listen(sink.add).asFuture<void>(),
+      process.stderr.listen(errors.add).asFuture<void>(),
     ]);
     return await process.exitCode;
   } finally {
-    await sink.close();
+    await Future.wait([sink.close(), if (stderrPath != null) errors.close()]);
   }
 }
 

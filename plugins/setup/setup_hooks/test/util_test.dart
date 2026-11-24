@@ -35,6 +35,38 @@ void main() {
     });
   });
 
+  test(
+    'keeps tool diagnostics separate from a machine-readable result',
+    () async {
+      final directory = Directory.systemTemp.createTempSync(
+        'setup_hooks_output_',
+      );
+      addTearDown(() => directory.deleteSync(recursive: true));
+      final script = File('${directory.path}/result.dart')
+        ..writeAsStringSync(
+          "import 'dart:io';\n"
+          '''void main(List<String> args) {
+          stdout.writeln('{"ok":true}');
+          stderr.writeln('dependency manager notice');
+          exitCode = int.parse(args.single);
+        }''',
+        );
+      final output = File('${directory.path}/result.log');
+      final errors = File('${directory.path}/result.log.stderr');
+      for (final status in [0, 2]) {
+        final code = await runCommandCaptureToFile(
+          Platform.resolvedExecutable,
+          [script.path, status.toString()],
+          outputPath: output.path,
+          stderrPath: errors.path,
+        );
+        expect(code, status);
+        expect(output.readAsStringSync().trim(), '{"ok":true}');
+        expect(errors.readAsStringSync().trim(), 'dependency manager notice');
+      }
+    },
+  );
+
   group('runCommandStream', () {
     test('reports a failure whose output is not UTF-8', () async {
       final directory = Directory.systemTemp.createTempSync(
