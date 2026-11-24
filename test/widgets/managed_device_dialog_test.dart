@@ -43,13 +43,15 @@ class _Device extends ManagedDeviceNotifier {
   var asks = 0;
   DeviceCodeMethod? method;
   final codes = <String?>[];
+  var approvedElsewhere = false;
 
   @override
-  Future<void> submitDeviceCode(
+  Future<bool> submitDeviceCode(
     ManagedDeviceEnrollment pending, {
     String? code,
   }) async {
     codes.add(code);
+    return approvedElsewhere || code != null;
   }
 
   @override
@@ -180,6 +182,22 @@ void main() {
     expect(device.asks, 3);
     expect(results, [true]);
     expect(find.text('FFFFF-00000'), findsNothing);
+  });
+
+  testWidgets('sending an email closes once when already approved', (
+    tester,
+  ) async {
+    final device = _Device()
+      ..method = DeviceCodeMethod.email
+      ..approvedElsewhere = true;
+    final results = await _open(tester, device);
+    await tester.tap(find.text(appLocalizations.sendCode));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 5));
+    expect(device.codes, [null]);
+    expect(find.text(appLocalizations.codeSent), findsNothing);
+    expect(results, [true]);
+    expect(device.asks, 1);
   });
 
   for (final method in DeviceCodeMethod.values) {

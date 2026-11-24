@@ -406,17 +406,17 @@ class _DeviceCodeFormState extends ConsumerState<_DeviceCodeForm> {
       _feedback = null;
     });
     try {
-      await ref
+      final approved = await ref
           .read(managedDeviceProvider.notifier)
           .submitDeviceCode(widget.pending, code: sendEmail ? null : code);
       if (!mounted) return;
-      if (sendEmail) {
+      if (approved) {
+        widget.onVerified();
+      } else {
         setState(() {
           _feedback = appLocalizations.codeSent;
           _failed = false;
         });
-      } else {
-        widget.onVerified();
       }
     } catch (error) {
       if (!mounted ||
