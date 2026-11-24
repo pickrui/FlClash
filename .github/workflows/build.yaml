@@ -305,6 +305,33 @@ jobs:
           key: ${{ runner.os }}-gradle-v2-${{ hashFiles('android/**/*.gradle*', 'android/gradle/libs.versions.toml', 'android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-v2-
+      - name: Cache Robolectric SDKs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.m2/repository/org/robolectric/android-all-instrumented
+          key: robolectric-sdks-${{ hashFiles('android/gradle/robolectric-sdks.sha512') }}
+      - name: Prepare verified Robolectric SDKs
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=org/robolectric/android-all-instrumented
+          lock="$GITHUB_WORKSPACE/android/gradle/robolectric-sdks.sha512"
+          mkdir -p "$HOME/.m2/repository/$base"
+          cd "$HOME/.m2/repository/$base"
+          while read -r sha jar; do
+            if [[ -f "$jar" ]] && echo "$sha  $jar" | sha512sum --check --status; then continue; fi
+            mkdir -p "$(dirname "$jar")"
+            for host in maven-central.storage-download.googleapis.com repo.maven.apache.org; do
+              if curl -fsSL --connect-timeout 10 --max-time 150 \
+                "https://$host/maven2/$base/$jar" -o "$jar.part" &&
+                echo "$sha  $jar.part" | sha512sum --check --status; then
+                mv "$jar.part" "$jar"
+                continue 2
+              fi
+            done
+            echo "::error::Could not download a verified $jar" >&2
+            exit 1
+          done < "$lock"
       - name: Run Android unit tests
         working-directory: android
         run: |
