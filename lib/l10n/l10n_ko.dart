@@ -13,6 +13,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get approveDevice => '이 기기 승인';
 
   @override
+  String get deviceEmailCode => '계정 이메일로 받은 8자리 코드';
+
+  @override
+  String get deviceAuthenticatorCode => '인증 앱의 6자리 코드';
+
+  @override
+  String get deviceOtherMethods => '다른 승인 방법';
+
+  @override
   String get deviceApproved => '기기가 승인되었습니다';
 
   @override

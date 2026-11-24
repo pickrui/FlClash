@@ -13,6 +13,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get approveDevice => 'Autoriser cet appareil';
 
   @override
+  String get deviceEmailCode =>
+      'Code à 8 chiffres reçu sur l’adresse e-mail du compte';
+
+  @override
+  String get deviceAuthenticatorCode =>
+      'Code à 6 chiffres de l’application d’authentification';
+
+  @override
+  String get deviceOtherMethods => 'Autres méthodes d’approbation';
+
+  @override
   String get deviceApproved => 'Appareil autorisé';
 
   @override

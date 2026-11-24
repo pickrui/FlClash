@@ -1,5 +1,8 @@
 {
   "approveDevice": "この端末を承認",
+  "deviceEmailCode": "登録メールアドレスに届く8桁のコード",
+  "deviceAuthenticatorCode": "認証アプリの6桁のコード",
+  "deviceOtherMethods": "その他の承認方法",
   "deviceApproved": "端末を承認しました",
   "deviceApprovalSteps": "アカウントにログインしたブラウザでリンクを開いて確認コードを照合するか、連携済みの Telegram ボットに個別チャットでコマンドを送信してください。指紋が一致する場合のみ承認してください",
   "deviceApprovalRequired": "ノードを取得するには、この端末を承認してください",

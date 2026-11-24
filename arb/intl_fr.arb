@@ -1,5 +1,8 @@
 {
   "approveDevice": "Autoriser cet appareil",
+  "deviceEmailCode": "Code à 8 chiffres reçu sur l’adresse e-mail du compte",
+  "deviceAuthenticatorCode": "Code à 6 chiffres de l’application d’authentification",
+  "deviceOtherMethods": "Autres méthodes d’approbation",
   "deviceApproved": "Appareil autorisé",
   "deviceApprovalSteps": "Ouvrez le lien dans un navigateur connecté à votre compte et vérifiez le code, ou envoyez la commande en privé à votre bot Telegram associé. N’autorisez que si l’empreinte correspond.",
   "deviceApprovalRequired": "Autorisez cet appareil pour obtenir les nœuds",

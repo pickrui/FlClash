@@ -1,5 +1,8 @@
 {
   "approveDevice": "批准这台设备",
+  "deviceEmailCode": "注册邮箱收到的 8 位验证码",
+  "deviceAuthenticatorCode": "身份验证器中的 6 位动态码",
+  "deviceOtherMethods": "其他批准方式",
   "deviceApproved": "设备已批准",
   "deviceApprovalSteps": "在已登录账户的浏览器中打开链接并核对确认码，或私聊已绑定的 Telegram Bot 发送命令。设备指纹一致才批准",
   "deviceApprovalRequired": "批准这台设备后才能获取节点",

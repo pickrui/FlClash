@@ -114,6 +114,24 @@ abstract class AppLocalizations {
   /// **'Approve this device'**
   String get approveDevice;
 
+  /// No description provided for @deviceEmailCode.
+  ///
+  /// In en, this message translates to:
+  /// **'8-digit code from your account email'**
+  String get deviceEmailCode;
+
+  /// No description provided for @deviceAuthenticatorCode.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code from your authenticator app'**
+  String get deviceAuthenticatorCode;
+
+  /// No description provided for @deviceOtherMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Other approval methods'**
+  String get deviceOtherMethods;
+
   /// No description provided for @deviceApproved.
   ///
   /// In en, this message translates to:

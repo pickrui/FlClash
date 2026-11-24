@@ -13,6 +13,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get approveDevice => 'この端末を承認';
 
   @override
+  String get deviceEmailCode => '登録メールアドレスに届く8桁のコード';
+
+  @override
+  String get deviceAuthenticatorCode => '認証アプリの6桁のコード';
+
+  @override
+  String get deviceOtherMethods => 'その他の承認方法';
+
+  @override
   String get deviceApproved => '端末を承認しました';
 
   @override

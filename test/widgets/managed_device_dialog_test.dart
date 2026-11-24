@@ -21,13 +21,17 @@ import '../helpers/test_app.dart';
 
 const _link = 'https://panel.test/user/managed-device?code=A1B2C-3D4E5';
 
-ManagedDeviceEnrollment _pending({String code = 'A1B2C-3D4E5'}) =>
-    ManagedDeviceEnrollment(
-      session: 0,
-      fingerprint: '0123456789abcdef' * 4,
-      code: code,
-      verificationUrl: _link,
-    );
+ManagedDeviceEnrollment _pending({
+  String code = 'A1B2C-3D4E5',
+  DeviceCodeMethod? method,
+}) => ManagedDeviceEnrollment(
+  session: 0,
+  fingerprint: '0123456789abcdef' * 4,
+  code: code,
+  requestId: 'c' * 32,
+  codeMethod: method,
+  verificationUrl: _link,
+);
 
 class _SignedIn extends CloudAccountNotifier {
   @override
@@ -37,15 +41,27 @@ class _SignedIn extends CloudAccountNotifier {
 class _Device extends ManagedDeviceNotifier {
   final answers = <Object>[];
   var asks = 0;
+  DeviceCodeMethod? method;
+  final codes = <String?>[];
+
+  @override
+  Future<void> submitDeviceCode(
+    ManagedDeviceEnrollment pending, {
+    String? code,
+  }) async {
+    codes.add(code);
+  }
 
   @override
   ManagedDeviceState build() =>
-      ManagedDeviceState(approved: false, pending: _pending());
+      ManagedDeviceState(approved: false, pending: _pending(method: method));
 
   @override
   Future<ManagedDeviceEnrollment> enroll({String? ticket}) async {
     asks++;
-    final answer = answers.isEmpty ? _pending() : answers.removeAt(0);
+    final answer = answers.isEmpty
+        ? _pending(method: method)
+        : answers.removeAt(0);
     if (answer is! ManagedDeviceEnrollment) throw answer;
     state = ManagedDeviceState(
       approved: answer.approved,
@@ -165,6 +181,30 @@ void main() {
     expect(results, [true]);
     expect(find.text('FFFFF-00000'), findsNothing);
   });
+
+  for (final method in DeviceCodeMethod.values) {
+    testWidgets('approves within the app with ${method.name}', (tester) async {
+      final device = _Device()..method = method;
+      final results = await _open(tester, device);
+      final send = find.text(appLocalizations.sendCode);
+      if (method == DeviceCodeMethod.email) {
+        await tester.tap(send);
+        await tester.pump();
+        expect(device.codes, [null]);
+        expect(find.text(appLocalizations.codeSent), findsOneWidget);
+      } else {
+        expect(send, findsNothing);
+      }
+      expect(find.text(appLocalizations.openInBrowser), findsNothing);
+      final code = method == DeviceCodeMethod.email ? '00123456' : '001234';
+      await tester.enterText(find.byType(EditableText), code);
+      await tester.pump();
+      await tester.tap(find.text(appLocalizations.confirm));
+      await tester.pumpAndSettle();
+      expect(device.codes.last, code);
+      expect(results, [true]);
+    });
+  }
 
   testWidgets('a refusal stops asking until refreshed', (tester) async {
     final device = _Device()

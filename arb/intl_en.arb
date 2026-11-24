@@ -1,5 +1,8 @@
 {
   "approveDevice": "Approve this device",
+  "deviceEmailCode": "8-digit code from your account email",
+  "deviceAuthenticatorCode": "6-digit code from your authenticator app",
+  "deviceOtherMethods": "Other approval methods",
   "deviceApproved": "Device approved",
   "deviceApprovalSteps": "Open the link in a browser signed in to your account and check the code, or send the command to your linked Telegram bot in a private chat. Approve only if the fingerprint matches.",
   "deviceApprovalRequired": "Approve this device to get nodes",

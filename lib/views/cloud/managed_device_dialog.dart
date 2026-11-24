@@ -46,8 +46,7 @@ Future<bool?> showManagedDeviceApproval(BuildContext context) {
   );
 }
 
-/// The code, link and command that approve this device elsewhere. It asks the
-/// panel every few seconds and closes itself once the device is approved.
+/// Shows the available approval methods and checks for approval on another device.
 class ManagedDeviceApprovalDialog extends ConsumerStatefulWidget {
   const ManagedDeviceApprovalDialog({super.key});
 
@@ -67,6 +66,7 @@ class _ManagedDeviceApprovalDialogState
   var _checking = false;
   var _stopped = false;
   var _closed = false;
+  var _showOtherMethods = false;
   String? _error;
 
   @override
@@ -239,6 +239,8 @@ class _ManagedDeviceApprovalDialogState
       managedDeviceProvider.select((s) => s.pending),
     );
     final code = enrollment?.code;
+    final inApp =
+        enrollment?.codeMethod != null && enrollment?.requestId != null;
     final url = code == null
         ? null
         : managedDeviceApprovalUrl(
@@ -251,6 +253,7 @@ class _ManagedDeviceApprovalDialogState
     final level = context.raisedSurfaceLevel;
     return AlertDialog(
       title: appLocalizations.approveDevice,
+      hasFields: inApp,
       actions: [
         TextButton(
           onPressed: () => _close(false),
@@ -266,83 +269,230 @@ class _ManagedDeviceApprovalDialogState
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 16,
         children: [
-          Text(
-            appLocalizations.deviceApprovalSteps,
-            style: AppTextStyle.subheadline
-                .of(context)
-                .copyWith(color: colorScheme.onSurfaceVariant),
-          ),
-          if (enrollment != null && code != null) ...[
-            if (url != null) ...[
-              // A television or a computer hands the link to a phone.
-              if ((system.isTV || system.isDesktop) && QrCodeView.fits(url))
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: const ShapeDecoration(
-                      color: Colors.white,
-                      shape: AppShape.lg,
+          if (inApp && enrollment != null) ...[
+            _DeviceCodeForm(
+              key: ValueKey((
+                enrollment.session,
+                enrollment.requestId,
+                enrollment.codeMethod,
+                enrollment.code,
+              )),
+              pending: enrollment,
+              onVerified: () => _close(true),
+            ),
+            TextButton(
+              onPressed: () =>
+                  setState(() => _showOtherMethods = !_showOtherMethods),
+              child: Text(appLocalizations.deviceOtherMethods),
+            ),
+          ],
+          if (!inApp || _showOtherMethods) ...[
+            Text(
+              appLocalizations.deviceApprovalSteps,
+              style: AppTextStyle.subheadline
+                  .of(context)
+                  .copyWith(color: colorScheme.onSurfaceVariant),
+            ),
+            if (enrollment != null && code != null) ...[
+              if (url != null) ...[
+                // A television or a computer hands the link to a phone.
+                if ((system.isTV || system.isDesktop) && QrCodeView.fits(url))
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: const ShapeDecoration(
+                        color: Colors.white,
+                        shape: AppShape.lg,
+                      ),
+                      child: QrCodeView(data: url, size: 160),
                     ),
-                    child: QrCodeView(data: url, size: 160),
                   ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 8,
+                  children: [
+                    SelectableText(
+                      url,
+                      style: AppTextStyle.footnote
+                          .of(context)
+                          .copyWith(color: colorScheme.onSurfaceVariant),
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        SurfaceScope(
+                          level: level,
+                          child: TonalButton(
+                            glyph: AppGlyphs.openExternal,
+                            label: appLocalizations.openInBrowser,
+                            onPressed: () =>
+                                globalState.openUrl(url, confirm: false),
+                          ),
+                        ),
+                        SurfaceScope(
+                          level: level,
+                          child: TonalButton(
+                            glyph: AppGlyphs.copy,
+                            label: appLocalizations.copyLink,
+                            onPressed: () => _copy(url),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 8,
-                children: [
-                  SelectableText(
-                    url,
-                    style: AppTextStyle.footnote
-                        .of(context)
-                        .copyWith(color: colorScheme.onSurfaceVariant),
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      SurfaceScope(
-                        level: level,
-                        child: TonalButton(
-                          glyph: AppGlyphs.openExternal,
-                          label: appLocalizations.openInBrowser,
-                          onPressed: () =>
-                              globalState.openUrl(url, confirm: false),
-                        ),
-                      ),
-                      SurfaceScope(
-                        level: level,
-                        child: TonalButton(
-                          glyph: AppGlyphs.copy,
-                          label: appLocalizations.copyLink,
-                          onPressed: () => _copy(url),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              ],
+              _field(
+                appLocalizations.deviceApprovalCode,
+                code,
+                style: AppTextStyle.title2
+                    .of(context, emphasized: true)
+                    .toTabular
+                    .copyWith(color: colorScheme.onSurface),
+              ),
+              _field(
+                appLocalizations.deviceApprovalCommand,
+                enrollment.telegramCommand,
+              ),
+              _field(
+                appLocalizations.deviceFingerprint,
+                enrollment.shortFingerprint,
+                copyable: false,
               ),
             ],
-            _field(
-              appLocalizations.deviceApprovalCode,
-              code,
-              style: AppTextStyle.title2
-                  .of(context, emphasized: true)
-                  .toTabular
-                  .copyWith(color: colorScheme.onSurface),
-            ),
-            _field(
-              appLocalizations.deviceApprovalCommand,
-              enrollment.telegramCommand,
-            ),
-            _field(
-              appLocalizations.deviceFingerprint,
-              enrollment.shortFingerprint,
-              copyable: false,
-            ),
           ],
           _status(),
         ],
       ),
+    );
+  }
+}
+
+class _DeviceCodeForm extends ConsumerStatefulWidget {
+  const _DeviceCodeForm({
+    super.key,
+    required this.pending,
+    required this.onVerified,
+  });
+
+  final ManagedDeviceEnrollment pending;
+  final VoidCallback onVerified;
+
+  @override
+  ConsumerState<_DeviceCodeForm> createState() => _DeviceCodeFormState();
+}
+
+class _DeviceCodeFormState extends ConsumerState<_DeviceCodeForm> {
+  final _controller = TextEditingController();
+  bool _busy = false;
+  String? _feedback;
+  bool _failed = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit({required bool sendEmail}) async {
+    final code = _controller.text;
+    if (_busy ||
+        (!sendEmail && code.length != widget.pending.codeMethod!.digits)) {
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _feedback = null;
+    });
+    try {
+      await ref
+          .read(managedDeviceProvider.notifier)
+          .submitDeviceCode(widget.pending, code: sendEmail ? null : code);
+      if (!mounted) return;
+      if (sendEmail) {
+        setState(() {
+          _feedback = appLocalizations.codeSent;
+          _failed = false;
+        });
+      } else {
+        widget.onVerified();
+      }
+    } catch (error) {
+      if (!mounted ||
+          CloudApiException.isHandledUnauthorized(error) ||
+          CloudApiException.isStaleSession(error)) {
+        return;
+      }
+      if (CloudApiException.isUnauthorized(error)) {
+        await ref.read(cloudAccountProvider.notifier).handleUnauthorized();
+        return;
+      }
+      setState(() {
+        _feedback = CloudApiException.clean(error);
+        _failed = true;
+      });
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final method = widget.pending.codeMethod!;
+    final label = method == DeviceCodeMethod.email
+        ? appLocalizations.deviceEmailCode
+        : appLocalizations.deviceAuthenticatorCode;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        Text(label),
+        TextField(
+          controller: _controller,
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.oneTimeCode],
+          autocorrect: false,
+          enableIMEPersonalizedLearning: false,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(method.digits),
+          ],
+          onChanged: (_) => setState(() {}),
+          onSubmitted: (_) => _submit(sendEmail: false),
+        ),
+        Wrap(
+          spacing: 8,
+          children: [
+            if (method == DeviceCodeMethod.email)
+              TextButton(
+                onPressed: _busy ? null : () => _submit(sendEmail: true),
+                child: Text(appLocalizations.sendCode),
+              ),
+            TextButton(
+              onPressed: _busy || _controller.text.length != method.digits
+                  ? null
+                  : () => _submit(sendEmail: false),
+              child: Text(appLocalizations.confirm),
+            ),
+          ],
+        ),
+        if (_feedback case final message?)
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              message,
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(
+                    color: _failed
+                        ? context.colorScheme.error
+                        : context.colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+      ],
     );
   }
 }

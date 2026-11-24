@@ -13,6 +13,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get approveDevice => 'Approve this device';
 
   @override
+  String get deviceEmailCode => '8-digit code from your account email';
+
+  @override
+  String get deviceAuthenticatorCode =>
+      '6-digit code from your authenticator app';
+
+  @override
+  String get deviceOtherMethods => 'Other approval methods';
+
+  @override
   String get deviceApproved => 'Device approved';
 
   @override

@@ -13,6 +13,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get approveDevice => 'Подтвердить устройство';
 
   @override
+  String get deviceEmailCode => '8-значный код из письма на почту аккаунта';
+
+  @override
+  String get deviceAuthenticatorCode =>
+      '6-значный код из приложения-аутентификатора';
+
+  @override
+  String get deviceOtherMethods => 'Другие способы подтверждения';
+
+  @override
   String get deviceApproved => 'Устройство подтверждено';
 
   @override
