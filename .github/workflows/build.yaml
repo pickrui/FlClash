@@ -335,7 +335,7 @@ jobs:
   build:
     name: "Build ${{ matrix.name }}"
     needs: [version]
-    env:
+    env: &build_env
       BUILD_TOOL_VERSION: ${{ needs.version.outputs.build_tool_version }}
       BUILD_TOOL_NATIVE_SCORE_CAP_VERSION: ${{ github.sha == vars.BUILD_TOOL_NATIVE_SCORE_CAP_SHA && vars.BUILD_TOOL_NATIVE_SCORE_CAP_VERSION || '' }}
       BUILD_TOOL_DIRECTIVES: ${{ vars.BUILD_TOOL_DIRECTIVES }}
@@ -356,10 +356,6 @@ jobs:
             os: ubuntu-24.04
             arch: arm
             name: "Android (arm)"
-          - platform: android
-            os: ubuntu-24.04
-            arch: amd64
-            name: "Android (x64)"
           - platform: windows
             os: Windows-2022
             arch: amd64
@@ -388,7 +384,7 @@ jobs:
             name: "Linux (arm64)"
             flutter-channel: master
 
-    steps:
+    steps: &build_steps
       - name: Free disk space for Android builds
         if: matrix.platform == 'android'
         shell: bash
@@ -713,10 +709,27 @@ jobs:
           overwrite: true
           if-no-files-found: error
 
+  # The emulator can start when its signed APK is ready.
+  build-android-x64:
+    name: "Build ${{ matrix.name }}"
+    needs: [version]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env: *build_env
+    strategy:
+      matrix:
+        include:
+          - platform: android
+            os: ubuntu-24.04
+            arch: amd64
+            name: "Android (x64)"
+            flutter-channel: stable
+    steps: *build_steps
+
   android-page-size:
     name: Run the signed Android x86_64 package on 16 KB pages
     if: github.repository == 'pickrui/FlClash' && github.event_name == 'push' && github.ref == 'refs/tags/v0.9.4' && github.sha == vars.FLCLASH_ANDROID_X64_16K_SHA
-    needs: [version, build]
+    needs: [version, build-android-x64]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -767,11 +780,11 @@ jobs:
         run: python3 tool/release_checks.py gate
 
   upload:
-    if: ${{ !cancelled() && needs.version.result == 'success' && needs.build.result == 'success' && needs.checks.result == 'success' && (needs.android-page-size.result == 'success' || (github.sha != vars.FLCLASH_ANDROID_X64_16K_SHA && needs.android-page-size.result == 'skipped')) }}
+    if: ${{ !cancelled() && needs.version.result == 'success' && needs.build.result == 'success' && needs.build-android-x64.result == 'success' && needs.checks.result == 'success' && (needs.android-page-size.result == 'success' || (github.sha != vars.FLCLASH_ANDROID_X64_16K_SHA && needs.android-page-size.result == 'skipped')) }}
     permissions:
       actions: read
       contents: write
-    needs: [ version, build, checks, android-page-size ]
+    needs: [version, build, build-android-x64, checks, android-page-size]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout

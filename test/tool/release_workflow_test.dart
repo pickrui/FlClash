@@ -116,7 +116,7 @@ void main() {
     expect(steps[records]['with']['overwrite'], isTrue);
     expect(steps[packages]['with']['path'], './dist');
     final runtimeJob = jobs['android-page-size'] as YamlMap;
-    expect(runtimeJob['needs'], contains('build'));
+    expect(runtimeJob['needs'], ['version', 'build-android-x64']);
     final runtime = (runtimeJob['steps'] as YamlList).cast<YamlMap>();
     final getPackage = runtime.indexWhere(
       (step) => step['with']?['name'] == 'artifact-android-amd64',
@@ -236,9 +236,10 @@ void main() {
 
   test('packaging overlaps checks while publication waits for every gate', () {
     expect(jobs['build']['needs'], ['version']);
+    expect(jobs['build-android-x64']['needs'], ['version']);
     expect(
       jobs['upload']['needs'],
-      containsAll(['version', 'build', 'checks']),
+      containsAll(['version', 'build', 'build-android-x64', 'checks']),
     );
     expect(
       jobs['checks']['needs'],
@@ -260,7 +261,7 @@ void main() {
   test('publication requires successful builds and checks', () {
     final upload = jobs['upload']['if'] as String;
     expect(upload, contains('!cancelled()'));
-    for (final need in ['version', 'build', 'checks']) {
+    for (final need in ['version', 'build', 'build-android-x64', 'checks']) {
       expect(upload, contains("needs.$need.result == 'success'"));
     }
     final aur = jobs['aur']['if'] as String;
@@ -273,7 +274,16 @@ void main() {
     'each standalone Android build verifies the Core digest before upload',
     () {
       final build = jobs['build'] as YamlMap;
-      final matrix = build['strategy']['matrix']['include'] as YamlList;
+      final x64 = jobs['build-android-x64'] as YamlMap;
+      final x64Targets = x64['strategy']['matrix']['include'] as YamlList;
+      expect(x64Targets.single['platform'], 'android');
+      expect(x64Targets.single['arch'], 'amd64');
+      expect(x64['steps'], equals(build['steps']));
+      expect(x64['env'], equals(build['env']));
+      final matrix = [
+        ...build['strategy']['matrix']['include'] as YamlList,
+        ...x64Targets,
+      ];
       expect(
         matrix
             .where((row) => row['platform'] == 'android')
