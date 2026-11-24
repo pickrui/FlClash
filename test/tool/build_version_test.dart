@@ -161,13 +161,15 @@ void main() {
       for (final (tag, version) in [
         ('v0.8.98-pre.2+1', '0.8.98'),
         ('v0.8.97-debug', null),
-        ('ci-windows', '0.8.97'),
+        ('ci-windows', null),
       ]) {
         final result = await run(tag);
         expect(result.exitCode == 0, version != null, reason: tag);
         if (version != null) {
           expect(output.readAsLinesSync().first, 'version_number=$version');
           output.deleteSync();
+        } else {
+          expect(output.existsSync(), isFalse, reason: tag);
         }
       }
       final result = await run('v0.8.97');
