@@ -25,7 +25,7 @@ env:
 jobs:
   android:
     name: Build and verify Android x64
-    if: github.actor == 'pickrui' && github.triggering_actor == 'pickrui' && github.repository == 'pickrui/FlClash' && github.ref == 'refs/heads/main' && github.sha == vars.FLCLASH_RECOVERY_WORKFLOW_SHA && inputs.operation == 'build'
+    if: github.actor == 'pickrui' && github.triggering_actor == 'pickrui' && github.repository == 'pickrui/FlClash' && github.ref == 'refs/heads/main' && github.sha == vars.FLCLASH_RECOVERY_WORKFLOW_SHA && github.sha == '7a174024a7c316c5b726f77b84d6c41af41f9b7d' && inputs.operation == 'build'
     permissions:
       contents: read
       actions: read
@@ -57,7 +57,7 @@ jobs:
         with:
           repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
           ssh-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
-          ref: 0f4f661499b2666a640c07d792ab1111412e438f
+          ref: ee95f8ad8a52460dd1d9371469ce6cce6e63c926
           path: .release-checks
           persist-credentials: false
           sparse-checkout: tool/release_android_16k
@@ -313,7 +313,7 @@ jobs:
         with:
           repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
           ssh-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
-          ref: 0f4f661499b2666a640c07d792ab1111412e438f
+          ref: ee95f8ad8a52460dd1d9371469ce6cce6e63c926
           path: .release-checks
           persist-credentials: false
           sparse-checkout: tool/release_android_16k
