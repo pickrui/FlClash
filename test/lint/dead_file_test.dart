@@ -50,14 +50,28 @@ void main() {
       for (final file in dartFiles(includeGenerated: true))
         _relative(file): file.readAsStringSync(),
     };
-    final sources = {
-      for (final file in dartFiles(includeGenerated: false))
-        _relative(file): consumers[_relative(file)]!,
-    };
+    final sources = Map.of(consumers)
+      ..removeWhere((path, _) => isGenerated(path));
     final barrels = {
       for (final MapEntry(key: path, value: source) in sources.entries)
         if (_isBarrel(source)) path,
     };
+
+    // A declaration occurs in its own file. A second non-barrel file using the
+    // same word is enough, including when that consumer is generated code.
+    final firstUse = <String, String>{};
+    final sharedNames = <String>{};
+    final words = RegExp(r'\w+');
+    for (final MapEntry(key: path, value: source) in consumers.entries) {
+      if (barrels.contains(path)) continue;
+      for (final word in words.allMatches(source)) {
+        final name = word[0]!;
+        if (sharedNames.contains(name)) continue;
+        if (firstUse.putIfAbsent(name, () => path) != path) {
+          sharedNames.add(name);
+        }
+      }
+    }
 
     final orphans = <String>[];
 
@@ -71,15 +85,15 @@ void main() {
         for (final declaration in _declarations)
           ...declaration.allMatches(source).map((match) => match.group(1)!),
       };
-      if (names.isEmpty) continue;
+      if (names.isEmpty || names.any(sharedNames.contains)) continue;
 
       final fileName = p.basename(path);
       final directive = RegExp('''['"][^'"]*${RegExp.escape(fileName)}['"]''');
 
       final used = consumers.entries.any((entry) {
         if (entry.key == path || barrels.contains(entry.key)) return false;
-        if (directive.hasMatch(entry.value)) return true;
-        return names.any((name) => RegExp('\\b$name\\b').hasMatch(entry.value));
+        return entry.value.contains(fileName) &&
+            directive.hasMatch(entry.value);
       });
 
       if (!used) {
