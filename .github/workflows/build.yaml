@@ -3,7 +3,9 @@ name: build
 on:
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-pre.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-pre.[0-9]+\+[0-9]+'
 
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
@@ -17,6 +19,7 @@ permissions:
 jobs:
   version:
     name: Generate Version
+    if: github.ref_type == 'tag' && !github.event.deleted
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
@@ -54,15 +57,11 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)(-pre\.[0-9]+(\+[0-9]+)?)?$ ]]; then
-            VERSION_NUMBER="${BASH_REMATCH[1]}"
-          elif [[ "$TAG" == v* ]]; then
-            echo "::error::$TAG is neither vX.Y.Z nor vX.Y.Z-pre.N[+M]"
+          if [[ ! "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)(-pre\.[0-9]+(\+[0-9]+)?)?$ ]]; then
+            echo "::error::Expected vX.Y.Z or vX.Y.Z-pre.N[+M]" >&2
             exit 1
-          else
-            # A dispatch from a branch or a throwaway ci-* ref builds the pubspec version.
-            VERSION_NUMBER=$(grep -E "^version:" pubspec.yaml | sed -E 's/^version:[[:space:]]*([0-9.]+).*/\1/')
           fi
+          VERSION_NUMBER="${BASH_REMATCH[1]}"
           # One actual build date for every platform and architecture in this run.
           # The checked-in suffix is a snapshot, never a minimum build number.
           BUILD_NUMBER=$(date '+%Y%m%d%H')
