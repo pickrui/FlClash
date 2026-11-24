@@ -67,6 +67,7 @@ func handleInitClash(params *InitParams) bool {
 	if params.ConfigAgeSecretKey != "" {
 		GlobalConfigAgeSecretKey = params.ConfigAgeSecretKey
 	}
+	restoreManagedDeviceDNS()
 	resetGeoLifecycle()
 	isInit.Store(true)
 	return true

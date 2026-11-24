@@ -255,7 +255,6 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
         accountState.isRefreshing ||
         accountState.isSyncing ||
         _recoveringSubscription;
-    final notifier = ref.read(cloudAccountProvider.notifier);
     final serviceWarning = _serviceWarning;
 
     return Scaffold(
@@ -267,9 +266,7 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
             glyph: AppGlyphs.refresh,
             tooltip: currentAppLocalizations.refreshNodes,
             isLoading: accountState.isRefreshing || accountState.isSyncing,
-            onPressed: accountBusy
-                ? null
-                : () => notifier.refreshManagedSubscription(),
+            onPressed: accountBusy ? null : _refreshNodes,
           ),
         ],
       ],
@@ -476,11 +473,13 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
                 if (state.error case final error?)
                   CloudErrorBanner(
                     message: error,
-                    onRetry: busy
-                        ? null
-                        : () => notifier.refreshManagedSubscription(),
+                    onRetry: busy ? null : _refreshNodes,
                   ),
                 CloudProfileCard(profile: profile),
+                if (ref
+                    .watch(managedDeviceProvider)
+                    .needsApprovalIn(CloudApiService().sessionRevision))
+                  _buildApprovalEntry(),
                 if (profile.offersNodeFilter)
                   CloudNodeFilterEntry(
                     profile: profile,
@@ -513,6 +512,23 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildApprovalEntry() {
+    return generateSection(
+      items: [
+        ListItem(
+          leading: GlyphIcon(
+            AppGlyphs.devices,
+            color: context.colorScheme.warning,
+          ),
+          title: Text(currentAppLocalizations.approveDevice),
+          subtitle: Text(currentAppLocalizations.deviceApprovalRequired),
+          trailing: const GlyphIcon(AppGlyphs.chevronForward),
+          onTap: () => ref.read(managedDeviceProvider.notifier).open(),
+        ),
+      ],
     );
   }
 
@@ -563,6 +579,17 @@ class _CloudAccountPageState extends ConsumerState<CloudAccountPage> {
         ],
       ),
     );
+  }
+
+  /// A refresh this device may not take part in yet says so in the approval
+  /// dialog, even when an earlier one was closed.
+  Future<void> _refreshNodes() async {
+    await ref.read(cloudAccountProvider.notifier).refreshManagedSubscription();
+    if (!mounted) return;
+    final device = ref.read(managedDeviceProvider);
+    if (device.needsApprovalIn(CloudApiService().sessionRevision)) {
+      await ref.read(managedDeviceProvider.notifier).open();
+    }
   }
 
   Future<void> _handleLogout() async {

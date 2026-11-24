@@ -144,7 +144,7 @@ func (s *diagnosticResolverStub) LookupIPv4(_ context.Context, name string) ([]n
 func TestNetworkDiagnosticUsesSignedResolver(t *testing.T) {
 	previous := currentDNSAuth()
 	defer setDNSAuth(previous)
-	setDNSAuth(&dnsAuthSettings{privKey: ed25519.NewKeyFromSeed(make([]byte, ed25519.SeedSize)), window: dnsAuthWindowSeconds, suffixes: []string{"managed.example"}})
+	setDNSAuth(testDNSDevice(t, ed25519.NewKeyFromSeed(make([]byte, ed25519.SeedSize))))
 	inner := &diagnosticResolverStub{}
 	wrapped := &tokenInjectResolver{Resolver: inner, secure: inner}
 	previousIPv6 := resolver.DisableIPv6.Load()
@@ -173,7 +173,7 @@ func (s *closingResolverStub) CloseQueries() { s.closed = true }
 func TestProxyServerResolverIsSignedAsInstalledAndRetiresItsQueries(t *testing.T) {
 	previous := currentDNSAuth()
 	defer setDNSAuth(previous)
-	setDNSAuth(&dnsAuthSettings{privKey: ed25519.NewKeyFromSeed(make([]byte, ed25519.SeedSize)), window: dnsAuthWindowSeconds, suffixes: []string{"managed.example"}})
+	setDNSAuth(testDNSDevice(t, ed25519.NewKeyFromSeed(make([]byte, ed25519.SeedSize))))
 	inner := &closingResolverStub{}
 	wrapped := executor.WrapProxyServerResolver(inner)
 	if _, ok := wrapped.(*tokenInjectResolver); !ok {
@@ -287,7 +287,7 @@ func TestNetworkDiagnosticManagedCertificateReason(t *testing.T) {
 func TestNetworkDiagnosticManagedCertificatesThroughSignedRace(t *testing.T) {
 	useManagedSuffixes(t, "managed.example")
 	previous := currentDNSAuth()
-	setDNSAuth(&dnsAuthSettings{privKey: vectorKey(), window: dnsAuthWindowSeconds, suffixes: []string{"managed.example"}})
+	setDNSAuth(testDNSDevice(t, vectorKey()))
 	t.Cleanup(func() { setDNSAuth(previous) })
 	certificate, _ := managedCertificate(t, "dot.example.invalid", "doh.example.invalid")
 	_, otherRoots := managedCertificate(t, "dot.example.invalid", "doh.example.invalid")

@@ -1,4 +1,13 @@
 {
+  "approveDevice": "批准这台设备",
+  "deviceApproved": "设备已批准",
+  "deviceApprovalSteps": "在已登录账户的浏览器中打开链接并核对确认码，或私聊已绑定的 Telegram Bot 发送命令。设备指纹一致才批准",
+  "deviceApprovalRequired": "批准这台设备后才能获取节点",
+  "deviceApprovalCode": "确认码",
+  "deviceApprovalCommand": "Telegram 命令",
+  "deviceFingerprint": "设备指纹",
+  "deviceApprovalWaiting": "等待批准",
+  "deviceApprovalPaused": "已停止自动检查，批准后点「刷新」",
   "applyNow": "立即应用",
   "rule": "规则",
   "global": "全局",

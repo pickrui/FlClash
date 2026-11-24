@@ -562,8 +562,6 @@ jobs:
           SPARE_DOMAIN: ${{ secrets.SPARE_DOMAIN }}
           API_DOMAIN: ${{ secrets.API_DOMAIN }}
           SPARE_API_DOMAIN: ${{ secrets.SPARE_API_DOMAIN }}
-          FLCLASH_APP_SECRET: ${{ secrets.FLCLASH_APP_SECRET }}
-          DNS_AUTH_PRIVATE_KEY: ${{ secrets.DNS_AUTH_PRIVATE_KEY }}
           DNS_AUTH_DOMAINS: ${{ secrets.DNS_AUTH_DOMAINS }}
           DNS_AUTH_DOT_SERVER: ${{ secrets.DNS_AUTH_DOT_SERVER }}
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform == 'macos' && '13.0' || '' }}

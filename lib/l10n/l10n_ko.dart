@@ -10,6 +10,34 @@ class AppLocalizationsKo extends AppLocalizations {
   AppLocalizationsKo([String locale = 'ko']) : super(locale);
 
   @override
+  String get approveDevice => '이 기기 승인';
+
+  @override
+  String get deviceApproved => '기기가 승인되었습니다';
+
+  @override
+  String get deviceApprovalSteps =>
+      '계정에 로그인한 브라우저에서 링크를 열어 확인 코드를 대조하거나, 연결된 Telegram 봇과의 개인 채팅에 명령을 보내세요. 지문이 일치할 때만 승인하세요.';
+
+  @override
+  String get deviceApprovalRequired => '노드를 받으려면 이 기기를 승인하세요';
+
+  @override
+  String get deviceApprovalCode => '확인 코드';
+
+  @override
+  String get deviceApprovalCommand => 'Telegram 명령';
+
+  @override
+  String get deviceFingerprint => '기기 지문';
+
+  @override
+  String get deviceApprovalWaiting => '승인 대기 중';
+
+  @override
+  String get deviceApprovalPaused => '자동 확인을 멈췄습니다. 승인한 후 새로 고침을 누르세요.';
+
+  @override
   String get applyNow => '지금 적용';
 
   @override

@@ -31,6 +31,7 @@ enum CoreMethod {
   encodeShareLinks('shareLink.encode'),
   validateConfigWithBytes('config.validateBytes'),
   decryptConfigBytes('config.decryptBytes'),
+  managedDevice('config.managedDevice'),
   configRecipient('config.recipient'),
   sealFetchedConfig('config.sealFetched'),
   validateSealedConfig('config.validateSealed'),

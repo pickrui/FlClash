@@ -43,6 +43,7 @@ mixin CoreInterface {
 
   Future<String> decryptConfigBytes(String data, String secretKey);
 
+  Future<bool> managedDevice(String id, String dns, String age);
   Future<String> configRecipient();
 
   Future<String> sealFetchedConfig(String data, String path);
@@ -451,6 +452,13 @@ abstract class CoreHandlerInterface with CoreInterface {
         ) ??
         '';
   }
+
+  @override
+  Future<bool> managedDevice(String id, String dns, String age) =>
+      _invokeRequiredMethod<bool>(
+        method: CoreMethod.managedDevice,
+        arguments: {'id': id, 'dns': dns, 'age': age},
+      );
 
   @override
   Future<String> configRecipient() =>

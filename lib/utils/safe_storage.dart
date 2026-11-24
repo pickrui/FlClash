@@ -184,6 +184,31 @@ class SafeStorage {
     return null;
   }
 
+  static Future<String> managedDeviceKeys(String Function() create) {
+    const key = 'managed_device_keys_v2';
+    final state = _states.putIfAbsent(key, _StorageMutationState.new);
+    late String result;
+    return state
+        .mutate(() async {
+          final lock = await File(
+            p.join(await appPath.homeDirPath, '.managed-device.lock'),
+          ).open(mode: FileMode.append);
+          try {
+            await lock.lock(FileLock.blockingExclusive);
+            final saved = await _readSecure(key);
+            if (saved != null) {
+              result = saved;
+            } else {
+              result = create();
+              await _writeSecure(key, result);
+            }
+          } finally {
+            await lock.close();
+          }
+        })
+        .then((_) => result);
+  }
+
   static Future<void> write(String key, String value) {
     final state = _states.putIfAbsent(key, _StorageMutationState.new);
     state.revision = Object();

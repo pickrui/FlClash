@@ -10,6 +10,36 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
+  String get approveDevice => 'Подтвердить устройство';
+
+  @override
+  String get deviceApproved => 'Устройство подтверждено';
+
+  @override
+  String get deviceApprovalSteps =>
+      'Откройте ссылку в браузере, где выполнен вход в аккаунт, и сверьте код или отправьте команду в личном чате с привязанным ботом Telegram. Подтверждайте, только если отпечаток совпадает.';
+
+  @override
+  String get deviceApprovalRequired =>
+      'Подтвердите устройство, чтобы получить узлы';
+
+  @override
+  String get deviceApprovalCode => 'Код подтверждения';
+
+  @override
+  String get deviceApprovalCommand => 'Команда Telegram';
+
+  @override
+  String get deviceFingerprint => 'Отпечаток устройства';
+
+  @override
+  String get deviceApprovalWaiting => 'Ожидание подтверждения';
+
+  @override
+  String get deviceApprovalPaused =>
+      'Проверка остановлена. После подтверждения нажмите «Обновить».';
+
+  @override
   String get applyNow => 'Применить сейчас';
 
   @override

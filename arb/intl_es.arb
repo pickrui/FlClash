@@ -1,4 +1,13 @@
 {
+  "approveDevice": "Autorizar este dispositivo",
+  "deviceApproved": "Dispositivo autorizado",
+  "deviceApprovalSteps": "Abra el enlace en un navegador con su cuenta iniciada y compruebe el código, o envíe el comando en privado a su bot de Telegram vinculado. Autorice solo si la huella coincide.",
+  "deviceApprovalRequired": "Autorice este dispositivo para obtener los nodos",
+  "deviceApprovalCode": "Código de confirmación",
+  "deviceApprovalCommand": "Comando de Telegram",
+  "deviceFingerprint": "Huella del dispositivo",
+  "deviceApprovalWaiting": "Esperando la autorización",
+  "deviceApprovalPaused": "Se dejó de comprobar. Pulse Actualizar después de autorizar.",
   "applyNow": "Aplicar ahora",
   "rule": "Regla",
   "global": "Global",

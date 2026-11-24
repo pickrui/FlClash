@@ -1,4 +1,13 @@
 {
+  "approveDevice": "Autoriser cet appareil",
+  "deviceApproved": "Appareil autorisé",
+  "deviceApprovalSteps": "Ouvrez le lien dans un navigateur connecté à votre compte et vérifiez le code, ou envoyez la commande en privé à votre bot Telegram associé. N’autorisez que si l’empreinte correspond.",
+  "deviceApprovalRequired": "Autorisez cet appareil pour obtenir les nœuds",
+  "deviceApprovalCode": "Code de confirmation",
+  "deviceApprovalCommand": "Commande Telegram",
+  "deviceFingerprint": "Empreinte de l’appareil",
+  "deviceApprovalWaiting": "En attente d’autorisation",
+  "deviceApprovalPaused": "Vérification arrêtée. Touchez Actualiser après l’autorisation.",
   "applyNow": "Appliquer maintenant",
   "rule": "Règle",
   "global": "Global",

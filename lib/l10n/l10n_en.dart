@@ -10,6 +10,35 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get approveDevice => 'Approve this device';
+
+  @override
+  String get deviceApproved => 'Device approved';
+
+  @override
+  String get deviceApprovalSteps =>
+      'Open the link in a browser signed in to your account and check the code, or send the command to your linked Telegram bot in a private chat. Approve only if the fingerprint matches.';
+
+  @override
+  String get deviceApprovalRequired => 'Approve this device to get nodes';
+
+  @override
+  String get deviceApprovalCode => 'Confirmation code';
+
+  @override
+  String get deviceApprovalCommand => 'Telegram command';
+
+  @override
+  String get deviceFingerprint => 'Device fingerprint';
+
+  @override
+  String get deviceApprovalWaiting => 'Waiting for approval';
+
+  @override
+  String get deviceApprovalPaused =>
+      'Stopped checking. Tap Refresh after approving.';
+
+  @override
   String get applyNow => 'Apply now';
 
   @override

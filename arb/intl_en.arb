@@ -1,4 +1,13 @@
 {
+  "approveDevice": "Approve this device",
+  "deviceApproved": "Device approved",
+  "deviceApprovalSteps": "Open the link in a browser signed in to your account and check the code, or send the command to your linked Telegram bot in a private chat. Approve only if the fingerprint matches.",
+  "deviceApprovalRequired": "Approve this device to get nodes",
+  "deviceApprovalCode": "Confirmation code",
+  "deviceApprovalCommand": "Telegram command",
+  "deviceFingerprint": "Device fingerprint",
+  "deviceApprovalWaiting": "Waiting for approval",
+  "deviceApprovalPaused": "Stopped checking. Tap Refresh after approving.",
   "applyNow": "Apply now",
   "rule": "Rule",
   "global": "Global",

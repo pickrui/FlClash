@@ -108,6 +108,60 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @approveDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve this device'**
+  String get approveDevice;
+
+  /// No description provided for @deviceApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Device approved'**
+  String get deviceApproved;
+
+  /// No description provided for @deviceApprovalSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the link in a browser signed in to your account and check the code, or send the command to your linked Telegram bot in a private chat. Approve only if the fingerprint matches.'**
+  String get deviceApprovalSteps;
+
+  /// No description provided for @deviceApprovalRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve this device to get nodes'**
+  String get deviceApprovalRequired;
+
+  /// No description provided for @deviceApprovalCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation code'**
+  String get deviceApprovalCode;
+
+  /// No description provided for @deviceApprovalCommand.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram command'**
+  String get deviceApprovalCommand;
+
+  /// No description provided for @deviceFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Device fingerprint'**
+  String get deviceFingerprint;
+
+  /// No description provided for @deviceApprovalWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval'**
+  String get deviceApprovalWaiting;
+
+  /// No description provided for @deviceApprovalPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped checking. Tap Refresh after approving.'**
+  String get deviceApprovalPaused;
+
   /// No description provided for @applyNow.
   ///
   /// In en, this message translates to:

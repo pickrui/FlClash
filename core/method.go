@@ -233,6 +233,16 @@ func handleMethodCall(call *MethodCall, response MethodResponse) {
 			return
 		}
 		response.success(base64.StdEncoding.EncodeToString(data))
+	case managedDeviceMethod:
+		var p struct {
+			ID  string `json:"id"`
+			DNS string `json:"dns"`
+			Age string `json:"age"`
+		}
+		if !decodeMethodArguments(call, response, &p) {
+			return
+		}
+		response.success(setManagedDevice(p.ID, p.DNS, p.Age))
 	case configRecipientMethod:
 		recipient, err := handleConfigRecipient()
 		if err != nil {

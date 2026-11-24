@@ -10,6 +10,34 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get approveDevice => '批准这台设备';
+
+  @override
+  String get deviceApproved => '设备已批准';
+
+  @override
+  String get deviceApprovalSteps =>
+      '在已登录账户的浏览器中打开链接并核对确认码，或私聊已绑定的 Telegram Bot 发送命令。设备指纹一致才批准';
+
+  @override
+  String get deviceApprovalRequired => '批准这台设备后才能获取节点';
+
+  @override
+  String get deviceApprovalCode => '确认码';
+
+  @override
+  String get deviceApprovalCommand => 'Telegram 命令';
+
+  @override
+  String get deviceFingerprint => '设备指纹';
+
+  @override
+  String get deviceApprovalWaiting => '等待批准';
+
+  @override
+  String get deviceApprovalPaused => '已停止自动检查，批准后点「刷新」';
+
+  @override
   String get applyNow => '立即应用';
 
   @override

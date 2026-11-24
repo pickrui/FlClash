@@ -133,6 +133,7 @@ const (
 	shutdownMethod                 CoreMethod = "core.shutdown"
 	validateConfigWithBytesMethod  CoreMethod = "config.validateBytes"
 	decryptConfigBytesMethod       CoreMethod = "config.decryptBytes"
+	managedDeviceMethod            CoreMethod = "config.managedDevice"
 	configRecipientMethod          CoreMethod = "config.recipient"
 	sealFetchedConfigMethod        CoreMethod = "config.sealFetched"
 	validateSealedConfigMethod     CoreMethod = "config.validateSealed"
