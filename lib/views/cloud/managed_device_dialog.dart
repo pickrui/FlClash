@@ -15,6 +15,29 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// Only configured websites may receive the code from the QR, browser or clipboard.
+String? managedDeviceApprovalUrl({
+  required String code,
+  required String? received,
+  required String primaryDomain,
+  required String spareDomain,
+}) {
+  const path = '/user/managed-device';
+  final suggested = received == null ? null : Uri.tryParse(received);
+  final backup = spareDomain.trim().toLowerCase();
+  final primary = primaryDomain.trim().toLowerCase();
+  final useBackup =
+      backup.isNotEmpty &&
+      suggested?.scheme == 'https' &&
+      suggested?.host == backup &&
+      suggested?.userInfo == '' &&
+      suggested?.port == 443 &&
+      suggested?.path == path;
+  final host = useBackup || primary.isEmpty ? backup : primary;
+  if (host.isEmpty) return null;
+  return Uri.https(host, path, {'code': code}).toString();
+}
+
 /// Completes with true once the panel approved this device.
 Future<bool?> showManagedDeviceApproval(BuildContext context) {
   return globalState.showCommonDialog<bool>(
@@ -216,7 +239,14 @@ class _ManagedDeviceApprovalDialogState
       managedDeviceProvider.select((s) => s.pending),
     );
     final code = enrollment?.code;
-    final url = enrollment?.verificationUrl;
+    final url = code == null
+        ? null
+        : managedDeviceApprovalUrl(
+            code: code,
+            received: enrollment?.verificationUrl,
+            primaryDomain: Secrets.primarySiteDomain,
+            spareDomain: Secrets.spareSiteDomain,
+          );
     final colorScheme = context.colorScheme;
     final level = context.raisedSurfaceLevel;
     return AlertDialog(

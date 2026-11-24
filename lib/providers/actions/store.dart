@@ -10,6 +10,7 @@ Future<Set<String>> prepareUserPreferencesClear(
 ) async {
   final credentialKeys = {
     'cloud_token',
+    SafeStorage.managedDeviceStorageKey,
     for (final network in networks)
       if (network.loginMethod == TailscaleLoginMethod.authKey)
         network.authKeyStorageKey,

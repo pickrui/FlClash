@@ -48,6 +48,37 @@ void main() {
     messenger.setMockMethodCallHandler(channel, null);
   });
 
+  test(
+    'device keys stay stable until a marked installation is reset',
+    () async {
+      var saved = 'previous';
+      var creates = 0;
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        expect(call.arguments['key'], SafeStorage.managedDeviceStorageKey);
+        final options = call.arguments['options'] as Map;
+        expect(options['accountName'], 'com.oixcloud.clash.managed-device');
+        expect(options['usesDataProtectionKeychain'], 'false');
+        if (call.method == 'write') {
+          saved = call.arguments['value'] as String;
+          return null;
+        }
+        expect(call.method, 'read');
+        return saved;
+      });
+      String generate() => 'new-${++creates}';
+      expect(await SafeStorage.managedDeviceKeys(generate), 'previous');
+      await SafeStorage.markForDeletion(SafeStorage.managedDeviceStorageKey);
+      final keys = await Future.wait([
+        SafeStorage.managedDeviceKeys(generate),
+        SafeStorage.managedDeviceKeys(generate),
+      ]);
+      expect(keys, ['new-1', 'new-1']);
+      expect(creates, 1);
+      expect(await SafeStorage.keysMarkedForDeletion(), isEmpty);
+    },
+    skip: Platform.isWindows,
+  );
+
   test('macOS fallback write clears a previous deletion marker', () async {
     await mockPreferences({SafeStorage.deletionMarkerKey('cloud_token'): true});
 

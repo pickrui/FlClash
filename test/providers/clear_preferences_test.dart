@@ -52,6 +52,7 @@ void main() {
   ];
   const keys = [
     'cloud_token',
+    SafeStorage.managedDeviceStorageKey,
     'config_age_seed',
     'tailscale_auth_key_home',
     'tailscale_auth_key_office',
@@ -223,13 +224,21 @@ void main() {
   test('macOS clear data removes local credentials without accessing shared Keychain', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
     for (final key in keys) {
-      await SafeStorage.write(key, 'stored-$key');
+      if (key != SafeStorage.managedDeviceStorageKey) {
+        await SafeStorage.write(key, 'stored-$key');
+      }
     }
 
     await clearUserPreferences(networks);
 
-    expect(deleted, isEmpty);
-    expect(secureValues.keys, unorderedEquals([...keys, 'unrelated']));
+    expect(deleted, [SafeStorage.managedDeviceStorageKey]);
+    expect(
+      secureValues.keys,
+      unorderedEquals([
+        ...keys.where((key) => key != SafeStorage.managedDeviceStorageKey),
+        'unrelated',
+      ]),
+    );
     final prefs = await SharedPreferences.getInstance();
     expect(
       prefs.getKeys(),
@@ -238,7 +247,7 @@ void main() {
     for (final key in keys) {
       expect(await SafeStorage.read(key, retry: true), isNull);
     }
-    expect(secureCalls, isEmpty);
+    expect(secureCalls, ['delete', 'read', 'delete']);
   });
 
   for (final throws in [false, true]) {

@@ -109,6 +109,13 @@ void main() {
         expect(await SafeStorage.read('cloud_token'), isNull);
         await SafeStorage.write('cloud_token', 'session-token');
         expect(await SafeStorage.read('cloud_token'), 'session-token');
+        expect(await SafeStorage.managedDeviceKeys(() => 'first'), 'first');
+        expect(await SafeStorage.managedDeviceKeys(() => 'second'), 'first');
+        await SafeStorage.delete(SafeStorage.managedDeviceStorageKey);
+        expect(
+          await SafeStorage.managedDeviceKeys(() => 'after-clear'),
+          'after-clear',
+        );
         expect(
           await SafeStorage.read('cloud_token', isValid: (_) => false),
           isNull,

@@ -18,9 +18,14 @@ import 'file_secure_storage.dart';
 import 'windows_storage_crypto.dart';
 
 class SafeStorage {
+  static const managedDeviceStorageKey = 'managed_device_keys_v2';
   static final _sessionValues = <String, String>{};
   static const _secureStorage = FlutterSecureStorage(
     aOptions: AndroidOptions(resetOnError: false),
+    mOptions: MacOsOptions(
+      accountName: 'com.oixcloud.clash.managed-device',
+      usesDataProtectionKeychain: false,
+    ),
   );
 
   /// Windows always uses its DPAPI file; Linux uses a private plain file only
@@ -109,6 +114,11 @@ class SafeStorage {
   static bool get _isMacOS =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
 
+  // Existing macOS credentials live in preferences. The device keys use this
+  // app's own Keychain service, including on builds without an access group.
+  static bool _inPreferences(String key) =>
+      _isMacOS && key != managedDeviceStorageKey;
+
   static bool get _isLinux =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
 
@@ -140,7 +150,7 @@ class SafeStorage {
       await state.mutate(() async {
         if (!isCurrent()) return;
         await _deleteLegacyValue(prefs, key);
-        if (!_isMacOS) {
+        if (!_inPreferences(key)) {
           try {
             await _deleteSecure(key);
           } catch (_) {}
@@ -170,7 +180,7 @@ class SafeStorage {
         ? storedValue
         : null;
     final migrated = prefs.getBool(migrationKey) ?? false;
-    if (_isMacOS) return legacyValue;
+    if (_inPreferences(key)) return legacyValue;
     if (!migrated && legacyValue != null) {
       return migrate(legacyValue);
     }
@@ -185,7 +195,10 @@ class SafeStorage {
   }
 
   static Future<String> managedDeviceKeys(String Function() create) {
-    const key = 'managed_device_keys_v2';
+    const key = managedDeviceStorageKey;
+    if (safeModeBuild) {
+      return Future.value(_sessionValues.putIfAbsent(key, create));
+    }
     final state = _states.putIfAbsent(key, _StorageMutationState.new);
     late String result;
     return state
@@ -195,12 +208,16 @@ class SafeStorage {
           ).open(mode: FileMode.append);
           try {
             await lock.lock(FileLock.blockingExclusive);
-            final saved = await _readSecure(key);
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.reload();
+            final deleted = prefs.getBool(_deletionKey(key)) == true;
+            final saved = deleted ? null : await _readSecure(key);
             if (saved != null) {
               result = saved;
             } else {
               result = create();
               await _writeSecure(key, result);
+              if (deleted) await _clearDeletionMarker(prefs, key);
             }
           } finally {
             await lock.close();
@@ -221,7 +238,7 @@ class SafeStorage {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
-    if (_isMacOS) {
+    if (_inPreferences(key)) {
       await _writePreference(prefs, key, value);
       return;
     }
@@ -263,7 +280,7 @@ class SafeStorage {
     final prefs = await SharedPreferences.getInstance();
     await _markForDeletion(prefs, key);
     await _markMigratedAndDeleteLegacy(prefs, key, _migrationKey(key));
-    if (_isMacOS) {
+    if (_inPreferences(key)) {
       return;
     }
     await _deleteSecure(key);
