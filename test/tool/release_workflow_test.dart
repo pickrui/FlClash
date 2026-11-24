@@ -82,23 +82,67 @@ void main() {
     final collect = steps.indexWhere(
       (step) => '${step['run']}'.contains('tool/collect_build_records.py'),
     );
+    final exception = steps.indexWhere(
+      (step) =>
+          step['name'] == 'Record the approved Android 16 KB package input',
+    );
     final records = steps.indexWhere(
-      (step) => '${step['with']?['name']}'.startsWith('build-records-'),
+      (step) => step['name'] == 'Upload build records',
     );
     final packages = steps.indexWhere(
       (step) => '${step['with']?['name']}'.startsWith('artifact-'),
     );
+    const approved = "env.FLCLASH_ANDROID_X64_16K_SHA != ''";
+    expect(exception, greaterThan(0));
+    expect(steps[exception]['if'], approved);
+    expect(steps[exception]['run'], contains('record'));
     expect(collect, greaterThan(0));
+    expect(steps[collect]['if'], "env.FLCLASH_ANDROID_X64_16K_SHA == ''");
     expect(records, greaterThan(collect));
+    expect(records, greaterThan(exception));
     expect(packages, greaterThan(records));
-    for (final step in [steps[collect], steps[records]]) {
-      expect(step['if'], isNull);
+    expect(steps[records]['if'], isNull);
+    expect(
+      steps[records]['with']['name'],
+      contains(
+        "$approved && 'native-input-android-amd64' || format('build-records-{0}-{1}', matrix.platform, matrix.arch)",
+      ),
+    );
+    for (final step in [steps[exception], steps[collect], steps[records]]) {
       expect(step['continue-on-error'], isNull);
     }
     expect(steps[records]['with']['path'], 'build/native-records.json');
     expect(steps[records]['with']['if-no-files-found'], 'error');
     expect(steps[records]['with']['overwrite'], isTrue);
     expect(steps[packages]['with']['path'], './dist');
+    final runtimeJob = jobs['android-page-size'] as YamlMap;
+    expect(runtimeJob['needs'], contains('build'));
+    final runtime = (runtimeJob['steps'] as YamlList).cast<YamlMap>();
+    final getPackage = runtime.indexWhere(
+      (step) => step['with']?['name'] == 'artifact-android-amd64',
+    );
+    final getInput = runtime.indexWhere(
+      (step) => step['with']?['name'] == 'native-input-android-amd64',
+    );
+    final runPackage = runtime.indexWhere(
+      (step) => '${step['run']}'.contains('run_emulator.sh'),
+    );
+    final finalRecords = runtime.indexWhere(
+      (step) => step['with']?['name'] == 'build-records-android-amd64',
+    );
+    expect(getPackage, greaterThanOrEqualTo(0));
+    expect(getInput, greaterThanOrEqualTo(0));
+    expect(runPackage, greaterThan(getPackage));
+    expect(runPackage, greaterThan(getInput));
+    expect(finalRecords, greaterThan(runPackage));
+    expect(runtime[runPackage]['continue-on-error'], isNull);
+    expect(runtime[finalRecords]['with']['path'], 'build/native-records.json');
+    expect(runtime[finalRecords]['with']['if-no-files-found'], 'error');
+    expect(jobs['upload']['needs'], contains('android-page-size'));
+    expect(
+      jobs['upload']['if'],
+      contains("needs.android-page-size.result == 'success'"),
+    );
     final seal = steps.indexWhere(
       (step) => '${step['run']}'.contains('tool/debug_symbols.dart seal'),
     );
