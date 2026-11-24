@@ -4,6 +4,8 @@
 
 安全与兼容：首次在新设备使用 oixCloud 时，按登录页提示完成设备批准后即可刷新节点。需要在网页批准时，客户端会显示当前设备的确认码
 
+节点：更新订阅时自动应用该账户保存的节点筛选，未设置筛选时按套餐选择节点
+
 问题修复：切换账户后重新读取对应的登录状态；未生效的套餐可直接更换，避免误入升级流程
 
 安全与兼容：macOS 版改用新的开发者证书签名，已安装的旧版请从发布页下载 DMG 手动安装一次。macOS 13 及以上的标准版随后可继续自动更新；macOS 12 兼容版需手动更新，按处理器选择 [Apple Silicon](https://github.com/pickrui/FlClash/releases/download/v0.9.4/flclash-v0.9.4-macos12-arm64.dmg) 或 [Intel](https://github.com/pickrui/FlClash/releases/download/v0.9.4/flclash-v0.9.4-macos12-amd64.dmg)

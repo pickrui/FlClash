@@ -339,6 +339,9 @@ jobs:
       BUILD_TOOL_VERSION: ${{ needs.version.outputs.build_tool_version }}
       BUILD_TOOL_NATIVE_SCORE_CAP_VERSION: ${{ github.sha == vars.BUILD_TOOL_NATIVE_SCORE_CAP_SHA && vars.BUILD_TOOL_NATIVE_SCORE_CAP_VERSION || '' }}
       BUILD_TOOL_DIRECTIVES: ${{ vars.BUILD_TOOL_DIRECTIVES }}
+      FLCLASH_ANDROID_X64_16K_SHA: ${{ matrix.platform == 'android' && matrix.arch == 'amd64' && github.repository == 'pickrui/FlClash' && github.event_name == 'push' && github.ref == 'refs/tags/v0.9.4' && github.sha == vars.FLCLASH_ANDROID_X64_16K_SHA && github.sha || '' }}
+      FLCLASH_RECOVERY_TOOL: ${{ github.workspace }}/.private-build/tool/release_android_16k/select_library.py
+      RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
@@ -552,6 +555,10 @@ jobs:
           done
           exit 1
 
+      - name: Prepare the approved Android 16 KB package input
+        if: env.FLCLASH_ANDROID_X64_16K_SHA != ''
+        run: python3 "$FLCLASH_RECOVERY_TOOL" install
+
       - name: Build Application
         id: build
         shell: bash
@@ -666,7 +673,12 @@ jobs:
             dart tool/sign_updates.dart dist "$RELEASE_BUILD"
           fi
 
+      - name: Record the approved Android 16 KB package input
+        if: env.FLCLASH_ANDROID_X64_16K_SHA != ''
+        run: python3 "$FLCLASH_RECOVERY_TOOL" record
+
       - name: Record native build verification
+        if: env.FLCLASH_ANDROID_X64_16K_SHA == ''
         env:
           RELEASE_VERSION: ${{ needs.version.outputs.version_number }}
           RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
@@ -676,7 +688,7 @@ jobs:
       - name: Upload build records
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: build-records-${{ matrix.platform }}-${{ matrix.arch }}
+          name: ${{ env.FLCLASH_ANDROID_X64_16K_SHA != '' && 'native-input-android-amd64' || format('build-records-{0}-{1}', matrix.platform, matrix.arch) }}
           path: build/native-records.json
           overwrite: true
           if-no-files-found: error
@@ -701,6 +713,40 @@ jobs:
           overwrite: true
           if-no-files-found: error
 
+  android-page-size:
+    name: Run the signed Android x86_64 package on 16 KB pages
+    if: github.repository == 'pickrui/FlClash' && github.event_name == 'push' && github.ref == 'refs/tags/v0.9.4' && github.sha == vars.FLCLASH_ANDROID_X64_16K_SHA
+    needs: [version, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      RELEASE_BUILD: ${{ needs.version.outputs.build_number }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Prepare private build sources
+        uses: ./.github/actions/private-source
+        with:
+          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
+          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: artifact-android-amd64
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: native-input-android-amd64
+          path: build
+      - name: Check the signed APK and start its Core
+        run: bash .private-build/tool/release_android_16k/run_emulator.sh dist/flclash-android-x86_64.apk build/native-records.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: build-records-android-amd64
+          path: build/native-records.json
+          if-no-files-found: error
+          overwrite: true
+
   checks:
     name: Required release checks
     if: ${{ always() }}
@@ -721,11 +767,11 @@ jobs:
         run: python3 tool/release_checks.py gate
 
   upload:
-    if: ${{ !cancelled() && needs.version.result == 'success' && needs.build.result == 'success' && needs.checks.result == 'success' }}
+    if: ${{ !cancelled() && needs.version.result == 'success' && needs.build.result == 'success' && needs.checks.result == 'success' && (needs.android-page-size.result == 'success' || (github.sha != vars.FLCLASH_ANDROID_X64_16K_SHA && needs.android-page-size.result == 'skipped')) }}
     permissions:
       actions: read
       contents: write
-    needs: [ version, build, checks ]
+    needs: [ version, build, checks, android-page-size ]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
