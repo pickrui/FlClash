@@ -1,517 +1,57 @@
-name: Release artifact recovery
+name: Android system image verification
 on:
   workflow_dispatch:
-    inputs:
-      operation:
-        type: choice
-        options:
-          - build
-          - publish
-        required: true
-      artifact_run:
-        description: Verified recovery run for publication
-        type: string
-        required: false
-permissions:
-  contents: read
-concurrency:
-  group: flclash-v094-release-recovery
-  cancel-in-progress: false
-env:
-  IS_STABLE: 'true'
-  FLUTTER_VERSION: '3.50.1'
-  GO_VERSION: '1.27.4'
-  APPROVED_WORKFLOW_SHA: ${{ vars.FLCLASH_RECOVERY_WORKFLOW_SHA }}
+permissions: {}
 jobs:
-  android:
-    name: Build and verify Android x64
-    if: github.actor == 'pickrui' && github.triggering_actor == 'pickrui' && github.repository == 'pickrui/FlClash' && github.ref == 'refs/heads/main' && github.sha == vars.FLCLASH_RECOVERY_WORKFLOW_SHA && github.sha == '7a174024a7c316c5b726f77b84d6c41af41f9b7d' && inputs.operation == 'build'
-    permissions:
-      contents: read
-      actions: read
-    env:
-      BUILD_TOOL_VERSION: '3.6.0'
-      BUILD_TOOL_NATIVE_SCORE_CAP_VERSION: '3.6.0'
-      BUILD_TOOL_DIRECTIVES: ${{ vars.BUILD_TOOL_DIRECTIVES }}
-      FLCLASH_RECOVERY_TOOL: ${{ github.workspace }}/.release-checks/tool/release_android_16k/select_library.py
+  verify:
+    if: github.repository == 'pickrui/FlClash' && github.ref == 'refs/heads/main' && github.actor == 'pickrui' && github.triggering_actor == 'pickrui' && github.sha == vars.FLCLASH_RECOVERY_WORKFLOW_SHA
     runs-on: ubuntu-24.04
-    timeout-minutes: 65
-    strategy:
-      matrix:
-        include:
-          - platform: android
-            os: ubuntu-24.04
-            arch: amd64
-            name: Android x64
+    timeout-minutes: 12
     steps:
-      - name: Checkout release source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: 6bfe1d0108b84527e33425e934912e54c0868457
-          fetch-depth: 0
-          submodules: recursive
-          persist-credentials: false
-
-      - name: Read pinned recovery checks
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
-          ssh-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
-          ref: ee95f8ad8a52460dd1d9371469ce6cce6e63c926
-          path: .release-checks
-          persist-credentials: false
-          sparse-checkout: tool/release_android_16k
-
-      - name: Verify release identity
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RECOVERY_ARTIFACT_RUN: ${{ inputs.artifact_run }}
-          VERIFIED_ASSETS_SHA256: ${{ vars.FLCLASH_RECOVERY_MANIFEST_SHA256 }}
-        run: python3 .release-checks/tool/release_android_16k/verify_run.py build
-
-      - name: Free disk space for Android builds
-        if: matrix.platform == 'android'
+      - name: Boot and verify Android x86_64 with 16 KB pages
         shell: bash
-        run: |
-          df -h /
-          sudo rm -rf /usr/share/dotnet /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
-          df -h /
-
-      - name: Prepare private build sources
-        uses: ./.github/actions/private-source
-        with:
-          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
-          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
-
-      - name: Setup Node for native protection
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
-        with:
-          node-version: '24.22.3'
-
-      - name: Prepare Android signing
-        env:
-          SIGNING_CONTAINER: ${{ secrets.KEYSTORE }}
-          SIGNING_ALIAS: ${{ secrets.KEY_ALIAS }}
-          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          umask 077
-          printf '%s' "$SIGNING_CONTAINER" | base64 --decode > android/app/keystore.jks
-          printf 'keyAlias=%s\nstorePassword=%s\nkeyPassword=%s\n' "$SIGNING_ALIAS" "$STORE_PASSWORD" "$KEY_PASSWORD" >> android/local.properties
-
-      - name: Setup Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: |
-            core/go.sum
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          # Stable publishes no Windows or Linux arm64 archive; master makes the action
-          # clone the SDK at the pinned tag and fetch the host's own Dart SDK.
-          channel: stable
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          # The repository cache is capped at 10 GB. Flutter SDK caches (1-2 GB each,
-          # about a minute saved) pushed out the Go build cache, which saves ~8 minutes.
-          cache: false
-
-      - name: Cache Gradle
-        if: matrix.platform == 'android'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: |
-            ~/.gradle/caches/modules-2
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-v2-${{ hashFiles('android/**/*.gradle*', 'android/gradle/libs.versions.toml', 'android/gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-v2-
-
-      - name: Cache Cargo
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            plugins/rust_api/rust/target
-            services/helper/target
-            .dart_tool/hooks_runner/shared/rust_api/build/*/target
-          key: ${{ runner.os }}-${{ matrix.platform }}-${{ matrix.arch }}-cargo-v2-${{ env.FLUTTER_VERSION }}-${{ hashFiles('plugins/rust_api/rust/Cargo.lock', 'services/helper/Cargo.lock', '**/rust-toolchain.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.platform }}-${{ matrix.arch }}-cargo-v2-${{ env.FLUTTER_VERSION }}-
-
-      - name: Cache npm
-        if: matrix.platform == 'macos'
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('setup.dart') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
-      - name: Get Flutter Dependency
-        run: |
-          flutter --version
-          flutter pub get
-
-      - name: Install Android script binding dependencies
-        if: matrix.platform == 'android'
-        run: sudo apt-get update && sudo apt-get install -y libclang-dev
-
-      # setup.dart stages these same roots as a Flutter asset.
-      # Pinned by hash, so a new bundle from https://curl.se/docs/caextract.html is a reviewed bump.
-
-      - name: Fetch CA certificates
-        shell: bash
-        env:
-          CA_BUNDLE: cacert-2026-09-25.pem
-          CA_BUNDLE_SHA256: a41b5d356aea97a529fe27e0f7316d2f9d946d75927476cf9cf1b90637d00505
-        run: |
-          bundle=core/Clash.Meta/component/ca/ca-certificates.crt
-          curl -fsSL --retry 3 -o "$bundle" "https://curl.se/ca/$CA_BUNDLE"
-          echo "$CA_BUNDLE_SHA256  $bundle" | sha256sum -c -
-
-      - name: Download Go modules with retries
-        working-directory: core
-        shell: bash
-        run: |
-          for attempt in 1 2 3; do
-            go mod download && exit 0
-            echo "go mod download failed (attempt $attempt)" >&2
-            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 15)); fi
+          image='system-images;android-35;google_apis_ps16k;x86_64'
+          sdk="$ANDROID_HOME"
+          adb="$sdk/platform-tools/adb"
+          emulator="$sdk/emulator/emulator"
+          mkdir -p "$RUNNER_TEMP/android-avd"
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/android-avd"
+          "$sdk/cmdline-tools/latest/bin/sdkmanager" "$image" emulator platform-tools >/dev/null
+          echo no | "$sdk/cmdline-tools/latest/bin/avdmanager" create avd --force -n validation -k "$image" --device pixel_6 >/dev/null
+          "$emulator" -list-avds | grep -Fx validation
+          sudo setfacl -m "u:$(id -un):rw" /dev/kvm
+          "$emulator" -accel-check
+          df -h "$ANDROID_AVD_HOME"
+          "$adb" start-server
+          "$emulator" -avd validation -port 5556 -no-window -gpu software -no-snapshot -no-audio -no-boot-anim -camera-back none -camera-front none -no-metrics >"$RUNNER_TEMP/emulator-log" 2>&1 &
+          pid=$!
+          serial=emulator-5556
+          a() { "$adb" -s "$serial" "$@"; }
+          cleanup_emulator() {
+            result=$?
+            if [[ $result != 0 ]]; then
+              grep -Ei 'error|warning|fatal|panic|disk|accel|unsupported|kvm|failed|avd|gpu' "$RUNNER_TEMP/emulator-log" | tail -40 || true
+            fi
+            a emu kill >/dev/null 2>&1 || true
+            if kill -0 "$pid" 2>/dev/null; then kill "$pid" 2>/dev/null || true; fi
+            wait "$pid" 2>/dev/null || true
+          }
+          trap cleanup_emulator EXIT
+          for _ in $(seq 1 70); do
+            if [[ $(a get-state 2>/dev/null || true) == device ]]; then break; fi
+            kill -0 "$pid" || exit 1
+            sleep 2
           done
-          exit 1
-
-      - name: Configure the approved package input
-        run: python3 "$FLCLASH_RECOVERY_TOOL" install
-
-      - name: Build Application
-        id: build
-        shell: bash
-        env:
-          FLCLASH_VERSION_NUMBER: '0.9.4'
-          FLCLASH_BUILD_NUMBER: '2026112501'
-          BASE_DOMAIN: ${{ secrets.BASE_DOMAIN }}
-          SPARE_DOMAIN: ${{ secrets.SPARE_DOMAIN }}
-          API_DOMAIN: ${{ secrets.API_DOMAIN }}
-          SPARE_API_DOMAIN: ${{ secrets.SPARE_API_DOMAIN }}
-          DNS_AUTH_DOMAINS: ${{ secrets.DNS_AUTH_DOMAINS }}
-          DNS_AUTH_DOT_SERVER: ${{ secrets.DNS_AUTH_DOT_SERVER }}
-          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.platform == 'macos' && '13.0' || '' }}
-        run: |
-          set -e
-          BUILD_ARGS=("${{ matrix.platform }}")
-          [ -n "${{ matrix.arch }}" ] && BUILD_ARGS+=(--arch "${{ matrix.arch }}")
-          BUILD_ARGS+=(--out app)
-          [ "${{ env.IS_STABLE }}" == "true" ] && BUILD_ARGS+=(--env stable)
-          if [ "${{ matrix.platform }}" == "android" ]; then
-            build_log="$RUNNER_TEMP/android-build.log"
-            set +e
-            dart setup.dart "${BUILD_ARGS[@]}" 2>&1 | tee "$build_log"
-            build_status=${PIPESTATUS[0]}
-            set -e
-            if [ "$build_status" -ne 0 ]; then
-              if ! grep -q 'Could not resolve all files for configuration' "$build_log" ||
-                 ! grep -Eq 'Could not find [^[:space:]]+\.jar ' "$build_log"; then
-                exit "$build_status"
-              fi
-              echo "Retrying Android build once with refreshed Gradle dependency metadata"
-              init_dir="${GRADLE_USER_HOME:-$HOME/.gradle}/init.d"
-              mkdir -p "$init_dir"
-              refresh_init=$(mktemp "$init_dir/flclash-refresh-XXXXXX.gradle")
-              trap 'rm -f "$refresh_init"' EXIT
-              printf '%s\n' 'gradle.startParameter.refreshDependencies = true' > "$refresh_init"
-              dart setup.dart "${BUILD_ARGS[@]}"
-            fi
-          elif [ "${{ matrix.platform }}" == "macos" ]; then
-            build_log="$RUNNER_TEMP/macos-build.log"
-            set +e
-            dart setup.dart "${BUILD_ARGS[@]}" 2>&1 | tee "$build_log"
-            build_status=${PIPESTATUS[0]}
-            set -e
-            if [ "$build_status" -ne 0 ]; then
-              if ! grep -q 'github.com/simolus3/sqlite3.dart/releases/download/' "$build_log" ||
-                 ! grep -q 'Connection closed before full header was received' "$build_log"; then
-                exit "$build_status"
-              fi
-              echo "Retrying macOS build once after the SQLite dependency download was interrupted"
-              dart setup.dart "${BUILD_ARGS[@]}"
-            fi
-          else
-            dart setup.dart "${BUILD_ARGS[@]}"
-          fi
-
-          if [ ! -d ./dist ] || [ -z "$(find ./dist -type f -print -quit)" ]; then
-            echo "Build produced no artifacts in ./dist" >&2
-            exit 1
-          fi
-
-      - name: Verify final Android APK version and alignment
-        if: matrix.platform == 'android'
-        env:
-          RELEASE_VERSION: '0.9.4'
-          RELEASE_BUILD: '2026112501'
-          RELEASE_ARCH: ${{ matrix.arch }}
-        run: |
-          python3 tool/check_apk_version.py --version "$RELEASE_VERSION" --build "$RELEASE_BUILD" \
-            --arch "$RELEASE_ARCH" --core-digests build/core/gomobile/release/metadata/core-sha256.json dist/*.apk
-
-      - name: Verify the signed package on 16 KB Android x86_64
-        run: |
-          set -euo pipefail
-          python3 "$FLCLASH_RECOVERY_TOOL" record
-          bash .release-checks/tool/release_android_16k/run_emulator.sh dist/flclash-android-x86_64.apk build/native-records.json
-
-      - name: Upload build records
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: build-records-${{ matrix.platform }}-${{ matrix.arch }}
-          path: build/native-records.json
-          overwrite: true
-          if-no-files-found: error
-
-      - name: Seal debug symbols
-        run: dart tool/debug_symbols.dart seal build/debug-symbols build/debug-symbols-sealed
-
-      - name: Upload sealed debug symbols
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: debug-symbols-${{ matrix.platform }}-${{ matrix.arch }}
-          path: build/debug-symbols-sealed
-          retention-days: 90
-          overwrite: true
-          if-no-files-found: error
-
-      - name: Upload
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: artifact-${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) }}
-          path: ./dist
-          overwrite: true
-          if-no-files-found: error
-
-  upload:
-    name: Publish the verified release
-    if: github.actor == 'pickrui' && github.triggering_actor == 'pickrui' && github.repository == 'pickrui/FlClash' && github.ref == 'refs/heads/main' && github.sha == vars.FLCLASH_RECOVERY_WORKFLOW_SHA && inputs.operation == 'publish'
-    runs-on: ubuntu-24.04
-    permissions:
-      actions: read
-      contents: write
-    steps:
-      - name: Checkout release source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: 6bfe1d0108b84527e33425e934912e54c0868457
-          fetch-depth: 0
-          submodules: recursive
-          persist-credentials: false
-
-      - name: Read pinned recovery checks
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
-          ssh-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
-          ref: ee95f8ad8a52460dd1d9371469ce6cce6e63c926
-          path: .release-checks
-          persist-credentials: false
-          sparse-checkout: tool/release_android_16k
-
-      - name: Verify release identity
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RECOVERY_ARTIFACT_RUN: ${{ inputs.artifact_run }}
-          VERIFIED_ASSETS_SHA256: ${{ vars.FLCLASH_RECOVERY_MANIFEST_SHA256 }}
-        run: python3 .release-checks/tool/release_android_16k/verify_run.py publish
-
-      - name: Prepare private build sources
-        uses: ./.github/actions/private-source
-        with:
-          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
-          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
-
-      - name: Retrieve original packages
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        with:
-          path: ./dist/
-          pattern: artifact-*
-          merge-multiple: true
-          run-id: 45454608342
-          github-token: ${{ github.token }}
-
-      - name: Retrieve replacement packages
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        with:
-          path: ./dist/
-          pattern: artifact-android-amd64
-          merge-multiple: true
-          run-id: ${{ inputs.artifact_run }}
-          github-token: ${{ github.token }}
-
-      - name: Verify the complete package set against the reviewed manifest
-        env:
-          MANIFEST_SHA256: ${{ vars.FLCLASH_RECOVERY_MANIFEST_SHA256 }}
-        run: |
-          set -euo pipefail
-          python3 tool/release_checksums.py dist
-          test "$(wc -l < dist/SHA256SUMS)" -eq 25
-          printf '%s  %s\n' "$MANIFEST_SHA256" dist/SHA256SUMS | sha256sum --check --strict
-
-      - name: Generate release.md
-        run: |
-          tag="v0.9.4"
-          out="release.md"
-          awk -v heading="## $tag" '
-            $0 == heading || index($0, heading " (") == 1 { found=1; capture=1; next }
-            capture && /^## / { exit }
-            capture { print }
-            END { if (!found) exit 1 }
-          ' CHANGELOG.md > "$out"
-          if ! grep -q '[^[:space:]]' "$out"; then
-            echo "No changelog entries found for $tag" >&2
-            exit 1
-          fi
-
-      - name: Patch release.md
-        run: |
-          version=$(echo "v0.9.4" | sed 's/^v//')
-          sed "s|VERSION|$version|g" ./.github/release_template.md >> release.md
-
-      - name: Release
-        if: ${{ env.IS_STABLE == 'true' }}
-        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
-        with:
-          tag_name: v0.9.4
-          files: ./dist/*
-          body_path: './release.md'
-
-      - name: Update Version via oixCloud API
-        if: success() && env.IS_STABLE == 'true'
-        continue-on-error: true
-        run: |
-          API_KEY="${{ secrets.FLCLASH_KEY }}"
-          API_URL="https://${{ secrets.API_DOMAIN }}/api/v1/version/update"
-          FULL_VERSION="0.9.4+2026112501"
-
-          if [ -z "$API_KEY" ]; then
-            echo "⚠️  Skipping version update: API_KEY secret not configured"
-            exit 0
-          fi
-
-          if [ -z "$FULL_VERSION" ]; then
-            echo "❌ Error: Version number not available"
-            exit 1
-          fi
-
-          echo "📦 Updating oixCloud version to: $FULL_VERSION"
-
-          response=$(curl -s -w "\n%{http_code}" -X POST "$API_URL" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            --data-urlencode "key=$API_KEY" \
-            --data-urlencode "version=$FULL_VERSION")
-
-          http_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-          ret_code=$(echo "$body" | grep -oE '"ret"[[:space:]]*:[[:space:]]*[0-9]+' | grep -oE '[0-9]+$' || echo "")
-
-          echo "Response body: $body"
-          echo "HTTP status: $http_code   Business ret: ${ret_code:-<none>}"
-
-          if [ "$http_code" = "200" ] && [ "$ret_code" = "200" ]; then
-            echo "✅ Version updated successfully on oixCloud"
-            echo "   Version: $FULL_VERSION"
-            echo "   API: $API_URL"
-          else
-            echo "❌ Failed to update version"
-            echo "   HTTP Status: $http_code"
-            echo "   Business ret: ${ret_code:-<none>}"
-            echo "   Response: $body"
-            exit 1
-          fi
-
-  aur:
-    name: Publish AUR package
-    if: ${{ !cancelled() && needs.upload.result == 'success' }}
-    needs: [upload]
-    permissions:
-      contents: write
-    uses: ./.github/workflows/aur.yaml
-    with:
-      tag: v0.9.4
-    secrets:
-      AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
-
-  docker:
-    name: Build Docker (amd64/arm64)
-    needs: [upload]
-    if: ${{ !cancelled() && needs.upload.result == 'success' }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 90
-    permissions:
-      contents: read
-      packages: write
-    env:
-      FLCLASH_VERSION: '0.9.4'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: 6bfe1d0108b84527e33425e934912e54c0868457
-          persist-credentials: false
-
-      - name: Wait for release assets
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          VERSION="$FLCLASH_VERSION"
-          TAG="v${VERSION}"
-          API="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}"
-          echo "Checking deb assets on release ${TAG}..."
-          for i in $(seq 1 10); do
-            BODY=$(curl -sSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "$API" || true)
-            if echo "$BODY" | grep -q "flclash-linux-amd64.deb" && echo "$BODY" | grep -q "flclash-linux-arm64.deb"; then
-              echo "Both deb assets are available."
-              exit 0
-            fi
-            echo "Attempt $i/10: assets not visible yet, sleeping 15s..."
-            sleep 15
+          test "$(a get-state)" = device
+          for _ in $(seq 1 120); do
+            if [[ $(a shell getprop sys.boot_completed 2>/dev/null | tr -d '\r') == 1 ]]; then break; fi
+            kill -0 "$pid"
+            sleep 2
           done
-          echo "Timed out waiting for release assets."
-          exit 1
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
-
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
-
-      - name: Login to GHCR
-        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compute tags
-        id: tags
-        run: |
-          VERSION="$FLCLASH_VERSION"
-          OWNER=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
-          TAGS="ghcr.io/${OWNER}/flclash:latest,ghcr.io/${OWNER}/flclash:${VERSION}"
-          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
-          echo "Tags: $TAGS"
-
-      - name: Build and push
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
-        with:
-          context: ./docker
-          file: ./docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.tags.outputs.tags }}
-          build-args: |
-            FLCLASH_VERSION=0.9.4
-            FLCLASH_REPO=${{ github.repository }}
-          provenance: false
+          test "$(a shell getprop sys.boot_completed | tr -d '\r')" = 1
+          a root >/dev/null
+          a wait-for-device
+          test "$(a shell getconf PAGE_SIZE | tr -d '\r')" = 16384
+          test "$(a shell getprop ro.product.cpu.abi | tr -d '\r')" = x86_64
