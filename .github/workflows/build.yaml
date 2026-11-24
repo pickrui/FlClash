@@ -164,7 +164,7 @@ jobs:
           cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
 
       - name: Build native script test library
-        run: cargo build --locked --manifest-path plugins/rust_api/rust/Cargo.toml
+        run: cargo rustc --locked --manifest-path plugins/rust_api/rust/Cargo.toml --lib --crate-type cdylib
 
       - name: Skip hooks for explicitly built unit-test fixtures
         run: dart tool/set_native_build_assets.dart false
@@ -182,14 +182,6 @@ jobs:
 
       - name: Coverage floor
         run: dart tool/check_coverage.dart
-
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: flutter-coverage
-          path: coverage/lcov.info
-          if-no-files-found: ignore
 
       - name: Verify isolated desktop safe mode
         env:
@@ -787,43 +779,27 @@ jobs:
           if-no-files-found: error
           overwrite: true
 
-  checks:
-    name: Required release checks
-    if: ${{ always() }}
-    needs: [version, test, go-test, android-core-test, android-test, windows-helper-test]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Prepare private build sources
-        uses: ./.github/actions/private-source
-        with:
-          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
-          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
-
-      - name: Require every applicable check to pass
-        env:
-          NEEDS_JSON: ${{ toJSON(needs) }}
-        run: python3 tool/release_checks.py gate
-
   upload:
-    if: ${{ !cancelled() && needs.version.result == 'success' && needs.build.result == 'success' && needs.build-android-x64.result == 'success' && needs.checks.result == 'success' && (needs.android-page-size.result == 'success' || (github.sha != vars.FLCLASH_ANDROID_X64_16K_SHA && needs.android-page-size.result == 'skipped')) }}
+    needs: [version, build, build-android-x64, test, go-test, android-core-test, android-test, windows-helper-test, android-page-size]
+    if: >-
+      ${{ !cancelled() &&
+      needs.version.result == 'success' &&
+      needs.build.result == 'success' &&
+      needs.build-android-x64.result == 'success' &&
+      needs.test.result == 'success' &&
+      needs.go-test.result == 'success' &&
+      needs.android-core-test.result == 'success' &&
+      needs.android-test.result == 'success' &&
+      needs.windows-helper-test.result == 'success' &&
+      (needs.android-page-size.result == 'success' ||
+       (github.sha != vars.FLCLASH_ANDROID_X64_16K_SHA && needs.android-page-size.result == 'skipped')) }}
     permissions:
       actions: read
       contents: write
-    needs: [version, build, build-android-x64, checks, android-page-size]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          fetch-depth: 0
-
-      - name: Prepare private build sources
-        uses: ./.github/actions/private-source
-        with:
-          source-repository: ${{ secrets.PRIVATE_SOURCE_REPOSITORY }}
-          source-key: ${{ secrets.PRIVATE_SOURCE_KEY }}
 
       - name: Download
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8

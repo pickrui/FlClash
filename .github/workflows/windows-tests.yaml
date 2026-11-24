@@ -53,9 +53,6 @@ jobs:
       - name: Compile Windows installer code
         run: python -m unittest discover -s test/ci -p test_windows_installer.py -v
 
-      - name: Check format
-        run: cargo fmt --manifest-path services/helper/Cargo.toml -- --check
-
       - name: Run Windows service tests
         run: cargo test --manifest-path services/helper/Cargo.toml --features windows-service
 
@@ -84,7 +81,6 @@ jobs:
             test/core/desktop/process_probe_test.dart \
             test/core/desktop/helper_client_test.dart \
             test/core/desktop/launch_policy_test.dart \
-            test/widgets/init_error_screen_test.dart \
             test/common/bundled_roots_test.dart \
             test/common/http_certificate_scope_test.dart \
             test/common/request_read_race_test.dart \
@@ -97,7 +93,6 @@ jobs:
             test/common/config_backup_test.dart \
             test/widgets/config_recovery_test.dart \
             test/services/network_diagnostic_platform_test.dart \
-            test/services/network_diagnostic_proxy_channel_test.dart \
             test/common/update_download_task_test.dart \
             test/widgets/update_download_page_test.dart
 

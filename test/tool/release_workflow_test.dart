@@ -237,33 +237,32 @@ void main() {
   test('packaging overlaps checks while publication waits for every gate', () {
     expect(jobs['build']['needs'], ['version']);
     expect(jobs['build-android-x64']['needs'], ['version']);
+    const required = [
+      'version',
+      'build',
+      'build-android-x64',
+      'test',
+      'go-test',
+      'android-core-test',
+      'android-test',
+      'windows-helper-test',
+    ];
+    final upload = jobs['upload'] as YamlMap;
     expect(
-      jobs['upload']['needs'],
-      containsAll(['version', 'build', 'build-android-x64', 'checks']),
+      upload['needs'],
+      unorderedEquals([...required, 'android-page-size']),
     );
-    expect(
-      jobs['checks']['needs'],
-      containsAll([
-        'version',
-        'test',
-        'go-test',
-        'android-core-test',
-        'android-test',
-        'windows-helper-test',
-      ]),
-    );
-    expect(jobs['checks']['if'], contains('always()'));
-    final step = (jobs['checks']['steps'] as YamlList).last as YamlMap;
-    expect(step['env']['NEEDS_JSON'], contains('toJSON(needs)'));
-    expect(step['run'], 'python3 tool/release_checks.py gate');
-  });
-
-  test('publication requires successful builds and checks', () {
-    final upload = jobs['upload']['if'] as String;
-    expect(upload, contains('!cancelled()'));
-    for (final need in ['version', 'build', 'build-android-x64', 'checks']) {
-      expect(upload, contains("needs.$need.result == 'success'"));
+    final condition = upload['if'] as String;
+    expect(condition, contains('!cancelled()'));
+    for (final need in required) {
+      expect(condition, contains("needs.$need.result == 'success'"));
     }
+    expect(
+      condition,
+      contains(
+        "github.sha != vars.FLCLASH_ANDROID_X64_16K_SHA && needs.android-page-size.result == 'skipped'",
+      ),
+    );
     final aur = jobs['aur']['if'] as String;
     expect(aur, contains('!cancelled()'));
     expect(aur, contains("needs.upload.result == 'success'"));
