@@ -6,7 +6,7 @@
 
 问题修复：切换账户后重新读取对应的登录状态；未生效的套餐可直接更换，避免误入升级流程
 
-安全与兼容：macOS 版改用新的开发者证书签名，已安装的旧版无法通过应用内更新升级到此版本，请从发布页下载 DMG 手动安装一次，之后可正常自动更新
+安全与兼容：macOS 版改用新的开发者证书签名，已安装的旧版请从发布页下载 DMG 手动安装一次。macOS 13 及以上的标准版随后可继续自动更新；macOS 12 兼容版需手动更新，按处理器选择 [Apple Silicon](https://github.com/pickrui/FlClash/releases/download/v0.9.4/flclash-v0.9.4-macos12-arm64.dmg) 或 [Intel](https://github.com/pickrui/FlClash/releases/download/v0.9.4/flclash-v0.9.4-macos12-amd64.dmg)
 
 安全与兼容：数据库升级至 v16。标准覆写可先运行覆写脚本，附加规则排在脚本返回的规则之前；原脚本模式的配置升级后停用全局附加规则，但该配置先前留下的自有附加规则会随脚本一起生效
 
@@ -18,7 +18,7 @@
 
 内核更新：升级至 mihomo v1.19.34；Android 网络切换后 WireGuard、Hysteria2 和 TUIC 自动重连，VPN 启动前建立的内核连接同样受保护；HTTPUpgrade 节点分享链接按 httpupgrade 类型导出
 
-渲染调整：Windows 与 Intel Mac 改用 Impeller 渲染
+渲染调整：Windows 与 macOS 13 及以上的 Intel Mac 改用 Impeller 渲染
 
 行为调整：Windows 新安装默认在绕过列表中加入 <local>，可以像其他条目一样删除，已有配置升级后保持原样；Linux 托盘左键打开窗口、右键弹出菜单，Linux 安装包不再依赖 appindicator
 
