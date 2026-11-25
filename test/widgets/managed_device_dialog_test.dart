@@ -24,13 +24,14 @@ const _link = 'https://panel.test/user/managed-device?code=A1B2C-3D4E5';
 ManagedDeviceEnrollment _pending({
   String code = 'A1B2C-3D4E5',
   DeviceCodeMethod? method,
+  String? verificationUrl = _link,
 }) => ManagedDeviceEnrollment(
   session: 0,
   fingerprint: '0123456789abcdef' * 4,
   code: code,
   requestId: 'c' * 32,
   codeMethod: method,
-  verificationUrl: _link,
+  verificationUrl: verificationUrl,
 );
 
 class _SignedIn extends CloudAccountNotifier {
@@ -42,6 +43,7 @@ class _Device extends ManagedDeviceNotifier {
   final answers = <Object>[];
   var asks = 0;
   var reapplies = 0;
+  String? verificationUrl = _link;
   DeviceCodeMethod? method;
   final codes = <String?>[];
   var approvedElsewhere = false;
@@ -56,8 +58,10 @@ class _Device extends ManagedDeviceNotifier {
   }
 
   @override
-  ManagedDeviceState build() =>
-      ManagedDeviceState(approved: false, pending: _pending(method: method));
+  ManagedDeviceState build() => ManagedDeviceState(
+    approved: false,
+    pending: _pending(method: method, verificationUrl: verificationUrl),
+  );
 
   @override
   Future<ManagedDeviceEnrollment> reapply(ManagedDeviceState denied) {
@@ -69,7 +73,7 @@ class _Device extends ManagedDeviceNotifier {
   Future<ManagedDeviceEnrollment> enroll({String? ticket}) async {
     asks++;
     final answer = answers.isEmpty
-        ? _pending(method: method)
+        ? _pending(method: method, verificationUrl: verificationUrl)
         : answers.removeAt(0);
     if (answer is! ManagedDeviceEnrollment) {
       if (answer is ManagedDeviceRefusal &&
@@ -128,11 +132,13 @@ void main() {
         String? suggestion, {
         String primary = 'primary.test',
         String backup = 'backup.test',
+        bool allowFallback = true,
       }) => managedDeviceApprovalUrl(
         code: 'A1B2C-3D4E5',
         received: suggestion,
         primaryDomain: primary,
         spareDomain: backup,
+        allowFallback: allowFallback,
       );
       const suffix = '/user/managed-device?code=A1B2C-3D4E5';
       for (final source in [
@@ -143,59 +149,98 @@ void main() {
         'https://user@backup.test/user/managed-device',
       ]) {
         expect(link(source), 'https://primary.test$suffix');
+        expect(link(source, allowFallback: false), isNull);
       }
       expect(
         link('https://backup.test/user/managed-device?code=old#unneeded'),
+        'https://backup.test$suffix',
+      );
+      expect(
+        link('https://primary.test/user/managed-device', allowFallback: false),
+        'https://primary.test$suffix',
+      );
+      expect(
+        link('https://backup.test/user/managed-device', allowFallback: false),
         'https://backup.test$suffix',
       );
       expect(link(null, primary: '', backup: ''), isNull);
     },
   );
 
-  testWidgets('shows what approves the device and closes once approved', (
-    tester,
-  ) async {
-    final device = _Device();
-    final results = await _open(tester, device);
+  testWidgets(
+    'a legacy request without a website still offers external approval',
+    (tester) async {
+      final device = _Device()..verificationUrl = null;
+      final results = await _open(tester, device);
 
-    expect(find.text('A1B2C-3D4E5'), findsOneWidget);
-    expect(find.text('/device A1B2C-3D4E5'), findsOneWidget);
-    expect(find.text('0123 4567 89ab cdef'), findsOneWidget);
-    final expectedLink = managedDeviceApprovalUrl(
-      code: 'A1B2C-3D4E5',
-      received: _link,
-      primaryDomain: Secrets.primarySiteDomain,
-      spareDomain: Secrets.spareSiteDomain,
-    );
-    if (expectedLink != null) expect(find.text(expectedLink), findsOneWidget);
-    expect(
-      find.byType(SelectableText),
-      findsNWidgets(expectedLink == null ? 3 : 4),
-    );
-    expect(
-      find.text(appLocalizations.openInBrowser),
-      expectedLink == null ? findsNothing : findsOneWidget,
-    );
-    expect(find.text(appLocalizations.deviceApprovalWaiting), findsOneWidget);
-    expect(device.asks, 1);
+      expect(find.text('A1B2C-3D4E5'), findsOneWidget);
+      expect(find.text('/device A1B2C-3D4E5'), findsOneWidget);
+      expect(find.text('0123 4567 89ab cdef'), findsOneWidget);
+      final expectedLink = managedDeviceApprovalUrl(
+        code: 'A1B2C-3D4E5',
+        received: null,
+        primaryDomain: Secrets.primarySiteDomain,
+        spareDomain: Secrets.spareSiteDomain,
+      );
+      if (expectedLink != null) expect(find.text(expectedLink), findsOneWidget);
+      expect(
+        find.byType(SelectableText),
+        findsNWidgets(expectedLink == null ? 3 : 4),
+      );
+      expect(
+        find.text(appLocalizations.openInBrowser),
+        expectedLink == null ? findsNothing : findsOneWidget,
+      );
+      expect(find.text(appLocalizations.deviceApprovalWaiting), findsOneWidget);
+      expect(device.asks, 1);
 
-    // The panel hands out a new code once the old request expires.
-    device.answers.add(_pending(code: 'FFFFF-00000'));
-    await tester.pump(const Duration(seconds: 5));
-    await tester.pump();
-    expect(device.asks, 2);
-    expect(find.text('FFFFF-00000'), findsOneWidget);
-    expect(find.text('/device FFFFF-00000'), findsOneWidget);
+      // The panel hands out a new code once the old request expires.
+      device.answers.add(_pending(code: 'FFFFF-00000'));
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pump();
+      expect(device.asks, 2);
+      expect(find.text('FFFFF-00000'), findsOneWidget);
+      expect(find.text('/device FFFFF-00000'), findsOneWidget);
 
-    device.answers.add(
-      ManagedDeviceEnrollment(session: 0, fingerprint: '0123456789abcdef' * 4),
+      device.answers.add(
+        ManagedDeviceEnrollment(
+          session: 0,
+          fingerprint: '0123456789abcdef' * 4,
+        ),
+      );
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      expect(device.asks, 3);
+      expect(results, [true]);
+      expect(find.text('FFFFF-00000'), findsNothing);
+    },
+  );
+
+  for (final method in DeviceCodeMethod.values) {
+    testWidgets(
+      'a new $method request without a website only offers the in-app code',
+      (tester) async {
+        final device = _Device()
+          ..method = method
+          ..verificationUrl = null;
+        await _open(tester, device);
+        expect(
+          find.text(
+            method == DeviceCodeMethod.email
+                ? appLocalizations.deviceEmailCode
+                : appLocalizations.deviceAuthenticatorCode,
+          ),
+          findsOneWidget,
+        );
+        expect(find.text(appLocalizations.deviceOtherMethods), findsNothing);
+        expect(find.text(appLocalizations.deviceApprovalSteps), findsNothing);
+        expect(find.text(appLocalizations.openInBrowser), findsNothing);
+        expect(find.text('/device A1B2C-3D4E5'), findsNothing);
+        await tester.tap(find.text(appLocalizations.close));
+        await tester.pumpAndSettle();
+      },
     );
-    await tester.pump(const Duration(seconds: 5));
-    await tester.pumpAndSettle();
-    expect(device.asks, 3);
-    expect(results, [true]);
-    expect(find.text('FFFFF-00000'), findsNothing);
-  });
+  }
 
   testWidgets('sending an email closes once when already approved', (
     tester,

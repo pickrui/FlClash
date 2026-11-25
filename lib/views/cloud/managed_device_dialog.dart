@@ -21,18 +21,24 @@ String? managedDeviceApprovalUrl({
   required String? received,
   required String primaryDomain,
   required String spareDomain,
+  bool allowFallback = true,
 }) {
   const path = '/user/managed-device';
   final suggested = received == null ? null : Uri.tryParse(received);
   final backup = spareDomain.trim().toLowerCase();
   final primary = primaryDomain.trim().toLowerCase();
-  final useBackup =
-      backup.isNotEmpty &&
-      suggested?.scheme == 'https' &&
-      suggested?.host == backup &&
-      suggested?.userInfo == '' &&
-      suggested?.port == 443 &&
-      suggested?.path == path;
+  final offered =
+      suggested != null &&
+      suggested.scheme == 'https' &&
+      suggested.userInfo.isEmpty &&
+      suggested.port == 443 &&
+      suggested.path == path;
+  final useBackup = offered && backup.isNotEmpty && suggested.host == backup;
+  if (!allowFallback &&
+      !useBackup &&
+      !(offered && primary.isNotEmpty && suggested.host == primary)) {
+    return null;
+  }
   final host = useBackup || primary.isEmpty ? backup : primary;
   if (host.isEmpty) return null;
   return Uri.https(host, path, {'code': code}).toString();
@@ -254,6 +260,7 @@ class _ManagedDeviceApprovalDialogState
             received: enrollment?.verificationUrl,
             primaryDomain: Secrets.primarySiteDomain,
             spareDomain: Secrets.spareSiteDomain,
+            allowFallback: !inApp,
           );
     final colorScheme = context.colorScheme;
     final level = context.raisedSurfaceLevel;
@@ -294,13 +301,15 @@ class _ManagedDeviceApprovalDialogState
               pending: enrollment,
               onVerified: () => _close(true),
             ),
-            TextButton(
-              onPressed: () =>
-                  setState(() => _showOtherMethods = !_showOtherMethods),
-              child: Text(appLocalizations.deviceOtherMethods),
-            ),
+            if (url != null)
+              TextButton(
+                onPressed: () =>
+                    setState(() => _showOtherMethods = !_showOtherMethods),
+                child: Text(appLocalizations.deviceOtherMethods),
+              ),
           ],
-          if (device.denial == null && (!inApp || _showOtherMethods)) ...[
+          if (device.denial == null &&
+              (!inApp || (url != null && _showOtherMethods))) ...[
             Text(
               appLocalizations.deviceApprovalSteps,
               style: AppTextStyle.subheadline
