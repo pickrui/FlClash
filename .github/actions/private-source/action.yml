@@ -37,7 +37,7 @@ runs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       with:
         repository: ${{ inputs.source-repository }}
-        ref: 14dc00a76c378cebf71dfffcc5f6fb16068648cc
+        ref: 1113c233b160f64461ac9147258047cf01d6b0f4
         path: .private-build
         ssh-key: ${{ inputs.source-key }}
         persist-credentials: false

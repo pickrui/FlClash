@@ -28,10 +28,7 @@ void main() {
       final resolver = steps.indexWhere((step) => step['id'] == 'build_tool');
       expect(privateSources, greaterThan(0));
       expect(resolver, greaterThan(privateSources));
-      expect(
-        steps[resolver]['env']['BUILD_TOOL_VERSION_OVERRIDE'],
-        r'${{ vars.BUILD_TOOL_VERSION_OVERRIDE }}',
-      );
+      expect(steps[resolver]['run'], contains('resolve_build_tool_version.sh'));
 
       final build = jobs['build'] as YamlMap;
       expect(
@@ -39,8 +36,10 @@ void main() {
         r'${{ needs.version.outputs.build_tool_version }}',
       );
       expect(
-        build['env']['BUILD_TOOL_DIRECTIVES'],
-        r'${{ vars.BUILD_TOOL_DIRECTIVES }}',
+        (build['steps'] as YamlList).cast<YamlMap>().where(
+          (step) => '${step['run']}'.contains('resolve_build_tool_version.sh'),
+        ),
+        hasLength(1),
       );
       final setup = File('setup.dart').readAsStringSync();
       expect(setup, contains("'BUILD_TOOL_VERSION': buildToolVersion!"));
@@ -68,7 +67,7 @@ void main() {
       ]) {
         final builder = File(path).readAsStringSync();
         expect(builder, contains("'build_tool_version', buildToolVersion"));
-        expect(builder, contains('buildToolDirectivesEnabled()'));
+        expect(builder, contains('nativeToolLock(rootDir)'));
       }
       expect(
         File('macos/Runner.xcodeproj/project.pbxproj').readAsStringSync(),
@@ -82,33 +81,24 @@ void main() {
     final collect = steps.indexWhere(
       (step) => '${step['run']}'.contains('tool/collect_build_records.py'),
     );
-    final exception = steps.indexWhere(
-      (step) =>
-          step['name'] == 'Record the approved Android 16 KB package input',
-    );
     final records = steps.indexWhere(
       (step) => step['name'] == 'Upload build records',
     );
     final packages = steps.indexWhere(
       (step) => '${step['with']?['name']}'.startsWith('artifact-'),
     );
-    const approved = "env.FLCLASH_ANDROID_X64_16K_SHA != ''";
-    expect(exception, greaterThan(0));
-    expect(steps[exception]['if'], approved);
-    expect(steps[exception]['run'], contains('record'));
     expect(collect, greaterThan(0));
-    expect(steps[collect]['if'], "env.FLCLASH_ANDROID_X64_16K_SHA == ''");
+    expect(steps[collect]['if'], isNull);
     expect(records, greaterThan(collect));
-    expect(records, greaterThan(exception));
     expect(packages, greaterThan(records));
     expect(steps[records]['if'], isNull);
     expect(
       steps[records]['with']['name'],
       contains(
-        "$approved && 'native-input-android-amd64' || format('build-records-{0}-{1}', matrix.platform, matrix.arch)",
+        "matrix.platform == 'android' && matrix.arch == 'amd64' && 'native-input-android-amd64' || format('build-records-{0}-{1}', matrix.platform, matrix.arch)",
       ),
     );
-    for (final step in [steps[exception], steps[collect], steps[records]]) {
+    for (final step in [steps[collect], steps[records]]) {
       expect(step['continue-on-error'], isNull);
     }
     expect(steps[records]['with']['path'], 'build/native-records.json');
@@ -257,12 +247,7 @@ void main() {
     for (final need in required) {
       expect(condition, contains("needs.$need.result == 'success'"));
     }
-    expect(
-      condition,
-      contains(
-        "github.sha != vars.FLCLASH_ANDROID_X64_16K_SHA && needs.android-page-size.result == 'skipped'",
-      ),
-    );
+    expect(condition, contains("needs.android-page-size.result == 'success'"));
     final aur = jobs['aur']['if'] as String;
     expect(aur, contains('!cancelled()'));
     expect(aur, contains("needs.upload.result == 'success'"));

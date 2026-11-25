@@ -101,7 +101,7 @@ class GoBuilder {
           return [
             outFile,
             if (buildToolVersion case final version?)
-              await protectBinary(outFile, version: version),
+              await protectBinary(outFile, version: version, root: rootDir),
           ];
         } finally {
           if (stagingDir.existsSync()) {
@@ -136,7 +136,10 @@ class GoBuilder {
       ..addValue('cache_schema', BuildCache.schemaVersion)
       ..addValue('kind', 'go-core')
       ..addValue('build_tool_version', buildToolVersion)
-      ..addValue('build_tool_directives', buildToolDirectivesEnabled())
+      ..addValue(
+        'build_tool_lock',
+        buildToolVersion == null ? null : nativeToolLock(rootDir),
+      )
       ..addValue('target', {'goos': target.goos, 'goarch': target.goarch})
       ..addValue('config', config.toFingerprintMap())
       ..addValue('environment', env)

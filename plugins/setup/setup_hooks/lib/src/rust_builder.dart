@@ -115,7 +115,7 @@ class RustBuilder {
         return [
           destPath,
           if (buildToolVersion case final version?)
-            await protectBinary(destPath, version: version),
+            await protectBinary(destPath, version: version, root: rootDir),
         ];
       },
     );
@@ -132,7 +132,10 @@ class RustBuilder {
       ..addValue('cache_schema', BuildCache.schemaVersion)
       ..addValue('kind', 'helper')
       ..addValue('build_tool_version', buildToolVersion)
-      ..addValue('build_tool_directives', buildToolDirectivesEnabled())
+      ..addValue(
+        'build_tool_lock',
+        buildToolVersion == null ? null : nativeToolLock(rootDir),
+      )
       ..addValue('toolchain', _helperToolchain)
       ..addValue('target', {'goos': target.goos, 'goarch': target.goarch})
       ..addValue('arguments', args)
