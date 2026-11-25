@@ -6,6 +6,7 @@
   "deviceOtherMethods": "其他批准方式",
   "deviceApproved": "设备已批准",
   "deviceApprovalSteps": "在已登录账户的浏览器中打开链接并核对确认码，或私聊已绑定的 Telegram Bot 发送命令。设备指纹一致才批准",
+  "deviceTemporaryAccess": "已临时联网",
   "deviceApprovalRequired": "批准这台设备后才能获取节点",
   "deviceApprovalCode": "确认码",
   "deviceApprovalCommand": "Telegram 命令",

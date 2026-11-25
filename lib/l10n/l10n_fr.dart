@@ -34,6 +34,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Ouvrez le lien dans un navigateur connecté à votre compte et vérifiez le code, ou envoyez la commande en privé à votre bot Telegram associé. N’autorisez que si l’empreinte correspond.';
 
   @override
+  String get deviceTemporaryAccess => 'Accès temporaire';
+
+  @override
   String get deviceApprovalRequired =>
       'Autorisez cet appareil pour obtenir les nœuds';
 

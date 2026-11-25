@@ -150,6 +150,12 @@ abstract class AppLocalizations {
   /// **'Open the link in a browser signed in to your account and check the code, or send the command to your linked Telegram bot in a private chat. Approve only if the fingerprint matches.'**
   String get deviceApprovalSteps;
 
+  /// No description provided for @deviceTemporaryAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary access'**
+  String get deviceTemporaryAccess;
+
   /// No description provided for @deviceApprovalRequired.
   ///
   /// In en, this message translates to:

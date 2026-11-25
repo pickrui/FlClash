@@ -33,6 +33,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'Откройте ссылку в браузере, где выполнен вход в аккаунт, и сверьте код или отправьте команду в личном чате с привязанным ботом Telegram. Подтверждайте, только если отпечаток совпадает.';
 
   @override
+  String get deviceTemporaryAccess => 'Временный доступ';
+
+  @override
   String get deviceApprovalRequired =>
       'Подтвердите устройство, чтобы получить узлы';
 

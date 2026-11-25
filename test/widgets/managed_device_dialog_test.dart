@@ -273,7 +273,11 @@ void main() {
       }
       expect(find.text(appLocalizations.openInBrowser), findsNothing);
       final code = method == DeviceCodeMethod.email ? '00123456' : '001234';
-      await tester.enterText(find.byType(EditableText), code);
+      expect(find.text('0123 4567 89ab cdef'), findsOneWidget);
+      final input = find.byWidgetPredicate(
+        (widget) => widget is EditableText && !widget.readOnly,
+      );
+      await tester.enterText(input, code);
       await tester.pump();
       await tester.tap(find.text(appLocalizations.confirm));
       await tester.pumpAndSettle();

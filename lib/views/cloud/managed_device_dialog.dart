@@ -308,6 +308,12 @@ class _ManagedDeviceApprovalDialogState
                 child: Text(appLocalizations.deviceOtherMethods),
               ),
           ],
+          if (device.denial == null && enrollment != null)
+            _field(
+              appLocalizations.deviceFingerprint,
+              enrollment.shortFingerprint,
+              copyable: false,
+            ),
           if (device.denial == null &&
               (!inApp || (url != null && _showOtherMethods))) ...[
             Text(
@@ -377,11 +383,6 @@ class _ManagedDeviceApprovalDialogState
               _field(
                 appLocalizations.deviceApprovalCommand,
                 enrollment.telegramCommand,
-              ),
-              _field(
-                appLocalizations.deviceFingerprint,
-                enrollment.shortFingerprint,
-                copyable: false,
               ),
             ],
           ],

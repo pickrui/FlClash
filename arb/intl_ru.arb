@@ -6,6 +6,7 @@
   "deviceOtherMethods": "Другие способы подтверждения",
   "deviceApproved": "Устройство подтверждено",
   "deviceApprovalSteps": "Откройте ссылку в браузере, где выполнен вход в аккаунт, и сверьте код или отправьте команду в личном чате с привязанным ботом Telegram. Подтверждайте, только если отпечаток совпадает.",
+  "deviceTemporaryAccess": "Временный доступ",
   "deviceApprovalRequired": "Подтвердите устройство, чтобы получить узлы",
   "deviceApprovalCode": "Код подтверждения",
   "deviceApprovalCommand": "Команда Telegram",

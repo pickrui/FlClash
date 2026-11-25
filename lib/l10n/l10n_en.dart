@@ -33,6 +33,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open the link in a browser signed in to your account and check the code, or send the command to your linked Telegram bot in a private chat. Approve only if the fingerprint matches.';
 
   @override
+  String get deviceTemporaryAccess => 'Temporary access';
+
+  @override
   String get deviceApprovalRequired => 'Approve this device to get nodes';
 
   @override

@@ -32,6 +32,9 @@ class AppLocalizationsZh extends AppLocalizations {
       '在已登录账户的浏览器中打开链接并核对确认码，或私聊已绑定的 Telegram Bot 发送命令。设备指纹一致才批准';
 
   @override
+  String get deviceTemporaryAccess => '已临时联网';
+
+  @override
   String get deviceApprovalRequired => '批准这台设备后才能获取节点';
 
   @override

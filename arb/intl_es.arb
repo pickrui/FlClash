@@ -6,6 +6,7 @@
   "deviceOtherMethods": "Otros métodos de aprobación",
   "deviceApproved": "Dispositivo autorizado",
   "deviceApprovalSteps": "Abra el enlace en un navegador con su cuenta iniciada y compruebe el código, o envíe el comando en privado a su bot de Telegram vinculado. Autorice solo si la huella coincide.",
+  "deviceTemporaryAccess": "Acceso temporal",
   "deviceApprovalRequired": "Autorice este dispositivo para obtener los nodos",
   "deviceApprovalCode": "Código de confirmación",
   "deviceApprovalCommand": "Comando de Telegram",

@@ -32,6 +32,9 @@ class AppLocalizationsJa extends AppLocalizations {
       'アカウントにログインしたブラウザでリンクを開いて確認コードを照合するか、連携済みの Telegram ボットに個別チャットでコマンドを送信してください。指紋が一致する場合のみ承認してください';
 
   @override
+  String get deviceTemporaryAccess => '一時アクセス';
+
+  @override
   String get deviceApprovalRequired => 'ノードを取得するには、この端末を承認してください';
 
   @override

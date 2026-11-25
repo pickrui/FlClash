@@ -33,6 +33,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Abra el enlace en un navegador con su cuenta iniciada y compruebe el código, o envíe el comando en privado a su bot de Telegram vinculado. Autorice solo si la huella coincide.';
 
   @override
+  String get deviceTemporaryAccess => 'Acceso temporal';
+
+  @override
   String get deviceApprovalRequired =>
       'Autorice este dispositivo para obtener los nodos';
 
