@@ -587,6 +587,9 @@ jobs:
           BUILD_ARGS+=(--out app)
           [ "${{ env.IS_STABLE }}" == "true" ] && BUILD_ARGS+=(--env stable)
           if [ "${{ matrix.platform }}" == "android" ]; then
+            init_dir="${GRADLE_USER_HOME:-$HOME/.gradle}/init.d"
+            mkdir -p "$init_dir"
+            cp android/gradle/ci-central.init.gradle "$init_dir/flclash-central.gradle"
             build_log="$RUNNER_TEMP/android-build.log"
             set +e
             dart setup.dart "${BUILD_ARGS[@]}" 2>&1 | tee "$build_log"
@@ -598,8 +601,6 @@ jobs:
                 exit "$build_status"
               fi
               echo "Retrying Android build once with refreshed Gradle dependency metadata"
-              init_dir="${GRADLE_USER_HOME:-$HOME/.gradle}/init.d"
-              mkdir -p "$init_dir"
               refresh_init=$(mktemp "$init_dir/flclash-refresh-XXXXXX.gradle")
               trap 'rm -f "$refresh_init"' EXIT
               printf '%s\n' 'gradle.startParameter.refreshDependencies = true' > "$refresh_init"
