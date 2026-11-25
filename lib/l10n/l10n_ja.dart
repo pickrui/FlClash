@@ -13,6 +13,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get approveDevice => 'この端末を承認';
 
   @override
+  String get deviceRequestAgain => '再申請';
+
+  @override
   String get deviceEmailCode => '登録メールアドレスに届く8桁のコード';
 
   @override

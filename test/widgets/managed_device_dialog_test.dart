@@ -41,6 +41,7 @@ class _SignedIn extends CloudAccountNotifier {
 class _Device extends ManagedDeviceNotifier {
   final answers = <Object>[];
   var asks = 0;
+  var reapplies = 0;
   DeviceCodeMethod? method;
   final codes = <String?>[];
   var approvedElsewhere = false;
@@ -59,12 +60,24 @@ class _Device extends ManagedDeviceNotifier {
       ManagedDeviceState(approved: false, pending: _pending(method: method));
 
   @override
+  Future<ManagedDeviceEnrollment> reapply(ManagedDeviceState denied) {
+    reapplies++;
+    return enroll();
+  }
+
+  @override
   Future<ManagedDeviceEnrollment> enroll({String? ticket}) async {
     asks++;
     final answer = answers.isEmpty
         ? _pending(method: method)
         : answers.removeAt(0);
-    if (answer is! ManagedDeviceEnrollment) throw answer;
+    if (answer is! ManagedDeviceEnrollment) {
+      if (answer is ManagedDeviceRefusal &&
+          answer.code == 'device_approval_denied') {
+        state = ManagedDeviceState(approved: false, denial: answer);
+      }
+      throw answer;
+    }
     state = ManagedDeviceState(
       approved: answer.approved,
       pending: answer.approved ? null : answer,
@@ -224,27 +237,37 @@ void main() {
     });
   }
 
-  testWidgets('a refusal stops asking until refreshed', (tester) async {
-    final device = _Device()
-      ..answers.add(
-        const ManagedDeviceRefusal('Too many devices', code: 'device_limit'),
-      );
-    await _open(tester, device);
+  for (final (reason, message) in [
+    ('device_limit', 'Too many devices'),
+    ('device_approval_denied', 'Device approval request denied'),
+  ]) {
+    testWidgets('a $reason refusal stops asking until refreshed', (
+      tester,
+    ) async {
+      final device = _Device()
+        ..answers.add(ManagedDeviceRefusal(message, code: reason));
+      await _open(tester, device);
 
-    expect(device.asks, 1);
-    expect(find.text('Too many devices'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 20));
-    expect(device.asks, 1);
+      expect(device.asks, 1);
+      expect(find.text(message), findsOneWidget);
+      await tester.pump(const Duration(minutes: 15));
+      expect(device.asks, 1);
+      expect(device.reapplies, 0);
+      final denied = reason == 'device_approval_denied';
+      final button = denied
+          ? appLocalizations.deviceRequestAgain
+          : appLocalizations.refresh;
+      await tester.tap(find.text(button));
+      await tester.pump();
+      await tester.pump();
+      expect(device.asks, 2);
+      expect(device.reapplies, denied ? 1 : 0);
+      expect(find.text(message), findsNothing);
 
-    await tester.tap(find.text(appLocalizations.refresh));
-    await tester.pump();
-    await tester.pump();
-    expect(device.asks, 2);
-    expect(find.text('Too many devices'), findsNothing);
-
-    await tester.tap(find.text(appLocalizations.close));
-    await tester.pumpAndSettle();
-  });
+      await tester.tap(find.text(appLocalizations.close));
+      await tester.pumpAndSettle();
+    });
+  }
 
   testWidgets('asking stops after ten minutes', (tester) async {
     final device = _Device();

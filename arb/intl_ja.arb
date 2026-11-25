@@ -1,5 +1,6 @@
 {
   "approveDevice": "この端末を承認",
+  "deviceRequestAgain": "再申請",
   "deviceEmailCode": "登録メールアドレスに届く8桁のコード",
   "deviceAuthenticatorCode": "認証アプリの6桁のコード",
   "deviceOtherMethods": "その他の承認方法",

@@ -1,5 +1,6 @@
 {
   "approveDevice": "Autoriser cet appareil",
+  "deviceRequestAgain": "Faire une nouvelle demande",
   "deviceEmailCode": "Code à 8 chiffres reçu sur l’adresse e-mail du compte",
   "deviceAuthenticatorCode": "Code à 6 chiffres de l’application d’authentification",
   "deviceOtherMethods": "Autres méthodes d’approbation",

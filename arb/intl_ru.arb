@@ -1,5 +1,6 @@
 {
   "approveDevice": "Подтвердить устройство",
+  "deviceRequestAgain": "Запросить снова",
   "deviceEmailCode": "8-значный код из письма на почту аккаунта",
   "deviceAuthenticatorCode": "6-значный код из приложения-аутентификатора",
   "deviceOtherMethods": "Другие способы подтверждения",

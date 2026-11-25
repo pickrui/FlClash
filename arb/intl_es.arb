@@ -1,5 +1,6 @@
 {
   "approveDevice": "Autorizar este dispositivo",
+  "deviceRequestAgain": "Volver a solicitar",
   "deviceEmailCode": "Código de 8 dígitos del correo de tu cuenta",
   "deviceAuthenticatorCode": "Código de 6 dígitos de tu aplicación de autenticación",
   "deviceOtherMethods": "Otros métodos de aprobación",

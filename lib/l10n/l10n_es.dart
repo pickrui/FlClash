@@ -13,6 +13,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get approveDevice => 'Autorizar este dispositivo';
 
   @override
+  String get deviceRequestAgain => 'Volver a solicitar';
+
+  @override
   String get deviceEmailCode => 'Código de 8 dígitos del correo de tu cuenta';
 
   @override

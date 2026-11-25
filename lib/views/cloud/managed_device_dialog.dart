@@ -100,16 +100,24 @@ class _ManagedDeviceApprovalDialogState
   @override
   Future<void> poll(PollGuard isCurrent) => _check();
 
-  Future<void> _check() async {
+  Future<void> _check({ManagedDeviceState? retry}) async {
     if (_checking || _closed) return;
     final notifier = ref.read(managedDeviceProvider.notifier);
     final account = ref.read(cloudAccountProvider.notifier);
     setState(() => _checking = true);
     try {
-      final enrollment = await notifier.enroll();
+      final enrollment = retry == null
+          ? await notifier.enroll()
+          : await notifier.reapply(retry);
       if (!mounted) return;
       setState(() => _error = null);
-      if (enrollment.approved) _close(true);
+      if (enrollment.approved) {
+        _close(true);
+      } else if (retry != null) {
+        _startWindow();
+        setState(() => _stopped = false);
+        startPolling();
+      }
     } catch (e) {
       if (CloudApiException.isHandledUnauthorized(e) ||
           CloudApiException.isStaleSession(e)) {
@@ -122,7 +130,6 @@ class _ManagedDeviceApprovalDialogState
         return;
       }
       if (!mounted) return;
-      // Asking again cannot change what the panel turned down.
       final refused = e is ManagedDeviceRefusal;
       setState(() {
         _error = CloudApiException.clean(e);
@@ -235,9 +242,8 @@ class _ManagedDeviceApprovalDialogState
     ref.listen(managedDeviceProvider.select((s) => s.approved), (_, approved) {
       if (approved == true) _close(true);
     });
-    final enrollment = ref.watch(
-      managedDeviceProvider.select((s) => s.pending),
-    );
+    final device = ref.watch(managedDeviceProvider);
+    final enrollment = device.pending;
     final code = enrollment?.code;
     final inApp =
         enrollment?.codeMethod != null && enrollment?.requestId != null;
@@ -260,8 +266,16 @@ class _ManagedDeviceApprovalDialogState
           child: Text(appLocalizations.close),
         ),
         TextButton(
-          onPressed: _checking ? null : _restart,
-          child: Text(appLocalizations.refresh),
+          onPressed: _checking
+              ? null
+              : device.denial == null
+              ? _restart
+              : () => _check(retry: device),
+          child: Text(
+            device.denial == null
+                ? appLocalizations.refresh
+                : appLocalizations.deviceRequestAgain,
+          ),
         ),
       ],
       child: Column(
@@ -286,7 +300,7 @@ class _ManagedDeviceApprovalDialogState
               child: Text(appLocalizations.deviceOtherMethods),
             ),
           ],
-          if (!inApp || _showOtherMethods) ...[
+          if (device.denial == null && (!inApp || _showOtherMethods)) ...[
             Text(
               appLocalizations.deviceApprovalSteps,
               style: AppTextStyle.subheadline

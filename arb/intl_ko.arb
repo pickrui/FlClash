@@ -1,5 +1,6 @@
 {
   "approveDevice": "이 기기 승인",
+  "deviceRequestAgain": "다시 요청",
   "deviceEmailCode": "계정 이메일로 받은 8자리 코드",
   "deviceAuthenticatorCode": "인증 앱의 6자리 코드",
   "deviceOtherMethods": "다른 승인 방법",

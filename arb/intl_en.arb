@@ -1,5 +1,6 @@
 {
   "approveDevice": "Approve this device",
+  "deviceRequestAgain": "Request again",
   "deviceEmailCode": "8-digit code from your account email",
   "deviceAuthenticatorCode": "6-digit code from your authenticator app",
   "deviceOtherMethods": "Other approval methods",

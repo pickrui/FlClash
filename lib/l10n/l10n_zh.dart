@@ -13,6 +13,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get approveDevice => '批准这台设备';
 
   @override
+  String get deviceRequestAgain => '重新申请';
+
+  @override
   String get deviceEmailCode => '注册邮箱收到的 8 位验证码';
 
   @override

@@ -114,6 +114,12 @@ abstract class AppLocalizations {
   /// **'Approve this device'**
   String get approveDevice;
 
+  /// No description provided for @deviceRequestAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Request again'**
+  String get deviceRequestAgain;
+
   /// No description provided for @deviceEmailCode.
   ///
   /// In en, this message translates to:

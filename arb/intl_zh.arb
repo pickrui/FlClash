@@ -1,5 +1,6 @@
 {
   "approveDevice": "批准这台设备",
+  "deviceRequestAgain": "重新申请",
   "deviceEmailCode": "注册邮箱收到的 8 位验证码",
   "deviceAuthenticatorCode": "身份验证器中的 6 位动态码",
   "deviceOtherMethods": "其他批准方式",
