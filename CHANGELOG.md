@@ -8,7 +8,7 @@
 
 节点：更新订阅时自动应用该账户保存的节点筛选，未设置筛选时按套餐选择节点
 
-问题修复：切换账户后重新读取对应的登录状态；未生效的套餐可直接更换，避免误入升级流程
+问题修复：切换账户后重新读取对应的登录状态；未生效的套餐可直接更换，避免误入升级流程。修复自定义脚本覆盖规则源后，oixCloud 配置可能因 DNS 策略缺少规则源而无法加载的问题
 
 安全与兼容：macOS 版改用新的开发者证书签名，已安装的旧版请从发布页下载 DMG 手动安装一次。macOS 13 及以上的标准版随后可继续自动更新；macOS 12 兼容版需手动更新，按处理器选择 [Apple Silicon](https://github.com/pickrui/FlClash/releases/download/v0.9.4/flclash-v0.9.4-macos12-arm64.dmg) 或 [Intel](https://github.com/pickrui/FlClash/releases/download/v0.9.4/flclash-v0.9.4-macos12-amd64.dmg)
 

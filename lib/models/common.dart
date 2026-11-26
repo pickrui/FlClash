@@ -975,6 +975,38 @@ String renamedRuleSetsIn(
 
 const _dnsPolicyKeys = ['nameserver-policy', 'proxy-server-nameserver-policy'];
 
+Set<String> _dnsPolicyRuleSets(Map dns) => {
+  for (final key in _dnsPolicyKeys)
+    if (dns[key] case final Map policy)
+      for (final domain in policy.keys.whereType<String>())
+        ...ruleSetsIn(domain, policyKey: true),
+};
+
+void restoreInheritedDnsRuleProviders(
+  Map<String, dynamic> source,
+  Map<String, dynamic> output,
+) {
+  final sourceDns = source['dns'];
+  final outputDns = output['dns'];
+  final sourceProviders = source['rule-providers'];
+  final providers = output['rule-providers'] ?? <String, dynamic>{};
+  if (sourceDns is! Map ||
+      outputDns is! Map ||
+      sourceProviders is! Map ||
+      providers is! Map<String, dynamic>) {
+    return;
+  }
+  final retained = _dnsPolicyRuleSets(outputDns);
+  for (final name in _dnsPolicyRuleSets(sourceDns).intersection(retained)) {
+    if (providers.containsKey(name)) continue;
+    final definition = sourceProviders[name];
+    if (definition is Map) {
+      providers[name] = jsonDecode(jsonEncode(definition));
+      output['rule-providers'] = providers;
+    }
+  }
+}
+
 const _snifferMatcherKeys = [
   'force-domain',
   'skip-domain',
@@ -989,10 +1021,7 @@ Set<String> configMatcherRuleSets(Map<String, dynamic> config) {
   final sniffer = config['sniffer'];
   return {
     if (dns is Map) ...[
-      for (final key in _dnsPolicyKeys)
-        if (dns[key] case final Map policy)
-          for (final domain in policy.keys)
-            ...ruleSetsIn('$domain', policyKey: true),
+      ..._dnsPolicyRuleSets(dns),
       if (dns['fake-ip-filter'] case final List filter)
         for (final entry in filter) ...ruleSetsIn('$entry'),
     ],

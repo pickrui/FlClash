@@ -95,6 +95,96 @@ void main() {
       },
     );
 
+    test(
+      'managed scripts retain only inherited DNS policy providers',
+      () async {
+        const original = {
+          'type': 'inline',
+          'behavior': 'domain',
+          'payload': ['a.example'],
+        };
+        const replacement = {
+          'type': 'inline',
+          'behavior': 'domain',
+          'payload': ['b.example'],
+        };
+        final source = {
+          'rule-providers': {
+            for (final name in [
+              'Domestic Domains',
+              'Custom',
+              'Removed',
+              'Moved',
+              'Unused',
+              'New',
+            ])
+              name: original,
+          },
+          'dns': {
+            'nameserver-policy': {
+              'rule-set:Domestic Domains,Removed,Moved': '127.0.0.1',
+            },
+            'proxy-server-nameserver-policy': {'rule-set:Custom': '127.0.0.1'},
+          },
+        };
+        const script = '''
+        function main(c) {
+          c['rule-providers'] = {Custom: {type: 'inline', behavior: 'domain', payload: ['b.example']}};
+          c.dns['nameserver-policy'] = {'RULE-SET:Domestic Domains,New': '127.0.0.2'};
+          c.dns['proxy-server-nameserver-policy']['rule-set:Moved'] = '127.0.0.2';
+          return c;
+        }
+      ''';
+        final managed = await evaluateProfileScript(
+          script,
+          source,
+          managedProfile: true,
+        );
+        expect(managed['rule-providers'], {
+          'Domestic Domains': original,
+          'Moved': original,
+          'Custom': replacement,
+        });
+        expect(managed['dns']['nameserver-policy'], {
+          'RULE-SET:Domestic Domains,New': '127.0.0.2',
+        });
+        final regular = await evaluateProfileScript(script, source);
+        expect(regular['rule-providers'], {'Custom': replacement});
+      },
+    );
+
+    test(
+      'a removed section is rebuilt only for a surviving DNS reference',
+      () async {
+        const source = {
+          'rule-providers': {
+            'Keep': {
+              'type': 'inline',
+              'behavior': 'domain',
+              'payload': ['a.example'],
+            },
+          },
+          'dns': {
+            'proxy-server-nameserver-policy': {'rule-set:Keep': '127.0.0.1'},
+          },
+        };
+        const remove = "delete c['rule-providers'];";
+        final kept = await evaluateProfileScript(
+          'function main(c) { $remove return c; }',
+          source,
+          managedProfile: true,
+        );
+        expect(kept['rule-providers'], source['rule-providers']);
+        final removed = await evaluateProfileScript(
+          'function main(c) { $remove delete c.dns; return c; }',
+          source,
+          managedProfile: true,
+        );
+        expect(removed.containsKey('rule-providers'), isFalse);
+        expect(removed.containsKey('dns'), isFalse);
+      },
+    );
+
     test('default script can be evaluated repeatedly', () async {
       for (var index = 0; index < 10; index++) {
         final result = await evaluateProfileScript('$scriptTemplate ', {

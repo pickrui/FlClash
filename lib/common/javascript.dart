@@ -7,6 +7,8 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
+import 'package:fl_clash/models/common.dart'
+    show restoreInheritedDnsRuleProviders;
 
 import 'package:flutter/foundation.dart';
 import 'package:rust_api/rust_api.dart';
@@ -24,6 +26,7 @@ final _scriptOptionsCache = ScriptOptionsCache(_extractScriptOptions);
 Future<Map<String, dynamic>> evaluateProfileScript(
   String script,
   Map<String, dynamic> config, {
+  bool managedProfile = false,
   void Function(String level, String output)? onConsole,
   void Function(ScriptConfigChanges changes)? onChanges,
   Map<String, bool> options = const {},
@@ -50,6 +53,7 @@ Future<Map<String, dynamic>> evaluateProfileScript(
   if (decoded is! Map<String, dynamic>) {
     throw 'script did not return a configuration object';
   }
+  if (managedProfile) restoreInheritedDnsRuleProviders(input, decoded);
   if (onChanges != null) {
     onChanges(
       await compute(compareScriptConfigs, (before: input, after: decoded)),

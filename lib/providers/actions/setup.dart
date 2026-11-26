@@ -413,6 +413,7 @@ extension SetupControllerExt on AppController {
         source = await evaluateProfileScript(
           content,
           source,
+          managedProfile: profile?.isoixCloudProfile == true,
           options:
               _ref.read(appSettingProvider).scriptOptions['$scriptId'] ??
               const {},
@@ -899,6 +900,7 @@ extension SetupControllerExt on AppController {
       final output = await evaluateProfileScript(
         scriptContent!,
         rawConfig,
+        managedProfile: setupState.managedProfile,
         onChanges: onScriptChanges,
         options:
             _ref.read(appSettingProvider).scriptOptions[setupState.script?.id
