@@ -15,9 +15,6 @@ class Navigation {
   static Navigation? _instance;
   Widget Function(BuildContext, PageLabel)? pageBuilder;
   Future<void> Function(BuildContext)? cloudLoginPresenter;
-
-  /// Completes with true once the panel approved this device.
-  Future<bool?> Function(BuildContext)? managedDevicePresenter;
   void Function(BuildContext)? networkDiagnosticsPresenter;
   Future<UpdateDownloadAction?> Function(
     BuildContext,
@@ -45,14 +42,6 @@ class Navigation {
   Future<void> showCloudLogin(BuildContext context) {
     final presenter = cloudLoginPresenter;
     if (presenter == null) throw StateError('Cloud login is not bound');
-    return presenter(context);
-  }
-
-  Future<bool?> showManagedDeviceApproval(BuildContext context) {
-    final presenter = managedDevicePresenter;
-    if (presenter == null) {
-      throw StateError('Managed device approval is not bound');
-    }
     return presenter(context);
   }
 

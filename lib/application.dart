@@ -5,7 +5,6 @@
 // 详见仓库 NOTICE；第三方许可权利不受影响。
 import 'package:fl_clash/views/network_diagnostics.dart';
 import 'package:fl_clash/views/cloud/cloud_login_page.dart';
-import 'package:fl_clash/views/cloud/managed_device_dialog.dart';
 import 'package:fl_clash/ui/ui.dart';
 
 import 'dart:async';
@@ -113,7 +112,6 @@ class ApplicationState extends ConsumerState<Application> {
       await showCloudLoginPage<void>(context);
     };
     navigation.networkDiagnosticsPresenter = showNetworkDiagnostics;
-    navigation.managedDevicePresenter = showManagedDeviceApproval;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || startupDiagnostics.hasTimedOut) return;
       final currentContext = globalState.navigatorKey.currentContext;

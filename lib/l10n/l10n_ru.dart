@@ -10,50 +10,8 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
-  String get approveDevice => 'Подтвердить устройство';
-
-  @override
-  String get deviceRequestAgain => 'Запросить снова';
-
-  @override
-  String get deviceEmailCode => '8-значный код из письма на почту аккаунта';
-
-  @override
-  String get deviceAuthenticatorCode =>
-      '6-значный код из приложения-аутентификатора';
-
-  @override
-  String get deviceOtherMethods => 'Другие способы подтверждения';
-
-  @override
-  String get deviceApproved => 'Устройство подтверждено';
-
-  @override
-  String get deviceApprovalSteps =>
-      'Откройте ссылку в браузере, где выполнен вход в аккаунт, и сверьте код или отправьте команду в личном чате с привязанным ботом Telegram. Подтверждайте, только если отпечаток совпадает.';
-
-  @override
-  String get deviceTemporaryAccess => 'Временный доступ';
-
-  @override
-  String get deviceApprovalRequired =>
-      'Подтвердите устройство, чтобы получить узлы';
-
-  @override
-  String get deviceApprovalCode => 'Код подтверждения';
-
-  @override
-  String get deviceApprovalCommand => 'Команда Telegram';
-
-  @override
-  String get deviceFingerprint => 'Отпечаток устройства';
-
-  @override
-  String get deviceApprovalWaiting => 'Ожидание подтверждения';
-
-  @override
-  String get deviceApprovalPaused =>
-      'Проверка остановлена. После подтверждения нажмите «Обновить».';
+  String get deviceRegistrationExpired =>
+      'Это устройство больше не зарегистрировано. Выйдите и войдите снова.';
 
   @override
   String get applyNow => 'Применить сейчас';

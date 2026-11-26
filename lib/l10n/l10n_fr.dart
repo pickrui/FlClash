@@ -10,51 +10,8 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get approveDevice => 'Autoriser cet appareil';
-
-  @override
-  String get deviceRequestAgain => 'Faire une nouvelle demande';
-
-  @override
-  String get deviceEmailCode =>
-      'Code à 8 chiffres reçu sur l’adresse e-mail du compte';
-
-  @override
-  String get deviceAuthenticatorCode =>
-      'Code à 6 chiffres de l’application d’authentification';
-
-  @override
-  String get deviceOtherMethods => 'Autres méthodes d’approbation';
-
-  @override
-  String get deviceApproved => 'Appareil autorisé';
-
-  @override
-  String get deviceApprovalSteps =>
-      'Ouvrez le lien dans un navigateur connecté à votre compte et vérifiez le code, ou envoyez la commande en privé à votre bot Telegram associé. N’autorisez que si l’empreinte correspond.';
-
-  @override
-  String get deviceTemporaryAccess => 'Accès temporaire';
-
-  @override
-  String get deviceApprovalRequired =>
-      'Autorisez cet appareil pour obtenir les nœuds';
-
-  @override
-  String get deviceApprovalCode => 'Code de confirmation';
-
-  @override
-  String get deviceApprovalCommand => 'Commande Telegram';
-
-  @override
-  String get deviceFingerprint => 'Empreinte de l’appareil';
-
-  @override
-  String get deviceApprovalWaiting => 'En attente d’autorisation';
-
-  @override
-  String get deviceApprovalPaused =>
-      'Vérification arrêtée. Touchez Actualiser après l’autorisation.';
+  String get deviceRegistrationExpired =>
+      'Cet appareil n’est plus enregistré. Déconnectez-vous, puis reconnectez-vous.';
 
   @override
   String get applyNow => 'Appliquer maintenant';

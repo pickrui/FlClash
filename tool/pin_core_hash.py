@@ -25,24 +25,30 @@ def compiled_in():
 def replace_once(path, old, new):
     with open(path, "rb") as file:
         data = file.read()
-    if data.count(old) != 1:
-        sys.exit(f"error: {path} embeds the Core SHA256 {data.count(old)} times")
+    signed_count = data.count(new)
+    if signed_count == 1 and (old == new or old not in data):
+        return
+    original_count = data.count(old)
+    if original_count != 1 or signed_count:
+        sys.exit(f"error: {path} embeds the Core SHA256 {original_count} times and the signed SHA256 {signed_count} times")
     with open(path, "wb") as file:
         file.write(data.replace(old, new))
 
 
-def main(core, helper, manifest, app):
-    with open(manifest) as file:
+def main(core, helper, manifest, app, staged_manifest=None):
+    with open(staged_manifest or manifest) as file:
         old = json.load(file)["coreSha256"].encode()
     with open(core, "rb") as file:
         new = hashlib.sha256(file.read()).hexdigest().encode()
-    if old == new:
-        return
     replace_once(helper, old, new)
     if compiled_in():
         replace_once(app, old, new)
-    with open(manifest, "w") as file:
-        json.dump({"coreSha256": new.decode()}, file)
+    with open(manifest) as file:
+        bundled = json.load(file)
+    if bundled["coreSha256"] != new.decode():
+        bundled["coreSha256"] = new.decode()
+        with open(manifest, "w") as file:
+            json.dump(bundled, file)
 
 
 if __name__ == "__main__":

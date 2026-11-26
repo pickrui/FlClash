@@ -10,47 +10,8 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
-  String get approveDevice => 'この端末を承認';
-
-  @override
-  String get deviceRequestAgain => '再申請';
-
-  @override
-  String get deviceEmailCode => '登録メールアドレスに届く8桁のコード';
-
-  @override
-  String get deviceAuthenticatorCode => '認証アプリの6桁のコード';
-
-  @override
-  String get deviceOtherMethods => 'その他の承認方法';
-
-  @override
-  String get deviceApproved => '端末を承認しました';
-
-  @override
-  String get deviceApprovalSteps =>
-      'アカウントにログインしたブラウザでリンクを開いて確認コードを照合するか、連携済みの Telegram ボットに個別チャットでコマンドを送信してください。指紋が一致する場合のみ承認してください';
-
-  @override
-  String get deviceTemporaryAccess => '一時アクセス';
-
-  @override
-  String get deviceApprovalRequired => 'ノードを取得するには、この端末を承認してください';
-
-  @override
-  String get deviceApprovalCode => '確認コード';
-
-  @override
-  String get deviceApprovalCommand => 'Telegram コマンド';
-
-  @override
-  String get deviceFingerprint => '端末の指紋';
-
-  @override
-  String get deviceApprovalWaiting => '承認を待っています';
-
-  @override
-  String get deviceApprovalPaused => '自動確認を停止しました。承認後に「更新」をタップしてください';
+  String get deviceRegistrationExpired =>
+      'この端末の登録は無効になりました。ログアウトしてから再度ログインしてください';
 
   @override
   String get applyNow => '今すぐ適用';

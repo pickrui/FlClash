@@ -10,49 +10,8 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get approveDevice => 'Approve this device';
-
-  @override
-  String get deviceRequestAgain => 'Request again';
-
-  @override
-  String get deviceEmailCode => '8-digit code from your account email';
-
-  @override
-  String get deviceAuthenticatorCode =>
-      '6-digit code from your authenticator app';
-
-  @override
-  String get deviceOtherMethods => 'Other approval methods';
-
-  @override
-  String get deviceApproved => 'Device approved';
-
-  @override
-  String get deviceApprovalSteps =>
-      'Open the link in a browser signed in to your account and check the code, or send the command to your linked Telegram bot in a private chat. Approve only if the fingerprint matches.';
-
-  @override
-  String get deviceTemporaryAccess => 'Temporary access';
-
-  @override
-  String get deviceApprovalRequired => 'Approve this device to get nodes';
-
-  @override
-  String get deviceApprovalCode => 'Confirmation code';
-
-  @override
-  String get deviceApprovalCommand => 'Telegram command';
-
-  @override
-  String get deviceFingerprint => 'Device fingerprint';
-
-  @override
-  String get deviceApprovalWaiting => 'Waiting for approval';
-
-  @override
-  String get deviceApprovalPaused =>
-      'Stopped checking. Tap Refresh after approving.';
+  String get deviceRegistrationExpired =>
+      'This device is no longer registered. Sign out and sign in again.';
 
   @override
   String get applyNow => 'Apply now';

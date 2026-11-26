@@ -10,47 +10,7 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get approveDevice => '批准这台设备';
-
-  @override
-  String get deviceRequestAgain => '重新申请';
-
-  @override
-  String get deviceEmailCode => '注册邮箱收到的 8 位验证码';
-
-  @override
-  String get deviceAuthenticatorCode => '身份验证器中的 6 位动态码';
-
-  @override
-  String get deviceOtherMethods => '其他批准方式';
-
-  @override
-  String get deviceApproved => '设备已批准';
-
-  @override
-  String get deviceApprovalSteps =>
-      '在已登录账户的浏览器中打开链接并核对确认码，或私聊已绑定的 Telegram Bot 发送命令。设备指纹一致才批准';
-
-  @override
-  String get deviceTemporaryAccess => '已临时联网';
-
-  @override
-  String get deviceApprovalRequired => '批准这台设备后才能获取节点';
-
-  @override
-  String get deviceApprovalCode => '确认码';
-
-  @override
-  String get deviceApprovalCommand => 'Telegram 命令';
-
-  @override
-  String get deviceFingerprint => '设备指纹';
-
-  @override
-  String get deviceApprovalWaiting => '等待批准';
-
-  @override
-  String get deviceApprovalPaused => '已停止自动检查，批准后点「刷新」';
+  String get deviceRegistrationExpired => '这台设备的登记已失效，请退出登录后重新登录';
 
   @override
   String get applyNow => '立即应用';
