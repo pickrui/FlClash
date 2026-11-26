@@ -158,11 +158,18 @@ docker stats flclash
 docker top flclash
 ```
 
-Docker 的 `100%` 表示占满一个逻辑 CPU。浏览器页面打开时，Selkies 需要持续处理
-画面变化；不需要操作界面时关闭页面，FlClash 和代理核心会继续在容器中运行，
-但不再为该页面编码视频流。
+Docker 的 `100%` 表示占满一个逻辑 CPU。FlClash 检测到可访问的 GPU 渲染设备时，
+会沿用桌面的 GTK 后端和驱动设置。如果没有检测到设备，或显式设置了
+`LIBGL_ALWAYS_SOFTWARE=true`，FlClash 会优先使用 X11（默认桌面上为 Xwayland），
+并给 llvmpipe 和 Mesa 分别设置默认值 `LP_NUM_THREADS=1` 和 `vblank_mode=3`。
+GTK 后端和这两个默认值均可在 Compose 中覆盖
 
-低性能设备可以将帧率继续降到 20 或 15 FPS：
+在 X11 下，无人连接约 30 秒后，FlClash 会最小化可见窗口并暂停渲染，代理内核继续运行。
+期间重连会取消倒计时。窗口自动最小化后，首个重新连接的客户端会恢复窗口。手动隐藏或
+最小化的窗口可从桌面菜单重新打开。窗口尺寸超过远程桌面工作区时，会自动最大化以适应视口。
+原生 Wayland 会话沿用 FlClash 原有的窗口行为
+
+低性能设备还可以将串流帧率降到 20 或 15 FPS
 
 ```yaml
 environment:

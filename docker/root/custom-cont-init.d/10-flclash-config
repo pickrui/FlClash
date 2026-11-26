@@ -9,3 +9,12 @@ install -d -m 700 -o abc -g abc /config/.local/share/keyrings
 install -d -o abc -g abc /config/.local/share/com.oixcloud.clash
 install -m 644 -o abc -g abc /defaults/autostart_wayland /config/.config/labwc/autostart
 install -m 644 -o abc -g abc /defaults/autostart /config/.config/openbox/autostart
+
+if [[ -n ${FLCLASH_SELKIES_CLIENT_FILE:-} ]]; then
+  install -d -m 700 -o abc -g abc /run/flclash-selkies
+  rm -f /run/flclash-selkies/client-connected
+  printf "touch -- \"\$FLCLASH_SELKIES_CLIENT_FILE\"; %s" "${SELKIES_RUN_AFTER_CONNECT:-:}" \
+    > /run/s6/container_environment/SELKIES_RUN_AFTER_CONNECT
+  printf "rm -f -- \"\$FLCLASH_SELKIES_CLIENT_FILE\"; %s" "${SELKIES_RUN_AFTER_DISCONNECT:-:}" \
+    > /run/s6/container_environment/SELKIES_RUN_AFTER_DISCONNECT
+fi

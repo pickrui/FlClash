@@ -172,12 +172,21 @@ docker stats flclash
 docker top flclash
 ```
 
-Docker reports `100%` when one logical CPU is fully occupied. While the browser
-page is open, Selkies must process screen changes. Close the page when the UI is
-not needed; FlClash and its proxy core continue running, but the container no
-longer encodes a video stream for that page.
+Docker reports `100%` when one logical CPU is fully occupied. When FlClash
+detects an accessible GPU render device, it keeps the desktop's GTK backend and
+driver settings. If it finds none, or you set `LIBGL_ALWAYS_SOFTWARE=true`, it
+prefers X11 (Xwayland on the default desktop) and defaults to `LP_NUM_THREADS=1`
+for llvmpipe and `vblank_mode=3` for Mesa. You can override the GTK backend
+and these two defaults in Compose.
 
-Low-power hosts can reduce the frame rate to 20 or 15 FPS:
+On X11, after about 30 seconds without a connected viewer, FlClash minimizes its
+visible window and pauses rendering. The proxy core keeps running. Reconnecting
+during that interval cancels the timer. Afterward, the first viewer restores a
+window that the session minimized. A window you hid or minimized yourself stays
+that way. An oversized window maximizes to fit the available desktop area.
+Native Wayland sessions use FlClash's regular desktop window behavior.
+
+Low-power hosts can also reduce the stream frame rate to 20 or 15 FPS:
 
 ```yaml
 environment:

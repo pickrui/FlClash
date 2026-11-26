@@ -15,6 +15,7 @@ ENV LANG=zh_CN.UTF-8 \
   TZ=Asia/Shanghai \
   TITLE=FlClash \
   FLCLASH_DOCKER=true \
+  FLCLASH_SELKIES_CLIENT_FILE=/run/flclash-selkies/client-connected \
   SELKIES_UI_TITLE=FlClash \
   START_DOCKER=false \
   NO_GAMEPAD=true \
